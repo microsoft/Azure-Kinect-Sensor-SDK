@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 /** \class k4a_record_t types.h <k4arecord/types.h>
- * Handle to a k4a recording.
+ * Handle to a k4a recording opened for writing.
  *
  * Handles are created with k4a_record_create(), and closed with k4a_record_close().
  * Invalid handles are set to 0.
@@ -26,7 +26,7 @@ extern "C" {
 K4A_DECLARE_HANDLE(k4a_record_t);
 
 /** \class k4a_playback_t types.h <k4arecord/types.h>
- * Handle to a k4a recording.
+ * Handle to a k4a recording opened for playback.
  *
  * Handles are created with k4a_playback_open(), and closed with k4a_playback_close().
  * Invalid handles are set to 0.
@@ -54,6 +54,14 @@ typedef enum
     K4A_STREAM_RESULT_EOF,           /**< The end of the data stream was reached */
 } k4a_stream_result_t;
 
+/** Playback seeking positions
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">types.h (include k4arecord/types.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 typedef enum
 {
     K4A_PLAYBACK_SEEK_BEGIN, /**< Seek relative to the beginning of a recording */
