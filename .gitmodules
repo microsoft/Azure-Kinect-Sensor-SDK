@@ -1,0 +1,34 @@
+[submodule "extern/cjson/src"]
+	path = extern/cjson/src
+	url = https://github.com/DaveGamble/cJSON.git
+[submodule "extern/azure_c_shared/src"]
+	path = extern/azure_c_shared/src
+	url = https://github.com/Azure/azure-c-shared-utility.git
+	branch = master
+[submodule "extern/spdlog/src"]
+	path = extern/spdlog/src
+	url = https://github.com/gabime/spdlog.git
+[submodule "extern/libyuv/src"]
+	path = extern/libyuv/src
+	url = https://chromium.googlesource.com/libyuv/libyuv
+[submodule "extern/libmatroska/src"]
+	path = extern/libmatroska/src
+	url = https://github.com/Matroska-Org/libmatroska.git
+[submodule "extern/libeml/src"]
+	path = extern/libebml/src
+	url = https://github.com/Matroska-Org/libebml.git
+[submodule "extern/imgui/src"]
+	path = extern/imgui/src
+	url = https://github.com/ocornut/imgui.git
+[submodule "extern/googletest/src"]
+	path = extern/googletest/src
+	url = https://github.com/google/googletest.git
+[submodule "extern/glfw/src"]
+	path = extern/glfw/src
+	url = https://github.com/glfw/glfw
+[submodule "extern/libsoundio/src"]
+	path = extern/libsoundio/src
+	url = https://github.com/andrewrk/libsoundio.git
+[submodule "extern/libjpeg-turbo/src"]
+	path = extern/libjpeg-turbo/src
+	url = https://github.com/libjpeg-turbo/libjpeg-turbo.git

@@ -1,0 +1,210 @@
+{
+    "configurations": [
+        {
+            "name": "Win-x64-Debug-Ninja",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "inheritEnvironments": [
+                "msvc_x64"
+            ],
+            "buildRoot": "${projectDir}\\build\\${name}",
+            "installRoot": "${projectDir}\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": ""
+        },
+        {
+            "name": "Win-x64-Release-Ninja",
+            "generator": "Ninja",
+            "configurationType": "RelWithDebInfo",
+            "inheritEnvironments": [
+                "msvc_x64"
+            ],
+            "buildRoot": "${projectDir}\\build\\${name}",
+            "installRoot": "${projectDir}\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": ""
+        },
+        {
+            "name": "Win-x64-Debug-MSBuild",
+            "generator": "Visual Studio 15 2017 Win64",
+            "configurationType": "Debug",
+            "inheritEnvironments": [
+                "msvc_x64"
+            ],
+            "buildRoot": "${projectDir}\\build\\${name}",
+            "installRoot": "${projectDir}\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "/v:m",
+            "ctestCommandArgs": ""
+        },
+        {
+            "name": "Win-x64-Release-MSBuild",
+            "generator": "Visual Studio 15 2017 Win64",
+            "configurationType": "RelWithDebInfo",
+            "inheritEnvironments": [
+                "msvc_x64"
+            ],
+            "buildRoot": "${projectDir}\\build\\${name}",
+            "installRoot": "${projectDir}\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "/v:m",
+            "ctestCommandArgs": ""
+        },
+        {
+            "name": "Linux-Debug-Makefile",
+            "generator": "Unix Makefiles",
+            "remoteMachineName": "${defaultRemoteMachineName}",
+            "configurationType": "Debug",
+            "remoteCMakeListsRoot": "/var/tmp/src/${workspaceHash}/${name}",
+            "cmakeExecutable": "/usr/local/bin/cmake",
+            "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+            "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+            "remoteBuildRoot": "/var/tmp/build/${workspaceHash}/build/${name}",
+            "remoteInstallRoot": "/var/tmp/build/${workspaceHash}/install/${name}",
+            "remoteCopySources": true,
+            "remoteCopySourcesOutputVerbosity": "Normal",
+            "remoteCopySourcesConcurrentCopies": "10",
+            "remoteCopySourcesMethod": "rsync",
+            "remoteCopySourcesExclusionList": [
+                ".vs",
+                ".git",
+                "/build"
+            ],
+            "rsyncCommandArgs": "-t --delete --delete-excluded",
+            "remoteCopyBuildOutput": false,
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [
+                "linux_x64"
+            ]
+        },
+        {
+            "name": "Linux-Release-Makefile",
+            "generator": "Unix Makefiles",
+            "remoteMachineName": "${defaultRemoteMachineName}",
+            "configurationType": "RelWithDebInfo",
+            "remoteCMakeListsRoot": "/var/tmp/src/${workspaceHash}/${name}",
+            "cmakeExecutable": "/usr/bin/cmake",
+            "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+            "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+            "remoteBuildRoot": "/var/tmp/build/${workspaceHash}/build/${name}",
+            "remoteInstallRoot": "/var/tmp/build/${workspaceHash}/install/${name}",
+            "remoteCopySources": true,
+            "remoteCopySourcesOutputVerbosity": "Normal",
+            "remoteCopySourcesConcurrentCopies": "10",
+            "remoteCopySourcesMethod": "rsync",
+            "remoteCopySourcesExclusionList": [
+                ".vs",
+                ".git",
+                "/build"
+            ],
+            "rsyncCommandArgs": "-t --delete --delete-excluded",
+            "remoteCopyBuildOutput": false,
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [
+                "linux_x64"
+            ]
+        },
+        {
+            "name": "Linux-Debug-Makefile-Clang",
+            "generator": "Unix Makefiles",
+            "remoteMachineName": "${defaultRemoteMachineName}",
+            "configurationType": "Debug",
+            "remoteCMakeListsRoot": "/var/tmp/src/${workspaceHash}/${name}",
+            "cmakeExecutable": "/usr/local/bin/cmake",
+            "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+            "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+            "remoteBuildRoot": "/var/tmp/build/${workspaceHash}/build/${name}",
+            "remoteInstallRoot": "/var/tmp/build/${workspaceHash}/install/${name}",
+            "remoteCopySources": true,
+            "remoteCopySourcesOutputVerbosity": "Normal",
+            "remoteCopySourcesConcurrentCopies": "10",
+            "remoteCopySourcesMethod": "rsync",
+            "remoteCopySourcesExclusionList": [
+                ".vs",
+                ".git",
+                "/build"
+            ],
+            "rsyncCommandArgs": "-t --delete --delete-excluded",
+            "remoteCopyBuildOutput": false,
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [
+                "linux_x64"
+            ],
+            "variables": [
+                {
+                    "name": "CMAKE_TOOLCHAIN_FILE",
+                    "value": "/var/tmp/src/${workspaceHash}/${name}/cmake/toolchains/x86_64-linux-clang.cmake"
+                }
+            ]
+        },
+        {
+            "name": "Linux-Release-Makefile-Clang",
+            "generator": "Unix Makefiles",
+            "remoteMachineName": "${defaultRemoteMachineName}",
+            "configurationType": "RelWithDebInfo",
+            "remoteCMakeListsRoot": "/var/tmp/src/${workspaceHash}/${name}",
+            "cmakeExecutable": "/usr/bin/cmake",
+            "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+            "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+            "remoteBuildRoot": "/var/tmp/build/${workspaceHash}/build/${name}",
+            "remoteInstallRoot": "/var/tmp/build/${workspaceHash}/install/${name}",
+            "remoteCopySources": true,
+            "remoteCopySourcesOutputVerbosity": "Normal",
+            "remoteCopySourcesConcurrentCopies": "10",
+            "remoteCopySourcesMethod": "rsync",
+            "remoteCopySourcesExclusionList": [
+                ".vs",
+                ".git",
+                "/build"
+            ],
+            "rsyncCommandArgs": "-t --delete --delete-excluded",
+            "remoteCopyBuildOutput": false,
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [
+                "linux_x64"
+            ],
+            "variables": [
+                {
+                    "name": "CMAKE_TOOLCHAIN_FILE",
+                    "value": "/var/tmp/src/${workspaceHash}/${name}/cmake/toolchains/x86_64-linux-clang.cmake"
+                }
+            ]
+        },
+        {
+            "name": "UWP-x64-Debug-MSBuild",
+            "generator": "Visual Studio 15 2017",
+            "configurationType": "Debug",
+            "inheritEnvironments": [
+                "msvc_x64_x64"
+            ],
+            "buildRoot": "${projectDir}\\build\\${name}",
+            "installRoot": "${projectDir}\\install\\${name}",
+            "cmakeCommandArgs": "-DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": ""
+        },
+        {
+            "name": "UWP-x64-Release-MSBuild",
+            "generator": "Visual Studio 15 2017",
+            "configurationType": "Release",
+            "inheritEnvironments": [
+                "msvc_x64_x64"
+            ],
+            "buildRoot": "${projectDir}\\build\\${name}",
+            "installRoot": "${projectDir}\\install\\${name}",
+            "cmakeCommandArgs": "-DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": ""
+        }
+    ]
+}

@@ -1,0 +1,1 @@
+add_subdirectory(azure_c_shared)

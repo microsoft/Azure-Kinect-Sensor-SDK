@@ -1,0 +1,193 @@
+# Minimum Version determined by the following dev environments
+# Ubuntu 16.04 (Xenial) - CMake 3.5.1
+# Ubuntu 18.04 (Bionic) - CMake 3.10.2
+# Visual Studio 2017 15.3 - CMake 3.8
+# Visual Studio 2017 15.4 - CMake 3.9
+# Visual Studio 2017 15.7 - CMake 3.11
+cmake_minimum_required(VERSION 3.9.0)
+
+# Add this repository's cmake modules to CMAKE_MODULE_PATH
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_LIST_DIR}/cmake)
+
+# If no project name is set, we are the root project
+if (NOT CMAKE_PROJECT_NAME)
+    # Set the default build type (if not already set)
+    include(DefaultBuildType)
+endif()
+
+project(K4A LANGUAGES C CXX)
+
+option(K4A_BUILD_DOCS "Build K4A doxygen documentation" OFF)
+
+# Set the project version
+include(K4AProjectVersion)
+
+set(PROJ_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(INCLUDE_DIR ${PROJ_DIR}/include)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_C_STANDARD 99)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+
+# For code, link against the static crt on windows
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    include(MSVCStaticCrt)
+    include(MSVCLinkerFlags)
+endif()
+
+# Find all dependencies
+add_subdirectory(extern)
+
+# Don't enable testing until after building dependencies
+enable_testing()
+
+# Turn on compiler flags for our code
+include(k4aCompilerFlags)
+
+# Source for the K4A SDK
+set(K4A_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
+
+add_subdirectory(examples)
+add_subdirectory(src)
+add_subdirectory(tests)
+add_subdirectory(tools)
+
+if (K4A_BUILD_DOCS)
+    find_package(Doxygen 1.8.14 EXACT)
+    if (DOXYGEN_FOUND)
+        set(DOXYGEN_MAINPAGE ${CMAKE_CURRENT_SOURCE_DIR}/docs/sdk.md )
+
+        set(DOXYGEN_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/include/k4a ${DOXYGEN_MAINPAGE})
+
+        # These variables are used in Doxyfile.in
+        string(REPLACE ";" " " DOXYGEN_INPUT "${DOXYGEN_SOURCES}")
+        set(DOXYGEN_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/docs)
+
+        configure_file(Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+        add_custom_command(
+            OUTPUT ${DOXYGEN_OUTPUT_DIRECTORY}/html/index.html
+            COMMAND ${DOXYGEN_EXECUTABLE}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            MAIN_DEPENDENCY Doxyfile.in
+            DEPENDS ${DOXYGEN_SOURCES}
+            )
+    add_custom_target(k4adocs ALL DEPENDS ${DOXYGEN_OUTPUT_DIRECTORY}/html/index.html)
+
+    endif()
+endif()
+
+option(K4A_VALIDATE_CLANG_FORMAT "Validate clang-format results as part of build" Yes)
+
+set (CLANG_FORMAT_ROOT
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/tools)
+
+find_program(CLANG_FORMAT clang-format DOC "Clang format tool")
+if (${CLANG_FORMAT} STREQUAL "CLANG_FORMAT-NOTFOUND")
+    message(STATUS "Clang-format not found")
+else()
+
+    set(VALID_CLANG_FORMAT_VERSION "6.0.0")
+    execute_process(COMMAND ${CLANG_FORMAT} -version OUTPUT_VARIABLE CLANG_VERSION_STRING)
+    message(STATUS "clang-format version: ${CLANG_VERSION_STRING}")
+
+    if (${CLANG_VERSION_STRING} MATCHES "^.*${VALID_CLANG_FORMAT_VERSION}.*$")
+        find_package(PythonInterp 3)
+        if (NOT ${PYTHONINTERP_FOUND})
+            find_program(PYTHON_EXECUTABLE python3 DOC "python3")
+            if (${PYTHON_EXECUTABLE} STREQUAL "PYTHON_EXECUTABLE-NOTFOUND")
+                message(FATAL_ERROR "Could not find Python3")
+            endif()
+        endif()
+
+
+        set(CLANG_FORMAT_SOURCES)
+        foreach(root ${CLANG_FORMAT_ROOT})
+            file(GLOB_RECURSE CLANG_FORMAT_SOURCES_X CONFIGURE_DEPENDS
+                ${root}/*.c
+                ${root}/*.cpp
+                ${root}/*.h)
+            list(APPEND CLANG_FORMAT_SOURCES ${CLANG_FORMAT_SOURCES_X})
+        endforeach()
+
+        set(VALIDATE_RESULT_LIST)
+        set(REFORMAT_RESULT_LIST)
+        foreach(file ${CLANG_FORMAT_SOURCES})
+            file(RELATIVE_PATH filerelpath ${CMAKE_CURRENT_SOURCE_DIR} ${file})
+
+            set(validateoutput "${CMAKE_CURRENT_BINARY_DIR}/${filerelpath}.clang-validate-result")
+            set(reformatoutput "${CMAKE_CURRENT_BINARY_DIR}/${filerelpath}.clang-reformat-result")
+
+            add_custom_command(
+                OUTPUT ${validateoutput}
+                COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --clangformat "${CLANG_FORMAT}" --file ${file} --output ${validateoutput}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+                DEPENDS ${file}
+                COMMENT "Validating format of ${file}"
+                )
+            list(APPEND VALIDATE_RESULT_LIST ${validateoutput})
+
+
+            add_custom_command(
+                OUTPUT ${reformatoutput}
+                COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --reformat --clangformat "${CLANG_FORMAT}" --file ${file} --output ${reformatoutput}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+                DEPENDS ${file}
+                COMMENT "Reformatting ${file}"
+                )
+            list(APPEND REFORMAT_RESULT_LIST ${reformatoutput})
+
+        endforeach()
+
+        if (${K4A_VALIDATE_CLANG_FORMAT})
+            add_custom_target(validateclangformat ALL DEPENDS ${VALIDATE_RESULT_LIST})
+        else()
+            add_custom_target(validateclangformat DEPENDS ${VALIDATE_RESULT_LIST})
+        endif()
+
+        add_custom_target(clangformat DEPENDS ${REFORMAT_RESULT_LIST})
+    else()
+        message(STATUS "Need clang-format version ${VALID_CLANG_FORMAT_VERSION}")
+        message(STATUS "Not validating source format")
+    endif()
+
+endif()
+
+set(TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+
+# CMake doesn't set the target processor correctly for MSVC
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(TARGET_ARCH "amd64")
+    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
+        set(TARGET_ARCH "x86")
+    else()
+        message(FATAL_ERROR "Unknown architecture with size of void* = ${CMAKE_SIZEOF_VOID_P}")
+    endif()
+endif()
+
+# Packaging support
+set(CPACK_PACKAGE_VENDOR "Microsoft")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C/C++ SDK for Kinect for Azure")
+set(CPACK_PACKAGE_DESCRIPTION "C/C++ SDK for Kinect for Azure")
+set(CPACK_PACKAGE_VERSION_MAJOR ${K4A_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${K4A_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${K4A_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION ${K4A_VERSION_STR})
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+set(CPACK_PACKAGE_NAME "k4asdk")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${K4A_VERSION_STR}.${CMAKE_SYSTEM_NAME}.${TARGET_ARCH}.${CMAKE_BUILD_TYPE}")
+
+set(CPACK_GENERATOR "TGZ" "ZIP")
+
+include(CPack)

@@ -1,0 +1,15 @@
+# Bus 002 Device 116: ID 045e:097a Microsoft Corp. 
+# Bus 001 Device 015: ID 045e:097b Microsoft Corp. 
+# Bus 002 Device 118: ID 045e:097c Microsoft Corp. 
+# Bus 002 Device 117: ID 045e:097d Microsoft Corp. 
+# Bus 001 Device 016: ID 045e:097e Microsoft Corp. 
+
+BUS!="usb", ACTION!="add", SUBSYSTEM!=="usb_device", GOTO="k4a_logic_rules_end"
+
+ATTRS{idVendor}=="045e", ATTRS{idProduct}=="097a", MODE="0666", GROUP="plugdev"
+ATTRS{idVendor}=="045e", ATTRS{idProduct}=="097b", MODE="0666", GROUP="plugdev"
+ATTRS{idVendor}=="045e", ATTRS{idProduct}=="097c", MODE="0666", GROUP="plugdev"
+ATTRS{idVendor}=="045e", ATTRS{idProduct}=="097d", MODE="0666", GROUP="plugdev"
+ATTRS{idVendor}=="045e", ATTRS{idProduct}=="097e", MODE="0666", GROUP="plugdev"
+
+LABEL="k4a_logic_rules_end"

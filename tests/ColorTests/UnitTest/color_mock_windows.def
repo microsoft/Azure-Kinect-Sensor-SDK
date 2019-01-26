@@ -1,0 +1,5 @@
+EXPORTS
+    SetWindowsSystemMock
+    CM_Get_Device_Interface_PropertyW
+    CM_Locate_DevNodeW
+    CM_Get_DevNode_PropertyW

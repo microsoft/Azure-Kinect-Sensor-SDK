@@ -1,0 +1,25 @@
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set(DYNLIB_SRCS dynlib_windows.c)
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    set(DYNLIB_SRCS dynlib_linux.c)
+else()
+    message(FATAL_ERROR "Unknown system: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+add_library(k4a_dynlib STATIC
+            ${DYNLIB_SRCS}
+            )
+
+# Consumers should #include <k4ainternal/dynlib.h>
+target_include_directories(k4a_dynlib PUBLIC ${K4A_PRIV_INCLUDE_DIR})
+
+target_link_libraries(k4a_dynlib PUBLIC
+    k4ainternal::allocator
+    k4ainternal::logging)
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    target_link_libraries(k4a_dynlib PUBLIC dl)
+endif()
+
+# Define alias for other targets to link against
+add_library(k4ainternal::dynlib ALIAS k4a_dynlib)

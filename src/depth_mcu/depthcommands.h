@@ -1,0 +1,116 @@
+/****************************************************************
+                       Copyright (c)
+                    Microsoft Corporation
+                    All Rights Reserved
+               Licensed under the MIT License.
+****************************************************************/
+
+/**
+ * Kinect For Azure SDK.
+ */
+
+#ifndef DEVICE_COMMAND_H
+#define DEVICE_COMMAND_H
+
+//************************ Includes *****************************
+#include <k4a/k4atypes.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+//**************Symbolic Constant Macros (defines)  *************
+#define SENSOR_MODE_PSEUDO_COMMON 3
+#define SENSOR_MODE_LONG_THROW_NATIVE 4
+#define SENSOR_MODE_MEGA_PIXEL 5
+#define SENSOR_MODE_QUARTER_MEGA_PIXEL 7
+
+#define ROUND_UP(a, round) (((a) + ((round)-1)) & ~((round)-1))
+
+#define SENSOR_MODE_LONG_THROW_NATIVE_SIZE (5310760)  // K4A_DEPTH_MODE_NFOV_2X2BINNED & K4A_DEPTH_MODE_NFOV_UNBINNED
+#define SENSOR_MODE_PSEUDO_COMMON_SIZE (1678024)      // K4A_DEPTH_MODE_PASSIVE_IR
+#define SENSOR_MODE_MEGA_PIXEL_SIZE (9438664)         // K4A_DEPTH_MODE_WFOV_UNBINNED
+#define SENSOR_MODE_QUARTER_MEGA_PIXEL_SIZE (3777232) // K4A_DEPTH_MODE_WFOV_2X2BINNED
+
+// For USB3 round up to the nearest 1024
+#define SENSOR_MODE_LONG_THROW_NATIVE_PAYLOAD_SIZE ROUND_UP(SENSOR_MODE_LONG_THROW_NATIVE_SIZE, 1024)
+#define SENSOR_MODE_PSEUDO_COMMON_PAYLOAD_SIZE ROUND_UP(SENSOR_MODE_PSEUDO_COMMON_SIZE, 1024)
+#define SENSOR_MODE_MEGA_PIXEL_PAYLOAD_SIZE ROUND_UP(SENSOR_MODE_MEGA_PIXEL_SIZE, 1024)
+#define SENSOR_MODE_QUARTER_MEGA_PIXEL_PAYLOAD_SIZE ROUND_UP(SENSOR_MODE_QUARTER_MEGA_PIXEL_SIZE, 1024)
+
+//************************ Typedefs *****************************
+typedef enum
+{
+    DEV_CMD_RESET = 0x00000000,
+    DEV_CMD_VERSION_GET = 0x00000002,
+    DEV_CMD_DEPTH_START = 0x00000009,
+    DEV_CMD_DEPTH_STOP = 0x0000000A,
+    DEV_CMD_NV_DATA_GET = 0x00000022,
+    DEV_CMD_DEPTH_MODE_SET = 0x000000E1,
+    DEV_CMD_DEPTH_POWER_OFF = 0x000000EF,
+    DEV_CMD_DEPTH_POWER_ON = 0x000000F0,
+    DEV_CMD_DEPTH_STREAM_START = 0x000000F1,
+    DEV_CMD_DEPTH_STREAM_STOP = 0x000000F2,
+    DEV_CMD_DEPTH_FPS_SET = 0x00000103,
+    DEV_CMD_DEPTH_READ_CALIBRATION_DATA = 0x00000111,
+    DEV_CMD_DEPTH_READ_PRODUCT_SN = 0x00000115,
+    DEV_CMD_COMPONENT_VERSION_GET = 0x00000201,
+    DEV_CMD_DOWNLOAD_FIRMWARE = 0x00000202,
+    DEV_CMD_GET_FIRMWARE_UPDATE_STATUS = 0x00000203,
+
+    DEV_CMD_MAX_CMD // Keep last
+} device_commands_t;
+
+/* ---------------------------------------*/
+/*   DEV_CMD_NV_DATA_GET        */
+/*   DEV_CMD_NV_DATA_SET        */
+/* ---------------------------------------*/
+typedef enum _DEV_CMD_NV_TAG
+{
+    DEVICE_NV_NO_DATA = 0,
+    DEVICE_NV_SERIAL_NUMBER = 1,
+    DEVICE_NV_IR_P0_CORRECTION = 2,
+    DEVICE_NV_IR_SENSOR_CALIBRATION = 2,
+
+    DEVICE_NV_IR_LENSE_DISTORTION_CORRECTION = 3,
+    DEVICE_NV_IR_RGB_IR_REGISTRATION_CORRECTION = 4,
+    DEVICE_NV_AUDIO_MICROPHONE_BAR_EQ = 5,
+    DEVICE_NV_LASER_POWER = 6,
+    DEVICE_NV_DEPRECATED_1 = 8,
+    DEVICE_NV_DEPRECATED_2 = 9,
+    DEVICE_NV_ACCELEROMETER = 10,
+    DEVICE_NV_ENABLE_SHUTDOWN = 11,
+    DEVICE_NV_IR_DAC_VALUES = 12,
+    DEVICE_NV_AUDIO_MICROPHONE_BAR_EQ_MS = 13,
+    DEVICE_NV_IR_SHUTTERGAIN_VALUES = 14,
+    DEVICE_NV_HOME_CALIBRATION = 15,
+    DEVICE_NV_IR_P0_HW_CORRECTION = 16,
+    DEVICE_NV_IR_COLUMN_GAIN_ARRAY = 17,
+    DEVICE_NV_WOV_GRAMMAR_AND_MODEL = 18,
+    DEVICE_NV_DEPRECATED_3 = 19,
+    DEVICE_NV_USB_TUB = 20,
+    DEVICE_NV_TRACE_ENABLE_DEFAULT = 21,
+    DEVICE_NV_TRACE_CONTROL = 22,
+    DEVICE_NV_PRODUCT_TYPE = 23,
+    DEVICE_NV_PRODUCT_CONFIGURATION = 24,
+    DEVICE_NV_IR_LIGHTHOUSE_DAC_VALUES = 25,
+
+    DEVICE_NV_IR_SENSOR_PROPERTY_BLOCK = 30,
+    DEVICE_NV_IR_MALKA_EEPROM_PROPERTY_BLOCK = 31,
+    DEVICE_NV_IR_MALKA_EEPROM_CAL_DATA_BLOCK = 32,
+    DEVICE_NV_IR_MACCABI_EEPROM_PROPERTY_BLOCK = 33,
+    DEVICE_NV_IR_MACCABI_EEPROM_CAL_DATA_BLOCK = 34,
+
+    // Must be last.
+    DEVICE_NV_BLOCK_MAX_ID
+} DEV_CMD_NV_TAG;
+
+//************ Declarations (Statics and globals) ***************
+
+//******************* Function Prototypes ***********************
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* DEVICE_COMMAND_H */

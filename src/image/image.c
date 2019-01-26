@@ -1,0 +1,319 @@
+// This library
+#include <k4ainternal/image.h>
+#include <k4ainternal/allocator.h>
+
+// Dependent libraries
+#include <azure_c_shared_utility/lock.h>
+#include <azure_c_shared_utility/refcount.h>
+
+// System dependencies
+#include <stdlib.h>
+#include <assert.h>
+
+typedef struct _image_context_t
+{
+    volatile long ref_count;
+    LOCK_HANDLE lock;
+
+    uint8_t *buffer;
+    size_t buffer_size;
+
+    k4a_image_format_t format;   /** capture type */
+    int width_pixels;            /** width in pixels */
+    int height_pixels;           /** height in pixels */
+    int stride_bytes;            /** stride in bytes */
+    uint64_t timestamp_usec;     /** timestamp in micro seconds */
+    uint64_t exposure_time_usec; /** image exposure duration */
+    size_t size_allocated;       /** size of the raw memory allocation */
+
+    image_destroy_cb_t *memory_free_cb;
+    void *memory_free_cb_context;
+
+    union
+    {
+        struct
+        {
+            uint32_t white_balance;
+            uint32_t iso_speed;
+        } color;
+    } metadata;
+
+} image_context_t;
+
+K4A_DECLARE_CONTEXT(k4a_image_t, image_context_t);
+
+k4a_result_t image_create_from_buffer(k4a_image_format_t format,
+                                      int width_pixels,
+                                      int height_pixels,
+                                      int stride_bytes,
+                                      uint8_t *buffer,
+                                      size_t buffer_size,
+                                      image_destroy_cb_t *buffer_destroy_cb,
+                                      void *buffer_destroy_cb_context,
+                                      k4a_image_t *image_handle)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, image_handle == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, format < K4A_IMAGE_FORMAT_COLOR_MJPG || format > K4A_IMAGE_FORMAT_CUSTOM);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, width_pixels <= 0 || width_pixels > 20000);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, height_pixels <= 0 || height_pixels > 20000);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, buffer == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, buffer_size == 0);
+
+    image_context_t *image;
+    k4a_result_t result;
+
+    result = K4A_RESULT_FROM_BOOL((image = k4a_image_t_create(image_handle)) != NULL);
+
+    if (K4A_SUCCEEDED(result))
+    {
+        image->format = format;
+        image->width_pixels = width_pixels;
+        image->height_pixels = height_pixels;
+        image->stride_bytes = stride_bytes;
+        image->buffer_size = buffer_size;
+        image->buffer = buffer;
+        image->ref_count = 1;
+        image->memory_free_cb = buffer_destroy_cb;
+        image->memory_free_cb_context = buffer_destroy_cb_context;
+        image->lock = Lock_Init();
+        result = K4A_RESULT_FROM_BOOL(image->lock != NULL);
+    }
+
+    //
+    // NOTE: Contract is that if we fail this function, buffer is still valid and that caller needs to free the memory.
+    // No failure in this function should result in buffer being freed.
+    //
+    if (K4A_FAILED(result) && *image_handle)
+    {
+        if (image)
+        {
+            // Don't free memory caller needs to do that if we fail
+            image->buffer = NULL;
+        }
+        k4a_image_t_destroy(*image_handle);
+        *image_handle = NULL;
+    }
+
+    return result;
+}
+
+static k4a_result_t image_create_empty_image(allocation_source_t source, size_t size, k4a_image_t *image_handle)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, image_handle == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, size == 0);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, source < ALLOCATION_SOURCE_USER || source > ALLOCATION_SOURCE_USB_IMU);
+
+    k4a_result_t result;
+    image_context_t *image = NULL;
+    void *alloc_context = NULL;
+
+    result = K4A_RESULT_FROM_BOOL((image = k4a_image_t_create(image_handle)) != NULL);
+
+    if (K4A_SUCCEEDED(result))
+    {
+        result = K4A_RESULT_FROM_BOOL((image->buffer = allocator_alloc(source, size, &alloc_context)) != NULL);
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        image->ref_count = 1;
+        image->buffer_size = size;
+        image->memory_free_cb = allocator_free;
+        image->memory_free_cb_context = alloc_context;
+        image->lock = Lock_Init();
+        result = K4A_RESULT_FROM_BOOL(image->lock != NULL);
+    }
+
+    if (K4A_FAILED(result))
+    {
+        image_dec_ref(*image_handle);
+        *image_handle = NULL;
+    }
+    return result;
+}
+
+k4a_result_t image_create_empty_internal(allocation_source_t source, size_t size, k4a_image_t *image_handle)
+{
+    // User is special and only allowed to be used by the user through a public API.
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, image_handle == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, source == ALLOCATION_SOURCE_USER);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, size == 0);
+
+    return image_create_empty_image(source, size, image_handle);
+}
+
+k4a_result_t image_create(k4a_image_format_t format,
+                          int width_pixels,
+                          int height_pixels,
+                          int stride_bytes,
+                          k4a_image_t *image_handle)
+{
+    // User is special and only allowed to be used by the user through a public API.
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, image_handle == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
+                        !(format >= K4A_IMAGE_FORMAT_COLOR_MJPG && format <= K4A_IMAGE_FORMAT_CUSTOM));
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !(width_pixels > 0 && width_pixels < 20000));
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !(height_pixels > 0 && height_pixels < 20000));
+
+    image_context_t *image = NULL;
+    k4a_result_t result;
+    size_t size = (size_t)height_pixels * (size_t)stride_bytes;
+
+    *image_handle = NULL;
+    result = TRACE_CALL(image_create_empty_image(ALLOCATION_SOURCE_USER, size, image_handle));
+
+    if (K4A_SUCCEEDED(result))
+    {
+        result = K4A_RESULT_FROM_BOOL((image = k4a_image_t_get_context(*image_handle)) != NULL);
+    }
+    if (K4A_SUCCEEDED(result))
+    {
+        image->width_pixels = width_pixels;
+        image->height_pixels = height_pixels;
+        image->stride_bytes = stride_bytes;
+    }
+
+    if (K4A_FAILED(result) && image_handle)
+    {
+        image_dec_ref(*image_handle);
+        *image_handle = NULL;
+        image = NULL;
+    }
+
+    return result;
+}
+
+void image_dec_ref(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+
+    long count = DEC_REF_VAR(image->ref_count);
+
+    if (count == 0)
+    {
+        if (image->memory_free_cb)
+        {
+            image->memory_free_cb(image->buffer, image->memory_free_cb_context);
+        }
+        Lock_Deinit(image->lock);
+        k4a_image_t_destroy(image_handle);
+    }
+}
+
+void image_inc_ref(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+
+    INC_REF_VAR(image->ref_count);
+}
+
+uint8_t *image_get_buffer(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(NULL, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->buffer;
+}
+
+size_t image_get_size(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->buffer_size;
+}
+
+void image_set_size(k4a_image_t image_handle, size_t size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+
+    // We should only be reducing the size
+    assert(image->buffer_size >= size);
+    image->buffer_size = size;
+}
+
+k4a_image_format_t image_get_format(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_IMAGE_FORMAT_CUSTOM, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->format;
+}
+
+int image_get_width_pixels(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->width_pixels;
+}
+
+int image_get_height_pixels(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->height_pixels;
+}
+
+int image_get_stride_bytes(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->stride_bytes;
+}
+
+uint64_t image_get_timestamp_usec(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->timestamp_usec;
+}
+
+uint64_t image_get_exposure_usec(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->exposure_time_usec;
+}
+
+uint32_t image_get_white_balance(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->metadata.color.white_balance;
+}
+
+uint32_t image_get_iso_speed(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->metadata.color.iso_speed;
+}
+
+void image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, timestamp_usec == 0);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    image->timestamp_usec = timestamp_usec;
+}
+
+void image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_time_usec)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    image->exposure_time_usec = exposure_time_usec;
+}
+
+void image_set_white_balance(k4a_image_t image_handle, uint32_t white_balance)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    image->metadata.color.white_balance = white_balance;
+}
+
+void image_set_iso_speed(k4a_image_t image_handle, uint32_t iso_speed)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    image->metadata.color.iso_speed = iso_speed;
+}

@@ -1,0 +1,14 @@
+add_library(k4a_color_mcu STATIC 
+            color_mcu.c
+            )
+
+# Consumers should #include <k4ainternal/color_mcu.h>
+target_include_directories(k4a_color_mcu PUBLIC 
+    ${K4A_PRIV_INCLUDE_DIR})
+
+# Dependencies of this library
+target_link_libraries(k4a_color_mcu PUBLIC 
+    k4ainternal::logging)
+
+# Define alias for other targets to link against
+add_library(k4ainternal::color_mcu ALIAS k4a_color_mcu)

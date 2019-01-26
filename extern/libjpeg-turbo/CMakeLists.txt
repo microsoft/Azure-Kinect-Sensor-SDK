@@ -1,0 +1,28 @@
+if (NOT TARGET turbojpeg)
+    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+        add_compile_options("/D_CRT_SECURE_NO_WARNINGS")
+    endif()
+
+    set(ENABLE_STATIC ON CACHE BOOL "Force libjpeg to enable static lib" FORCE)
+
+    include(CheckLanguage)
+    check_language(ASM_NASM)
+    if (CMAKE_ASM_NASM_COMPILER)
+        enable_language(ASM_NASM)
+        option(WITH_SIMD "" ON)
+    else()
+        message(WARNING "NASM assembler not found - libjpeg-turbo performance may suffer")
+        option(WITH_SIMD "" OFF)
+    endif()
+
+    set(CMAKE_INSTALL_DOCDIR ${CMAKE_CURRENT_BINARY_DIR}/install)
+    add_subdirectory(src EXCLUDE_FROM_ALL)
+
+    target_include_directories(turbojpeg-static PUBLIC
+        src
+    )
+else()
+    message(STATUS "turbojpeg is already a target. Skipping adding it twice")
+endif()
+
+add_library(libjpeg-turbo::libjpeg-turbo ALIAS turbojpeg-static)

@@ -1,0 +1,139 @@
+/** \file color_mcu *h
+ * Kinect For Azure SDK.
+ */
+
+#ifndef COLOR_MCU_H
+#define COLOR_MCU_H
+
+#include <k4a/k4atypes.h>
+#include <k4ainternal/handle.h>
+#include <k4ainternal/logging.h>
+#include <k4ainternal/usbcommand.h>
+#include <k4ainternal/allocator.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/** Handle to the color mcu (micro controller unit) device.
+ *
+ * Handles are created with \ref colormcu_create and closed
+ * with \ref colormcu_destroy.
+ * Invalid handles are set to 0.
+ */
+K4A_DECLARE_HANDLE(colormcu_t);
+
+#pragma pack(push, 1)
+typedef struct
+{
+    uint64_t pts; // 8 bytes PTS timestamp
+    int16_t rx;
+    int16_t ry;
+    int16_t rz;
+} xyz_vector_t;
+
+typedef struct _temperature_t
+{
+    uint32_t reporting_rate_in_us;    // 19.23ms, 52Hz
+    uint16_t temperature_sensitivity; // in milli degrees C
+    int16_t value;                    // temperature value
+} temperature_t;
+
+typedef struct _gyroscope_t
+{
+    uint16_t sensitivity; // in micro dps
+    uint32_t sample_rate_in_us;
+    uint32_t sample_count;
+} gyroscope_t;
+
+typedef struct _accelerometer_t
+{
+    uint16_t sensitivity; // in micro Gs
+    uint32_t sample_rate_in_us;
+    uint32_t sample_count;
+} accelerometer_t;
+
+typedef struct _imu_payload_metadata_t
+{
+    temperature_t temperature;
+    gyroscope_t gyro;
+    accelerometer_t accel;
+} imu_payload_metadata_t;
+
+#pragma pack(pop)
+
+#define IMU_MAX_ACC_COUNT_IN_PAYLOAD 8
+#define IMU_MAX_GYRO_COUNT_IN_PAYLOAD 8
+#define IMU_MAX_PAYLOAD_SIZE                                                                                           \
+    (sizeof(imu_payload_metadata_t) + (sizeof(xyz_vector_t) * IMU_MAX_ACC_COUNT_IN_PAYLOAD) +                          \
+     (sizeof(xyz_vector_t) * IMU_MAX_GYRO_COUNT_IN_PAYLOAD))
+
+/** Open a handle to the color mcu device.
+ *
+ * \param device_index
+ * Index of the USB device to open.
+ *
+ * \param colormcu_handle [OUT]
+ *    A pointer to write the opened color mcu handle to
+ *
+ * \return K4A_RESULT_SUCCEEDED if the device was opened, otherwise an error code
+ *
+ * If successful, \ref colormcu_create will return a color mcu device handle in the color mcu
+ * parameter. This handle grants exclusive access to the device and may be used in
+ * the other k4a API calls.
+ *
+ * When done with the device, close the handle with \ref colormcu_destroy
+ */
+k4a_result_t colormcu_create(uint8_t device_index, colormcu_t *colormcu_handle);
+
+/** Closes the color mcu module and free's it resources
+ * */
+void colormcu_destroy(colormcu_t colormcu_handle);
+
+/** Writes the device synchronization settings
+ *
+ * \param colormcu_handle
+ * Colormcu handle provided by the colormcu_create() call
+ *
+ * \param config [IN]
+ * A pointer to the configuration settings that we want reflected in the hardware
+ *
+ * \return K4A_RESULT_SUCCEEDED if the call succeeded
+ */
+k4a_result_t colormcu_set_multi_device_mode(colormcu_t colormcu_handle, k4a_device_configuration_t *config);
+
+/** Writes the device synchronization settings
+ *
+ * \param colormcu_handle
+ * Colormcu handle provided by the colormcu_create() call
+ *
+ * \param sync_in_jack_connected [OUT]
+ * A pointer to a location to write the sync in jack status
+ *
+ * \param sync_out_jack_connected [OUT]
+ * A pointer to a location to write the sync out jack status
+ *
+ * \return K4A_RESULT_SUCCEEDED if the call succeeded
+ */
+k4a_result_t colormcu_get_external_sync_jack_state(colormcu_t colormcu_handle,
+                                                   bool *sync_in_jack_connected,
+                                                   bool *sync_out_jack_connected);
+
+// general
+
+k4a_result_t colormcu_reset(colormcu_t colormcu_handle);
+
+// IMU functions
+k4a_result_t colormcu_imu_start_streaming(colormcu_t colormcu_handle);
+void colormcu_imu_stop_streaming(colormcu_t colormcu_handle);
+k4a_result_t colormcu_imu_register_stream_cb(colormcu_t colormcu_handle,
+                                             usb_cmd_stream_cb_t *capture_ready_cb,
+                                             void *context);
+k4a_result_t colormcu_imu_get_calibration(colormcu_t colormcu_handle,
+                                          void *memory); // RGB_CAMERA_USB_COMMAND_READ_IMU_CALIDATA
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* COLOR_MCU_H */

@@ -1,0 +1,11 @@
+if (NOT TARGET gtest)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    option(INSTALL_GTEST "" OFF)
+    option(INSTALL_GMOCK "" OFF)
+    add_subdirectory(src EXCLUDE_FROM_ALL)
+else()
+    message(STATUS "gtest is already a target. Skipping adding it twice")
+endif()
+
+add_library(gtest::gtest ALIAS gtest)
+add_library(gtest::gmock ALIAS gmock)

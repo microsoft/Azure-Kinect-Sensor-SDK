@@ -1,0 +1,2 @@
+# More info about versioning can be found in docs/versioning.txt
+0.8.0
