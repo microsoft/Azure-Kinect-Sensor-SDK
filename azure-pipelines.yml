@@ -57,7 +57,7 @@ jobs:
   - checkout: self
     clean: true
     fetchDepth: 20
-    lfs: true
+    lfs: false
     persistCredentials: true
     submodules: 'recursive'
 
@@ -193,7 +193,7 @@ jobs:
   - checkout: self
     clean: true
     fetchDepth: 20
-    lfs: true
+    lfs: false
     persistCredentials: true
     submodules: 'recursive'
 
@@ -280,7 +280,7 @@ jobs:
   - checkout: self
     clean: true
     fetchDepth: 20
-    lfs: true
+    lfs: false
     persistCredentials: true
     submodules: 'recursive'
 
@@ -370,7 +370,7 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    lfs: true
+    lfs: false
     persistCredentials: true
     submodules: 'recursive'
 
@@ -420,7 +420,7 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    lfs: true
+    lfs: false
     persistCredentials: true
     submodules: 'recursive'
 
