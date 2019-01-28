@@ -69,7 +69,7 @@ k4a_result_t k4a_record_create(const char *path,
 
     uint32_t color_width = 0;
     uint32_t color_height = 0;
-    if (K4A_SUCCEEDED(result))
+    if (K4A_SUCCEEDED(result) && device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF)
     {
         if (!k4a_convert_resolution_to_width_height(device_config.color_resolution, &color_width, &color_height))
         {
