@@ -7,7 +7,7 @@
 
 // Associated header
 //
-#include "k4adeviceselectioncontrol.h"
+#include "k4asourceselectiondockcontrol.h"
 
 // System headers
 //
@@ -20,63 +20,59 @@
 
 // Project headers
 //
+#include "filesystem17.h"
 #include "k4aaudiomanager.h"
 #include "k4aimguiextensions.h"
+#include "k4arecording.h"
 #include "k4aviewererrormanager.h"
+#include "k4arecordingdockcontrol.h"
+#include "k4aviewerutil.h"
+#include "k4awindowmanager.h"
 
 using namespace k4aviewer;
 
-K4ADeviceSelectionControl::K4ADeviceSelectionControl()
+K4ASourceSelectionDockControl::K4ASourceSelectionDockControl()
 {
     RefreshDevices();
 }
 
-void K4ADeviceSelectionControl::Show()
+void K4ASourceSelectionDockControl::Show()
 {
-    if (!m_deviceSettingsControl)
+    ImGui::Text("Open Device");
+    ImGuiExtensions::K4AComboBox("Device S/N",
+                                 "(No available devices)",
+                                 ImGuiComboFlags_None,
+                                 m_connectedDevices,
+                                 &m_selectedDevice);
+
+    if (ImGui::Button("Refresh Devices"))
     {
-        ImGuiExtensions::K4AComboBox("Device S/N",
-                                     "(No available devices)",
-                                     ImGuiComboFlags_None,
-                                     m_connectedDevices,
-                                     &m_selectedDevice);
+        RefreshDevices();
+    }
 
-        if (ImGui::Button("Refresh Devices"))
-        {
-            RefreshDevices();
-        }
+    ImGui::SameLine();
 
-        ImGui::SameLine();
-
-        const bool openAvailable = !m_connectedDevices.empty();
+    const bool openAvailable = !m_connectedDevices.empty();
+    {
         ImGuiExtensions::ButtonColorChanger colorChanger(ImGuiExtensions::ButtonColor::Green, openAvailable);
         if (ImGuiExtensions::K4AButton("Open Device", openAvailable))
         {
             OpenDevice();
         }
     }
-    else
-    {
-        std::stringstream labelBuilder;
-        labelBuilder << "Device S/N: " << m_connectedDevices[size_t(m_selectedDevice)].second;
-        ImGui::Text("%s", labelBuilder.str().c_str());
-        ImGui::SameLine();
 
-        ImGuiExtensions::ButtonColorChanger cc(ImGuiExtensions::ButtonColor::Red);
-        if (ImGui::SmallButton("Close device"))
-        {
-            m_deviceSettingsControl.reset();
-        }
-    }
+    ImGui::NewLine();
+    ImGui::Separator();
+    ImGui::NewLine();
 
-    if (m_deviceSettingsControl)
+    ImGui::Text("Open Recording");
+    if (m_filePicker.Show())
     {
-        ImGui::Separator();
-        m_deviceSettingsControl->Show();
+        OpenRecording(m_filePicker.GetPath());
     }
 }
 
-void K4ADeviceSelectionControl::RefreshDevices()
+void K4ASourceSelectionDockControl::RefreshDevices()
 {
     m_selectedDevice = -1;
 
@@ -102,7 +98,7 @@ void K4ADeviceSelectionControl::RefreshDevices()
 
     if (!m_connectedDevices.empty())
     {
-        m_selectedDevice = 0;
+        m_selectedDevice = m_connectedDevices[0].first;
     }
 
     const int audioRefreshStatus = K4AAudioManager::Instance().RefreshDevices();
@@ -116,7 +112,7 @@ void K4ADeviceSelectionControl::RefreshDevices()
     }
 }
 
-void K4ADeviceSelectionControl::OpenDevice()
+void K4ASourceSelectionDockControl::OpenDevice()
 {
     if (m_selectedDevice < 0)
     {
@@ -133,5 +129,17 @@ void K4ADeviceSelectionControl::OpenDevice()
         return;
     }
 
-    m_deviceSettingsControl.reset(new K4ADeviceSettingsControl(std::move(device)));
+    K4AWindowManager::Instance().PushDockControl(std14::make_unique<K4ADeviceDockControl>(std::move(device)));
+}
+
+void K4ASourceSelectionDockControl::OpenRecording(const std17::filesystem::path &path)
+{
+    std::unique_ptr<K4ARecording> recording = K4ARecording::Open(path.c_str());
+    if (!recording)
+    {
+        K4AViewerErrorManager::Instance().SetErrorStatus("Failed to open recording!");
+        return;
+    }
+
+    K4AWindowManager::Instance().PushDockControl(std14::make_unique<K4ARecordingDockControl>(std::move(recording)));
 }

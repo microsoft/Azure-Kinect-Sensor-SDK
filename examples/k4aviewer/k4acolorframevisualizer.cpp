@@ -282,39 +282,39 @@ public:
     {
     }
 
-private:
-    tjhandle m_decompressor;
     ~K4AMJPGFrameVisualizer() override
     {
         (void)tjDestroy(m_decompressor);
     }
+
+private:
+    tjhandle m_decompressor;
 };
 
 template<>
 std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_YUY2>>
 K4AColorFrameVisualizerFactory::Create(k4a_color_resolution_t resolution)
 {
-    return std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_YUY2>>(new K4AYUY2FrameVisualizer(resolution));
+    return std14::make_unique<K4AYUY2FrameVisualizer>(resolution);
 }
 
 template<>
 std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_NV12>>
 K4AColorFrameVisualizerFactory::Create(k4a_color_resolution_t resolution)
 {
-    return std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_NV12>>(new K4ANV12FrameVisualizer(resolution));
+    return std14::make_unique<K4ANV12FrameVisualizer>(resolution);
 }
 
 template<>
 std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_BGRA32>>
 K4AColorFrameVisualizerFactory::Create(k4a_color_resolution_t resolution)
 {
-    return std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_BGRA32>>(
-        new K4ABGRA32FrameVisualizer(resolution));
+    return std14::make_unique<K4ABGRA32FrameVisualizer>(resolution);
 }
 
 template<>
 std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_MJPG>>
 K4AColorFrameVisualizerFactory::Create(k4a_color_resolution_t resolution)
 {
-    return std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_MJPG>>(new K4AMJPGFrameVisualizer(resolution));
+    return std14::make_unique<K4AMJPGFrameVisualizer>(resolution);
 }

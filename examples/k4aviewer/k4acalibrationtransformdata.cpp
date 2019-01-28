@@ -20,12 +20,6 @@
 
 using namespace k4aviewer;
 
-K4ACalibrationTransformData::K4ACalibrationTransformData()
-{
-    TransformationHandle = nullptr;
-    PointCloudImage = nullptr;
-}
-
 K4ACalibrationTransformData::~K4ACalibrationTransformData()
 {
     if (TransformationHandle != nullptr)
@@ -48,26 +42,37 @@ k4a_result_t K4ACalibrationTransformData::Initialize(const k4a_device_t &device,
         return result;
     }
 
+    return CommonInitialize();
+}
+
+k4a_result_t K4ACalibrationTransformData::Initialize(const k4a_playback_t &playback)
+{
+    const k4a_result_t result = k4a_playback_get_calibration(playback, &CalibrationData);
+    if (result != K4A_RESULT_SUCCEEDED)
+    {
+        return result;
+    }
+
+    return CommonInitialize();
+}
+
+k4a_result_t K4ACalibrationTransformData::CommonInitialize()
+{
     DepthWidth = CalibrationData.depth_camera_calibration.resolution_width;
     DepthHeight = CalibrationData.depth_camera_calibration.resolution_height;
 
-    if (PointCloudImage != nullptr)
-    {
-        k4a_image_release(PointCloudImage);
-    }
-    k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16,
-                     DepthWidth,
-                     DepthHeight,
-                     DepthWidth * 3 * (int)sizeof(int16_t),
-                     &PointCloudImage);
+    const k4a_result_t result = k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16,
+                                                 DepthWidth,
+                                                 DepthHeight,
+                                                 DepthWidth * 3 * static_cast<int>(sizeof(int16_t)),
+                                                 &PointCloudImage);
 
-    if (TransformationHandle != nullptr)
+    if (result != K4A_RESULT_SUCCEEDED)
     {
-        k4a_transformation_destroy(TransformationHandle);
+        return result;
     }
+
     TransformationHandle = k4a_transformation_create(&CalibrationData);
-
-    // TODO add support for using color frame data to colorize point cloud
 
     return K4A_RESULT_SUCCEEDED;
 }

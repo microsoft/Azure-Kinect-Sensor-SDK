@@ -15,6 +15,7 @@
 
 // System headers
 //
+#include <cmath>
 
 // Library headers
 //
@@ -40,7 +41,13 @@ void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const K4AImage<K4A
 
     ImGui::Text("Current pixel: %d, %d", int(hoveredPixel.x), int(hoveredPixel.y));
     ImGui::Text("Current pixel value: %d mm", pixelValue);
-    ImGui::Text("Sensor temperature: %.2f C", double(m_frameSource->GetLastSensorTemperature()));
+
+    // In recordings, there is no sensor temperature, so it's set to NaN.
+    //
+    if (!std::isnan(m_frameSource->GetLastSensorTemperature()))
+    {
+        ImGui::Text("Sensor temperature: %.2f C", double(m_frameSource->GetLastSensorTemperature()));
+    }
 }
 
 #ifdef __clang__

@@ -15,6 +15,7 @@
 //
 #include <array>
 #include <memory>
+#include <stack>
 #include <vector>
 
 // Library headers
@@ -23,6 +24,7 @@
 
 // Project headers
 //
+#include "ik4adockcontrol.h"
 #include "ik4avisualizationwindow.h"
 
 namespace k4aviewer
@@ -35,16 +37,16 @@ public:
 
     void SetGLWindowSize(ImVec2 glWindowSize);
     void SetMenuBarHeight(float menuBarHeight);
-    void SetDockWidth(float dockWidth);
-
-    K4AWindowPlacementInfo GetDockPlacementInfo() const;
 
     void AddWindow(std::unique_ptr<IK4AVisualizationWindow> &&window);
     void AddWindowGroup(std::vector<std::unique_ptr<IK4AVisualizationWindow>> &&windowGroup);
     void ClearFullscreenWindow();
     void ClearWindows();
 
-    void ShowWindows();
+    void PushDockControl(std::unique_ptr<IK4ADockControl> &&dockControl);
+    void PopDockControl();
+
+    void ShowAll();
 
     K4AWindowManager(const K4AWindowManager &) = delete;
     K4AWindowManager &operator=(const K4AWindowManager &) = delete;
@@ -80,6 +82,8 @@ private:
     void
     ShowWindow(ImVec2 windowAreaPosition, ImVec2 windowAreaSize, IK4AVisualizationWindow *window, bool isMaximized);
 
+    void ShowDock();
+
     ImVec2 m_glWindowSize = { 0, 0 };
     float m_menuBarHeight = 0;
     float m_dockWidth = 0;
@@ -87,6 +91,8 @@ private:
     IK4AVisualizationWindow *m_maximizedWindow = nullptr;
 
     WindowListEntry m_windows;
+
+    std::stack<std::unique_ptr<IK4ADockControl>> m_dockControls;
 };
 } // namespace k4aviewer
 
