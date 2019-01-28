@@ -1,5 +1,7 @@
 # K4A SDK
 
+[![Build Status (develop)](https://microsoft.visualstudio.com/Analog/_apis/build/status/Analog/AI/depthcamera/Microsoft.Azure-Kinect-Sensor-SDK?branchName=develop)](https://microsoft.visualstudio.com/Analog/_build/latest?definitionId=35486&branchName=develop)
+
 ## Introduction
 
 K4A SDK is a cross platform (Linux and Windows) SDK to read data from your
