@@ -190,7 +190,8 @@ K4ARECORD_EXPORT k4a_fps_t k4a_playback_get_camera_fps(k4a_playback_t playback_h
  * The name of the tag to read
  *
  * \returns
- * The value of the tag, or NULL if the tag does not exist.
+ * The value of the tag, or NULL if the tag does not exist. This string is valid for the lifetime of the
+ * \p playback_handle, and will be freed when the recording is closed.
  *
  * \relates k4a_playback_t
  *
@@ -214,8 +215,8 @@ K4ARECORD_EXPORT const char *k4a_playback_get_tag(k4a_playback_t playback_handle
  * this capture
  *
  * \returns
- * ::K4A_PLAYBACK_RESULT_SUCCEEDED if a capture is returned, or ::K4A_PLAYBACK_RESULT_EOF if the end of the recording is
- * reached. All other failures will return ::K4A_PLAYBACK_RESULT_FAILED.
+ * ::K4A_STREAM_RESULT_SUCCEEDED if a capture is returned, or ::K4A_STREAM_RESULT_EOF if the end of the recording is
+ * reached. All other failures will return ::K4A_STREAM_RESULT_FAILED.
  *
  * \relates k4a_playback_t
  *
@@ -226,7 +227,7 @@ K4ARECORD_EXPORT const char *k4a_playback_get_tag(k4a_playback_t playback_handle
  *
  * \remarks
  * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return the first capture
- * with a timestamp >= the seek time.
+ * with all timestamps >= the seek time.
  *
  * \remarks
  * Capture objects will always contain at least 1 image, but may have images missing if frames were dropped in the
@@ -253,8 +254,8 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_
  * this capture
  *
  * \returns
- * ::K4A_PLAYBACK_RESULT_SUCCEEDED if a capture is returned, or ::K4A_PLAYBACK_RESULT_EOF if the start of the recording
- * is reached. All other failures will return ::K4A_PLAYBACK_RESULT_FAILED.
+ * ::K4A_STREAM_RESULT_SUCCEEDED if a capture is returned, or ::K4A_STREAM_RESULT_EOF if the start of the recording is
+ * reached. All other failures will return ::K4A_STREAM_RESULT_FAILED.
  *
  * \relates k4a_playback_t
  *
@@ -265,7 +266,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_
  *
  * \remarks
  * The first call to k4a_playback_get_previous_capture() after k4a_playback_seek_timestamp() will return the first
- * capture with a timestamp < the seek time.
+ * capture with all timestamps < the seek time.
  *
  * \remarks
  * Capture objects will always contain at least 1 image, but may have images missing if frames were dropped in the
@@ -282,9 +283,71 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_
 K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_capture(k4a_playback_t playback_handle,
                                                                        k4a_capture_t *capture_handle);
 
-// TODO
+/** Read the next imu sample in the recording sequence.
+ *
+ * \param playback_handle
+ * Handle obtained by k4a_playback_open().
+ *
+ * \param imu_sample [OUT]
+ * The location to write the imu sample.
+ *
+ * \returns
+ * ::K4A_STREAM_RESULT_SUCCEEDED if a sample is returned, or ::K4A_STREAM_RESULT_EOF if the end of the recording is
+ * reached. All other failures will return ::K4A_STREAM_RESULT_FAILED.
+ *
+ * \relates k4a_playback_t
+ *
+ * \remarks
+ * k4a_playback_get_next_imu_sample() always returns the imu sample after the last returned sample. If the last call to
+ * k4a_playback_get_previous_imu_sample() returned EOF, k4a_playback_get_next_imu_sample() will return the first imu
+ * sample in the recording.
+ *
+ * \remarks
+ * The first call to k4a_playback_get_next_imu_sample() after k4a_playback_seek_timestamp() will return the first imu
+ * sample with a timestamp >= the seek time.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playback_t playback_handle,
                                                                       k4a_imu_sample_t *imu_sample);
+
+/** Read the previous imu sample in the recording sequence.
+ *
+ * \param playback_handle
+ * Handle obtained by k4a_playback_open().
+ *
+ * \param imu_sample [OUT]
+ * The location to write the imu sample.
+ *
+ * \returns
+ * ::K4A_STREAM_RESULT_SUCCEEDED if a sample is returned, or ::K4A_STREAM_RESULT_EOF if the start of the recording is
+ * reached. All other failures will return ::K4A_STREAM_RESULT_FAILED.
+ *
+ * \relates k4a_playback_t
+ *
+ * \remarks
+ * k4a_playback_get_previous_imu_sample() always returns the imu sample before the last returned sample. If the last
+ * call to k4a_playback_get_next_imu_sample() returned EOF, k4a_playback_get_previous_imu_sample() will return the last
+ * imu sample in the recording.
+ *
+ * \remarks
+ * The first call to k4a_playback_get_previous_imu_sample() after k4a_playback_seek_timestamp() will return the first
+ * imu sample with a timestamp < the seek time.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback_handle,
                                                                           k4a_imu_sample_t *imu_sample);
 
@@ -307,11 +370,19 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  *
  * \remarks
  * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return the first capture
- * with a timestamp >= the seek time.
+ * with all timestamps >= the seek time.
  *
  * \remarks
  * The first call to k4a_playback_get_previous_capture() after k4a_playback_seek_timestamp() will return the first
- * capture with a timestamp < the seek time.
+ * capture with all timestamps < the seek time.
+ *
+ * \remarks
+ * The first call to k4a_playback_get_next_imu_sample() after k4a_playback_seek_timestamp() will return the first imu
+ * sample with a timestamp >= the seek time.
+ *
+ * \remarks
+ * The first call to k4a_playback_get_previous_imu_sample() after k4a_playback_seek_timestamp() will return the first
+ * imu sample with a timestamp < the seek time.
  *
  * \xmlonly
  * <requirements>
