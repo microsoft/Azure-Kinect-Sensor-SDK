@@ -6,6 +6,19 @@
 
 using namespace testing;
 
+static const char *format_names[] = { "K4A_IMAGE_FORMAT_COLOR_MJPG", "K4A_IMAGE_FORMAT_COLOR_NV12",
+                                      "K4A_IMAGE_FORMAT_COLOR_YUY2", "K4A_IMAGE_FORMAT_COLOR_BGRA32",
+                                      "K4A_IMAGE_FORMAT_DEPTH16",    "K4A_IMAGE_FORMAT_IR16",
+                                      "K4A_IMAGE_FORMAT_CUSTOM" };
+static const char *resolution_names[] = { "K4A_COLOR_RESOLUTION_OFF",   "K4A_COLOR_RESOLUTION_720P",
+                                          "K4A_COLOR_RESOLUTION_1080P", "K4A_COLOR_RESOLUTION_1440P",
+                                          "K4A_COLOR_RESOLUTION_1536P", "K4A_COLOR_RESOLUTION_2160P",
+                                          "K4A_COLOR_RESOLUTION_3072P" };
+static const char *depth_names[] = { "K4A_DEPTH_MODE_OFF",           "K4A_DEPTH_MODE_NFOV_2X2BINNED",
+                                     "K4A_DEPTH_MODE_NFOV_UNBINNED", "K4A_DEPTH_MODE_WFOV_2X2BINNED",
+                                     "K4A_DEPTH_MODE_WFOV_UNBINNED", "K4A_DEPTH_MODE_PASSIVE_IR" };
+static const char *fps_names[] = { "K4A_FRAMES_PER_SECOND_5", "K4A_FRAMES_PER_SECOND_15", "K4A_FRAMES_PER_SECOND_30" };
+
 class playback_ut : public ::testing::Test
 {
 protected:
@@ -20,10 +33,40 @@ TEST_F(playback_ut, DISABLED_open_basic_file)
     k4a_result_t result = k4a_playback_open("TestData/playback_test_input.mkv", &handle);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
+    // Get tag with exact buffer size
+    size_t tag_value_size = 0;
+    k4a_buffer_result_t buffer_result = k4a_playback_get_tag(handle, "K4A_COLOR_MODE", NULL, &tag_value_size);
+    ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_TOO_SMALL);
+    ASSERT_EQ(tag_value_size, (size_t)11);
+    std::vector<char> tag_value = std::vector<char>(tag_value_size);
+    buffer_result = k4a_playback_get_tag(handle, "K4A_COLOR_MODE", tag_value.data(), &tag_value_size);
+    ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_SUCCEEDED);
+    ASSERT_EQ(tag_value_size, (size_t)11);
+    ASSERT_STREQ(tag_value.data(), "MJPG_1080P");
+
+    // Get tag with oversize buffer
+    tag_value.resize(256);
+    tag_value_size = tag_value.size();
+    buffer_result = k4a_playback_get_tag(handle, "K4A_DEPTH_MODE", tag_value.data(), &tag_value_size);
+    ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_SUCCEEDED);
+    ASSERT_EQ(tag_value_size, (size_t)14);
+    ASSERT_STREQ(tag_value.data(), "NFOV_UNBINNED");
+
+    // Missing Tag
+    buffer_result = k4a_playback_get_tag(handle, "FOO", NULL, &tag_value_size);
+    ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_FAILED);
+
+    // Read recording configuration
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
+    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+
     // TODO: Check these cases in the unit test
-    // std::cout << "K4A_COLOR_MODE: " << k4a_playback_get_tag(handle, "K4A_COLOR_MODE") << std::endl;
-    // std::cout << "K4A_DEPTH_MODE: " << k4a_playback_get_tag(handle, "K4A_DEPTH_MODE") << std::endl;
-    // std::cout << "Missing tag: " << k4a_playback_get_tag(handle, "FOO") << std::endl;
     /*
     std::cout << "Color track by name: " << get_track_by_name(context, "COLOR") << std::endl;
     std::cout << "Color track by tag: " << get_track_by_tag(context, "K4A_COLOR_MODE") << std::endl;
@@ -139,6 +182,16 @@ TEST_F(playback_ut, DISABLED_open_full_file)
             k4a_capture_release(capture);
         }
     }
+
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    std::cout << "Config:" << std::endl;
+    std::cout << "    Color format: " << format_names[config.color_format] << std::endl;
+    std::cout << "    Color resolution: " << resolution_names[config.color_resolution] << std::endl;
+    std::cout << "    Depth mode: " << depth_names[config.depth_mode] << std::endl;
+    std::cout << "    Frame rate: " << fps_names[config.camera_fps] << std::endl;
+    std::cout << "    Depth delay: " << config.depth_delay_off_color_usec << " usec" << std::endl;
 
     k4a_playback_close(handle);
 }

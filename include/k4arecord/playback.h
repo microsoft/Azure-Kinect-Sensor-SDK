@@ -95,17 +95,16 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playba
 K4ARECORD_EXPORT k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle,
                                                            k4a_calibration_t *calibration);
 
-/** Get the color format used in a recording.
+/** Get the device configuration used during recording.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
  *
- * \param format [OUT]
- * Location to write the color format
+ * \param config [OUT]
+ * Location to write the recording configuration.
  *
  * \remarks
- * ::K4A_RESULT_SUCCEEDED if \p format was successfully written. ::K4A_RESULT_FAILED is returned if the color camera is
- * not enabled in the recording.
+ * ::K4A_RESULT_SUCCEEDED if \p config was successfully written. ::K4A_RESULT_FAILED otherwise.
  *
  * \relates k4a_playback_t
  *
@@ -117,69 +116,8 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_calibration(k4a_playback_t playba
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_playback_get_color_format(k4a_playback_t playback_handle, k4a_image_format_t *format);
-
-/** Get the color resolution used in a recording.
- *
- * \param playback_handle
- * Handle obtained by k4a_playback_open().
- *
- * \returns
- * The resolution used by the color camera to record, or ::K4A_COLOR_RESOLUTION_OFF if the recording contains no color
- * data.
- *
- * \relates k4a_playback_t
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
- *   <requirement name="Library">k4arecord.lib</requirement>
- *   <requirement name="DLL">k4arecord.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4ARECORD_EXPORT k4a_color_resolution_t k4a_playback_get_color_resolution(k4a_playback_t playback_handle);
-
-/** Get the depth mode used a the recording.
- *
- * \param playback_handle
- * Handle obtained by k4a_playback_open().
- *
- * \returns
- * The mode used by the depth camera to record, or ::K4A_DEPTH_MODE_OFF if the recording contains no depth data.
- *
- * \relates k4a_playback_t
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
- *   <requirement name="Library">k4arecord.lib</requirement>
- *   <requirement name="DLL">k4arecord.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4ARECORD_EXPORT k4a_depth_mode_t k4a_playback_get_depth_mode(k4a_playback_t playback_handle);
-
-/** Get the camera framerate used in a recording.
- *
- * \param playback_handle
- * Handle obtained by k4a_playback_open().
- *
- * \returns
- * The framerate used by the camera during recording. ::K4A_FRAMES_PER_SECOND_30 is returned by default if the recording
- * contains no camera data.
- *
- * \relates k4a_playback_t
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
- *   <requirement name="Library">k4arecord.lib</requirement>
- *   <requirement name="DLL">k4arecord.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4ARECORD_EXPORT k4a_fps_t k4a_playback_get_camera_fps(k4a_playback_t playback_handle);
+K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle,
+                                                                    k4a_record_configuration_t *config);
 
 /** Read the value of a tag from a recording.
  *
@@ -189,9 +127,19 @@ K4ARECORD_EXPORT k4a_fps_t k4a_playback_get_camera_fps(k4a_playback_t playback_h
  * \param name
  * The name of the tag to read
  *
+ * \param value
+ * Location to write the tag value. This will be a UTF8 null terminated string. If a NULL buffer is specified, \p
+ * value_size will be set to the size of buffer needed to store the string.
+ *
+ * \param value_size
+ * On input, the size of the \p value buffer. On output, this is set to the length of the tag value (including the null
+ * terminator).
+ *
  * \returns
- * The value of the tag, or NULL if the tag does not exist. This string is valid for the lifetime of the
- * \p playback_handle, and will be freed when the recording is closed.
+ * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p value has been filled in. If the buffer is too small the
+ * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p value buffer is returned in the \p
+ * value_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the tag does not exist. All other failures return
+ * ::K4A_BUFFER_RESULT_FAILED.
  *
  * \relates k4a_playback_t
  *
@@ -203,7 +151,10 @@ K4ARECORD_EXPORT k4a_fps_t k4a_playback_get_camera_fps(k4a_playback_t playback_h
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT const char *k4a_playback_get_tag(k4a_playback_t playback_handle, const char *name);
+K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playback_handle,
+                                                          const char *name,
+                                                          char *value,
+                                                          size_t *value_size);
 
 /** Read the next capture in the recording sequence.
  *

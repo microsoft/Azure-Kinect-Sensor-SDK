@@ -110,6 +110,7 @@ int main(int argc, char **argv)
     bool recording_rate_set = false;
     bool recording_imu_enabled = true;
     k4a_wired_sync_mode_t wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
+    int32_t depth_delay_off_color_usec = 0;
     char *recording_filename;
 
     CmdParser::OptionParser cmd_parser;
@@ -292,6 +293,14 @@ int main(int argc, char **argv)
                                       throw std::runtime_error(str.str());
                                   }
                               });
+    cmd_parser.RegisterOption("--depth-delay",
+                              "Set the time offset between color and depth frames in microseconds (default: 0)\n"
+                              "A negative value means depth frames will arrive before color frames.\n"
+                              "The delay must be less than 1 frame period.",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  depth_delay_off_color_usec = std::stoi(args[0]);
+                              });
 
     int args_left = 0;
     try
@@ -357,6 +366,7 @@ int main(int argc, char **argv)
     device_config.depth_mode = recording_depth_mode;
     device_config.camera_fps = recording_rate;
     device_config.wired_sync_mode = wired_sync_mode;
+    device_config.depth_delay_off_color_usec = depth_delay_off_color_usec;
 
     return do_recording((uint8_t)device_index,
                         recording_filename,

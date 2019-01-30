@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <climits>
+#include <sstream>
 
 #include <k4a/k4a.h>
 #include <k4ainternal/matroska_read.h>
@@ -273,7 +274,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         frame_period_ns = GetChild<KaxTrackDefaultDuration>(*context->color_track.track).GetValue();
 
         RETURN_IF_ERROR(read_bitmap_info_header(&context->color_track));
-        context->color_resolution = K4A_COLOR_RESOLUTION_OFF;
+        context->record_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
         for (size_t i = 0; i < arraysize(color_resolutions); i++)
         {
             uint32_t width, height;
@@ -281,12 +282,12 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             {
                 if (context->color_track.width == width && context->color_track.height == height)
                 {
-                    context->color_resolution = color_resolutions[i];
+                    context->record_config.color_resolution = color_resolutions[i];
                     break;
                 }
             }
         }
-        if (context->color_resolution == K4A_COLOR_RESOLUTION_OFF)
+        if (context->record_config.color_resolution == K4A_COLOR_RESOLUTION_OFF)
         {
             logger_error(LOGGER_RECORD,
                          "Unsupported color resolution: %dx%d",
@@ -295,11 +296,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             return K4A_RESULT_FAILED;
         }
 
-        context->color_format = context->color_track.format;
+        context->record_config.color_format = context->color_track.format;
     }
     else
     {
-        context->color_resolution = K4A_COLOR_RESOLUTION_OFF;
+        context->record_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
+        // Set to a default color format if color track is disabled.
+        context->record_config.color_format = K4A_IMAGE_FORMAT_CUSTOM;
     }
 
     KaxTag *depth_mode_tag = get_tag(context, "K4A_DEPTH_MODE");
@@ -312,19 +315,19 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     uint32_t depth_width = 0;
     uint32_t depth_height = 0;
-    context->depth_mode = K4A_DEPTH_MODE_OFF;
+    context->record_config.depth_mode = K4A_DEPTH_MODE_OFF;
     for (size_t i = 0; i < arraysize(depth_modes); i++)
     {
         if (k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
         {
             if (depth_mode_str == depth_modes[i].second)
             {
-                context->depth_mode = depth_modes[i].first;
+                context->record_config.depth_mode = depth_modes[i].first;
                 break;
             }
         }
     }
-    if (context->depth_mode == K4A_DEPTH_MODE_OFF)
+    if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
     {
         logger_error(LOGGER_RECORD, "Unsupported depth mode: %s", depth_mode_str.c_str());
         return K4A_RESULT_FAILED;
@@ -416,13 +419,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         switch (1_s / frame_period_ns)
         {
         case 5:
-            context->camera_fps = K4A_FRAMES_PER_SECOND_5;
+            context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_5;
             break;
         case 15:
-            context->camera_fps = K4A_FRAMES_PER_SECOND_15;
+            context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
             break;
         case 30:
-            context->camera_fps = K4A_FRAMES_PER_SECOND_30;
+            context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
             break;
         default:
             logger_error(LOGGER_RECORD,
@@ -431,6 +434,46 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                          (1_s / frame_period_ns));
             return K4A_RESULT_FAILED;
         }
+    }
+    else
+    {
+        // Default to 30 fps if no video tracks are enabled.
+        context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    }
+
+    // Read depth_delay_off_color_usec and set offsets for each track accordingly.
+    KaxTag *depth_delay_tag = get_tag(context, "K4A_DEPTH_DELAY_NS");
+    if (depth_delay_tag != NULL)
+    {
+        int64_t depth_delay_ns;
+        std::istringstream depth_delay_str(get_tag_string(depth_delay_tag));
+        depth_delay_str >> depth_delay_ns;
+        if (!depth_delay_str.fail())
+        {
+            assert(depth_delay_ns / 1000 <= INT32_MAX);
+            context->record_config.depth_delay_off_color_usec = (int32_t)(depth_delay_ns / 1000);
+
+            // Only set positive delays so that we don't wrap around near 0.
+            if (depth_delay_ns > 0)
+            {
+                context->color_track.sync_delay_ns = (uint64_t)depth_delay_ns;
+            }
+            else if (depth_delay_ns < 0)
+            {
+                context->depth_track.sync_delay_ns = (uint64_t)(-depth_delay_ns);
+                context->ir_track.sync_delay_ns = (uint64_t)(-depth_delay_ns);
+            }
+        }
+        else
+        {
+            logger_error(LOGGER_RECORD,
+                         "Tag K4A_DEPTH_DELAY_NS contains invalid value: %s",
+                         get_tag_string(depth_delay_tag).c_str());
+        }
+    }
+    else
+    {
+        context->record_config.depth_delay_off_color_usec = 0;
     }
 
     return K4A_RESULT_SUCCEEDED;
@@ -579,7 +622,7 @@ KaxTag *get_tag(k4a_playback_context_t *context, const char *name)
 
 std::string get_tag_string(KaxTag *tag)
 {
-    RETURN_VALUE_IF_ARG(NULL, tag == NULL);
+    RETURN_VALUE_IF_ARG(std::string(), tag == NULL);
 
     KaxTagSimple &tagSimple = GetChild<KaxTagSimple>(*tag);
     return GetChild<KaxTagString>(tagSimple).GetValueUTF8();
@@ -882,6 +925,7 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
                 {
                     next_block->block->SetParent(*next_block->cluster);
                     next_block->timestamp_ns = next_block->block->GlobalTimecode();
+                    next_block->sync_timestamp_ns = next_block->timestamp_ns + reader->sync_delay_ns;
                     if (timestamp_search)
                     {
                         if ((next && next_block->timestamp_ns >= context->seek_timestamp_ns) ||
@@ -958,7 +1002,7 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     if (block->reader == &context->color_track)
     {
-        result = TRACE_CALL(k4a_image_create_from_buffer(context->color_format,
+        result = TRACE_CALL(k4a_image_create_from_buffer(context->record_config.color_format,
                                                          (int)block->reader->width,
                                                          (int)block->reader->height,
                                                          (int)block->reader->stride,
@@ -1044,13 +1088,13 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             if (next_blocks[i] && next_blocks[i]->block)
             {
                 // Find the lowest and highest timestamp out of the next blocks
-                if (next_blocks[i]->timestamp_ns < timestamp_start_ns)
+                if (next_blocks[i]->sync_timestamp_ns < timestamp_start_ns)
                 {
-                    timestamp_start_ns = next_blocks[i]->timestamp_ns;
+                    timestamp_start_ns = next_blocks[i]->sync_timestamp_ns;
                 }
-                if (next_blocks[i]->timestamp_ns > timestamp_end_ns)
+                if (next_blocks[i]->sync_timestamp_ns > timestamp_end_ns)
                 {
-                    timestamp_end_ns = next_blocks[i]->timestamp_ns;
+                    timestamp_end_ns = next_blocks[i]->sync_timestamp_ns;
                 }
             }
             else
@@ -1070,11 +1114,11 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             if (next_blocks[i] && next_blocks[i]->block)
             {
                 // If we're seeking forward, check the start timestamp, otherwise check the end timestamp
-                if (next && (next_blocks[i]->timestamp_ns - timestamp_start_ns < context->sync_period_ns / 2))
+                if (next && (next_blocks[i]->sync_timestamp_ns - timestamp_start_ns < context->sync_period_ns / 2))
                 {
                     valid_blocks++;
                 }
-                else if (!next && (timestamp_end_ns - next_blocks[i]->timestamp_ns < context->sync_period_ns / 2))
+                else if (!next && (timestamp_end_ns - next_blocks[i]->sync_timestamp_ns < context->sync_period_ns / 2))
                 {
                     valid_blocks++;
                 }

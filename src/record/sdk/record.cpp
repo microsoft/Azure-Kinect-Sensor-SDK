@@ -83,10 +83,9 @@ k4a_result_t k4a_record_create(const char *path,
     std::ostringstream color_mode_str;
     if (K4A_SUCCEEDED(result))
     {
-        context->color_format = device_config.color_format;
         if (device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF)
         {
-            switch (context->color_format)
+            switch (device_config.color_format)
             {
             case K4A_IMAGE_FORMAT_COLOR_NV12:
                 color_mode_str << "NV12_" << color_height << "P";
@@ -100,7 +99,7 @@ k4a_result_t k4a_record_create(const char *path,
             default:
                 logger_error(LOGGER_RECORD,
                              "Unsupported color_format specified in recording: %d",
-                             context->color_format);
+                             device_config.color_format);
                 result = K4A_RESULT_FAILED;
             }
         }
@@ -165,7 +164,8 @@ k4a_result_t k4a_record_create(const char *path,
     if (K4A_SUCCEEDED(result) && device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF)
     {
         BITMAPINFOHEADER codec_info = {};
-        result = TRACE_CALL(populate_bitmap_info_header(&codec_info, color_width, color_height, context->color_format));
+        result = TRACE_CALL(
+            populate_bitmap_info_header(&codec_info, color_width, color_height, device_config.color_format));
 
         context->color_track = add_track(context,
                                          "COLOR",
@@ -225,6 +225,14 @@ k4a_result_t k4a_record_create(const char *path,
                 device_config.depth_mode == K4A_DEPTH_MODE_PASSIVE_IR ? "PASSIVE" : "ACTIVE",
                 TAG_TARGET_TYPE_TRACK,
                 track_uid);
+    }
+
+    if (K4A_SUCCEEDED(result) && device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF &&
+        device_config.depth_mode != K4A_DEPTH_MODE_OFF)
+    {
+        std::ostringstream delay_str;
+        delay_str << device_config.depth_delay_off_color_usec * 1000;
+        add_tag(context, "K4A_DEPTH_DELAY_NS", delay_str.str().c_str());
     }
 
     if (K4A_SUCCEEDED(result))
@@ -453,7 +461,9 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
         k4a_capture_get_depth_image(capture),
         k4a_capture_get_ir_image(capture),
     };
-    k4a_image_format_t expected_formats[] = { context->color_format, K4A_IMAGE_FORMAT_DEPTH16, K4A_IMAGE_FORMAT_IR16 };
+    k4a_image_format_t expected_formats[] = { context->device_config.color_format,
+                                              K4A_IMAGE_FORMAT_DEPTH16,
+                                              K4A_IMAGE_FORMAT_IR16 };
     KaxTrackEntry *tracks[] = { context->color_track, context->depth_track, context->ir_track };
     static_assert(arraysize(images) == arraysize(tracks), "Invalid mapping from images to track");
     static_assert(arraysize(images) == arraysize(expected_formats), "Invalid mapping from images to formats");

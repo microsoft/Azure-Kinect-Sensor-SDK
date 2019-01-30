@@ -144,8 +144,8 @@ k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, k4a_ca
         buffer[buffer.size() - 1] = 0;
         k4a_result_t result = k4a_calibration_get_from_raw(buffer.data(),
                                                            buffer.size(),
-                                                           context->depth_mode,
-                                                           context->color_resolution,
+                                                           context->record_config.depth_mode,
+                                                           context->record_config.color_resolution,
                                                            context->device_calibration.get());
         if (K4A_FAILED(result))
         {
@@ -158,60 +158,47 @@ k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, k4a_ca
     return K4A_RESULT_SUCCEEDED;
 }
 
-k4a_result_t k4a_playback_get_color_format(k4a_playback_t playback_handle, k4a_image_format_t *format)
+k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle, k4a_record_configuration_t *config)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, format == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);
 
-    if (context->color_resolution != K4A_COLOR_RESOLUTION_OFF)
-    {
-        *format = context->color_format;
-        return K4A_RESULT_SUCCEEDED;
-    }
-    return K4A_RESULT_FAILED;
+    *config = context->record_config;
+    return K4A_RESULT_SUCCEEDED;
 }
 
-k4a_color_resolution_t k4a_playback_get_color_resolution(k4a_playback_t playback_handle)
+k4a_buffer_result_t
+k4a_playback_get_tag(k4a_playback_t playback_handle, const char *name, char *value, size_t *value_size)
 {
-    RETURN_VALUE_IF_HANDLE_INVALID(K4A_COLOR_RESOLUTION_OFF, k4a_playback_t, playback_handle);
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
-    RETURN_VALUE_IF_ARG(K4A_COLOR_RESOLUTION_OFF, context == NULL);
-
-    return context->color_resolution;
-}
-
-k4a_depth_mode_t k4a_playback_get_depth_mode(k4a_playback_t playback_handle)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(K4A_DEPTH_MODE_OFF, k4a_playback_t, playback_handle);
-    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
-    RETURN_VALUE_IF_ARG(K4A_DEPTH_MODE_OFF, context == NULL);
-
-    return context->depth_mode;
-}
-
-k4a_fps_t k4a_playback_get_camera_fps(k4a_playback_t playback_handle)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(K4A_FRAMES_PER_SECOND_30, k4a_playback_t, playback_handle);
-    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
-    RETURN_VALUE_IF_ARG(K4A_FRAMES_PER_SECOND_30, context == NULL);
-
-    if (context->color_resolution != K4A_COLOR_RESOLUTION_OFF || context->depth_mode != K4A_DEPTH_MODE_OFF)
-    {
-        return context->camera_fps;
-    }
-    return K4A_FRAMES_PER_SECOND_30;
-}
-
-const char *k4a_playback_get_tag(k4a_playback_t playback_handle, const char *name)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(NULL, k4a_playback_t, playback_handle);
-    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
-    RETURN_VALUE_IF_ARG(NULL, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, value_size == NULL);
 
     KaxTag *tag = get_tag(context, name);
-    return tag ? get_tag_string(tag).c_str() : NULL;
+    if (tag != NULL)
+    {
+        std::string tag_str = get_tag_string(tag);
+
+        size_t input_buffer_size = *value_size;
+        *value_size = tag_str.size() + 1;
+        if (value == NULL || input_buffer_size < *value_size)
+        {
+            return K4A_BUFFER_RESULT_TOO_SMALL;
+        }
+        else
+        {
+            memset(value, '\0', input_buffer_size);
+            memcpy(value, tag_str.c_str(), tag_str.size());
+            return K4A_BUFFER_RESULT_SUCCEEDED;
+        }
+    }
+    else
+    {
+        return K4A_BUFFER_RESULT_FAILED;
+    }
 }
 
 k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_t playback_handle, k4a_capture_t *capture_handle)

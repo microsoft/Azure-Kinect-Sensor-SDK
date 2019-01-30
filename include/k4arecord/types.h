@@ -68,6 +68,37 @@ typedef enum
     K4A_PLAYBACK_SEEK_END    /**< Seek relative to the end of a recording */
 } k4a_playback_seek_origin_t;
 
+/** Structure containing the device configuration used to record.
+ *
+ * \relates k4a_device_configuration_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">types.h (include k4arecord/types.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef struct _k4a_record_configuration_t
+{
+    /** Image format used to record the color camera */
+    k4a_image_format_t color_format;
+
+    /** Image resolution used to record the color camera */
+    k4a_color_resolution_t color_resolution;
+
+    /** Mode used to record the depth camera */
+    k4a_depth_mode_t depth_mode;
+
+    /** Frame rate used to record the color and depth camera */
+    k4a_fps_t camera_fps;
+
+    /**
+     * The delay between color and depth images in the recording.
+     * A negative delay means depth images are first, and a positive delay means color images are first.
+     */
+    int32_t depth_delay_off_color_usec;
+} k4a_record_configuration_t;
+
 #ifdef __cplusplus
 }
 #endif

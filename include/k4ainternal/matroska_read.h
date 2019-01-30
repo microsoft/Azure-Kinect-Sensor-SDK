@@ -17,6 +17,7 @@ typedef struct _read_block_t
     libmatroska::KaxInternalBlock *block;
 
     uint64_t timestamp_ns;
+    uint64_t sync_timestamp_ns;
     int index;
 } read_block_t;
 
@@ -25,6 +26,7 @@ typedef struct _track_reader_t
     libmatroska::KaxTrackEntry *track;
     uint32_t width, height, stride;
     k4a_image_format_t format;
+    uint64_t sync_delay_ns;
     BITMAPINFOHEADER *bitmap_header;
     std::shared_ptr<read_block_t> current_block;
 } track_reader_t;
@@ -36,10 +38,7 @@ typedef struct _k4a_playback_context_t
     logger_t logger_handle;
 
     uint64_t timecode_scale;
-    k4a_image_format_t color_format;
-    k4a_color_resolution_t color_resolution;
-    k4a_depth_mode_t depth_mode;
-    k4a_fps_t camera_fps;
+    k4a_record_configuration_t record_config;
 
     std::unique_ptr<libebml::EbmlStream> stream;
     std::unique_ptr<libmatroska::KaxSegment> segment;
@@ -54,8 +53,6 @@ typedef struct _k4a_playback_context_t
     std::unique_ptr<k4a_calibration_t> device_calibration;
 
     uint64_t sync_period_ns;
-    // TODO: int64_t depth_delay_off_color_ns;
-
     uint64_t seek_timestamp_ns;
     std::shared_ptr<libmatroska::KaxCluster> seek_cluster;
 

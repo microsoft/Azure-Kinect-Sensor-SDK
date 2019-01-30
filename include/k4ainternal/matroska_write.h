@@ -47,7 +47,6 @@ typedef struct _k4a_record_context_t
     logger_t logger_handle;
 
     uint64_t timecode_scale;
-    k4a_image_format_t color_format;
     uint32_t camera_fps;
 
     k4a_device_t device;
