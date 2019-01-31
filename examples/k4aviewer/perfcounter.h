@@ -11,7 +11,11 @@
 
 // System headers
 //
+#include <algorithm>
+#include <array>
 #include <chrono>
+#include <map>
+#include <numeric>
 #include <ratio>
 
 // Library headers
@@ -20,7 +24,6 @@
 
 // Project headers
 //
-#include <map>
 
 namespace k4aviewer
 {
@@ -67,6 +70,8 @@ private:
 class PerfCounter
 {
 public:
+    using SampleData = std::array<float, 100>;
+
     PerfCounter(const char *name)
     {
         PerfCounterManager::RegisterPerfCounter(name, this);
@@ -74,27 +79,49 @@ public:
 
     PerfCounter(const std::string &name) : PerfCounter(name.c_str()) {}
 
-    inline double GetAverage()
+    inline float GetMax() const
     {
-        return Total / SampleCount;
+        return m_max;
+    }
+
+    inline float GetAverage() const
+    {
+        return static_cast<float>(std::accumulate(m_samples.begin(), m_samples.end(), 0.0) / m_samples.size());
+    }
+
+    inline const SampleData &GetSampleData() const
+    {
+        return m_samples;
+    }
+
+    inline size_t GetCurrentSampleId() const
+    {
+        return m_currentSample;
     }
 
     inline void EndSample(std::chrono::high_resolution_clock::time_point startTime)
     {
-        auto endTime = std::chrono::high_resolution_clock::now();
-        Total += std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-        ++SampleCount;
+        const auto endTime = std::chrono::high_resolution_clock::now();
+        const long long durationNs = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime).count();
+
+        const float durationMs = durationNs * 1.0f * std::milli::den / std::milli::num * std::nano::num /
+                                 std::nano::den;
+        m_max = std::max(m_max, durationMs);
+
+        m_currentSample = (m_currentSample + 1) % m_samples.size();
+        m_samples[m_currentSample] = durationMs;
     }
 
     inline void Reset()
     {
-        Total = 0;
-        SampleCount = 0;
+        m_max = 0;
+        std::fill(m_samples.begin(), m_samples.end(), 0.0f);
     }
 
 private:
-    double Total = 0;
-    double SampleCount = 0;
+    float m_max = 0;
+    size_t m_currentSample = 0;
+    SampleData m_samples;
 };
 
 inline void PerfSample::End()

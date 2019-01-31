@@ -18,7 +18,6 @@
 
 // Project headers
 //
-#include "k4adeviceselectioncontrol.h"
 
 struct K4AViewerOptions
 {
@@ -53,8 +52,6 @@ private:
     bool m_showStyleEditor = false;
     bool m_showMetricsWindow = false;
     bool m_showPerfCounters = false;
-
-    std::unique_ptr<K4ADeviceSelectionControl> m_deviceSelectionControl;
 };
 } // namespace k4aviewer
 

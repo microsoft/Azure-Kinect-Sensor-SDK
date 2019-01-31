@@ -7,7 +7,7 @@
 
 // Associated header
 //
-#include "k4adevicesettingscontrol.h"
+#include "k4adevicedockcontrol.h"
 
 // System headers
 //
@@ -21,22 +21,82 @@
 // Project headers
 //
 #include "k4aaudiomanager.h"
-#include "k4acolorframevisualizer.h"
-#include "k4adepthframevisualizer.h"
 #include "k4aimguiextensions.h"
-#include "k4aviewererrormanager.h"
-#include "k4aimuwindow.h"
-#include "k4aaudiowindow.h"
-#include "k4ainfraredframevisualizer.h"
-#include "k4apointcloudwindow.h"
 #include "k4atypeoperators.h"
+#include "k4aviewererrormanager.h"
 #include "k4awindowmanager.h"
 
 using namespace k4aviewer;
 
-void K4ADeviceSettingsControl::CheckFirmwareVersion(const k4a_version_t actualVersion,
-                                                    const k4a_version_t minVersion,
-                                                    const char *type) const
+namespace
+{
+static constexpr int MaxTimeoutCount = 120;
+
+bool HasTimedOut(k4a_wait_result_t result, int &timeoutCounter)
+{
+    if (result == K4A_WAIT_RESULT_SUCCEEDED)
+    {
+        timeoutCounter = 0;
+        return false;
+    }
+
+    if (result == K4A_WAIT_RESULT_TIMEOUT)
+    {
+        if (timeoutCounter < MaxTimeoutCount)
+        {
+            ++timeoutCounter;
+            return false;
+        }
+
+        return true;
+    }
+
+    return true;
+}
+
+template<typename T>
+void PollSensor(K4ADevice &device,
+                const char *sensorFriendlyName,
+                const std::function<k4a_wait_result_t(K4ADevice &, T &)> &pollFn,
+                const std::function<void(K4ADevice &)> &stopFn,
+                int &timeoutCounter,
+                K4ADataSource<T> &dataSource)
+{
+    T data;
+    const k4a_wait_result_t pollStatus = pollFn(device, data);
+    const bool hasTimedOut = HasTimedOut(pollStatus, timeoutCounter);
+
+    if (pollStatus == K4A_WAIT_RESULT_SUCCEEDED)
+    {
+        dataSource.NotifyObservers(data);
+    }
+    else if (pollStatus == K4A_WAIT_RESULT_TIMEOUT && !hasTimedOut)
+    {
+        // do nothing
+    }
+    else
+    {
+        std::stringstream errorBuilder;
+        errorBuilder << sensorFriendlyName << " on device " << device.GetSerialNumber();
+        if (pollStatus == K4A_WAIT_RESULT_TIMEOUT)
+        {
+            errorBuilder << " timed out!";
+        }
+        else
+        {
+            errorBuilder << " failed!";
+        }
+
+        K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
+        stopFn(device);
+        dataSource.NotifyTermination();
+    }
+}
+} // namespace
+
+void K4ADeviceDockControl::CheckFirmwareVersion(const k4a_version_t actualVersion,
+                                                const k4a_version_t minVersion,
+                                                const char *type) const
 {
     if (actualVersion < minVersion)
     {
@@ -50,9 +110,9 @@ void K4ADeviceSettingsControl::CheckFirmwareVersion(const k4a_version_t actualVe
     }
 }
 
-void K4ADeviceSettingsControl::ShowColorControl(k4a_color_control_command_t command,
-                                                ColorSetting &cacheEntry,
-                                                const std::function<ColorControlAction(ColorSetting &)> &showControl)
+void K4ADeviceDockControl::ShowColorControl(k4a_color_control_command_t command,
+                                            ColorSetting &cacheEntry,
+                                            const std::function<ColorControlAction(ColorSetting &)> &showControl)
 {
     const ColorControlAction action = showControl(cacheEntry);
     if (action == ColorControlAction::None)
@@ -72,9 +132,9 @@ void K4ADeviceSettingsControl::ShowColorControl(k4a_color_control_command_t comm
     ApplyColorSetting(command, cacheEntry);
 }
 
-void K4ADeviceSettingsControl::ShowColorControlAutoButton(k4a_color_control_mode_t currentMode,
-                                                          ColorControlAction &actionToUpdate,
-                                                          const char *id)
+void K4ADeviceDockControl::ShowColorControlAutoButton(k4a_color_control_mode_t currentMode,
+                                                      ColorControlAction &actionToUpdate,
+                                                      const char *id)
 {
     ImGui::PushID(id);
     if (currentMode == K4A_COLOR_CONTROL_MODE_MANUAL)
@@ -94,7 +154,7 @@ void K4ADeviceSettingsControl::ShowColorControlAutoButton(k4a_color_control_mode
     ImGui::PopID();
 }
 
-void K4ADeviceSettingsControl::ApplyColorSetting(k4a_color_control_command_t command, ColorSetting &cacheEntry)
+void K4ADeviceDockControl::ApplyColorSetting(k4a_color_control_command_t command, ColorSetting &cacheEntry)
 {
     const k4a_result_t result = m_device->SetColorControl(command, cacheEntry.Mode, cacheEntry.Value);
     if (K4A_RESULT_SUCCEEDED != result)
@@ -110,7 +170,7 @@ void K4ADeviceSettingsControl::ApplyColorSetting(k4a_color_control_command_t com
     ReadColorSetting(command, cacheEntry);
 }
 
-void K4ADeviceSettingsControl::ApplyDefaultColorSettings()
+void K4ADeviceDockControl::ApplyDefaultColorSettings()
 {
     // The color settings get persisted in the camera's firmware, so there isn't a way
     // to know if the setting's value at the time we started K4AViewer is the default.
@@ -148,7 +208,7 @@ void K4ADeviceSettingsControl::ApplyDefaultColorSettings()
     ApplyColorSetting(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, m_colorSettingsCache.PowerlineFrequency);
 }
 
-void K4ADeviceSettingsControl::ReadColorSetting(k4a_color_control_command_t command, ColorSetting &cacheEntry)
+void K4ADeviceDockControl::ReadColorSetting(k4a_color_control_command_t command, ColorSetting &cacheEntry)
 {
     const k4a_result_t result = m_device->GetColorControl(command, cacheEntry.Mode, cacheEntry.Value);
     if (K4A_RESULT_SUCCEEDED != result)
@@ -159,7 +219,7 @@ void K4ADeviceSettingsControl::ReadColorSetting(k4a_color_control_command_t comm
     }
 }
 
-void K4ADeviceSettingsControl::LoadColorSettingsCache()
+void K4ADeviceDockControl::LoadColorSettingsCache()
 {
     // If more color controls are added, they need to be initialized here
     //
@@ -178,7 +238,7 @@ void K4ADeviceSettingsControl::LoadColorSettingsCache()
     ReadColorSetting(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, m_colorSettingsCache.PowerlineFrequency);
 }
 
-void K4ADeviceSettingsControl::RefreshSyncCableStatus()
+void K4ADeviceDockControl::RefreshSyncCableStatus()
 {
     const k4a_result_t result = m_device->GetSyncCablesConnected(m_syncInConnected, m_syncOutConnected);
     if (result != K4A_RESULT_SUCCEEDED)
@@ -187,12 +247,12 @@ void K4ADeviceSettingsControl::RefreshSyncCableStatus()
     }
 }
 
-bool K4ADeviceSettingsControl::DeviceIsStarted() const
+bool K4ADeviceDockControl::DeviceIsStarted() const
 {
     return m_device->CamerasAreStarted() || m_device->ImuIsStarted() || (m_microphone && m_microphone->IsStarted());
 }
 
-K4ADeviceSettingsControl::K4ADeviceSettingsControl(std::shared_ptr<K4ADevice> device) : m_device(std::move(device))
+K4ADeviceDockControl::K4ADeviceDockControl(std::shared_ptr<K4ADevice> device) : m_device(std::move(device))
 {
     ApplyDefaultConfiguration();
 
@@ -214,14 +274,30 @@ K4ADeviceSettingsControl::K4ADeviceSettingsControl(std::shared_ptr<K4ADevice> de
     RefreshSyncCableStatus();
 }
 
-K4ADeviceSettingsControl::~K4ADeviceSettingsControl()
+K4ADeviceDockControl::~K4ADeviceDockControl()
 {
     K4AWindowManager::Instance().ClearWindows();
     CloseDevice();
 }
 
-void K4ADeviceSettingsControl::Show()
+void K4ADeviceDockControl::Show()
 {
+    std::stringstream labelBuilder;
+    labelBuilder << "Device S/N: " << m_device->GetSerialNumber();
+    ImGui::Text("%s", labelBuilder.str().c_str());
+    ImGui::SameLine();
+
+    {
+        ImGuiExtensions::ButtonColorChanger cc(ImGuiExtensions::ButtonColor::Red);
+        if (ImGui::SmallButton("Close device"))
+        {
+            K4AWindowManager::Instance().PopDockControl();
+            return;
+        }
+    }
+
+    ImGui::Separator();
+
     const bool deviceIsStarted = DeviceIsStarted();
 
     if (!m_paused)
@@ -699,23 +775,10 @@ void K4ADeviceSettingsControl::Show()
                                                m_pendingDeviceConfiguration.DepthMode != K4A_DEPTH_MODE_PASSIVE_IR &&
                                                m_device->CamerasAreStarted();
 
-        ImGui::Text("View Mode");
-        const ViewType oldViewType = m_currentViewType;
-        bool modeClicked = false;
-        modeClicked |= ImGuiExtensions::K4ARadioButton("2D",
-                                                       reinterpret_cast<int *>(&m_currentViewType),
-                                                       static_cast<int>(ViewType::Normal),
-                                                       !m_paused);
-        ImGui::SameLine();
-        modeClicked |= ImGuiExtensions::K4ARadioButton("3D",
-                                                       reinterpret_cast<int *>(&m_currentViewType),
-                                                       static_cast<int>(ViewType::PointCloudViewer),
-                                                       pointCloudViewerAvailable && !m_paused);
-
-        if (modeClicked && oldViewType != m_currentViewType)
-        {
-            SetViewType(m_currentViewType);
-        }
+        K4AWindowSet::ShowModeSelector(&m_currentViewType,
+                                       true,
+                                       pointCloudViewerAvailable,
+                                       [this](K4AWindowSet::ViewType t) { return this->SetViewType(t); });
 
         if (m_paused)
         {
@@ -738,50 +801,31 @@ void K4ADeviceSettingsControl::Show()
     m_firstRun = false;
 }
 
-void K4ADeviceSettingsControl::PollDevice()
+void K4ADeviceDockControl::PollDevice()
 {
     if (m_device->CamerasAreStarted())
     {
-        const k4a_wait_result_t cameraPollStatus = m_device->PollCameras();
-
-        if (cameraPollStatus != K4A_WAIT_RESULT_SUCCEEDED)
-        {
-            std::stringstream errorBuilder;
-            errorBuilder << "Camera(s) on device " << m_device->GetSerialNumber();
-            if (cameraPollStatus == K4A_WAIT_RESULT_TIMEOUT)
-            {
-                errorBuilder << " timed out!";
-            }
-            else
-            {
-                errorBuilder << " failed!";
-            }
-
-            K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
-            StopCameras();
-        }
+        PollSensor<std::shared_ptr<K4ACapture>>(*m_device,
+                                                "Cameras",
+                                                [](K4ADevice &device, std::shared_ptr<K4ACapture> &result) {
+                                                    std::unique_ptr<K4ACapture> p;
+                                                    k4a_wait_result_t status = device.PollCameras(p);
+                                                    result = std::move(p);
+                                                    return status;
+                                                },
+                                                [](K4ADevice &device) { device.StopCameras(); },
+                                                m_cameraTimeoutCounter,
+                                                m_cameraDataSource);
     }
 
     if (m_device->ImuIsStarted())
     {
-        const k4a_wait_result_t imuPollStatus = m_device->PollImu();
-
-        if (imuPollStatus != K4A_WAIT_RESULT_SUCCEEDED)
-        {
-            std::stringstream errorBuilder;
-            errorBuilder << "IMU on device " << m_device->GetSerialNumber();
-            if (imuPollStatus == K4A_WAIT_RESULT_TIMEOUT)
-            {
-                errorBuilder << " timed out!";
-            }
-            else
-            {
-                errorBuilder << " failed!";
-            }
-
-            K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
-            StopImu();
-        }
+        PollSensor<k4a_imu_sample_t>(*m_device,
+                                     "IMU",
+                                     [](K4ADevice &device, k4a_imu_sample_t &result) { return device.PollImu(result); },
+                                     [](K4ADevice &device) { device.StopImu(); },
+                                     m_imuTimeoutCounter,
+                                     m_imuDataSource);
     }
 
     if (m_microphone && m_microphone->GetStatusCode() != SoundIoErrorNone)
@@ -793,7 +837,7 @@ void K4ADeviceSettingsControl::PollDevice()
     }
 }
 
-void K4ADeviceSettingsControl::Start()
+void K4ADeviceDockControl::Start()
 {
     const bool enableCameras = m_pendingDeviceConfiguration.EnableColorCamera ||
                                m_pendingDeviceConfiguration.EnableDepthCamera;
@@ -810,20 +854,20 @@ void K4ADeviceSettingsControl::Start()
         StartMicrophone();
     }
 
-    SetViewType(ViewType::Normal);
+    SetViewType(K4AWindowSet::ViewType::Normal);
     m_paused = false;
 }
 
-void K4ADeviceSettingsControl::Stop()
+void K4ADeviceDockControl::Stop()
 {
     K4AWindowManager::Instance().ClearWindows();
 
-    StopCameras();
-    StopImu();
+    m_device->StopCameras();
+    m_device->StopImu();
     StopMicrophone();
 }
 
-bool K4ADeviceSettingsControl::StartCameras()
+bool K4ADeviceDockControl::StartCameras()
 {
     if (m_device->CamerasAreStarted())
     {
@@ -843,12 +887,7 @@ bool K4ADeviceSettingsControl::StartCameras()
     return true;
 }
 
-void K4ADeviceSettingsControl::StopCameras()
-{
-    m_device->StopCameras();
-}
-
-bool K4ADeviceSettingsControl::StartMicrophone()
+bool K4ADeviceDockControl::StartMicrophone()
 {
     if (!m_microphone)
     {
@@ -875,7 +914,7 @@ bool K4ADeviceSettingsControl::StartMicrophone()
     return true;
 }
 
-void K4ADeviceSettingsControl::StopMicrophone()
+void K4ADeviceDockControl::StopMicrophone()
 {
     if (m_microphone)
     {
@@ -883,7 +922,7 @@ void K4ADeviceSettingsControl::StopMicrophone()
     }
 }
 
-bool K4ADeviceSettingsControl::StartImu()
+bool K4ADeviceDockControl::StartImu()
 {
     if (m_device->ImuIsStarted())
     {
@@ -901,146 +940,50 @@ bool K4ADeviceSettingsControl::StartImu()
     return true;
 }
 
-void K4ADeviceSettingsControl::StopImu()
-{
-    m_device->StopImu();
-}
-
-void K4ADeviceSettingsControl::StartPointCloudViewer()
-{
-    std::unique_ptr<K4ACalibrationTransformData> calibrationData;
-
-    const k4a_result_t getCalibrationResult =
-        m_device->GetCalibrationTransformData(calibrationData,
-                                              m_pendingDeviceConfiguration.DepthMode,
-                                              m_pendingDeviceConfiguration.ColorResolution);
-
-    if (getCalibrationResult != K4A_RESULT_SUCCEEDED)
-    {
-        K4AViewerErrorManager::Instance().SetErrorStatus("Failed to get calibration data!");
-        return;
-    }
-
-    std::string pointCloudTitle = m_device->GetSerialNumber() + ": Point Cloud Viewer";
-    auto frameSource = std::make_shared<K4ANonBufferingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>>();
-    m_device->RegisterCaptureObserver(frameSource);
-
-    auto &wm = K4AWindowManager::Instance();
-    wm.AddWindow(
-        std::unique_ptr<IK4AVisualizationWindow>(new K4APointCloudWindow(std::move(pointCloudTitle),
-                                                                         m_pendingDeviceConfiguration.DepthMode,
-                                                                         std::move(frameSource),
-                                                                         std::move(calibrationData))));
-}
-
-void K4ADeviceSettingsControl::SetViewType(ViewType viewType)
+void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
 {
     K4AWindowManager::Instance().ClearWindows();
     switch (viewType)
     {
-    case ViewType::Normal:
-        StartNormalView();
+    case K4AWindowSet::ViewType::Normal:
+        K4AWindowSet::StartNormalWindows(m_device->GetSerialNumber().c_str(),
+                                         &m_cameraDataSource,
+                                         &m_imuDataSource,
+                                         m_pendingDeviceConfiguration.EnableMicrophone ?
+                                             m_microphone->CreateListener() :
+                                             nullptr,
+                                         m_pendingDeviceConfiguration.EnableDepthCamera,
+                                         m_pendingDeviceConfiguration.DepthMode,
+                                         m_pendingDeviceConfiguration.EnableColorCamera,
+                                         m_pendingDeviceConfiguration.ColorFormat,
+                                         m_pendingDeviceConfiguration.ColorResolution);
         break;
 
-    case ViewType::PointCloudViewer:
-        StartPointCloudViewer();
+    case K4AWindowSet::ViewType::PointCloudViewer:
+        std::unique_ptr<K4ACalibrationTransformData> calibrationData;
+
+        const k4a_result_t getCalibrationResult =
+            m_device->GetCalibrationTransformData(calibrationData,
+                                                  m_pendingDeviceConfiguration.DepthMode,
+                                                  m_pendingDeviceConfiguration.ColorResolution);
+
+        if (getCalibrationResult != K4A_RESULT_SUCCEEDED)
+        {
+            K4AViewerErrorManager::Instance().SetErrorStatus("Failed to get calibration data!");
+            return;
+        }
+
+        K4AWindowSet::StartPointCloudWindow(m_device->GetSerialNumber().c_str(),
+                                            std::move(calibrationData),
+                                            m_cameraDataSource,
+                                            m_pendingDeviceConfiguration.DepthMode);
         break;
     }
 
     m_currentViewType = viewType;
 }
 
-void K4ADeviceSettingsControl::StartNormalView()
-{
-    if (m_device->CamerasAreStarted())
-    {
-        if (m_pendingDeviceConfiguration.EnableDepthCamera)
-        {
-            CreateVideoWindow<>("Infrared Preview",
-                                std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_IR16>>(
-                                    new K4AInfraredFrameVisualizer(m_pendingDeviceConfiguration.DepthMode)));
-
-            // K4A_DEPTH_MODE_PASSIVE_IR doesn't support actual depth
-            //
-            if (m_pendingDeviceConfiguration.DepthMode != K4A_DEPTH_MODE_PASSIVE_IR)
-            {
-                CreateVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>(
-                    "Depth Preview",
-                    std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_DEPTH16>>(
-                        new K4ADepthFrameVisualizer(m_pendingDeviceConfiguration.DepthMode)));
-            }
-        }
-
-        if (m_pendingDeviceConfiguration.EnableColorCamera)
-        {
-            constexpr char colorWindowTitle[] = "Color Preview";
-
-            switch (m_pendingDeviceConfiguration.ColorFormat)
-            {
-            case K4A_IMAGE_FORMAT_COLOR_YUY2:
-                CreateVideoWindow<K4A_IMAGE_FORMAT_COLOR_YUY2>(
-                    colorWindowTitle,
-                    K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_YUY2>(
-                        m_pendingDeviceConfiguration.ColorResolution));
-                break;
-
-            case K4A_IMAGE_FORMAT_COLOR_MJPG:
-                CreateVideoWindow<K4A_IMAGE_FORMAT_COLOR_MJPG>(
-                    colorWindowTitle,
-                    K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_MJPG>(
-                        m_pendingDeviceConfiguration.ColorResolution));
-                break;
-
-            case K4A_IMAGE_FORMAT_COLOR_BGRA32:
-                CreateVideoWindow<K4A_IMAGE_FORMAT_COLOR_BGRA32>(
-                    colorWindowTitle,
-                    K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_BGRA32>(
-                        m_pendingDeviceConfiguration.ColorResolution));
-                break;
-
-            case K4A_IMAGE_FORMAT_COLOR_NV12:
-                CreateVideoWindow<K4A_IMAGE_FORMAT_COLOR_NV12>(
-                    colorWindowTitle,
-                    K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_NV12>(
-                        m_pendingDeviceConfiguration.ColorResolution));
-                break;
-
-            default:
-                K4AViewerErrorManager::Instance().SetErrorStatus("Invalid color mode!");
-            }
-        }
-    }
-
-    // Build a collection of the graph-type windows we're using so the window manager knows it can group them
-    // in the same section
-    //
-    std::vector<std::unique_ptr<IK4AVisualizationWindow>> graphWindows;
-    if (m_device->ImuIsStarted())
-    {
-        std::string title = m_device->GetSerialNumber() + ": IMU Preview";
-
-        auto imuSampleSource = std::make_shared<K4AImuSampleSource>();
-        m_device->RegisterImuObserver(std::static_pointer_cast<IK4AImuObserver>(imuSampleSource));
-
-        graphWindows.emplace_back(
-            std::unique_ptr<K4AImuWindow>(new K4AImuWindow(std::move(title), std::move(imuSampleSource))));
-    }
-
-    if (m_microphone && m_microphone->IsStarted())
-    {
-        std::string micTitle = m_device->GetSerialNumber() + ": Microphone Preview";
-
-        graphWindows.emplace_back(std::unique_ptr<IK4AVisualizationWindow>(
-            new K4AAudioWindow(std::move(micTitle), m_microphone->CreateListener())));
-    }
-
-    if (!graphWindows.empty())
-    {
-        K4AWindowManager::Instance().AddWindowGroup(std::move(graphWindows));
-    }
-}
-
-void K4ADeviceSettingsControl::CloseDevice()
+void K4ADeviceDockControl::CloseDevice()
 {
     if (m_device)
     {
@@ -1049,17 +992,17 @@ void K4ADeviceSettingsControl::CloseDevice()
     }
 }
 
-void K4ADeviceSettingsControl::ApplyDefaultConfiguration()
+void K4ADeviceDockControl::ApplyDefaultConfiguration()
 {
     m_pendingDeviceConfiguration = K4AViewerSettingsManager::Instance().GetSavedDeviceConfiguration();
 }
 
-void K4ADeviceSettingsControl::SaveDefaultConfiguration()
+void K4ADeviceDockControl::SaveDefaultConfiguration()
 {
     K4AViewerSettingsManager::Instance().SetSavedDeviceConfiguration(m_pendingDeviceConfiguration);
 }
 
-void K4ADeviceSettingsControl::ResetDefaultConfiguration()
+void K4ADeviceDockControl::ResetDefaultConfiguration()
 {
     m_pendingDeviceConfiguration = K4ADeviceConfiguration();
     SaveDefaultConfiguration();

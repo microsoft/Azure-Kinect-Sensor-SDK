@@ -187,7 +187,7 @@ k4a_result_t capture_create(k4a_capture_t *capture_handle)
     if (K4A_SUCCEEDED(result))
     {
         capture->ref_count = 1;
-        capture->temperature_c = FP_NAN;
+        capture->temperature_c = NAN;
         capture->lock = Lock_Init();
         result = K4A_RESULT_FROM_BOOL(capture->lock != NULL);
     }
@@ -315,6 +315,16 @@ void capture_set_imu_image(k4a_capture_t capture_handle, k4a_image_t image_handl
     // We just reuse the ir image location as this is never exposed to the user.
     capture_set_ir_image(capture_handle, image_handle);
 }
+
+// On Ubuntu 16.04 this works without warnings, but on Ubuntu 18.04 isnan actually
+// takes a long double, we get a double-promotion warning here.  Unfortunately,
+// isnan has an implementation-defined argument type, so there's not a specific
+// type we can cast it to in order to avoid clang's precision warnings, so we
+// just need to suppress the warning.
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdouble-promotion"
+#endif
 void capture_set_temperature_c(k4a_capture_t capture_handle, float temperature_c)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_capture_t, capture_handle);
@@ -323,9 +333,14 @@ void capture_set_temperature_c(k4a_capture_t capture_handle, float temperature_c
     capture_context_t *capture = k4a_capture_t_get_context(capture_handle);
     capture->temperature_c = temperature_c;
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
 float capture_get_temperature_c(k4a_capture_t capture_handle)
 {
-    RETURN_VALUE_IF_HANDLE_INVALID(FP_NAN, k4a_capture_t, capture_handle);
+    RETURN_VALUE_IF_HANDLE_INVALID(NAN, k4a_capture_t, capture_handle);
 
     capture_context_t *capture = k4a_capture_t_get_context(capture_handle);
     return capture->temperature_c;

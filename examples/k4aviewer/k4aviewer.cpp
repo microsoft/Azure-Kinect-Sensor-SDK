@@ -21,9 +21,9 @@
 // Project headers
 //
 #include "k4aaudiomanager.h"
+#include "k4asourceselectiondockcontrol.h"
 #include "k4aviewererrormanager.h"
 #include "k4awindowmanager.h"
-
 #include "perfcounter.h"
 
 using namespace k4aviewer;
@@ -146,7 +146,7 @@ K4AViewer::K4AViewer(const K4AViewerOptions &args)
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str().c_str());
     }
 
-    m_deviceSelectionControl.reset(new K4ADeviceSelectionControl());
+    K4AWindowManager::Instance().PushDockControl(std::unique_ptr<IK4ADockControl>(new K4ASourceSelectionDockControl));
 }
 
 K4AViewer::~K4AViewer()
@@ -173,24 +173,7 @@ void K4AViewer::Run()
 
         ShowMainMenuBar();
 
-        K4AWindowPlacementInfo placementInfo = K4AWindowManager::Instance().GetDockPlacementInfo();
-        ImGui::SetNextWindowPos(placementInfo.Position);
-        const ImVec2 minSize(0, placementInfo.Size.y);
-        const ImVec2 maxSize(std::numeric_limits<float>::max(), placementInfo.Size.y);
-        ImGui::SetNextWindowSizeConstraints(minSize, maxSize);
-
-        ImGui::Begin("Dock",
-                     nullptr,
-                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
-                         ImGuiWindowFlags_NoTitleBar);
-        m_deviceSelectionControl->Show();
-
-        ImVec2 dockSize = ImGui::GetWindowSize();
-        K4AWindowManager::Instance().SetDockWidth(dockSize.x);
-
-        ImGui::End();
-
-        K4AWindowManager::Instance().ShowWindows();
+        K4AWindowManager::Instance().ShowAll();
 
         ShowErrorOverlay();
 

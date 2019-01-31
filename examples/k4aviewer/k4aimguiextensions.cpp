@@ -20,6 +20,7 @@
 
 // Project headers
 //
+#include "filesystem17.h"
 
 namespace
 {

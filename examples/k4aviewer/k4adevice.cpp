@@ -19,32 +19,13 @@
 // Project headers
 //
 #include "k4acapture.h"
+#include "k4aviewerutil.h"
 
 using namespace k4aviewer;
 
 namespace
 {
 constexpr int32_t StartupCaptureTimeoutMs = 10000;
-constexpr int MaxCaptureTimeoutCount = 120;
-
-template<typename T> void NotifyObservers(std::list<std::weak_ptr<IK4AObserver<T>>> &observerList, T &value)
-{
-    for (auto wpObserver = observerList.begin(); wpObserver != observerList.end();)
-    {
-        auto spObserver = wpObserver->lock();
-        if (spObserver)
-        {
-            spObserver->NotifyData(value);
-            ++wpObserver;
-        }
-        else
-        {
-            auto toDelete = wpObserver;
-            ++wpObserver;
-            observerList.erase(toDelete);
-        }
-    }
-}
 } // namespace
 
 K4ADevice::K4ADevice(const k4a_device_t device) : m_device(device)
@@ -120,7 +101,10 @@ k4a_result_t K4ADevice::StartCameras(k4a_device_configuration_t &configuration)
         timeout = K4A_WAIT_INFINITE;
     }
 
-    const k4a_wait_result_t waitResult = PollCameras(timeout);
+    // 'Prime' the camera - this lets us set a longer timeout for camera startup
+    //
+    std::unique_ptr<K4ACapture> firstCapture;
+    const k4a_wait_result_t waitResult = PollCameras(timeout, firstCapture);
     if (waitResult != K4A_WAIT_RESULT_SUCCEEDED)
     {
         StopCameras();
@@ -140,13 +124,18 @@ k4a_result_t K4ADevice::StartImu()
         return result;
     }
 
-    const k4a_wait_result_t waitResult = PollImu(StartupCaptureTimeoutMs);
+    m_imuStarted = true;
+
+    // 'Prime' the IMU - this lets us set a longer timeout for IMU startup
+    //
+    k4a_imu_sample_t firstImuSample;
+    const k4a_wait_result_t waitResult = PollImu(StartupCaptureTimeoutMs, firstImuSample);
     if (waitResult != K4A_WAIT_RESULT_SUCCEEDED)
     {
+        StopImu();
         return K4A_RESULT_FAILED;
     }
 
-    m_imuStarted = true;
     return result;
 }
 
@@ -154,14 +143,6 @@ void K4ADevice::StopCameras()
 {
     k4a_device_stop_cameras(m_device);
     m_camerasStarted = false;
-
-    for (const auto &captureObserver : m_captureObservers)
-    {
-        if (auto spCaptureObserver = captureObserver.lock())
-        {
-            spCaptureObserver->NotifyTermination();
-        }
-    }
 }
 
 void K4ADevice::StopImu()
@@ -170,7 +151,7 @@ void K4ADevice::StopImu()
     m_imuStarted = false;
 }
 
-k4a_wait_result_t K4ADevice::PollCameras(const int32_t timeoutMs)
+k4a_wait_result_t K4ADevice::PollCameras(const int32_t timeoutMs, std::unique_ptr<K4ACapture> &capture)
 {
     if (!m_camerasStarted)
     {
@@ -178,7 +159,6 @@ k4a_wait_result_t K4ADevice::PollCameras(const int32_t timeoutMs)
     }
 
     k4a_capture_t newCapture;
-
     const k4a_wait_result_t waitResult = k4a_device_get_capture(m_device, &newCapture, timeoutMs);
 
     if (K4A_WAIT_RESULT_SUCCEEDED != waitResult)
@@ -186,24 +166,23 @@ k4a_wait_result_t K4ADevice::PollCameras(const int32_t timeoutMs)
         return waitResult;
     }
 
-    auto spCapture = std::make_shared<K4ACapture>(newCapture);
-
-    NotifyObservers(m_captureObservers, spCapture);
+    capture = std14::make_unique<K4ACapture>(newCapture);
 
     return waitResult;
 }
 
-k4a_wait_result_t K4ADevice::PollImu(const int32_t timeoutMs)
+k4a_wait_result_t K4ADevice::PollImu(const int32_t timeoutMs, k4a_imu_sample_t &sample)
 {
-    k4a_imu_sample_t sample;
+    if (!m_imuStarted)
+    {
+        return K4A_WAIT_RESULT_FAILED;
+    }
 
     const k4a_wait_result_t result = k4a_device_get_imu_sample(m_device, &sample, timeoutMs);
     if (result != K4A_WAIT_RESULT_SUCCEEDED)
     {
         return result;
     }
-
-    NotifyObservers(m_imuObservers, sample);
 
     return result;
 }
@@ -242,19 +221,9 @@ k4a_result_t K4ADevice::GetColorControl(k4a_color_control_command_t command,
     return k4a_device_get_color_control(m_device, command, &targetMode, &value);
 }
 
-void K4ADevice::RegisterCaptureObserver(std::shared_ptr<IK4ACaptureObserver> &&captureObserver)
+k4a_wait_result_t K4ADevice::PollCameras(std::unique_ptr<K4ACapture> &capture)
 {
-    m_captureObservers.emplace_back(std::move(captureObserver));
-}
-
-void K4ADevice::RegisterImuObserver(std::shared_ptr<IK4AImuObserver> &&imuObserver)
-{
-    m_imuObservers.emplace_back(std::move(imuObserver));
-}
-
-k4a_wait_result_t K4ADevice::PollCameras()
-{
-    const k4a_wait_result_t result = CheckTimeout(PollCameras(0), &m_cameraTimeoutCounter);
+    const k4a_wait_result_t result = PollCameras(0, capture);
 
     if (result == K4A_WAIT_RESULT_FAILED)
     {
@@ -264,35 +233,13 @@ k4a_wait_result_t K4ADevice::PollCameras()
     return result;
 }
 
-k4a_wait_result_t K4ADevice::PollImu()
+k4a_wait_result_t K4ADevice::PollImu(k4a_imu_sample_t &imuSample)
 {
-    const k4a_wait_result_t result = CheckTimeout(PollImu(0), &m_imuTimeoutCounter);
+    const k4a_wait_result_t result = PollImu(0, imuSample);
 
     if (result == K4A_WAIT_RESULT_FAILED)
     {
         StopImu();
-    }
-
-    return result;
-}
-
-k4a_wait_result_t K4ADevice::CheckTimeout(const k4a_wait_result_t result, int *timeoutCounter)
-{
-    if (result == K4A_WAIT_RESULT_SUCCEEDED)
-    {
-        *timeoutCounter = 0;
-        return result;
-    }
-
-    if (result == K4A_WAIT_RESULT_TIMEOUT)
-    {
-        if (*timeoutCounter < MaxCaptureTimeoutCount)
-        {
-            ++*timeoutCounter;
-            return K4A_WAIT_RESULT_SUCCEEDED;
-        }
-
-        return K4A_WAIT_RESULT_FAILED;
     }
 
     return result;

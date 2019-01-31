@@ -5,12 +5,11 @@
                Licensed under the MIT License.
 ****************************************************************/
 
-#ifndef K4ADEVICEWINDOW_H
-#define K4ADEVICEWINDOW_H
+#ifndef K4ADEVICEDOCKCONTROL_H
+#define K4ADEVICEDOCKCONTROL_H
 
 // System headers
 //
-#include <list>
 #include <memory>
 
 // Library headers
@@ -19,28 +18,27 @@
 
 // Project headers
 //
-#include "k4avideowindow.h"
+#include "ik4adockcontrol.h"
+#include "k4adatasource.h"
 #include "k4adevice.h"
 #include "k4amicrophone.h"
-#include "k4acolorframevisualizer.h"
-#include "k4apointcloudwindow.h"
 #include "k4aviewersettingsmanager.h"
-#include "k4awindowmanager.h"
+#include "k4awindowset.h"
 
 namespace k4aviewer
 {
-class K4ADeviceSettingsControl
+class K4ADeviceDockControl : public IK4ADockControl
 {
 public:
-    explicit K4ADeviceSettingsControl(std::shared_ptr<K4ADevice> device);
-    K4ADeviceSettingsControl(K4ADeviceSettingsControl &other) = delete;
-    K4ADeviceSettingsControl(K4ADeviceSettingsControl &&other) = delete;
-    K4ADeviceSettingsControl operator=(K4ADeviceSettingsControl &other) = delete;
-    K4ADeviceSettingsControl operator=(K4ADeviceSettingsControl &&other) = delete;
+    explicit K4ADeviceDockControl(std::shared_ptr<K4ADevice> device);
+    K4ADeviceDockControl(K4ADeviceDockControl &other) = delete;
+    K4ADeviceDockControl(K4ADeviceDockControl &&other) = delete;
+    K4ADeviceDockControl operator=(K4ADeviceDockControl &other) = delete;
+    K4ADeviceDockControl operator=(K4ADeviceDockControl &&other) = delete;
 
-    ~K4ADeviceSettingsControl();
+    ~K4ADeviceDockControl() override;
 
-    void Show();
+    void Show() override;
     void PollDevice();
 
 private:
@@ -63,20 +61,6 @@ private:
         ColorSetting Gain;
         ColorSetting PowerlineFrequency;
     } m_colorSettingsCache;
-
-    template<k4a_image_format_t ImageFormat>
-    void CreateVideoWindow(const char *windowTitle, std::unique_ptr<IK4AFrameVisualizer<ImageFormat>> &&frameVisualizer)
-    {
-        std::string title = m_device->GetSerialNumber() + ": " + windowTitle;
-
-        const auto frameSource = std::make_shared<K4ANonBufferingFrameSource<ImageFormat>>();
-        m_device->RegisterCaptureObserver(frameSource);
-
-        std::unique_ptr<IK4AVisualizationWindow> window(
-            new K4AVideoWindow<ImageFormat>(std::move(title), std::move(frameVisualizer), frameSource));
-
-        K4AWindowManager::Instance().AddWindow(std::move(window));
-    }
 
     void CheckFirmwareVersion(k4a_version_t actualVersion, k4a_version_t minVersion, const char *type) const;
 
@@ -106,13 +90,11 @@ private:
     bool DeviceIsStarted() const;
 
     bool StartCameras();
-    void StopCameras();
 
     bool StartMicrophone();
     void StopMicrophone();
 
     bool StartImu();
-    void StopImu();
 
     void CloseDevice();
 
@@ -122,21 +104,19 @@ private:
 
     void RefreshSyncCableStatus();
 
-    enum class ViewType
-    {
-        Normal,
-        PointCloudViewer
-    };
-    ViewType m_currentViewType = ViewType::Normal;
+    K4AWindowSet::ViewType m_currentViewType = K4AWindowSet::ViewType::Normal;
 
-    void SetViewType(ViewType);
-    void StartPointCloudViewer();
-    void StartNormalView();
+    void SetViewType(K4AWindowSet::ViewType viewType);
 
     K4ADeviceConfiguration m_pendingDeviceConfiguration;
 
     std::shared_ptr<K4ADevice> m_device;
     std::shared_ptr<K4AMicrophone> m_microphone;
+
+    K4ADataSource<std::shared_ptr<K4ACapture>> m_cameraDataSource;
+    K4ADataSource<k4a_imu_sample_t> m_imuDataSource;
+    int m_cameraTimeoutCounter = 0;
+    int m_imuTimeoutCounter = 0;
 
     bool m_firstRun = true;
 

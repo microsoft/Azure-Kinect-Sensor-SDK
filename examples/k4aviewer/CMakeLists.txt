@@ -8,8 +8,8 @@ set(SOURCE_FILES
     k4acolorframevisualizer.cpp
     k4adepthframevisualizer.cpp
     k4adevice.cpp
-    k4adeviceselectioncontrol.cpp
-    k4adevicesettingscontrol.cpp
+    k4adevicedockcontrol.cpp
+    k4afilepicker.cpp
     k4aimguiextensions.cpp
     k4aimudatagraph.cpp
     k4aimusamplesource.cpp
@@ -21,12 +21,16 @@ set(SOURCE_FILES
     k4apointcloudviewcontrol.cpp
     k4apointcloudvisualizer.cpp
     k4apointcloudwindow.cpp
+    k4arecording.cpp
+    k4arecordingdockcontrol.cpp
+    k4asourceselectiondockcontrol.cpp
     k4atypeoperators.cpp
     k4avideowindow.cpp
     k4aviewer.cpp
     k4aviewererrormanager.cpp
     k4aviewersettingsmanager.cpp
     k4awindowmanager.cpp
+    k4awindowset.cpp
     opengltexture.cpp
     perfcounter.cpp
 )
@@ -40,6 +44,7 @@ include_directories(
 
 set(EXTERNAL_LIBRARIES
     k4a::k4a
+    k4a::k4arecord
     imgui::imgui
     libjpeg-turbo::libjpeg-turbo
     libsoundio::libsoundio
@@ -54,16 +59,18 @@ set(EXTERNAL_LIBRARIES
 #
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     list(APPEND SOURCE_FILES
+        platform/windows/filesystem17.cpp
         platform/windows/k4adevicecorrelator.cpp
         platform/windows/wmain.cpp
     )
 
-    find_library(SETUPAPI_LIB setupapi)
     list(APPEND EXTERNAL_LIBRARIES
-        ${SETUPAPI_LIB}
+        setupapi.lib
+        pathcch.lib
     )
 else()
     list(APPEND SOURCE_FILES
+        platform/linux/filesystem17.cpp
         platform/linux/k4adevicecorrelator.cpp
     )
 
@@ -82,4 +89,3 @@ endif()
 
 add_executable(k4aviewer WIN32 ${SOURCE_FILES})
 target_link_libraries(k4aviewer PRIVATE ${EXTERNAL_LIBRARIES})
-

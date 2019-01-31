@@ -11,6 +11,7 @@
 
 // System headers
 //
+#include <limits>
 
 // Library headers
 //
@@ -38,22 +39,6 @@ void K4AWindowManager::SetMenuBarHeight(float menuBarHeight)
     m_menuBarHeight = menuBarHeight;
 }
 
-void K4AWindowManager::SetDockWidth(float dockWidth)
-{
-    m_dockWidth = dockWidth;
-}
-
-K4AWindowPlacementInfo K4AWindowManager::GetDockPlacementInfo() const
-{
-    K4AWindowPlacementInfo result;
-    result.Position.x = 0;
-    result.Position.y = m_menuBarHeight;
-
-    result.Size.x = m_dockWidth;
-    result.Size.y = m_glWindowSize.y - m_menuBarHeight;
-    return result;
-}
-
 void K4AWindowManager::AddWindow(std::unique_ptr<IK4AVisualizationWindow> &&window)
 {
     m_windows.WindowGroup.emplace_back(WindowListEntry(std::move(window)));
@@ -76,8 +61,20 @@ void K4AWindowManager::ClearWindows()
     ClearFullscreenWindow();
 }
 
-void K4AWindowManager::ShowWindows()
+void K4AWindowManager::PushDockControl(std::unique_ptr<IK4ADockControl> &&dockControl)
 {
+    m_dockControls.emplace(std::move(dockControl));
+}
+
+void K4AWindowManager::PopDockControl()
+{
+    m_dockControls.pop();
+}
+
+void K4AWindowManager::ShowAll()
+{
+    ShowDock();
+
     const ImVec2 windowAreaPosition(m_dockWidth, m_menuBarHeight);
     const ImVec2 windowAreaSize(m_glWindowSize.x - windowAreaPosition.x, m_glWindowSize.y - windowAreaPosition.y);
 
@@ -221,4 +218,29 @@ void K4AWindowManager::ShowWindow(const ImVec2 windowAreaPosition,
     ImGui::End();
 
     ImGui::PopStyleColor();
+}
+
+void K4AWindowManager::ShowDock()
+{
+    if (!m_dockControls.empty())
+    {
+        const ImVec2 dockPosition(0, m_menuBarHeight);
+        const float dockHeight = m_glWindowSize.y - dockPosition.y;
+
+        ImGui::SetNextWindowPos(dockPosition);
+        const ImVec2 minSize(0, dockHeight);
+        const ImVec2 maxSize(std::numeric_limits<float>::max(), dockHeight);
+        ImGui::SetNextWindowSizeConstraints(minSize, maxSize);
+
+        ImGui::Begin("Dock",
+                     nullptr,
+                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
+                         ImGuiWindowFlags_NoTitleBar);
+
+        m_dockControls.top()->Show();
+
+        m_dockWidth = ImGui::GetWindowSize().x;
+
+        ImGui::End();
+    }
 }

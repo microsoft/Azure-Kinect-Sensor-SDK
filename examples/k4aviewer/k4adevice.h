@@ -75,11 +75,8 @@ public:
                                  k4a_color_control_mode_t targetMode,
                                  int32_t value);
 
-    void RegisterCaptureObserver(std::shared_ptr<IK4ACaptureObserver> &&captureObserver);
-    void RegisterImuObserver(std::shared_ptr<IK4AImuObserver> &&imuObserver);
-
-    k4a_wait_result_t PollCameras();
-    k4a_wait_result_t PollImu();
+    k4a_wait_result_t PollCameras(std::unique_ptr<K4ACapture> &capture);
+    k4a_wait_result_t PollImu(k4a_imu_sample_t &sample);
 
     // Devices are not copyable.
     //
@@ -93,25 +90,17 @@ private:
 
     explicit K4ADevice(k4a_device_t device);
 
-    k4a_wait_result_t PollCameras(int32_t timeoutMs);
-    k4a_wait_result_t PollImu(int32_t timeoutMs);
-
-    static k4a_wait_result_t CheckTimeout(k4a_wait_result_t result, int *timeoutCounter);
+    k4a_wait_result_t PollCameras(int32_t timeoutMs, std::unique_ptr<K4ACapture> &capture);
+    k4a_wait_result_t PollImu(int32_t timeoutMs, k4a_imu_sample_t &sample);
 
     k4a_device_t m_device;
     k4a_device_configuration_t m_configuration{};
-
-    std::list<std::weak_ptr<IK4ACaptureObserver>> m_captureObservers;
-    std::list<std::weak_ptr<IK4AImuObserver>> m_imuObservers;
 
     std::string m_serialNumber = "";
     k4a_hardware_version_t m_firmwareVersion{};
 
     bool m_camerasStarted = false;
     bool m_imuStarted = false;
-
-    int m_cameraTimeoutCounter = 0;
-    int m_imuTimeoutCounter = 0;
 };
 
 class K4ADeviceFactory

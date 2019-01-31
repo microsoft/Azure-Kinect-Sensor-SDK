@@ -99,7 +99,7 @@ TEST(allocator_ut, allocator_api_validation)
         capture_set_temperature_c(capture_c, 50.0f);
         capture_set_temperature_c(NULL, 1234.0f);
 
-        ASSERT_EQ(FP_NAN, capture_get_temperature_c(NULL));
+        ASSERT_TRUE(std::isnan(capture_get_temperature_c(NULL)));
         ASSERT_EQ(100.0f, capture_get_temperature_c(capture_d));
         ASSERT_EQ(50.0f, capture_get_temperature_c(capture_c));
     }

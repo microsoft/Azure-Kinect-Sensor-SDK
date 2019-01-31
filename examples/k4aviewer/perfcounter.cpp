@@ -31,7 +31,17 @@ void PerfCounterManager::ShowPerfWindow(bool *windowOpen)
     {
         for (auto &counter : m_perfCounters)
         {
-            ImGui::Text("%s: %f", counter.first.c_str(), counter.second->GetAverage());
+            ImGui::Text("%s", counter.first.c_str());
+            ImGui::Text("avg: %f", double(counter.second->GetAverage()));
+            ImGui::Text("max: %f", double(counter.second->GetMax()));
+
+            const PerfCounter::SampleData &data = counter.second->GetSampleData();
+            ImGui::PlotLines("",
+                             &data[0],
+                             static_cast<int>(data.size()),
+                             static_cast<int>(counter.second->GetCurrentSampleId()),
+                             "");
+            ImGui::Separator();
         }
 
         if (ImGui::Button("Reset perf counters"))
