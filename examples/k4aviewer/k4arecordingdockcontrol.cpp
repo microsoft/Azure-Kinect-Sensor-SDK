@@ -53,7 +53,10 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &
         break;
     }
 
-    m_recordingHasDepth = recordConfig.depth_mode != K4A_DEPTH_MODE_OFF;
+    // We don't record a depth track if the camera is started in passive IR mode
+    //
+    m_recordingHasDepth = recordConfig.depth_mode != K4A_DEPTH_MODE_OFF &&
+                          recordConfig.depth_mode != K4A_DEPTH_MODE_PASSIVE_IR;
     std::stringstream depthSS;
     depthSS << recordConfig.depth_mode;
     m_depthModeLabel = depthSS.str();
