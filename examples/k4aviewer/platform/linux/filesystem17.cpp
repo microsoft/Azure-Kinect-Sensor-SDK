@@ -153,7 +153,10 @@ path std17::filesystem::current_path()
 {
     std::vector<char> buffer;
     buffer.resize(PATH_MAX, '\0');
-    getcwd(&buffer[0], PATH_MAX);
+    if (!getcwd(&buffer[0], PATH_MAX))
+    {
+        return path("");
+    }
     return path(&buffer[0]);
 }
 

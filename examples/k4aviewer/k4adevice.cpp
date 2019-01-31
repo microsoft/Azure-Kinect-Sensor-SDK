@@ -104,7 +104,7 @@ k4a_result_t K4ADevice::StartCameras(k4a_device_configuration_t &configuration)
     // 'Prime' the camera - this lets us set a longer timeout for camera startup
     //
     std::unique_ptr<K4ACapture> firstCapture;
-    const k4a_wait_result_t waitResult = PollCameras(StartupCaptureTimeoutMs, firstCapture);
+    const k4a_wait_result_t waitResult = PollCameras(timeout, firstCapture);
     if (waitResult != K4A_WAIT_RESULT_SUCCEEDED)
     {
         StopCameras();
