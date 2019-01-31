@@ -88,6 +88,7 @@ option(K4A_VALIDATE_CLANG_FORMAT "Validate clang-format results as part of build
 set (CLANG_FORMAT_ROOT
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples
     ${CMAKE_CURRENT_SOURCE_DIR}/tests
     ${CMAKE_CURRENT_SOURCE_DIR}/tools)
 
