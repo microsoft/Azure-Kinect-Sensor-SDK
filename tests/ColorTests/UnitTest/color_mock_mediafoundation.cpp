@@ -568,7 +568,8 @@ public:
 
     STDMETHOD(SetStreamSelection)(DWORD dwStreamIndex, BOOL fSelected)
     {
-        if (dwStreamIndex != (DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM)
+        if (dwStreamIndex != (DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM &&
+            dwStreamIndex != (DWORD)MF_SOURCE_READER_ALL_STREAMS)
         {
             return MF_E_INVALIDSTREAMNUMBER;
         }
