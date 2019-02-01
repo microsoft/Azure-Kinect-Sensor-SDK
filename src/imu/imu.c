@@ -28,6 +28,9 @@ extern "C" {
 #define IMU_TEMPERATURE_DIVISOR 256
 #define IMU_TEMPERATURE_CONSTANT 15
 #define IMU_SCALE_NORMALIZATION 1000000
+// This gravitational constant is consistent with the parameter used in device calibration.
+// Changing this constant to a different value would break the IMU accelerometer calibration.
+#define IMU_GRAVITATIONAL_CONSTANT 9.81f
 
 #define MAX_IMU_TIME_STAMP_MS 5000
 
@@ -198,12 +201,12 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
                 sample.gyro_sample.xyz.z = (float)p_gyro_data[i].rz * p_metadata->gyro.sensitivity /
                                            IMU_SCALE_NORMALIZATION;
                 sample.gyro_timestamp_usec = K4A_90K_HZ_TICK_TO_USEC(p_gyro_data[i].pts);
-                sample.acc_sample.xyz.x = (float)p_accel_data[i].rx * p_metadata->accel.sensitivity /
-                                          IMU_SCALE_NORMALIZATION;
-                sample.acc_sample.xyz.y = (float)p_accel_data[i].ry * p_metadata->accel.sensitivity /
-                                          IMU_SCALE_NORMALIZATION;
-                sample.acc_sample.xyz.z = (float)p_accel_data[i].rz * p_metadata->accel.sensitivity /
-                                          IMU_SCALE_NORMALIZATION;
+                sample.acc_sample.xyz.x = (float)p_accel_data[i].rx * p_metadata->accel.sensitivity *
+                                          IMU_GRAVITATIONAL_CONSTANT / IMU_SCALE_NORMALIZATION;
+                sample.acc_sample.xyz.y = (float)p_accel_data[i].ry * p_metadata->accel.sensitivity *
+                                          IMU_GRAVITATIONAL_CONSTANT / IMU_SCALE_NORMALIZATION;
+                sample.acc_sample.xyz.z = (float)p_accel_data[i].rz * p_metadata->accel.sensitivity *
+                                          IMU_GRAVITATIONAL_CONSTANT / IMU_SCALE_NORMALIZATION;
                 sample.acc_timestamp_usec = K4A_90K_HZ_TICK_TO_USEC(p_accel_data[i].pts);
 
                 memcpy(image_get_buffer(imu_image), &sample, sizeof(k4a_imu_sample_t));
