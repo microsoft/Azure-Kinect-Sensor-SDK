@@ -837,19 +837,13 @@ void K4ADeviceDockControl::PollDevice()
                                          // TODO move device polling to a separate thread so we can
                                          //      decouple the IMU polling rate from the app framerate.
                                          //
-                                         // We usually expect around 60 samples per app frame, but
-                                         // we want a bit of tolerance so we can 'catch up' if we fall
-                                         // behind.
-                                         //
-                                         constexpr int maxSamples = 200;
-                                         int sampleCount = 0;
+                                         bool gotSample = false;
                                          k4a_wait_result_t status;
-                                         while (sampleCount < maxSamples &&
-                                                K4A_WAIT_RESULT_SUCCEEDED == (status = device.PollImu(result)))
+                                         while (K4A_WAIT_RESULT_SUCCEEDED == (status = device.PollImu(result)))
                                          {
-                                             ++sampleCount;
+                                             gotSample = true;
                                          }
-                                         if (sampleCount != 0 && status == K4A_WAIT_RESULT_TIMEOUT)
+                                         if (gotSample && status == K4A_WAIT_RESULT_TIMEOUT)
                                          {
                                              status = K4A_WAIT_RESULT_SUCCEEDED;
                                          }
