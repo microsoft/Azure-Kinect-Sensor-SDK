@@ -12,31 +12,53 @@
 
 constexpr char const PointCloudFragmentShader[] =
 R"(
-#version 330
-varying vec3 fragment_color;
+#version 430
+varying vec4 fragmentColor;
 
 void main()
 {
-    gl_FragColor = vec4(fragment_color, 1);
+    gl_FragColor = fragmentColor;
 }
 )";
 
 constexpr char const PointCloudVertexShader[] =
 R"(
-#version 330
-attribute vec3 vertex_position;
-attribute vec3 vertex_color;
+#version 430
+layout(location = 0) in vec3 vertexPosition;
+layout(location = 1) in vec4 vertexColor;
+layout(location = 2) in vec3 vertexNormal;
 
-varying vec3 fragment_color;
+varying vec4 fragmentColor;
 
-uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform bool enableShading;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(vertex_position, 1);
-    fragment_color = vertex_color;
+    gl_Position = projection * view * vec4(vertexPosition, 1);
+
+    if (enableShading)
+    {
+        vec3 lightPosition = vec3(0, 0, 0);
+        float diffuse = 1.f;
+        if (dot(vertexNormal, vertexNormal) != 0.f)
+        {
+            vec3 lightDirection = normalize(lightPosition - vertexPosition);
+            diffuse = abs(dot(normalize(vertexNormal), lightDirection));
+        }
+
+        float distance = length(lightPosition - vertexPosition);
+        // Attenuation term for light source that covers distance up to 50 meters
+        // http://wiki.ogre3d.org/tiki-index.php?page=-Point+Light+Attenuation
+        float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * distance * distance);
+
+        fragmentColor = vec4(attenuation * diffuse * vertexColor.rgb, vertexColor.a);
+    }
+    else
+    {
+        fragmentColor = vertexColor;
+    }
 }
 )";
 

@@ -10,7 +10,6 @@
 
 // System headers
 //
-#include <mutex>
 
 // Library headers
 //
@@ -19,6 +18,7 @@
 
 // Project headers
 //
+#include "k4apointcloudtypes.h"
 
 namespace k4aviewer
 {
@@ -28,18 +28,21 @@ public:
     PointCloudRenderer();
     ~PointCloudRenderer();
 
-    void UpdateModelViewProjection(linmath::mat4x4 model, linmath::mat4x4 view, linmath::mat4x4 projection);
+    void UpdateViewProjection(linmath::mat4x4 view, linmath::mat4x4 projection);
 
-    // Hint to the point cloud rendererwhat the greatest possible number of points it might receive is
+    // Hint to the point cloud renderer what the greatest possible number of points it might receive is
     // to avoid extra OpenGL buffer allocations
     //
     void ReservePointCloudBuffer(GLsizei numPoints);
 
-    void UpdatePointClouds(float *pointCoordinates, float *pointColors, unsigned int numPoints);
+    void UpdatePointClouds(Vertex* vertices, unsigned int numVertices);
 
     void Render();
 
     void ChangePointCloudSize(float pointCloudSize);
+    void EnableShading(bool enableShading);
+
+    bool ShadingIsEnabled() const;
 
     PointCloudRenderer(PointCloudRenderer &) = delete;
     PointCloudRenderer(PointCloudRenderer &&) = delete;
@@ -47,34 +50,28 @@ public:
     PointCloudRenderer &operator=(PointCloudRenderer &&) = delete;
 
 private:
-    linmath::mat4x4 m_model;
     linmath::mat4x4 m_view;
     linmath::mat4x4 m_projection;
 
     // Render settings
     GLfloat m_pointCloudSize = 3.f;
+    bool m_enableShading = true;
 
     // Point Array Size
-    GLsizei m_drawArraySize = 0;
-    GLsizei m_drawArraySizeMax = 0;
+    GLsizei m_vertexArraySize = 0;
+    GLsizei m_vertexArraySizeMax = 0;
 
     // OpenGL resources
     GLuint m_shaderProgram;
     GLuint m_vertexShader;
     GLuint m_fragmentShader;
 
-    GLuint m_vertexPositionIndex;
-    GLuint m_vertexPositionBuffer;
-    GLuint m_vertexColorIndex;
-    GLuint m_vertexColorBuffer;
-    GLint m_modelIndex;
-    GLint m_viewIndex;
-    GLint m_projectionIndex;
+    GLuint m_vertexArrayObject;
+    GLuint m_vertexBufferObject;
 
-    GLuint m_vertexAttribArray;
-
-    // Lock
-    std::mutex m_mutex;
+    GLuint m_viewIndex;
+    GLuint m_projectionIndex;
+    GLuint m_enableShadingIndex;
 };
 } // namespace k4aviewer
 #endif
