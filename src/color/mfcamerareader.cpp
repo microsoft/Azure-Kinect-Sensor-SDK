@@ -187,9 +187,9 @@ CMFCameraReader::~CMFCameraReader()
         (void)MFShutdown();
     }
 
-    if (m_hStreamStopped != NULL && m_hStreamStopped != INVALID_HANDLE_VALUE)
+    if (m_hStreamFlushed != NULL && m_hStreamFlushed != INVALID_HANDLE_VALUE)
     {
-        CloseHandle(m_hStreamStopped);
+        CloseHandle(m_hStreamFlushed);
     }
 }
 
@@ -249,7 +249,7 @@ HRESULT CMFCameraReader::RuntimeClassInitialize(GUID *containerId)
             return hr;
         }
 
-        if (FAILED(hr = m_spSourceReader->SetStreamSelection((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, FALSE)))
+        if (FAILED(hr = m_spSourceReader->SetStreamSelection((DWORD)MF_SOURCE_READER_ALL_STREAMS, FALSE)))
         {
             logger_error(LOGGER_COLOR, "Failed to deselect stream in open camera: 0x%08x", hr);
             return hr;
@@ -264,8 +264,8 @@ HRESULT CMFCameraReader::RuntimeClassInitialize(GUID *containerId)
             return hr;
         }
 
-        m_hStreamStopped = CreateEvent(nullptr, TRUE, TRUE, nullptr);
-        if (m_hStreamStopped == NULL || m_hStreamStopped == INVALID_HANDLE_VALUE)
+        m_hStreamFlushed = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+        if (m_hStreamFlushed == NULL || m_hStreamFlushed == INVALID_HANDLE_VALUE)
         {
             hr = HRESULT_FROM_WIN32(GetLastError());
             logger_error(LOGGER_COLOR, "Failed to create event in open camera: 0x%08x", hr);
@@ -451,22 +451,14 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
             m_pCallback = pCallback;
             m_pCallbackContext = pCallbackContext;
 
-            if (ResetEvent(m_hStreamStopped))
+            if (SUCCEEDED(hr = m_spSourceReader->ReadSample(
+                              (DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr, nullptr, nullptr, nullptr)))
             {
-                if (SUCCEEDED(hr = m_spSourceReader->ReadSample(
-                                  (DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr, nullptr, nullptr, nullptr)))
-                {
-                    m_started = true;
-                }
-                else
-                {
-                    logger_error(LOGGER_COLOR, "Failed to request first sample at start: 0x%08x", hr);
-                }
+                m_started = true;
             }
             else
             {
-                hr = HRESULT_FROM_WIN32(GetLastError());
-                logger_error(LOGGER_COLOR, "Failed to reset stopped event at start: 0x%08x", hr);
+                logger_error(LOGGER_COLOR, "Failed to request first sample at start: 0x%08x", hr);
             }
         }
         else
@@ -495,35 +487,46 @@ void CMFCameraReader::Shutdown()
 
 void CMFCameraReader::Stop()
 {
+    HRESULT hr = S_OK;
+    auto lock = m_lock.LockExclusive();
+
     if (m_started)
     {
-        auto lock = m_lock.LockExclusive();
-
+        // Set flag to not handle sample anymore
         m_started = false;
-    }
 
-    do
-    {
-        // TODO: implement colormcu_is_connected as part of this loop, abort loop if we get disconnect
-
-        // Wait until async operations are terminated for 10 sec
-        switch (WaitForSingleObject(m_hStreamStopped, 10000))
+        if (SUCCEEDED(hr = m_spSourceReader->Flush((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM)))
         {
-        case WAIT_OBJECT_0:
-            // Stop completed
-            return;
-
-        case WAIT_TIMEOUT:
-            LOG_ERROR("Timeout waiting for m_hStreamStopped");
-            break;
-        case WAIT_FAILED:
-            LOG_ERROR("WaitForSingleObject on m_hStreamStopped failed (%d)", GetLastError());
-            assert(false);
-            break;
-        default:
-            break;
+            m_flushing = true;
         }
-    } while (1);
+        else
+        {
+            logger_error(LOGGER_COLOR, "Failed to request flush for stop: 0x%08x", hr);
+        }
+
+        lock.Unlock(); // Wait without lock
+        do
+        {
+            // TODO: implement colormcu_is_connected as part of this loop, abort loop if we get disconnect
+
+            // Wait until async operations are terminated for 10 sec
+            switch (WaitForSingleObject(m_hStreamFlushed, 10000))
+            {
+            case WAIT_OBJECT_0:
+                // Flushing completed
+                return;
+            case WAIT_TIMEOUT:
+                LOG_ERROR("Timeout waiting for m_hStreamFlushed");
+                break;
+            case WAIT_FAILED:
+                LOG_ERROR("WaitForSingleObject on m_hStreamFlushed failed (%d)", GetLastError());
+                assert(false);
+                break;
+            default:
+                break;
+            }
+        } while (1);
+    }
 }
 
 k4a_result_t CMFCameraReader::GetKsControl(const k4a_color_control_command_t command,
@@ -784,7 +787,7 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
     {
         auto lock = m_lock.LockExclusive();
 
-        if (m_started)
+        if (m_started && !m_flushing)
         {
             if (pSample && m_pCallback && m_pCallbackContext)
             {
@@ -863,26 +866,6 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
                 logger_error(LOGGER_COLOR, "Failed to request sample: 0x%08x", hr);
             }
         }
-        else
-        {
-            // Camera Stopped. Deselect stream and clean up.
-            if (SUCCEEDED(hr = m_spSourceReader->SetStreamSelection((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, FALSE)))
-            {
-                if (SUCCEEDED(hr = m_spSourceReader->Flush((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM)))
-                {
-                    m_pCallback = nullptr;
-                    m_pCallbackContext = nullptr;
-                }
-                else
-                {
-                    logger_error(LOGGER_COLOR, "Failed to request flush for stop: 0x%08x", hr);
-                }
-            }
-            else
-            {
-                logger_error(LOGGER_COLOR, "Failed to deselect stream for stop: 0x%08x", hr);
-            }
-        }
     }
     else
     {
@@ -897,16 +880,7 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
         m_pCallback(K4A_RESULT_FAILED, NULL, m_pCallbackContext);
 
         // Stop and clean up.
-        m_pCallback = nullptr;
-        m_pCallbackContext = nullptr;
-        m_started = false;
-
-        if (SetEvent(m_hStreamStopped) == 0)
-        {
-            logger_error(LOGGER_COLOR,
-                         "Failed to set stopped event for error: 0x%08x",
-                         HRESULT_FROM_WIN32(GetLastError()));
-        }
+        Stop();
     }
 
     return hr;
@@ -915,19 +889,33 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
 STDMETHODIMP CMFCameraReader::OnFlush(DWORD dwStreamIndex)
 {
     UNREFERENCED_PARAMETER(dwStreamIndex);
+    HRESULT hr = S_OK;
     auto lock = m_lock.LockShared();
 
     if (m_started == false)
     {
-        if (SetEvent(m_hStreamStopped) == 0)
+        // Flushed. Deselect stream if it's not streaming
+        if (SUCCEEDED(hr = m_spSourceReader->SetStreamSelection((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, FALSE)))
         {
-            logger_error(LOGGER_COLOR,
-                         "Failed to set stopped event after flushing: 0x%08x",
-                         HRESULT_FROM_WIN32(GetLastError()));
+            m_pCallback = nullptr;
+            m_pCallbackContext = nullptr;
+        }
+        else
+        {
+            logger_error(LOGGER_COLOR, "Failed to deselect stream for stop: 0x%08x", hr);
         }
     }
 
-    return S_OK;
+    if (SetEvent(m_hStreamFlushed) == 0)
+    {
+        logger_error(LOGGER_COLOR,
+                     "Failed to set flushed event after flushing: 0x%08x",
+                     HRESULT_FROM_WIN32(GetLastError()));
+    }
+
+    m_flushing = false;
+
+    return hr;
 }
 
 STDMETHODIMP CMFCameraReader::OnEvent(DWORD dwStreamIndex, IMFMediaEvent *pEvent)
