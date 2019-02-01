@@ -29,7 +29,7 @@ extern "C" {
 #define IMU_TEMPERATURE_CONSTANT 15
 #define IMU_SCALE_NORMALIZATION 1000000
 // This gravitational constant is consistent with the parameter used in device calibration.
-// Changing this constant to a different value will break the IMU calibration.
+// Changing this constant to a different value would break the IMU accelerometer calibration.
 #define IMU_GRAVITATIONAL_CONSTANT 9.81f
 
 #define MAX_IMU_TIME_STAMP_MS 5000

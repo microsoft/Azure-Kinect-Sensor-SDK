@@ -3,6 +3,7 @@
 ### v0.8.0
 
 * Output intrinsic calibrated IMU data
+* Changed units of IMU accelerometer reading from G to m/s^2
 * Breaking change to k4a_calibration_get_from_raw API, size of source calibration string is now required along with the 
 source calibration.
 
