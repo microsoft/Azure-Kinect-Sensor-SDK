@@ -822,7 +822,33 @@ void K4ADeviceDockControl::PollDevice()
     {
         PollSensor<k4a_imu_sample_t>(*m_device,
                                      "IMU",
-                                     [](K4ADevice &device, k4a_imu_sample_t &result) { return device.PollImu(result); },
+                                     [](K4ADevice &device, k4a_imu_sample_t &result) {
+                                         // The IMU refreshes significantly faster than the viewer's
+                                         // framerate, so if we only grab one IMU sample per app frame,
+                                         // we end up dropping a bunch of IMU samples, which generates
+                                         // a bunch of noise in the K4A SDK logs.
+                                         //
+                                         // To mitigate this, we drain the queue whenever we poll the
+                                         // IMU.  This is reasonable for a viewer app where we're just
+                                         // trying to see if the IMU is returning data, but not for real
+                                         // IMU applications like tracking where you can't afford to drop
+                                         // samples.
+                                         //
+                                         // TODO move device polling to a separate thread so we can
+                                         //      decouple the IMU polling rate from the app framerate.
+                                         //
+                                         bool gotSample = false;
+                                         k4a_wait_result_t status;
+                                         while (K4A_WAIT_RESULT_SUCCEEDED == (status = device.PollImu(result)))
+                                         {
+                                             gotSample = true;
+                                         }
+                                         if (gotSample && status == K4A_WAIT_RESULT_TIMEOUT)
+                                         {
+                                             status = K4A_WAIT_RESULT_SUCCEEDED;
+                                         }
+                                         return status;
+                                     },
                                      [](K4ADevice &device) { device.StopImu(); },
                                      m_imuTimeoutCounter,
                                      m_imuDataSource);
