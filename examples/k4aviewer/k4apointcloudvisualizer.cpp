@@ -36,7 +36,7 @@ constexpr ImageDimensions PointCloudVisualizerTextureDimensions = { 640, 576 };
 
 inline k4a_float3_t operator-(const k4a_float3_t &point1, const k4a_float3_t &point2)
 {
-    return k4a_float3_t{ point1.v[0] - point2.v[0], point1.v[1] - point2.v[1], point1.v[2] - point2.v[2] };
+    return k4a_float3_t{ { point1.v[0] - point2.v[0], point1.v[1] - point2.v[1], point1.v[2] - point2.v[2] } };
 }
 
 inline k4a_float3_t cross(const k4a_float3_t &vector1, const k4a_float3_t &vector2)
@@ -54,7 +54,7 @@ inline k4a_float3_t ConvertK4AToOpenGLCoordinate(k4a_float3_t pt)
     // OpenGL and K4A have different conventions on which direction is positive -
     // we need to flip the X coordinate.
     //
-    return { -pt.v[0], pt.v[1], pt.v[2] };
+    return { { -pt.v[0], pt.v[1], pt.v[2] } };
 }
 
 inline void ConvertK4AFloat3ToLinmathVec3(const k4a_float3_t &in, linmath::vec3 &out)
@@ -228,8 +228,6 @@ void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_
         for (int w = 0; w < frameWidth; ++w)
         {
             Vertex &outputVertex = m_vertexBuffer[dstIndex];
-
-            const int srcIndex = h * frameWidth + w;
 
             k4a_float3_t position;
             if (!GetPoint3d(position, pointCloudBuffer, frameWidth, frameHeight, w, h))

@@ -150,8 +150,9 @@ void PointCloudRenderer::UpdatePointClouds(Vertex *vertices, const unsigned int 
 
 void PointCloudRenderer::ReservePointCloudBuffer(GLsizei numVertices)
 {
+    GLsizeiptr bufferSize = static_cast<GLsizeiptr>(static_cast<size_t>(numVertices) * sizeof(Vertex));
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vertex), nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STREAM_DRAW);
     m_vertexArraySize = numVertices;
     m_vertexArraySizeMax = std::max(m_vertexArraySizeMax, m_vertexArraySize);
 }

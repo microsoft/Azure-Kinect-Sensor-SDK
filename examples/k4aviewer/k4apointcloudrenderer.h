@@ -69,9 +69,9 @@ private:
     GLuint m_vertexArrayObject;
     GLuint m_vertexBufferObject;
 
-    GLuint m_viewIndex;
-    GLuint m_projectionIndex;
-    GLuint m_enableShadingIndex;
+    GLint m_viewIndex;
+    GLint m_projectionIndex;
+    GLint m_enableShadingIndex;
 };
 } // namespace k4aviewer
 #endif
