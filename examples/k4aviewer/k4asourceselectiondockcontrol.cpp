@@ -42,10 +42,10 @@ void K4ASourceSelectionDockControl::Show()
     if (ImGui::TreeNode("Open Device"))
     {
         ImGuiExtensions::K4AComboBox("Device S/N",
-                                    "(No available devices)",
-                                    ImGuiComboFlags_None,
-                                    m_connectedDevices,
-                                    &m_selectedDevice);
+                                     "(No available devices)",
+                                     ImGuiComboFlags_None,
+                                     m_connectedDevices,
+                                     &m_selectedDevice);
 
         if (ImGui::Button("Refresh Devices"))
         {

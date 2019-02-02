@@ -34,12 +34,12 @@ const ImVec4 ClearColor = { 0.05f, 0.05f, 0.05f, 0.0f };
 //
 constexpr ImageDimensions PointCloudVisualizerTextureDimensions = { 640, 576 };
 
-inline k4a_float3_t operator - (const k4a_float3_t& point1, const k4a_float3_t& point2)
+inline k4a_float3_t operator-(const k4a_float3_t &point1, const k4a_float3_t &point2)
 {
     return k4a_float3_t{ point1.v[0] - point2.v[0], point1.v[1] - point2.v[1], point1.v[2] - point2.v[2] };
 }
 
-inline k4a_float3_t cross(const k4a_float3_t& vector1, const k4a_float3_t& vector2)
+inline k4a_float3_t cross(const k4a_float3_t &vector1, const k4a_float3_t &vector2)
 {
     k4a_float3_t result;
     result.v[0] = vector1.v[1] * vector2.v[2] - vector1.v[2] * vector2.v[1];
@@ -57,19 +57,19 @@ inline k4a_float3_t ConvertK4AToOpenGLCoordinate(k4a_float3_t pt)
     return { -pt.v[0], pt.v[1], pt.v[2] };
 }
 
-inline void ConvertK4AFloat3ToLinmathVec3(const k4a_float3_t& in, linmath::vec3& out)
+inline void ConvertK4AFloat3ToLinmathVec3(const k4a_float3_t &in, linmath::vec3 &out)
 {
     constexpr size_t vecSize = sizeof(in.v) / sizeof(float);
     std::copy(in.v, in.v + vecSize, out);
 }
 
-inline void ConvertLinmathVec3ToK4AFloat3(const linmath::vec3& in, k4a_float3_t& out)
+inline void ConvertLinmathVec3ToK4AFloat3(const linmath::vec3 &in, k4a_float3_t &out)
 {
     constexpr size_t vecSize = sizeof(in) / sizeof(float);
     std::copy(in, in + vecSize, out.v);
 }
 
-bool GetPoint3d(k4a_float3_t& point3d, int16_t* pointCloudBuffer, int depthW, int depthH, int x, int y)
+bool GetPoint3d(k4a_float3_t &point3d, int16_t *pointCloudBuffer, int depthW, int depthH, int x, int y)
 {
     if (x < 0 || x >= depthW || y < 0 || y >= depthH)
     {
@@ -227,7 +227,7 @@ void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_
     {
         for (int w = 0; w < frameWidth; ++w)
         {
-            Vertex& outputVertex = m_vertexBuffer[dstIndex];
+            Vertex &outputVertex = m_vertexBuffer[dstIndex];
 
             const int srcIndex = h * frameWidth + w;
 
@@ -251,9 +251,9 @@ void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_
             //
             // TODO integrate color from RGB camera
             //
-            const RgbPixel colorization =
-                K4ADepthPixelColorizer::ColorizeRedToBlue(m_expectedValueRange,
-                 static_cast<DepthPixel>(position.xyz.z));
+            const RgbPixel colorization = K4ADepthPixelColorizer::ColorizeRedToBlue(m_expectedValueRange,
+                                                                                    static_cast<DepthPixel>(
+                                                                                        position.xyz.z));
 
             constexpr auto uint8_t_max = static_cast<float>(std::numeric_limits<uint8_t>::max());
             outputVertex.Color[0] = colorization.Red / uint8_t_max;

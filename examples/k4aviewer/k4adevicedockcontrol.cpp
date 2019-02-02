@@ -978,9 +978,7 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     case K4AWindowSet::ViewType::Normal:
         K4AWindowSet::StartNormalWindows(m_device->GetSerialNumber().c_str(),
                                          &m_cameraDataSource,
-                                         m_pendingDeviceConfiguration.EnableImu ? 
-                                             &m_imuDataSource :
-                                             nullptr,
+                                         m_pendingDeviceConfiguration.EnableImu ? &m_imuDataSource : nullptr,
                                          m_pendingDeviceConfiguration.EnableMicrophone ?
                                              m_microphone->CreateListener() :
                                              nullptr,

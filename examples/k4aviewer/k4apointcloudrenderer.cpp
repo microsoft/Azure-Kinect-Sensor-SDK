@@ -112,7 +112,7 @@ void PointCloudRenderer::UpdateViewProjection(mat4x4 view, mat4x4 projection)
     mat4x4_dup(m_projection, projection);
 }
 
-void PointCloudRenderer::UpdatePointClouds(Vertex* vertices, const unsigned int numVertices)
+void PointCloudRenderer::UpdatePointClouds(Vertex *vertices, const unsigned int numVertices)
 {
     glBindVertexArray(m_vertexArrayObject);
 
@@ -131,17 +131,17 @@ void PointCloudRenderer::UpdatePointClouds(Vertex* vertices, const unsigned int 
     // Vertex Positions
     //
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
 
     // Vertex Colors
     //
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Color));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Color));
 
     // Vertex Normals
     //
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Normal));
 
     glBindVertexArray(0);
 

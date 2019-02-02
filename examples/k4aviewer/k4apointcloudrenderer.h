@@ -35,7 +35,7 @@ public:
     //
     void ReservePointCloudBuffer(GLsizei numPoints);
 
-    void UpdatePointClouds(Vertex* vertices, unsigned int numVertices);
+    void UpdatePointClouds(Vertex *vertices, unsigned int numVertices);
 
     void Render();
 
