@@ -46,6 +46,7 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
 
     ImVec2 availableSize = placementInfo.Size;
     availableSize.y -= 3 * ImGui::GetTextLineHeightWithSpacing(); // Instructions text
+    availableSize.y -= GetDefaultButtonHeight();                  // Shader checkbox
     availableSize.y -= GetDefaultButtonHeight();                  // Reset button
 
     const ImVec2 sourceImageSize = ImVec2(static_cast<float>(m_texture->GetDimensions().Width),
@@ -58,6 +59,10 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
     ImGui::Text("Look: [Right Mouse] + Drag");
     ImGui::Text("Zoom: Mouse wheel");
 
+    if (ImGui::Checkbox("Enable shading", &m_enableShading))
+    {
+        m_pointCloudVisualizer.EnableShading(m_enableShading);
+    }
     if (ImGui::Button("Reset position"))
     {
         m_pointCloudVisualizer.ResetPosition();
