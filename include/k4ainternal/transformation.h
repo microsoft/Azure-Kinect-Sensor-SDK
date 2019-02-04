@@ -33,6 +33,15 @@ typedef struct _k4a_transformation_xy_tables_t
     int height;     // height of x and y tables
 } k4a_transformation_xy_tables_t;
 
+typedef struct _k4a_transform_engine_calibration_t
+{
+    k4a_calibration_camera_t depth_camera_calibration;                    // depth camera calibration
+    k4a_calibration_camera_t color_camera_calibration;                    // color camera calibration
+    k4a_calibration_extrinsics_t depth_camera_to_color_camera_extrinsics; // depth to color extrinsics
+    k4a_calibration_extrinsics_t color_camera_to_depth_camera_extrinsics; // color to depth extrinsics
+    k4a_transformation_xy_tables_t depth_camera_xy_tables;                // depth camera xy tables
+} k4a_transform_engine_calibration_t;
+
 k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_camera_t *depth_camera_calibration,
                                                           const k4a_calibration_camera_t *color_camera_calibration,
                                                           const k4a_calibration_extrinsics_t *gyro_extrinsics,
@@ -70,7 +79,7 @@ k4a_result_t transformation_2d_to_2d(const k4a_calibration_t *calibration,
                                      float target_point2d[2],
                                      int *valid);
 
-k4a_transformation_t transformation_create(const k4a_calibration_t *calibration);
+k4a_transformation_t transformation_create(const k4a_calibration_t *calibration, bool gpu_optimization);
 
 void transformation_destroy(k4a_transformation_t transformation_handle);
 

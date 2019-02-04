@@ -6,6 +6,7 @@
 * Changed units of IMU accelerometer reading from G to m/s^2
 * Breaking change to k4a_calibration_get_from_raw API, size of source calibration string is now required along with the 
 source calibration.
+* Integrated GPU transform engine into SDK to accelerate transformation between depth image and color image.
 
 ### v0.7.1
 

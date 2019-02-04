@@ -4,9 +4,7 @@ add_library(k4a_dewrapper STATIC
 
 # Consumers should #include <k4ainternal/dewrapper.h>
 target_include_directories(k4a_dewrapper PUBLIC
-    ${K4A_PRIV_INCLUDE_DIR}
-    ${PROJECT_SOURCE_DIR}/src/RawToDepth/DepthEngine
-    ${PROJECT_SOURCE_DIR}/src/RawToDepth/DepthEngineLib/Interfaces)
+    ${K4A_PRIV_INCLUDE_DIR})
 
 target_link_libraries(k4a_dewrapper PUBLIC
     azure::aziotsharedutil
