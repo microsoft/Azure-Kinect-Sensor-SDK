@@ -1,0 +1,338 @@
+diff -Naur extern/libuvc/src/include/libuvc/libuvc.h ../libuvc/include/libuvc/libuvc.h
+--- extern/libuvc/src/include/libuvc/libuvc.h	2019-01-22 14:28:04.598156800 -0800
++++ ../libuvc/include/libuvc/libuvc.h	2019-01-16 21:18:22.744660600 -0800
+@@ -82,6 +82,8 @@
+   UVC_FRAME_FORMAT_SGBRG8,
+   UVC_FRAME_FORMAT_SRGGB8,
+   UVC_FRAME_FORMAT_SBGGR8,
++  /** YUV420: NV12 */
++  UVC_FRAME_FORMAT_NV12,
+   /** Number of formats understood */
+   UVC_FRAME_FORMAT_COUNT,
+ };
+@@ -98,6 +100,7 @@
+ #define UVC_COLOR_FORMAT_MJPEG UVC_FRAME_FORMAT_MJPEG
+ #define UVC_COLOR_FORMAT_GRAY8 UVC_FRAME_FORMAT_GRAY8
+ #define UVC_COLOR_FORMAT_GRAY16 UVC_FRAME_FORMAT_GRAY16
++#define UVC_COLOR_FORMAT_NV12 UVC_FRAME_FORMAT_NV12
+ 
+ /** VideoStreaming interface descriptor subtype (A.6) */
+ enum uvc_vs_desc_subtype {
+@@ -450,6 +453,10 @@
+    * Set this field to zero if you are supplying the buffer.
+    */
+   uint8_t library_owns_data;
++  /** Metadata for this frame if available */
++  void *metadata;
++  /** Size of metadata buffer */
++  size_t metadata_bytes;
+ } uvc_frame_t;
+ 
+ /** A callback function to handle incoming assembled UVC frames
+diff -Naur extern/libuvc/src/include/libuvc/libuvc_internal.h ../libuvc/include/libuvc/libuvc_internal.h
+--- extern/libuvc/src/include/libuvc/libuvc_internal.h	2019-01-22 14:28:04.599656600 -0800
++++ ../libuvc/include/libuvc/libuvc_internal.h	2019-01-17 00:58:09.831099300 -0800
+@@ -217,6 +217,7 @@
+ #define LIBUVC_NUM_TRANSFER_BUFS 100
+ 
+ #define LIBUVC_XFER_BUF_SIZE	( 16 * 1024 * 1024 )
++#define LIBUVC_XFER_META_BUF_SIZE ( 4 * 1024 )
+ 
+ struct uvc_stream_handle {
+   struct uvc_device_handle *devh;
+@@ -246,6 +247,10 @@
+   uint8_t *transfer_bufs[LIBUVC_NUM_TRANSFER_BUFS];
+   struct uvc_frame frame;
+   enum uvc_frame_format frame_format;
++
++  /* raw metadata buffer if available */
++  uint8_t *meta_outbuf, *meta_holdbuf;
++  size_t meta_got_bytes, meta_hold_bytes;
+ };
+ 
+ /** Handle on an open UVC device
+diff -Naur extern/libuvc/src/src/device.c ../libuvc/src/device.c
+--- extern/libuvc/src/src/device.c	2019-01-22 14:28:04.604634200 -0800
++++ ../libuvc/src/device.c	2019-01-18 22:25:06.462228900 -0800
+@@ -858,7 +858,7 @@
+   UVC_ENTER();
+ 
+   if ( devh->claimed & ( 1 << idx )) {
+-    fprintf ( stderr, "attempt to claim already-claimed interface %d\n", idx );
++    UVC_DEBUG("attempt to claim already-claimed interface %d\n", idx );
+     UVC_EXIT(ret);
+     return ret;
+   }
+@@ -894,7 +894,7 @@
+   UVC_ENTER();
+   UVC_DEBUG("releasing interface %d", idx);
+   if (!( devh->claimed & ( 1 << idx ))) {
+-    fprintf ( stderr, "attempt to release unclaimed interface %d\n", idx );
++    UVC_DEBUG("attempt to release unclaimed interface %d\n", idx );
+     UVC_EXIT(ret);
+     return ret;
+   }
+@@ -1465,10 +1465,10 @@
+     ret = uvc_parse_vs_input_header(stream_if, block, block_size);
+     break;
+   case UVC_VS_OUTPUT_HEADER:
+-    fprintf ( stderr, "unsupported descriptor subtype VS_OUTPUT_HEADER\n" );
++    UVC_DEBUG("unsupported descriptor subtype VS_OUTPUT_HEADER");
+     break;
+   case UVC_VS_STILL_IMAGE_FRAME:
+-    fprintf ( stderr, "unsupported descriptor subtype VS_STILL_IMAGE_FRAME\n" );
++    UVC_DEBUG("unsupported descriptor subtype VS_STILL_IMAGE_FRAME");
+     break;
+   case UVC_VS_FORMAT_UNCOMPRESSED:
+     ret = uvc_parse_vs_format_uncompressed(stream_if, block, block_size);
+@@ -1481,13 +1481,13 @@
+     ret = uvc_parse_vs_frame_uncompressed(stream_if, block, block_size);
+     break;
+   case UVC_VS_FORMAT_MPEG2TS:
+-    fprintf ( stderr, "unsupported descriptor subtype VS_FORMAT_MPEG2TS\n" );
++    UVC_DEBUG("unsupported descriptor subtype VS_FORMAT_MPEG2TS");
+     break;
+   case UVC_VS_FORMAT_DV:
+-    fprintf ( stderr, "unsupported descriptor subtype VS_FORMAT_DV\n" );
++    UVC_DEBUG("unsupported descriptor subtype VS_FORMAT_DV");
+     break;
+   case UVC_VS_COLORFORMAT:
+-    fprintf ( stderr, "unsupported descriptor subtype VS_COLORFORMAT\n" );
++    UVC_DEBUG("unsupported descriptor subtype VS_COLORFORMAT");
+     break;
+   case UVC_VS_FORMAT_FRAME_BASED:
+     ret = uvc_parse_vs_frame_format ( stream_if, block, block_size );
+@@ -1496,11 +1496,11 @@
+     ret = uvc_parse_vs_frame_frame ( stream_if, block, block_size );
+     break;
+   case UVC_VS_FORMAT_STREAM_BASED:
+-    fprintf ( stderr, "unsupported descriptor subtype VS_FORMAT_STREAM_BASED\n" );
++    UVC_DEBUG("unsupported descriptor subtype VS_FORMAT_STREAM_BASED");
+     break;
+   default:
+     /** @todo handle JPEG and maybe still frames or even DV... */
+-    //fprintf ( stderr, "unsupported descriptor subtype: %d\n",descriptor_subtype );
++    //UVC_DEBUG("unsupported descriptor subtype: %d",descriptor_subtype);
+     break;
+   }
+ 
+diff -Naur extern/libuvc/src/src/frame.c ../libuvc/src/frame.c
+--- extern/libuvc/src/src/frame.c	2019-01-22 14:28:04.606659700 -0800
++++ ../libuvc/src/frame.c	2019-01-17 14:29:06.639057500 -0800
+@@ -90,8 +90,13 @@
+  * @param frame Frame to destroy
+  */
+ void uvc_free_frame(uvc_frame_t *frame) {
+-  if (frame->data_bytes > 0 && frame->library_owns_data)
+-    free(frame->data);
++  if (frame->library_owns_data)
++  {
++    if (frame->data_bytes > 0)
++      free(frame->data);
++    if (frame->metadata_bytes > 0)
++      free(frame->metadata);
++  }
+ 
+   free(frame);
+ }
+@@ -120,6 +125,16 @@
+ 
+   memcpy(out->data, in->data, in->data_bytes);
+ 
++  if (in->metadata && in->metadata_bytes > 0)
++  {
++      if (out->metadata_bytes < in->metadata_bytes)
++      {
++          out->metadata = realloc(out->metadata, in->metadata_bytes);
++      }
++      out->metadata_bytes = in->metadata_bytes;
++      memcpy(out->metadata, in->metadata, in->metadata_bytes);
++  }
++
+   return UVC_SUCCESS;
+ }
+ 
+diff -Naur extern/libuvc/src/src/stream.c ../libuvc/src/stream.c
+--- extern/libuvc/src/src/stream.c	2019-01-22 14:28:04.608668600 -0800
++++ ../libuvc/src/stream.c	2019-01-18 22:33:05.948573400 -0800
+@@ -100,9 +100,9 @@
+     ABS_FMT(UVC_FRAME_FORMAT_ANY, 2,
+       {UVC_FRAME_FORMAT_UNCOMPRESSED, UVC_FRAME_FORMAT_COMPRESSED})
+ 
+-    ABS_FMT(UVC_FRAME_FORMAT_UNCOMPRESSED, 4,
++    ABS_FMT(UVC_FRAME_FORMAT_UNCOMPRESSED, 5,
+       {UVC_FRAME_FORMAT_YUYV, UVC_FRAME_FORMAT_UYVY, UVC_FRAME_FORMAT_GRAY8,
+-      UVC_FRAME_FORMAT_GRAY16})
++      UVC_FRAME_FORMAT_GRAY16, UVC_FRAME_FORMAT_NV12})
+     FMT(UVC_FRAME_FORMAT_YUYV,
+       {'Y',  'U',  'Y',  '2', 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71})
+     FMT(UVC_FRAME_FORMAT_UYVY,
+@@ -111,6 +111,8 @@
+       {'Y',  '8',  '0',  '0', 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71})
+     FMT(UVC_FRAME_FORMAT_GRAY16,
+       {'Y',  '1',  '6',  ' ', 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71})
++    FMT(UVC_FRAME_FORMAT_NV12,
++      {'N',  'V',  '1',  '2', 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71})
+     FMT(UVC_FRAME_FORMAT_BY8,
+       {'B',  'Y',  '8',  ' ', 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71})
+     FMT(UVC_FRAME_FORMAT_BA81,
+@@ -464,12 +466,19 @@
+   strmh->hold_last_scr = strmh->last_scr;
+   strmh->hold_pts = strmh->pts;
+   strmh->hold_seq = strmh->seq;
++  
++  /* swap metadata buffer */
++  tmp_buf = strmh->meta_holdbuf;
++  strmh->meta_holdbuf = strmh->meta_outbuf;
++  strmh->meta_outbuf = tmp_buf;
++  strmh->meta_hold_bytes = strmh->meta_got_bytes;
+ 
+   pthread_cond_broadcast(&strmh->cb_cond);
+   pthread_mutex_unlock(&strmh->cb_mutex);
+ 
+   strmh->seq++;
+   strmh->got_bytes = 0;
++  strmh->meta_got_bytes = 0;
+   strmh->last_scr = 0;
+   strmh->pts = 0;
+ }
+@@ -559,6 +568,13 @@
+       strmh->last_scr = DW_TO_INT(payload + variable_offset);
+       variable_offset += 6;
+     }
++
++    if (header_len > variable_offset)
++    {
++        // Metadata is attached to header
++        memcpy(strmh->meta_outbuf + strmh->meta_got_bytes, payload + variable_offset, header_len - variable_offset);
++        strmh->meta_got_bytes += header_len - variable_offset;
++    }
+   }
+ 
+   if (data_len > 0) {
+@@ -649,7 +665,29 @@
+   
+   if ( resubmit ) {
+     if ( strmh->running ) {
+-      libusb_submit_transfer(transfer);
++      int libusbRet = libusb_submit_transfer(transfer);
++      if (libusbRet < 0)
++      {
++        int i;
++        pthread_mutex_lock(&strmh->cb_mutex);
++
++        /* Mark transfer as deleted. */
++        for (i = 0; i < LIBUVC_NUM_TRANSFER_BUFS; i++) {
++          if (strmh->transfers[i] == transfer) {
++            UVC_DEBUG("Freeing failed transfer %d (%p)", i, transfer);
++            free(transfer->buffer);
++            libusb_free_transfer(transfer);
++            strmh->transfers[i] = NULL;
++            break;
++          }
++        }
++        if (i == LIBUVC_NUM_TRANSFER_BUFS) {
++          UVC_DEBUG("failed transfer %p not found; not freeing!", transfer);
++        }
++
++        pthread_cond_broadcast(&strmh->cb_cond);
++        pthread_mutex_unlock(&strmh->cb_mutex);
++      }
+     } else {
+       int i;
+       pthread_mutex_lock(&strmh->cb_mutex);
+@@ -661,6 +699,7 @@
+           free(transfer->buffer);
+           libusb_free_transfer(transfer);
+           strmh->transfers[i] = NULL;
++          break;
+         }
+       }
+       if(i == LIBUVC_NUM_TRANSFER_BUFS ) {
+@@ -798,6 +837,9 @@
+   /** @todo take only what we need */
+   strmh->outbuf = malloc( LIBUVC_XFER_BUF_SIZE );
+   strmh->holdbuf = malloc( LIBUVC_XFER_BUF_SIZE );
++
++  strmh->meta_outbuf = malloc( LIBUVC_XFER_META_BUF_SIZE );
++  strmh->meta_holdbuf = malloc( LIBUVC_XFER_META_BUF_SIZE );
+    
+   pthread_mutex_init(&strmh->cb_mutex, NULL);
+   pthread_cond_init(&strmh->cb_cond, NULL);
+@@ -883,7 +925,7 @@
+     /* For isochronous streaming, we choose an appropriate altsetting for the endpoint
+      * and set up several transfers */
+     const struct libusb_interface_descriptor *altsetting = 0;
+-    const struct libusb_endpoint_descriptor *endpoint;
++    const struct libusb_endpoint_descriptor *endpoint = 0;
+     /* The greatest number of bytes that the device might provide, per packet, in this
+      * configuration */
+     size_t config_bytes_per_packet;
+@@ -907,12 +949,23 @@
+       for (ep_idx = 0; ep_idx < altsetting->bNumEndpoints; ep_idx++) {
+         endpoint = altsetting->endpoint + ep_idx;
+ 
+-        if (endpoint->bEndpointAddress == format_desc->parent->bEndpointAddress) {
+-          endpoint_bytes_per_packet = endpoint->wMaxPacketSize;
+-          // wMaxPacketSize: [unused:2 (multiplier-1):3 size:11]
+-          endpoint_bytes_per_packet = (endpoint_bytes_per_packet & 0x07ff) *
+-                                      (((endpoint_bytes_per_packet >> 11) & 3) + 1);
+-          break;
++        struct libusb_ss_endpoint_companion_descriptor *ep_comp = 0;
++        libusb_get_ss_endpoint_companion_descriptor(NULL, endpoint, &ep_comp);
++        if (ep_comp)
++        {
++          endpoint_bytes_per_packet = ep_comp->wBytesPerInterval;
++          libusb_free_ss_endpoint_companion_descriptor(ep_comp);
++          break;
++        }
++        else
++        {
++          if (endpoint->bEndpointAddress == format_desc->parent->bEndpointAddress) {
++              endpoint_bytes_per_packet = endpoint->wMaxPacketSize;
++            // wMaxPacketSize: [unused:2 (multiplier-1):3 size:11]
++            endpoint_bytes_per_packet = (endpoint_bytes_per_packet & 0x07ff) *
++              (((endpoint_bytes_per_packet >> 11) & 3) + 1);
++            break;
++          }
+         }
+       }
+ 
+@@ -1087,6 +1140,9 @@
+   case UVC_FRAME_FORMAT_YUYV:
+     frame->step = frame->width * 2;
+     break;
++  case UVC_FRAME_FORMAT_NV12:
++    frame->step = frame->width;
++    break;
+   case UVC_FRAME_FORMAT_MJPEG:
+     frame->step = 0;
+     break;
+@@ -1106,8 +1162,15 @@
+   frame->data_bytes = strmh->hold_bytes;
+   memcpy(frame->data, strmh->holdbuf, frame->data_bytes);
+ 
+-
+-
++  if (strmh->meta_hold_bytes > 0)
++  {
++      if (frame->metadata_bytes < strmh->meta_hold_bytes)
++      {
++          frame->metadata = realloc(frame->metadata, strmh->meta_hold_bytes);
++      }
++      frame->metadata_bytes = strmh->meta_hold_bytes;
++      memcpy(frame->metadata, strmh->meta_holdbuf, frame->metadata_bytes);
++  }
+ }
+ 
+ /** Poll for a frame
+@@ -1280,6 +1343,9 @@
+   free(strmh->outbuf);
+   free(strmh->holdbuf);
+ 
++  free(strmh->meta_outbuf);
++  free(strmh->meta_holdbuf);
++
+   pthread_cond_destroy(&strmh->cb_cond);
+   pthread_mutex_destroy(&strmh->cb_mutex);
+ 
