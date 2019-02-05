@@ -99,6 +99,12 @@ k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t playback_han
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, data_size == NULL);
 
+    if (context->calibration_attachment == NULL)
+    {
+        logger_error(LOGGER_RECORD, "The device calibration is missing from the recording.");
+        return K4A_BUFFER_RESULT_FAILED;
+    }
+
     KaxFileData &file_data = GetChild<KaxFileData>(*context->calibration_attachment);
     // Attachment is stored in binary, not a string, so null termination is not guaranteed.
     // Check if the binary data is null terminated, and if not append a zero.
@@ -130,8 +136,13 @@ k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, k4a_ca
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->calibration_attachment == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, calibration == NULL);
+
+    if (context->calibration_attachment == NULL)
+    {
+        logger_error(LOGGER_RECORD, "The device calibration is missing from the recording.");
+        return K4A_RESULT_FAILED;
+    }
 
     if (context->device_calibration == nullptr)
     {
@@ -221,9 +232,25 @@ k4a_stream_result_t k4a_playback_get_previous_capture(k4a_playback_t playback_ha
     return get_capture(context, capture_handle, false);
 }
 
-k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playback_t playback_handle, k4a_imu_sample_t *imu_sample);
+k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playback_t playback_handle, k4a_imu_sample_t *imu_sample)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, imu_sample == NULL);
 
-k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback_handle, k4a_imu_sample_t *imu_sample);
+    return get_imu_sample(context, imu_sample, true);
+}
+
+k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback_handle, k4a_imu_sample_t *imu_sample)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, imu_sample == NULL);
+
+    return get_imu_sample(context, imu_sample, false);
+}
 
 k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
                                          int64_t offset_usec,
@@ -238,18 +265,25 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin == K4A_PLAYBACK_SEEK_BEGIN && offset_usec < 0);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin == K4A_PLAYBACK_SEEK_END && offset_usec > 0);
 
-    // TODO Test each seek mode
-    uint64_t target_time_ns = origin == K4A_PLAYBACK_SEEK_END ? (context->last_timestamp_ns + 1) : 0;
+    uint64_t target_time_ns = 0;
 
-    // TODO: Figure out a better way to handle this.
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#endif
-    target_time_ns += offset_usec * 1000;
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
+    if (origin == K4A_PLAYBACK_SEEK_END)
+    {
+        uint64_t offset_ns = (uint64_t)(-offset_usec * 1000);
+        if (offset_ns >= context->last_timestamp_ns)
+        {
+            // If the target timestamp is negative, clamp to 0 so we don't underflow.
+            target_time_ns = 0;
+        }
+        else
+        {
+            target_time_ns = context->last_timestamp_ns + 1 - offset_ns;
+        }
+    }
+    else
+    {
+        target_time_ns = (uint64_t)offset_usec * 1000;
+    }
 
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 

@@ -260,8 +260,8 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     }
     if (context->calibration_attachment == NULL)
     {
-        logger_error(LOGGER_RECORD, "Device calibration is missing from recording.");
-        return K4A_RESULT_FAILED;
+        // The rest of the recording can still be read if no device calibration blob exists.
+        logger_warn(LOGGER_RECORD, "Device calibration is missing from recording.");
     }
 
     uint64_t frame_period_ns = 0;
@@ -1157,6 +1157,22 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
         }
     }
     return valid_blocks == 0 ? K4A_STREAM_RESULT_EOF : K4A_STREAM_RESULT_SUCCEEDED;
+}
+
+k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next)
+{
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, imu_sample == NULL);
+
+    if (context->imu_track.track == NULL)
+    {
+        return K4A_STREAM_RESULT_EOF;
+    }
+
+    // TODO
+    (void)next;
+
+    return K4A_STREAM_RESULT_FAILED;
 }
 
 } // namespace k4arecord
