@@ -29,9 +29,10 @@
  * Expected name of plugin's dynamic library
  *
  * \remarks When the K4A SDK tried to load the depth engine, it will attempt to
- * load a dynamic library named "depthengine".
+ * load a dynamic library named "depthengine100". The name contains a version number
+ * to bind with the matching depth engine plugin interface.
  */
-#define K4A_PLUGIN_DYNAMIC_LIBRARY_NAME "depthengine"
+#define K4A_PLUGIN_DYNAMIC_LIBRARY_NAME "depthengine100"
 
 /**
  * Name of the function all plugins must export in a dynamic library
