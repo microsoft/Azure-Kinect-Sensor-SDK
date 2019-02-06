@@ -56,6 +56,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_open(const char *path, k4a_playback_t
  * too small to hold the output, ::K4A_BUFFER_RESULT_TOO_SMALL is returned and \p data_size is updated to contain the
  * minimum buffer size needed to capture the calibration data.
  *
+ * \remarks
+ * The raw calibration may not exist if the device was not specified during recording.
+ *
  * \relates k4a_playback_t
  *
  * \xmlonly
@@ -82,6 +85,9 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playba
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p calibration was successfully written. ::K4A_RESULT_FAILED otherwise.
  *
+ * \remarks
+ * The calibration may not exist if the device was not specified during recording.
+ *
  * \relates k4a_playback_t
  *
  * \xmlonly
@@ -103,7 +109,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_calibration(k4a_playback_t playba
  * \param config [OUT]
  * Location to write the recording configuration.
  *
- * \remarks
+ * \returns
  * ::K4A_RESULT_SUCCEEDED if \p config was successfully written. ::K4A_RESULT_FAILED otherwise.
  *
  * \relates k4a_playback_t

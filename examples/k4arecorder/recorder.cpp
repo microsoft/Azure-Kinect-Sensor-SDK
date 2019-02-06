@@ -20,16 +20,6 @@
         }                                                                                                              \
     }
 
-constexpr uint64_t operator"" _s(unsigned long long x)
-{
-    return x * 1000000000;
-}
-
-constexpr uint64_t operator"" _ms(unsigned long long x)
-{
-    return x * 1000000;
-}
-
 std::atomic_bool exiting(false);
 
 int do_recording(uint8_t device_index,

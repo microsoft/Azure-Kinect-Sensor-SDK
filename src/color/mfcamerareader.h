@@ -143,8 +143,9 @@ private:
     Microsoft::WRL::Wrappers::SRWLock m_lock;
     bool m_mfStarted = false;
     bool m_started = false;
+    bool m_flushing = false;
     bool m_use_mf_buffer = true;
-    HANDLE m_hStreamStopped = NULL;
+    HANDLE m_hStreamFlushed = NULL;
 
     Microsoft::WRL::ComPtr<IMFSourceReader> m_spSourceReader;
     Microsoft::WRL::ComPtr<IKsControl> m_spKsControl;

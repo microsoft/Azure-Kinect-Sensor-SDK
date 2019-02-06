@@ -140,12 +140,20 @@ function(k4a_add_tests)
         list(APPEND GTEST_PROPERTIES "ENVIRONMENT;K4A_ENABLE_LOG_TO_STDOUT=1")
     endif()
 
+
+    set(TIMEOUT_VAR_NAME "DISCOVERY_TIMEOUT")
+    if ((${CMAKE_VERSION} VERSION_EQUAL "3.10.1") OR (${CMAKE_VERSION} VERSION_EQUAL "3.10.2"))
+        set(TIMEOUT_VAR_NAME "TIMEOUT")
+    endif()
+
     gtest_discover_tests(
         ${K4A_ADD_TESTS_TARGET}
         EXTRA_ARGS
             "--gtest_output=xml:TEST-${K4A_ADD_TESTS_TARGET}.xml"
         WORKING_DIRECTORY
             ${K4A_ADD_TESTS_WORKING_DIRECTORY}
+        ${TIMEOUT_VAR_NAME}
+            60
         PROPERTIES
             "${GTEST_PROPERTIES}")
 

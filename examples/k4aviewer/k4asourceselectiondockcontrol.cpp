@@ -38,37 +38,46 @@ K4ASourceSelectionDockControl::K4ASourceSelectionDockControl()
 
 void K4ASourceSelectionDockControl::Show()
 {
-    ImGui::Text("Open Device");
-    ImGuiExtensions::K4AComboBox("Device S/N",
-                                 "(No available devices)",
-                                 ImGuiComboFlags_None,
-                                 m_connectedDevices,
-                                 &m_selectedDevice);
-
-    if (ImGui::Button("Refresh Devices"))
+    ImGui::SetNextTreeNodeOpen(true, ImGuiCond_FirstUseEver);
+    if (ImGui::TreeNode("Open Device"))
     {
-        RefreshDevices();
-    }
+        ImGuiExtensions::K4AComboBox("Device S/N",
+                                     "(No available devices)",
+                                     ImGuiComboFlags_None,
+                                     m_connectedDevices,
+                                     &m_selectedDevice);
 
-    ImGui::SameLine();
-
-    const bool openAvailable = !m_connectedDevices.empty();
-    {
-        ImGuiExtensions::ButtonColorChanger colorChanger(ImGuiExtensions::ButtonColor::Green, openAvailable);
-        if (ImGuiExtensions::K4AButton("Open Device", openAvailable))
+        if (ImGui::Button("Refresh Devices"))
         {
-            OpenDevice();
+            RefreshDevices();
         }
+
+        ImGui::SameLine();
+
+        const bool openAvailable = !m_connectedDevices.empty();
+        {
+            ImGuiExtensions::ButtonColorChanger colorChanger(ImGuiExtensions::ButtonColor::Green, openAvailable);
+            if (ImGuiExtensions::K4AButton("Open Device", openAvailable))
+            {
+                OpenDevice();
+            }
+        }
+
+        ImGui::TreePop();
     }
 
     ImGui::NewLine();
     ImGui::Separator();
     ImGui::NewLine();
 
-    ImGui::Text("Open Recording");
-    if (m_filePicker.Show())
+    if (ImGui::TreeNode("Open Recording"))
     {
-        OpenRecording(m_filePicker.GetPath());
+        if (m_filePicker.Show())
+        {
+            OpenRecording(m_filePicker.GetPath());
+        }
+
+        ImGui::TreePop();
     }
 }
 
