@@ -25,9 +25,9 @@ static bool verify_plugin(const k4a_plugin_t *plugin)
     RETURN_VALUE_IF_ARG(false, plugin == NULL);
 
     LOG_INFO("Loaded K4A Plugin with version: %u.%u.%u",
-             g_destub.plugin.version.major,
-             g_destub.plugin.version.minor,
-             g_destub.plugin.version.patch);
+             g_deloader.plugin.version.major,
+             g_deloader.plugin.version.minor,
+             g_deloader.plugin.version.patch);
 
     // Major versions must match
     if (plugin->version.major != K4A_PLUGIN_MAJOR_VERSION)
