@@ -49,6 +49,8 @@ private:
     std::shared_ptr<OpenGlTexture> m_texture;
     std::shared_ptr<K4ANonBufferingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>> m_depthFrameSource;
 
+    bool m_enableShading = true;
+
     bool m_failed = false;
 
     // OpenGL time

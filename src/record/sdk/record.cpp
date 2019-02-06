@@ -235,7 +235,7 @@ k4a_result_t k4a_record_create(const char *path,
         add_tag(context, "K4A_DEPTH_DELAY_NS", delay_str.str().c_str());
     }
 
-    if (K4A_SUCCEEDED(result))
+    if (K4A_SUCCEEDED(result) && device != NULL)
     {
         // Add the firmware version and device serial number to the recording
         k4a_hardware_version_t version_info;
@@ -260,7 +260,7 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    if (K4A_SUCCEEDED(result))
+    if (K4A_SUCCEEDED(result) && device != NULL)
     {
         // Add calibration.json to the recording
         size_t calibration_size = 0;
@@ -422,7 +422,7 @@ k4a_result_t k4a_record_write_header(const k4a_record_t recording_handle)
 
         { // Write tags with a void block after to make editing easier
             auto &tags = GetChild<KaxTags>(*context->file_segment);
-            tags.Render(*context->ebml_file, true);
+            tags.Render(*context->ebml_file);
 
             EbmlVoid tag_void;
             tag_void.SetSize(1024);
@@ -455,7 +455,7 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
         return K4A_RESULT_FAILED;
     }
 
-    // Arrays used to map image formats to tracks, these 2 arrays are order dependant.
+    // Arrays used to map image formats to tracks, these 3 arrays are order dependant.
     k4a_image_t images[] = {
         k4a_capture_get_color_image(capture),
         k4a_capture_get_depth_image(capture),
@@ -477,19 +477,26 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
             uint8_t *image_buffer = k4a_image_get_buffer(images[i]);
             if (image_buffer != NULL && buffer_size > 0)
             {
-                assert(k4a_image_get_format(images[i]) == expected_formats[i]);
-
-                uint64_t timestamp_ns = k4a_image_get_timestamp_usec(images[i]) * 1000;
-                assert(buffer_size <= UINT32_MAX);
-                // TODO: BUG 19475311 - Frame needs to be copied until color capture bug is fixed.
-                DataBuffer *data_buffer = new DataBuffer(image_buffer, (uint32)buffer_size, NULL, true);
-                k4a_result_t tmp_result = TRACE_CALL(write_track_data(context, tracks[i], timestamp_ns, data_buffer));
-                if (K4A_FAILED(tmp_result))
+                if (k4a_image_get_format(images[i]) == expected_formats[i])
                 {
-                    // Write as many of the image buffers as possible, even if some fail due to timestamp.
-                    result = tmp_result;
-                    data_buffer->FreeBuffer(*data_buffer);
-                    delete data_buffer;
+                    uint64_t timestamp_ns = k4a_image_get_timestamp_usec(images[i]) * 1000;
+                    assert(buffer_size <= UINT32_MAX);
+                    // TODO: BUG 19475311 - Frame needs to be copied until color capture bug is fixed.
+                    DataBuffer *data_buffer = new DataBuffer(image_buffer, (uint32)buffer_size, NULL, true);
+                    k4a_result_t tmp_result = TRACE_CALL(
+                        write_track_data(context, tracks[i], timestamp_ns, data_buffer));
+                    if (K4A_FAILED(tmp_result))
+                    {
+                        // Write as many of the image buffers as possible, even if some fail due to timestamp.
+                        result = tmp_result;
+                        data_buffer->FreeBuffer(*data_buffer);
+                        delete data_buffer;
+                    }
+                }
+                else
+                {
+                    logger_error(LOGGER_RECORD, "Tried to write capture with unexpected image format.");
+                    result = K4A_RESULT_FAILED;
                 }
             }
             k4a_image_release(images[i]);
@@ -605,15 +612,27 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
                     seek_head.IndexThis(segment_info, *context->file_segment);
 
                     auto &tracks = GetChild<KaxTracks>(*context->file_segment);
-                    seek_head.IndexThis(tracks, *context->file_segment);
+                    if (tracks.GetElementPosition() > 0)
+                    {
+                        seek_head.IndexThis(tracks, *context->file_segment);
+                    }
 
                     auto &attachments = GetChild<KaxAttachments>(*context->file_segment);
-                    seek_head.IndexThis(attachments, *context->file_segment);
+                    if (attachments.GetElementPosition() > 0)
+                    {
+                        seek_head.IndexThis(attachments, *context->file_segment);
+                    }
 
                     auto &tags = GetChild<KaxTags>(*context->file_segment);
-                    seek_head.IndexThis(tags, *context->file_segment);
+                    if (tags.GetElementPosition() > 0)
+                    {
+                        seek_head.IndexThis(tags, *context->file_segment);
+                    }
 
-                    seek_head.IndexThis(cues, *context->file_segment);
+                    if (cues.GetElementPosition() > 0)
+                    {
+                        seek_head.IndexThis(cues, *context->file_segment);
+                    }
 
                     context->seek_void->ReplaceWith(seek_head, *context->ebml_file);
                 }
