@@ -199,7 +199,7 @@ typedef struct
     uint32_t patch; /**< Plugin Patch Version */
 } k4a_plugin_version_t;
 
-/** Opaque struct to be implemented by plugin
+/** Depth Engine context handle to be implemented by plugin
  *
  * \xmlonly
  * <requirements>
@@ -209,7 +209,7 @@ typedef struct
  */
 typedef struct k4a_depth_engine_context_t k4a_depth_engine_context_t;
 
-/** Opaque struct to be implemented by plugin
+/** Transform Engine context handle to be implemented by plugin
  *
  * \xmlonly
  * <requirements>
@@ -242,7 +242,7 @@ typedef void(__stdcall k4a_processing_complete_cb_t)(void *context, int status, 
  * An opaque pointer to be passed around to the rest of the depth engine calls.
  *
  * \param cal_block_size_in_bytes
- * Size of the depth calibration blob being passed in
+ * Size of the depth calibration blob being passed in, in bytes
  *
  * \param cal_block
  * The depth calibration blob
@@ -285,7 +285,7 @@ typedef k4a_depth_engine_result_code_t(__stdcall *k4a_de_create_and_initialize_f
  * Input frame buffer containing depth raw captured data
  *
  * \param input_frame_size
- * Size of the input_frame buffer
+ * Size of the input_frame buffer in bytes
  *
  * \param output_type
  * The type of frame the depth engine should output
@@ -293,7 +293,7 @@ typedef k4a_depth_engine_result_code_t(__stdcall *k4a_de_create_and_initialize_f
  * \param output_frame
  * The buffer of the output frame
  *
- * \param output_frame_size
+ * \param output_frame_size in bytes
  * The size of the output_frame buffer
  *
  * \param output_frame_info
@@ -369,16 +369,18 @@ typedef k4a_depth_engine_result_code_t(__stdcall *k4a_te_create_and_initialize_f
  * Frame buffer containing depth frame data
  *
  * \param depth_frame_size
- * Size of the depth_frame buffer
+ * Size of the depth_frame buffer in bytes
  *
  * \param color_frame
  * Frame buffer containing color frame data
  *
  * \param color_frame_size
- * Size of the color_frame buffer
+ * Size of the color_frame buffer in bytes
  *
  * \param output_frame
- * The buffer of the output frame
+ * The buffer of the output frame *
+ * \param output_frame_size
+ * Size of the output_frame buffer in bytes
  *
  * \returns
  * K4A_DEPTH_ENGINE_RESULT_SUCCEEDED on success, or the proper failure code on
