@@ -378,7 +378,8 @@ typedef k4a_depth_engine_result_code_t(__stdcall *k4a_te_create_and_initialize_f
  * Size of the color_frame buffer in bytes
  *
  * \param output_frame
- * The buffer of the output frame *
+ * The buffer of the output frame
+ *
  * \param output_frame_size
  * Size of the output_frame buffer in bytes
  *
