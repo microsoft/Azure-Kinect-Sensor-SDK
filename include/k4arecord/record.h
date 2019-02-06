@@ -20,7 +20,8 @@ extern "C" {
  * Filesystem path for the new recording.
  *
  * \param device
- * The k4a device that is being recorded.
+ * The k4a device that is being recorded. The device handle is used to store device calibration and serial number
+ * information. May be NULL if recording user-generated data.
  *
  * \param device_config
  * The configuration the k4a device was opened with.

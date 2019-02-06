@@ -106,6 +106,7 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
                          std::shared_ptr<read_block_t> &block,
                          k4a_capture_t *capture_handle);
 k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *capture_handle, bool next);
+k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next);
 
 // Template helper functions
 template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElement *element)

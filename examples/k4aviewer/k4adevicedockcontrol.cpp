@@ -889,7 +889,11 @@ void K4ADeviceDockControl::Stop()
     K4AWindowManager::Instance().ClearWindows();
 
     m_device->StopCameras();
+    m_cameraDataSource.NotifyTermination();
+
     m_device->StopImu();
+    m_imuDataSource.NotifyTermination();
+
     StopMicrophone();
 }
 
@@ -974,7 +978,7 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     case K4AWindowSet::ViewType::Normal:
         K4AWindowSet::StartNormalWindows(m_device->GetSerialNumber().c_str(),
                                          &m_cameraDataSource,
-                                         &m_imuDataSource,
+                                         m_pendingDeviceConfiguration.EnableImu ? &m_imuDataSource : nullptr,
                                          m_pendingDeviceConfiguration.EnableMicrophone ?
                                              m_microphone->CreateListener() :
                                              nullptr,

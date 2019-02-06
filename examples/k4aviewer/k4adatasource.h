@@ -69,6 +69,7 @@ public:
 
     void NotifyTermination()
     {
+        m_primed = false;
         for (const auto &wpObserver : m_observers)
         {
             if (auto spObserver = wpObserver.lock())

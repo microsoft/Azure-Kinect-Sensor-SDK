@@ -17,13 +17,13 @@
 
 // Project headers
 //
-#include "k4anonbufferingframesource.h"
-#include "opengltexture.h"
-
-#include "k4apointcloudrenderer.h"
-#include "k4apointcloudviewcontrol.h"
 #include "k4acalibrationtransformdata.h"
+#include "k4anonbufferingframesource.h"
+#include "k4apointcloudrenderer.h"
+#include "k4apointcloudtypes.h"
+#include "k4apointcloudviewcontrol.h"
 #include "k4aviewerutil.h"
+#include "opengltexture.h"
 
 namespace k4aviewer
 {
@@ -38,6 +38,8 @@ public:
     void ProcessMouseScroll(float yoffset);
 
     void ResetPosition();
+
+    void EnableShading(bool enable);
 
     K4APointCloudVisualizer(k4a_depth_mode_t depthMode, std::unique_ptr<K4ACalibrationTransformData> &&calibrationData);
     virtual ~K4APointCloudVisualizer();
@@ -57,7 +59,6 @@ private:
     bool m_pointCloudRendererBufferInitialized = false;
     ViewControl m_viewControl;
 
-    linmath::mat4x4 m_model{};
     linmath::mat4x4 m_projection{};
     linmath::mat4x4 m_view{};
 
@@ -66,8 +67,7 @@ private:
 
     std::unique_ptr<K4ACalibrationTransformData> m_calibrationTransformData;
 
-    std::vector<k4a_float3_t> m_depthPositionBuffer;
-    std::vector<k4a_float3_t> m_depthColorBuffer;
+    std::vector<Vertex> m_vertexBuffer;
 };
 } // namespace k4aviewer
 

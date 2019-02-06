@@ -24,6 +24,11 @@ static bool verify_plugin(const k4a_plugin_t *plugin)
 {
     RETURN_VALUE_IF_ARG(false, plugin == NULL);
 
+    LOG_INFO("Loaded K4A Plugin with version: %u.%u.%u",
+             g_destub.plugin.version.major,
+             g_destub.plugin.version.minor,
+             g_destub.plugin.version.patch);
+
     // Major versions must match
     if (plugin->version.major != K4A_PLUGIN_MAJOR_VERSION)
     {
@@ -54,6 +59,12 @@ static k4a_result_t load_depth_engine()
     }
 
     k4a_result_t result = dynlib_create(K4A_PLUGIN_DYNAMIC_LIBRARY_NAME, &g_deloader.handle);
+    if (K4A_FAILED(result))
+    {
+        LOG_ERROR("Failed to Load Depth Engine Plugin (%s). Depth functionality will not work",
+                  K4A_PLUGIN_DYNAMIC_LIBRARY_NAME);
+        LOG_ERROR("Make sure the depth engine plugin is in your loaders path", 0);
+    }
 
     if (K4A_SUCCEEDED(result))
     {

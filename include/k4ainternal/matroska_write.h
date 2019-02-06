@@ -9,21 +9,6 @@
 #include <k4ainternal/matroska_common.h>
 #include <set>
 
-#ifndef MAX_CLUSTER_LENGTH_NS
-#define MAX_CLUSTER_LENGTH_NS 1000_ms
-#endif
-
-#ifndef MATROSKA_TIMESCALE_NS
-// 1 unit = 1ms
-#define MATROSKA_TIMESCALE_NS 1_ms
-#endif
-
-#ifndef CLUSTER_WRITE_DELAY_NS
-#define CLUSTER_WRITE_DELAY_NS MAX_CLUSTER_LENGTH_NS * 2
-#endif
-
-static_assert(MAX_CLUSTER_LENGTH_NS < INT16_MAX * MATROSKA_TIMESCALE_NS, "Cluster length must fit in a 16 bit int");
-
 namespace k4arecord
 {
 typedef struct _track_data_t

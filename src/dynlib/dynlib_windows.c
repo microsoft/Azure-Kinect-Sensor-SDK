@@ -25,7 +25,7 @@ k4a_result_t dynlib_create(const char *name, dynlib_t *dynlib_handle)
     if (K4A_SUCCEEDED(result))
     {
         dynlib->handle = LoadLibraryA(name);
-        result = K4A_RESULT_FROM_BOOL(dynlib->handle != NULL);
+        result = (dynlib->handle != NULL) ? K4A_RESULT_SUCCEEDED : K4A_RESULT_FAILED;
 
         if (K4A_FAILED(result))
         {

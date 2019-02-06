@@ -1,23 +1,14 @@
 #include <utcommon.h>
 #include <k4a/k4a.h>
+#include <k4ainternal/common.h>
+
+#include "test_helpers.h"
+#include <fstream>
 
 // Module being tested
 #include <k4arecord/playback.h>
 
 using namespace testing;
-
-static const char *format_names[] = { "K4A_IMAGE_FORMAT_COLOR_MJPG", "K4A_IMAGE_FORMAT_COLOR_NV12",
-                                      "K4A_IMAGE_FORMAT_COLOR_YUY2", "K4A_IMAGE_FORMAT_COLOR_BGRA32",
-                                      "K4A_IMAGE_FORMAT_DEPTH16",    "K4A_IMAGE_FORMAT_IR16",
-                                      "K4A_IMAGE_FORMAT_CUSTOM" };
-static const char *resolution_names[] = { "K4A_COLOR_RESOLUTION_OFF",   "K4A_COLOR_RESOLUTION_720P",
-                                          "K4A_COLOR_RESOLUTION_1080P", "K4A_COLOR_RESOLUTION_1440P",
-                                          "K4A_COLOR_RESOLUTION_1536P", "K4A_COLOR_RESOLUTION_2160P",
-                                          "K4A_COLOR_RESOLUTION_3072P" };
-static const char *depth_names[] = { "K4A_DEPTH_MODE_OFF",           "K4A_DEPTH_MODE_NFOV_2X2BINNED",
-                                     "K4A_DEPTH_MODE_NFOV_UNBINNED", "K4A_DEPTH_MODE_WFOV_2X2BINNED",
-                                     "K4A_DEPTH_MODE_WFOV_UNBINNED", "K4A_DEPTH_MODE_PASSIVE_IR" };
-static const char *fps_names[] = { "K4A_FRAMES_PER_SECOND_5", "K4A_FRAMES_PER_SECOND_15", "K4A_FRAMES_PER_SECOND_30" };
 
 class playback_ut : public ::testing::Test
 {
@@ -26,11 +17,21 @@ protected:
     void TearDown() override {}
 };
 
-// Disabled for now because the TestData file doesn't exist when using msbuild
-TEST_F(playback_ut, DISABLED_open_basic_file)
+TEST_F(playback_ut, open_empty_file)
 {
-    k4a_playback_t handle;
-    k4a_result_t result = k4a_playback_open("TestData/playback_test_input.mkv", &handle);
+    { // Check to make sure the test recording exists and is readable.
+        std::ifstream test_file("record_test_empty.mkv");
+        ASSERT_TRUE(test_file.good());
+    }
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_empty.mkv", &handle);
+    ASSERT_EQ(result, K4A_RESULT_FAILED);
+}
+
+TEST_F(playback_ut, read_playback_tags)
+{
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_full.mkv", &handle);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
     // Get tag with exact buffer size
@@ -56,6 +57,15 @@ TEST_F(playback_ut, DISABLED_open_basic_file)
     buffer_result = k4a_playback_get_tag(handle, "FOO", NULL, &tag_value_size);
     ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_FAILED);
 
+    k4a_playback_close(handle);
+}
+
+TEST_F(playback_ut, open_large_file)
+{
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_full.mkv", &handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
     // Read recording configuration
     k4a_record_configuration_t config;
     result = k4a_playback_get_record_configuration(handle, &config);
@@ -66,25 +76,250 @@ TEST_F(playback_ut, DISABLED_open_basic_file)
     ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
     ASSERT_EQ(config.depth_delay_off_color_usec, 0);
 
-    // TODO: Check these cases in the unit test
-    /*
-    std::cout << "Color track by name: " << get_track_by_name(context, "COLOR") << std::endl;
-    std::cout << "Color track by tag: " << get_track_by_tag(context, "K4A_COLOR_MODE") << std::endl;
-
-    std::cout << "Depth track by name: " << get_track_by_name(context, "DEPTH") << std::endl;
-    std::cout << "Depth track by tag: " << get_track_by_tag(context, "K4A_DEPTH_MODE") << std::endl;
-
-    std::cout << "missing track: " << get_track_by_tag(context, "foo") << std::endl;
-    std::cout << "missing attachment: " << get_attachment_by_tag(context, "foo") << std::endl;
-
-    std::cout << "'calibration.json' by name: " << get_attachment_by_name(context, "calibration.json") << std::endl;
-    std::cout << "'calibration.json' by tag: " << get_attachment_by_tag(context, "K4A_CALIBRATION_FILE") << std::endl;
-    */
+    k4a_capture_t capture = NULL;
+    k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
+    uint64_t timestamps[3] = { 0, 1000, 1000 };
+    uint64_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(config.camera_fps);
+    int i = 0;
+    for (; i < 50; i++)
+    {
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+        timestamps[0] += timestamp_delta;
+        timestamps[1] += timestamp_delta;
+        timestamps[2] += timestamp_delta;
+    }
+    { // Try reading backwards for a couple captures.
+        timestamps[0] -= timestamp_delta;
+        timestamps[1] -= timestamp_delta;
+        timestamps[2] -= timestamp_delta;
+        for (; i > 40; i--)
+        {
+            timestamps[0] -= timestamp_delta;
+            timestamps[1] -= timestamp_delta;
+            timestamps[2] -= timestamp_delta;
+            stream_result = k4a_playback_get_previous_capture(handle, &capture);
+            ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+            ASSERT_TRUE(validate_test_capture(capture,
+                                              timestamps,
+                                              config.color_format,
+                                              config.color_resolution,
+                                              config.depth_mode));
+            k4a_capture_release(capture);
+        }
+        timestamps[0] += timestamp_delta;
+        timestamps[1] += timestamp_delta;
+        timestamps[2] += timestamp_delta;
+    }
+    for (; i < 100; i++)
+    {
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+        timestamps[0] += timestamp_delta;
+        timestamps[1] += timestamp_delta;
+        timestamps[2] += timestamp_delta;
+    }
+    stream_result = k4a_playback_get_next_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_EQ(capture, (k4a_capture_t)NULL);
 
     k4a_playback_close(handle);
 }
 
-TEST_F(playback_ut, DISABLED_open_full_file)
+TEST_F(playback_ut, open_delay_offset_file)
+{
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_delay.mkv", &handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    // Read recording configuration
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
+    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.depth_delay_off_color_usec, 10000);
+
+    k4a_capture_t capture = NULL;
+    k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
+    uint64_t timestamps[3] = { 0, 10000, 10000 };
+    uint64_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(config.camera_fps);
+
+    // Read forward
+    for (int i = 0; i < 100; i++)
+    {
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+        timestamps[0] += timestamp_delta;
+        timestamps[1] += timestamp_delta;
+        timestamps[2] += timestamp_delta;
+    }
+    stream_result = k4a_playback_get_next_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+
+    // Read backward
+    for (int i = 0; i < 100; i++)
+    {
+        timestamps[0] -= timestamp_delta;
+        timestamps[1] -= timestamp_delta;
+        timestamps[2] -= timestamp_delta;
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+    }
+    stream_result = k4a_playback_get_previous_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+
+    k4a_playback_close(handle);
+}
+
+TEST_F(playback_ut, playback_seek_test)
+{
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_full.mkv", &handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    // Read recording configuration
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
+    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+
+    k4a_capture_t capture = NULL;
+    k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
+    uint64_t timestamps[3] = { 0, 1000, 1000 };
+    uint64_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(config.camera_fps);
+
+    // Test initial state
+    stream_result = k4a_playback_get_previous_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+
+    stream_result = k4a_playback_get_next_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    ASSERT_TRUE(
+        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
+    k4a_capture_release(capture);
+
+    // Test seek to beginning
+    result = k4a_playback_seek_timestamp(handle, 0, K4A_PLAYBACK_SEEK_BEGIN);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    stream_result = k4a_playback_get_previous_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+
+    stream_result = k4a_playback_get_next_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    ASSERT_TRUE(
+        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
+    k4a_capture_release(capture);
+
+    // Test seek past beginning
+    result = k4a_playback_seek_timestamp(handle,
+                                         -(int64_t)k4a_playback_get_last_timestamp_usec(handle) - 10,
+                                         K4A_PLAYBACK_SEEK_END);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    stream_result = k4a_playback_get_next_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    ASSERT_TRUE(
+        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
+    k4a_capture_release(capture);
+
+    // Test seek to end
+    result = k4a_playback_seek_timestamp(handle, 0, K4A_PLAYBACK_SEEK_END);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    timestamps[0] += timestamp_delta * 99;
+    timestamps[1] += timestamp_delta * 99;
+    timestamps[2] += timestamp_delta * 99;
+
+    stream_result = k4a_playback_get_next_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+
+    stream_result = k4a_playback_get_previous_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    ASSERT_TRUE(
+        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
+    k4a_capture_release(capture);
+
+    // Test seek to end, relative to start
+    result = k4a_playback_seek_timestamp(handle,
+                                         (int64_t)k4a_playback_get_last_timestamp_usec(handle) + 1,
+                                         K4A_PLAYBACK_SEEK_BEGIN);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    stream_result = k4a_playback_get_next_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+
+    stream_result = k4a_playback_get_previous_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    ASSERT_TRUE(
+        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
+    k4a_capture_release(capture);
+
+    // Test seek to middle of capture, then read forward
+    timestamps[0] -= timestamp_delta * 50;
+    timestamps[1] -= timestamp_delta * 50;
+    timestamps[2] -= timestamp_delta * 50;
+    result = k4a_playback_seek_timestamp(handle, (int64_t)timestamps[0] + 500, K4A_PLAYBACK_SEEK_BEGIN);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    stream_result = k4a_playback_get_next_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    // Color image is before the timestamp and will be missing.
+    ASSERT_TRUE(
+        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode));
+    k4a_capture_release(capture);
+
+    // Test seek to middle of capture, then read backward
+    result = k4a_playback_seek_timestamp(handle, (int64_t)timestamps[0] + 500, K4A_PLAYBACK_SEEK_BEGIN);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    stream_result = k4a_playback_get_previous_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    // Depth and IR images are before the timestamp and will be missing.
+    ASSERT_TRUE(
+        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, K4A_DEPTH_MODE_OFF));
+    k4a_capture_release(capture);
+
+    k4a_playback_close(handle);
+}
+
+TEST_F(playback_ut, DISABLED_open_test_file)
 {
     k4a_playback_t handle;
     k4a_result_t result = k4a_playback_open("test.mkv", &handle);
@@ -200,6 +435,7 @@ int main(int argc, char **argv)
 {
     k4a_unittest_init();
 
+    ::testing::AddGlobalTestEnvironment(new SampleRecordings());
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

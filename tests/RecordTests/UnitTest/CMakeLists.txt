@@ -1,5 +1,5 @@
 add_executable(record_ut record_ut.cpp)
-add_executable(playback_ut playback_ut.cpp)
+add_executable(playback_ut playback_ut.cpp test_helpers.cpp sample_recordings.cpp)
 
 target_link_libraries(record_ut PRIVATE
     k4ainternal::utcommon
