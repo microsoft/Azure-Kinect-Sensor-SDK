@@ -28,9 +28,15 @@ extern "C" {
 #define IMU_TEMPERATURE_DIVISOR 256
 #define IMU_TEMPERATURE_CONSTANT 15
 #define IMU_SCALE_NORMALIZATION 1000000
+
+// The raw readings from accelerometer are in g's and in the SDK g = 9.81 m/s^2 is used as constant factor to convert it.
 // This gravitational constant is consistent with the parameter used in device calibration.
 // Changing this constant to a different value would break the IMU accelerometer calibration.
 #define IMU_GRAVITATIONAL_CONSTANT 9.81f
+
+// The raw readings from gyroscope are in degrees per second and in the SDK, is converted to radians per second.
+#define PI 3.141592f
+#define IMU_RADIANS_PER_DEGREES (PI / 180.0f)
 
 #define MAX_IMU_TIME_STAMP_MS 5000
 
@@ -194,12 +200,12 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
                 k4a_imu_sample_t sample = { 0 };
                 sample.temperature = ((float)(p_metadata->temperature.value) / IMU_TEMPERATURE_DIVISOR) +
                                      IMU_TEMPERATURE_CONSTANT;
-                sample.gyro_sample.xyz.x = (float)p_gyro_data[i].rx * p_metadata->gyro.sensitivity /
-                                           IMU_SCALE_NORMALIZATION;
-                sample.gyro_sample.xyz.y = (float)p_gyro_data[i].ry * p_metadata->gyro.sensitivity /
-                                           IMU_SCALE_NORMALIZATION;
-                sample.gyro_sample.xyz.z = (float)p_gyro_data[i].rz * p_metadata->gyro.sensitivity /
-                                           IMU_SCALE_NORMALIZATION;
+                sample.gyro_sample.xyz.x = (float)p_gyro_data[i].rx * p_metadata->gyro.sensitivity *
+                                           IMU_RADIANS_PER_DEGREES / IMU_SCALE_NORMALIZATION;
+                sample.gyro_sample.xyz.y = (float)p_gyro_data[i].ry * p_metadata->gyro.sensitivity *
+                                           IMU_RADIANS_PER_DEGREES / IMU_SCALE_NORMALIZATION;
+                sample.gyro_sample.xyz.z = (float)p_gyro_data[i].rz * p_metadata->gyro.sensitivity *
+                                           IMU_RADIANS_PER_DEGREES / IMU_SCALE_NORMALIZATION;
                 sample.gyro_timestamp_usec = K4A_90K_HZ_TICK_TO_USEC(p_gyro_data[i].pts);
                 sample.acc_sample.xyz.x = (float)p_accel_data[i].rx * p_metadata->accel.sensitivity *
                                           IMU_GRAVITATIONAL_CONSTANT / IMU_SCALE_NORMALIZATION;
