@@ -43,7 +43,6 @@ extern "C" {
 // IMU start.
 #define MAX_IMU_TIME_STAMP_MS 1500
 
-
 //************************ Typedefs *****************************
 
 // parameters used to compute the calibrated IMU
