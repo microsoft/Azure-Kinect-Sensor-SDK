@@ -19,6 +19,14 @@ extern "C" {
 
 #define DEPTH_CALIBRATION_DATA_SIZE 2000000
 
+static k4a_version_t g_min_fw_version_rgb = { 1, 5, 78 };             // 1.5.78
+static k4a_version_t g_min_fw_version_depth = { 1, 5, 60 };           // 1.5.60
+static k4a_version_t g_min_fw_version_audio = { 1, 5, 13 };           // 1.5.13
+static k4a_version_t g_min_fw_version_depth_config = { 5006, 27, 0 }; // 5006.27 (interation is not used, set to zero)
+
+#define MINOR_VERSION_OFFSET_1 100 // Some variants of development FW offset minor version with 100
+#define MINOR_VERSION_OFFSET_2 200 // Some variants of development FW offset minor version with 200
+
 typedef struct _depth_context_t
 {
     depthmcu_t depthmcu;
@@ -29,7 +37,7 @@ typedef struct _depth_context_t
     bool calibration_init;
 
     bool running;
-
+    k4a_hardware_version_t version;
     k4a_calibration_camera_t calibration;
 
     depth_cb_streaming_capture_t *capture_ready_cb;
@@ -42,6 +50,75 @@ depthmcu_stream_cb_t depth_capture_available;
 
 static void log_device_info(depth_context_t *depth);
 static void depth_stop_internal(depth_t depth_handle, bool quiet);
+bool is_fw_version_compatable(const char *fw_type, k4a_version_t *fw_version, k4a_version_t *fw_min_version);
+
+bool is_fw_version_compatable(const char *fw_type, k4a_version_t *fw_version, k4a_version_t *fw_min_version)
+{
+    typedef enum
+    {
+        FW_OK,
+        FW_TOO_LOW,
+        FW_UNKNOWN
+    } fw_check_state_t;
+
+    fw_check_state_t fw = FW_UNKNOWN;
+
+    // Check major version
+    if (fw_version->major > fw_min_version->major)
+    {
+        fw = FW_OK;
+    }
+    else if (fw_version->major < fw_min_version->major)
+    {
+        fw = FW_TOO_LOW;
+    }
+
+    // Check minor version
+    if (fw == FW_UNKNOWN)
+    {
+        uint32_t minor = fw_version->minor;
+        if (fw_version->minor > MINOR_VERSION_OFFSET_2)
+        {
+            minor = fw_version->minor - MINOR_VERSION_OFFSET_2;
+        }
+        else if (fw_version->minor > MINOR_VERSION_OFFSET_1)
+        {
+            minor = fw_version->minor - MINOR_VERSION_OFFSET_1;
+        }
+
+        if (minor > fw_min_version->minor)
+        {
+            fw = FW_OK;
+        }
+        else if (minor < fw_min_version->minor)
+        {
+            fw = FW_TOO_LOW;
+        }
+    }
+
+    // Check iteration version
+    if (fw == FW_UNKNOWN)
+    {
+        fw = FW_TOO_LOW;
+        if (fw_version->iteration >= fw_min_version->iteration)
+        {
+            fw = FW_OK;
+        }
+    }
+
+    if (fw != FW_OK)
+    {
+        LOG_ERROR("ERROR Firmware version for %s is %d.%d.%d is not current enough. Use %d.%d.%d or newer.",
+                  fw_type,
+                  fw_version->major,
+                  fw_version->minor,
+                  fw_version->iteration,
+                  fw_min_version->major,
+                  fw_min_version->minor,
+                  fw_min_version->iteration);
+    }
+    return (fw == FW_OK);
+}
 
 k4a_result_t depth_create(depthmcu_t depthmcu,
                           calibration_t calibration_handle,
@@ -69,11 +146,32 @@ k4a_result_t depth_create(depthmcu_t depthmcu,
 
     if (K4A_SUCCEEDED(result))
     {
+        result = K4A_RESULT_FROM_BOOL(depthmcu_wait_is_ready(depth->depthmcu));
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        result = TRACE_CALL(depth_get_device_version(*depth_handle, &depth->version));
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        log_device_info(depth);
+
+        if (!is_fw_version_compatable("RGB", &depth->version.rgb, &g_min_fw_version_rgb) ||
+            !is_fw_version_compatable("Depth", &depth->version.depth, &g_min_fw_version_depth) ||
+            !is_fw_version_compatable("Audio", &depth->version.audio, &g_min_fw_version_audio) ||
+            !is_fw_version_compatable("Depth Config", &depth->version.depth_sensor, &g_min_fw_version_depth_config))
+        {
+            result = K4A_RESULT_FAILED;
+        }
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
         result = TRACE_CALL(
             calibration_get_camera(calibration_handle, K4A_CALIBRATION_TYPE_DEPTH, &depth->calibration));
     }
-
-    log_device_info(depth);
 
     if (K4A_SUCCEEDED(result))
     {
@@ -139,35 +237,31 @@ static void log_device_info(depth_context_t *depth)
         logger_critical(LOGGER_API, "Serial Number:       %s", serial_number);
     }
 
-    depthmcu_firmware_versions_t version;
-    if (depthmcu_get_version(depth->depthmcu, &version) == K4A_RESULT_SUCCEEDED)
-    {
-        logger_critical(LOGGER_API,
-                        "RGB Sensor Version:  %d.%d.%d",
-                        version.rgb_major,
-                        version.rgb_minor,
-                        version.rgb_build);
-        logger_critical(LOGGER_API,
-                        "Depth Sensor Version:%d.%d.%d",
-                        version.depth_major,
-                        version.depth_minor,
-                        version.depth_build);
-        logger_critical(LOGGER_API,
-                        "Mic Array Version:   %d.%d.%d",
-                        version.audio_major,
-                        version.audio_minor,
-                        version.audio_build);
-        logger_critical(LOGGER_API,
-                        "Sensor Config:       %d.%d",
-                        version.depth_sensor_cfg_major,
-                        version.depth_sensor_cfg_minor);
-        logger_critical(LOGGER_API, "Build type:          %s", version.build_config == 0 ? "Release" : "Debug");
-        logger_critical(LOGGER_API,
-                        "Signature type:      %s",
-                        version.signature_type == K4A_FIRMWARE_SIGNATURE_MSFT ?
-                            "MSFT" :
-                            (version.signature_type == K4A_FIRMWARE_SIGNATURE_TEST ? "Test" : "Unsigned"));
-    }
+    logger_critical(LOGGER_API,
+                    "RGB Sensor Version:  %d.%d.%d",
+                    depth->version.rgb.major,
+                    depth->version.rgb.minor,
+                    depth->version.rgb.iteration);
+    logger_critical(LOGGER_API,
+                    "Depth Sensor Version:%d.%d.%d",
+                    depth->version.depth.major,
+                    depth->version.depth.minor,
+                    depth->version.depth.iteration);
+    logger_critical(LOGGER_API,
+                    "Mic Array Version:   %d.%d.%d",
+                    depth->version.audio.major,
+                    depth->version.audio.minor,
+                    depth->version.audio.iteration);
+    logger_critical(LOGGER_API,
+                    "Sensor Config:       %d.%d",
+                    depth->version.depth_sensor.major,
+                    depth->version.depth_sensor.minor);
+    logger_critical(LOGGER_API, "Build type:          %s", depth->version.firmware_build == 0 ? "Release" : "Debug");
+    logger_critical(LOGGER_API,
+                    "Signature type:      %s",
+                    depth->version.firmware_signature == K4A_FIRMWARE_SIGNATURE_MSFT ?
+                        "MSFT" :
+                        (depth->version.firmware_signature == K4A_FIRMWARE_SIGNATURE_TEST ? "Test" : "Unsigned"));
 
     // TODO add hardware info here too
 
@@ -238,7 +332,7 @@ k4a_result_t depth_get_device_version(depth_t depth_handle, k4a_hardware_version
         version->audio.iteration = mcu_version.audio_build;
 
         version->depth_sensor.major = mcu_version.depth_sensor_cfg_major;
-        version->depth_sensor.minor = mcu_version.depth_sensor_cfg_major;
+        version->depth_sensor.minor = mcu_version.depth_sensor_cfg_minor;
         version->depth_sensor.iteration = 0;
 
         switch (mcu_version.build_config)
@@ -343,8 +437,8 @@ void depth_stop_internal(depth_t depth_handle, bool quiet)
 
     depth_context_t *depth = depth_t_get_context(depth_handle);
 
-    // It is ok to call this multiple times, so no lock. Only doing it once is an optimization to not stop if the sensor
-    // was never started.
+    // It is ok to call this multiple times, so no lock. Only doing it once is an optimization to not stop if the
+    // sensor was never started.
     if (depth->running)
     {
         depthmcu_depth_stop_streaming(depth->depthmcu, quiet);

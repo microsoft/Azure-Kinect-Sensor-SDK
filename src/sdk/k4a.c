@@ -14,7 +14,6 @@
 #include <k4ainternal/capturesync.h>
 #include <k4ainternal/transformation.h>
 #include <azure_c_shared_utility/tickcounter.h>
-#include <azure_c_shared_utility/threadapi.h>
 
 // System dependencies
 #include <stdlib.h>
@@ -110,23 +109,8 @@ k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
     // Create MCU modules
     if (K4A_SUCCEEDED(result))
     {
+        // This will block until the depth process is ready to recieve commands
         result = TRACE_CALL(depthmcu_create(index, &device->depthmcu));
-    }
-
-    // Wait for the device to be ready...
-    if (K4A_SUCCEEDED(result))
-    {
-        int retry = 0;
-        while (!depthmcu_is_ready(device->depthmcu) && retry++ < 20)
-        {
-            ThreadAPI_Sleep(500);
-        }
-
-        if (!depthmcu_is_ready(device->depthmcu))
-        {
-            logger_error(LOGGER_API, "k4a_device_open timed out waiting for the device to become ready");
-            result = K4A_RESULT_FAILED;
-        }
     }
 
     if (K4A_SUCCEEDED(result))
