@@ -13,6 +13,7 @@
 
 #ifndef _WIN32
 #define __stdcall /**< __stdcall not defined in Linux */
+#define __cdecl   /**< __cdecl not defined in Linux */
 #endif
 
 /**
@@ -464,7 +465,7 @@ typedef struct _k4a_plugin_t
  * \returns
  * True if the plugin believes it successfully registered, false otherwise.
  */
-typedef bool (*k4a_register_plugin_fn)(k4a_plugin_t *plugin);
+typedef bool(__cdecl *k4a_register_plugin_fn)(k4a_plugin_t *plugin);
 
 #ifdef __cplusplus
 }
