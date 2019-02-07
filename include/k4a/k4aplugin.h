@@ -22,17 +22,15 @@
  * that would cause an older SDK to not be able to use this plugin.
  */
 #define K4A_PLUGIN_MAJOR_VERSION 1 /**< K4A plugin major version */
-#define K4A_PLUGIN_MINOR_VERSION 1 /**< K4A plugin minor version */
-#define K4A_PLUGIN_PATCH_VERSION 0 /**< K4A plugin patch version */
+#define K4A_PLUGIN_MINOR_VERSION 0 /**< K4A plugin minor version */
 
 /**
  * Expected name of plugin's dynamic library
  *
  * \remarks When the K4A SDK tried to load the depth engine, it will attempt to
- * load a dynamic library named "depthengine100". The name contains a version number
- * to bind with the matching depth engine plugin interface.
+ * load a dynamic library named "depthengine".
  */
-#define K4A_PLUGIN_DYNAMIC_LIBRARY_NAME "depthengine100"
+#define K4A_PLUGIN_DYNAMIC_LIBRARY_NAME "depthengine"
 
 /**
  * Name of the function all plugins must export in a dynamic library
