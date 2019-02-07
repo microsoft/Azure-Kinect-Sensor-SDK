@@ -60,7 +60,7 @@ static k4a_result_t load_depth_engine()
 
     k4a_result_t result = dynlib_create(K4A_PLUGIN_DYNAMIC_LIBRARY_NAME,
                                         K4A_PLUGIN_MAJOR_VERSION,
-                                        K4A_PLUGIN_MAJOR_VERSION,
+                                        K4A_PLUGIN_MINOR_VERSION,
                                         &g_deloader.handle);
     if (K4A_FAILED(result))
     {
