@@ -29,9 +29,9 @@ extern "C" {
 #define IMU_TEMPERATURE_CONSTANT 15
 #define IMU_SCALE_NORMALIZATION 1000000
 
-// The raw readings from accelerometer are in g's and in the SDK g = 9.81 m/s^2 is used as constant factor to convert it.
-// This gravitational constant is consistent with the parameter used in device calibration.
-// Changing this constant to a different value would break the IMU accelerometer calibration.
+// The raw readings from accelerometer are in g's and in the SDK g = 9.81 m/s^2 is used as constant factor to convert
+// it. This gravitational constant is consistent with the parameter used in device calibration. Changing this constant
+// to a different value would break the IMU accelerometer calibration.
 #define IMU_GRAVITATIONAL_CONSTANT 9.81f
 
 // The raw readings from gyroscope are in degrees per second and in the SDK, is converted to radians per second.

@@ -3,7 +3,8 @@
 ### v0.8.0
 
 * Output intrinsic calibrated IMU data
-* Changed units of IMU accelerometer reading from G to meters per second squared and units of IMU Gyroscope reading from degrees per second to radians per second.
+* Changed units of IMU accelerometer reading from G to meters per second squared.
+* Changed units of IMU Gyroscope reading from degrees per second to radians per second.
 * Breaking change to k4a_calibration_get_from_raw API, size of source calibration string is now required along with the 
 source calibration.
 
