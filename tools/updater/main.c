@@ -346,43 +346,51 @@ static k4a_result_t load_firmware_file(updater_command_info_t *command_info)
     return result;
 }
 
-static void print_firmware_build_config(firmware_build_config_t build_config)
+static void print_firmware_build_config(k4a_firmware_build_t build_config)
 {
     printf("  Build Config:             ");
     switch (build_config)
     {
-    case FIRMWARE_BUILD_CONFIG_RELEASE:
+    case K4A_FIRMWARE_BUILD_RELEASE:
         printf("Production\n");
         break;
 
-    case FIRMWARE_BUILD_CONFIG_DEBUG:
+    case K4A_FIRMWARE_BUILD_DEBUG:
         printf("Debug\n");
         break;
 
     default:
-        printf("Unknown\n");
+        printf("Unknown (%d)\n", build_config);
     }
 }
 
-static void print_firmware_signature_type(firmware_signature_type_t signature_type)
+static void print_firmware_signature_type(k4a_firmware_signature_t signature_type, bool certificate)
 {
-    printf("  Signature Type:           ");
+    if (certificate)
+    {
+        printf("  Certificate Type:         ");
+    }
+    else
+    {
+        printf("  Signature Type:           ");
+    }
+
     switch (signature_type)
     {
-    case FIRMWARE_SIGNED_MSFT:
-        printf("Signed by Microsoft\n");
+    case K4A_FIRMWARE_SIGNATURE_MSFT:
+        printf("Microsoft\n");
         break;
 
-    case FIRMWARE_SIGNED_TEST:
-        printf("Test signed\n");
+    case K4A_FIRMWARE_SIGNATURE_TEST:
+        printf("Test\n");
         break;
 
-    case FIRMWARE_UNSIGNED:
+    case K4A_FIRMWARE_SIGNATURE_UNSIGNED:
         printf("Unsigned\n");
         break;
 
     default:
-        printf("Unknown\n");
+        printf("Unknown (%d)\n", signature_type);
     }
 }
 
@@ -426,7 +434,8 @@ static k4a_result_t print_firmware_package_info(firmware_package_info_t package_
            package_info.audio.iteration);
 
     print_firmware_build_config(package_info.build_config);
-    print_firmware_signature_type(package_info.signature_type);
+    print_firmware_signature_type(package_info.certificate_type, true);
+    print_firmware_signature_type(package_info.signature_type, false);
     printf("\n");
 
     return K4A_RESULT_SUCCEEDED;
@@ -503,7 +512,28 @@ static char *component_status_to_string(const firmware_component_status_t status
 
     if (status.overall == FIRMWARE_OPERATION_INPROGRESS)
     {
-        return "IN PROGRESS";
+        if (status.authentication_check != FIRMWARE_OPERATION_SUCCEEDED)
+        {
+            return "IN PROGRESS (Authentication Check)";
+        }
+        if (status.version_check != FIRMWARE_OPERATION_SUCCEEDED)
+        {
+            return "IN PROGRESS (Version Check)";
+        }
+        if (status.image_transfer != FIRMWARE_OPERATION_SUCCEEDED)
+        {
+            return "IN PROGRESS (Image Transfer)";
+        }
+        if (status.flash_erase != FIRMWARE_OPERATION_SUCCEEDED)
+        {
+            return "IN PROGRESS (Flash Erase)";
+        }
+        if (status.flash_write != FIRMWARE_OPERATION_SUCCEEDED)
+        {
+            return "IN PROGRESS (Flash Write)";
+        }
+
+        return "IN PROGRESS (Unknown)";
     }
 
     // If the version check failed, this component's update was skipped. This could because the new version is
@@ -513,7 +543,28 @@ static char *component_status_to_string(const firmware_component_status_t status
         return "SKIPPPED";
     }
 
-    return "FAILED";
+    if (status.authentication_check != FIRMWARE_OPERATION_SUCCEEDED)
+    {
+        return "FAILED (Authentication Check)";
+    }
+    if (status.version_check != FIRMWARE_OPERATION_SUCCEEDED)
+    {
+        return "FAILED (Version Check)";
+    }
+    if (status.image_transfer != FIRMWARE_OPERATION_SUCCEEDED)
+    {
+        return "FAILED (Image Transfer)";
+    }
+    if (status.flash_erase != FIRMWARE_OPERATION_SUCCEEDED)
+    {
+        return "FAILED (Flash Erase)";
+    }
+    if (status.flash_write != FIRMWARE_OPERATION_SUCCEEDED)
+    {
+        return "FAILED (Flash Write)";
+    }
+
+    return "FAILED (Unknown)";
 }
 
 static bool compare_version(uint8_t major, uint8_t minor, uint16_t iteration, k4a_version_t version)
@@ -877,7 +928,7 @@ static k4a_result_t command_query_device(updater_command_info_t *command_info)
                command_info->current_version.audio_build);
 
         print_firmware_build_config(command_info->current_version.build_config);
-        print_firmware_signature_type(command_info->current_version.signature_type);
+        print_firmware_signature_type(command_info->current_version.signature_type, true);
         printf("\n");
     }
     else
