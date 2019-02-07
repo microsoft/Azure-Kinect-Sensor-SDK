@@ -100,6 +100,19 @@ template<typename T, size_t N> constexpr size_t arraysize(T const (&)[N]) noexce
     return N;
 }
 
+// Function for switching between big and little-endian 16-bit ints
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
+constexpr uint16_t swap_bytes_16(uint16_t input)
+{
+#if __has_builtin(__builtin_bswap16)
+    return __builtin_bswap16(input);
+#else
+    return input >> 8 | input << 8;
+#endif
+}
+
 namespace k4arecord
 {
 /**
