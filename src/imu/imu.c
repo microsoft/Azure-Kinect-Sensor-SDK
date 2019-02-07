@@ -32,7 +32,10 @@ extern "C" {
 // Changing this constant to a different value would break the IMU accelerometer calibration.
 #define IMU_GRAVITATIONAL_CONSTANT 9.81f
 
-#define MAX_IMU_TIME_STAMP_MS 5000
+// Set the max timestamp expected from the IMU after starting it with the color camera. If this value is too large then
+// starting and stopping the IMU & color camera in rapid succession can result in timestamps going backwards near each
+// IMU start.
+#define MAX_IMU_TIME_STAMP_MS 1500
 
 //************************ Typedefs *****************************
 

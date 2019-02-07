@@ -103,9 +103,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
 
-    // TODO remove this sleep when IMU timestamps are increasing in a predictable way.
-    ThreadAPI_Sleep(1000);
-
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(device));
 
