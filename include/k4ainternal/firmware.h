@@ -26,19 +26,6 @@ typedef enum
     FIRMWARE_OPERATION_SUCCEEDED = 3   /**< The operation has completed and has succeeded */
 } firmware_operation_status_t;
 
-typedef enum
-{
-    FIRMWARE_BUILD_CONFIG_RELEASE = 0,
-    FIRMWARE_BUILD_CONFIG_DEBUG = 1
-} firmware_build_config_t;
-
-typedef enum _firmware_signature_type_t
-{
-    FIRMWARE_SIGNED_MSFT = 0,
-    FIRMWARE_SIGNED_TEST = 1,
-    FIRMWARE_UNSIGNED = 2
-} firmware_signature_type_t;
-
 typedef struct _firmware_component_status_t
 {
     firmware_operation_status_t version_check;
@@ -66,8 +53,9 @@ typedef struct _firmware_package_info_t
     k4a_version_t audio;
     uint8_t depth_config_number_versions;
     k4a_version_t depth_config_versions[5];
-    firmware_build_config_t build_config;
-    firmware_signature_type_t signature_type;
+    k4a_firmware_build_t build_config;
+    k4a_firmware_signature_t signature_type;
+    k4a_firmware_signature_t certificate_type;
 } firmware_package_info_t;
 
 k4a_result_t firmware_create(depthmcu_t depthmcu_handle, firmware_t *firmware_handle);

@@ -6,6 +6,7 @@
 #include <k4ainternal/calibration.h>
 #include <k4ainternal/deloader.h>
 #include <azure_c_shared_utility/threadapi.h>
+#include <azure_c_shared_utility/condition.h>
 #include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/lock.h>
 #include <azure_c_shared_utility/refcount.h>
@@ -27,7 +28,9 @@ typedef struct _dewrapper_context_t
 
     THREAD_HANDLE thread;
     LOCK_HANDLE lock;
+    COND_HANDLE condition;
     volatile bool thread_stop;
+    k4a_result_t thread_start_result;
 
     k4a_fps_t fps;
     k4a_depth_mode_t depth_mode;
@@ -180,6 +183,15 @@ static int depth_engine_thread(void *param)
                                                   dewrapper->depth_mode,
                                                   &depth_engine_max_compute_time_ms,
                                                   &depth_engine_output_buffer_size));
+
+    // The Start routine is blocked waiting for this thread to complete startup, so we signal it here and share our
+    // startup status.
+    Lock(dewrapper->lock);
+    dewrapper->thread_start_result = result;
+    Condition_Post(dewrapper->condition);
+    Unlock(dewrapper->lock);
+
+    // NOTE: Failures after this point are reported to the user via the k4a_device_get_capture()
 
     while (result != K4A_RESULT_FAILED && dewrapper->thread_stop == false)
     {
@@ -407,6 +419,7 @@ dewrapper_t dewrapper_create(k4a_calibration_camera_t *calibration,
     dewrapper->calibration = calibration;
     dewrapper->capture_ready_cb = capture_ready_cb;
     dewrapper->capture_ready_cb_context = capture_ready_context;
+    dewrapper->thread_start_result = K4A_RESULT_FAILED;
     dewrapper->tick = tickcounter_create();
     result = K4A_RESULT_FROM_BOOL(NULL != dewrapper->tick);
 
@@ -414,6 +427,11 @@ dewrapper_t dewrapper_create(k4a_calibration_camera_t *calibration,
     {
         dewrapper->lock = Lock_Init();
         result = K4A_RESULT_FROM_BOOL(dewrapper->lock != NULL);
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        dewrapper->condition = Condition_Init();
     }
 
     if (K4A_SUCCEEDED(result))
@@ -441,10 +459,17 @@ void dewrapper_destroy(dewrapper_t dewrapper_handle)
     {
         queue_destroy(dewrapper->queue);
     }
+
     if (dewrapper->tick)
     {
         tickcounter_destroy(dewrapper->tick);
     }
+
+    if (dewrapper->condition)
+    {
+        Condition_Deinit(dewrapper->condition);
+    }
+
     if (dewrapper->lock)
     {
         Lock_Deinit(dewrapper->lock);
@@ -483,11 +508,13 @@ k4a_result_t dewrapper_start(dewrapper_t dewrapper_handle,
 
     dewrapper->calibration_memory = calibration_memory;
     dewrapper->calibration_memory_size = calibration_memory_size;
+    dewrapper->thread_start_result = K4A_RESULT_FAILED;
 
     k4a_result_t result = K4A_RESULT_FROM_BOOL(dewrapper->thread == NULL);
 
     if (K4A_SUCCEEDED(result))
     {
+        bool locked = false;
         queue_enable(dewrapper->queue);
 
         // NOTE: do not copy config ptr, it may be freed after this call
@@ -497,6 +524,32 @@ k4a_result_t dewrapper_start(dewrapper_t dewrapper_handle,
 
         THREADAPI_RESULT tresult = ThreadAPI_Create(&dewrapper->thread, depth_engine_thread, dewrapper);
         result = K4A_RESULT_FROM_BOOL(tresult == THREADAPI_OK);
+
+        if (K4A_SUCCEEDED(result))
+        {
+            Lock(dewrapper->lock);
+            locked = true;
+            int infinite_timeout = 0;
+            COND_RESULT cond_result = Condition_Wait(dewrapper->condition, dewrapper->lock, infinite_timeout);
+            result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
+        }
+
+        if (K4A_SUCCEEDED(result) && K4A_FAILED(dewrapper->thread_start_result))
+        {
+            LOG_ERROR("Depth Engine thread failed to start", 0);
+            result = dewrapper->thread_start_result;
+        }
+
+        if (locked)
+        {
+            Unlock(dewrapper->lock);
+            locked = false;
+        }
+    }
+
+    if (K4A_FAILED(result))
+    {
+        dewrapper_stop(dewrapper_handle);
     }
     return result;
 }
