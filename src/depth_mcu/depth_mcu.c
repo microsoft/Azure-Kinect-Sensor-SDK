@@ -3,6 +3,7 @@
 
 // Dependent libraries
 #include <k4ainternal/logging.h>
+#include <azure_c_shared_utility/threadapi.h>
 
 // System dependencies
 #include <assert.h>
@@ -172,34 +173,45 @@ k4a_buffer_result_t depthmcu_get_serialnum(depthmcu_t depthmcu_handle, char *ser
     return K4A_BUFFER_RESULT_SUCCEEDED;
 }
 
-bool depthmcu_is_ready(depthmcu_t depthmcu_handle)
+bool depthmcu_wait_is_ready(depthmcu_t depthmcu_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, depthmcu_t, depthmcu_handle);
     depthmcu_context_t *depthmcu = depthmcu_t_get_context(depthmcu_handle);
     depthmcu_firmware_versions_t tmpVersion = { 0 };
     uint32_t cmd_status = 0;
     size_t bytes_read = 0;
+    int retries = 0;
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4a_result_t result = TRACE_CALL(usb_cmd_read_with_status(depthmcu->usb_cmd,
-                                                              DEV_CMD_COMPONENT_VERSION_GET,
-                                                              NULL,
-                                                              0,
-                                                              (uint8_t *)&tmpVersion,
-                                                              sizeof(tmpVersion),
-                                                              &bytes_read,
-                                                              &cmd_status));
-
-    if (K4A_SUCCEEDED(result) && cmd_status != CMD_STATUS_PASS)
+    do
     {
-        result = K4A_RESULT_FAILED;
-    }
+        result = TRACE_CALL(usb_cmd_read_with_status(depthmcu->usb_cmd,
+                                                     DEV_CMD_COMPONENT_VERSION_GET,
+                                                     NULL,
+                                                     0,
+                                                     (uint8_t *)&tmpVersion,
+                                                     sizeof(tmpVersion),
+                                                     &bytes_read,
+                                                     &cmd_status));
 
-    if (K4A_SUCCEEDED(result))
-    {
-        result = K4A_RESULT_FROM_BOOL(bytes_read >= sizeof(tmpVersion));
-    }
+        if (K4A_SUCCEEDED(result) && cmd_status != CMD_STATUS_PASS)
+        {
+            result = K4A_RESULT_FAILED;
+        }
 
-    return K4A_SUCCEEDED(result);
+        if (K4A_SUCCEEDED(result))
+        {
+            result = K4A_RESULT_FROM_BOOL(bytes_read >= sizeof(tmpVersion));
+        }
+
+        if (K4A_FAILED(result))
+        {
+            ThreadAPI_Sleep(500);
+            retries++;
+        }
+    } while (K4A_FAILED(result) && retries < 20);
+
+    return (result == K4A_RESULT_SUCCEEDED);
 }
 
 k4a_result_t depthmcu_get_version(depthmcu_t depthmcu_handle, depthmcu_firmware_versions_t *version)

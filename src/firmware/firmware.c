@@ -22,25 +22,25 @@ typedef struct _firmware_package_header_t
     uint8_t signature_type;
     uint8_t build_configuration;
 
-    uint8_t reserved_1[4];
+    uint32_t auth_block_start;
 
     uint8_t depth_version_major;
     uint8_t depth_version_minor;
     uint16_t depth_version_build;
 
-    uint8_t reserved_2[8];
+    uint8_t reserved_1[8];
 
     uint8_t rgb_version_major;
     uint8_t rgb_version_minor;
     uint16_t rgb_version_build;
 
-    uint8_t reserved_3[8];
+    uint8_t reserved_2[8];
 
     uint8_t audio_version_major;
     uint8_t audio_version_minor;
     uint16_t audio_version_build;
 
-    uint8_t reserved_4[8];
+    uint8_t reserved_3[8];
 
     uint16_t number_depth_config;
     firmware_package_depth_config_header_t depth_config[FIRMWARE_PACKAGE_MAX_NUMBER_DEPTH_CONFIG];
@@ -195,8 +195,8 @@ k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
     const firmware_package_header_t *package_header = (const firmware_package_header_t *)firmware_buffer;
 
     package_info->package_valid = true;
-    package_info->signature_type = (firmware_signature_type_t)package_header->signature_type;
-    package_info->build_config = (firmware_build_config_t)package_header->build_configuration;
+    package_info->signature_type = (k4a_firmware_signature_t)package_header->signature_type;
+    package_info->build_config = (k4a_firmware_build_t)package_header->build_configuration;
 
     uint32_t crc = 0;
     size_t crc_offset = firmware_size - sizeof(crc);
@@ -239,6 +239,37 @@ k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
     {
         package_info->depth_config_versions[i].major = package_header->depth_config[i].version_major;
         package_info->depth_config_versions[i].minor = package_header->depth_config[i].version_minor;
+    }
+
+    uint32_t certificate_block_start_offset = 0;
+    uint16_t certificate_block_length = 0;
+
+    if (package_header->auth_block_start + 6 > firmware_size)
+    {
+        LOG_ERROR("Firmware Package Authentication block not found.", 0);
+        package_info->package_valid = false;
+    }
+    else
+    {
+        memcpy(&certificate_block_start_offset,
+               firmware_buffer + package_header->auth_block_start,
+               sizeof(certificate_block_start_offset));
+        memcpy(&certificate_block_length,
+               firmware_buffer + package_header->auth_block_start + sizeof(certificate_block_start_offset),
+               sizeof(certificate_block_length));
+
+        if (certificate_block_length < 1 || (certificate_block_start_offset + certificate_block_length) > firmware_size)
+        {
+            LOG_ERROR("Firmware Package Authentication invalid.", 0);
+            package_info->package_valid = false;
+        }
+        else
+        {
+            uint8_t certificate_type;
+            memcpy(&certificate_type, firmware_buffer + certificate_block_start_offset, sizeof(certificate_type));
+
+            package_info->certificate_type = (k4a_firmware_signature_t)certificate_type;
+        }
     }
 
     return K4A_RESULT_SUCCEEDED;

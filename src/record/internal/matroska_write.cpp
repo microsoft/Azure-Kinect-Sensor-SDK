@@ -67,31 +67,30 @@ populate_bitmap_info_header(BITMAPINFOHEADER *header, uint64_t width, uint64_t h
 
     case K4A_IMAGE_FORMAT_COLOR_NV12:
         header->biBitCount = 12;
-        header->biCompression = 0x3231564E; // NV12 little endian
+        header->biCompression = 0x3231564E; // NV12
 
         // NV12 uses 4:2:0 downsampling
-        header->biSizeImage = sizeof(uint8) * header->biWidth * header->biHeight * 3 / 2;
+        header->biSizeImage = sizeof(uint8_t) * header->biWidth * header->biHeight * 3 / 2;
         break;
     case K4A_IMAGE_FORMAT_COLOR_YUY2:
         header->biBitCount = 16;
-        header->biCompression = 0x32595559; // YUY2 little endian
+        header->biCompression = 0x32595559; // YUY2
 
         // YUY2 uses 4:2:2 downsampling
-        header->biSizeImage = sizeof(uint8) * header->biWidth * header->biHeight * 2;
+        header->biSizeImage = sizeof(uint8_t) * header->biWidth * header->biHeight * 2;
         break;
     case K4A_IMAGE_FORMAT_COLOR_MJPG:
         header->biBitCount = 24;
-        header->biCompression = 0x47504A4D; // MJPG little endian
+        header->biCompression = 0x47504A4D; // MJPG
 
         header->biSizeImage = 0; // JPEG is variable size
         break;
     case K4A_IMAGE_FORMAT_DEPTH16:
     case K4A_IMAGE_FORMAT_IR16:
-        // Store depth in YUY2 format, since it's 16-bit and is the closest format for visualizing depth that's
-        // supported natively by Movies & TV.
+        // Store depth in b16g format, which is supported by ffmpeg.
         header->biBitCount = 16;
-        header->biCompression = 0x32595559; // YUY2 little endian
-        header->biSizeImage = sizeof(uint16) * header->biWidth * header->biHeight;
+        header->biCompression = 0x67363162; // b16g (16 bit grayscale, big endian)
+        header->biSizeImage = sizeof(uint8_t) * header->biWidth * header->biHeight * 2;
         break;
     default:
         logger_error(LOGGER_RECORD, "Unsupported color format specified in recording: %d", format);

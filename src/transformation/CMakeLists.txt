@@ -13,6 +13,7 @@ target_include_directories(k4a_transformation PUBLIC
 # Dependencies of this library
 target_link_libraries(k4a_transformation PUBLIC 
     k4ainternal::math
+    k4ainternal::deloader
     )
 
 # Define alias for other targets to link against
