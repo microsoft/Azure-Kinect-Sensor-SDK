@@ -459,7 +459,7 @@ jobs:
   - task: CopyFiles@2
     displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
     inputs:
-      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x84_64/release/"
+      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
       contents: "libdepthengine.so*"
       targetFolder: "$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo/bin/"
       flattenFolders: true
