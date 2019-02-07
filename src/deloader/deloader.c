@@ -58,7 +58,10 @@ static k4a_result_t load_depth_engine()
         return K4A_RESULT_SUCCEEDED;
     }
 
-    k4a_result_t result = dynlib_create(K4A_PLUGIN_DYNAMIC_LIBRARY_NAME, &g_deloader.handle);
+    k4a_result_t result = dynlib_create(K4A_PLUGIN_DYNAMIC_LIBRARY_NAME,
+                                        K4A_PLUGIN_MAJOR_VERSION,
+                                        K4A_PLUGIN_MAJOR_VERSION,
+                                        &g_deloader.handle);
     if (K4A_FAILED(result))
     {
         LOG_ERROR("Failed to Load Depth Engine Plugin (%s). Depth functionality will not work",
