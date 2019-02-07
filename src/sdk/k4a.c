@@ -51,6 +51,7 @@ K4A_DECLARE_CONTEXT(k4a_device_t, k4a_context_t);
 
 #define DEPTH_CAPTURE (false)
 #define COLOR_CAPTURE (true)
+#define TRANSFORM_ENABLE_GPU_OPTIMIZATION (true)
 
 uint32_t k4a_device_get_installed_count(void)
 {
@@ -923,7 +924,7 @@ k4a_result_t k4a_calibration_2d_to_2d(const k4a_calibration_t *calibration,
 
 k4a_transformation_t k4a_transformation_create(const k4a_calibration_t *calibration)
 {
-    return transformation_create(calibration);
+    return transformation_create(calibration, TRANSFORM_ENABLE_GPU_OPTIMIZATION);
 }
 
 void k4a_transformation_destroy(k4a_transformation_t transformation_handle)

@@ -136,14 +136,14 @@ static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
     if (K4A_SUCCEEDED(result))
     {
         k4a_depth_engine_result_code_t deresult =
-            destub_depth_engine_create_and_initialize(&dewrapper->depth_engine,
-                                                      dewrapper->calibration_memory_size,
-                                                      dewrapper->calibration_memory,
-                                                      get_de_mode_from_depth_mode(depth_mode),
-                                                      get_input_format_from_depth_mode(depth_mode),
-                                                      dewrapper->calibration, // k4a_calibration_camera_t*
-                                                      NULL,                   // Callback
-                                                      NULL);                  // Callback Context
+            deloader_depth_engine_create_and_initialize(&dewrapper->depth_engine,
+                                                        dewrapper->calibration_memory_size,
+                                                        dewrapper->calibration_memory,
+                                                        get_de_mode_from_depth_mode(depth_mode),
+                                                        get_input_format_from_depth_mode(depth_mode),
+                                                        dewrapper->calibration, // k4a_calibration_camera_t*
+                                                        NULL,                   // Callback
+                                                        NULL);                  // Callback Context
         if (deresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
         {
             LOG_ERROR("Depth engine create and initialize failed with error code: %d.", deresult);
@@ -153,7 +153,7 @@ static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
 
     if (K4A_SUCCEEDED(result))
     {
-        *depth_engine_output_buffer_size = destub_depth_engine_get_output_frame_size(dewrapper->depth_engine);
+        *depth_engine_output_buffer_size = deloader_depth_engine_get_output_frame_size(dewrapper->depth_engine);
         result = K4A_RESULT_FROM_BOOL(0 != *depth_engine_output_buffer_size);
     }
 
@@ -164,7 +164,7 @@ static void depth_engine_stop_helper(dewrapper_context_t *dewrapper)
 {
     if (dewrapper->depth_engine != NULL)
     {
-        destub_depth_engine_destroy(&dewrapper->depth_engine);
+        deloader_depth_engine_destroy(&dewrapper->depth_engine);
         dewrapper->depth_engine = NULL;
     }
 }
@@ -243,14 +243,14 @@ static int depth_engine_thread(void *param)
 
             tickcounter_get_current_ms(dewrapper->tick, &start_time);
             k4a_depth_engine_result_code_t deresult =
-                destub_depth_engine_process_frame(dewrapper->depth_engine,
-                                                  raw_image_buffer,
-                                                  raw_image_buffer_size,
-                                                  K4A_DEPTH_ENGINE_OUTPUT_TYPE_Z_DEPTH,
-                                                  capture_byte_ptr,
-                                                  depth_engine_output_buffer_size,
-                                                  &outputCaptureInfo,
-                                                  NULL);
+                deloader_depth_engine_process_frame(dewrapper->depth_engine,
+                                                    raw_image_buffer,
+                                                    raw_image_buffer_size,
+                                                    K4A_DEPTH_ENGINE_OUTPUT_TYPE_Z_DEPTH,
+                                                    capture_byte_ptr,
+                                                    depth_engine_output_buffer_size,
+                                                    &outputCaptureInfo,
+                                                    NULL);
             tickcounter_get_current_ms(dewrapper->tick, &stop_time);
             if (deresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
             {

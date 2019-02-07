@@ -386,14 +386,14 @@ jobs:
       command: download
       vstsFeed: 'DepthEnginePlugin'
       vstsFeedPackage: 'depthengine'
-      vstsPackageVersion: "0.0.0"
+      vstsPackageVersion: "1.0.1"
       downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
   - task: CopyFiles@2
     displayName: "Copy DepthEnginePlugin into bin folder"
     inputs:
-      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin"
-      contents: "windows/amd64/release/depthengine.dll"
+      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
+      contents: "depthengine*.dll"
       targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
       flattenFolders: true
 
@@ -453,14 +453,14 @@ jobs:
       command: download
       vstsFeed: 'DepthEnginePlugin'
       vstsFeedPackage: 'depthengine'
-      vstsPackageVersion: "0.0.0"
+      vstsPackageVersion: "1.0.1"
       downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
   - task: CopyFiles@2
     displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
     inputs:
-      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin"
-      contents: "linux/x86_64/release/libdepthengine.so"
+      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
+      contents: "libdepthengine.so*"
       targetFolder: "$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo/bin/"
       flattenFolders: true
 
