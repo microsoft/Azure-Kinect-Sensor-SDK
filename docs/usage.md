@@ -2,7 +2,21 @@
 
 ## Dependencies
 
-The following dependencies are needed for the K4A SDK to run.
+The K4A SDK depends on a depth engine plugin to interact with the depth
+camera. This plugin comes as part of the SDK. On Linux it is named
+libdepthengine.so. On Windows it is named depthengine_major_minor.dll where
+"major" and "minor" are the major and minor number.
+
+You can download this plugin from the depth engine. Microsoft internal
+employees can also consume this plugin by using Universal Packages. To do so,
+please follow the steps
+[here](https://docs.microsoft.com/en-us/azure/devops/artifacts/quickstarts/universal-packages?view=azure-devops&tabs=azuredevops#prerequisites)
+to install the Azure CLI and login to Azure DevOps. If these tools are
+installed, CMake will grab the correct version of the depthengine plugin as
+part of the build.
+
+The following dependencies are needed for the K4A SDK to run on different
+platforms.
 
 ### Windows Dependencies
 
