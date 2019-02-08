@@ -50,6 +50,8 @@ enable_testing()
 # Turn on compiler flags for our code
 include(k4aCompilerFlags)
 
+include(DownloadDepthEngine)
+
 # Source for the K4A SDK
 set(K4A_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
