@@ -1,5 +1,5 @@
-# Note: This name will be updated during the build
-name: k4asdk
+
+name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 
 trigger:
   batch: false
@@ -88,12 +88,6 @@ jobs:
     env:
       CC: cl
       CXX: cl
-
-  - powershell: |
-      $version = (Get-Content "version.txt").Trim()
-      Write-Host "##vso[build.updatebuildnumber]$version"
-    workingDirectory: '$(Build.BinariesDirectory)'
-    displayName: 'Update build number'
 
   - task: CMake@1
     displayName: 'CMake Build'
@@ -216,12 +210,6 @@ jobs:
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
 
-  - powershell: |
-      $version = (Get-Content "version.txt").Trim()
-      Write-Host "##vso[build.updatebuildnumber]$version"
-    workingDirectory: '$(Build.BinariesDirectory)'
-    displayName: 'Update build number'
-
   - task: CMake@1
     displayName: 'CMake Build'
     inputs:
@@ -337,12 +325,6 @@ jobs:
     env:
       CC: cl
       CXX: cl
-
-  - powershell: |
-      $version = (Get-Content "version.txt").Trim()
-      Write-Host "##vso[build.updatebuildnumber]$version"
-    workingDirectory: '$(Build.BinariesDirectory)'
-    displayName: 'Update build number'
 
   - task: CMake@1
     displayName: 'CMake Build'
