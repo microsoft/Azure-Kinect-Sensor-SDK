@@ -973,15 +973,26 @@ bool K4ADeviceDockControl::StartImu()
 void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
 {
     K4AWindowManager::Instance().ClearWindows();
+
+    std::shared_ptr<K4AMicrophoneListener> micListener = nullptr;
+    if (m_pendingDeviceConfiguration.EnableMicrophone)
+    {
+        micListener = m_microphone->CreateListener();
+        if (micListener == nullptr)
+        {
+            std::stringstream errorBuilder;
+            errorBuilder << "Failed to create microphone listener: " << soundio_strerror(m_microphone->GetStatusCode());
+            K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
+        }
+    }
+
     switch (viewType)
     {
     case K4AWindowSet::ViewType::Normal:
         K4AWindowSet::StartNormalWindows(m_device->GetSerialNumber().c_str(),
                                          &m_cameraDataSource,
                                          m_pendingDeviceConfiguration.EnableImu ? &m_imuDataSource : nullptr,
-                                         m_pendingDeviceConfiguration.EnableMicrophone ?
-                                             m_microphone->CreateListener() :
-                                             nullptr,
+                                         std::move(micListener),
                                          m_pendingDeviceConfiguration.EnableDepthCamera,
                                          m_pendingDeviceConfiguration.DepthMode,
                                          m_pendingDeviceConfiguration.EnableColorCamera,

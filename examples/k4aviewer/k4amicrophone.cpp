@@ -97,6 +97,11 @@ void K4AMicrophone::Stop()
 
 std::shared_ptr<K4AMicrophoneListener> K4AMicrophone::CreateListener()
 {
+    if (!m_inStream)
+    {
+        return nullptr;
+    }
+
     constexpr int bufferPaddingRatio = 3;
     const auto bufferSize = static_cast<size_t>(bufferPaddingRatio * m_inStream->software_latency *
                                                 m_inStream->sample_rate * m_inStream->bytes_per_frame);
