@@ -17,13 +17,13 @@
 #define ERROR_START_STREAM_TIME 10000
 #define IMU_EXPECTED_FPS_1600 1666
 
-// Total ACC range is +/- 15 m/s^2
+// Total ACC range is +/- 147.15 m/s^2.
 #define MIN_ACC_READING -15.0f
 #define MAX_ACC_READING 15.0f
 
-// Total Gyro range is +/- 1147 dps
-#define MIN_GYRO_READING -4.0f
-#define MAX_GYRO_READING 4.0f
+// Total Gyro range is +/- 20 rad/s
+#define MIN_GYRO_READING -0.1f
+#define MAX_GYRO_READING 0.1f
 //************************ Typedefs *****************************
 
 //************ Declarations (Statics and globals) ***************
