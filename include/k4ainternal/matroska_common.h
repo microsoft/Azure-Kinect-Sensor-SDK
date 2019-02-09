@@ -175,6 +175,11 @@ static const std::pair<k4a_depth_mode_t, std::string> depth_modes[] =
       { K4A_DEPTH_MODE_WFOV_UNBINNED, "WFOV_UNBINNED" },
       { K4A_DEPTH_MODE_PASSIVE_IR, "PASSIVE_IR" } };
 
+static const std::pair<k4a_wired_sync_mode_t, std::string> external_sync_modes[] =
+    { { K4A_WIRED_SYNC_MODE_STANDALONE, "STANDALONE" },
+      { K4A_WIRED_SYNC_MODE_MASTER, "MASTER" },
+      { K4A_WIRED_SYNC_MODE_SUBORDINATE, "SUBORDINATE" } };
+
 } // namespace k4arecord
 
 #endif /* RECORD_COMMON_H */

@@ -296,6 +296,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             return K4A_RESULT_FAILED;
         }
 
+        context->record_config.color_track_enabled = true;
         context->record_config.color_format = context->color_track.format;
     }
     else
@@ -364,6 +365,8 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
 
         RETURN_IF_ERROR(read_bitmap_info_header(&context->depth_track));
+
+        context->record_config.depth_track_enabled = true;
     }
 
     if (context->ir_track.track)
@@ -411,6 +414,8 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
 
         RETURN_IF_ERROR(read_bitmap_info_header(&context->ir_track));
+
+        context->record_config.ir_track_enabled = true;
     }
 
     context->sync_period_ns = frame_period_ns;
@@ -474,6 +479,68 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     else
     {
         context->record_config.depth_delay_off_color_usec = 0;
+    }
+
+    if (context->imu_track.track)
+    {
+        context->record_config.imu_track_enabled = true;
+    }
+
+    // Read wired_sync_mode and subordinate_delay_off_master_usec.
+    KaxTag *sync_mode_tag = get_tag(context, "K4A_WIRED_SYNC_MODE");
+    if (sync_mode_tag != NULL)
+    {
+        bool sync_mode_found = false;
+        std::string sync_mode_str = get_tag_string(sync_mode_tag);
+        for (size_t i = 0; i < arraysize(external_sync_modes); i++)
+        {
+            if (sync_mode_str == external_sync_modes[i].second)
+            {
+                context->record_config.wired_sync_mode = external_sync_modes[i].first;
+                sync_mode_found = true;
+                break;
+            }
+        }
+        if (!sync_mode_found)
+        {
+            logger_error(LOGGER_RECORD, "Unsupported wired sync mode: %s", sync_mode_str.c_str());
+            return K4A_RESULT_FAILED;
+        }
+
+        if (context->record_config.wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
+        {
+            KaxTag *subordinate_delay_tag = get_tag(context, "K4A_SUBORDINATE_DELAY_NS");
+            if (subordinate_delay_tag != NULL)
+            {
+                uint64_t subordinate_delay_ns;
+                std::istringstream subordinate_delay_str(get_tag_string(subordinate_delay_tag));
+                subordinate_delay_str >> subordinate_delay_ns;
+                if (!subordinate_delay_str.fail())
+                {
+                    assert(subordinate_delay_ns / 1000 <= UINT32_MAX);
+                    context->record_config.subordinate_delay_off_master_usec = (uint32_t)(subordinate_delay_ns / 1000);
+                }
+                else
+                {
+                    logger_error(LOGGER_RECORD,
+                                 "Tag K4A_SUBORDINATE_DELAY_NS contains invalid value: %s",
+                                 get_tag_string(subordinate_delay_tag).c_str());
+                }
+            }
+            else
+            {
+                context->record_config.subordinate_delay_off_master_usec = 0;
+            }
+        }
+        else
+        {
+            context->record_config.subordinate_delay_off_master_usec = 0;
+        }
+    }
+    else
+    {
+        context->record_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
+        context->record_config.subordinate_delay_off_master_usec = 0;
     }
 
     return K4A_RESULT_SUCCEEDED;

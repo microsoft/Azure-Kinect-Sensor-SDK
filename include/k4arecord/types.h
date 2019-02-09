@@ -92,11 +92,32 @@ typedef struct _k4a_record_configuration_t
     /** Frame rate used to record the color and depth camera */
     k4a_fps_t camera_fps;
 
+    /** True if the recording contains Color camera frames */
+    bool color_track_enabled;
+
+    /** True if the recording contains Depth camera frames */
+    bool depth_track_enabled;
+
+    /** True if the recording contains IR camera frames */
+    bool ir_track_enabled;
+
+    /** True if the recording contains IMU sample data */
+    bool imu_track_enabled;
+
     /**
      * The delay between color and depth images in the recording.
      * A negative delay means depth images are first, and a positive delay means color images are first.
      */
     int32_t depth_delay_off_color_usec;
+
+    /** External synchronization mode */
+    k4a_wired_sync_mode_t wired_sync_mode;
+
+    /**
+     * The delay between this recording and the externally synced master camera.
+     * This value is 0 unless \p wired_sync_mode is set to K4A_WIRED_SYNC_MODE_SUBORDINATE
+     */
+    uint32_t subordinate_delay_off_master_usec;
 } k4a_record_configuration_t;
 
 #ifdef __cplusplus

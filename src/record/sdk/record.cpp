@@ -235,6 +235,26 @@ k4a_result_t k4a_record_create(const char *path,
         add_tag(context, "K4A_DEPTH_DELAY_NS", delay_str.str().c_str());
     }
 
+    if (K4A_SUCCEEDED(result))
+    {
+        switch (device_config.wired_sync_mode)
+        {
+        case K4A_WIRED_SYNC_MODE_STANDALONE:
+            add_tag(context, "K4A_WIRED_SYNC_MODE", "STANDALONE");
+            break;
+        case K4A_WIRED_SYNC_MODE_MASTER:
+            add_tag(context, "K4A_WIRED_SYNC_MODE", "MASTER");
+            break;
+        case K4A_WIRED_SYNC_MODE_SUBORDINATE:
+            add_tag(context, "K4A_WIRED_SYNC_MODE", "SUBORDINATE");
+
+            std::ostringstream delay_str;
+            delay_str << device_config.subordinate_delay_off_master_usec * 1000;
+            add_tag(context, "K4A_SUBORDINATE_DELAY_NS", delay_str.str().c_str());
+            break;
+        }
+    }
+
     if (K4A_SUCCEEDED(result) && device != NULL)
     {
         // Add the firmware version and device serial number to the recording
