@@ -328,16 +328,12 @@ k4a_result_t depthmcu_depth_start_streaming(depthmcu_t depthmcu_handle,
     {
         // Send start streaming command (Note, sensor MUST be in the ON state)
         result = TRACE_CALL(usb_cmd_write(depthmcu->usb_cmd, DEV_CMD_DEPTH_STREAM_START, NULL, 0, NULL, 0));
-
-        // TODO: If this command fails, do we need to send a command to stop the depth command?
     }
 
     if (K4A_SUCCEEDED(result))
     {
         // Start the streaming thread
         result = TRACE_CALL(usb_cmd_stream_start(depthmcu->usb_cmd, depthmcu->payload_size));
-
-        // TODO: If this command fails, do we need to send commands to stop streaming?
     }
 
     return result;

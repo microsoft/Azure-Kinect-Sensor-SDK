@@ -625,10 +625,6 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_con
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     k4a_context_t *device = k4a_device_t_get_context(device_handle);
 
-    // TODO: this layer shouldn't need to keep track of the individual states of the lower layers
-    // we should either force the lower layers to stop and restart, call a function to determine if they
-    // are in a started state, or propagate the failure of them starting twice. This needs some review.
-
     logger_trace(LOGGER_API, "k4a_device_start_cameras starting");
     if (device->depth_started == true || device->color_started == true)
     {
@@ -688,7 +684,7 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_con
     {
         if (config->color_resolution != K4A_COLOR_RESOLUTION_OFF)
         {
-            // TODO - Color must be started before depth and IMU as it triggers the sync of PTS. If it starts after
+            // NOTE: Color must be started before depth and IMU as it triggers the sync of PTS. If it starts after
             // depth or IMU, the user will see timestamps reset back to zero when the color camera is started.
             result = TRACE_CALL(color_start(device->color, config));
         }

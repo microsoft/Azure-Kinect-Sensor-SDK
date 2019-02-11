@@ -112,7 +112,7 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
 
     // Start clock on getting frames
     tickcounter_get_current_ms(tick_count, &start_ms);
-    timeout_ms = 2000; // TODO: Make this tighter once the data path has been optimized
+    timeout_ms = 2000;
 
     uint64_t last_gyro_ts = 0;
     uint64_t last_acc_ts = 0;
@@ -135,9 +135,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
         ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.z, MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_Z"));
 
         stream_count--;
-
-        // Verify no dropped frames
-        // TODO - Waiting on metadata
     };
 
     // Check if this was the correct frame rate (+/- 10%)
@@ -146,10 +143,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     k4a_device_stop_imu(device);
 
     error_tolerance = STREAM_RUN_TIME_SEC * 100; // 10%
-    // ASSERT_LT(delta_ms, (STREAM_RUN_TIME_SEC * 1000) + error_tolerance) << "Frame rate too slow, " << (1000 *
-    // (STREAM_RUN_TIME_SEC * expected_fps)) / delta_ms << "fps\n"; ASSERT_GT(delta_ms, (STREAM_RUN_TIME_SEC * 1000) -
-    // error_tolerance) << "Frame rate too fast, " << (1000 * (STREAM_RUN_TIME_SEC * expected_fps)) / delta_ms <<
-    // "fps\n";
     if (delta_ms > ((STREAM_RUN_TIME_SEC * 1000) + error_tolerance))
     {
         std::cout << "Frame rate too slow, " << (1000 * (STREAM_RUN_TIME_SEC * expected_fps)) / delta_ms << "fps\n";
@@ -163,7 +156,7 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
 }
 
 /**
- *  Functional test for verifying TODO FP
+ *  Functional test for verifying IMU
  *
  *  @Test criteria
  *   Frames shall be received within 600 mSec of starting the stream

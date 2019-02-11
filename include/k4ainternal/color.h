@@ -76,27 +76,85 @@ k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
                           void *capture_ready_cb_context,
                           color_t *color_handle);
 
-/** Closes the color module and free's it resources
- * */
+/** Closes the handle to the color device.
+ *
+ * \param color_handle
+ * Handle to close
+ */
 void color_destroy(color_t color_handle);
 
-// TODO
+/** Starts the color camera streaming
+ *
+ * \param color_handle
+ * Handle to the color camera
+ *
+ * \param config
+ * The configuration settings for the color camera being started
+ *
+ * \return ::K4A_RESULT_SUCCESS if successful. ::K4A_RESULT_FAILED if an error occurs. If this API's fails then there is
+ * not need to call /ref color_stop
+ */
 k4a_result_t color_start(color_t color_handle, const k4a_device_configuration_t *config);
 
-// TODO
+/** Stops the color camera when it is currently streaming
+ *
+ * \param color_handle
+ * Handle to the color camera to stop
+ *
+ * \ref color_destroy implicitly stops the color camera when /ref color_destroy is called.
+ */
 void color_stop(color_t color_handle);
 
-// TODO
-tickcounter_ms_t color_get_sensor_start_time_tick(const color_t handle);
+/** Returns the system tick count saved by the color camera when it was started.
+ *
+ * \param color_handle
+ * Handle to the color camera
+ *
+ * \return the system tick count of when the color camera was started. zero is returned if the color camera is not
+ * actively streaming
+ */
+tickcounter_ms_t color_get_sensor_start_time_tick(const color_t color_handle);
 
-// TODO
-k4a_result_t color_get_control(const color_t handle,
+/** Gets the value of the given color camera's control command setting.
+ *
+ * \param color_handle
+ * Handle to the color camera
+ *
+ * \param command
+ * The targeted color control command to read the the value for.
+ *
+ * \param mode
+ * The mode of the command in question.
+ *
+ * \param value
+ * A pointer to the location to write to fetched value to.
+ *
+ * \return ::K4A_RESULT_FAILED if the value could not be read. ::K4A_RESULT_SUCCEEDED if successful. Details of the
+ * error can be read from the debug output
+ */
+k4a_result_t color_get_control(const color_t color_handle,
                                const k4a_color_control_command_t command,
                                k4a_color_control_mode_t *mode,
                                int32_t *value);
 
-// TODO
-k4a_result_t color_set_control(const color_t handle,
+/** Sets the value of the given color camera's control command setting.
+ *
+ * \param color_handle
+ * Handle to the color camera
+ *
+ * \param command
+ * The targeted color control command to write the the value to.
+ *
+ * \param mode
+ * The mode of the command in question.
+ *
+ * \param value
+ * The value to write to the control command setting.
+ *
+ * \return ::K4A_RESULT_FAILED if the value could not be set. ::K4A_RESULT_SUCCEEDED if successful. Details of the
+ * error can be read from the debug output
+ */
+k4a_result_t color_set_control(const color_t color_handle,
                                const k4a_color_control_command_t command,
                                const k4a_color_control_mode_t mode,
                                int32_t value);

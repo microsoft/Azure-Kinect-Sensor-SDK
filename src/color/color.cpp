@@ -115,9 +115,6 @@ void color_capture_available(k4a_result_t result, k4a_capture_t capture_handle, 
         logger_warn(LOGGER_COLOR, "A streaming color transfer failed");
         return;
     }
-
-    // TODO firmware structure CUSTOM_METADATA_FrameAlignInfo has footer info for RGB to get
-    // at PTS and other critical info.
 }
 
 k4a_result_t color_start(color_t color_handle, const k4a_device_configuration_t *config)

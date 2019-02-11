@@ -24,9 +24,8 @@ typedef struct _synchronization_config_t
 {
     uint32_t mode;                             // Standalone, master, subordinate
     uint32_t subordinate_delay_off_master_pts; // Capture delay between master and subordinate, units are 90kHz tick
-    int32_t depth_delay_off_color_pts; // TODO value is signed, make sure neg value is effectively a sample before
-                                       // color. Units are 90kHz tick
-    uint8_t enable_privacy_led;        // 0 disabled; 1 enabled
+    int32_t depth_delay_off_color_pts;         // Units are 90kHz tick
+    uint8_t enable_privacy_led;                // 0 disabled; 1 enabled
 } synchronization_config_t;
 
 #pragma pack(pop)
@@ -112,8 +111,6 @@ void colormcu_imu_stop_streaming(colormcu_t colormcu_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, colormcu_t, colormcu_handle)
     colormcu_context_t *colormcu = colormcu_t_get_context(colormcu_handle);
-
-    // TODO: Ensure that the streaming has actually stopped before returning from this function
 
     // stop the imu stream thread
     TRACE_CALL(usb_cmd_stream_stop(colormcu->usb_cmd));

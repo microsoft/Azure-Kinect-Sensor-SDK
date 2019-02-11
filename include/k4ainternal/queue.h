@@ -18,7 +18,7 @@ extern "C" {
 
 /** Default queue depth in microseconds. This is just a target.
  */
-#define QUEUE_DEFAULT_DEPTH_USEC (250000)
+#define QUEUE_DEFAULT_DEPTH_USEC (500000)
 
 /** Use capture FPS to determine how deep the queue is.
  * NOTE 1: User should use maximum FPS for this.

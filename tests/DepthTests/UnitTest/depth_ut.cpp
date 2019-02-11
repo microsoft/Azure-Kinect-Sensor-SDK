@@ -63,19 +63,16 @@ k4a_result_t depthmcu_get_version(depthmcu_t depthmcu_handle, depthmcu_firmware_
     return g_MockDepthMcu->depthmcu_get_version(depthmcu_handle, version);
 }
 
-// TODO add a test for this
 k4a_result_t depthmcu_depth_set_capture_mode(depthmcu_t depthmcu_handle, k4a_depth_mode_t capture_mode)
 {
     return g_MockDepthMcu->depthmcu_depth_set_capture_mode(depthmcu_handle, capture_mode);
 }
 
-// TODO add a test for this
 k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, k4a_fps_t capture_fps)
 {
     return g_MockDepthMcu->depthmcu_depth_set_fps(depthmcu_handle, capture_fps);
 }
 
-// TODO add a test for this
 k4a_result_t depthmcu_depth_start_streaming(depthmcu_t depthmcu_handle,
                                             depthmcu_stream_cb_t *callback,
                                             void *callback_context)
@@ -83,13 +80,11 @@ k4a_result_t depthmcu_depth_start_streaming(depthmcu_t depthmcu_handle,
     return g_MockDepthMcu->depthmcu_depth_start_streaming(depthmcu_handle, callback, callback_context);
 }
 
-// TODO add a test for this
 void depthmcu_depth_stop_streaming(depthmcu_t depthmcu_handle, bool quiet)
 {
     g_MockDepthMcu->depthmcu_depth_stop_streaming(depthmcu_handle, quiet);
 }
 
-// TODO add a test for this
 k4a_result_t depthmcu_get_cal(depthmcu_t depthmcu_handle, uint8_t *calibration, size_t cal_size, size_t *bytes_read)
 {
     return g_MockDepthMcu->depthmcu_get_cal(depthmcu_handle, calibration, cal_size, bytes_read);

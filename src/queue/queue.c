@@ -272,7 +272,7 @@ void queue_disable(queue_t queue_handle)
 
     while (queue->queue_pop_blocked != 0)
     {
-        logger_warn(queue->name, "queue_destroy waiting for blocking call to complete");
+        LOG_WARNING("Waiting for blocking call to complete", 0);
         Condition_Post(queue->condition);
         Unlock(queue->lock);
         ThreadAPI_Sleep(25);

@@ -72,19 +72,74 @@ k4a_result_t depth_create(depthmcu_t depthmcu_handle,
                           void *capture_ready_cb_context,
                           depth_t *depth_handle);
 
-/** Closes the depth module and free's it resources
- * */
+/** Closes the handle to the depth device.
+ *
+ * \param depth_handle [IN]
+ * The depth device handle to close
+ *
+ * If the sensor was streaming at the time /ref depth_destroy is called, /ref depth_stop will be implicitly called to
+ * stop the sensor.
+ */
 void depth_destroy(depth_t depth_handle);
 
-// TODO
+/** Returns the Azure Kinect device serial number.
+ *
+ * \param depth_handle [IN]
+ * The depth device handle.
+ *
+ * \param serial_number [IN]
+ * char array to write to serial number to.
+ *
+ * \param serial_number_size [IN OUT]
+ * [IN] the maximum size of the memory pointed to by /ref serial_number
+ * [OUT] When used with /ref serial_number set to NULL, this value will represent the minimum allocation size needed for
+ * this call to succeed.
+ *
+ * \return ::K4A_BUFFER_RESULT_SUCCEEDED if the serial number was successfully read and written into /ref serial_number.
+ * ::K4A_BUFFER_RESULT_TOO_SMALL if the size of serial_number was too small, in this case /ref serial_number_size will
+ * have been updated with the size needed. ::K4A_BUFFER_RESULT_FAILED if an error was encountered. device was opened,
+ * otherwise an error code
+ *  *
+ * If successful, /ref serial_number will contain a NULL terminated string.
+ */
 k4a_buffer_result_t depth_get_device_serialnum(depth_t depth_handle, char *serial_number, size_t *serial_number_size);
 
+/** Returns the Azure Kinect device versions.
+ *
+ * \param depth_handle [IN]
+ * The depth device handle.
+ *
+ * \param version [OUT]
+ * Pre allocated version structure for the function to write the version info to.
+ *
+ * \return ::K4A_RESULT_SUCCEEDED if the verison was successfully from the device and written into /ref version.
+ * ::K4A_RESULT_FAILED if an error was encountered.
+ */
 k4a_result_t depth_get_device_version(depth_t depth_handle, k4a_hardware_version_t *version);
 
-// TODO
+/** Starts the depth sensor streaming
+ *
+ * \param depth_handle [IN]
+ * The depth device handle.
+ *
+ * \param config [IN]
+ * The configuration of the depth sensor the user wants the sensor to run in.
+ *
+ * \return ::K4A_RESULT_SUCCEEDED if the depth sensor was successfully started. ::K4A_RESULT_FAILED if an error was
+ * encountered.
+ *
+ * call /ref depth_stop when the sensor no longer needs to stream.
+ */
 k4a_result_t depth_start(depth_t depth_handle, const k4a_device_configuration_t *config);
 
-// TODO
+/** Stops the depth sensor when it has been streaming
+ *
+ * \param depth_handle [IN]
+ * The depth device handle.
+ *
+ * Stops depth sensor when it has been running. /ref depth_destroy implicitly calls this API if the sensor is in a
+ * running state.
+ */
 void depth_stop(depth_t depth_handle);
 
 #ifdef __cplusplus

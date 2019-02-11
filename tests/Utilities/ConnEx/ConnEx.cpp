@@ -26,7 +26,6 @@ typedef struct connection_exerciser_internal_t
     HANDLE serialHandle;
 } connection_exerciser_internal_t;
 
-// TODO: Abstract into a platform independent library.
 static HANDLE OpenComPort(LPCSTR comPort)
 {
     // Open serial port
@@ -159,8 +158,7 @@ float connection_exerciser::get_current_reading()
         return -1;
     }
 
-    // TODO: Is this calculation correct?
-    // If the current is negative, I am seeing this return the current plus 1000.
+    // Is this calculation correct? If the current is negative, I am seeing this return the current plus 1000.
     if (rawValue > 1000)
     {
         rawValue = 1000 - rawValue;
@@ -254,7 +252,6 @@ k4a_result_t connection_exerciser::find_connection_exerciser()
         state->serialHandle = INVALID_HANDLE_VALUE;
     }
 
-    // TODO: Better logic for searching. e.g. don't bother opening COM ports that don't exist.
     for (int i = 1; i < 10; ++i)
     {
         sprintf_s(comPort, "COM%d", i);

@@ -417,8 +417,15 @@ TEST_P(throughput_perf, testTest)
                    missed_this_period,
                    TS_TO_MS(current_max_ts),
                    TS_TO_MS(last_ts));
+            if (missed_this_period > capture_count)
+            {
+                capture_count = 0;
+            }
+            else
+            {
+                capture_count -= missed_this_period;
+            }
             missed_count += missed_this_period;
-            capture_count -= missed_this_period;
         }
         last_ts = std::max(last_ts, current_max_ts);
 

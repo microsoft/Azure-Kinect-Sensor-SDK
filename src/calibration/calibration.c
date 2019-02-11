@@ -11,9 +11,6 @@
 #include <stdbool.h>
 #include <assert.h>
 
-// TODO BUG 19116190 allocate memory less aggressively when USB command can handle sending in a buffer that is too small
-//#define READ_RETRY_ALLOC_INCREASE (2 * 1024)
-//#define READ_RETRY_BASE_ALLOCATION (2 * 1024)
 #define READ_RETRY_ALLOC_INCREASE (5 * 1024)
 #define READ_RETRY_BASE_ALLOCATION (10 * 1024)
 #define MAX_READ_RETRIES (10)

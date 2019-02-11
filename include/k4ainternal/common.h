@@ -20,9 +20,7 @@ extern "C" {
 
 #define STRINGIFY(string) #string
 
-/** Clock tick runs 90kHz and convert sec to micro sec
- */
-// TODO: Move to more appropriate header
+// Clock tick runs 90kHz and convert sec to micro sec
 #define K4A_90K_HZ_TICK_TO_USEC(x) ((uint64_t)(x)*100 / 9)
 #define K4A_USEC_TO_90K_HZ_TICK(x) ((x)*9 / 100)
 
