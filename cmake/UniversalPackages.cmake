@@ -13,22 +13,45 @@ if (NOT AZURE_CLI)
     return()
 endif()
 
-if (NOT AZURE_CLI_AZURE_DEVOPS_ADDED)
-    execute_process(
-        COMMAND
-            ${AZURE_CLI} extension add --name azure-devops
-        RESULT_VARIABLE
-            AZ_EXTENSION_ADD_RESULT
-        OUTPUT_VARIABLE
-            AZ_EXTENSION_ADD_OUTPUT
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+function(universal_package_setup)
+    if (NOT AZURE_CLI_LOGGED_IN)
+        execute_process(
+            COMMAND
+                ${AZURE_CLI} login
+            RESULT_VARIABLE
+                AZ_LOGIN_RESULT
+            OUTPUT_VARIABLE
+                AZ_LOGIN_OUTPUT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
 
-    if (NOT (${AZ_EXTENSION_ADD_RESULT} EQUAL 0))
-        message(FATAL_ERROR "'az extension add --name azure-devops' failed: ${AZ_EXTENSION_ADD_OUTPUT}")
+        if (${AZ_LOGIN_RESULT} EQUAL 0)
+            # Successfully logged in
+            set(AZURE_CLI_LOGGED_IN ON CACHE BOOL "Azure CLI tool logged in")
+        else()
+            # Failed to logged in
+            message(FATAL_ERROR "'az login' failed: ${AZ_LOGIN_OUTPUT}")
+        endif()
     endif()
-    set(AZURE_CLI_AZURE_DEVOPS_ADDED ON CACHE BOOL "Azure CLI tool added azure-devops extension")
-endif()
+
+    if (NOT AZURE_CLI_AZURE_DEVOPS_ADDED)
+        execute_process(
+            COMMAND
+                ${AZURE_CLI} extension add --name azure-devops
+            RESULT_VARIABLE
+                AZ_EXTENSION_ADD_RESULT
+            OUTPUT_VARIABLE
+                AZ_EXTENSION_ADD_OUTPUT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+        if (${AZ_EXTENSION_ADD_RESULT} EQUAL 0)
+            set(AZURE_CLI_AZURE_DEVOPS_ADDED ON CACHE BOOL "Azure CLI tool added azure-devops extension")
+        else()
+            message(FATAL_ERROR "'az extension add --name azure-devops' failed: ${AZ_EXTENSION_ADD_OUTPUT}")
+        endif()
+    endif()
+endfunction()
 
 
 set(UNIVERSAL_PACKAGE_CACHE_DIR ${PROJECT_BINARY_DIR}/universalpkgs)
@@ -61,6 +84,9 @@ function(download_universal_package)
     set(TEMP_OUTPUT_PATH ${OUTPUT_PATH}_TEMP)
 
     if (NOT EXISTS ${OUTPUT_PATH})
+
+        # Only run authentication if we have too
+        universal_package_setup()
 
         file(REMOVE_RECURSE ${TEMP_OUTPUT_PATH})
 
