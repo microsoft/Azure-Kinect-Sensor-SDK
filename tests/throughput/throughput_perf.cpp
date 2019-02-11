@@ -277,7 +277,7 @@ TEST_P(throughput_perf, testTest)
         k4a_capture_release(capture);
     };
 
-    logger_error("throughput_perf", "Queue's Empty, test is starting");
+    logger_info("throughput_perf", "Queue's Empty, test is starting");
 
     printf("\n");
     printf("       | TS [Delta TS]          | TS [Delta TS]          | TS [Delta TS]           | TS Delta (C&D)\n");
@@ -286,7 +286,7 @@ TEST_P(throughput_perf, testTest)
     thread.enable_counting = true; // start counting IMU samples
     while (capture_count-- > 0)
     {
-        uint64_t current_max_ts = 0;
+        uint64_t adjusted_max_ts = 0;
         uint64_t ts;
         bool color = false;
         bool depth = false;
@@ -306,7 +306,7 @@ TEST_P(throughput_perf, testTest)
             {
                 color = true;
                 ts = k4a_image_get_timestamp_usec(image);
-                current_max_ts = ts;
+                adjusted_max_ts = std::max(ts, adjusted_max_ts);
                 static_assert(sizeof(ts) == 8, "this should not be wrong");
                 printf(" Color TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_color_ts));
 
@@ -327,7 +327,7 @@ TEST_P(throughput_perf, testTest)
             {
                 depth = true;
                 ts = k4a_image_get_timestamp_usec(image);
-                current_max_ts = std::max(ts, current_max_ts);
+                adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
                 printf(" | Ir16  TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
 
                 // TS should increase
@@ -346,7 +346,7 @@ TEST_P(throughput_perf, testTest)
             if (image)
             {
                 ts = k4a_image_get_timestamp_usec(image);
-                current_max_ts = std::max(ts, current_max_ts);
+                adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
                 printf(" | Depth16 TS:%6lld[%4lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
 
                 // TS should increase
@@ -397,25 +397,25 @@ TEST_P(throughput_perf, testTest)
             color_count++;
         }
 
-        EXPECT_NE(current_max_ts, 0);
+        EXPECT_NE(adjusted_max_ts, 0);
         if (last_ts == UINT64_MAX)
         {
-            last_ts = current_max_ts;
+            last_ts = adjusted_max_ts;
         }
-        else if ((current_max_ts - last_ts) >= (fps_in_usec * 15 / 10))
+        else if ((adjusted_max_ts - last_ts) >= (fps_in_usec * 15 / 10))
         {
             // Calc how many captures we didn't get. If the delta between the last two time stamps is more than 1.5
             // * fps_in_usec then we count
-            int missed_this_period = ((int)((current_max_ts - last_ts) / fps_in_usec));
+            int missed_this_period = ((int)((adjusted_max_ts - last_ts) / fps_in_usec));
             missed_this_period--; // We got a new time stamp to do this math, so this count has 1 too many, remove
                                   // it
-            if (((current_max_ts - last_ts) % fps_in_usec) > fps_in_usec / 2)
+            if (((adjusted_max_ts - last_ts) % fps_in_usec) > fps_in_usec / 2)
             {
                 missed_this_period++;
             }
             printf("Missed %d captures before previous capture %lld %lld\n",
                    missed_this_period,
-                   TS_TO_MS(current_max_ts),
+                   TS_TO_MS(adjusted_max_ts),
                    TS_TO_MS(last_ts));
             if (missed_this_period > capture_count)
             {
@@ -427,7 +427,7 @@ TEST_P(throughput_perf, testTest)
             }
             missed_count += missed_this_period;
         }
-        last_ts = std::max(last_ts, current_max_ts);
+        last_ts = std::max(last_ts, adjusted_max_ts);
 
         // release capture
         if (wresult == K4A_WAIT_RESULT_SUCCEEDED)
@@ -436,7 +436,7 @@ TEST_P(throughput_perf, testTest)
         }
     }
 
-    logger_error("throughput_perf", "Test complete, cleanup beginning");
+    logger_info("throughput_perf", "Test complete, cleanup beginning");
     thread.exit = true; // shut down IMU thread
     k4a_device_stop_cameras(m_device);
 
