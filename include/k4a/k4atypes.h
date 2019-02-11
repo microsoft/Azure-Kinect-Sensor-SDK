@@ -662,9 +662,9 @@ typedef struct _k4a_calibration_camera_t
     float metric_radius;                     /**< Max FOV of the camera */
 } k4a_calibration_camera_t;
 
-/** Calibration type representing device calibration. It contains (1) the depth and color cameras� intrinsic
+/** Calibration type representing device calibration. It contains (1) the depth and color camera's intrinsic
  * calibrations, (2) extrinsic transformation parameters (3) depth and color modes. The extrinsic parameters allow 3d
- * coordinate conversions between depth camera, color camera, the imu�s gyro and the imu�s accelerometer. For
+ * coordinate conversions between depth camera, color camera, the imu's gyro and the imu's accelerometer. For
  * transforming from a source to a target 3d coordinate system, use the parameters stored under
  * extrinsics[source][target]. *
  * \xmlonly
