@@ -1,4 +1,14 @@
-add_executable(AzureKinectFirmwareTool main.c)
+add_executable(AzureKinectFirmwareTool main.c ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+
+# Include ${CMAKE_CURRENT_BINARY_DIR}/version.rc in the target's sources
+# to embed version information
+set(K4A_FILEDESCRIPTION "Azure Kinect Firmware Tool")
+set(K4A_ORIGINALFILENAME "AzureKinectFirmwareTool.exe")
+configure_file(
+    ${K4A_VERSION_RC}
+    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+    @ONLY
+    )
 
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
