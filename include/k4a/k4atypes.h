@@ -569,7 +569,7 @@ typedef struct _k4a_imu_sample_t
     float temperature;            /**< Temperature reading of this sample (Celsius) */
     k4a_float3_t acc_sample;      /**< Accelerometer sample in meters per second squared */
     uint64_t acc_timestamp_usec;  /**< Timestamp in uSec */
-    k4a_float3_t gyro_sample;     /**< Gyro sample in degree's per second */
+    k4a_float3_t gyro_sample;     /**< Gyro sample in radians per second */
     uint64_t gyro_timestamp_usec; /**< Timestamp in uSec */
 } k4a_imu_sample_t;
 

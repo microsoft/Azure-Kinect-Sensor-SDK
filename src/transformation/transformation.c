@@ -1,5 +1,6 @@
 #include <k4ainternal/transformation.h>
 #include <k4ainternal/logging.h>
+#include <k4ainternal/deloader.h>
 
 // System dependencies
 #include <stdlib.h>
@@ -333,11 +334,13 @@ typedef struct _k4a_transformation_context_t
     float *memory_depth_camera_xy_tables;
     k4a_transformation_xy_tables_t color_camera_xy_tables;
     float *memory_color_camera_xy_tables;
+    bool gpu_optimization;
+    k4a_transform_engine_context_t *transform_engine;
 } k4a_transformation_context_t;
 
 K4A_DECLARE_CONTEXT(k4a_transformation_t, k4a_transformation_context_t);
 
-k4a_transformation_t transformation_create(const k4a_calibration_t *calibration)
+k4a_transformation_t transformation_create(const k4a_calibration_t *calibration, bool gpu_optimization)
 {
     k4a_transformation_t transformation_handle = NULL;
     k4a_transformation_context_t *transformation_context = k4a_transformation_t_create(&transformation_handle);
@@ -362,6 +365,39 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration)
         return 0;
     }
 
+    transformation_context->gpu_optimization = gpu_optimization;
+    if (transformation_context->gpu_optimization)
+    {
+        // Set up transform engine expected calibration struct
+        k4a_transform_engine_calibration_t transform_engine_calibration;
+        memcpy(&transform_engine_calibration.depth_camera_calibration,
+               &transformation_context->calibration.depth_camera_calibration,
+               sizeof(k4a_calibration_camera_t));
+        memcpy(&transform_engine_calibration.color_camera_calibration,
+               &transformation_context->calibration.color_camera_calibration,
+               sizeof(k4a_calibration_camera_t));
+        memcpy(&transform_engine_calibration.depth_camera_to_color_camera_extrinsics,
+               &transformation_context->calibration.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR],
+               sizeof(k4a_calibration_extrinsics_t));
+        memcpy(&transform_engine_calibration.color_camera_to_depth_camera_extrinsics,
+               &transformation_context->calibration.extrinsics[K4A_CALIBRATION_TYPE_COLOR][K4A_CALIBRATION_TYPE_DEPTH],
+               sizeof(k4a_calibration_extrinsics_t));
+        memcpy(&transform_engine_calibration.depth_camera_xy_tables,
+               &transformation_context->depth_camera_xy_tables,
+               sizeof(k4a_transformation_xy_tables_t));
+
+        k4a_depth_engine_result_code_t deresult =
+            deloader_transform_engine_create_and_initialize(&transformation_context->transform_engine,
+                                                            &transform_engine_calibration,
+                                                            NULL,  // Callback
+                                                            NULL); // Callback Context
+        if (deresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
+        {
+            LOG_ERROR("Transform engine create and initialize failed with error code: %d.", deresult);
+            return 0;
+        }
+    }
+
     return transformation_handle;
 }
 
@@ -378,6 +414,11 @@ void transformation_destroy(k4a_transformation_t transformation_handle)
     {
         free(transformation_context->memory_color_camera_xy_tables);
     }
+    if (transformation_context->transform_engine != 0)
+    {
+        deloader_transform_engine_destroy(&transformation_context->transform_engine);
+        transformation_context->transform_engine = 0;
+    }
     k4a_transformation_t_destroy(transformation_handle);
 }
 
@@ -391,15 +432,51 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_transformation_t, transformation_handle);
     k4a_transformation_context_t *transformation_context = k4a_transformation_t_get_context(transformation_handle);
 
-    if (K4A_BUFFER_RESULT_SUCCEEDED !=
-        transformation_depth_image_to_color_camera_internal(&transformation_context->calibration,
-                                                            &transformation_context->depth_camera_xy_tables,
-                                                            depth_image_data,
-                                                            depth_image_descriptor,
-                                                            transformed_depth_image_data,
-                                                            transformed_depth_image_descriptor))
+    if (transformation_context->gpu_optimization)
     {
-        return K4A_RESULT_FAILED;
+        size_t depth_image_size = (size_t)(depth_image_descriptor->stride_bytes *
+                                           depth_image_descriptor->height_pixels);
+        size_t transformed_depth_image_size = (size_t)(transformed_depth_image_descriptor->stride_bytes *
+                                                       transformed_depth_image_descriptor->height_pixels);
+        size_t transform_engine_output_buffer_size =
+            deloader_transform_engine_get_output_frame_size(transformation_context->transform_engine,
+                                                            K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR);
+        if (transformed_depth_image_size != transform_engine_output_buffer_size)
+        {
+            LOG_ERROR("Transform engine output buffer size not expected. Expect: %d, Actual: %d.",
+                      transform_engine_output_buffer_size,
+                      transformed_depth_image_size);
+            return K4A_RESULT_FAILED;
+        }
+
+        k4a_depth_engine_result_code_t deresult =
+            deloader_transform_engine_process_frame(transformation_context->transform_engine,
+                                                    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR,
+                                                    depth_image_data,
+                                                    depth_image_size,
+                                                    NULL, // Color image data is not needed when transform depth image
+                                                          // to the geometry of color camera
+                                                    0,
+                                                    transformed_depth_image_data,
+                                                    transformed_depth_image_size);
+        if (deresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
+        {
+            LOG_ERROR("Transform engine process frame failed with error code: %d.", deresult);
+            return K4A_RESULT_FAILED;
+        }
+    }
+    else
+    {
+        if (K4A_BUFFER_RESULT_SUCCEEDED !=
+            transformation_depth_image_to_color_camera_internal(&transformation_context->calibration,
+                                                                &transformation_context->depth_camera_xy_tables,
+                                                                depth_image_data,
+                                                                depth_image_descriptor,
+                                                                transformed_depth_image_data,
+                                                                transformed_depth_image_descriptor))
+        {
+            return K4A_RESULT_FAILED;
+        }
     }
     return K4A_RESULT_SUCCEEDED;
 }
@@ -416,17 +493,54 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_transformation_t, transformation_handle);
     k4a_transformation_context_t *transformation_context = k4a_transformation_t_get_context(transformation_handle);
 
-    if (K4A_BUFFER_RESULT_SUCCEEDED !=
-        transformation_color_image_to_depth_camera_internal(&transformation_context->calibration,
-                                                            &transformation_context->depth_camera_xy_tables,
-                                                            depth_image_data,
-                                                            depth_image_descriptor,
-                                                            color_image_data,
-                                                            color_image_descriptor,
-                                                            transformed_color_image_data,
-                                                            transformed_color_image_descriptor))
+    if (transformation_context->gpu_optimization)
     {
-        return K4A_RESULT_FAILED;
+        size_t depth_image_size = (size_t)(depth_image_descriptor->stride_bytes *
+                                           depth_image_descriptor->height_pixels);
+        size_t color_image_size = (size_t)(color_image_descriptor->stride_bytes *
+                                           color_image_descriptor->height_pixels);
+        size_t transformed_color_image_size = (size_t)(transformed_color_image_descriptor->stride_bytes *
+                                                       transformed_color_image_descriptor->height_pixels);
+        size_t transform_engine_output_buffer_size =
+            deloader_transform_engine_get_output_frame_size(transformation_context->transform_engine,
+                                                            K4A_TRANSFORM_ENGINE_TYPE_COLOR_TO_DEPTH);
+        if (transformed_color_image_size != transform_engine_output_buffer_size)
+        {
+            LOG_ERROR("Transform engine output buffer size not expected. Expect: %d, Actual: %d.",
+                      transform_engine_output_buffer_size,
+                      transformed_color_image_size);
+            return K4A_RESULT_FAILED;
+        }
+
+        k4a_depth_engine_result_code_t deresult =
+            deloader_transform_engine_process_frame(transformation_context->transform_engine,
+                                                    K4A_TRANSFORM_ENGINE_TYPE_COLOR_TO_DEPTH,
+                                                    depth_image_data,
+                                                    depth_image_size,
+                                                    color_image_data,
+                                                    color_image_size,
+                                                    transformed_color_image_data,
+                                                    transformed_color_image_size);
+        if (deresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
+        {
+            LOG_ERROR("Transform engine process frame failed with error code: %d.", deresult);
+            return K4A_RESULT_FAILED;
+        }
+    }
+    else
+    {
+        if (K4A_BUFFER_RESULT_SUCCEEDED !=
+            transformation_color_image_to_depth_camera_internal(&transformation_context->calibration,
+                                                                &transformation_context->depth_camera_xy_tables,
+                                                                depth_image_data,
+                                                                depth_image_descriptor,
+                                                                color_image_data,
+                                                                color_image_descriptor,
+                                                                transformed_color_image_data,
+                                                                transformed_color_image_descriptor))
+        {
+            return K4A_RESULT_FAILED;
+        }
     }
     return K4A_RESULT_SUCCEEDED;
 }

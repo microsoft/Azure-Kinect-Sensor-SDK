@@ -1,7 +1,7 @@
 # Create K4A library
 add_library(k4a SHARED
             k4a.c
-            )
+            ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
 # Generate k4a_export.h
 # This is a platform specific header defining the macros for the export functions
@@ -14,6 +14,16 @@ generate_export_header(k4a
 configure_file(
     "${K4A_INCLUDE_DIR}/k4a/k4aversion.h.in"
     "${CMAKE_CURRENT_BINARY_DIR}/include/k4a/k4aversion.h"
+    )
+
+# Include ${CMAKE_CURRENT_BINARY_DIR}/version.rc in the target's sources
+# to embed version information
+set(K4A_FILEDESCRIPTION "Azure Kinect SDK")
+set(K4A_ORIGINALFILENAME "k4a.dll")
+configure_file(
+    ${K4A_VERSION_RC}
+    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+    @ONLY
     )
 
 # ${K4A_INCLUDE_DIR} contains k4a/k4a.h which is the primary header consumers should include

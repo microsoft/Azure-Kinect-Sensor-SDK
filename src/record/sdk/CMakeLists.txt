@@ -2,6 +2,7 @@
 add_library(k4arecord SHARED
             playback.cpp
             record.cpp
+            ${CMAKE_CURRENT_BINARY_DIR}/version.rc
             )
 
 # Generate k4arecord_export.h
@@ -11,6 +12,16 @@ add_library(k4arecord SHARED
 include(GenerateExportHeader)
 generate_export_header(k4arecord
     EXPORT_FILE_NAME "include/k4arecord/k4arecord_export.h")
+
+# Include ${CMAKE_CURRENT_BINARY_DIR}/version.rc in the target's sources
+# to embed version information
+set(K4A_FILEDESCRIPTION "Azure Kinect Recording SDK")
+set(K4A_ORIGINALFILENAME "k4arecord.dll")
+configure_file(
+    ${K4A_VERSION_RC}
+    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+    @ONLY
+    )
 
 # ${K4ARECORD_INCLUDE_DIR} contains k4arecord/record.h and k4arecord/playback.h, which are the primary headers consumers should include
 # ${CMAKE_CURRENT_BINARY_DIR}/include contains the generated k4arecord/k4arecord_export.h

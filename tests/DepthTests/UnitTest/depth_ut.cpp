@@ -2,6 +2,7 @@
 #include <ut_calibration_data.h>
 
 // Module being tested
+#include <k4ainternal/common.h>
 #include <k4ainternal/depth.h>
 #include <k4ainternal/depth_mcu.h>
 #include <k4ainternal/calibration.h>
@@ -41,6 +42,8 @@ public:
 
     MOCK_CONST_METHOD4(depthmcu_get_extrinsic_calibration,
                        k4a_result_t(depthmcu_t depthmcu_handle, char *json, size_t json_size, size_t *bytes_read));
+
+    MOCK_CONST_METHOD1(depthmcu_wait_is_ready, bool(depthmcu_t depthmcu_handle));
 };
 
 extern "C" {
@@ -97,6 +100,11 @@ depthmcu_get_extrinsic_calibration(depthmcu_t depthmcu_handle, char *json, size_
 {
     return g_MockDepthMcu->depthmcu_get_extrinsic_calibration(depthmcu_handle, json, json_size, bytes_read);
 }
+
+bool depthmcu_wait_is_ready(depthmcu_t depthmcu_handle)
+{
+    return g_MockDepthMcu->depthmcu_wait_is_ready(depthmcu_handle);
+}
 }
 
 // k4a_result_t depthmcu_get_serialnum(depthmcu_t depthmcu_handle, char* serial_number, size_t*
@@ -138,7 +146,8 @@ static void EXPECT_depthmcu_get_version(MockDepthMcu &mockMcu)
             {
                 return K4A_RESULT_FAILED;
             }
-            memset(version, 0, sizeof(depthmcu_firmware_versions_t));
+            memset(version, 0xFF, sizeof(depthmcu_firmware_versions_t));
+
             return K4A_RESULT_SUCCEEDED;
         }));
 }
@@ -164,6 +173,17 @@ static void EXPECT_depthmcu_get_extrinsic_calibration(MockDepthMcu &mockMcu)
             memcpy(json, g_test_json, sizeof(g_test_json));
             *bytes_read = sizeof(g_test_json);
             return K4A_RESULT_SUCCEEDED;
+        }));
+}
+
+// bool depthmcu_wait_is_ready(depthmcu_t depthmcu_handle)
+static void EXPECT_depthmcu_wait_is_ready(MockDepthMcu &mockMcu)
+{
+    EXPECT_CALL(mockMcu,
+                depthmcu_wait_is_ready(
+                    /* depthmcu_t depthmcu_handle */ FAKE_MCU))
+        .WillRepeatedly(Invoke([](Unused) { // depthmcu_t depthmcu_handle,
+            return true;
         }));
 }
 
@@ -213,6 +233,7 @@ protected:
         EXPECT_depthmcu_get_version(m_MockDepthMcu);
         EXPECT_depthmcu_get_serialnum(m_MockDepthMcu);
         EXPECT_depthmcu_get_extrinsic_calibration(m_MockDepthMcu);
+        EXPECT_depthmcu_wait_is_ready(m_MockDepthMcu);
     }
 
     void TearDown() override
@@ -295,6 +316,9 @@ TEST_F(depth_ut, serialnum)
     depth_destroy(depth_handle);
 }
 
+// Function prototype for the Depth module API we want to test.
+extern "C" bool is_fw_version_compatable(const char *fw_type, k4a_version_t *fw_version, k4a_version_t *fw_min_version);
+
 TEST_F(depth_ut, version)
 {
     // Create the depth instance
@@ -313,6 +337,20 @@ TEST_F(depth_ut, version)
 
     calibration_destroy(calibration_handle);
     depth_destroy(depth_handle);
+
+    k4a_version_t min = { 2, 2, 2 };
+    k4a_version_t ver_bad[] = { { 1, 1, 1 }, { 2, 2, 1 }, { 2, 1, 2 }, { 1, 2, 2 } };
+    k4a_version_t ver_good[] = { { 2, 2, 2 }, { 2, 2, 3 }, { 2, 3, 0 }, { 3, 0, 0 } };
+
+    for (int x = 0; x < (int)COUNTOF(ver_bad); x++)
+    {
+        ASSERT_FALSE(is_fw_version_compatable("test fw", &ver_bad[x], &min)) << " Test Index is " << x << "\n";
+    }
+
+    for (int x = 0; x < (int)COUNTOF(ver_good); x++)
+    {
+        ASSERT_TRUE(is_fw_version_compatable("test fw", &ver_good[x], &min)) << " Test Index is " << x << "\n";
+    }
 }
 
 int main(int argc, char **argv)

@@ -74,7 +74,13 @@ TEST_F(playback_ut, open_large_file)
     ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
     ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
     ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_TRUE(config.color_track_enabled);
+    ASSERT_TRUE(config.depth_track_enabled);
+    ASSERT_TRUE(config.ir_track_enabled);
+    ASSERT_TRUE(config.imu_track_enabled);
     ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+    ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_STANDALONE);
+    ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)0);
 
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
@@ -152,7 +158,13 @@ TEST_F(playback_ut, open_delay_offset_file)
     ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
     ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
     ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_TRUE(config.color_track_enabled);
+    ASSERT_TRUE(config.depth_track_enabled);
+    ASSERT_TRUE(config.ir_track_enabled);
+    ASSERT_FALSE(config.imu_track_enabled);
     ASSERT_EQ(config.depth_delay_off_color_usec, 10000);
+    ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_STANDALONE);
+    ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)0);
 
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
@@ -200,6 +212,31 @@ TEST_F(playback_ut, open_delay_offset_file)
     k4a_playback_close(handle);
 }
 
+TEST_F(playback_ut, open_subordinate_delay_file)
+{
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_sub.mkv", &handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    // Read recording configuration
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
+    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_TRUE(config.color_track_enabled);
+    ASSERT_TRUE(config.depth_track_enabled);
+    ASSERT_TRUE(config.ir_track_enabled);
+    ASSERT_FALSE(config.imu_track_enabled);
+    ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+    ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_SUBORDINATE);
+    ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)10000);
+
+    k4a_playback_close(handle);
+}
+
 TEST_F(playback_ut, playback_seek_test)
 {
     k4a_playback_t handle = NULL;
@@ -214,7 +251,13 @@ TEST_F(playback_ut, playback_seek_test)
     ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
     ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
     ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_TRUE(config.color_track_enabled);
+    ASSERT_TRUE(config.depth_track_enabled);
+    ASSERT_TRUE(config.ir_track_enabled);
+    ASSERT_TRUE(config.imu_track_enabled);
     ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+    ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_STANDALONE);
+    ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)0);
 
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;

@@ -1,4 +1,14 @@
-add_executable(AzureKinectFirmwareTool main.c)
+add_executable(AzureKinectFirmwareTool main.c ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+
+# Include ${CMAKE_CURRENT_BINARY_DIR}/version.rc in the target's sources
+# to embed version information
+set(K4A_FILEDESCRIPTION "Azure Kinect Firmware Tool")
+set(K4A_ORIGINALFILENAME "AzureKinectFirmwareTool.exe")
+configure_file(
+    ${K4A_VERSION_RC}
+    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+    @ONLY
+    )
 
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
@@ -20,7 +30,8 @@ install(
 
 install(
     FILES
-        firmware/Firmware_Composite_TestCert_Debug_TestSigned_1.4.705610_5006.27_6109.05_0112.bin
+        firmware/Firmware_Composite_MSFTCert_Debug_TestSigned_1.105.785813.5006.27_6109.07_0121.bin
+        firmware/Firmware_Composite_MSFTCert_Release_MSFTSigned_1.5.786013_5006.27_6109.07_0122.bin
     DESTINATION
         ${CMAKE_INSTALL_DATADIR}/k4a/firmware
 )

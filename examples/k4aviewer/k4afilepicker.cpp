@@ -85,7 +85,8 @@ void K4AFilePicker::ChangeWorkingDirectory(std17::filesystem::path newDirectory)
         return;
     }
 
-    std::copy(&newDirectoryStr[0], &newDirectoryStr[newDirectoryStr.size() + 1], m_currentDirectoryBuffer.begin());
+    const char *newDirectoryCStr = newDirectoryStr.c_str();
+    std::copy(newDirectoryCStr, newDirectoryCStr + newDirectoryStr.size() + 1, m_currentDirectoryBuffer.begin());
 
     m_currentDirectoryFiles.clear();
     m_currentDirectorySubdirectories.clear();

@@ -33,7 +33,18 @@ set(SOURCE_FILES
     k4awindowset.cpp
     opengltexture.cpp
     perfcounter.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
 )
+
+# Include ${CMAKE_CURRENT_BINARY_DIR}/version.rc in the target's sources
+# to embed version information
+set(K4A_FILEDESCRIPTION "Azure Kinect Viewer")
+set(K4A_ORIGINALFILENAME "k4aviewer.exe")
+configure_file(
+    ${K4A_VERSION_RC}
+    ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+    @ONLY
+    )
 
 find_package(OpenGL REQUIRED)
 find_package(LibUSB REQUIRED)

@@ -1,5 +1,5 @@
-# Note: This name will be updated during the build
-name: k4asdk
+
+name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 
 trigger:
   batch: false
@@ -88,12 +88,6 @@ jobs:
     env:
       CC: cl
       CXX: cl
-
-  - powershell: |
-      $version = (Get-Content "version.txt").Trim()
-      Write-Host "##vso[build.updatebuildnumber]$version"
-    workingDirectory: '$(Build.BinariesDirectory)'
-    displayName: 'Update build number'
 
   - task: CMake@1
     displayName: 'CMake Build'
@@ -216,12 +210,6 @@ jobs:
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
 
-  - powershell: |
-      $version = (Get-Content "version.txt").Trim()
-      Write-Host "##vso[build.updatebuildnumber]$version"
-    workingDirectory: '$(Build.BinariesDirectory)'
-    displayName: 'Update build number'
-
   - task: CMake@1
     displayName: 'CMake Build'
     inputs:
@@ -338,12 +326,6 @@ jobs:
       CC: cl
       CXX: cl
 
-  - powershell: |
-      $version = (Get-Content "version.txt").Trim()
-      Write-Host "##vso[build.updatebuildnumber]$version"
-    workingDirectory: '$(Build.BinariesDirectory)'
-    displayName: 'Update build number'
-
   - task: CMake@1
     displayName: 'CMake Build'
     inputs:
@@ -379,6 +361,23 @@ jobs:
     inputs:
       artifactName: 'amd64-windows-msvc-RelWithDebInfo'
       parallelizationLimit: 8
+
+  - task: UniversalPackages@0
+    displayName: 'Download DepthEngine Plugin'
+    inputs:
+      command: download
+      vstsFeed: 'DepthEnginePlugin'
+      vstsFeedPackage: 'depthengine'
+      vstsPackageVersion: "1.0.1"
+      downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
+
+  - task: CopyFiles@2
+    displayName: "Copy DepthEnginePlugin into bin folder"
+    inputs:
+      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
+      contents: "depthengine*.dll"
+      targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
+      flattenFolders: true
 
   - task: PowerShell@2
     inputs:
@@ -430,15 +429,32 @@ jobs:
       artifactName: 'x86_64-linux-clang-RelWithDebInfo'
       parallelizationLimit: 8
 
+  - task: UniversalPackages@0
+    displayName: 'Download DepthEngine Plugin'
+    inputs:
+      command: download
+      vstsFeed: 'DepthEnginePlugin'
+      vstsFeedPackage: 'depthengine'
+      vstsPackageVersion: "1.0.1"
+      downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
+
+  - task: CopyFiles@2
+    displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
+    inputs:
+      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
+      contents: "libdepthengine.so*"
+      targetFolder: "$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo/bin/"
+      flattenFolders: true
+
   - script: 'chmod +x ./x86_64-linux-clang-relwithdebinfo/bin/*'
     workingDirectory: '$(System.ArtifactsDirectory)'
     displayName: 'Add execution property to binary files'
 
-    # Adding the bin folder to the LD_LIBRARY_PATH, so the executables can find the necessary .so files. 
+    # Adding the bin folder to the LD_LIBRARY_PATH, so the executables can find the necessary .so files.
   - script: 'echo "##vso[task.setvariable variable=LD_LIBRARY_PATH]$BUILD_ARTIFACTSTAGINGDIRECTORY/x86_64-linux-clang-relwithdebinfo/bin/"'
     workingDirectory: '$(System.ArtifactsDirectory)'
     displayName: 'set LD_LIBRARY_PATH'
-   
+
     # Set the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
   - script: 'echo "##vso[task.setvariable variable=DISPLAY]:0"'
     workingDirectory: '$(System.ArtifactsDirectory)'

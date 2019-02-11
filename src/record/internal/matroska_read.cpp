@@ -296,6 +296,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             return K4A_RESULT_FAILED;
         }
 
+        context->record_config.color_track_enabled = true;
         context->record_config.color_format = context->color_track.format;
     }
     else
@@ -364,6 +365,8 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
 
         RETURN_IF_ERROR(read_bitmap_info_header(&context->depth_track));
+
+        context->record_config.depth_track_enabled = true;
     }
 
     if (context->ir_track.track)
@@ -411,6 +414,8 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
 
         RETURN_IF_ERROR(read_bitmap_info_header(&context->ir_track));
+
+        context->record_config.ir_track_enabled = true;
     }
 
     context->sync_period_ns = frame_period_ns;
@@ -476,6 +481,68 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         context->record_config.depth_delay_off_color_usec = 0;
     }
 
+    if (context->imu_track.track)
+    {
+        context->record_config.imu_track_enabled = true;
+    }
+
+    // Read wired_sync_mode and subordinate_delay_off_master_usec.
+    KaxTag *sync_mode_tag = get_tag(context, "K4A_WIRED_SYNC_MODE");
+    if (sync_mode_tag != NULL)
+    {
+        bool sync_mode_found = false;
+        std::string sync_mode_str = get_tag_string(sync_mode_tag);
+        for (size_t i = 0; i < arraysize(external_sync_modes); i++)
+        {
+            if (sync_mode_str == external_sync_modes[i].second)
+            {
+                context->record_config.wired_sync_mode = external_sync_modes[i].first;
+                sync_mode_found = true;
+                break;
+            }
+        }
+        if (!sync_mode_found)
+        {
+            logger_error(LOGGER_RECORD, "Unsupported wired sync mode: %s", sync_mode_str.c_str());
+            return K4A_RESULT_FAILED;
+        }
+
+        if (context->record_config.wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
+        {
+            KaxTag *subordinate_delay_tag = get_tag(context, "K4A_SUBORDINATE_DELAY_NS");
+            if (subordinate_delay_tag != NULL)
+            {
+                uint64_t subordinate_delay_ns;
+                std::istringstream subordinate_delay_str(get_tag_string(subordinate_delay_tag));
+                subordinate_delay_str >> subordinate_delay_ns;
+                if (!subordinate_delay_str.fail())
+                {
+                    assert(subordinate_delay_ns / 1000 <= UINT32_MAX);
+                    context->record_config.subordinate_delay_off_master_usec = (uint32_t)(subordinate_delay_ns / 1000);
+                }
+                else
+                {
+                    logger_error(LOGGER_RECORD,
+                                 "Tag K4A_SUBORDINATE_DELAY_NS contains invalid value: %s",
+                                 get_tag_string(subordinate_delay_tag).c_str());
+                }
+            }
+            else
+            {
+                context->record_config.subordinate_delay_off_master_usec = 0;
+            }
+        }
+        else
+        {
+            context->record_config.subordinate_delay_off_master_usec = 0;
+        }
+    }
+    else
+    {
+        context->record_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
+        context->record_config.subordinate_delay_off_master_usec = 0;
+    }
+
     return K4A_RESULT_SUCCEEDED;
 }
 
@@ -496,17 +563,21 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track)
 
         switch (track->bitmap_header->biCompression)
         {
-        case 0x3231564E: // NV12 little endian
+        case 0x3231564E: // NV12
             track->format = K4A_IMAGE_FORMAT_COLOR_NV12;
             track->stride = track->width;
             break;
-        case 0x32595559: // YUY2 little endian
+        case 0x32595559: // YUY2
             track->format = K4A_IMAGE_FORMAT_COLOR_YUY2;
             track->stride = track->width * 2;
             break;
-        case 0x47504A4D: // MJPG little endian
+        case 0x47504A4D: // MJPG
             track->format = K4A_IMAGE_FORMAT_COLOR_MJPG;
             track->stride = 0;
+            break;
+        case 0x67363162: // b16g
+            track->format = K4A_IMAGE_FORMAT_DEPTH16;
+            track->stride = track->width * 2;
             break;
         default:
             logger_error(LOGGER_RECORD,
@@ -966,12 +1037,12 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
     return next_block;
 }
 
-static void free_capture_buffer(void *buffer, void *context)
+static void free_vector_buffer(void *buffer, void *context)
 {
     (void)buffer;
     assert(context != nullptr);
-    std::shared_ptr<read_block_t> *block_ptr = static_cast<std::shared_ptr<read_block_t> *>(context);
-    delete block_ptr;
+    std::vector<uint8_t> *vector = static_cast<std::vector<uint8_t> *>(context);
+    delete vector;
 }
 
 k4a_result_t new_capture(k4a_playback_context_t *context,
@@ -992,8 +1063,19 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
 
     std::shared_ptr<read_block_t> *block_ptr = new std::shared_ptr<read_block_t>(block);
     DataBuffer &data_buffer = block->block->GetBuffer(0);
-    uint8_t *buffer = static_cast<uint8_t *>(data_buffer.Buffer());
-    size_t buffer_size = static_cast<size_t>(data_buffer.Size());
+    std::vector<uint8_t> *buffer = new std::vector<uint8_t>(data_buffer.Buffer(),
+                                                            data_buffer.Buffer() + data_buffer.Size());
+
+    if (block->reader->format == K4A_IMAGE_FORMAT_DEPTH16 || block->reader->format == K4A_IMAGE_FORMAT_IR16)
+    {
+        // 16 bit grayscale needs to be converted from big-endian back to little-endian.
+        assert(buffer->size() % sizeof(uint16_t) == 0);
+        uint16_t *buffer_raw = reinterpret_cast<uint16_t *>(buffer->data());
+        for (size_t j = 0; j < buffer->size() / sizeof(uint16_t); j++)
+        {
+            buffer_raw[j] = swap_bytes_16(buffer_raw[j]);
+        }
+    }
 
     assert(block->reader->width <= INT_MAX);
     assert(block->reader->height <= INT_MAX);
@@ -1006,10 +1088,10 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
                                                          (int)block->reader->width,
                                                          (int)block->reader->height,
                                                          (int)block->reader->stride,
+                                                         buffer->data(),
+                                                         buffer->size(),
+                                                         &free_vector_buffer,
                                                          buffer,
-                                                         buffer_size,
-                                                         &free_capture_buffer,
-                                                         block_ptr,
                                                          &image_handle));
         k4a_image_set_timestamp_usec(image_handle, block->timestamp_ns / 1000);
         k4a_capture_set_color_image(*capture_handle, image_handle);
@@ -1020,10 +1102,10 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
                                                          (int)block->reader->width,
                                                          (int)block->reader->height,
                                                          (int)block->reader->stride,
+                                                         buffer->data(),
+                                                         buffer->size(),
+                                                         &free_vector_buffer,
                                                          buffer,
-                                                         buffer_size,
-                                                         &free_capture_buffer,
-                                                         block_ptr,
                                                          &image_handle));
         k4a_image_set_timestamp_usec(image_handle, block->timestamp_ns / 1000);
         k4a_capture_set_depth_image(*capture_handle, image_handle);
@@ -1034,10 +1116,10 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
                                                          (int)block->reader->width,
                                                          (int)block->reader->height,
                                                          (int)block->reader->stride,
+                                                         buffer->data(),
+                                                         buffer->size(),
+                                                         &free_vector_buffer,
                                                          buffer,
-                                                         buffer_size,
-                                                         &free_capture_buffer,
-                                                         block_ptr,
                                                          &image_handle));
         k4a_image_set_timestamp_usec(image_handle, block->timestamp_ns / 1000);
         k4a_capture_set_ir_image(*capture_handle, image_handle);

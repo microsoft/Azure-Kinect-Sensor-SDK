@@ -17,13 +17,13 @@
 #define ERROR_START_STREAM_TIME 10000
 #define IMU_EXPECTED_FPS_1600 1666
 
-// Total ACC range is +/- 15 m/s^2
+// Total ACC range is +/- 147.15 m/s^2.
 #define MIN_ACC_READING -15.0f
 #define MAX_ACC_READING 15.0f
 
-// Total Gyro range is +/- 1147 dps
-#define MIN_GYRO_READING -4.0f
-#define MAX_GYRO_READING 4.0f
+// Total Gyro range is +/- 20 rad/s
+#define MIN_GYRO_READING -0.1f
+#define MAX_GYRO_READING 0.1f
 //************************ Typedefs *****************************
 
 //************ Declarations (Statics and globals) ***************
@@ -102,9 +102,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
-
-    // TODO remove this sleep when IMU timestamps are increasing in a predictable way.
-    ThreadAPI_Sleep(1000);
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(device));

@@ -527,6 +527,7 @@ static k4a_result_t usb_cmd_io(usb_command_handle_t p_command_handle,
                                uint32_t *cmd_status)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cmd_status == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, p_rx_data != NULL && p_tx_data != NULL);
 
     k4a_result_t result = K4A_RESULT_FAILED;
     usb_cmd_handle_t *p_handle = (usb_cmd_handle_t *)p_command_handle;
@@ -595,21 +596,6 @@ static k4a_result_t usb_cmd_io(usb_command_handle_t p_command_handle,
                                         NULL,
                                         USB_CMD_MAX_WAIT_TIME)) == LIBUSB_SUCCESS)
         {
-            // Get Data if resources provided to read into
-            if ((p_rx_data != NULL) && ((err = libusb_bulk_transfer(p_handle->libusb,
-                                                                    p_handle->cmd_rx_endpoint,
-                                                                    (uint8_t *)p_rx_data,
-                                                                    (int)payload_size,
-                                                                    &usb_transfer_count,
-                                                                    USB_CMD_MAX_WAIT_TIME)) != LIBUSB_SUCCESS))
-            {
-                usb_transfer_count = 0;
-                logger_error(LOGGER_USB_CMD,
-                             "Error calling libusb_bulk_transfer for rx, result:%s",
-                             libusb_error_name(err));
-                goto exit;
-            }
-
             // Send Data if data to send
             if ((p_tx_data != NULL) && ((err = libusb_bulk_transfer(p_handle->libusb,
                                                                     p_handle->cmd_tx_endpoint,
@@ -621,6 +607,21 @@ static k4a_result_t usb_cmd_io(usb_command_handle_t p_command_handle,
                 usb_transfer_count = 0;
                 logger_error(LOGGER_USB_CMD,
                              "Error calling libusb_bulk_transfer for tx, result:%s",
+                             libusb_error_name(err));
+                goto exit;
+            }
+
+            // Get Data if resources provided to read into
+            if ((p_rx_data != NULL) && ((err = libusb_bulk_transfer(p_handle->libusb,
+                                                                    p_handle->cmd_rx_endpoint,
+                                                                    (uint8_t *)p_rx_data,
+                                                                    (int)payload_size,
+                                                                    &usb_transfer_count,
+                                                                    USB_CMD_MAX_WAIT_TIME)) != LIBUSB_SUCCESS))
+            {
+                usb_transfer_count = 0;
+                logger_error(LOGGER_USB_CMD,
+                             "Error calling libusb_bulk_transfer for rx, result:%s",
                              libusb_error_name(err));
                 goto exit;
             }
