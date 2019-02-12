@@ -1,1 +1,2 @@
+add_subdirectory(deversion)
 add_subdirectory(updater)
