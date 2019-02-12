@@ -95,8 +95,6 @@ void K4APointCloudWindow::ProcessInput()
     const auto timeDelta = static_cast<float>(currentTime - m_lastTime);
     m_lastTime = currentTime;
 
-    // TODO consider redoing controls to use the mouse to rotate around a point rather than 'video game controls'
-    //
     if (ImGui::IsWindowFocused())
     {
         ImGuiIO &io = ImGui::GetIO();

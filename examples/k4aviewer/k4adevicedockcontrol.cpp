@@ -262,10 +262,6 @@ K4ADeviceDockControl::K4ADeviceDockControl(std::shared_ptr<K4ADevice> device) : 
 
     // Show warnings if firmware is too old
     //
-    // TODO for now, this is just so we know if we're on a version with known compat issues,
-    //      but in future, we may want to add a mechanism to auto-check for a new firmware
-    //      version from the Internet.  If that happens, delete this.
-    //
     CheckFirmwareVersion(m_device->GetVersionInfo().rgb, { 1, 2, 29 }, "RGB");
     CheckFirmwareVersion(m_device->GetVersionInfo().depth, { 1, 2, 21 }, "Depth");
     CheckFirmwareVersion(m_device->GetVersionInfo().audio, { 0, 3, 1 }, "Microphone");
@@ -833,9 +829,6 @@ void K4ADeviceDockControl::PollDevice()
                                          // trying to see if the IMU is returning data, but not for real
                                          // IMU applications like tracking where you can't afford to drop
                                          // samples.
-                                         //
-                                         // TODO move device polling to a separate thread so we can
-                                         //      decouple the IMU polling rate from the app framerate.
                                          //
                                          bool gotSample = false;
                                          k4a_wait_result_t status;

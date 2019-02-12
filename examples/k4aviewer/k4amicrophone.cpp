@@ -57,9 +57,6 @@ int K4AMicrophone::Start()
     m_inStream->format = SoundIoFormatFloat32LE;
     m_inStream->sample_rate = K4AMicrophoneSampleRate;
 
-    // TODO for some reason, libsoundio doesn't get a correct layout when it queries the device; figure out why
-    //      Hardcoding the correct layout for now.
-    //
     m_inStream->layout = *soundio_channel_layout_get_builtin(SoundIoChannelLayoutId7Point0);
     m_inStream->software_latency = 0.2;
 

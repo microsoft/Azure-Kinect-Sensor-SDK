@@ -40,8 +40,6 @@ int CALLBACK WinMain(_In_ HINSTANCE hInstance,
 
     // Set default DPI
     //
-    // TODO enable autodetection of DPI on Linux
-    //
     SetProcessDPIAware();
     constexpr int NormalDpi = 96;
     const char HighDpiArgument[] = "-HIGHDPI";

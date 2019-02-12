@@ -247,8 +247,6 @@ void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_
 
             // Compute color
             //
-            // TODO integrate color from RGB camera
-            //
             const RgbPixel colorization = K4ADepthPixelColorizer::ColorizeRedToBlue(m_expectedValueRange,
                                                                                     static_cast<DepthPixel>(
                                                                                         position.xyz.z));

@@ -43,8 +43,6 @@
 
 // For disabling buttons, which has not yet been promoted to the public API
 //
-// TODO when dear imgui promotes button disabling to the public API, remove this include
-//
 #include <imgui_internal.h>
 
 #ifdef __clang__
