@@ -9,7 +9,6 @@
 #include <azure_c_shared_utility/lock.h>
 #include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/threadapi.h>
-#include <azure_c_shared_utility/condition.h>
 
 int main(int argc, char **argv)
 {
@@ -365,103 +364,6 @@ TEST(queue_ut, queue_pop_on_empty_queue)
 
     Lock_Deinit(data.lock);
     queue_destroy(queue);
-}
-
-typedef struct _destroy_queue_while_blocking_t
-{
-    queue_t queue;
-    LOCK_HANDLE lock;
-    COND_HANDLE condition;
-} destroy_queue_while_blocking_t;
-
-static int thread_wait_infinite_on_pop(void *param)
-{
-    k4a_capture_t capture;
-    k4a_wait_result_t wresult;
-    destroy_queue_while_blocking_t *data = (destroy_queue_while_blocking_t *)param;
-
-    Lock(data->lock);
-    Unlock(data->lock);
-
-    wresult = queue_pop(data->queue, 0, &capture);
-    if (wresult != K4A_WAIT_RESULT_TIMEOUT)
-    {
-        EXPECT_EQ(K4A_WAIT_RESULT_TIMEOUT, wresult);
-        Condition_Post(data->condition);
-        return K4A_WAIT_RESULT_FAILED;
-    }
-
-    Condition_Post(data->condition);
-    wresult = queue_pop(data->queue, K4A_WAIT_INFINITE, &capture);
-    if (wresult == K4A_WAIT_RESULT_SUCCEEDED)
-    {
-        capture_dec_ref(capture);
-    }
-    return wresult;
-}
-
-TEST(queue_ut, destroy_or_disable_queue_while_blocking)
-{
-    queue_t queue = NULL;
-    uint32_t queue_depth = TEST_QUEUE_DEPTH;
-    destroy_queue_while_blocking_t data;
-    THREAD_HANDLE t1;
-
-    data.lock = Lock_Init();
-    data.condition = Condition_Init();
-
-    for (int y = 0; y < 2; y++)
-    {
-        // test multiple times because there is no way to garantee worker thread is actually waiting on on queue_pop
-        for (int x = 0; x < 10; x++)
-        {
-            if (queue == NULL)
-            {
-                ASSERT_EQ(queue_create(queue_depth, "queue_test", &queue), K4A_RESULT_SUCCEEDED);
-            }
-            queue_enable(queue);
-
-            data.queue = queue;
-
-            // prevent the threads from running
-            Lock(data.lock);
-
-            ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&t1, thread_wait_infinite_on_pop, &data))
-                << "iteration is " << x << " " << y << "\n";
-
-            COND_RESULT cond_result = Condition_Wait(data.condition, data.lock, 30000);
-            if (cond_result == COND_OK)
-            {
-                if (y == 0)
-                {
-                    queue_destroy(queue);
-                    queue = NULL;
-                }
-                else
-                {
-                    queue_disable(queue);
-                }
-            }
-
-            // Give the worker thread to progess from signalling the COND var to waiting on the queue
-            ThreadAPI_Sleep(100);
-
-            Unlock(data.lock);
-
-            int t_result;
-            ASSERT_EQ(THREADAPI_OK, ThreadAPI_Join(t1, &t_result)) << "iteration is " << x << " " << y << "\n";
-            ASSERT_EQ(K4A_WAIT_RESULT_FAILED, t_result);
-        }
-    }
-
-    queue_destroy(queue);
-    queue = NULL;
-
-    // Verify all our allocations were released
-    ASSERT_EQ(allocator_test_for_leaks(), 0);
-
-    Lock_Deinit(data.lock);
-    Condition_Deinit(data.condition);
 }
 
 TEST(queue_ut, test_queue_push_w_dropped)
