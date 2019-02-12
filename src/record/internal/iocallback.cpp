@@ -88,6 +88,7 @@ void LargeFileIOCallback::close()
     {
         // Due to the definition of libebml::IOCallback, the only way for us to return a close error is with an
         // exception. Enable failbit exceptions again for file close.
+        m_stream.clear();
         m_stream.exceptions(std::ios::failbit | std::ios::badbit);
         m_stream.close();
     }

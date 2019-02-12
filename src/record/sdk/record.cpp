@@ -444,9 +444,9 @@ k4a_result_t k4a_record_write_header(const k4a_record_t recording_handle)
             auto &tags = GetChild<KaxTags>(*context->file_segment);
             tags.Render(*context->ebml_file);
 
-            EbmlVoid tag_void;
-            tag_void.SetSize(1024);
-            tag_void.Render(*context->ebml_file);
+            context->tags_void = make_unique<EbmlVoid>();
+            context->tags_void->SetSize(1024);
+            context->tags_void->Render(*context->ebml_file);
         }
     }
     catch (std::ios_base::failure e)
@@ -637,6 +637,22 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
                 auto &cues = GetChild<KaxCues>(*context->file_segment);
                 cues.Render(*context->ebml_file);
 
+                // Update tags
+                auto &tags = GetChild<KaxTags>(*context->file_segment);
+                if (tags.GetElementPosition() > 0)
+                {
+                    context->ebml_file->setFilePointer((int64_t)tags.GetElementPosition());
+                    tags.Render(*context->ebml_file);
+                    if (tags.GetEndPosition() != context->tags_void->GetElementPosition())
+                    {
+                        // Rewrite the void block after tags
+                        EbmlVoid tags_void;
+                        tags_void.SetSize(context->tags_void->GetSize() -
+                                          (tags.GetEndPosition() - context->tags_void->GetElementPosition()));
+                        tags_void.Render(*context->ebml_file);
+                    }
+                }
+
                 { // Update seek info
                     auto &seek_head = GetChild<KaxSeekHead>(*context->file_segment);
                     seek_head.RemoveAll(); // Remove any seek entries from previous flushes
@@ -655,7 +671,6 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
                         seek_head.IndexThis(attachments, *context->file_segment);
                     }
 
-                    auto &tags = GetChild<KaxTags>(*context->file_segment);
                     if (tags.GetElementPosition() > 0)
                     {
                         seek_head.IndexThis(tags, *context->file_segment);

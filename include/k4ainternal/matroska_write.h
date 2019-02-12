@@ -42,6 +42,7 @@ typedef struct _k4a_record_context_t
      * Used to offset the recording to ensure it starts at timestamp 0.
      */
     uint64_t start_timestamp_offset;
+    bool start_offset_tag_added;
 
     /**
      * The end timestamp of the last cluster written to disk.
@@ -60,6 +61,7 @@ typedef struct _k4a_record_context_t
     std::unique_ptr<libmatroska::KaxSegment> file_segment;
     std::unique_ptr<libebml::EbmlVoid> seek_void;
     std::unique_ptr<libebml::EbmlVoid> segment_info_void;
+    std::unique_ptr<libebml::EbmlVoid> tags_void;
 
     libmatroska::KaxTrackEntry *color_track;
     libmatroska::KaxTrackEntry *depth_track;

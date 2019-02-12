@@ -327,8 +327,8 @@ TEST(allocator_ut, image_api_validation)
         ASSERT_EQ(0, image_get_timestamp_usec(image));
         image_set_timestamp_usec(image, 10); // should succeed
         ASSERT_EQ(10, image_get_timestamp_usec(image));
-        image_set_timestamp_usec(image, 0); // should not be allowed
-        ASSERT_EQ(10, image_get_timestamp_usec(image));
+        image_set_timestamp_usec(image, 0); // should succeed
+        ASSERT_EQ(0, image_get_timestamp_usec(image));
 
         ASSERT_EQ(0, image_get_exposure_usec(NULL));
         ASSERT_EQ(0, image_get_exposure_usec(image));

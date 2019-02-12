@@ -1,6 +1,7 @@
 #include <ctime>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 
 #include <k4a/k4a.h>
 #include <k4ainternal/matroska_write.h>
@@ -308,6 +309,14 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
         context->first_cluster_written = true;
     }
 
+    if (!context->start_offset_tag_added)
+    {
+        std::ostringstream offset_str;
+        offset_str << context->start_timestamp_offset;
+        add_tag(context, "K4A_START_OFFSET_NS", offset_str.str().c_str());
+        context->start_offset_tag_added = true;
+    }
+
     new_cluster->SetParent(*context->file_segment);
     new_cluster->EnableChecksum();
 
@@ -481,7 +490,6 @@ KaxTag *
 add_tag(k4a_record_context_t *context, const char *name, const char *value, TagTargetType target, uint64_t target_uid)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
-    RETURN_VALUE_IF_ARG(NULL, context->header_written);
 
     auto &tags = GetChild<KaxTags>(*context->file_segment);
     auto tag = new KaxTag();
