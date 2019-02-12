@@ -461,7 +461,7 @@ typedef struct _k4a_hardware_version_t
  */
 typedef struct _k4a_device_configuration_t
 {
-    /** Image format to capture with the color camera. The color camera does not natively produce BGRA32 images. 
+    /** Image format to capture with the color camera. The color camera does not natively produce BGRA32 images.
      * Setting BGRA32 for color_format will result in higher CPU utilization. */
     k4a_image_format_t color_format;
 
