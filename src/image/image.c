@@ -292,7 +292,6 @@ uint32_t image_get_iso_speed(k4a_image_t image_handle)
 void image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
-    RETURN_VALUE_IF_ARG(VOID_VALUE, timestamp_usec == 0);
     image_context_t *image = k4a_image_t_get_context(image_handle);
     image->timestamp_usec = timestamp_usec;
 }

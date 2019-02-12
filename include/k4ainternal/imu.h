@@ -57,14 +57,47 @@ void imu_destroy(imu_t imu_handle);
 
 k4a_wait_result_t imu_get_sample(imu_t imu_handle, k4a_imu_sample_t *imu_sample, int32_t timeout_in_ms);
 
-// TODO
+/** Starts the IMU sensor streaming
+ *
+ * \param imu_handle [IN]
+ * The IMU device handle.
+ *
+ * \param color_camera_start_tick [IN]
+ * This is the system tick recorded when the color camera was started. Zero means the color camera was not started.
+ *
+ * \return ::K4A_RESULT_SUCCEEDED if the IMU sensor was successfully started. ::K4A_RESULT_FAILED if an error was
+ * encountered.
+ *
+ * call /ref imu_stop when the sensor no longer needs to stream.
+ */
 k4a_result_t imu_start(imu_t imu_handle, tickcounter_ms_t color_camera_start_tick);
 
-// TODO
+/** Stops the IMU sensor when it has been streaming
+ *
+ * \param imu_handle [IN]
+ * The IMU device handle.
+ *
+ * Stops IMU sensor when it has been running. /ref imu_destroy implicitly calls this API if the sensor is in a
+ * running state.
+ */
 void imu_stop(imu_t imu_handle);
 
+/** Get the gyro extrinsic calibration data
+ *
+ * \param imu_handle [IN]
+ * The IMU device handle.
+ *
+ * Returns a pointer to gyro extrinsic data that will remain valid until /ref imu_destroy is called.
+ */
 k4a_calibration_extrinsics_t *imu_get_gyro_extrinsics(imu_t imu_handle);
 
+/** Get the accelerometer extrinsic calibration data
+ *
+ * \param imu_handle [IN]
+ * The IMU device handle.
+ *
+ * Returns a pointer to accelerometer extrinsic data that will remain valid until /ref imu_destroy is called.
+ */
 k4a_calibration_extrinsics_t *imu_get_accel_extrinsics(imu_t imu_handle);
 
 #ifdef __cplusplus

@@ -13,10 +13,6 @@
 #include <math.h>
 
 //************** Symbolic Constant Macros (defines) *************
-#define TARGET_RGB_MAJOR_VERSION 1
-#define TARGET_RGB_MINOR_VERSION 2
-#define TARGET_RGB_BUILD_VERSION 14
-
 #define STREAM_RUN_TIME_SEC 4
 #define ERROR_START_STREAM_TIME 10000
 #define K4A_COLOR_MODE_NV12_720P_EXPECTED_SIZE (1280 * 720 * 3 / 2) //  1,382,400 bytes
@@ -122,7 +118,7 @@ TEST_P(color_functional_test, color_streaming_test)
 
     // Start clock on getting frames
     tickcounter_get_current_ms(m_tick_count, &start_ms);
-    timeout_ms = 2000; // TODO: Make this tighter once the data path has been optimized
+    timeout_ms = 2000;
 
     while (stream_count > 0)
     {
@@ -169,9 +165,6 @@ TEST_P(color_functional_test, color_streaming_test)
             break;
         }
 
-        // Verify no dropped frames
-        // TODO - Waiting on metadata
-
         k4a_image_release(image);
         k4a_capture_release(capture);
     };
@@ -182,11 +175,6 @@ TEST_P(color_functional_test, color_streaming_test)
     k4a_device_stop_cameras(m_device);
 
     error_tolerance = STREAM_RUN_TIME_SEC * 100; // 10%
-    // EXPECT_LT(delta_ms, (STREAM_RUN_TIME_SEC * 1000) + error_tolerance) << "Frame rate too slow, " << (1000 *
-    // (STREAM_RUN_TIME_SEC * expected_fps)) / delta_ms << "fps\n"; EXPECT_GT(delta_ms, (STREAM_RUN_TIME_SEC * 1000) -
-    // error_tolerance) << "Frame rate too fast, " << (1000 * (STREAM_RUN_TIME_SEC * expected_fps)) / delta_ms <<
-    // "fps\n";
-    // TODO: Set pass / fail once the data path has been optimized
     if (delta_ms > ((STREAM_RUN_TIME_SEC * 1000) + error_tolerance))
     {
         std::cout << "Frame rate too slow, " << (1000 * (STREAM_RUN_TIME_SEC * as.expected_fps)) / delta_ms << "fps\n";
@@ -447,29 +435,6 @@ INSTANTIATE_TEST_CASE_P(color_streaming,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 }));
 
 /**
- *  Functional test for verifying correct FW version for this
- *  functional test suite
- *
- *  @Test criteria
- *   Pass conditions;
- *       Color FW version >= 1.2.14
- *
- *
- */
-TEST_F(color_functional_test, colorStreamVersion)
-{
-    k4a_hardware_version_t version;
-
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_version(m_device, &version)) << "Couldn't get version information\n";
-
-    // TODO: This version check will fail if the major gets updated and causes the minor or build to go down
-    //       e.g. moving from 1.2.14 to 2.0.1 will fail since 0 < 2 and 1 < 14
-    EXPECT_GE(version.rgb.major, (uint32_t)TARGET_RGB_MAJOR_VERSION) << "Major color version invalid\n";
-    EXPECT_GE(version.rgb.minor, (uint32_t)TARGET_RGB_MINOR_VERSION) << "Minor color version invalid\n";
-    EXPECT_GE(version.rgb.iteration, (uint32_t)TARGET_RGB_BUILD_VERSION) << "Color build invalid\n";
-}
-
-/**
  *  Functional test for verifying that changing modes actually causes data to be returned in the right mode
  *
  *  @Test criteria
@@ -578,8 +543,8 @@ TEST_F(color_functional_test, colorExposureTest)
     // Verify exposure metadata
     ASSERT_NE(image = k4a_capture_get_color_image(capture), (k4a_image_t)NULL);
     EXPECT_GT(exposure_time = k4a_image_get_exposure_usec(image), 0);
+    EXPECT_LT(exposure_time, 33333); // At a min, this should be smaller than the frame rate
 
-    // ToDo: exposure time value verification
     std::cout << "exposure_time applied = " << exposure_time << " uSec\n";
 
     k4a_image_release(image);

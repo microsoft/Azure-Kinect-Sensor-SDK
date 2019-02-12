@@ -436,8 +436,6 @@ static inline void mat4x4_look_at(mat4x4 m, vec3 eye, vec3 center, vec3 up)
     /* See the OpenGL GLUT documentation for gluLookAt for a description */
     /* of the algorithm. We implement it in a straightforward way:       */
 
-    /* TODO: The negation of of can be spared by swapping the order of
-     *       operands in the following cross products in the right way. */
     vec3 f;
     vec3 s;
     vec3 t;
@@ -589,7 +587,6 @@ static inline void mat4x4_from_quat(mat4x4 M, quat q)
 static inline void mat4x4o_mul_quat(mat4x4 R, mat4x4 M, quat q)
 {
     /*  XXX: The way this is written only works for othogonal matrices. */
-    /* TODO: Take care of non-orthogonal case. */
     quat_mul_vec3(R[0], q, M[0]);
     quat_mul_vec3(R[1], q, M[1]);
     quat_mul_vec3(R[2], q, M[2]);

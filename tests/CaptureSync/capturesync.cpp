@@ -533,9 +533,6 @@ static void capturesync_validate_synchronization(capturesync_test_timing_t *test
         config.depth_delay_off_color_usec = -1;
     }
 
-    // TODO remove this hack
-    private_capturesync_disable_hardware_hacks(sync);
-
     ASSERT_EQ(capturesync_start(sync, &config), K4A_RESULT_SUCCEEDED);
 
     // prevent the threads from running yet

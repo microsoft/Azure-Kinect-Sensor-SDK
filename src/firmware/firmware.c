@@ -157,8 +157,7 @@ k4a_result_t firmware_get_download_status(firmware_t firmware_handle, firmware_s
     depthmcu_firmware_update_status_t depthmcu_status = { 0 };
     firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
 
-    // TODO: The spec says this shouldn't be called more frequently than 2Hz.
-    // Should we add a sleep or keep track of time to prevent from being able to call more frequently?
+    // NOTE: The spec says this shouldn't be called more frequently than 2Hz.
     result = TRACE_CALL(depthmcu_get_firmware_update_status(firmware->depthmcu, &depthmcu_status));
     if (K4A_SUCCEEDED(result))
     {

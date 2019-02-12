@@ -219,8 +219,10 @@ static CLI_STATUS k4a_record_depth(int Argc, char **Argv)
         config.camera_fps = fps;
 
         // start streaming.
-        (void)k4a_device_start_cameras(device, &config);
-        // TODO: Check result code
+        if (K4A_FAILED(k4a_device_start_cameras(device, &config)))
+        {
+            return CLI_ERROR;
+        }
 
         // loop through stream data
         while (stream_count-- > 0)

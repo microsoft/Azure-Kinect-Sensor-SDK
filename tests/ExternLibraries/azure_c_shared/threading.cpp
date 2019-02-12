@@ -63,8 +63,6 @@ TEST(azure_c_shared_threading, ThreadAPI)
     // We should expect the join to have taken at least 150 ms from the time the
     // thread was started/
 
-    // TODO: Measure time and assert
-
     EXPECT_EQ(TEST_ASSIGN_VALUE, data.value);
 
     ASSERT_EQ(LOCK_OK, Lock_Deinit(data.lock));

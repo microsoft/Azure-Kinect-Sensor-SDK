@@ -99,8 +99,6 @@ public:
         // It looks like OpenGL's conversion is slightly faster than libyuv's, so we
         // have mismatched format and internalformat here.
         //
-        // TODO find some way to dodge the extra conversion to improve perf (write our own converter?)
-        //
         return OpenGlTextureFactory::CreateTexture(texture,
                                                    &m_outputBuffer[0],
                                                    m_dimensions,

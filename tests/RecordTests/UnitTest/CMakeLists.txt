@@ -11,7 +11,6 @@ target_link_libraries(playback_ut PRIVATE
     k4ainternal::playback
     k4a::k4arecord
 )
-configure_file("TestData/playback_test_input.mkv" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/TestData/playback_test_input.mkv" COPYONLY)
 
 # Include the PUBLIC and INTERFACE directories specified by k4ainternal::record
 target_include_directories(record_ut PRIVATE $<TARGET_PROPERTY:k4ainternal::record,INTERFACE_INCLUDE_DIRECTORIES>)

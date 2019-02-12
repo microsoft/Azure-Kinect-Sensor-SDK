@@ -56,7 +56,6 @@ private:
     uint64_t m_currentTimestamp = 0;
 
     K4ADataSource<std::shared_ptr<K4ACapture>> m_cameraDataSource;
-    // K4ADataSource<k4a_imu_sample_t> m_imuDataSource; // TODO hook up IMU once recording API supports it
 
     std::chrono::high_resolution_clock::time_point m_lastFrameShownTime;
     std::chrono::microseconds m_timePerFrame;

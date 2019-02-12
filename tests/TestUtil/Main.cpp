@@ -112,8 +112,7 @@ int main(int Argc, char **Argv)
     // Initialize the K4A library
     open_k4a();
 
-    // Initialize CLI Modules
-    // TODO: For each functional test file, add an initialization routine
+    // Initialize CLI Modules. For each functional test file, add an initialization routine
     ExampleInit();
 
     // K4A SDK commands

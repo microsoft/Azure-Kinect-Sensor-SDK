@@ -161,19 +161,6 @@ HRESULT GetContainerIdToWasapiIdMap(std::map<GUID, std::string, GuidComparer> &r
 
         PropVariantClear(&containerIdProperty);
 
-        // TODO remove once the firmware bug causing duplicate container IDs is fixed
-        //
-        if (result.find(containerId) != result.end())
-        {
-            std::string errorMessage =
-                "Warning: There's currently a K4A firmware bug that causes all K4A devices to\n"
-                "have the same container ID, which breaks our ability to correlate microphones\n"
-                "and cameras.  You appear to have multiple K4A devices connected, but all audio\n"
-                "windows will only show the output of one of those microphones, and it might not\n"
-                "be the one you have open.  You may want to unplug one of your K4A devices.\n";
-            K4AViewerErrorManager::Instance().SetErrorStatus(std::move(errorMessage));
-        }
-
         result[containerId] = std::move(idString);
     }
 

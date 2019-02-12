@@ -55,26 +55,6 @@ public:
 };
 
 /**
- *  Functional test for verifying correct FW version for this
- *  functional test suite
- *
- *  @Test criteria
- *   Pass conditions;
- *       depth FW version >= 1.2.6
- *
- *
- */
-TEST_F(depth_ft, depthStreamVersion)
-{
-    k4a_hardware_version_t version;
-
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_version(m_device, &version)) << "Couldn't get version information\n";
-    EXPECT_GE(version.depth.major, (uint32_t)1) << "Major depth version invalid\n";
-    EXPECT_GE(version.depth.minor, (uint32_t)2) << "Minor depth version invalid\n";
-    EXPECT_GE(version.depth.iteration, (uint32_t)6) << "Depth build invalid\n";
-}
-
-/**
  *  Functional test for verifying correct serial number format
  *
  *  @Test criteria
@@ -188,7 +168,7 @@ static void RunStreamConfig(k4a_device_t device,
 
     // Start clock on getting frames
     tickcounter_get_current_ms(tick_count, &start_ms);
-    timeout_ms = 2000; // TODO: Make this tighter once the data path has been optimized
+    timeout_ms = 2000;
 
     while (stream_count > 0)
     {
@@ -216,9 +196,6 @@ static void RunStreamConfig(k4a_device_t device,
             ASSERT_EQ(expected_depth_capture_size, k4a_image_get_size(image));
             k4a_image_release(image);
         }
-
-        // Verify no dropped captures/images
-        // TODO - Waiting on metadata
 
         k4a_capture_release(capture);
     };

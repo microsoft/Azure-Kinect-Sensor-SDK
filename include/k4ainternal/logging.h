@@ -280,7 +280,6 @@ FORCEINLINE void TraceInvalidHandle(int result,
     if ((NULL == _type_##_get_context(_handle_)))                                                                      \
     {                                                                                                                  \
         TraceInvalidHandle(0, __FILE__, __LINE__, __func__, #_type_, #_handle_, _handle_);                             \
-        /* TODO : ASSERT here */                                                                                       \
         return _fail_value_;                                                                                           \
     }                                                                                                                  \
     else                                                                                                               \

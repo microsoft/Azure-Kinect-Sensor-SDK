@@ -55,6 +55,10 @@
 #endif
 
 // Helpers to easily specify time in nanoseconds
+constexpr uint64_t operator"" _us(unsigned long long x)
+{
+    return x * 1000;
+}
 constexpr uint64_t operator"" _ms(unsigned long long x)
 {
     return x * 1000000;
@@ -65,12 +69,12 @@ constexpr uint64_t operator"" _s(unsigned long long x)
 }
 
 #ifndef MAX_CLUSTER_LENGTH_NS
-#define MAX_CLUSTER_LENGTH_NS 1000_ms
+#define MAX_CLUSTER_LENGTH_NS 32_ms
 #endif
 
 #ifndef MATROSKA_TIMESCALE_NS
-// 1 unit = 1ms
-#define MATROSKA_TIMESCALE_NS 1_ms
+// 1 unit = 1us
+#define MATROSKA_TIMESCALE_NS 1_us
 #endif
 
 #ifndef CLUSTER_WRITE_DELAY_NS

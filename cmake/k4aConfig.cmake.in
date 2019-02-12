@@ -1,8 +1,4 @@
 include(CMakeFindDependencyMacro)
 
-# Same syntax as find_package
-# @TODO: Write a FindLibUSB.cmake we can re-distribute
-# find_dependency(libusb 1.0 REQUIRED)
-
 # Add the targets file
 include("${CMAKE_CURRENT_LIST_DIR}/k4aTargets.cmake")

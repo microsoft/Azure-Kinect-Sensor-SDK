@@ -246,7 +246,7 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     case K4AWindowSet::ViewType::Normal:
         K4AWindowSet::StartNormalWindows(m_filenameLabel.c_str(),
                                          &m_cameraDataSource,
-                                         nullptr, // TODO hook up IMU once recording API supports it
+                                         nullptr, // IMU playback not supported yet
                                          nullptr, // Audio source - sound is not supported in recordings
                                          m_recordingHasDepth,
                                          recordConfig.depth_mode,

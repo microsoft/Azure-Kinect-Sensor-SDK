@@ -37,8 +37,6 @@ typedef struct _capturesync_context_t
     bool sync_captures;            // enables depth and color captures to be synchronized.
     bool synchronized_images_only; // Only send captures to the user if they contain both color and depth images
 
-    // TODO remove this hack
-    bool disable_hardware_hacks;
     bool waiting_for_clean_depth_ts;
 
     bool disable_sync;      // Disables synchronizing depth and color captures. Instead releases them as they arrive.
@@ -142,8 +140,6 @@ static void replace_sample(capturesync_context_t *sync, k4a_capture_t capture_ne
                  "Releasing capture early due to full queue TS:%10lld type:%s",
                  frame_info->ts,
                  frame_info->color_capture ? "Color" : "Depth");
-    // TODO: Are we convinced enough to enable this?
-    // assert(0); // This should not happen, the queue's should be sufficiently large enough
 
     if (!sync->synchronized_images_only)
     {
@@ -263,8 +259,8 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
         }
         else if (!color_capture && sync->waiting_for_clean_depth_ts)
         {
-            // TODO when firmware is fixed TS should start at 0 and may repeat until the depth and color streams
-            // have begun. This protects against large uninitialized timestamps at the start.
+            // Timestamps at the start of streaming are tricky, they will get reset to zero when the color camera is
+            // started. This code protects against the depth timestamps from being reported before the reset happens.
             if (ts_raw_capture / sync->fps_period > 10)
             {
                 logger_warn("capturesync_ts", "Dropping depth capture as TS is too large TS:%10lld", ts_raw_capture);
@@ -417,19 +413,17 @@ k4a_result_t capturesync_create(capturesync_t *capturesync_handle)
 
     if (K4A_SUCCEEDED(result))
     {
-        // TODO - should we go back to the default size?
-        result = TRACE_CALL(queue_create(QUEUE_DEFAULT_SIZE * 2, "Queue_depth", &sync->depth_ir.queue));
+        result = TRACE_CALL(queue_create(QUEUE_DEFAULT_SIZE, "Queue_depth", &sync->depth_ir.queue));
     }
 
     if (K4A_SUCCEEDED(result))
     {
-        // TODO - should we go back to the default size?
-        result = TRACE_CALL(queue_create(QUEUE_DEFAULT_SIZE * 2, "Queue_color", &sync->color.queue));
+        result = TRACE_CALL(queue_create(QUEUE_DEFAULT_SIZE, "Queue_color", &sync->color.queue));
     }
 
     if (K4A_SUCCEEDED(result))
     {
-        result = TRACE_CALL(queue_create(QUEUE_DEFAULT_SIZE, "Queue_capture", &sync->sync_queue));
+        result = TRACE_CALL(queue_create(QUEUE_DEFAULT_SIZE / 2, "Queue_capture", &sync->sync_queue));
     }
 
     if (K4A_SUCCEEDED(result))
@@ -590,12 +584,4 @@ k4a_wait_result_t capturesync_get_capture(capturesync_t capturesync_handle,
         *capture = capture_handle;
     }
     return wresult;
-}
-
-void private_capturesync_disable_hardware_hacks(capturesync_t capturesync_handle)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, capturesync_t, capturesync_handle);
-
-    capturesync_context_t *sync = capturesync_t_get_context(capturesync_handle);
-    sync->disable_hardware_hacks = 1;
 }

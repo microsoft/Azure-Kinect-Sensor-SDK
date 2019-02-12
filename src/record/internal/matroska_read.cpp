@@ -474,6 +474,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             logger_error(LOGGER_RECORD,
                          "Tag K4A_DEPTH_DELAY_NS contains invalid value: %s",
                          get_tag_string(depth_delay_tag).c_str());
+            return K4A_RESULT_FAILED;
         }
     }
     else
@@ -525,6 +526,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                     logger_error(LOGGER_RECORD,
                                  "Tag K4A_SUBORDINATE_DELAY_NS contains invalid value: %s",
                                  get_tag_string(subordinate_delay_tag).c_str());
+                    return K4A_RESULT_FAILED;
                 }
             }
             else
@@ -541,6 +543,30 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     {
         context->record_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
         context->record_config.subordinate_delay_off_master_usec = 0;
+    }
+
+    KaxTag *start_offset_tag = get_tag(context, "K4A_START_OFFSET_NS");
+    if (start_offset_tag != NULL)
+    {
+        uint64_t start_offset_ns;
+        std::istringstream start_offset_str(get_tag_string(start_offset_tag));
+        start_offset_str >> start_offset_ns;
+        if (!start_offset_str.fail())
+        {
+            assert(start_offset_ns / 1000 <= UINT32_MAX);
+            context->record_config.start_timestamp_offset_usec = (uint32_t)(start_offset_ns / 1000);
+        }
+        else
+        {
+            logger_error(LOGGER_RECORD,
+                         "Tag K4A_START_OFFSET_NS contains invalid value: %s",
+                         get_tag_string(start_offset_tag).c_str());
+            return K4A_RESULT_FAILED;
+        }
+    }
+    else
+    {
+        context->record_config.start_timestamp_offset_usec = 0;
     }
 
     return K4A_RESULT_SUCCEEDED;
@@ -901,17 +927,22 @@ std::shared_ptr<KaxCluster> find_cluster(k4a_playback_context_t *context, uint64
 
     if (previous != nullptr)
     {
-        if (read_element<KaxCluster>(context, previous.get()) == NULL)
+        // If the timestamp is before the first cluster, return the first cluster.
+        current = std::move(previous);
+    }
+    if (current != nullptr)
+    {
+        if (read_element<KaxCluster>(context, current.get()) == NULL)
         {
             logger_error(LOGGER_RECORD, "Failed to read cluster");
             return nullptr;
         }
 
-        uint64_t timecode = GetChild<KaxClusterTimecode>(*previous).GetValue();
+        uint64_t timecode = GetChild<KaxClusterTimecode>(*current).GetValue();
         assert(context->timecode_scale <= INT64_MAX);
-        previous->InitTimecode(timecode, (int64_t)context->timecode_scale);
+        current->InitTimecode(timecode, (int64_t)context->timecode_scale);
     }
-    return previous;
+    return current;
 }
 
 // Finds the next or previous cluster given a current cluster.
@@ -936,7 +967,7 @@ std::shared_ptr<libmatroska::KaxCluster> next_cluster(k4a_playback_context_t *co
             return nullptr;
         }
 
-        std::shared_ptr<libmatroska::KaxCluster> next_cluster = find_next<KaxCluster>(context, true, true);
+        std::shared_ptr<KaxCluster> next_cluster = find_next<KaxCluster>(context, true, true);
         if (next_cluster)
         {
             uint64_t timecode = GetChild<KaxClusterTimecode>(*next_cluster).GetValue();
@@ -952,7 +983,12 @@ std::shared_ptr<libmatroska::KaxCluster> next_cluster(k4a_playback_context_t *co
         {
             return nullptr;
         }
-        return seek_timestamp(context, timestamp_ns - 1);
+        std::shared_ptr<KaxCluster> previous_cluster = seek_timestamp(context, timestamp_ns - 1);
+        if (previous_cluster && previous_cluster->GetElementPosition() == current_cluster->GetElementPosition())
+        {
+            return nullptr;
+        }
+        return previous_cluster;
     }
 }
 

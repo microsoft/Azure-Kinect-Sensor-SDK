@@ -118,6 +118,12 @@ typedef struct _k4a_record_configuration_t
      * This value is 0 unless \p wired_sync_mode is set to K4A_WIRED_SYNC_MODE_SUBORDINATE
      */
     uint32_t subordinate_delay_off_master_usec;
+
+    /**
+     * The timestamp offset of the start of the recording. All recorded timestamps are offset by this value such that
+     * the recording starts at timestamp 0. This value can be used to synchronize timestamps between 2 recording files.
+     */
+    uint32_t start_timestamp_offset_usec;
 } k4a_record_configuration_t;
 
 #ifdef __cplusplus

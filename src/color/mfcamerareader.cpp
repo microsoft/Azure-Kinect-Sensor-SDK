@@ -183,8 +183,11 @@ CMFCameraReader::~CMFCameraReader()
 {
     if (m_mfStarted)
     {
-        // TODO: What happens if this fails? We should at least add a comment on the behavior
-        (void)MFShutdown();
+        HRESULT hr = MFShutdown();
+        if (FAILED(hr))
+        {
+            logger_error(LOGGER_COLOR, "MFShutdown failed: 0x%08x", hr);
+        }
     }
 
     if (m_hStreamFlushed != NULL && m_hStreamFlushed != INVALID_HANDLE_VALUE)
@@ -507,8 +510,6 @@ void CMFCameraReader::Stop()
         lock.Unlock(); // Wait without lock
         do
         {
-            // TODO: implement colormcu_is_connected as part of this loop, abort loop if we get disconnect
-
             // Wait until async operations are terminated for 10 sec
             switch (WaitForSingleObject(m_hStreamFlushed, 10000))
             {

@@ -83,21 +83,28 @@ k4a_wait_result_t capturesync_get_capture(capturesync_t capturesync_handle,
                                           k4a_capture_t *capture_handle,
                                           int32_t timeout_in_ms);
 
-/** TODO
+/** Capturesync module asynchronously accepts new captures from color and depth modules through this API.
+ *
+ * \param capturesync_handle
+ * The capturesync handle from capturesync_create()
+ *
+ * \param result
+ * The result of the USB opperation providing the sample.
+ *
+ * \param capture_raw
+ * A capture of a single color image, or a capture with upto 2 images; depth and IR.
+ *
+ * \param color_capture
+ * True if the capture contains a single color capture. False is the capture contains upto 2 images; depth and IR.
+ *
+ * \remarks
+ * If ::K4A_SUCCEEDED(result) is true then capture_raw must be valid. If ::K4A_SUCCEEDED(result) is false then
+ * capture_raw is optional and may be NULL.
  */
 void capturesync_add_capture(capturesync_t capturesync_handle,
                              k4a_result_t result,
                              k4a_capture_t capture_raw,
                              bool color_capture);
-
-/** TODO remove this hacky API
- *
- * \param capturesync_handle
- * The capturesync handle from capturesync_create()
- *
- * Private temporary function to disable hardware hacks so that unit tests can keep running successfully
- */
-void private_capturesync_disable_hardware_hacks(capturesync_t capturesync_handle);
 
 #ifdef __cplusplus
 }
