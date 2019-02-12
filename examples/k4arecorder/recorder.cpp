@@ -90,20 +90,40 @@ int do_recording(uint8_t device_index,
 
     // Wait for the first capture before starting recording.
     k4a_capture_t capture;
-    int32_t timeout_ms_for_first_capture = 60000;
+    int32_t timeout_sec_for_first_capture = 60;
     if (device_config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
     {
-        timeout_ms_for_first_capture = 360000;
+        timeout_sec_for_first_capture = 360;
         std::cout << "[subordinate mode] Waiting for signal from master" << std::endl;
     }
-    k4a_wait_result_t result = k4a_device_get_capture(device, &capture, timeout_ms_for_first_capture);
-
-    if (result != K4A_WAIT_RESULT_SUCCEEDED)
+    clock_t first_capture_start = clock();
+    k4a_wait_result_t result = K4A_WAIT_RESULT_TIMEOUT;
+    // Wait for the first capture in a loop so Ctrl-C will still exit.
+    while (!exiting && (clock() - first_capture_start) < (CLOCKS_PER_SEC * timeout_sec_for_first_capture))
     {
-        std::cerr << "Runtime error: k4a_device_get_capture() returned " << result << std::endl;
+        result = k4a_device_get_capture(device, &capture, 100);
+        if (result == K4A_WAIT_RESULT_SUCCEEDED)
+        {
+            k4a_capture_release(capture);
+            break;
+        }
+        else if (result == K4A_WAIT_RESULT_FAILED)
+        {
+            std::cerr << "Runtime error: k4a_device_get_capture() returned error: " << result << std::endl;
+            return 1;
+        }
+    }
+
+    if (exiting)
+    {
+        k4a_device_close(device);
+        return 0;
+    }
+    else if (result == K4A_WAIT_RESULT_TIMEOUT)
+    {
+        std::cerr << "Timed out waiting for first capture." << std::endl;
         return 1;
     }
-    k4a_capture_release(capture);
 
     std::cout << "Started recording" << std::endl;
     if (recording_length <= 0)
@@ -155,7 +175,11 @@ int do_recording(uint8_t device_index,
     } while (!exiting && result != K4A_WAIT_RESULT_FAILED &&
              (recording_length < 0 || (clock() - recording_start < recording_length * CLOCKS_PER_SEC)));
 
-    std::cout << "Stopping recording..." << std::endl;
+    if (!exiting)
+    {
+        exiting = true;
+        std::cout << "Stopping recording..." << std::endl;
+    }
     // TODO: BUG 19412496, BUG 19475311 - If references are held, stop command will hang.
     if (record_imu)
     {

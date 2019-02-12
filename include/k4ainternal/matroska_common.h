@@ -100,6 +100,19 @@ template<typename T, size_t N> constexpr size_t arraysize(T const (&)[N]) noexce
     return N;
 }
 
+// Function for switching between big and little-endian 16-bit ints
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
+constexpr uint16_t swap_bytes_16(uint16_t input)
+{
+#if __has_builtin(__builtin_bswap16)
+    return __builtin_bswap16(input);
+#else
+    return input >> 8 | input << 8;
+#endif
+}
+
 namespace k4arecord
 {
 /**
@@ -161,6 +174,11 @@ static const std::pair<k4a_depth_mode_t, std::string> depth_modes[] =
       { K4A_DEPTH_MODE_WFOV_2X2BINNED, "WFOV_2X2BINNED" },
       { K4A_DEPTH_MODE_WFOV_UNBINNED, "WFOV_UNBINNED" },
       { K4A_DEPTH_MODE_PASSIVE_IR, "PASSIVE_IR" } };
+
+static const std::pair<k4a_wired_sync_mode_t, std::string> external_sync_modes[] =
+    { { K4A_WIRED_SYNC_MODE_STANDALONE, "STANDALONE" },
+      { K4A_WIRED_SYNC_MODE_MASTER, "MASTER" },
+      { K4A_WIRED_SYNC_MODE_SUBORDINATE, "SUBORDINATE" } };
 
 } // namespace k4arecord
 

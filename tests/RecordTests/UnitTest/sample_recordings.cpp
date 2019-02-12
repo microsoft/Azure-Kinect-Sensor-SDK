@@ -21,6 +21,10 @@ void SampleRecordings::SetUp()
     k4a_device_configuration_t record_config_delay = record_config_full;
     record_config_delay.depth_delay_off_color_usec = 10000; // 10ms
 
+    k4a_device_configuration_t record_config_sub = record_config_full;
+    record_config_sub.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
+    record_config_sub.subordinate_delay_off_master_usec = 10000; // 10ms
+
     {
         k4a_record_t handle = NULL;
         k4a_result_t result = k4a_record_create("record_test_empty.mkv", NULL, record_config_empty, &handle);
@@ -112,6 +116,28 @@ void SampleRecordings::SetUp()
 
         k4a_record_close(handle);
     }
+    {
+        k4a_record_t handle = NULL;
+        k4a_result_t result = k4a_record_create("record_test_sub.mkv", NULL, record_config_sub, &handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        result = k4a_record_write_header(handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        uint64_t timestamps[3] = { 0, 0, 0 };
+        k4a_capture_t capture = create_test_capture(timestamps,
+                                                    record_config_sub.color_format,
+                                                    record_config_sub.color_resolution,
+                                                    record_config_sub.depth_mode);
+        result = k4a_record_write_capture(handle, capture);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        k4a_capture_release(capture);
+
+        result = k4a_record_flush(handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        k4a_record_close(handle);
+    }
 }
 
 void SampleRecordings::TearDown()
@@ -119,4 +145,5 @@ void SampleRecordings::TearDown()
     std::remove("record_test_empty.mkv");
     std::remove("record_test_full.mkv");
     std::remove("record_test_delay.mkv");
+    std::remove("record_test_sub.mkv");
 }

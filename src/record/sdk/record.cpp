@@ -235,6 +235,26 @@ k4a_result_t k4a_record_create(const char *path,
         add_tag(context, "K4A_DEPTH_DELAY_NS", delay_str.str().c_str());
     }
 
+    if (K4A_SUCCEEDED(result))
+    {
+        switch (device_config.wired_sync_mode)
+        {
+        case K4A_WIRED_SYNC_MODE_STANDALONE:
+            add_tag(context, "K4A_WIRED_SYNC_MODE", "STANDALONE");
+            break;
+        case K4A_WIRED_SYNC_MODE_MASTER:
+            add_tag(context, "K4A_WIRED_SYNC_MODE", "MASTER");
+            break;
+        case K4A_WIRED_SYNC_MODE_SUBORDINATE:
+            add_tag(context, "K4A_WIRED_SYNC_MODE", "SUBORDINATE");
+
+            std::ostringstream delay_str;
+            delay_str << device_config.subordinate_delay_off_master_usec * 1000;
+            add_tag(context, "K4A_SUBORDINATE_DELAY_NS", delay_str.str().c_str());
+            break;
+        }
+    }
+
     if (K4A_SUCCEEDED(result) && device != NULL)
     {
         // Add the firmware version and device serial number to the recording
@@ -477,12 +497,24 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
             uint8_t *image_buffer = k4a_image_get_buffer(images[i]);
             if (image_buffer != NULL && buffer_size > 0)
             {
-                if (k4a_image_get_format(images[i]) == expected_formats[i])
+                k4a_image_format_t image_format = k4a_image_get_format(images[i]);
+                if (image_format == expected_formats[i])
                 {
-                    uint64_t timestamp_ns = k4a_image_get_timestamp_usec(images[i]) * 1000;
                     assert(buffer_size <= UINT32_MAX);
                     // TODO: BUG 19475311 - Frame needs to be copied until color capture bug is fixed.
                     DataBuffer *data_buffer = new DataBuffer(image_buffer, (uint32)buffer_size, NULL, true);
+                    if (image_format == K4A_IMAGE_FORMAT_DEPTH16 || image_format == K4A_IMAGE_FORMAT_IR16)
+                    {
+                        // 16 bit grayscale needs to be converted to big-endian in the file.
+                        assert(data_buffer->Size() % sizeof(uint16_t) == 0);
+                        uint16_t *data_buffer_raw = reinterpret_cast<uint16_t *>(data_buffer->Buffer());
+                        for (size_t j = 0; j < data_buffer->Size() / sizeof(uint16_t); j++)
+                        {
+                            data_buffer_raw[j] = swap_bytes_16(data_buffer_raw[j]);
+                        }
+                    }
+
+                    uint64_t timestamp_ns = k4a_image_get_timestamp_usec(images[i]) * 1000;
                     k4a_result_t tmp_result = TRACE_CALL(
                         write_track_data(context, tracks[i], timestamp_ns, data_buffer));
                     if (K4A_FAILED(tmp_result))

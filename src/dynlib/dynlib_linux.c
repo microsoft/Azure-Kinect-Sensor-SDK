@@ -6,8 +6,12 @@
 
 // System dependencies
 #include <stdlib.h>
+#include <stdio.h>
 #include <ctype.h>
 #include <dlfcn.h>
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
 
 typedef struct _dynlib_context_t
 {
@@ -15,41 +19,75 @@ typedef struct _dynlib_context_t
 } dynlib_context_t;
 
 K4A_DECLARE_CONTEXT(dynlib_t, dynlib_context_t);
-
-k4a_result_t dynlib_create(const char *name, dynlib_t *dynlib_handle)
+static char *generate_file_name(const char *name, uint32_t major_ver, uint32_t minor_ver)
 {
-    // Note: A nullptr is allowed on linux systems for "name"
+    const char *lib_prefix = "lib";
+    const char *lib_suffix = "so";
+    size_t max_buffer_size = strlen(name) + strlen(TOSTRING(DYNLIB_MAX_MAJOR_VERSION)) +
+                             strlen(TOSTRING(DYNLIB_MAX_MINOR_VERSION)) + strlen(".") + strlen(".") +
+                             strlen(lib_suffix) + strlen(lib_prefix) + 1;
+
+    char *versioned_file_name = malloc(max_buffer_size);
+    if (versioned_file_name == NULL)
+    {
+        LOG_ERROR("malloc failed with size %llu", max_buffer_size);
+        return NULL;
+    }
+    versioned_file_name[0] = '\0';
+    snprintf(versioned_file_name, max_buffer_size, "%s%s.%s.%u.%u", lib_prefix, name, lib_suffix, major_ver, minor_ver);
+
+    return versioned_file_name;
+}
+
+k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_ver, dynlib_t *dynlib_handle)
+{
+    // Note: A nullptr is allowed on linux systems for "name", however, this is
+    // functionality we do not support
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, name == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, dynlib_handle == NULL);
+
+    if (major_ver > DYNLIB_MAX_MAJOR_VERSION)
+    {
+        LOG_ERROR("Failed to load dynamic library %s. major_ver %u is too large to load. Max is %u\n",
+                  name,
+                  major_ver,
+                  DYNLIB_MAX_MAJOR_VERSION);
+        return K4A_RESULT_FAILED;
+    }
+
+    if (minor_ver > DYNLIB_MAX_MINOR_VERSION)
+    {
+        LOG_ERROR("Failed to load dynamic library %s. minor_ver %u is too large to load. Max is %u\n",
+                  name,
+                  minor_ver,
+                  DYNLIB_MAX_MINOR_VERSION);
+        return K4A_RESULT_FAILED;
+    }
+
+    char *versioned_name = generate_file_name(name, major_ver, minor_ver);
+    if (versioned_name == NULL)
+    {
+        return K4A_RESULT_FAILED;
+    }
 
     dynlib_context_t *dynlib = dynlib_t_create(dynlib_handle);
     k4a_result_t result = K4A_RESULT_FROM_BOOL(dynlib != NULL);
 
     if (K4A_SUCCEEDED(result))
     {
-        dynlib->handle = dlopen(name, RTLD_NOW);
-
-        if ((dynlib->handle == NULL) && name && isalpha(name[0]))
-        {
-            // try to load "lib" + name + ".so" this emulates Windows
-            // automatically adding .DLL to name
-            const char *lib_prefix = "lib";
-            const char *lib_suffix = ".so";
-            char *full_name = malloc(strlen(lib_prefix) + strlen(name) + strlen(lib_suffix) + 1);
-            full_name[0] = '\0';
-            strcat(full_name, lib_prefix);
-            strcat(full_name, name);
-            strcat(full_name, lib_suffix);
-
-            dynlib->handle = dlopen(full_name, RTLD_NOW);
-            free(full_name);
-        }
+        dynlib->handle = dlopen(versioned_name, RTLD_NOW);
 
         result = (dynlib->handle != NULL) ? K4A_RESULT_SUCCEEDED : K4A_RESULT_FAILED;
 
         if (K4A_FAILED(result))
         {
-            LOG_ERROR("Failed to load shared object %s with error: %s", name, dlerror());
+            LOG_ERROR("Failed to load shared object %s with error: %s", versioned_name, dlerror());
         }
+    }
+
+    if (versioned_name)
+    {
+        free(versioned_name);
     }
 
     return result;

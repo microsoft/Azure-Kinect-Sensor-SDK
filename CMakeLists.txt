@@ -6,6 +6,8 @@
 # Visual Studio 2017 15.7 - CMake 3.11
 cmake_minimum_required(VERSION 3.9.0)
 
+cmake_policy(SET CMP0048 NEW)
+
 # Add this repository's cmake modules to CMAKE_MODULE_PATH
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
@@ -15,9 +17,12 @@ if (NOT CMAKE_PROJECT_NAME)
     include(DefaultBuildType)
 endif()
 
-project(K4A LANGUAGES C CXX)
+project(K4A LANGUAGES C CXX
+    VERSION 1.0)
 
 option(K4A_BUILD_DOCS "Build K4A doxygen documentation" OFF)
+
+include(GitCommands)
 
 # Set the project version
 include(K4AProjectVersion)
@@ -52,6 +57,9 @@ include(k4aCompilerFlags)
 
 # Source for the K4A SDK
 set(K4A_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
+
+# Source for the common version resource file
+set(K4A_VERSION_RC ${CMAKE_CURRENT_LIST_DIR}/version.rc.in)
 
 add_subdirectory(examples)
 add_subdirectory(src)

@@ -3,9 +3,13 @@
 ### v0.8.0
 
 * Output intrinsic calibrated IMU data
-* Changed units of IMU accelerometer reading from G to m/s^2
+* Changed units of IMU accelerometer reading from G to meters per second squared.
+* Changed units of IMU Gyroscope reading from degrees per second to radians per second.
 * Breaking change to k4a_calibration_get_from_raw API, size of source calibration string is now required along with the 
 source calibration.
+* Added FW version minumum bar check
+* Integrated GPU transform engine into SDK to accelerate transformation between depth image and color image.
+* Depth Engine plugin versioning throught binding with SDK during loading and more logging added.
 
 ### v0.7.1
 

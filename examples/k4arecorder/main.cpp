@@ -19,11 +19,11 @@ static void signal_handler()
     if (!exiting)
     {
         std::cout << "Stopping recording..." << std::endl;
-        exiting = true;
         exiting_timestamp = clock();
+        exiting = true;
     }
     // If Ctrl-C is received again after 1 second, force-stop the application since it's not responding.
-    else if (clock() - exiting_timestamp > CLOCKS_PER_SEC)
+    else if (exiting_timestamp != 0 && clock() - exiting_timestamp > CLOCKS_PER_SEC)
     {
         std::cout << "Forcing stop." << std::endl;
         exit(1);
@@ -111,6 +111,7 @@ int main(int argc, char **argv)
     bool recording_imu_enabled = true;
     k4a_wired_sync_mode_t wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
     int32_t depth_delay_off_color_usec = 0;
+    uint32_t subordinate_delay_off_master_usec = 0;
     char *recording_filename;
 
     CmdParser::OptionParser cmd_parser;
@@ -224,6 +225,14 @@ int main(int argc, char **argv)
                                       throw std::runtime_error(str.str());
                                   }
                               });
+    cmd_parser.RegisterOption("--depth-delay",
+                              "Set the time offset between color and depth frames in microseconds (default: 0)\n"
+                              "A negative value means depth frames will arrive before color frames.\n"
+                              "The delay must be less than 1 frame period.",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  depth_delay_off_color_usec = std::stoi(args[0]);
+                              });
     cmd_parser.RegisterOption("-r|--rate",
                               "Set the camera frame rate in Frames per Second\n"
                               "Default is the maximum rate supported by the camera modes.\n"
@@ -293,13 +302,17 @@ int main(int argc, char **argv)
                                       throw std::runtime_error(str.str());
                                   }
                               });
-    cmd_parser.RegisterOption("--depth-delay",
-                              "Set the time offset between color and depth frames in microseconds (default: 0)\n"
-                              "A negative value means depth frames will arrive before color frames.\n"
-                              "The delay must be less than 1 frame period.",
+    cmd_parser.RegisterOption("--sync-delay",
+                              "Set the external sync delay off the master camera in microseconds (default: 0)\n"
+                              "This setting is only valid if the camera is in Subordinate mode.",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  depth_delay_off_color_usec = std::stoi(args[0]);
+                                  int delay = std::stoi(args[0]);
+                                  if (delay < 0)
+                                  {
+                                      throw std::runtime_error("External sync delay must be positive.");
+                                  }
+                                  subordinate_delay_off_master_usec = (uint32_t)delay;
                               });
 
     int args_left = 0;
@@ -337,6 +350,11 @@ int main(int argc, char **argv)
             return 1;
         }
     }
+    if (subordinate_delay_off_master_usec > 0 && wired_sync_mode != K4A_WIRED_SYNC_MODE_SUBORDINATE)
+    {
+        std::cerr << "--sync-delay is only valid if --external-sync is set to Subordinate." << std::endl;
+        return 1;
+    }
 
 #if defined(_WIN32)
     SetConsoleCtrlHandler(
@@ -367,6 +385,7 @@ int main(int argc, char **argv)
     device_config.camera_fps = recording_rate;
     device_config.wired_sync_mode = wired_sync_mode;
     device_config.depth_delay_off_color_usec = depth_delay_off_color_usec;
+    device_config.subordinate_delay_off_master_usec = subordinate_delay_off_master_usec;
 
     return do_recording((uint8_t)device_index,
                         recording_filename,

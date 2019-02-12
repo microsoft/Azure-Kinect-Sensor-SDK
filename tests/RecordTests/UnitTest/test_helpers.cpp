@@ -182,11 +182,14 @@ bool validate_test_capture(k4a_capture_t capture,
 k4a_image_t
 create_test_image(uint64_t timestamp_us, k4a_image_format_t format, uint32_t width, uint32_t height, uint32_t stride)
 {
-    // Ignore the correct buffer size for testing, and create a 1KB image instead.
+    // Ignore the correct buffer size for testing, and create a 8KB image instead.
     // Generating 1GB+ recordings for testing is too slow.
-    size_t buffer_size = 1024;
+    size_t buffer_size = 8096;
     uint8_t *buffer = new uint8_t[buffer_size];
-    memset(buffer, 0xAA, buffer_size);
+    for (size_t i = 0; i < buffer_size / sizeof(uint32_t); i++)
+    {
+        reinterpret_cast<uint32_t *>(buffer)[i] = 0xAABBCCDD;
+    }
 
     k4a_image_t image = NULL;
     k4a_result_t result = k4a_image_create_from_buffer(format,
@@ -225,13 +228,18 @@ bool validate_test_image(k4a_image_t image,
         VALIDATE_PARAMETER(k4a_image_get_height_pixels(image), (int)height);
         VALIDATE_PARAMETER(k4a_image_get_stride_bytes(image), (int)stride);
 
-        uint8_t *buffer = k4a_image_get_buffer(image);
+        uint32_t *buffer = reinterpret_cast<uint32_t *>(k4a_image_get_buffer(image));
         size_t buffer_size = k4a_image_get_size(image);
-        for (size_t i = 0; i < buffer_size; i++)
+        VALIDATE_PARAMETER(buffer_size, 8096);
+        for (size_t i = 0; i < buffer_size / sizeof(uint32_t); i++)
         {
-            if (buffer[i] != 0xAA)
+            if (buffer[i] != 0xAABBCCDD)
             {
-                logger_error("PlaybackTest", "Image data is incorrect");
+                logger_error("PlaybackTest",
+                             "Image data is incorrect (index %d): 0x%X != 0x%X",
+                             i,
+                             buffer[i],
+                             0xAABBCCDD);
                 return false;
             }
         }

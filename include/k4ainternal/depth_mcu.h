@@ -113,7 +113,7 @@ k4a_result_t depthmcu_color_imu_calibration(depthmcu_t depthmcu_handle, k4a_capt
 k4a_buffer_result_t depthmcu_get_serialnum(depthmcu_t depthmcu_handle, char *serial_number, size_t *serial_number_size);
 
 k4a_result_t depthmcu_get_version(depthmcu_t depthmcu_handle, depthmcu_firmware_versions_t *version);
-bool depthmcu_is_ready(depthmcu_t depthmcu_handle);
+bool depthmcu_wait_is_ready(depthmcu_t depthmcu_handle);
 
 k4a_result_t depthmcu_get_cal(depthmcu_t depthmcu_handle, uint8_t *calibration, size_t cal_size, size_t *bytes_read);
 
