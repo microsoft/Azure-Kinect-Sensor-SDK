@@ -12,7 +12,7 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 # Why use the Azure Kinect Sensor SDK 
 
-The Azure Kinect Sensor SDK enables you to get the most out of your Azure Kinect camera. This SDK provides acess to:
+The Azure Kinect Sensor SDK enables you to get the most out of your Azure Kinect camera. Features inlclude:
 * Depth camera access
 * RGB camera access and control (e.g. exposure and white balance)
 * Motion sensor (gyroscope and accelerometer) access
