@@ -54,7 +54,7 @@ static usb_cmd_stream_cb_t usb_cmd_stream_callback;
 static CLI_STATUS usb_cmd_imu_read(int Argc, char **Argv)
 {
     k4a_result_t result;
-    usb_command_handle_t handle;
+    usbcmd_t handle;
     CLI_STATUS status = CLI_SUCCESS;
     uint32_t device_num;
     uint32_t command;
@@ -89,7 +89,7 @@ static CLI_STATUS usb_cmd_imu_read(int Argc, char **Argv)
 
     // use maximum buffer size for getting response
     // Get handle for imu (assumes K4A has been initialized)
-    if (usb_cmd_create(USB_DEVICE_COLOR_IMU_PROCESSOR, (uint8_t)device_num, &handle) == K4A_RESULT_SUCCEEDED)
+    if (usb_cmd_create(USB_DEVICE_COLOR_IMU_PROCESSOR, (uint8_t)device_num, NULL, &handle) == K4A_RESULT_SUCCEEDED)
     {
         result =
             usb_cmd_read(handle, command, data_buffer, (uint32_t)data_size, data_buffer, MAX_BUFFER_SIZE, &data_size);
@@ -136,7 +136,7 @@ static CLI_STATUS usb_cmd_imu_read(int Argc, char **Argv)
 static CLI_STATUS usb_cmd_depth_read(int Argc, char **Argv)
 {
     k4a_result_t result;
-    usb_command_handle_t handle;
+    usbcmd_t handle;
     CLI_STATUS status = CLI_SUCCESS;
     uint32_t device_num;
     uint32_t command;
@@ -171,7 +171,7 @@ static CLI_STATUS usb_cmd_depth_read(int Argc, char **Argv)
 
     // use maximum buffer size for getting response
     // Get handle for imu (assumes K4A has been initialized)
-    if (usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, (uint8_t)device_num, &handle) == K4A_RESULT_SUCCEEDED)
+    if (usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, (uint8_t)device_num, NULL, &handle) == K4A_RESULT_SUCCEEDED)
     {
         result =
             usb_cmd_read(handle, command, data_buffer, (uint32_t)data_size, data_buffer, MAX_BUFFER_SIZE, &data_size);
@@ -218,7 +218,7 @@ static CLI_STATUS usb_cmd_depth_read(int Argc, char **Argv)
 static CLI_STATUS usb_cmd_imu_write(int Argc, char **Argv)
 {
     k4a_result_t result;
-    usb_command_handle_t handle;
+    usbcmd_t handle;
     CLI_STATUS status = CLI_SUCCESS;
     uint32_t device_num;
     uint32_t command;
@@ -261,7 +261,7 @@ static CLI_STATUS usb_cmd_imu_write(int Argc, char **Argv)
 
     // use maximum buffer size for getting response
     // Get handle for imu (assumes K4A has been initialized)
-    if (usb_cmd_create(USB_DEVICE_COLOR_IMU_PROCESSOR, (uint8_t)device_num, &handle) == K4A_RESULT_SUCCEEDED)
+    if (usb_cmd_create(USB_DEVICE_COLOR_IMU_PROCESSOR, (uint8_t)device_num, NULL, &handle) == K4A_RESULT_SUCCEEDED)
     {
         result = usb_cmd_write(handle, command, data_buffer, (uint32_t)data_size, tx_buffer, tx_size);
         if (result != K4A_RESULT_SUCCEEDED)
@@ -296,7 +296,7 @@ static CLI_STATUS usb_cmd_imu_write(int Argc, char **Argv)
 static CLI_STATUS usb_cmd_depth_write(int Argc, char **Argv)
 {
     k4a_result_t result;
-    usb_command_handle_t handle;
+    usbcmd_t handle;
     CLI_STATUS status = CLI_SUCCESS;
     uint32_t device_num;
     uint32_t command;
@@ -339,7 +339,7 @@ static CLI_STATUS usb_cmd_depth_write(int Argc, char **Argv)
 
     // use maximum buffer size for getting response
     // Get handle for imu (assumes K4A has been initialized)
-    if (usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, (uint8_t)device_num, &handle) == K4A_RESULT_SUCCEEDED)
+    if (usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, (uint8_t)device_num, NULL, &handle) == K4A_RESULT_SUCCEEDED)
     {
         result = usb_cmd_write(handle, command, data_buffer, (uint32_t)data_size, tx_buffer, tx_size);
         if (result != K4A_RESULT_SUCCEEDED)
@@ -416,7 +416,7 @@ static void usb_cmd_stream_callback(k4a_result_t result, k4a_image_t image, void
 static CLI_STATUS usb_cmd_read_imu_stream(int Argc, char **Argv)
 {
     k4a_result_t result;
-    usb_command_handle_t handle;
+    usbcmd_t handle;
     uint32_t device_num;
     CLI_STATUS status = CLI_SUCCESS;
     uint32_t stream_count = 0;
@@ -444,7 +444,7 @@ static CLI_STATUS usb_cmd_read_imu_stream(int Argc, char **Argv)
     close_k4a();
 
     // Get handle instance
-    if (usb_cmd_create(USB_DEVICE_COLOR_IMU_PROCESSOR, (uint8_t)device_num, &handle) == K4A_RESULT_SUCCEEDED)
+    if (usb_cmd_create(USB_DEVICE_COLOR_IMU_PROCESSOR, (uint8_t)device_num, NULL, &handle) == K4A_RESULT_SUCCEEDED)
     {
         // attach callback and wait for it to complete
         if ((result = usb_cmd_stream_register_cb(handle, usb_cmd_stream_callback, &stream_count)) !=
@@ -515,7 +515,7 @@ static CLI_STATUS usb_cmd_read_imu_stream(int Argc, char **Argv)
 static CLI_STATUS usb_cmd_read_depth_stream(int Argc, char **Argv)
 {
     k4a_result_t result;
-    usb_command_handle_t handle;
+    usbcmd_t handle;
     uint32_t device_num;
     CLI_STATUS status = CLI_SUCCESS;
     uint32_t stream_count = 0;
@@ -588,7 +588,7 @@ static CLI_STATUS usb_cmd_read_depth_stream(int Argc, char **Argv)
     }
 
     // Get handle instance
-    if (usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, (uint8_t)device_num, &handle) == K4A_RESULT_SUCCEEDED)
+    if (usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, (uint8_t)device_num, NULL, &handle) == K4A_RESULT_SUCCEEDED)
     {
         // Register callback routine with handle
         if ((result = usb_cmd_stream_register_cb(handle, usb_cmd_stream_callback, &stream_count)) !=

@@ -165,7 +165,7 @@ static CLI_STATUS capture_cmd_sync(int Argc, char **Argv)
 {
     CLI_STATUS status = CLI_SUCCESS;
     k4a_result_t result;
-    usb_command_handle_t handle;
+    usbcmd_t handle;
     uint32_t depth_mode;
     uint32_t fps;
     uint32_t depth_fps;
@@ -348,7 +348,7 @@ static CLI_STATUS capture_cmd_sync(int Argc, char **Argv)
     close_k4a();
 
     // Get handle instance
-    if (usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, 0, &handle) == K4A_RESULT_SUCCEEDED)
+    if (usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, 0, NULL, &handle) == K4A_RESULT_SUCCEEDED)
     {
         tick_handle = tickcounter_create();
         stream_mutex = Lock_Init();

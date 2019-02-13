@@ -8,15 +8,15 @@
 #include "color_mock_mediafoundation.h"
 #include "color_mock_windows.h"
 
-// Fake container ID
-static const GUID guid_FakeContainerId = { 0x4e666abb,
-                                           0x31e9,
-                                           0x4425,
-                                           { 0xaf, 0x9f, 0x11, 0x81, 0x2e, 0x64, 0x34, 0xde } };
 #endif // _WIN32
 
-#define FAKE_COLOR_MCU ((colormcu_t)0xface100)
-#define FAKE_DEPTH_MCU ((depthmcu_t)0xface200)
+// Fake container ID
+static const guid_t guid_FakeGoodContainerId = {
+    { 0x4e, 0x66, 0x6a, 0xbb, 0x31, 0xe9, 0x44, 0x25, 0xaf, 0x9f, 0x11, 0x81, 0x2e, 0x64, 0x34, 0xde }
+};
+static const guid_t guid_FakeBadContainerId = {
+    { 0xff, 0x66, 0x6a, 0xbb, 0x31, 0xe9, 0x44, 0x25, 0xaf, 0x9f, 0x11, 0x81, 0x2e, 0x64, 0x34, 0xde }
+};
 
 using namespace testing;
 
@@ -38,7 +38,8 @@ protected:
         EXPECT_MFCreateSourceReaderFromMediaSource(m_mockMediaFoundation);
         EXPECT_CM_Get_Device_Interface_PropertyW(m_mockWindows);
         EXPECT_CM_Locate_DevNodeW(m_mockWindows);
-        EXPECT_CM_Get_DevNode_PropertyW(m_mockWindows, guid_FakeContainerId);
+        GUID *containerId = (GUID *)&guid_FakeGoodContainerId;
+        EXPECT_CM_Get_DevNode_PropertyW(m_mockWindows, *containerId);
 #endif
     }
 
@@ -64,28 +65,23 @@ TEST_F(color_ut, create)
 
     ASSERT_NE((TICK_COUNTER_HANDLE)0, (tick = tickcounter_create()));
 
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, NULL, NULL, NULL, NULL));
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, FAKE_COLOR_MCU, NULL, NULL, NULL, NULL));
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, FAKE_DEPTH_MCU, NULL, NULL, NULL));
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, FAKE_COLOR_MCU, FAKE_DEPTH_MCU, NULL, NULL, NULL));
-
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, NULL, NULL, NULL, &color_handle1));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, NULL, NULL, NULL));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, &guid_FakeBadContainerId, NULL, NULL, NULL));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, NULL, NULL, &color_handle1));
     ASSERT_EQ(color_handle1, (color_t)NULL);
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, FAKE_COLOR_MCU, NULL, NULL, NULL, &color_handle1));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, &guid_FakeBadContainerId, NULL, NULL, &color_handle1));
     ASSERT_EQ(color_handle1, (color_t)NULL);
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, FAKE_DEPTH_MCU, NULL, NULL, &color_handle1));
+#ifdef _WIN32
+    // Linux does not yet support container ID search, so this doesn't currently fail
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(tick, &guid_FakeBadContainerId, NULL, NULL, &color_handle1));
     ASSERT_EQ(color_handle1, (color_t)NULL);
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, FAKE_DEPTH_MCU, NULL, NULL, &color_handle1));
-    ASSERT_EQ(color_handle1, (color_t)NULL);
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, FAKE_COLOR_MCU, FAKE_DEPTH_MCU, NULL, NULL, &color_handle1));
-    ASSERT_EQ(color_handle1, (color_t)NULL);
-
+#endif
     // Create an instance
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, FAKE_COLOR_MCU, FAKE_DEPTH_MCU, NULL, NULL, &color_handle1));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, &guid_FakeGoodContainerId, NULL, NULL, &color_handle1));
     ASSERT_NE(color_handle1, (color_t)NULL);
 
     // Create a second instance
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, FAKE_COLOR_MCU, FAKE_DEPTH_MCU, NULL, NULL, &color_handle2));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, &guid_FakeGoodContainerId, NULL, NULL, &color_handle2));
     ASSERT_NE(color_handle2, (color_t)NULL);
 
     // Verify the instances are unique
@@ -107,7 +103,7 @@ TEST_F(color_ut, streaming)
     ASSERT_NE((TICK_COUNTER_HANDLE)0, (tick = tickcounter_create()));
 
     // test color_create()
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, FAKE_COLOR_MCU, FAKE_DEPTH_MCU, NULL, NULL, &color_handle));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, &guid_FakeGoodContainerId, NULL, NULL, &color_handle));
     ASSERT_NE(color_handle, (color_t)NULL);
 
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
@@ -134,7 +130,7 @@ TEST_F(color_ut, exposure_control)
     ASSERT_NE((TICK_COUNTER_HANDLE)0, (tick = tickcounter_create()));
 
     // test color_create()
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, FAKE_COLOR_MCU, FAKE_DEPTH_MCU, NULL, NULL, &color_handle));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, &guid_FakeGoodContainerId, NULL, NULL, &color_handle));
     ASSERT_NE(color_handle, (color_t)NULL);
 
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;

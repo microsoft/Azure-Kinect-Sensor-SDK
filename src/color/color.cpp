@@ -2,8 +2,6 @@
 #include <k4ainternal/color.h>
 
 // Dependent libraries
-#include <k4ainternal/color_mcu.h>
-#include <k4ainternal/depth_mcu.h>
 
 // System dependencies
 #include <stdlib.h>
@@ -25,8 +23,6 @@ color_cb_mf_stream_t color_capture_available;
 typedef struct _color_context_t
 {
     TICK_COUNTER_HANDLE tick;
-    depthmcu_t depthmcu;
-    colormcu_t colormcu;
     color_cb_streaming_capture_t *capture_ready_cb;
     void *capture_ready_cb_context;
     tickcounter_ms_t sensor_start_time_tick;
@@ -39,15 +35,13 @@ typedef struct _color_context_t
 K4A_DECLARE_CONTEXT(color_t, color_context_t);
 
 k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
-                          colormcu_t colormcu,
-                          depthmcu_t depthmcu,
+                          const guid_t *container_id,
                           color_cb_streaming_capture_t capture_ready,
                           void *capture_ready_context,
                           color_t *color_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, tick_handle == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, colormcu == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, depthmcu == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, container_id == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, color_handle == NULL);
 
     color_context_t *color = color_t_create(color_handle);
@@ -55,8 +49,6 @@ k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
 
     if (K4A_SUCCEEDED(result))
     {
-        color->depthmcu = depthmcu;
-        color->colormcu = colormcu;
         color->capture_ready_cb = capture_ready;
         color->capture_ready_cb_context = capture_ready_context;
         color->sensor_start_time_tick = 0;
@@ -66,9 +58,9 @@ k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
 #ifdef _WIN32
     if (K4A_SUCCEEDED(result))
     {
-        uint8_t ContainerID[16];
+        static_assert(sizeof(guid_t) == sizeof(GUID), "Windows GUID and this guid_t are not the same");
         result = K4A_RESULT_FROM_BOOL(SUCCEEDED(
-            Microsoft::WRL::MakeAndInitialize<CMFCameraReader>(&color->m_spCameraReader, (GUID *)ContainerID)));
+            Microsoft::WRL::MakeAndInitialize<CMFCameraReader>(&color->m_spCameraReader, (GUID *)container_id)));
     }
 #else
     result = K4A_RESULT_SUCCEEDED;
@@ -213,7 +205,10 @@ void color_stop(color_t color_handle)
     // Request stop streaming and wait until clean up and flushing.
     // After this call, no more sample callback will be called.
 
-    color->m_spCameraReader->Stop();
+    if (color->m_spCameraReader)
+    {
+        color->m_spCameraReader->Stop();
+    }
 #else
     (void)color;
 #endif

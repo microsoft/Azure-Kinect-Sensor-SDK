@@ -16,7 +16,7 @@
 
 typedef struct _depthmcu_context_t
 {
-    usb_command_handle_t usb_cmd;
+    usbcmd_t usb_cmd;
     depthmcu_stream_cb_t *callback;
     void *callback_context;
     size_t payload_size;
@@ -62,7 +62,7 @@ k4a_result_t depthmcu_create(uint8_t device_index, depthmcu_t *depthmcu_handle)
 
     if (K4A_SUCCEEDED(result))
     {
-        result = TRACE_CALL(usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, device_index, &depthmcu->usb_cmd));
+        result = TRACE_CALL(usb_cmd_create(USB_DEVICE_DEPTH_PROCESSOR, device_index, NULL, &depthmcu->usb_cmd));
     }
 
     if (K4A_SUCCEEDED(result))
@@ -458,4 +458,13 @@ k4a_result_t depthmcu_reset_device(depthmcu_t depthmcu_handle)
     depthmcu_context_t *depthmcu = depthmcu_t_get_context(depthmcu_handle);
 
     return TRACE_CALL(usb_cmd_write(depthmcu->usb_cmd, DEV_CMD_RESET, NULL, 0, NULL, 0));
+}
+
+const guid_t *depthmcu_get_container_id(depthmcu_t depthmcu_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(NULL, depthmcu_t, depthmcu_handle);
+
+    depthmcu_context_t *depthmcu = depthmcu_t_get_context(depthmcu_handle);
+
+    return usb_cmd_get_container_id(depthmcu->usb_cmd);
 }

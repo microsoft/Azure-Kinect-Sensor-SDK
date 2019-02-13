@@ -6,6 +6,7 @@
 #define DEPTH_MCU_H
 
 #include <k4a/k4atypes.h>
+#include <k4ainternal/common.h>
 #include <k4ainternal/handle.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/usbcommand.h>
@@ -15,10 +16,43 @@
 extern "C" {
 #endif
 
+#pragma pack(push, 1)
+
+typedef struct _depthmcu_firmware_versions_t
+{
+    uint8_t rgb_major;
+    uint8_t rgb_minor;
+    uint16_t rgb_build;
+
+    uint8_t depth_major;
+    uint8_t depth_minor;
+    uint16_t depth_build;
+
+    uint8_t audio_major;
+    uint8_t audio_minor;
+    uint16_t audio_build;
+
+    uint16_t depth_sensor_cfg_major;
+    uint16_t depth_sensor_cfg_minor;
+
+    uint8_t build_config;   // 0x00 = Release; 0x01 = Debug
+    uint8_t signature_type; // 0x00 = MSFT; 0x01 = test; 0x02 = unsigned
+} depthmcu_firmware_versions_t;
+
+typedef struct _depthmcu_firmware_update_status_t
+{
+    uint16_t depth_status;
+    uint16_t rgb_status;
+    uint16_t audio_status;
+    uint16_t depth_configure_status;
+} depthmcu_firmware_update_status_t;
+
+#pragma pack(pop)
+
 /** Delivers a sample to the registered callback function when a capture is ready for processing.
  *
  * \param result
- * inidicates if the capture being passed in is complete
+ * indicates if the capture being passed in is complete
  *
  * \param image_handle
  * Image being read by hardware.
@@ -60,38 +94,7 @@ k4a_result_t depthmcu_create(uint8_t device_index, depthmcu_t *depthmcu_handle);
  * */
 void depthmcu_destroy(depthmcu_t depthmcu_handle);
 
-#pragma pack(push, 1)
-
-typedef struct _depthmcu_firmware_versions_t
-{
-    uint8_t rgb_major;
-    uint8_t rgb_minor;
-    uint16_t rgb_build;
-
-    uint8_t depth_major;
-    uint8_t depth_minor;
-    uint16_t depth_build;
-
-    uint8_t audio_major;
-    uint8_t audio_minor;
-    uint16_t audio_build;
-
-    uint16_t depth_sensor_cfg_major;
-    uint16_t depth_sensor_cfg_minor;
-
-    uint8_t build_config;   // 0x00 = Release; 0x01 = Debug
-    uint8_t signature_type; // 0x00 = MSFT; 0x01 = test; 0x02 = unsigned
-} depthmcu_firmware_versions_t;
-
-typedef struct _depthmcu_firmware_update_status_t
-{
-    uint16_t depth_status;
-    uint16_t rgb_status;
-    uint16_t audio_status;
-    uint16_t depth_configure_status;
-} depthmcu_firmware_update_status_t;
-
-#pragma pack(pop)
+const guid_t *depthmcu_get_container_id(depthmcu_t depthmcu_handle);
 
 k4a_result_t depthmcu_depth_start_streaming(depthmcu_t depthmcu_handle,
                                             depthmcu_stream_cb_t *callback,

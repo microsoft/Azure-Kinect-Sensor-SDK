@@ -8,7 +8,8 @@ target_include_directories(k4a_color_mcu PUBLIC
 
 # Dependencies of this library
 target_link_libraries(k4a_color_mcu PUBLIC 
-    k4ainternal::logging)
+    k4ainternal::logging
+    k4ainternal::usb_cmd)
 
 # Define alias for other targets to link against
 add_library(k4ainternal::color_mcu ALIAS k4a_color_mcu)

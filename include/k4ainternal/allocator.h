@@ -32,6 +32,16 @@ typedef enum
     ALLOCATION_SOURCE_USB_IMU,   /**< Memory was allocated by the USB reader */
 } allocation_source_t;
 
+/** Initializes the globals used by the allocator
+ *
+ */
+void allocator_initialize(void);
+
+/** Deinitializes the globals used by the allocator
+ *
+ */
+void allocator_deinitialize(void);
+
 /** Allocates memory from the allocator
  *
  * \param source

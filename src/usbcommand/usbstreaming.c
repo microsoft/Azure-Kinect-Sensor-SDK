@@ -36,18 +36,18 @@
  */
 static void usb_cmd_release_xfr(struct libusb_transfer *p_bulk_transfer)
 {
-    usb_cmd_handle_t *p_handle = (usb_cmd_handle_t *)(p_bulk_transfer->user_data);
+    usbcmd_context_t *usbcmd = (usbcmd_context_t *)(p_bulk_transfer->user_data);
 
     for (uint32_t i = 0; i < USB_CMD_MAX_XFR_COUNT; i++)
     {
-        if (p_handle->p_bulk_transfer[i] == p_bulk_transfer)
+        if (usbcmd->p_bulk_transfer[i] == p_bulk_transfer)
         {
-            p_handle->p_bulk_transfer[i] = NULL;
+            usbcmd->p_bulk_transfer[i] = NULL;
             // dereference allocator handle if one was allocated
-            if (p_handle->image[i] != NULL)
+            if (usbcmd->image[i] != NULL)
             {
-                image_dec_ref(p_handle->image[i]);
-                p_handle->image[i] = NULL;
+                image_dec_ref(usbcmd->image[i]);
+                usbcmd->image[i] = NULL;
             }
 
             break;
@@ -66,14 +66,14 @@ static void usb_cmd_release_xfr(struct libusb_transfer *p_bulk_transfer)
  */
 void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer)
 {
-    usb_cmd_handle_t *p_handle = (usb_cmd_handle_t *)(p_bulk_transfer->user_data);
+    usbcmd_context_t *usbcmd = (usbcmd_context_t *)(p_bulk_transfer->user_data);
     k4a_result_t result = K4A_RESULT_FAILED;
     uint8_t image_index = 0;
 
     // Get index to allocated handle
     for (image_index = 0; image_index < USB_CMD_MAX_XFR_COUNT; image_index++)
     {
-        if (p_handle->p_bulk_transfer[image_index] == p_bulk_transfer)
+        if (usbcmd->p_bulk_transfer[image_index] == p_bulk_transfer)
         {
             break;
         }
@@ -83,38 +83,38 @@ void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer)
 
     if (((p_bulk_transfer->status == LIBUSB_TRANSFER_COMPLETED) ||
          p_bulk_transfer->status == LIBUSB_TRANSFER_TIMED_OUT) &&
-        (p_handle->stream_going) && (image_index < USB_CMD_MAX_XFR_COUNT))
+        (usbcmd->stream_going) && (image_index < USB_CMD_MAX_XFR_COUNT))
     {
         // if callback provided, callback with associated information
-        if ((p_bulk_transfer->status == LIBUSB_TRANSFER_COMPLETED) && (p_handle->callback != NULL))
+        if ((p_bulk_transfer->status == LIBUSB_TRANSFER_COMPLETED) && (usbcmd->callback != NULL))
         {
-            image_set_size(p_handle->image[image_index], (size_t)p_bulk_transfer->actual_length);
-            p_handle->callback(K4A_RESULT_SUCCEEDED, p_handle->image[image_index], p_handle->stream_context);
+            image_set_size(usbcmd->image[image_index], (size_t)p_bulk_transfer->actual_length);
+            usbcmd->callback(K4A_RESULT_SUCCEEDED, usbcmd->image[image_index], usbcmd->stream_context);
         }
         else
         {
             LOG_WARNING("USB timeout on streaming endpoint for %s",
-                        p_handle->interface == USB_CMD_DEPTH_INTERFACE ? "depth" : "imu");
+                        usbcmd->interface == USB_CMD_DEPTH_INTERFACE ? "depth" : "imu");
         }
 
         // We guarantee the capture is valid during the callback if someone wants it to survive longer then they
         // need to add a ref
-        image_dec_ref(p_handle->image[image_index]);
-        p_handle->image[image_index] = NULL;
+        image_dec_ref(usbcmd->image[image_index]);
+        usbcmd->image[image_index] = NULL;
 
         // allocate next buffer and re-use transfer
         result = TRACE_CALL(
-            image_create_empty_internal(p_handle->source, p_handle->stream_size, &p_handle->image[image_index]));
+            image_create_empty_internal(usbcmd->source, usbcmd->stream_size, &usbcmd->image[image_index]));
         if (K4A_SUCCEEDED(result))
         {
             int err = LIBUSB_ERROR_OTHER;
             libusb_fill_bulk_transfer(p_bulk_transfer,
-                                      p_handle->libusb,
-                                      p_handle->stream_endpoint,
-                                      image_get_buffer(p_handle->image[image_index]),
-                                      (int)p_handle->stream_size,
+                                      usbcmd->libusb,
+                                      usbcmd->stream_endpoint,
+                                      image_get_buffer(usbcmd->image[image_index]),
+                                      (int)usbcmd->stream_size,
                                       usb_cmd_libusb_cb,
-                                      p_handle,
+                                      usbcmd,
                                       USB_CMD_MAX_WAIT_TIME);
             if ((err = libusb_submit_transfer(p_bulk_transfer)) != LIBUSB_SUCCESS)
             {
@@ -122,14 +122,14 @@ void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer)
                 logger_error(LOGGER_USB_CMD,
                              "Error calling libusb_submit_transfer for tx, result:%s",
                              libusb_error_name(err));
-                image_dec_ref(p_handle->image[image_index]);
-                p_handle->image[image_index] = NULL;
+                image_dec_ref(usbcmd->image[image_index]);
+                usbcmd->image[image_index] = NULL;
             }
         }
     }
     if (K4A_FAILED(result))
     {
-        if (p_handle->stream_going && (p_bulk_transfer->status != LIBUSB_TRANSFER_CANCELLED) &&
+        if (usbcmd->stream_going && (p_bulk_transfer->status != LIBUSB_TRANSFER_CANCELLED) &&
             (p_bulk_transfer->status != LIBUSB_TRANSFER_OVERFLOW))
         {
             // Note: The overflow happens when the thread tries to submit the next transfer and the kernel doesn't
@@ -142,10 +142,10 @@ void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer)
                          libusb_error_name((int)p_bulk_transfer->status));
 
             // check if the error state can be propagated
-            if ((image_index < USB_CMD_MAX_XFR_COUNT) && (p_handle->callback != NULL))
+            if ((image_index < USB_CMD_MAX_XFR_COUNT) && (usbcmd->callback != NULL))
             {
-                image_set_size(p_handle->image[image_index], (size_t)0);
-                p_handle->callback(K4A_RESULT_FAILED, p_handle->image[image_index], p_handle->stream_context);
+                image_set_size(usbcmd->image[image_index], (size_t)0);
+                usbcmd->callback(K4A_RESULT_FAILED, usbcmd->image[image_index], usbcmd->stream_context);
             }
         }
         // release resource for phy related changes or transfer stopped
@@ -168,11 +168,11 @@ void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer)
 static int usb_cmd_lib_usb_thread(void *var)
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
-    usb_cmd_handle_t *p_handle = (usb_cmd_handle_t *)var;
-    libusb_context *p_ctx = p_handle->usblib_context;
+    usbcmd_context_t *usbcmd = (usbcmd_context_t *)var;
+    libusb_context *p_ctx = usbcmd->libusb_context;
     int err = LIBUSB_SUCCESS;
     struct timeval tv = { 0 };
-    size_t xfer_pool = p_handle->stream_size;
+    size_t xfer_pool = usbcmd->stream_size;
     size_t max_xfr_pool = USB_CMD_MAX_XFR_POOL;
 
     // override the xfr pool if the environment variable is defined
@@ -184,114 +184,105 @@ static int usb_cmd_lib_usb_thread(void *var)
 
     tv.tv_sec = USB_CMD_LIBUSB_EVENT_TIMEOUT;
 
-    if (usb_cmd_is_handle_valid(p_handle))
+    if (usbcmd->stream_size > INT32_MAX)
     {
-        if (p_handle->stream_size > INT32_MAX)
-        {
-            result = K4A_RESULT_FAILED;
-        }
-        else
-        {
-            // set up the transfers.  Limit the overall amount of resources to a predefined amount
-            for (uint32_t i = 0; (i < USB_CMD_MAX_XFR_COUNT) && (xfer_pool < max_xfr_pool); i++)
-            {
-                xfer_pool += p_handle->stream_size;
-                p_handle->p_bulk_transfer[i] = libusb_alloc_transfer(0);
-                if (p_handle->p_bulk_transfer[i] == NULL)
-                {
-                    logger_error(LOGGER_USB_CMD, "libusb transfer could not be allocated");
-                    result = K4A_RESULT_FAILED;
-                    break;
-                }
-
-                result = TRACE_CALL(
-                    image_create_empty_internal(p_handle->source, p_handle->stream_size, &p_handle->image[i]));
-
-                if (K4A_FAILED(result))
-                {
-                    logger_error(LOGGER_USB_CMD, "stream buffer could not be allocated");
-                    result = K4A_RESULT_FAILED;
-                    break;
-                }
-
-                libusb_fill_bulk_transfer(p_handle->p_bulk_transfer[i],
-                                          p_handle->libusb,
-                                          p_handle->stream_endpoint,
-                                          image_get_buffer(p_handle->image[i]),
-                                          (int)p_handle->stream_size,
-                                          usb_cmd_libusb_cb,
-                                          p_handle,
-                                          USB_CMD_MAX_WAIT_TIME);
-
-                if ((err = libusb_submit_transfer(p_handle->p_bulk_transfer[i])) != LIBUSB_SUCCESS)
-                {
-                    if (i == 0)
-                    {
-                        // Could not even submit one.  This is an error
-                        logger_error(LOGGER_USB_CMD,
-                                     "No libusb transfers could not be submitted, error:%s",
-                                     libusb_error_name(err));
-                        result = K4A_RESULT_FAILED;
-                    }
-                    else
-                    {
-                        // Could not allocate a transfer within the predefined amount.
-                        // This could indicate other resource are competing and the allocation
-                        // pool needs to be adjusted
-                        logger_warn(
-                            LOGGER_USB_CMD,
-                            "Less than optimal %d libusb transfers submitted. Please evaluate available resources",
-                            i + 1);
-                    }
-
-                    image_dec_ref(p_handle->image[i]);
-                    p_handle->image[i] = NULL;
-
-                    // dealloc transfer
-                    libusb_free_transfer(p_handle->p_bulk_transfer[i]);
-                    p_handle->p_bulk_transfer[i] = NULL;
-                    break;
-                }
-            }
-        }
-
-        // loop servicing libusb
-        if (result == K4A_RESULT_SUCCEEDED)
-        {
-            while (p_handle->stream_going)
-            {
-                if ((err = libusb_handle_events_timeout_completed(p_ctx, &tv, NULL)) < 0)
-                {
-                    p_handle->stream_going = false; // Close stream if error is detected
-                    logger_error(LOGGER_USB_CMD,
-                                 "Error calling libusb_handle_events_timeout failed, result:%s",
-                                 libusb_error_name(err));
-                    result = K4A_RESULT_FAILED;
-                }
-            }
-        }
-
-        // cancel everything just in case of errors
-        for (uint32_t i = 0; i < USB_CMD_MAX_XFR_COUNT; i++)
-        {
-            if (p_handle->p_bulk_transfer[i] != NULL)
-            {
-                // Cancel any outstanding transfer
-                libusb_cancel_transfer(p_handle->p_bulk_transfer[i]);
-                // Service the library after  cancellation
-                if ((err = libusb_handle_events_timeout_completed(p_ctx, &tv, NULL)) < 0)
-                {
-                    logger_error(LOGGER_USB_CMD,
-                                 "Error calling libusb_handle_events_timeout failed, result:%s",
-                                 libusb_error_name(err));
-                    result = K4A_RESULT_FAILED;
-                }
-            }
-        }
+        result = K4A_RESULT_FAILED;
     }
     else
     {
-        result = K4A_RESULT_FAILED;
+        // set up the transfers.  Limit the overall amount of resources to a predefined amount
+        for (uint32_t i = 0; (i < USB_CMD_MAX_XFR_COUNT) && (xfer_pool < max_xfr_pool); i++)
+        {
+            xfer_pool += usbcmd->stream_size;
+            usbcmd->p_bulk_transfer[i] = libusb_alloc_transfer(0);
+            if (usbcmd->p_bulk_transfer[i] == NULL)
+            {
+                logger_error(LOGGER_USB_CMD, "libusb transfer could not be allocated");
+                result = K4A_RESULT_FAILED;
+                break;
+            }
+
+            result = TRACE_CALL(image_create_empty_internal(usbcmd->source, usbcmd->stream_size, &usbcmd->image[i]));
+
+            if (K4A_FAILED(result))
+            {
+                logger_error(LOGGER_USB_CMD, "stream buffer could not be allocated");
+                result = K4A_RESULT_FAILED;
+                break;
+            }
+
+            libusb_fill_bulk_transfer(usbcmd->p_bulk_transfer[i],
+                                      usbcmd->libusb,
+                                      usbcmd->stream_endpoint,
+                                      image_get_buffer(usbcmd->image[i]),
+                                      (int)usbcmd->stream_size,
+                                      usb_cmd_libusb_cb,
+                                      usbcmd,
+                                      USB_CMD_MAX_WAIT_TIME);
+
+            if ((err = libusb_submit_transfer(usbcmd->p_bulk_transfer[i])) != LIBUSB_SUCCESS)
+            {
+                if (i == 0)
+                {
+                    // Could not even submit one.  This is an error
+                    logger_error(LOGGER_USB_CMD,
+                                 "No libusb transfers could not be submitted, error:%s",
+                                 libusb_error_name(err));
+                    result = K4A_RESULT_FAILED;
+                }
+                else
+                {
+                    // Could not allocate a transfer within the predefined amount.
+                    // This could indicate other resource are competing and the allocation
+                    // pool needs to be adjusted
+                    logger_warn(LOGGER_USB_CMD,
+                                "Less than optimal %d libusb transfers submitted. Please evaluate available resources",
+                                i + 1);
+                }
+
+                image_dec_ref(usbcmd->image[i]);
+                usbcmd->image[i] = NULL;
+
+                // dealloc transfer
+                libusb_free_transfer(usbcmd->p_bulk_transfer[i]);
+                usbcmd->p_bulk_transfer[i] = NULL;
+                break;
+            }
+        }
+    }
+
+    // loop servicing libusb
+    if (result == K4A_RESULT_SUCCEEDED)
+    {
+        while (usbcmd->stream_going)
+        {
+            if ((err = libusb_handle_events_timeout_completed(p_ctx, &tv, NULL)) < 0)
+            {
+                usbcmd->stream_going = false; // Close stream if error is detected
+                logger_error(LOGGER_USB_CMD,
+                             "Error calling libusb_handle_events_timeout failed, result:%s",
+                             libusb_error_name(err));
+                result = K4A_RESULT_FAILED;
+            }
+        }
+    }
+
+    // cancel everything just in case of errors
+    for (uint32_t i = 0; i < USB_CMD_MAX_XFR_COUNT; i++)
+    {
+        if (usbcmd->p_bulk_transfer[i] != NULL)
+        {
+            // Cancel any outstanding transfer
+            libusb_cancel_transfer(usbcmd->p_bulk_transfer[i]);
+            // Service the library after  cancellation
+            if ((err = libusb_handle_events_timeout_completed(p_ctx, &tv, NULL)) < 0)
+            {
+                logger_error(LOGGER_USB_CMD,
+                             "Error calling libusb_handle_events_timeout failed, result:%s",
+                             libusb_error_name(err));
+                result = K4A_RESULT_FAILED;
+            }
+        }
     }
 
     ThreadAPI_Exit((int)result);
@@ -303,7 +294,7 @@ static int usb_cmd_lib_usb_thread(void *var)
  *  USB_CMD_MAX_XFR_COUNT number of transfers on the stream pipe and
  *  start the transfers.
  *
- *  @param p_command_handle
+ *  @param usbcmd_handle
  *   Handle to the entry that will be passed into the usb library as a context
  *
  *  @param payload_size
@@ -314,30 +305,35 @@ static int usb_cmd_lib_usb_thread(void *var)
  *   K4A_RESULT_FAILED      Operation failed or stream already started
  *
  */
-k4a_result_t usb_cmd_stream_start(usb_command_handle_t p_command_handle, size_t payload_size)
+k4a_result_t usb_cmd_stream_start(usbcmd_t usbcmd_handle, size_t payload_size)
 {
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, usbcmd_t, usbcmd_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, payload_size == 0);
 
-    k4a_result_t result = K4A_RESULT_FAILED;
-    usb_cmd_handle_t *p_handle = (usb_cmd_handle_t *)p_command_handle;
+    usbcmd_context_t *usbcmd;
+    k4a_result_t result;
+
+    result = K4A_RESULT_FROM_BOOL((usbcmd = usbcmd_t_get_context(usbcmd_handle)) != NULL);
 
     // start stream handler
-    if (usb_cmd_is_handle_valid(p_handle))
+    if (K4A_SUCCEEDED(result))
     {
+        result = K4A_RESULT_FAILED;
+
         // Sync operation with commands going to device
-        Lock(p_handle->cmd_mutex);
-        if (p_handle->stream_going)
+        Lock(usbcmd->lock);
+        if (usbcmd->stream_going)
         {
             // Steam already going (Error?)
             logger_info(LOGGER_USB_CMD, "Stream already in progress");
         }
         else
         {
-            p_handle->stream_size = payload_size;
-            p_handle->stream_going = true;
-            if (ThreadAPI_Create(&(p_handle->stream_handle), usb_cmd_lib_usb_thread, p_handle) != THREADAPI_OK)
+            usbcmd->stream_size = payload_size;
+            usbcmd->stream_going = true;
+            if (ThreadAPI_Create(&(usbcmd->stream_handle), usb_cmd_lib_usb_thread, usbcmd) != THREADAPI_OK)
             {
-                p_handle->stream_going = false;
+                usbcmd->stream_going = false;
                 logger_error(LOGGER_USB_CMD, "Could not start stream thread");
             }
             else
@@ -345,7 +341,7 @@ k4a_result_t usb_cmd_stream_start(usb_command_handle_t p_command_handle, size_t 
                 result = K4A_RESULT_SUCCEEDED;
             }
         }
-        Unlock(p_handle->cmd_mutex);
+        Unlock(usbcmd->lock);
     }
 
     return result;
@@ -356,7 +352,7 @@ k4a_result_t usb_cmd_stream_start(usb_command_handle_t p_command_handle, size_t 
  *  will block until the stream is stopped.  It is called implicitly
  *  by the usb_cmd_destroy() function
  *
- *  @param p_command_handle
+ *  @param usbcmd_handle
  *   Handle that contains the transfer resources used.
  *
  *  @return
@@ -364,24 +360,30 @@ k4a_result_t usb_cmd_stream_start(usb_command_handle_t p_command_handle, size_t 
  *   K4A_RESULT_FAILED      Operation failed
  *
  */
-k4a_result_t usb_cmd_stream_stop(usb_command_handle_t p_command_handle)
+k4a_result_t usb_cmd_stream_stop(usbcmd_t usbcmd_handle)
 {
-    k4a_result_t result = K4A_RESULT_FAILED;
-    usb_cmd_handle_t *p_handle = (usb_cmd_handle_t *)p_command_handle;
+    k4a_result_t result;
+    usbcmd_context_t *usbcmd;
 
-    if (usb_cmd_is_handle_valid(p_handle))
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, usbcmd_t, usbcmd_handle)
+
+    result = K4A_RESULT_FROM_BOOL((usbcmd = usbcmd_t_get_context(usbcmd_handle)) != NULL);
+
+    if (K4A_SUCCEEDED(result))
     {
+        result = K4A_RESULT_FAILED;
+
         // Sync operation with commands going to device
-        Lock(p_handle->cmd_mutex);
-        p_handle->stream_going = false;
+        Lock(usbcmd->lock);
+        usbcmd->stream_going = false;
 
         // This function is the only place that kills the thread so this should be safe
-        if (p_handle->stream_handle != NULL) // check if the thread has already stopped
+        if (usbcmd->stream_handle != NULL) // check if the thread has already stopped
         {
-            ThreadAPI_Join(p_handle->stream_handle, NULL);
-            p_handle->stream_handle = NULL;
+            ThreadAPI_Join(usbcmd->stream_handle, NULL);
+            usbcmd->stream_handle = NULL;
         }
-        Unlock(p_handle->cmd_mutex);
+        Unlock(usbcmd->lock);
 
         result = K4A_RESULT_SUCCEEDED;
     }

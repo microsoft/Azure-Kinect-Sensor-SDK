@@ -1,5 +1,10 @@
 ## Change Log
 
+### v1.0.0
+
+* Breaking Change to pre-production devices, update container ID & serial number
+* Added support for multiple devices on a single PC.
+
 ### v0.8.0
 
 * Output intrinsic calibrated IMU data

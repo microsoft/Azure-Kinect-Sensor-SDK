@@ -16,6 +16,7 @@
 #include <stdbool.h>
 // This library
 #include <k4ainternal/usbcommand.h>
+#include <k4ainternal/common.h>
 
 // Dependent libraries
 #include <k4ainternal/allocator.h>
@@ -63,36 +64,44 @@ extern "C" {
 #define USB_CMD_IMU_OUT_ENDPOINT 0x83
 #define USB_CMD_IMU_STREAM_ENDPOINT 0x82
 
+#define USB_CMD_MAX_SERIAL_NUMBER_LENGTH                                                                               \
+    (13 * 2) // Current schema is for 12 digits plus NULL, the extra size is incase that grows in the future.
+
 //************************ Typedefs *****************************
-typedef struct _usb_cmd_handle_t
+typedef struct _usbcmd_context_t
 {
-    bool depth_context; // TRUE if this is depth, false if this is IMU
     allocation_source_t source;
+
+    // LIBUSB properties
+    libusb_device_handle *libusb;
+    libusb_context *libusb_context;
+
     uint8_t index;
-    uint8_t bus;
-    uint8_t port_path[USB_CMD_PORT_DEPTH];
+    uint16_t pid;
     uint8_t interface;
     uint8_t cmd_tx_endpoint;
     uint8_t cmd_rx_endpoint;
     uint8_t stream_endpoint;
     uint32_t transaction_id;
-    libusb_device_handle *libusb;
-    struct libusb_context *usblib_context;
+
+    unsigned char serial_number[32];
+    guid_t container_id;
+
     usb_cmd_stream_cb_t *callback;
     void *stream_context;
     bool stream_going;
     struct libusb_transfer *p_bulk_transfer[USB_CMD_MAX_XFR_COUNT];
     k4a_image_t image[USB_CMD_MAX_XFR_COUNT];
     size_t stream_size;
-    LOCK_HANDLE cmd_mutex;
+    LOCK_HANDLE lock;
     THREAD_HANDLE stream_handle;
-    struct _usb_cmd_handle_t *next;
-} usb_cmd_handle_t;
+} usbcmd_context_t;
+
+K4A_DECLARE_CONTEXT(usbcmd_t, usbcmd_context_t);
 
 //************ Declarations (Statics and globals) ***************
 
 //******************* Function Prototypes ***********************
-bool usb_cmd_is_handle_valid(usb_cmd_handle_t *p_handle);
 void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer);
 
 #ifdef __cplusplus

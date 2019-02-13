@@ -10,21 +10,22 @@
 using namespace testing;
 
 #define USB_INDEX (0)
-#define FAKE_USB ((usb_command_handle_t)0xface000)
+#define FAKE_USB ((usbcmd_t)0xface000)
 
 // Define a mock class for the public functions usb_cmd
 class MockUsbCmd
 {
 public:
-    MOCK_CONST_METHOD3(usb_cmd_create,
+    MOCK_CONST_METHOD4(usb_cmd_create,
                        k4a_result_t(usb_command_device_type_t device_type,
                                     uint8_t device_index,
-                                    usb_command_handle_t *p_command_handle));
+                                    const guid_t *container_id,
+                                    usbcmd_t *p_command_handle));
 
-    MOCK_CONST_METHOD1(usb_cmd_destroy, void(usb_command_handle_t p_command_handle));
+    MOCK_CONST_METHOD1(usb_cmd_destroy, void(usbcmd_t p_command_handle));
 
     MOCK_CONST_METHOD7(usb_cmd_read,
-                       k4a_result_t(usb_command_handle_t p_handle,
+                       k4a_result_t(usbcmd_t p_handle,
                                     uint32_t cmd,
                                     uint8_t *p_cmd_data, /* changed void* to uint8_t */
                                     size_t cmd_data_size,
@@ -33,7 +34,7 @@ public:
                                     size_t *bytes_read));
 
     MOCK_CONST_METHOD8(usb_cmd_read_with_status,
-                       k4a_result_t(usb_command_handle_t p_handle,
+                       k4a_result_t(usbcmd_t p_handle,
                                     uint32_t cmd,
                                     uint8_t *p_cmd_data, /* changed void* to uint8_t */
                                     size_t cmd_data_size,
@@ -43,7 +44,7 @@ public:
                                     uint32_t *cmd_status));
 
     MOCK_CONST_METHOD6(usb_cmd_write,
-                       k4a_result_t(usb_command_handle_t p_handle,
+                       k4a_result_t(usbcmd_t p_handle,
                                     uint32_t cmd,
                                     uint8_t *p_cmd_data, /* changed void* to uint8_t */
                                     size_t cmd_data_size,
@@ -51,7 +52,7 @@ public:
                                     size_t data_size));
 
     MOCK_CONST_METHOD7(usb_cmd_write_with_status,
-                       k4a_result_t(usb_command_handle_t p_handle,
+                       k4a_result_t(usbcmd_t p_handle,
                                     uint32_t cmd,
                                     uint8_t *p_cmd_data, /* changed void* to uint8_t */
                                     size_t cmd_data_size,
@@ -60,13 +61,11 @@ public:
                                     uint32_t *cmd_status));
 
     MOCK_CONST_METHOD3(usb_cmd_stream_register_cb,
-                       k4a_result_t(usb_command_handle_t p_command_handle,
-                                    usb_cmd_stream_cb_t *frame_ready_cb,
-                                    void *context));
+                       k4a_result_t(usbcmd_t p_command_handle, usb_cmd_stream_cb_t *frame_ready_cb, void *context));
 
-    MOCK_CONST_METHOD2(usb_cmd_stream_start, k4a_result_t(usb_command_handle_t p_command_handle, size_t payload_size));
+    MOCK_CONST_METHOD2(usb_cmd_stream_start, k4a_result_t(usbcmd_t p_command_handle, size_t payload_size));
 
-    MOCK_CONST_METHOD1(usb_cmd_stream_stop, k4a_result_t(usb_command_handle_t p_command_handle));
+    MOCK_CONST_METHOD1(usb_cmd_stream_stop, k4a_result_t(usbcmd_t p_command_handle));
 };
 
 extern "C" {
@@ -78,17 +77,18 @@ static MockUsbCmd *g_MockUsbCmd;
 // Only functions required to link the depth module are needed
 k4a_result_t usb_cmd_create(usb_command_device_type_t device_type,
                             uint8_t device_index,
-                            usb_command_handle_t *p_command_handle)
+                            const guid_t *container_id,
+                            usbcmd_t *p_command_handle)
 {
-    return g_MockUsbCmd->usb_cmd_create(device_type, device_index, p_command_handle);
+    return g_MockUsbCmd->usb_cmd_create(device_type, device_index, container_id, p_command_handle);
 }
 
-void usb_cmd_destroy(usb_command_handle_t p_command_handle)
+void usb_cmd_destroy(usbcmd_t p_command_handle)
 {
     g_MockUsbCmd->usb_cmd_destroy(p_command_handle);
 }
 
-k4a_result_t usb_cmd_read(usb_command_handle_t p_handle,
+k4a_result_t usb_cmd_read(usbcmd_t p_handle,
                           uint32_t cmd,
                           uint8_t *p_cmd_data,
                           size_t cmd_data_size,
@@ -100,7 +100,7 @@ k4a_result_t usb_cmd_read(usb_command_handle_t p_handle,
     return g_MockUsbCmd->usb_cmd_read(p_handle, cmd, p_cmd_data, cmd_data_size, p_data, data_size, bytes_read);
 }
 
-k4a_result_t usb_cmd_read_with_status(usb_command_handle_t p_handle,
+k4a_result_t usb_cmd_read_with_status(usbcmd_t p_handle,
                                       uint32_t cmd,
                                       uint8_t *p_cmd_data,
                                       size_t cmd_data_size,
@@ -114,7 +114,7 @@ k4a_result_t usb_cmd_read_with_status(usb_command_handle_t p_handle,
         ->usb_cmd_read_with_status(p_handle, cmd, p_cmd_data, cmd_data_size, p_data, data_size, bytes_read, cmd_status);
 }
 
-k4a_result_t usb_cmd_write(usb_command_handle_t p_handle,
+k4a_result_t usb_cmd_write(usbcmd_t p_handle,
                            uint32_t cmd,
                            uint8_t *p_cmd_data,
                            size_t cmd_data_size,
@@ -125,7 +125,7 @@ k4a_result_t usb_cmd_write(usb_command_handle_t p_handle,
     return g_MockUsbCmd->usb_cmd_write(p_handle, cmd, p_cmd_data, cmd_data_size, p_data, data_size);
 }
 
-k4a_result_t usb_cmd_write_with_status(usb_command_handle_t p_handle,
+k4a_result_t usb_cmd_write_with_status(usbcmd_t p_handle,
                                        uint32_t cmd,
                                        uint8_t *p_cmd_data,
                                        size_t cmd_data_size,
@@ -138,20 +138,18 @@ k4a_result_t usb_cmd_write_with_status(usb_command_handle_t p_handle,
         ->usb_cmd_write_with_status(p_handle, cmd, p_cmd_data, cmd_data_size, p_data, data_size, cmd_status);
 }
 
-k4a_result_t usb_cmd_stream_register_cb(usb_command_handle_t p_command_handle,
-                                        usb_cmd_stream_cb_t *frame_ready_cb,
-                                        void *context)
+k4a_result_t usb_cmd_stream_register_cb(usbcmd_t p_command_handle, usb_cmd_stream_cb_t *frame_ready_cb, void *context)
 {
     // Direct the call to the mock class
     return g_MockUsbCmd->usb_cmd_stream_register_cb(p_command_handle, frame_ready_cb, context);
 }
 
-k4a_result_t usb_cmd_stream_start(usb_command_handle_t p_command_handle, size_t payload_size)
+k4a_result_t usb_cmd_stream_start(usbcmd_t p_command_handle, size_t payload_size)
 {
     return g_MockUsbCmd->usb_cmd_stream_start(p_command_handle, payload_size);
 }
 
-k4a_result_t usb_cmd_stream_stop(usb_command_handle_t p_command_handle)
+k4a_result_t usb_cmd_stream_stop(usbcmd_t p_command_handle)
 {
     return g_MockUsbCmd->usb_cmd_stream_stop(p_command_handle);
 }
@@ -162,14 +160,14 @@ static void EXPECT_SerialNumberCall(MockUsbCmd &usbcmd, char *mockSerialNumber, 
 {
     EXPECT_CALL(usbcmd,
                 usb_cmd_read(
-                    /* usb_command_handle_t p_handle */ FAKE_USB,
+                    /* usbcmd_t p_handle */ FAKE_USB,
                     /* uint32_t cmd */ DEV_CMD_DEPTH_READ_PRODUCT_SN,
                     /* uint8_t* p_cmd_data */ IsNull(),
                     /* size_t cmd_data_size */ 0,
                     /* uint8_t* p_data */ NotNull(),
                     /* size_t data_size */ _,
                     /* size_t *bytes_read */ NotNull()))
-        .WillRepeatedly(Invoke([mockSerialNumber, mockSerialNumberBytes](Unused /* usb_command_handle_t p_handle */,
+        .WillRepeatedly(Invoke([mockSerialNumber, mockSerialNumberBytes](Unused /* usbcmd_t p_handle */,
                                                                          Unused /* uint32_t cmd */,
                                                                          Unused /* uint8_t* p_cmd_data */,
                                                                          Unused /* uint32_t cmd_data_size */,
@@ -191,14 +189,14 @@ static void EXPECT_SerialNumberCallFail(MockUsbCmd &usbcmd, k4a_result_t failure
 {
     EXPECT_CALL(usbcmd,
                 usb_cmd_read(
-                    /* usb_command_handle_t p_handle */ FAKE_USB,
+                    /* usbcmd_t p_handle */ FAKE_USB,
                     /* uint32_t cmd */ DEV_CMD_DEPTH_READ_PRODUCT_SN,
                     /* void* p_cmd_data */ IsNull(),
                     /* size_t cmd_data_size */ 0,
                     /* void* p_data */ NotNull(),
                     /* size_t data_size */ _,
                     /* size_t *bytes_read */ NotNull()))
-        .WillRepeatedly(Invoke([failure](Unused /* usb_command_handle_t p_handle */,
+        .WillRepeatedly(Invoke([failure](Unused /* usbcmd_t p_handle */,
                                          Unused /* uint32_t cmd */,
                                          Unused /* void* p_cmd_data */,
                                          Unused /* size_t cmd_data_size */,
@@ -213,10 +211,12 @@ static void EXPECT_UsbCmdCreateSuccess(MockUsbCmd &usbcmd)
                 usb_cmd_create(
                     /* usb_command_device_type_t device_type  */ USB_DEVICE_DEPTH_PROCESSOR,
                     /* uint8_t device_index                   */ 0,
-                    /* usb_command_handle_t *p_command_handle */ NotNull()))
+                    /* const guid_t *container_id             */ NULL,
+                    /* usbcmd_t *p_command_handle */ NotNull()))
         .WillRepeatedly(Invoke([](Unused, // usb_command_device_type_t device_type
                                   Unused, // uint8_t device_index
-                                  usb_command_handle_t *p_command_handle) {
+                                  Unused, // const guid_t* container_id
+                                  usbcmd_t *p_command_handle) {
             *p_command_handle = FAKE_USB;
             return K4A_RESULT_SUCCEEDED;
         }));
@@ -230,7 +230,8 @@ static void EXPECT_UsbCmdCreateFailure3(MockUsbCmd &usbcmd)
                 usb_cmd_create(
                     /* usb_command_device_type_t device_type  */ USB_DEVICE_DEPTH_PROCESSOR,
                     /* uint8_t device_index                   */ 0,
-                    /* usb_command_handle_t *p_command_handle */ NotNull()))
+                    /* const guid_t *container_id             */ NULL,
+                    /* usbcmd_t *p_command_handle */ NotNull()))
         .WillOnce(Return(K4A_RESULT_FAILED))
         .WillOnce(Return(K4A_RESULT_FAILED))
         .WillOnce(Return(K4A_RESULT_FAILED));
@@ -240,7 +241,7 @@ static void EXPECT_UsbCmdDestroyNone(MockUsbCmd &usbcmd)
 {
     EXPECT_CALL(usbcmd,
                 usb_cmd_destroy(
-                    /* usb_command_handle_t p_command_handle */ NotNull()))
+                    /* usbcmd_t p_command_handle */ NotNull()))
         .Times(0);
 }
 
@@ -248,7 +249,7 @@ static void EXPECT_UsbCmdDestroy(MockUsbCmd &usbcmd)
 {
     EXPECT_CALL(usbcmd,
                 usb_cmd_destroy(
-                    /* usb_command_handle_t p_command_handle */ NotNull()))
+                    /* usbcmd_t p_command_handle */ NotNull()))
         .WillRepeatedly(Return());
 }
 
@@ -256,10 +257,16 @@ static void EXPECT_UsbCmdRegisterCallback(MockUsbCmd &usbcmd)
 {
     EXPECT_CALL(usbcmd,
                 usb_cmd_stream_register_cb(
-                    /* usb_command_handle_t p_command_handle, */ FAKE_USB,
+                    /* usbcmd_t p_command_handle, */ FAKE_USB,
                     /* usb_cmd_stream_cb_t* frame_ready_cb */ NotNull(),
                     /* void *context*/ _))
         .WillRepeatedly(Return(K4A_RESULT_SUCCEEDED));
+}
+
+const guid_t *usb_cmd_get_container_id(usbcmd_t usbcmd_handle)
+{
+    (void)usbcmd_handle;
+    return NULL;
 }
 
 class depthmcu_ut : public ::testing::Test

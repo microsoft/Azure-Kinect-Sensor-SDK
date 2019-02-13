@@ -7,6 +7,7 @@
 
 #include <k4a/k4atypes.h>
 #include <k4ainternal/handle.h>
+#include <k4ainternal/common.h>
 #include <k4ainternal/color_mcu.h>
 #include <k4ainternal/depth_mcu.h>
 #include <azure_c_shared_utility/tickcounter.h>
@@ -46,11 +47,8 @@ K4A_DECLARE_HANDLE(color_t);
  * \param tick_handle [IN]
  * Handle to access the system tick
  *
- * \param colormcu
- * Handle to the color mcu for sending commands to.
- *
- * \param depthmcu
- * Handle to the depth mcu for sending commands to.
+ * \param container_id
+ * container id associated with the device being using by this instance of k4a_device_open
  *
  * \param capture_ready_cb [IN]
  *    A function pointer to call when new depth captures are ready
@@ -70,8 +68,7 @@ K4A_DECLARE_HANDLE(color_t);
  * When done with the device, close the handle with \ref color_destroy
  */
 k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
-                          colormcu_t colormcu,
-                          depthmcu_t depthmcu,
+                          const guid_t *container_id,
                           color_cb_streaming_capture_t capture_ready_cb,
                           void *capture_ready_cb_context,
                           color_t *color_handle);

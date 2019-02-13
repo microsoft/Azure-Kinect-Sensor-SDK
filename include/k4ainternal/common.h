@@ -12,6 +12,11 @@
 extern "C" {
 #endif
 
+typedef struct _guid_t
+{
+    uint8_t id[16];
+} guid_t;
+
 #define K4A_IMU_SAMPLE_RATE 1666
 
 #define MAX_FPS_IN_MS (33) // 30 FPS

@@ -1,4 +1,4 @@
-add_executable(handle_ut handle_ut.cpp)
+add_executable(handle_ut handle_ut.cpp handle2_ut.cpp)
 
 target_link_libraries(handle_ut PRIVATE
     k4ainternal::utcommon

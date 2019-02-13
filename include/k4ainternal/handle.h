@@ -6,6 +6,7 @@
 #define K4A_INTERNAL_HANDLE_H
 
 #include <k4ainternal/logging.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,11 +14,18 @@ extern "C" {
 
 #define IF_LOGGER(x) x
 
+#ifdef _WIN32
+#define KSELECTANY __declspec(selectany)
+#else
+#define KSELECTANY __attribute__((weak))
+#endif
+
 #define K4A_DECLARE_CONTEXT(_public_handle_name_, _internal_context_type_)                                             \
-    static const char _handle_##_public_handle_name_[] = #_internal_context_type_;                                     \
+    extern char _handle_##_public_handle_name_[];                                                                      \
+    KSELECTANY char _handle_##_public_handle_name_[] = #_internal_context_type_;                                       \
     typedef struct                                                                                                     \
     {                                                                                                                  \
-        const char *handleType;                                                                                        \
+        char *handleType;                                                                                              \
         _internal_context_type_ context;                                                                               \
     } _public_handle_name_##_wrapper;                                                                                  \
                                                                                                                        \

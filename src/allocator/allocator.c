@@ -21,12 +21,26 @@ typedef enum
     IMAGE_TYPE_COUNT,
 } image_type_index_t;
 
+//
+// Simple counts of memory allocations for the purpose of detecting leaks of the K4A SDK's larger memory objects.
+//
+// NOTE about using globals vs. an allocated context. In most cases we prefer to avoid globals and instead allocate a
+// context that gets passed around. The drawback to an allocated context in this case is how to use one and abstract it
+// away from the user such that they can hold onto memory after k4a_device_close has been called, which would ultimately
+// need to destroy the context.
+//
+// Globals have the drawback that they are shared for instances in the same process. So they count the allocations for
+// the entire process, not just the current session (k4a_device_open). As a result we must also count the active
+// sessions so we can properly report leaks when all active sessions end (k4a_device_close).
 static volatile long g_allocated_image_count_user = 0;
 static volatile long g_allocated_image_count_color = 0;
 static volatile long g_allocated_image_count_depth = 0;
 static volatile long g_allocated_image_count_imu = 0;
 static volatile long g_allocated_image_count_usb_depth = 0;
 static volatile long g_allocated_image_count_usb_imu = 0;
+
+// Count the number of active sessions for this process. A session maps to k4a_device_open
+static volatile long g_allocator_sessions = 0;
 
 typedef struct _capture_context_t
 {
@@ -39,6 +53,16 @@ typedef struct _capture_context_t
 } capture_context_t;
 
 K4A_DECLARE_CONTEXT(k4a_capture_t, capture_context_t);
+
+void allocator_initialize(void)
+{
+    INC_REF_VAR(g_allocator_sessions);
+}
+
+void allocator_deinitialize(void)
+{
+    DEC_REF_VAR(g_allocator_sessions);
+}
 
 uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size, void **context)
 {
@@ -120,6 +144,12 @@ void allocator_free(void *buffer, void *context)
 
 long allocator_test_for_leaks(void)
 {
+    if (g_allocator_sessions != 0)
+    {
+        // See comment at the top of the file about counting active sessions
+        return 0;
+    }
+
     if (g_allocated_image_count_user || g_allocated_image_count_depth || g_allocated_image_count_color ||
         g_allocated_image_count_imu || g_allocated_image_count_usb_depth || g_allocated_image_count_usb_imu)
     {

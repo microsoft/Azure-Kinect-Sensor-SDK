@@ -21,10 +21,11 @@
 
 #define TS_TO_MS(ts) ((long long)((ts) / 1000)) // TS convertion to milliseconds
 
-#define CAPTURE_COUNT 100
-
 static bool g_skip_delay_off_color_validation = false;
 static int32_t g_depth_delay_off_color_usec = 0;
+static uint8_t g_device_index = K4A_DEVICE_DEFAULT;
+static k4a_wired_sync_mode_t g_wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
+static int g_capture_count = 100;
 
 using ::testing::ValuesIn;
 
@@ -56,7 +57,7 @@ class throughput_perf : public ::testing::Test, public ::testing::WithParamInter
 public:
     virtual void SetUp()
     {
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_open(K4A_DEVICE_DEFAULT, &m_device)) << "Couldn't open device\n";
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_open(g_device_index, &m_device)) << "Couldn't open device\n";
         ASSERT_NE(m_device, nullptr);
     }
 
@@ -208,7 +209,7 @@ TEST_P(throughput_perf, testTest)
     auto as = GetParam();
     const int32_t TIMEOUT_IN_MS = 1000;
     k4a_capture_t capture = NULL;
-    int capture_count = CAPTURE_COUNT;
+    int capture_count = g_capture_count;
     int both_count = 0;
     int depth_count = 0;
     int color_count = 0;
@@ -219,14 +220,15 @@ TEST_P(throughput_perf, testTest)
     uint64_t last_color_ts = 0;
     uint64_t last_depth16_ts = 0;
     uint64_t last_ir16_ts = 0;
-    int failure_threshold = CAPTURE_COUNT * 5 / 100; // 5%
+    int failure_threshold_percent = 5;
+    int failure_threshold_count = g_capture_count * failure_threshold_percent / 100; // 5%
     bool failed = false;
     FILE *file_handle = NULL;
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     thread_data thread = { 0 };
     THREAD_HANDLE th1;
 
-    printf("Capturing %d frames for test: %s\n", capture_count, as.test_name);
+    printf("Capturing %d frames for test: %s\n", g_capture_count, as.test_name);
 
     fps_in_usec = 1000000 / k4a_convert_fps_to_uint(as.fps);
 
@@ -235,6 +237,7 @@ TEST_P(throughput_perf, testTest)
     config.depth_mode = as.depth_mode;
     config.camera_fps = as.fps;
     config.depth_delay_off_color_usec = g_depth_delay_off_color_usec;
+    config.wired_sync_mode = g_wired_sync_mode;
     if (g_depth_delay_off_color_usec == 0)
     {
         // Create delay that can be +fps to -fps
@@ -436,7 +439,6 @@ TEST_P(throughput_perf, testTest)
         }
     }
 
-    logger_info("throughput_perf", "Test complete, cleanup beginning");
     thread.exit = true; // shut down IMU thread
     k4a_device_stop_cameras(m_device);
 
@@ -455,7 +457,7 @@ TEST_P(throughput_perf, testTest)
 
     {
         bool criteria_failed = false;
-        if (abs(both_count - CAPTURE_COUNT) > failure_threshold)
+        if (abs(both_count - g_capture_count) > failure_threshold_count)
         {
             failed = true;
             criteria_failed = true;
@@ -465,7 +467,7 @@ TEST_P(throughput_perf, testTest)
 
     {
         bool criteria_failed = false;
-        if (abs(depth_count) > failure_threshold)
+        if (abs(depth_count) > failure_threshold_count)
         {
             failed = true;
             criteria_failed = true;
@@ -474,7 +476,7 @@ TEST_P(throughput_perf, testTest)
     }
     {
         bool criteria_failed = false;
-        if (abs(color_count) > failure_threshold)
+        if (abs(color_count) > failure_threshold_count)
         {
             failed = true;
             criteria_failed = true;
@@ -483,7 +485,7 @@ TEST_P(throughput_perf, testTest)
     }
     {
         bool criteria_failed = false;
-        if (abs(missed_count) > failure_threshold)
+        if (abs(missed_count) > failure_threshold_count)
         {
             failed = true;
             criteria_failed = true;
@@ -492,7 +494,7 @@ TEST_P(throughput_perf, testTest)
     }
     {
         bool criteria_failed = false;
-        if (imu_percent > failure_threshold || imu_percent < -failure_threshold)
+        if (imu_percent > failure_threshold_percent || imu_percent < -failure_threshold_percent)
         {
             failed = true;
             criteria_failed = true;
@@ -504,7 +506,7 @@ TEST_P(throughput_perf, testTest)
     }
     {
         bool criteria_failed = false;
-        if (not_synchronized_count > failure_threshold)
+        if (not_synchronized_count > failure_threshold_count)
         {
             if (!g_skip_delay_off_color_validation)
             {
@@ -540,7 +542,7 @@ TEST_P(throughput_perf, testTest)
                  get_string_from_color_resolution(as.color_resolution),
                  k4a_convert_fps_to_uint(as.fps),
                  get_string_from_depth_mode(as.depth_mode),
-                 CAPTURE_COUNT,
+                 g_capture_count,
                  both_count,
                  depth_count,
                  color_count,
@@ -713,7 +715,7 @@ int main(int argc, char **argv)
             {
 
                 g_depth_delay_off_color_usec = (int32_t)strtol(argv[i + 1], NULL, 10);
-                printf("setting g_depth_delay_off_color_usec = %d\n", g_depth_delay_off_color_usec);
+                printf("Setting g_depth_delay_off_color_usec = %d\n", g_depth_delay_off_color_usec);
                 i++;
             }
             else
@@ -722,9 +724,47 @@ int main(int argc, char **argv)
                 error = true;
             }
         }
-        if (strcmp(argument, "--skip_delay_off_color_validation") == 0)
+        else if (strcmp(argument, "--skip_delay_off_color_validation") == 0)
         {
             g_skip_delay_off_color_validation = true;
+        }
+        else if (strcmp(argument, "--master") == 0)
+        {
+            g_wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
+            printf("Setting g_wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER\n");
+        }
+        else if (strcmp(argument, "--subordinate") == 0)
+        {
+            g_wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
+            printf("Setting g_wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE\n");
+        }
+        else if (strcmp(argument, "--index") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_device_index = (uint8_t)strtol(argv[i + 1], NULL, 10);
+                printf("setting g_device_index = %d\n", g_device_index);
+                i++;
+            }
+            else
+            {
+                printf("Error: index parameter missing\n");
+                error = true;
+            }
+        }
+        else if (strcmp(argument, "--capture_count") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_capture_count = (int)strtol(argv[i + 1], NULL, 10);
+                printf("g_capture_count g_device_index = %d\n", g_capture_count);
+                i++;
+            }
+            else
+            {
+                printf("Error: index parameter missing\n");
+                error = true;
+            }
         }
 
         if ((strcmp(argument, "-h") == 0) || (strcmp(argument, "/h") == 0) || (strcmp(argument, "-?") == 0) ||
@@ -736,7 +776,7 @@ int main(int argc, char **argv)
 
     if (error)
     {
-        printf("\n\nCustom Test Settings:\n");
+        printf("\n\nOptional Custom Test Settings:\n");
         printf("  --depth_delay_off_color <+/- microseconds>\n");
         printf("      This is the time delay the depth image capture is delayed off the color.\n");
         printf("      valid ranges for this are -1 frame time to +1 frame time. The percentage\n");
@@ -746,6 +786,15 @@ int main(int argc, char **argv)
         printf("      Set this when don't want the results of color to depth timestamp \n"
                "      measurements to allow your test run to fail. They will still be logged\n"
                "      to output and the CSV file.\n");
+        printf("  --master\n");
+        printf("      Run device in master mode\n");
+        printf("  --subordinate\n");
+        printf("      Run device in subordinate mode\n");
+        printf("  --index\n");
+        printf("      The device index to target when calling k4a_device_open()\n");
+        printf("  --capture_count\n");
+        printf("      The number of captures the test should read; default is 100\n");
+
         return 1; // Indicates an error or warning
     }
     return RUN_ALL_TESTS();

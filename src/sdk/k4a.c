@@ -84,6 +84,10 @@ k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
     k4a_context_t *device = NULL;
     logger_t logger_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    k4a_device_t handle = NULL;
+    const guid_t *container_id = NULL;
+
+    allocator_initialize();
 
     // Instantiate the logger as early as possible
     logger_config_t logger_config;
@@ -92,7 +96,7 @@ k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
 
     if (K4A_SUCCEEDED(result))
     {
-        device = k4a_device_t_create(device_handle);
+        device = k4a_device_t_create(&handle);
         result = K4A_RESULT_FROM_BOOL(device != NULL);
     }
 
@@ -115,7 +119,12 @@ k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
 
     if (K4A_SUCCEEDED(result))
     {
-        result = TRACE_CALL(colormcu_create(index, &device->colormcu));
+        result = K4A_RESULT_FROM_BOOL((container_id = depthmcu_get_container_id(device->depthmcu)) != NULL);
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        result = TRACE_CALL(colormcu_create(container_id, &device->colormcu));
     }
 
     // Create calibration module - ensure we can read calibration before proceeding
@@ -133,20 +142,17 @@ k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
     if (K4A_SUCCEEDED(result))
     {
         result = TRACE_CALL(
-            depth_create(device->depthmcu, device->calibration, depth_capture_ready, *device_handle, &device->depth));
+            depth_create(device->depthmcu, device->calibration, depth_capture_ready, handle, &device->depth));
     }
 
-    // create color Module
+    // Create color Module
     if (K4A_SUCCEEDED(result))
     {
-        result = TRACE_CALL(color_create(device->tick_handle,
-                                         device->colormcu,
-                                         device->depthmcu,
-                                         color_capture_ready,
-                                         *device_handle,
-                                         &device->color));
+        result = TRACE_CALL(
+            color_create(device->tick_handle, container_id, color_capture_ready, handle, &device->color));
     }
-    // create imu Module
+
+    // Create imu Module
     if (K4A_SUCCEEDED(result))
     {
         result = TRACE_CALL(imu_create(device->tick_handle, device->colormcu, device->calibration, &device->imu));
@@ -154,8 +160,12 @@ k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
 
     if (K4A_FAILED(result))
     {
-        k4a_device_close(*device_handle);
-        *device_handle = NULL;
+        k4a_device_close(handle);
+        handle = NULL;
+    }
+    else
+    {
+        *device_handle = handle;
     }
 
     return result;
@@ -226,6 +236,7 @@ void k4a_device_close(k4a_device_t device_handle)
         logger_destroy(device->logger_handle);
     }
     k4a_device_t_destroy(device_handle);
+    allocator_deinitialize();
     assert(allocator_test_for_leaks() == 0);
 }
 
@@ -494,14 +505,21 @@ static k4a_result_t validate_configuration(k4a_context_t *device, k4a_device_con
                                       config->wired_sync_mode <= K4A_WIRED_SYNC_MODE_SUBORDINATE);
     }
 
-    if (K4A_SUCCEEDED(result) && config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
+    if (K4A_SUCCEEDED(result) && (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE ||
+                                  config->wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER))
     {
         bool sync_in_cable_present;
-        result = TRACE_CALL(colormcu_get_external_sync_jack_state(device->colormcu, &sync_in_cable_present, NULL));
+        bool sync_out_cable_present;
+        result = TRACE_CALL(
+            colormcu_get_external_sync_jack_state(device->colormcu, &sync_in_cable_present, &sync_out_cable_present));
 
-        if (K4A_SUCCEEDED(result))
+        if (K4A_SUCCEEDED(result) && config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
         {
             result = K4A_RESULT_FROM_BOOL(sync_in_cable_present == true);
+        }
+        if (K4A_SUCCEEDED(result) && config->wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER)
+        {
+            result = K4A_RESULT_FROM_BOOL(sync_out_cable_present == true);
         }
     }
 

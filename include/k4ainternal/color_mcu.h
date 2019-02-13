@@ -70,8 +70,8 @@ typedef struct _imu_payload_metadata_t
 
 /** Open a handle to the color mcu device.
  *
- * \param device_index
- * Index of the USB device to open.
+ * \param container_id
+ * The container ID of the device to open
  *
  * \param colormcu_handle [OUT]
  *    A pointer to write the opened color mcu handle to
@@ -84,7 +84,7 @@ typedef struct _imu_payload_metadata_t
  *
  * When done with the device, close the handle with \ref colormcu_destroy
  */
-k4a_result_t colormcu_create(uint8_t device_index, colormcu_t *colormcu_handle);
+k4a_result_t colormcu_create(const guid_t *container_id, colormcu_t *colormcu_handle);
 
 /** Closes the color mcu module and free's it resources
  * */

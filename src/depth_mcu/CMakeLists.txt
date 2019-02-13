@@ -9,7 +9,8 @@ target_include_directories(k4a_depth_mcu PUBLIC
 # Dependencies of this library
 target_link_libraries(k4a_depth_mcu PUBLIC 
     k4ainternal::image
-    k4ainternal::logging)
+    k4ainternal::logging
+    k4ainternal::usb_cmd)
 
 # Define alias for other targets to link against
 add_library(k4ainternal::depth_mcu ALIAS k4a_depth_mcu)

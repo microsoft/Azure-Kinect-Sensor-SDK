@@ -1,7 +1,5 @@
 #include <utcommon.h>
-
-// Module being tested
-#include <k4ainternal/handle.h>
+#include "handle_ut.h"
 
 K4A_DECLARE_HANDLE(foo_t);
 
@@ -75,6 +73,20 @@ TEST(handle_ut_deathtest, use_after_free)
     foo_t_destroy(foo);
 
     EXPECT_EQ(NULL, foo_t_get_context(foo));
+}
+
+TEST(handle_ut, K4A_DECLARE_CONTEXT_in_shared_header)
+{
+    dual_defined_t dual = NULL;
+    dual_defined_context_t *context = dual_defined_t_create(&dual);
+
+    EXPECT_NE((dual_defined_context_t *)NULL, context);
+    EXPECT_NE((dual_defined_t)NULL, dual);
+
+    EXPECT_EQ(context, dual_defined_t_get_context(dual));
+    EXPECT_NE(0, is_handle_in_2nd_file_valid(dual));
+
+    dual_defined_t_destroy(dual);
 }
 
 int main(int argc, char **argv)

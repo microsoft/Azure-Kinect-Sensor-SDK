@@ -996,9 +996,7 @@ HRESULT CMFCameraReader::FindEdenColorCamera(GUID *containerId, ComPtr<IMFActiva
                                                         sizeof(guidContainerId),
                                                         &cbWritten)))
                         {
-                            // ToDo: Check Container ID
-                            // if (*containerId == guidContainerId)
-                            UNREFERENCED_PARAMETER(containerId);
+                            if (*containerId == guidContainerId)
                             {
                                 spDevice = ppDevices[i];
                                 delete[] symbolicLink;

@@ -32,14 +32,13 @@ typedef struct _synchronization_config_t
 
 typedef struct _colormcu_context_t
 {
-    usb_command_handle_t usb_cmd;
+    usbcmd_t usb_cmd;
 } colormcu_context_t;
 
 K4A_DECLARE_CONTEXT(colormcu_t, colormcu_context_t);
 
-k4a_result_t colormcu_create(uint8_t device_index, colormcu_t *colormcu_handle)
+k4a_result_t colormcu_create(const guid_t *container_id, colormcu_t *colormcu_handle)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device_index >= 10);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, colormcu_handle == NULL);
 
     colormcu_context_t *colormcu = colormcu_t_create(colormcu_handle);
@@ -47,7 +46,8 @@ k4a_result_t colormcu_create(uint8_t device_index, colormcu_t *colormcu_handle)
 
     if (K4A_SUCCEEDED(result))
     {
-        result = TRACE_CALL(usb_cmd_create(USB_DEVICE_COLOR_IMU_PROCESSOR, device_index, &colormcu->usb_cmd));
+        result = TRACE_CALL(
+            usb_cmd_create(USB_DEVICE_COLOR_IMU_PROCESSOR, NULL_INDEX, container_id, &colormcu->usb_cmd));
     }
 
     if (K4A_FAILED(result))

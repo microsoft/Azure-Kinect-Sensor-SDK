@@ -2,6 +2,7 @@
 #include <k4ainternal/logging.h>
 
 #include <azure_c_shared_utility/envvariable.h>
+#include <azure_c_shared_utility/refcount.h>
 
 // System dependencies
 #include <stdlib.h>
@@ -25,6 +26,7 @@ extern "C" {
 
 // Logger used for capturing errors from this module
 static std::shared_ptr<spdlog::logger> g_logger = NULL;
+static volatile long g_logger_count = 0;
 static bool g_logger_is_file_based = false;
 
 typedef struct logger_context_t
@@ -64,10 +66,16 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
         logging_level = environment_get_variable(config->env_var_log_level);
     }
 
-    if (g_logger)
+#if defined(REFCOUNT_USE_STD_ATOMIC)
+    // Validate implementation of INC_REF_VAR. Documentation for the implementation in this mode indicates the API
+    // behaves differently than the others. REFCOUNT_USE_STD_ATOMIC returns the pre-opperation value while other return
+    // the post opperation value
+    static_assert(0, "This configuration needs to be confirmed");
+#endif
+    if ((INC_REF_VAR(g_logger_count) > 1) || (g_logger))
     {
-        g_logger = NULL;
-        spdlog::drop(K4A_LOGGER);
+        // Reuse the configured logger settings in the event we have more than 1 active handle at a time
+        return K4A_RESULT_SUCCEEDED;
     }
 
     if (enable_file_logging && enable_file_logging[0] != '\0')
@@ -164,10 +172,13 @@ void logger_destroy(logger_t logger_handle)
     logger_context_t *context = logger_t_get_context(logger_handle);
 
     // destroy the logger
-    g_logger = NULL;
+    if (DEC_REF_VAR(g_logger_count) == 0)
+    {
+        g_logger = NULL;
+        spdlog::drop(K4A_LOGGER);
+        g_logger_is_file_based = false;
+    }
     context->logger = NULL;
-    spdlog::drop(K4A_LOGGER);
-    g_logger_is_file_based = false;
 
     logger_t_destroy(logger_handle);
 }
