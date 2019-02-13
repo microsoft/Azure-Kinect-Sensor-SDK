@@ -461,7 +461,8 @@ typedef struct _k4a_hardware_version_t
  */
 typedef struct _k4a_device_configuration_t
 {
-    /** Image format to capture with the color camera */
+    /** Image format to capture with the color camera. The color camera does not natively produce BGRA32 images.
+     * Setting BGRA32 for color_format will result in higher CPU utilization. */
     k4a_image_format_t color_format;
 
     /** Image resolution to capture with the color camera */
@@ -661,9 +662,9 @@ typedef struct _k4a_calibration_camera_t
     float metric_radius;                     /**< Max FOV of the camera */
 } k4a_calibration_camera_t;
 
-/** Calibration type representing device calibration. It contains (1) the depth and color cameras’ intrinsic
+/** Calibration type representing device calibration. It contains (1) the depth and color cameras' intrinsic
  * calibrations, (2) extrinsic transformation parameters (3) depth and color modes. The extrinsic parameters allow 3d
- * coordinate conversions between depth camera, color camera, the imu’s gyro and the imu’s accelerometer. For
+ * coordinate conversions between depth camera, color camera, the imu's gyro and the imu's accelerometer. For
  * transforming from a source to a target 3d coordinate system, use the parameters stored under
  * extrinsics[source][target]. *
  * \xmlonly
