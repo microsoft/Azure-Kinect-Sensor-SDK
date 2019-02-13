@@ -697,7 +697,7 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
         command_info->device_serial_number = serial_number;
 
         // Wait until the device is responding correctly...
-        if (K4A_FAILED(depthmcu_wait_is_ready(command_info->depthmcu_handle)))
+        if (!depthmcu_wait_is_ready(command_info->depthmcu_handle))
         {
             return K4A_RESULT_FAILED;
         }
@@ -779,7 +779,7 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
         }
 
         // Wait until the device is responding correctly...
-        if (K4A_FAILED(depthmcu_wait_is_ready(command_info->depthmcu_handle)))
+        if (!depthmcu_wait_is_ready(command_info->depthmcu_handle))
         {
             return K4A_RESULT_FAILED;
         }

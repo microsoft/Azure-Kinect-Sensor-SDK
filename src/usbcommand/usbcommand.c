@@ -958,7 +958,6 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
             break;
         }
 
-        logger_error(LOGGER_USB_CMD, "VID PID %08X %08X", desc.idVendor, desc.idProduct);
         //  Just check for one PID assuming the other is in the package
         if ((desc.idVendor == K4A_MSFT_VID) && (desc.idProduct == K4A_RGB_PID))
         {
