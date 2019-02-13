@@ -593,6 +593,19 @@ TEST_F(playback_ut, DISABLED_open_test_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     std::cout << "Config:" << std::endl;
+    std::cout << "    Tracks enabled:";
+    static const std::pair<bool *, std::string> tracks[] = { { &config.color_track_enabled, "Color" },
+                                                             { &config.depth_track_enabled, "Depth" },
+                                                             { &config.ir_track_enabled, "IR" },
+                                                             { &config.imu_track_enabled, "IMU" } };
+    for (int i = 0; i < 4; i++)
+    {
+        if (*tracks[i].first)
+        {
+            std::cout << " " << tracks[i].second;
+        }
+    }
+    std::cout << std::endl;
     std::cout << "    Color format: " << format_names[config.color_format] << std::endl;
     std::cout << "    Color resolution: " << resolution_names[config.color_resolution] << std::endl;
     std::cout << "    Depth mode: " << depth_names[config.depth_mode] << std::endl;

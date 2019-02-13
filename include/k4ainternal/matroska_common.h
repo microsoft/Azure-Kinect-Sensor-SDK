@@ -78,10 +78,11 @@ constexpr uint64_t operator"" _s(unsigned long long x)
 #endif
 
 #ifndef CLUSTER_WRITE_DELAY_NS
-#define CLUSTER_WRITE_DELAY_NS MAX_CLUSTER_LENGTH_NS * 2
+#define CLUSTER_WRITE_DELAY_NS 2_s
 #endif
 
 static_assert(MAX_CLUSTER_LENGTH_NS < INT16_MAX * MATROSKA_TIMESCALE_NS, "Cluster length must fit in a 16 bit int");
+static_assert(CLUSTER_WRITE_DELAY_NS >= MAX_CLUSTER_LENGTH_NS * 2, "Cluster write delay is shorter than 2 clusters");
 
 #define RETURN_IF_ERROR(_call_)                                                                                        \
     {                                                                                                                  \

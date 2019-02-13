@@ -385,6 +385,9 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
 
     context->imu_track = add_track(context, "IMU", track_subtitle, "S_K4A/IMU");
 
+    uint64_t track_uid = GetChild<KaxTrackUID>(*context->imu_track).GetValue();
+    add_tag(context, "K4A_IMU_MODE", "ON", TAG_TARGET_TYPE_TRACK, track_uid);
+
     return K4A_RESULT_SUCCEEDED;
 }
 
@@ -500,8 +503,8 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
                 k4a_image_format_t image_format = k4a_image_get_format(images[i]);
                 if (image_format == expected_formats[i])
                 {
+                    // Create a copy of the image buffer for writing to file.
                     assert(buffer_size <= UINT32_MAX);
-                    // TODO: BUG 19475311 - Frame needs to be copied until color capture bug is fixed.
                     DataBuffer *data_buffer = new DataBuffer(image_buffer, (uint32)buffer_size, NULL, true);
                     if (image_format == K4A_IMAGE_FORMAT_DEPTH16 || image_format == K4A_IMAGE_FORMAT_IR16)
                     {

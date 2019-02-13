@@ -11,11 +11,14 @@
 #include <iostream>
 #include <atomic>
 #include <ctime>
+#include <csignal>
 
 static time_t exiting_timestamp;
 
-static void signal_handler()
+static void signal_handler(int s)
 {
+    (void)s; // Unused
+
     if (!exiting)
     {
         std::cout << "Stopping recording..." << std::endl;
@@ -361,21 +364,18 @@ int main(int argc, char **argv)
         [](DWORD event) {
             if (event == CTRL_C_EVENT || event == CTRL_BREAK_EVENT)
             {
-                signal_handler();
+                signal_handler(0);
                 return TRUE;
             }
             return FALSE;
         },
         true);
 #else
-    // TODO: set signals up for linux
-    (void)signal_handler;
-    if (recording_length <= 0)
-    {
-        std::cout << "TODO: Linux is currently missing Ctrl-C interrupt handling." << std::endl;
-        std::cout << "Setting record length to 1 second." << std::endl;
-        recording_length = 1;
-    }
+    struct sigaction act;
+    act.sa_handler = signal_handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    sigaction(SIGINT, &act, 0);
 #endif
 
     k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;

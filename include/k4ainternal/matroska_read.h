@@ -224,6 +224,7 @@ template<typename T> bool check_element_type(EbmlElement *element, T **out)
         *out = static_cast<T *>(element);
         return true;
     }
+    *out = nullptr;
     return false;
 }
 

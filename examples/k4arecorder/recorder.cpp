@@ -180,7 +180,7 @@ int do_recording(uint8_t device_index,
         exiting = true;
         std::cout << "Stopping recording..." << std::endl;
     }
-    // TODO: BUG 19412496, BUG 19475311 - If references are held, stop command will hang.
+
     if (record_imu)
     {
         k4a_device_stop_imu(device);

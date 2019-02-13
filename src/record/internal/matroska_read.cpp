@@ -218,8 +218,12 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         }
         else if (check_element_type(e, &block_group))
         {
-            // TODO: Support KaxBlockGroup
-            assert(false);
+            block_group->SetParent(*cluster);
+            uint64_t block_timestamp_ns = block_group->GlobalTimecode();
+            if (block_timestamp_ns > context->last_timestamp_ns)
+            {
+                context->last_timestamp_ns = block_timestamp_ns;
+            }
         }
     }
     logger_trace(LOGGER_RECORD, "Found last timestamp: %llu", context->last_timestamp_ns);
@@ -234,10 +238,10 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     context->timecode_scale = GetChild<KaxTimecodeScale>(*context->segment_info).GetValue();
 
-    // TODO IMU track from tag
     context->color_track.track = get_track_by_tag(context, "K4A_COLOR_MODE");
     context->depth_track.track = get_track_by_tag(context, "K4A_DEPTH_MODE");
     context->ir_track.track = get_track_by_tag(context, "K4A_IR_MODE");
+    context->imu_track.track = get_track_by_tag(context, "K4A_IMU_MODE");
     if (context->color_track.track == NULL)
     {
         context->color_track.track = get_track_by_name(context, "COLOR");
@@ -250,7 +254,10 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     {
         context->ir_track.track = get_track_by_name(context, "IR");
     }
-    context->imu_track.track = get_track_by_name(context, "IMU");
+    if (context->imu_track.track == NULL)
+    {
+        context->imu_track.track = get_track_by_name(context, "IMU");
+    }
 
     // Read device calibration attachment
     context->calibration_attachment = get_attachment_by_tag(context, "K4A_CALIBRATION_FILE");
@@ -821,7 +828,6 @@ std::shared_ptr<KaxCluster> seek_timestamp(k4a_playback_context_t *context, uint
         const KaxCueTrackPositions *positions = cue->GetSeekPosition();
         if (positions)
         {
-            // TODO: Maybe do something about track number?
             target_offset = positions->ClusterPosition();
         }
     }
@@ -1024,33 +1030,43 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
     while (next_block->cluster != nullptr)
     {
         std::vector<EbmlElement *> elements = next_block->cluster->GetElementList();
+        KaxSimpleBlock *simple_block = NULL;
+        KaxBlockGroup *block_group = NULL;
         while (next_block->index < (int)elements.size() && next_block->index >= 0)
         {
-            if (check_element_type(elements[(size_t)next_block->index], (KaxSimpleBlock **)&next_block->block))
+            if (check_element_type(elements[(size_t)next_block->index], &simple_block))
             {
-                if (next_block->block->TrackNum() == search_number)
+                simple_block->SetParent(*next_block->cluster);
+                if (simple_block->TrackNum() == search_number)
                 {
-                    next_block->block->SetParent(*next_block->cluster);
-                    next_block->timestamp_ns = next_block->block->GlobalTimecode();
-                    next_block->sync_timestamp_ns = next_block->timestamp_ns + reader->sync_delay_ns;
-                    if (timestamp_search)
-                    {
-                        if ((next && next_block->timestamp_ns >= context->seek_timestamp_ns) ||
-                            (!next && next_block->timestamp_ns < context->seek_timestamp_ns))
-                        {
-                            return next_block;
-                        }
-                    }
-                    else
+                    next_block->block = simple_block;
+                }
+            }
+            else if (check_element_type(elements[(size_t)next_block->index], &block_group))
+            {
+                block_group->SetParent(*next_block->cluster);
+                block_group->SetParentTrack(*reader->track);
+                if (block_group->TrackNumber() == search_number)
+                {
+                    next_block->block = &GetChild<KaxBlock>(*block_group);
+                }
+            }
+            if (next_block->block != NULL)
+            {
+                next_block->timestamp_ns = next_block->block->GlobalTimecode();
+                next_block->sync_timestamp_ns = next_block->timestamp_ns + reader->sync_delay_ns;
+                if (timestamp_search)
+                {
+                    if ((next && next_block->timestamp_ns >= context->seek_timestamp_ns) ||
+                        (!next && next_block->timestamp_ns < context->seek_timestamp_ns))
                     {
                         return next_block;
                     }
                 }
-            }
-            else if (check_element_type(elements[(size_t)next_block->index], (KaxBlockGroup **)&next_block->block))
-            {
-                // TODO: Support KaxBlockGroup
-                assert(false);
+                else
+                {
+                    return next_block;
+                }
             }
             next_block->index += next ? 1 : -1;
         }
@@ -1287,7 +1303,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
         return K4A_STREAM_RESULT_EOF;
     }
 
-    // TODO
+    logger_error(LOGGER_RECORD, "IMU playback is not yet supported.");
     (void)next;
 
     return K4A_STREAM_RESULT_FAILED;
