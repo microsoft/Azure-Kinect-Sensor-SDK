@@ -151,6 +151,9 @@ protected:
     void interrupt_device_at_update_stage(firmware_operation_component_t component,
                                           firmware_operation_interruption_t interruption,
                                           firmware_status_summary_t *finalStatus);
+    void perform_device_update(uint8_t *firmware_buffer,
+                               size_t firmware_size,
+                               firmware_package_info_t firmware_package_info);
 
     static int k4a_port_number;
     static connection_exerciser *connEx;
@@ -435,6 +438,11 @@ void firmware_fw::interrupt_device_at_update_stage(firmware_operation_component_
         result = firmware_get_download_status(firmware_handle, finalStatus);
         if (result == K4A_RESULT_SUCCEEDED)
         {
+            std::cout << "Audio: " << calculate_overall_component_status(finalStatus->audio)
+                      << " Depth Config: " << calculate_overall_component_status(finalStatus->depth_config)
+                      << " Depth: " << calculate_overall_component_status(finalStatus->depth)
+                      << " RGB: " << calculate_overall_component_status(finalStatus->rgb) << std::endl;
+
             all_complete = ((finalStatus->audio.overall > FIRMWARE_OPERATION_INPROGRESS) &&
                             (finalStatus->depth_config.overall > FIRMWARE_OPERATION_INPROGRESS) &&
                             (finalStatus->depth.overall > FIRMWARE_OPERATION_INPROGRESS) &&
@@ -508,23 +516,18 @@ void firmware_fw::interrupt_device_at_update_stage(firmware_operation_component_
     interrupt_operation(FIRMWARE_OPERATION_RESET);
 }
 
-TEST_F(firmware_fw, simple_update)
+void firmware_fw::perform_device_update(uint8_t *firmware_buffer,
+                                        size_t firmware_size,
+                                        firmware_package_info_t firmware_package_info)
 {
     firmware_status_summary_t finalStatus;
 
-    LOG_INFO("Beginning the basic update test", 0);
-    connEx->set_usb_port(k4a_port_number);
-
-    open_firmware_device();
-
-    // Update to the test firmware
-    LOG_INFO("Updating the device to the test firmware.");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
     log_device_version(current_version);
-    log_firmware_version(test_firmware_package_info);
+    log_firmware_version(firmware_package_info);
 
     // Perform upgrade...
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, firmware_buffer, firmware_size));
     interrupt_device_at_update_stage(FIRMWARE_OPERATION_FULL_DEVICE, FIRMWARE_OPERATION_RESET, &finalStatus);
 
     ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
@@ -533,6 +536,63 @@ TEST_F(firmware_fw, simple_update)
     ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.rgb));
 
     // Check upgrade...
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
+    log_device_version(current_version);
+    ASSERT_TRUE(compare_version(current_version.audio, firmware_package_info.audio)) << "Audio version mismatch";
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor,
+                                     firmware_package_info.depth_config_number_versions,
+                                     firmware_package_info.depth_config_versions))
+        << "Depth Config mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth, firmware_package_info.depth)) << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb, firmware_package_info.rgb)) << "RGB mismatch";
+}
+
+TEST_F(firmware_fw, DISABLED_simple_update)
+{
+    LOG_INFO("Beginning the basic update test", 0);
+    connEx->set_usb_port(k4a_port_number);
+
+    open_firmware_device();
+
+    // Update to the test firmware
+    LOG_INFO("Updating the device to the test firmware.");
+    perform_device_update(test_firmware_buffer, test_firmware_size, test_firmware_package_info);
+
+    // Update back to the LKG firmware
+    LOG_INFO("Updating the device back to the LKG firmware.");
+    perform_device_update(lkg_firmware_buffer, lkg_firmware_size, lkg_firmware_package_info);
+}
+
+TEST_F(firmware_fw, interrupt_update_reboot)
+{
+    firmware_status_summary_t finalStatus;
+    LOG_INFO("Beginning the update test with reboots interrupting the update", 0);
+
+    LOG_INFO("Powering on the device...", 0);
+    connEx->set_usb_port(k4a_port_number);
+
+    open_firmware_device();
+
+    // Update to the test firmware
+    LOG_INFO("Updating the device to the test firmware.");
+    perform_device_update(test_firmware_buffer, test_firmware_size, test_firmware_package_info);
+
+    // Update back to the LKG firmware, but interrupt...
+    LOG_INFO("Interrupting at Audio stage");
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, lkg_firmware_buffer, lkg_firmware_size));
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_AUDIO, FIRMWARE_OPERATION_RESET, &finalStatus);
+
+    std::cout << "Audio: " << calculate_overall_component_status(finalStatus.audio)
+              << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
+              << " Depth: " << calculate_overall_component_status(finalStatus.depth)
+              << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
+
+    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
+    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
+
+    // Check that we are still on the old version...
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
     log_device_version(current_version);
     ASSERT_TRUE(compare_version(current_version.audio, test_firmware_package_info.audio)) << "Audio version mismatch";
@@ -545,29 +605,8 @@ TEST_F(firmware_fw, simple_update)
 
     // Update back to the LKG firmware
     LOG_INFO("Updating the device back to the LKG firmware.");
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
-    log_device_version(current_version);
-    log_firmware_version(lkg_firmware_package_info);
-
-    // Perform upgrade...
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, lkg_firmware_buffer, lkg_firmware_size));
+    perform_device_update(lkg_firmware_buffer, lkg_firmware_size, lkg_firmware_package_info);
     interrupt_device_at_update_stage(FIRMWARE_OPERATION_FULL_DEVICE, FIRMWARE_OPERATION_RESET, &finalStatus);
-
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth));
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.rgb));
-
-    // Check upgrade...
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
-    log_device_version(current_version);
-    ASSERT_TRUE(compare_version(current_version.audio, lkg_firmware_package_info.audio)) << "Audio version mismatch";
-    ASSERT_TRUE(compare_version_list(current_version.depth_sensor,
-                                     lkg_firmware_package_info.depth_config_number_versions,
-                                     lkg_firmware_package_info.depth_config_versions))
-        << "Depth Config mismatch";
-    ASSERT_TRUE(compare_version(current_version.depth, lkg_firmware_package_info.depth)) << "Depth mismatch";
-    ASSERT_TRUE(compare_version(current_version.rgb, lkg_firmware_package_info.rgb)) << "RGB mismatch";
 }
 
 int main(int argc, char **argv)
