@@ -25,7 +25,7 @@ struct Vertex
 {
     linmath::vec3 Position;
     linmath::vec4 Color;
-    linmath::vec3 Normal;
+    linmath::vec3 Neighbor;
 };
 } // namespace k4aviewer
 #endif

@@ -138,10 +138,10 @@ void PointCloudRenderer::UpdatePointClouds(Vertex *vertices, const unsigned int 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Color));
 
-    // Vertex Normals
+    // Vertex Neighbors
     //
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Normal));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Neighbor));
 
     glBindVertexArray(0);
 

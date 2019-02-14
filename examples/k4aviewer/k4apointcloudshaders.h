@@ -26,7 +26,7 @@ R"(
 #version 430
 layout(location = 0) in vec3 vertexPosition;
 layout(location = 1) in vec4 vertexColor;
-layout(location = 2) in vec3 vertexNormal;
+layout(location = 2) in vec3 vertexNeighbor;
 
 varying vec4 fragmentColor;
 
@@ -41,12 +41,8 @@ void main()
     if (enableShading)
     {
         vec3 lightPosition = vec3(0, 0, 0);
-        float diffuse = 1.f;
-        if (dot(vertexNormal, vertexNormal) != 0.f)
-        {
-            vec3 lightDirection = normalize(lightPosition - vertexPosition);
-            diffuse = abs(dot(normalize(vertexNormal), lightDirection));
-        }
+        float occlusion = length(vertexPosition - vertexNeighbor) * 20.0f;
+        float diffuse = 1.0f - clamp(occlusion, 0.0f, 0.6f);
 
         float distance = length(lightPosition - vertexPosition);
         // Attenuation term for light source that covers distance up to 50 meters

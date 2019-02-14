@@ -34,21 +34,6 @@ const ImVec4 ClearColor = { 0.05f, 0.05f, 0.05f, 0.0f };
 //
 constexpr ImageDimensions PointCloudVisualizerTextureDimensions = { 640, 576 };
 
-inline k4a_float3_t operator-(const k4a_float3_t &point1, const k4a_float3_t &point2)
-{
-    return k4a_float3_t{ { point1.v[0] - point2.v[0], point1.v[1] - point2.v[1], point1.v[2] - point2.v[2] } };
-}
-
-inline k4a_float3_t cross(const k4a_float3_t &vector1, const k4a_float3_t &vector2)
-{
-    k4a_float3_t result;
-    result.v[0] = vector1.v[1] * vector2.v[2] - vector1.v[2] * vector2.v[1];
-    result.v[1] = vector1.v[2] * vector2.v[0] - vector1.v[0] * vector2.v[2];
-    result.v[2] = vector1.v[0] * vector2.v[1] - vector1.v[1] * vector2.v[0];
-
-    return result;
-}
-
 inline k4a_float3_t ConvertK4AToOpenGLCoordinate(k4a_float3_t pt)
 {
     // OpenGL and K4A have different conventions on which direction is positive -
@@ -61,12 +46,6 @@ inline void ConvertK4AFloat3ToLinmathVec3(const k4a_float3_t &in, linmath::vec3 
 {
     constexpr size_t vecSize = sizeof(in.v) / sizeof(float);
     std::copy(in.v, in.v + vecSize, out);
-}
-
-inline void ConvertLinmathVec3ToK4AFloat3(const linmath::vec3 &in, k4a_float3_t &out)
-{
-    constexpr size_t vecSize = sizeof(in) / sizeof(float);
-    std::copy(in, in + vecSize, out.v);
 }
 
 bool GetPoint3d(k4a_float3_t &point3d, int16_t *pointCloudBuffer, int depthW, int depthH, int x, int y)
@@ -237,12 +216,11 @@ void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_
 
             ConvertK4AFloat3ToLinmathVec3(position, outputVertex.Position);
 
-            // Vertex positions are in millimeters, but everything else is in meters,
-            // so we need to convert
+            // Vertex positions are in millimeters, but everything else is in meters, so we need to convert
             //
             for (float &f : outputVertex.Position)
             {
-                f *= 1.0f * std::milli::num / std::milli::den;
+                f /= 1000.0f;
             }
 
             // Compute color
@@ -257,36 +235,52 @@ void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_
             outputVertex.Color[2] = colorization.Blue / uint8_t_max;
             outputVertex.Color[3] = uint8_t_max; // alpha
 
-            // Compute normal - only necessary if we're using the fancy shader
+            // Compute neighbors - only necessary if we're using the fancy shader
             //
             if (m_pointCloudRenderer.ShadingIsEnabled())
             {
+                // Find the neighboring point that is closest to the camera
+                k4a_float3_t closest = position;
+                closest.v[2] += 1000.0f; // If no neighbors have data, default to 1 meter behind point.
+
                 k4a_float3_t pointLeft, pointRight, pointUp, pointDown;
-                if (!GetPoint3d(pointLeft, pointCloudBuffer, frameWidth, frameHeight, w - 1, h))
+                if (GetPoint3d(pointLeft, pointCloudBuffer, frameWidth, frameHeight, w - 1, h))
                 {
-                    ConvertLinmathVec3ToK4AFloat3(outputVertex.Position, pointLeft);
+                    if (closest.v[2] > pointLeft.v[2])
+                    {
+                        closest = pointLeft;
+                    }
                 }
-                if (!GetPoint3d(pointRight, pointCloudBuffer, frameWidth, frameHeight, w + 1, h))
+                if (GetPoint3d(pointRight, pointCloudBuffer, frameWidth, frameHeight, w + 1, h))
                 {
-                    ConvertLinmathVec3ToK4AFloat3(outputVertex.Position, pointRight);
+                    if (closest.v[2] > pointRight.v[2])
+                    {
+                        closest = pointRight;
+                    }
                 }
-                if (!GetPoint3d(pointUp, pointCloudBuffer, frameWidth, frameHeight, w, h - 1))
+                if (GetPoint3d(pointUp, pointCloudBuffer, frameWidth, frameHeight, w, h - 1))
                 {
-                    ConvertLinmathVec3ToK4AFloat3(outputVertex.Position, pointUp);
+                    if (closest.v[2] > pointUp.v[2])
+                    {
+                        closest = pointUp;
+                    }
                 }
-                if (!GetPoint3d(pointDown, pointCloudBuffer, frameWidth, frameHeight, w, h + 1))
+                if (GetPoint3d(pointDown, pointCloudBuffer, frameWidth, frameHeight, w, h + 1))
                 {
-                    ConvertLinmathVec3ToK4AFloat3(outputVertex.Position, pointDown);
+                    if (closest.v[2] > pointDown.v[2])
+                    {
+                        closest = pointDown;
+                    }
                 }
 
-                k4a_float3_t xDirection = pointRight - pointLeft;
-                k4a_float3_t yDirection = pointUp - pointDown;
+                ConvertK4AFloat3ToLinmathVec3(closest, outputVertex.Neighbor);
 
-                // The normal is not normalized here. Leave the normalization step in the shader
+                // Vertex positions are in millimeters, but everything else is in meters, so we need to convert
                 //
-                k4a_float3_t normal = cross(xDirection, yDirection);
-
-                ConvertK4AFloat3ToLinmathVec3(normal, outputVertex.Normal);
+                for (float &f : outputVertex.Neighbor)
+                {
+                    f /= 1000.0f;
+                }
             }
 
             // Mark point succeeded

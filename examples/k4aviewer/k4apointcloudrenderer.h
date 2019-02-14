@@ -54,7 +54,7 @@ private:
     linmath::mat4x4 m_projection;
 
     // Render settings
-    GLfloat m_pointCloudSize = 3.f;
+    GLfloat m_pointCloudSize = 2.f;
     bool m_enableShading = true;
 
     // Point Array Size
