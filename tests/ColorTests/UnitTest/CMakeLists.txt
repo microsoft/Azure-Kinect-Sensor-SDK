@@ -37,11 +37,8 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         mfuuid.lib
         cfgmgr32.lib)
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-   # libuvc is static library. Do not link with libuvc but using mock and including libuvc include directory
-   get_target_property(LIBUVC_C_INCLUDES libuvc::libuvc INTERFACE_INCLUDE_DIRECTORIES)
-   include_directories(${LIBUVC_C_INCLUDES})
-
-   target_link_libraries(color_ut PRIVATE 
+    target_link_libraries(color_ut PRIVATE
+        libuvc::libuvc
         libjpeg-turbo::libjpeg-turbo)
 endif()
 
