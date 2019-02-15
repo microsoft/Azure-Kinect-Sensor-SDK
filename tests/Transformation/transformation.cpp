@@ -316,8 +316,8 @@ TEST_F(transformation_ut, transformation_create)
     result = k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_resolution, &calibration);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    k4a_transformation_t transformation_rgb_only = k4a_transformation_create(&calibration);
-    ASSERT_NE(transformation_rgb_only, (k4a_transformation_t)NULL);
+    k4a_transformation_t transformation_color_only = k4a_transformation_create(&calibration);
+    ASSERT_NE(transformation_color_only, (k4a_transformation_t)NULL);
 }
 
 int main(int argc, char **argv)

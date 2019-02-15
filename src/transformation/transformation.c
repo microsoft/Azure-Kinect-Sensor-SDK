@@ -442,7 +442,7 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
 
     if (!transformation_context->enable_depth_color_transform)
     {
-        LOG_ERROR("Require both depth and color camera are opened to transform depth image to color camera.");
+        LOG_ERROR("Require both depth camera and color camera are opened to transform depth image to color camera.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -509,7 +509,7 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
 
     if (!transformation_context->enable_depth_color_transform)
     {
-        LOG_ERROR("Require both depth and color camera are opened to transform color image to depth camera.");
+        LOG_ERROR("Require both depth camera and color camera are opened to transform color image to depth camera.", 0);
         return K4A_RESULT_FAILED;
     }
 
