@@ -17,7 +17,6 @@
 // Project headers
 //
 #include "k4adepthsensorframebasevisualizer.h"
-#include "k4anonbufferingframesource.h"
 #include "k4adepthpixelcolorizer.h"
 
 namespace k4aviewer

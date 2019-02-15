@@ -41,6 +41,11 @@ public:
         return m_statusCode;
     }
 
+    void ClearStatusCode()
+    {
+        m_statusCode = SoundIoErrorNone;
+    }
+
     bool IsStarted() const
     {
         return m_started;

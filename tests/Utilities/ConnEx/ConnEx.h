@@ -1,10 +1,11 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-****************************************************************/
+/* Copyright (c) Microsoft Corporation. All rights reserved.
+   Licensed under the MIT License. */
 
 #include <k4a/k4atypes.h>
+
+// The connection exerciser has 4 active ports plus a everything disconnected "port".
+// Port 0 is the disconnected port. Ports 1-4 are the active ports.
+#define CONN_EX_MAX_NUM_PORTS 5
 
 typedef struct connection_exerciser_internal_t *pconnection_exerciser_internal_t;
 

@@ -20,7 +20,6 @@
 // Project headers
 //
 #include "ik4aframevisualizer.h"
-#include "k4anonbufferingframesource.h"
 #include "k4aviewerutil.h"
 
 namespace k4aviewer

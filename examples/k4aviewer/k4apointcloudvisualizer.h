@@ -18,7 +18,6 @@
 // Project headers
 //
 #include "k4acalibrationtransformdata.h"
-#include "k4anonbufferingframesource.h"
 #include "k4apointcloudrenderer.h"
 #include "k4apointcloudtypes.h"
 #include "k4apointcloudviewcontrol.h"

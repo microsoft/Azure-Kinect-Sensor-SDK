@@ -16,29 +16,26 @@
 
 // Library headers
 //
-#include "opengltexture.h"
 
 // Project headers
 //
-#include "ik4aframevisualizer.h"
 #include "ik4avisualizationwindow.h"
+#include "k4aconvertingframesource.h"
 #include "k4aviewererrormanager.h"
 #include "k4aviewersettingsmanager.h"
 #include "k4awindowsizehelpers.h"
+#include "opengltexture.h"
 
 namespace k4aviewer
 {
 template<k4a_image_format_t ImageFormat> class K4AVideoWindow : public IK4AVisualizationWindow
 {
 public:
-    K4AVideoWindow(std::string &&title,
-                   std::unique_ptr<IK4AFrameVisualizer<ImageFormat>> &&frameVisualizer,
-                   std::shared_ptr<K4ANonBufferingFrameSource<ImageFormat>> frameSource) :
-        m_frameVisualizer(std::move(frameVisualizer)),
+    K4AVideoWindow(std::string &&title, std::shared_ptr<K4AConvertingFrameSource<ImageFormat>> frameSource) :
         m_frameSource(std::move(frameSource)),
         m_title(std::move(title))
     {
-        const GLenum initResult = m_frameVisualizer->InitializeTexture(m_currentTexture);
+        const GLenum initResult = m_frameSource->InitializeTexture(m_currentTexture);
         CheckImageVisualizationResult(GLEnumToImageVisualizationResult(initResult));
     }
 
@@ -78,14 +75,9 @@ private:
 
         // If we haven't received data from the camera yet, we just show the default texture (all black).
         //
-        std::shared_ptr<K4AImage<ImageFormat>> frame;
         if (m_frameSource->HasData())
         {
-            frame = m_frameSource->GetLastFrame();
-
-            // Turn camera data into an OpenGL texture so we can give it to ImGui
-            //
-            if (!CheckImageVisualizationResult(m_frameVisualizer->UpdateTexture(m_currentTexture, *frame)))
+            if (!CheckImageVisualizationResult(m_frameSource->GetNextFrame(*m_currentTexture, m_currentImage)))
             {
                 return;
             }
@@ -109,7 +101,7 @@ private:
 
         const bool imageIsHovered = ImGui::IsItemHovered();
 
-        if (frame && K4AViewerSettingsManager::Instance().GetShowInfoPane())
+        if (m_currentImage != nullptr && K4AViewerSettingsManager::Instance().GetShowInfoPane())
         {
             ImGui::SetNextWindowPos(imageStartPos, ImGuiCond_Always);
             ImGui::SetNextWindowBgAlpha(0.3f); // Transparent background
@@ -145,7 +137,7 @@ private:
                     hoveredImagePixel.y = hoveredUIPixel.y * uiCoordinateToImageCoordinateRatio;
                 }
 
-                RenderInfoPane(*frame, hoveredImagePixel);
+                RenderInfoPane(*m_currentImage, hoveredImagePixel);
             }
             ImGui::End();
         }
@@ -193,6 +185,10 @@ private:
             errorBuilder << "failed to upload image to OpenGL!";
             break;
 
+        case ImageVisualizationResult::NoDataError:
+            errorBuilder << "did not receive image data!";
+            break;
+
         default:
             errorBuilder << "unknown error!";
             break;
@@ -204,11 +200,11 @@ private:
         return false;
     }
 
-    std::unique_ptr<IK4AFrameVisualizer<ImageFormat>> m_frameVisualizer;
-    std::shared_ptr<K4ANonBufferingFrameSource<ImageFormat>> m_frameSource;
+    std::shared_ptr<K4AConvertingFrameSource<ImageFormat>> m_frameSource;
     std::string m_title;
     bool m_failed = false;
 
+    std::shared_ptr<K4AImage<ImageFormat>> m_currentImage;
     std::shared_ptr<OpenGlTexture> m_currentTexture;
 };
 

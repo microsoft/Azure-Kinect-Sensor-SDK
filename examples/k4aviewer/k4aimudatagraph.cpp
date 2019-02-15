@@ -62,19 +62,33 @@ K4AImuDataGraph::K4AImuDataGraph(std::string &&title,
     m_currentRange(-defaultRange),
     m_scaleFactor(scaleFactor),
     m_scaleTitle(GetScaleTitle(m_title))
-
 {
 }
 
 void K4AImuDataGraph::AddSample(const k4a_float3_t &sample, const uint64_t timestampUs)
 {
-    m_offset = (m_offset + 1) % m_x.size();
+    // We want to average a few samples together to slow down the graph enough that it's readable
+    //
+    m_nextSampleAccumulator.xyz.x += sample.xyz.x;
+    m_nextSampleAccumulator.xyz.y += sample.xyz.y;
+    m_nextSampleAccumulator.xyz.z += sample.xyz.z;
+    ++m_nextSampleAccumulatorCount;
 
-    m_x[m_offset] = sample.xyz.x * m_scaleFactor;
-    m_y[m_offset] = sample.xyz.y * m_scaleFactor;
-    m_z[m_offset] = sample.xyz.z * m_scaleFactor;
+    if (m_nextSampleAccumulatorCount >= DataSamplesPerGraphSample)
+    {
+        m_offset = (m_offset + 1) % m_x.size();
 
-    m_lastTimestamp = timestampUs;
+        m_x[m_offset] = m_nextSampleAccumulator.xyz.x / m_nextSampleAccumulatorCount * m_scaleFactor;
+        m_y[m_offset] = m_nextSampleAccumulator.xyz.y / m_nextSampleAccumulatorCount * m_scaleFactor;
+        m_z[m_offset] = m_nextSampleAccumulator.xyz.z / m_nextSampleAccumulatorCount * m_scaleFactor;
+
+        m_lastTimestamp = timestampUs;
+
+        m_nextSampleAccumulator.xyz.x = 0.f;
+        m_nextSampleAccumulator.xyz.y = 0.f;
+        m_nextSampleAccumulator.xyz.z = 0.f;
+        m_nextSampleAccumulatorCount = 0;
+    }
 }
 
 void K4AImuDataGraph::Show(ImVec2 maxSize)

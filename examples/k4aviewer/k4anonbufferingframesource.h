@@ -5,14 +5,15 @@
                Licensed under the MIT License.
 ****************************************************************/
 
-#ifndef K4AFRAMESOURCE_H
-#define K4AFRAMESOURCE_H
+#ifndef K4ANONBUFFERINGFRAMESOURCE_H
+#define K4ANONBUFFERINGFRAMESOURCE_H
 
 // System headers
 //
 #include <array>
 #include <chrono>
 #include <memory>
+#include <mutex>
 
 // Library headers
 //
@@ -22,41 +23,17 @@
 //
 #include "assertionexception.h"
 #include "ik4aobserver.h"
+#include "k4aimageextractor.h"
 
 namespace k4aviewer
 {
 
-// Lets us use a single function signature to pull different types of image out of a capture
-//
-class K4AImageExtractor
-{
-public:
-    template<k4a_image_format_t T>
-    static std::shared_ptr<K4AImage<T>> GetImageFromCapture(const std::shared_ptr<K4ACapture> &capture)
-    {
-        return capture->GetColorImage<T>();
-    }
-};
-
-template<>
-inline std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_DEPTH16>>
-K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_DEPTH16>(const std::shared_ptr<K4ACapture> &capture)
-{
-    return capture->GetDepthImage();
-}
-
-template<>
-inline std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_IR16>>
-K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_IR16>(const std::shared_ptr<K4ACapture> &capture)
-{
-    return capture->GetIrImage();
-}
-
 template<k4a_image_format_t ImageFormat> class K4ANonBufferingFrameSourceImpl : public IK4ACaptureObserver
 {
 public:
-    inline std::shared_ptr<K4AImage<ImageFormat>> GetLastFrame() const
+    inline std::shared_ptr<K4AImage<ImageFormat>> GetLastFrame()
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
         return GetLastFrameImpl();
     }
 
@@ -104,6 +81,7 @@ protected:
         std::shared_ptr<K4AImage<ImageFormat>> image = K4AImageExtractor::GetImageFromCapture<ImageFormat>(data);
         if (image != nullptr)
         {
+            std::lock_guard<std::mutex> lock(m_mutex);
             m_lastImage = std::move(image);
             UpdateFrameRate();
         }
@@ -151,6 +129,8 @@ private:
     double m_frameRateSampleAccumulator = 0;
     double m_frameRate = 0;
     std::chrono::high_resolution_clock::time_point m_lastSampleTime;
+
+    std::mutex m_mutex;
 };
 
 template<k4a_image_format_t ImageFormat>
@@ -167,17 +147,21 @@ class K4ANonBufferingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>
 public:
     float GetLastSensorTemperature()
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
         return m_lastSensorTemperature;
     }
 
     void NotifyData(const std::shared_ptr<K4ACapture> &data) override
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
         m_lastSensorTemperature = data->GetTemperature();
         NotifyDataImpl(data);
     }
 
 private:
     float m_lastSensorTemperature = 0.0f;
+
+    std::mutex m_mutex;
 };
 
 } // namespace k4aviewer

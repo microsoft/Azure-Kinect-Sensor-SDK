@@ -24,60 +24,38 @@
 #include "k4aimguiextensions.h"
 #include "k4atypeoperators.h"
 #include "k4aviewererrormanager.h"
+#include "k4aviewerutil.h"
 #include "k4awindowmanager.h"
 
 using namespace k4aviewer;
 
 namespace
 {
-static constexpr int MaxTimeoutCount = 120;
-
-bool HasTimedOut(k4a_wait_result_t result, int &timeoutCounter)
-{
-    if (result == K4A_WAIT_RESULT_SUCCEEDED)
-    {
-        timeoutCounter = 0;
-        return false;
-    }
-
-    if (result == K4A_WAIT_RESULT_TIMEOUT)
-    {
-        if (timeoutCounter < MaxTimeoutCount)
-        {
-            ++timeoutCounter;
-            return false;
-        }
-
-        return true;
-    }
-
-    return true;
-}
+constexpr int CameraPollingTimeoutMs = 2000;
+constexpr int ImuPollingTimeoutMs = 2000;
 
 template<typename T>
-void PollSensor(K4ADevice &device,
-                const char *sensorFriendlyName,
-                const std::function<k4a_wait_result_t(K4ADevice &, T &)> &pollFn,
-                const std::function<void(K4ADevice &)> &stopFn,
-                int &timeoutCounter,
-                K4ADataSource<T> &dataSource)
+bool PollSensor(const char *sensorFriendlyName,
+                K4ADevice *device,
+                K4ADataSource<T> *dataSource,
+                bool *paused,
+                std::function<k4a_wait_result_t(K4ADevice &, T &)> pollFn,
+                std::function<void(K4ADevice &)> stopFn)
 {
     T data;
-    const k4a_wait_result_t pollStatus = pollFn(device, data);
-    const bool hasTimedOut = HasTimedOut(pollStatus, timeoutCounter);
+    const k4a_wait_result_t pollStatus = pollFn(*device, data);
 
     if (pollStatus == K4A_WAIT_RESULT_SUCCEEDED)
     {
-        dataSource.NotifyObservers(data);
-    }
-    else if (pollStatus == K4A_WAIT_RESULT_TIMEOUT && !hasTimedOut)
-    {
-        // do nothing
+        if (!*paused)
+        {
+            dataSource->NotifyObservers(data);
+        }
     }
     else
     {
         std::stringstream errorBuilder;
-        errorBuilder << sensorFriendlyName << " on device " << device.GetSerialNumber();
+        errorBuilder << sensorFriendlyName << " on device " << device->GetSerialNumber();
         if (pollStatus == K4A_WAIT_RESULT_TIMEOUT)
         {
             errorBuilder << " timed out!";
@@ -88,9 +66,11 @@ void PollSensor(K4ADevice &device,
         }
 
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
-        stopFn(device);
-        dataSource.NotifyTermination();
+        dataSource->NotifyTermination();
+        stopFn(*device);
+        return false;
     }
+    return true;
 }
 } // namespace
 
@@ -272,8 +252,7 @@ K4ADeviceDockControl::K4ADeviceDockControl(std::shared_ptr<K4ADevice> device) : 
 
 K4ADeviceDockControl::~K4ADeviceDockControl()
 {
-    K4AWindowManager::Instance().ClearWindows();
-    CloseDevice();
+    Stop();
 }
 
 void K4ADeviceDockControl::Show()
@@ -296,9 +275,15 @@ void K4ADeviceDockControl::Show()
 
     const bool deviceIsStarted = DeviceIsStarted();
 
-    if (!m_paused)
+    // Check microphone health
+    //
+    if (m_microphone && m_microphone->GetStatusCode() != SoundIoErrorNone)
     {
-        PollDevice();
+        std::stringstream errorBuilder;
+        errorBuilder << "Microphone on device " << m_device->GetSerialNumber() << " failed!";
+        K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
+        StopMicrophone();
+        m_microphone->ClearStatusCode();
     }
 
     // Draw controls
@@ -797,65 +782,6 @@ void K4ADeviceDockControl::Show()
     m_firstRun = false;
 }
 
-void K4ADeviceDockControl::PollDevice()
-{
-    if (m_device->CamerasAreStarted())
-    {
-        PollSensor<std::shared_ptr<K4ACapture>>(*m_device,
-                                                "Cameras",
-                                                [](K4ADevice &device, std::shared_ptr<K4ACapture> &result) {
-                                                    std::unique_ptr<K4ACapture> p;
-                                                    k4a_wait_result_t status = device.PollCameras(p);
-                                                    result = std::move(p);
-                                                    return status;
-                                                },
-                                                [](K4ADevice &device) { device.StopCameras(); },
-                                                m_cameraTimeoutCounter,
-                                                m_cameraDataSource);
-    }
-
-    if (m_device->ImuIsStarted())
-    {
-        PollSensor<k4a_imu_sample_t>(*m_device,
-                                     "IMU",
-                                     [](K4ADevice &device, k4a_imu_sample_t &result) {
-                                         // The IMU refreshes significantly faster than the viewer's
-                                         // framerate, so if we only grab one IMU sample per app frame,
-                                         // we end up dropping a bunch of IMU samples, which generates
-                                         // a bunch of noise in the K4A SDK logs.
-                                         //
-                                         // To mitigate this, we drain the queue whenever we poll the
-                                         // IMU.  This is reasonable for a viewer app where we're just
-                                         // trying to see if the IMU is returning data, but not for real
-                                         // IMU applications like tracking where you can't afford to drop
-                                         // samples.
-                                         //
-                                         bool gotSample = false;
-                                         k4a_wait_result_t status;
-                                         while (K4A_WAIT_RESULT_SUCCEEDED == (status = device.PollImu(result)))
-                                         {
-                                             gotSample = true;
-                                         }
-                                         if (gotSample && status == K4A_WAIT_RESULT_TIMEOUT)
-                                         {
-                                             status = K4A_WAIT_RESULT_SUCCEEDED;
-                                         }
-                                         return status;
-                                     },
-                                     [](K4ADevice &device) { device.StopImu(); },
-                                     m_imuTimeoutCounter,
-                                     m_imuDataSource);
-    }
-
-    if (m_microphone && m_microphone->GetStatusCode() != SoundIoErrorNone)
-    {
-        std::stringstream errorBuilder;
-        errorBuilder << "Microphone on device " << m_device->GetSerialNumber() << " failed!";
-        K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
-        StopMicrophone();
-    }
-}
-
 void K4ADeviceDockControl::Start()
 {
     const bool enableCameras = m_pendingDeviceConfiguration.EnableColorCamera ||
@@ -881,12 +807,8 @@ void K4ADeviceDockControl::Stop()
 {
     K4AWindowManager::Instance().ClearWindows();
 
-    m_device->StopCameras();
-    m_cameraDataSource.NotifyTermination();
-
-    m_device->StopImu();
-    m_imuDataSource.NotifyTermination();
-
+    StopCameras();
+    StopImu();
     StopMicrophone();
 }
 
@@ -907,7 +829,37 @@ bool K4ADeviceDockControl::StartCameras()
         return false;
     }
 
+    K4ADevice *pDevice = m_device.get();
+    K4ADataSource<std::shared_ptr<K4ACapture>> *pCameraDataSource = &m_cameraDataSource;
+    bool *pPaused = &m_paused;
+
+    m_cameraPollingThread = std14::make_unique<K4APollingThread<std::shared_ptr<K4ACapture>>>(
+        [pDevice, pCameraDataSource, pPaused]() {
+            return PollSensor<std::shared_ptr<K4ACapture>>("Cameras",
+                                                           pDevice,
+                                                           pCameraDataSource,
+                                                           pPaused,
+                                                           [](K4ADevice &device, std::shared_ptr<K4ACapture> &capture) {
+                                                               std::unique_ptr<K4ACapture> up;
+                                                               k4a_wait_result_t status =
+                                                                   device.PollCameras(CameraPollingTimeoutMs, up);
+                                                               capture = std::move(up);
+                                                               return status;
+                                                           },
+                                                           [](K4ADevice &device) { device.StopCameras(); });
+        });
+
     return true;
+}
+
+void K4ADeviceDockControl::StopCameras()
+{
+    if (m_cameraPollingThread)
+    {
+        m_cameraPollingThread.reset();
+    }
+    m_cameraDataSource.NotifyTermination();
+    m_device->StopCameras();
 }
 
 bool K4ADeviceDockControl::StartMicrophone()
@@ -960,7 +912,33 @@ bool K4ADeviceDockControl::StartImu()
         return false;
     }
 
+    K4ADevice *pDevice = m_device.get();
+    K4ADataSource<k4a_imu_sample_t> *pImuDataSource = &m_imuDataSource;
+    bool *pPaused = &m_paused;
+
+    m_imuPollingThread = std14::make_unique<K4APollingThread<k4a_imu_sample_t>>([pDevice, pImuDataSource, pPaused]() {
+        return PollSensor<k4a_imu_sample_t>("IMU",
+                                            pDevice,
+                                            pImuDataSource,
+                                            pPaused,
+                                            [](K4ADevice &device, k4a_imu_sample_t &sample) {
+                                                return device.PollImu(ImuPollingTimeoutMs, sample);
+                                            },
+                                            [](K4ADevice &device) { device.StopCameras(); });
+    });
+
     return true;
+}
+
+void K4ADeviceDockControl::StopImu()
+{
+    if (m_imuPollingThread)
+    {
+        m_imuPollingThread.reset();
+    }
+    m_imuDataSource.NotifyTermination();
+
+    m_device->StopImu();
 }
 
 void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
@@ -1015,15 +993,6 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     }
 
     m_currentViewType = viewType;
-}
-
-void K4ADeviceDockControl::CloseDevice()
-{
-    if (m_device)
-    {
-        Stop();
-        m_device.reset();
-    }
 }
 
 void K4ADeviceDockControl::ApplyDefaultConfiguration()
