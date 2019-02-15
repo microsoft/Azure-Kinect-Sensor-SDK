@@ -361,6 +361,7 @@ constexpr char ImageFormatColorYUY2[] = "K4A_IMAGE_FORMAT_COLOR_YUY2";
 constexpr char ImageFormatColorBGRA32[] = "K4A_IMAGE_FORMAT_COLOR_BGRA32";
 constexpr char ImageFormatDepth16[] = "K4A_IMAGE_FORMAT_DEPTH16";
 constexpr char ImageFormatIR16[] = "K4A_IMAGE_FORMAT_IR16";
+constexpr char ImageFormatCustom[] = "K4A_IMAGE_FORMAT_CUSTOM";
 } // namespace
 
 std::ostream &operator<<(std::ostream &s, const k4a_image_format_t &val)
@@ -384,6 +385,9 @@ std::ostream &operator<<(std::ostream &s, const k4a_image_format_t &val)
         break;
     case K4A_IMAGE_FORMAT_IR16:
         s << ImageFormatIR16;
+        break;
+    case K4A_IMAGE_FORMAT_CUSTOM:
+        s << ImageFormatCustom;
         break;
     default:
         throw AssertionException("Unrecognized image format");
@@ -418,6 +422,10 @@ std::istream &operator>>(std::istream &s, k4a_image_format_t &val)
     else if (str == ImageFormatIR16)
     {
         val = K4A_IMAGE_FORMAT_IR16;
+    }
+    else if (str == ImageFormatCustom)
+    {
+        val = K4A_IMAGE_FORMAT_CUSTOM;
     }
     else
     {
