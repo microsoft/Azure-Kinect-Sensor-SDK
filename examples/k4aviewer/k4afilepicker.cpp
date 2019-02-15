@@ -12,6 +12,7 @@
 // System headers
 //
 #include <algorithm>
+#include <locale>
 #include <sstream>
 
 // Library headers
@@ -40,6 +41,12 @@ bool K4AFilePicker::Show()
         std17::filesystem::path currentDirectory(&m_currentDirectoryBuffer[0]);
         ChangeWorkingDirectory(currentDirectory.parent_path());
         return false;
+    }
+
+    if (ImGui::Checkbox("Show only MKV files", &m_filterExtensions))
+    {
+        std17::filesystem::path currentDirectory(&m_currentDirectoryBuffer[0]);
+        ChangeWorkingDirectory(currentDirectory);
     }
 
     for (const std::string &currentSubdirectory : m_currentDirectorySubdirectories)
@@ -95,14 +102,20 @@ void K4AFilePicker::ChangeWorkingDirectory(std17::filesystem::path newDirectory)
          it != std17::filesystem::directory_iterator::end(newDirectory);
          ++it)
     {
-        std::stringstream label;
         if (it->is_directory())
         {
             m_currentDirectorySubdirectories.emplace_back(it->path().filename().string());
         }
         else
         {
-            m_currentDirectoryFiles.emplace_back(it->path().filename().string());
+            std::string extension = it->path().extension().string();
+            std::transform(extension.begin(), extension.end(), extension.begin(), [](const char &c) {
+                return std::tolower(c, std::locale());
+            });
+            if (!m_filterExtensions || extension == ".mkv")
+            {
+                m_currentDirectoryFiles.emplace_back(it->path().filename().string());
+            }
         }
     }
 

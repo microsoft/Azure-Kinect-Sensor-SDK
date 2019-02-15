@@ -40,6 +40,8 @@ private:
 
     std::vector<std::string> m_currentDirectoryFiles;
     std::vector<std::string> m_currentDirectorySubdirectories;
+
+    bool m_filterExtensions = true;
 };
 } // namespace k4aviewer
 

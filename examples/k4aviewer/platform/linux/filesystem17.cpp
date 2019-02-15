@@ -133,6 +133,18 @@ path path::filename() const
     return path(basename(&filename[0]));
 }
 
+path path::extension() const
+{
+    std::string filenameStr = filename().string();
+    size_t lastPeriod = filenameStr.rfind('.');
+    if (lastPeriod == std::string::npos || lastPeriod == 0 || filenameStr == "..")
+    {
+        return path("");
+    }
+
+    return path(filenameStr.substr(lastPeriod).c_str());
+}
+
 path path::parent_path() const
 {
     std::string filename = m_path;
