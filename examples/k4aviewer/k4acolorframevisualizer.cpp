@@ -11,6 +11,7 @@
 
 // System headers
 //
+#include <algorithm>
 #include <string>
 
 // Library headers
@@ -76,11 +77,10 @@ protected:
     explicit K4AColorFrameVisualizerBase(k4a_color_resolution_t colorResolution) :
         m_dimensions(GetDimensionsForColorResolution(colorResolution))
     {
-        const size_t bufferSize = sizeof(RgbaPixel) * static_cast<size_t>(m_dimensions.Width * m_dimensions.Height);
-        m_outputBuffer.resize(bufferSize, 0);
+        m_expectedBufferSize = sizeof(RgbaPixel) * static_cast<size_t>(m_dimensions.Width * m_dimensions.Height);
     }
 
-    std::vector<uint8_t> m_outputBuffer;
+    size_t m_expectedBufferSize;
     ImageDimensions m_dimensions;
 };
 
@@ -99,16 +99,16 @@ public:
         // It looks like OpenGL's conversion is slightly faster than libyuv's, so we
         // have mismatched format and internalformat here.
         //
-        return OpenGlTextureFactory::CreateTexture(texture,
-                                                   &m_outputBuffer[0],
-                                                   m_dimensions,
-                                                   GL_BGRA,
-                                                   GL_RGBA,
-                                                   GL_UNSIGNED_BYTE);
+        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_BGRA, GL_RGBA, GL_UNSIGNED_BYTE);
     }
 
-    ImageVisualizationResult UpdateTexture(std::shared_ptr<OpenGlTexture> &texture,
-                                           const K4AImage<K4A_IMAGE_FORMAT_COLOR_YUY2> &frame) override
+    void InitializeBuffer(K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_YUY2> &buffer) override
+    {
+        buffer.Data.resize(m_expectedBufferSize);
+    }
+
+    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_COLOR_YUY2>> &image,
+                                          K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_YUY2> &buffer) override
     {
         // YUY2 is a 4:2:2 format, so there are 4 bytes per 'chunk' of data, and each 'chunk' represents 2 pixels.
         //
@@ -116,16 +116,16 @@ public:
 
         const auto expectedBufferSize = static_cast<size_t>(stride * m_dimensions.Height);
 
-        if (frame.GetSize() != expectedBufferSize)
+        if (image->GetSize() != expectedBufferSize)
         {
             return ImageVisualizationResult::InvalidBufferSizeError;
         }
 
         static PerfCounter decode("YUY2 decode");
         PerfSample decodeSample(&decode);
-        int result = libyuv::YUY2ToARGB(frame.GetBuffer(),                                        // src_yuy2,
+        int result = libyuv::YUY2ToARGB(image->GetBuffer(),                                       // src_yuy2,
                                         stride,                                                   // src_stride_yuy2,
-                                        &m_outputBuffer[0],                                       // dst_argb,
+                                        &buffer.Data[0],                                          // dst_argb,
                                         m_dimensions.Width * static_cast<int>(sizeof(RgbaPixel)), // dst_stride_argb,
                                         m_dimensions.Width,                                       // width,
                                         m_dimensions.Height                                       // height
@@ -136,9 +136,17 @@ public:
         {
             return ImageVisualizationResult::InvalidImageDataError;
         }
+
+        buffer.SourceImage = image;
+        return ImageVisualizationResult::Success;
+    }
+
+    ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_YUY2> &buffer,
+                                           OpenGlTexture &texture) override
+    {
         static PerfCounter upload("YUY2 upload");
         PerfSample uploadSample(&upload);
-        return GLEnumToImageVisualizationResult(texture->UpdateTexture(&m_outputBuffer[0]));
+        return GLEnumToImageVisualizationResult(texture.UpdateTexture(&buffer.Data[0]));
     }
 
     K4AYUY2FrameVisualizer(k4a_color_resolution_t resolution) : K4AColorFrameVisualizerBase(resolution) {}
@@ -150,26 +158,26 @@ class K4ANV12FrameVisualizer : public K4AColorFrameVisualizerBase,
 public:
     GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) override
     {
-        return OpenGlTextureFactory::CreateTexture(texture,
-                                                   &m_outputBuffer[0],
-                                                   m_dimensions,
-                                                   GL_RGBA,
-                                                   GL_RGBA,
-                                                   GL_UNSIGNED_BYTE);
+        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
     }
 
-    ImageVisualizationResult UpdateTexture(std::shared_ptr<OpenGlTexture> &texture,
-                                           const K4AImage<K4A_IMAGE_FORMAT_COLOR_NV12> &frame) override
+    void InitializeBuffer(K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_NV12> &buffer) override
+    {
+        buffer.Data.resize(m_expectedBufferSize);
+    }
+
+    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_COLOR_NV12>> &image,
+                                          K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_NV12> &buffer) override
     {
         const int luminanceStride = m_dimensions.Width;
         const int hueSatStride = m_dimensions.Width;
-        const uint8_t *hueSatStart = frame.GetBuffer() + luminanceStride * m_dimensions.Height;
+        const uint8_t *hueSatStart = image->GetBuffer() + luminanceStride * m_dimensions.Height;
 
         // NV12 is a 4:2:0 format, so there are half as many hue/sat pixels as luminance pixels
         //
         const auto expectedBufferSize = static_cast<size_t>(m_dimensions.Height * (luminanceStride + hueSatStride / 2));
 
-        if (frame.GetSize() != expectedBufferSize)
+        if (image->GetSize() != expectedBufferSize)
         {
             return ImageVisualizationResult::InvalidBufferSizeError;
         }
@@ -180,11 +188,11 @@ public:
         //
         static PerfCounter decode("NV12 decode");
         PerfSample decodeSample(&decode);
-        int result = libyuv::NV12ToABGR(frame.GetBuffer(),                                        // src_y
+        int result = libyuv::NV12ToABGR(image->GetBuffer(),                                       // src_y
                                         luminanceStride,                                          // src_stride_y
                                         hueSatStart,                                              // src_vu
                                         hueSatStride,                                             // src_stride_vu
-                                        &m_outputBuffer[0],                                       // dst_argb
+                                        &buffer.Data[0],                                          // dst_argb
                                         m_dimensions.Width * static_cast<int>(sizeof(RgbaPixel)), // dst_stride_argb
                                         m_dimensions.Width,                                       // width
                                         m_dimensions.Height                                       // height
@@ -196,9 +204,16 @@ public:
             return ImageVisualizationResult::InvalidImageDataError;
         }
 
+        buffer.SourceImage = image;
+        return ImageVisualizationResult::Success;
+    }
+
+    ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_NV12> &buffer,
+                                           OpenGlTexture &texture) override
+    {
         static PerfCounter upload("NV12 upload");
         PerfSample uploadSample(&upload);
-        return GLEnumToImageVisualizationResult(texture->UpdateTexture(&m_outputBuffer[0]));
+        return GLEnumToImageVisualizationResult(texture.UpdateTexture(&buffer.Data[0]));
     }
 
     K4ANV12FrameVisualizer(k4a_color_resolution_t resolution) : K4AColorFrameVisualizerBase(resolution) {}
@@ -210,25 +225,33 @@ class K4ABGRA32FrameVisualizer : public K4AColorFrameVisualizerBase,
 public:
     GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) override
     {
-        return OpenGlTextureFactory::CreateTexture(texture,
-                                                   &m_outputBuffer[0],
-                                                   m_dimensions,
-                                                   GL_BGRA,
-                                                   GL_RGBA,
-                                                   GL_UNSIGNED_BYTE);
+        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_BGRA, GL_RGBA, GL_UNSIGNED_BYTE);
     }
 
-    ImageVisualizationResult UpdateTexture(std::shared_ptr<OpenGlTexture> &texture,
-                                           const K4AImage<K4A_IMAGE_FORMAT_COLOR_BGRA32> &frame) override
+    void InitializeBuffer(K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_BGRA32> &buffer) override
     {
-        if (frame.GetSize() != static_cast<size_t>(m_dimensions.Height * m_dimensions.Width) * sizeof(RgbaPixel))
+        buffer.Data.resize(m_expectedBufferSize);
+    }
+
+    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_COLOR_BGRA32>> &image,
+                                          K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_BGRA32> &buffer) override
+    {
+        if (image->GetSize() != static_cast<size_t>(m_dimensions.Height * m_dimensions.Width) * sizeof(RgbaPixel))
         {
             return ImageVisualizationResult::InvalidBufferSizeError;
         }
 
+        std::copy(image->GetBuffer(), image->GetBuffer() + image->GetSize(), buffer.Data.begin());
+        buffer.SourceImage = image;
+        return ImageVisualizationResult::Success;
+    }
+
+    ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_BGRA32> &buffer,
+                                           OpenGlTexture &texture) override
+    {
         static PerfCounter upload("BGRA32 upload");
         PerfSample uploadSample(&upload);
-        return GLEnumToImageVisualizationResult(texture->UpdateTexture(frame.GetBuffer()));
+        return GLEnumToImageVisualizationResult(texture.UpdateTexture(&buffer.Data[0]));
     }
 
     K4ABGRA32FrameVisualizer(k4a_color_resolution_t resolution) : K4AColorFrameVisualizerBase(resolution) {}
@@ -240,24 +263,24 @@ class K4AMJPGFrameVisualizer : public K4AColorFrameVisualizerBase,
 public:
     GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) override
     {
-        return OpenGlTextureFactory::CreateTexture(texture,
-                                                   &m_outputBuffer[0],
-                                                   m_dimensions,
-                                                   GL_RGBA,
-                                                   GL_RGBA,
-                                                   GL_UNSIGNED_BYTE);
+        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
     }
 
-    ImageVisualizationResult UpdateTexture(std::shared_ptr<OpenGlTexture> &texture,
-                                           const K4AImage<K4A_IMAGE_FORMAT_COLOR_MJPG> &frame) override
+    void InitializeBuffer(K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_MJPG> &buffer) override
+    {
+        buffer.Data.resize(m_expectedBufferSize);
+    }
+
+    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_COLOR_MJPG>> &image,
+                                          K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_MJPG> &buffer) override
     {
         static PerfCounter mjpgDecode("MJPG decode");
         PerfSample decodeSample(&mjpgDecode);
 
         const int decompressStatus = tjDecompress2(m_decompressor,
-                                                   frame.GetBuffer(),
-                                                   static_cast<unsigned long>(frame.GetSize()),
-                                                   &m_outputBuffer[0],
+                                                   image->GetBuffer(),
+                                                   static_cast<unsigned long>(image->GetSize()),
+                                                   &buffer.Data[0],
                                                    m_dimensions.Width,
                                                    0, // pitch
                                                    m_dimensions.Height,
@@ -269,9 +292,16 @@ public:
             return ImageVisualizationResult::InvalidImageDataError;
         }
 
+        buffer.SourceImage = image;
+        return ImageVisualizationResult::Success;
+    }
+
+    ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_MJPG> &buffer,
+                                           OpenGlTexture &texture) override
+    {
         static PerfCounter mjpgUpload("MJPG upload");
         PerfSample uploadSample(&mjpgUpload);
-        return GLEnumToImageVisualizationResult(texture->UpdateTexture(&m_outputBuffer[0]));
+        return GLEnumToImageVisualizationResult(texture.UpdateTexture(&buffer.Data[0]));
     }
 
     K4AMJPGFrameVisualizer(k4a_color_resolution_t resolution) :

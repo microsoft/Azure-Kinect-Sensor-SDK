@@ -76,13 +76,12 @@ void K4AImuWindow::Show(K4AWindowPlacementInfo placementInfo)
         return;
     }
 
-    const k4a_imu_sample_t sample = m_sampleSource->GetLastSample();
-    if (sample.acc_timestamp_usec != m_lastAccTimestamp)
+    k4a_imu_sample_t sample;
+    while (m_sampleSource->PopSample(sample))
     {
-        m_lastAccTimestamp = sample.acc_timestamp_usec;
-
         m_accelerometerGraph.AddSample(sample.acc_sample, sample.acc_timestamp_usec);
         m_gyroscopeGraph.AddSample(sample.gyro_sample, sample.gyro_timestamp_usec);
+        m_sensorTemperature = static_cast<double>(sample.temperature);
     }
 
     // Sizing math
@@ -112,7 +111,7 @@ void K4AImuWindow::Show(K4AWindowPlacementInfo placementInfo)
     m_gyroscopeGraph.Show(graphSize);
 
     ImGui::Separator();
-    ImGui::Text("Sensor temperature: %.2f C", double(sample.temperature));
+    ImGui::Text("Sensor temperature: %.2f C", m_sensorTemperature);
 }
 
 const char *K4AImuWindow::GetTitle() const

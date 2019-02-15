@@ -30,6 +30,7 @@ K4AViewerErrorManager &K4AViewerErrorManager::Instance()
 
 void K4AViewerErrorManager::SetErrorStatus(const char *msg)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_errors.emplace(msg);
 }
 
@@ -40,6 +41,7 @@ void K4AViewerErrorManager::SetErrorStatus(const std::string &msg)
 
 void K4AViewerErrorManager::SetErrorStatus(std::string &&msg)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_errors.emplace(std::move(msg));
 }
 
@@ -69,5 +71,6 @@ void K4AViewerErrorManager::SetErrorStatus(const std::string &msg, k4a_wait_resu
 
 void K4AViewerErrorManager::PopError()
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_errors.pop();
 }

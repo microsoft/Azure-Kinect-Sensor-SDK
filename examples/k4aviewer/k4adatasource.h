@@ -14,6 +14,7 @@
 // Library headers
 //
 #include <list>
+#include <mutex>
 
 // Project headers
 //
@@ -39,6 +40,8 @@ public:
 
     void RegisterObserver(std::shared_ptr<IK4AObserver<T>> &&observer)
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         if (m_primed)
         {
             observer->NotifyData(m_mostRecentData);
@@ -48,8 +51,10 @@ public:
 
     void NotifyObservers(const T &data)
     {
-        m_primed = true;
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         m_mostRecentData = data;
+        m_primed = true;
         for (auto wpObserver = m_observers.begin(); wpObserver != m_observers.end();)
         {
             auto spObserver = wpObserver->lock();
@@ -69,6 +74,8 @@ public:
 
     void NotifyTermination()
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         m_primed = false;
         for (const auto &wpObserver : m_observers)
         {
@@ -77,6 +84,8 @@ public:
                 spObserver->NotifyTermination();
             }
         }
+
+        m_observers.clear();
     }
 
 private:
@@ -84,6 +93,8 @@ private:
 
     bool m_primed = false;
     T m_mostRecentData;
+
+    std::mutex m_mutex;
 };
 
 } // namespace k4aviewer

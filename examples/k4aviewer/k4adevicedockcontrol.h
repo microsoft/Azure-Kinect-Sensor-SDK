@@ -22,6 +22,7 @@
 #include "k4adatasource.h"
 #include "k4adevice.h"
 #include "k4amicrophone.h"
+#include "k4apollingthread.h"
 #include "k4aviewersettingsmanager.h"
 #include "k4awindowset.h"
 
@@ -39,7 +40,6 @@ public:
     ~K4ADeviceDockControl() override;
 
     void Show() override;
-    void PollDevice();
 
 private:
     struct ColorSetting
@@ -90,13 +90,13 @@ private:
     bool DeviceIsStarted() const;
 
     bool StartCameras();
+    void StopCameras();
 
     bool StartMicrophone();
     void StopMicrophone();
 
     bool StartImu();
-
-    void CloseDevice();
+    void StopImu();
 
     void ApplyDefaultConfiguration();
     void SaveDefaultConfiguration();
@@ -115,8 +115,6 @@ private:
 
     K4ADataSource<std::shared_ptr<K4ACapture>> m_cameraDataSource;
     K4ADataSource<k4a_imu_sample_t> m_imuDataSource;
-    int m_cameraTimeoutCounter = 0;
-    int m_imuTimeoutCounter = 0;
 
     bool m_firstRun = true;
 
@@ -126,6 +124,9 @@ private:
     bool m_paused = false;
 
     std::string m_windowTitle;
+
+    std::unique_ptr<K4APollingThread<std::shared_ptr<K4ACapture>>> m_cameraPollingThread;
+    std::unique_ptr<K4APollingThread<k4a_imu_sample_t>> m_imuPollingThread;
 };
 } // namespace k4aviewer
 

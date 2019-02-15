@@ -10,6 +10,7 @@
 
 // System headers
 //
+#include <mutex>
 
 // Library headers
 //
@@ -17,7 +18,8 @@
 
 // Project headers
 //
-#include <ik4aobserver.h>
+#include "ik4aobserver.h"
+#include "k4aringbuffer.h"
 
 namespace k4aviewer
 {
@@ -27,10 +29,7 @@ public:
     void NotifyData(const k4a_imu_sample_t &data) override;
     void NotifyTermination() override;
 
-    const k4a_imu_sample_t &GetLastSample() const
-    {
-        return m_lastSample;
-    }
+    bool PopSample(k4a_imu_sample_t &out);
 
     bool IsFailed() const
     {
@@ -40,8 +39,10 @@ public:
     ~K4AImuSampleSource() override = default;
 
 private:
-    k4a_imu_sample_t m_lastSample{};
+    K4ARingBuffer<k4a_imu_sample_t, 1000> m_sampleBuffer;
     bool m_failed = false;
+
+    mutable std::mutex m_mutex;
 };
 } // namespace k4aviewer
 

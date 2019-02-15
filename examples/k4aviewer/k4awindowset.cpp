@@ -36,15 +36,14 @@ template<k4a_image_format_t ImageFormat>
 void CreateVideoWindow(const char *sourceIdentifier,
                        const char *windowTitle,
                        K4ADataSource<std::shared_ptr<K4ACapture>> &cameraDataSource,
-                       std::unique_ptr<IK4AFrameVisualizer<ImageFormat>> &&frameVisualizer)
+                       std::shared_ptr<K4AConvertingFrameSource<ImageFormat>> &&frameSource)
 {
     std::string title = std::string(sourceIdentifier) + ": " + windowTitle;
 
-    const auto frameSource = std::make_shared<K4ANonBufferingFrameSource<ImageFormat>>();
     cameraDataSource.RegisterObserver(frameSource);
 
     std::unique_ptr<IK4AVisualizationWindow> window(
-        std14::make_unique<K4AVideoWindow<ImageFormat>>(std::move(title), std::move(frameVisualizer), frameSource));
+        std14::make_unique<K4AVideoWindow<ImageFormat>>(std::move(title), frameSource));
 
     K4AWindowManager::Instance().AddWindow(std::move(window));
 }
@@ -91,7 +90,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
             CreateVideoWindow(sourceIdentifier,
                               "Infrared Camera",
                               *cameraDataSource,
-                              std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_IR16>>(
+                              std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_IR16>>(
                                   std14::make_unique<K4AInfraredFrameVisualizer>(depthMode)));
 
             // K4A_DEPTH_MODE_PASSIVE_IR doesn't support actual depth
@@ -101,7 +100,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                 CreateVideoWindow(sourceIdentifier,
                                   "Depth Camera",
                                   *cameraDataSource,
-                                  std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_DEPTH16>>(
+                                  std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>>(
                                       std14::make_unique<K4ADepthFrameVisualizer>(depthMode)));
             }
         }
@@ -117,7 +116,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
-                    K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_YUY2>(colorResolution));
+                    std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_COLOR_YUY2>>(
+                        K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_YUY2>(colorResolution)));
                 break;
 
             case K4A_IMAGE_FORMAT_COLOR_MJPG:
@@ -125,7 +125,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
-                    K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_MJPG>(colorResolution));
+                    std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_COLOR_MJPG>>(
+                        K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_MJPG>(colorResolution)));
                 break;
 
             case K4A_IMAGE_FORMAT_COLOR_BGRA32:
@@ -133,7 +134,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
-                    K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_BGRA32>(colorResolution));
+                    std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_COLOR_BGRA32>>(
+                        K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_BGRA32>(colorResolution)));
                 break;
 
             case K4A_IMAGE_FORMAT_COLOR_NV12:
@@ -141,7 +143,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
-                    K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_NV12>(colorResolution));
+                    std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_COLOR_NV12>>(
+                        K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_NV12>(colorResolution)));
                 break;
 
             default:

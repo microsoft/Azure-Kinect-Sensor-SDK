@@ -46,8 +46,7 @@ private:
 
     K4AImuDataGraph m_accelerometerGraph;
     K4AImuDataGraph m_gyroscopeGraph;
-
-    uint64_t m_lastAccTimestamp = 0;
+    double m_sensorTemperature;
 };
 } // namespace k4aviewer
 
