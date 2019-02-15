@@ -297,6 +297,20 @@ TEST_F(transformation_ut, transformation_2d_to_2d)
     ASSERT_EQ_FLT2(point2d, m_depth_point2d_reference);
 }
 
+TEST_F(transformation_ut, transformation_create)
+{
+    k4a_depth_mode_t depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    k4a_color_resolution_t color_resolution = K4A_COLOR_RESOLUTION_OFF;
+    
+    k4a_calibration_t calibration = { 0 };
+    k4a_result_t result =
+        k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_resolution, &calibration);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    k4a_transformation_t transformation = k4a_transformation_create(&calibration);
+    ASSERT_NE(transformation, (k4a_transformation_t)NULL);
+}
+
 int main(int argc, char **argv)
 {
     return k4a_test_commmon_main(argc, argv);

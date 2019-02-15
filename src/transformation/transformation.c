@@ -365,7 +365,9 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration,
         return 0;
     }
 
-    transformation_context->gpu_optimization = gpu_optimization;
+    transformation_context->gpu_optimization = gpu_optimization &&
+                                               transformation_context->calibration.color_resolution !=
+                                                   K4A_COLOR_RESOLUTION_OFF;
     if (transformation_context->gpu_optimization)
     {
         // Set up transform engine expected calibration struct
