@@ -853,6 +853,7 @@ void K4ADeviceDockControl::PollDevice()
         errorBuilder << "Microphone on device " << m_device->GetSerialNumber() << " failed!";
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
         StopMicrophone();
+        m_microphone->ClearStatusCode();
     }
 }
 
