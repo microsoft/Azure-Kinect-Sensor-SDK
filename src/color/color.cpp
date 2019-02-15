@@ -12,13 +12,16 @@
 
 #ifdef _WIN32
 #include "mfcamerareader.h"
+#else
+#include "uvc_camerareader.h"
+#include <memory>
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-color_cb_mf_stream_t color_capture_available;
+color_cb_stream_t color_capture_available;
 
 typedef struct _color_context_t
 {
@@ -29,6 +32,8 @@ typedef struct _color_context_t
 
 #ifdef _WIN32
     Microsoft::WRL::ComPtr<CMFCameraReader> m_spCameraReader;
+#else
+    std::unique_ptr<UVCCameraReader> m_spCameraReader;
 #endif
 } color_context_t;
 
@@ -63,7 +68,12 @@ k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
             Microsoft::WRL::MakeAndInitialize<CMFCameraReader>(&color->m_spCameraReader, (GUID *)container_id)));
     }
 #else
-    result = K4A_RESULT_SUCCEEDED;
+    if (K4A_SUCCEEDED(result))
+    {
+        char *pSerialNumber = nullptr; // ToDo: Get Serial number
+        color->m_spCameraReader.reset(new UVCCameraReader);
+        result = color->m_spCameraReader->Init(pSerialNumber);
+    }
 #endif
 
     if (K4A_FAILED(result))
@@ -80,15 +90,16 @@ void color_destroy(color_t color_handle)
 
     color_stop(color_handle);
 
-#ifdef _WIN32
     color_context_t *color = color_t_get_context(color_handle);
     if (color->m_spCameraReader)
     {
         color->m_spCameraReader->Shutdown();
-
+#ifdef _WIN32
         color->m_spCameraReader.Reset();
-    }
+#else
+        color->m_spCameraReader.reset();
 #endif
+    }
     color_t_destroy(color_handle);
 }
 
@@ -170,21 +181,12 @@ k4a_result_t color_start(color_t color_handle, const k4a_device_configuration_t 
 
     if (K4A_SUCCEEDED(result))
     {
-#ifdef _WIN32
         result = TRACE_CALL(color->m_spCameraReader->Start(width,
                                                            height,                   // Resolution
                                                            fps,                      // Framerate
                                                            config->color_format,     // Color format enum
                                                            &color_capture_available, // Callback
                                                            color));                  // Callback context
-#else
-        (void)width;
-        (void)height;
-        (void)fps;
-        (void)color;
-        LOG_ERROR("not implemented", 0);
-        result = K4A_RESULT_SUCCEEDED;
-#endif
     }
 
     if (K4A_FAILED(result))
@@ -201,7 +203,6 @@ void color_stop(color_t color_handle)
     color_context_t *color = color_t_get_context(color_handle);
     color->sensor_start_time_tick = 0;
 
-#ifdef _WIN32
     // Request stop streaming and wait until clean up and flushing.
     // After this call, no more sample callback will be called.
 
@@ -209,9 +210,6 @@ void color_stop(color_t color_handle)
     {
         color->m_spCameraReader->Stop();
     }
-#else
-    (void)color;
-#endif
 
     return;
 }
@@ -236,12 +234,7 @@ k4a_result_t color_get_control(const color_t handle,
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, value == NULL);
     color_context_t *color = color_t_get_context(handle);
 
-#ifdef _WIN32
-    return color->m_spCameraReader->GetKsControl(command, mode, value);
-#else
-    (void)color;
-    return K4A_RESULT_SUCCEEDED;
-#endif
+    return color->m_spCameraReader->GetCameraControl(command, mode, value);
 }
 
 k4a_result_t color_set_control(const color_t handle,
@@ -257,13 +250,7 @@ k4a_result_t color_set_control(const color_t handle,
                         mode != K4A_COLOR_CONTROL_MODE_AUTO && mode != K4A_COLOR_CONTROL_MODE_MANUAL);
     color_context_t *color = color_t_get_context(handle);
 
-#ifdef _WIN32
-    return color->m_spCameraReader->SetKsControl(command, mode, value);
-#else
-    (void)color;
-    (void)value;
-    return K4A_RESULT_SUCCEEDED;
-#endif
+    return color->m_spCameraReader->SetCameraControl(command, mode, value);
 }
 
 #ifdef __cplusplus

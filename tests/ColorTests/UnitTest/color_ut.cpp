@@ -7,7 +7,8 @@
 #ifdef _WIN32
 #include "color_mock_mediafoundation.h"
 #include "color_mock_windows.h"
-
+#else
+#include "color_mock_libuvc.h"
 #endif // _WIN32
 
 // Fake container ID
@@ -26,6 +27,8 @@ protected:
 #ifdef _WIN32
     MockMediaFoundation m_mockMediaFoundation; // Mock for Media Foundation
     MockWindowsSystem m_mockWindows;           // Mock for dllexport Windows system calls
+#else
+    MockLibUVC m_mockLibUVC; // Mock for LibUVC
 #endif
 
     void SetUp() override
@@ -40,6 +43,46 @@ protected:
         EXPECT_CM_Locate_DevNodeW(m_mockWindows);
         GUID *containerId = (GUID *)&guid_FakeGoodContainerId;
         EXPECT_CM_Get_DevNode_PropertyW(m_mockWindows, *containerId);
+#else
+        g_mockLibUVC = &m_mockLibUVC;
+
+        EXPECT_uvc_init(m_mockLibUVC);
+        EXPECT_uvc_find_device(m_mockLibUVC);
+        EXPECT_uvc_open(m_mockLibUVC);
+        EXPECT_uvc_get_stream_ctrl_format_size(m_mockLibUVC);
+        EXPECT_uvc_start_streaming(m_mockLibUVC);
+        EXPECT_uvc_stop_streaming(m_mockLibUVC);
+        EXPECT_uvc_close(m_mockLibUVC);
+        EXPECT_uvc_unref_device(m_mockLibUVC);
+        EXPECT_uvc_exit(m_mockLibUVC);
+
+        EXPECT_uvc_get_ae_mode(m_mockLibUVC);
+        EXPECT_uvc_get_exposure_abs(m_mockLibUVC);
+        EXPECT_uvc_get_ae_priority(m_mockLibUVC);
+        EXPECT_uvc_get_brightness(m_mockLibUVC);
+        EXPECT_uvc_get_contrast(m_mockLibUVC);
+        EXPECT_uvc_get_saturation(m_mockLibUVC);
+        EXPECT_uvc_get_sharpness(m_mockLibUVC);
+        EXPECT_uvc_get_white_balance_temperature_auto(m_mockLibUVC);
+        EXPECT_uvc_get_white_balance_temperature(m_mockLibUVC);
+        EXPECT_uvc_get_backlight_compensation(m_mockLibUVC);
+        EXPECT_uvc_get_gain(m_mockLibUVC);
+        EXPECT_uvc_get_power_line_frequency(m_mockLibUVC);
+
+        EXPECT_uvc_set_ae_mode(m_mockLibUVC);
+        EXPECT_uvc_set_exposure_abs(m_mockLibUVC);
+        EXPECT_uvc_set_ae_priority(m_mockLibUVC);
+        EXPECT_uvc_set_brightness(m_mockLibUVC);
+        EXPECT_uvc_set_contrast(m_mockLibUVC);
+        EXPECT_uvc_set_saturation(m_mockLibUVC);
+        EXPECT_uvc_set_sharpness(m_mockLibUVC);
+        EXPECT_uvc_set_white_balance_temperature_auto(m_mockLibUVC);
+        EXPECT_uvc_set_white_balance_temperature(m_mockLibUVC);
+        EXPECT_uvc_set_backlight_compensation(m_mockLibUVC);
+        EXPECT_uvc_set_gain(m_mockLibUVC);
+        EXPECT_uvc_set_power_line_frequency(m_mockLibUVC);
+
+        EXPECT_uvc_strerror(m_mockLibUVC);
 #endif
     }
 
@@ -52,6 +95,9 @@ protected:
 
         g_mockMediaFoundation = nullptr;
         SetWindowsSystemMock(nullptr);
+#else
+        Mock::VerifyAndClear(&m_mockLibUVC);
+        g_mockLibUVC = nullptr;
 #endif
     }
 };
@@ -92,8 +138,6 @@ TEST_F(color_ut, create)
     tickcounter_destroy(tick);
 }
 
-#ifdef _WIN32
-// color_ut streaming test is only available for Windows
 TEST_F(color_ut, streaming)
 {
     color_t color_handle = NULL;
@@ -143,13 +187,13 @@ TEST_F(color_ut, exposure_control)
               color_set_control(color_handle,
                                 K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                                 K4A_COLOR_CONTROL_MODE_MANUAL,
-                                488));
+                                62500));
 
     // get exposure settings
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               color_get_control(color_handle, K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, &control_mode, &value));
     ASSERT_EQ(control_mode, K4A_COLOR_CONTROL_MODE_MANUAL);
-    ASSERT_EQ(value, 488);
+    ASSERT_EQ(value, 62500);
 
     // test color_start()
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_start(color_handle, &config));
@@ -159,7 +203,6 @@ TEST_F(color_ut, exposure_control)
     color_destroy(color_handle);
     tickcounter_destroy(tick);
 }
-#endif
 
 int main(int argc, char **argv)
 {

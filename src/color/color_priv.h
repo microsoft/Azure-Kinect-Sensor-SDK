@@ -23,7 +23,7 @@ extern "C" {
  * callback as the caller ensures a ref is held. If the callback function wants the capture to exist beyond this
  * callback, a ref must be taken with capture_inc_ref().
  */
-typedef void(color_cb_mf_stream_t)(k4a_result_t result, k4a_capture_t capture_handle, void *context);
+typedef void(color_cb_stream_t)(k4a_result_t result, k4a_capture_t capture_handle, void *context);
 
 #ifdef __cplusplus
 }

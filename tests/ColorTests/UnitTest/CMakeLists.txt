@@ -10,8 +10,10 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
     target_link_libraries(color_ut_mock PRIVATE
         k4ainternal::utcommon)
-endif()
 
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    set(COLOR_MOCK_SOURCE color_mock_libuvc.cpp)
+endif()
 
 #
 # Color unit test
@@ -34,6 +36,13 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         mfreadwrite.lib
         mfuuid.lib
         cfgmgr32.lib)
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+   # libuvc is static library. Do not link with libuvc but using mock and including libuvc include directory
+   get_target_property(LIBUVC_C_INCLUDES libuvc::libuvc INTERFACE_INCLUDE_DIRECTORIES)
+   include_directories(${LIBUVC_C_INCLUDES})
+
+   target_link_libraries(color_ut PRIVATE 
+        libjpeg-turbo::libjpeg-turbo)
 endif()
 
 k4a_add_tests(TARGET color_ut TEST_TYPE UNIT)

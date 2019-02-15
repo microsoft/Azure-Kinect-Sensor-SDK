@@ -84,20 +84,20 @@ public:
                        const UINT32 height,
                        const float fps,
                        const k4a_image_format_t imageFormat,
-                       color_cb_mf_stream_t *pCallback,
+                       color_cb_stream_t *pCallback,
                        void *pCallbackContext);
 
     void Stop();
 
     void Shutdown();
 
-    k4a_result_t GetKsControl(const k4a_color_control_command_t command,
-                              k4a_color_control_mode_t *mode,
-                              int32_t *pValue);
+    k4a_result_t GetCameraControl(const k4a_color_control_command_t command,
+                                  k4a_color_control_mode_t *mode,
+                                  int32_t *pValue);
 
-    k4a_result_t SetKsControl(const k4a_color_control_command_t command,
-                              const k4a_color_control_mode_t mode,
-                              int32_t newValue);
+    k4a_result_t SetCameraControl(const k4a_color_control_command_t command,
+                                  const k4a_color_control_mode_t mode,
+                                  int32_t newValue);
 
     // IMFSourceReaderCallback
     STDMETHOD(OnReadSample)
@@ -154,7 +154,7 @@ private:
     UINT32 m_height_pixels;
     k4a_image_format_t m_image_format;
 
-    color_cb_mf_stream_t *m_pCallback = nullptr;
+    color_cb_stream_t *m_pCallback = nullptr;
     void *m_pCallbackContext = nullptr;
 };
 

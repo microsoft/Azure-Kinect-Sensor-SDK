@@ -660,7 +660,12 @@ TEST_P(color_control_test, control_test)
             EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, as.command, &control_mode, &value));
 
             EXPECT_EQ(control_mode, K4A_COLOR_CONTROL_MODE_MANUAL);
+#ifdef _WIN32
             EXPECT_EQ(value, (int32_t)(exp2f((float)testValue) * 1000000.0f));
+#else
+            // LibUVC exposure time camera control has 0.0001 sec precision
+            EXPECT_EQ(value, (int32_t)(exp2f((float)testValue) * 10000.0f) * 100);
+#endif
         }
     }
     else
@@ -690,10 +695,22 @@ TEST_P(color_control_test, control_test)
     EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, as.command, initial_mode, initial_value));
 }
 
+#ifdef _WIN32
+static const int32_t EXPOSURE_TIME_ABSOLUTE_CONTROL_MAXIMUM_VALUE = 1;
+static const int32_t POWERLINE_FREQUENCY_CONTROL_MINIMUM_VALUE = 1;
+#else
+static const int32_t EXPOSURE_TIME_ABSOLUTE_CONTROL_MAXIMUM_VALUE = 0;
+static const int32_t POWERLINE_FREQUENCY_CONTROL_MINIMUM_VALUE = 0;
+#endif
+
 INSTANTIATE_TEST_CASE_P(
     color_control,
     color_control_test,
-    ::testing::Values(color_control_parameter{ K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, true, -11, 1, 1 },
+    ::testing::Values(color_control_parameter{ K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               true,
+                                               -11,
+                                               EXPOSURE_TIME_ABSOLUTE_CONTROL_MAXIMUM_VALUE,
+                                               1 },
                       color_control_parameter{ K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, false, 0, 1, 1 },
                       color_control_parameter{ K4A_COLOR_CONTROL_BRIGHTNESS, false, 0, 255, 1 },
                       color_control_parameter{ K4A_COLOR_CONTROL_CONTRAST, false, 0, 10, 1 },
@@ -702,7 +719,11 @@ INSTANTIATE_TEST_CASE_P(
                       color_control_parameter{ K4A_COLOR_CONTROL_WHITEBALANCE, true, 2500, 12500, 10 },
                       color_control_parameter{ K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, false, 0, 1, 1 },
                       color_control_parameter{ K4A_COLOR_CONTROL_GAIN, false, 0, 255, 1 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, false, 1, 2, 1 }));
+                      color_control_parameter{ K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
+                                               false,
+                                               POWERLINE_FREQUENCY_CONTROL_MINIMUM_VALUE,
+                                               2,
+                                               1 }));
 
 int main(int argc, char **argv)
 {
