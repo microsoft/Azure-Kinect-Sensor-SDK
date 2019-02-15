@@ -8,26 +8,26 @@ extern "C" {
 
 MockLibUVC *g_mockLibUVC = nullptr;
 
-uvc_context_t *g_uvc_context = (uvc_context_t *)0x0001;
-uvc_device_t *g_uvc_device = (uvc_device_t *)0x0002;
-uvc_device_handle_t *g_uvc_device_handle = (uvc_device_handle_t *)0x0004;
+static uvc_context_t *g_uvc_context = (uvc_context_t *)0x0001;
+static uvc_device_t *g_uvc_device = (uvc_device_t *)0x0002;
+static uvc_device_handle_t *g_uvc_device_handle = (uvc_device_handle_t *)0x0004;
 
-bool g_opened = false;
-bool g_streaming = false;
-int g_device_ref_count = 0;
+static bool g_opened = false;
+static bool g_streaming = false;
+static int g_device_ref_count = 0;
 
-uint8_t g_ae_mode = 8; // default is UVC_AUTO_EXPOSURE_MODE_APERTURE_PRIORITY
-uint32_t g_exposure_abs = 127;
-uint8_t g_ae_priority = 1;
-uint16_t g_brightness = 128;
-uint16_t g_contrast = 5;
-uint16_t g_saturation = 32;
-uint16_t g_sharpness = 2;
-uint8_t g_white_balance_temperature_auto = 1;
-uint16_t g_white_balance_temperature = 4500;
-uint16_t g_backlight_compensation = 0;
-uint16_t g_gain = 0;
-uint8_t g_power_line_frequency = 2;
+static uint8_t g_ae_mode = 8; // default is UVC_AUTO_EXPOSURE_MODE_APERTURE_PRIORITY
+static uint32_t g_exposure_abs = 127;
+static uint8_t g_ae_priority = 1;
+static uint16_t g_brightness = 128;
+static uint16_t g_contrast = 5;
+static uint16_t g_saturation = 32;
+static uint16_t g_sharpness = 2;
+static uint8_t g_white_balance_temperature_auto = 1;
+static uint16_t g_white_balance_temperature = 4500;
+static uint16_t g_backlight_compensation = 0;
+static uint16_t g_gain = 0;
+static uint8_t g_power_line_frequency = 2;
 
 //
 // Mock LibUVC

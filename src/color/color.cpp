@@ -94,11 +94,7 @@ void color_destroy(color_t color_handle)
     if (color->m_spCameraReader)
     {
         color->m_spCameraReader->Shutdown();
-#ifdef _WIN32
-        color->m_spCameraReader.Reset();
-#else
-        color->m_spCameraReader.reset();
-#endif
+        color->m_spCameraReader = nullptr;
     }
     color_t_destroy(color_handle);
 }
