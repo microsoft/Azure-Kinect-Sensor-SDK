@@ -684,12 +684,12 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_con
         LOG_INFO("    wired_sync_mode:%d", config->wired_sync_mode);
         LOG_INFO("    subordinate_delay_off_master_usec:%d", config->subordinate_delay_off_master_usec);
         LOG_INFO("    disable_streaming_indicator:%d", config->disable_streaming_indicator);
-        result = validate_configuration(device, config);
+        result = TRACE_CALL(validate_configuration(device, config));
     }
 
     if (K4A_SUCCEEDED(result))
     {
-        result = colormcu_set_multi_device_mode(device->colormcu, config);
+        result = TRACE_CALL(colormcu_set_multi_device_mode(device->colormcu, config));
     }
 
     if (K4A_SUCCEEDED(result))
