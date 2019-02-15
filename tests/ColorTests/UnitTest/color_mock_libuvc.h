@@ -52,27 +52,19 @@ public:
                  uvc_error_t(uvc_device_handle_t *devh, uint8_t *power_line_frequency, enum uvc_req_code req_code));
 
     MOCK_METHOD2(uvc_set_ae_mode, uvc_error_t(uvc_device_handle_t *devh, uint8_t mode));
-    MOCK_METHOD2(uvc_set_exposure_abs,
-                 uvc_error_t(uvc_device_handle_t *devh, uint32_t time));
-    MOCK_METHOD2(uvc_set_ae_priority,
-                 uvc_error_t(uvc_device_handle_t *devh, uint8_t priority));
-    MOCK_METHOD2(uvc_set_brightness,
-                 uvc_error_t(uvc_device_handle_t *devh, int16_t brightness));
-    MOCK_METHOD2(uvc_set_contrast,
-                 uvc_error_t(uvc_device_handle_t *devh, uint16_t contrast));
-    MOCK_METHOD2(uvc_set_saturation,
-                 uvc_error_t(uvc_device_handle_t *devh, uint16_t saturation));
-    MOCK_METHOD2(uvc_set_sharpness,
-                 uvc_error_t(uvc_device_handle_t *devh, uint16_t sharpness));
+    MOCK_METHOD2(uvc_set_exposure_abs, uvc_error_t(uvc_device_handle_t *devh, uint32_t time));
+    MOCK_METHOD2(uvc_set_ae_priority, uvc_error_t(uvc_device_handle_t *devh, uint8_t priority));
+    MOCK_METHOD2(uvc_set_brightness, uvc_error_t(uvc_device_handle_t *devh, int16_t brightness));
+    MOCK_METHOD2(uvc_set_contrast, uvc_error_t(uvc_device_handle_t *devh, uint16_t contrast));
+    MOCK_METHOD2(uvc_set_saturation, uvc_error_t(uvc_device_handle_t *devh, uint16_t saturation));
+    MOCK_METHOD2(uvc_set_sharpness, uvc_error_t(uvc_device_handle_t *devh, uint16_t sharpness));
     MOCK_METHOD2(uvc_set_white_balance_temperature_auto,
                  uvc_error_t(uvc_device_handle_t *devh, uint8_t temperature_auto));
-    MOCK_METHOD2(uvc_set_white_balance_temperature,
-                 uvc_error_t(uvc_device_handle_t *devh, uint16_t temperature));
+    MOCK_METHOD2(uvc_set_white_balance_temperature, uvc_error_t(uvc_device_handle_t *devh, uint16_t temperature));
     MOCK_METHOD2(uvc_set_backlight_compensation,
                  uvc_error_t(uvc_device_handle_t *devh, uint16_t backlight_compensation));
     MOCK_METHOD2(uvc_set_gain, uvc_error_t(uvc_device_handle_t *devh, uint16_t gain));
-    MOCK_METHOD2(uvc_set_power_line_frequency,
-                 uvc_error_t(uvc_device_handle_t *devh, uint8_t power_line_frequency));
+    MOCK_METHOD2(uvc_set_power_line_frequency, uvc_error_t(uvc_device_handle_t *devh, uint8_t power_line_frequency));
 
     MOCK_METHOD1(uvc_strerror, const char *(uvc_error_t err));
 };
