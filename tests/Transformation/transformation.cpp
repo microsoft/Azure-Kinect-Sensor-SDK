@@ -301,14 +301,23 @@ TEST_F(transformation_ut, transformation_create)
 {
     k4a_depth_mode_t depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
     k4a_color_resolution_t color_resolution = K4A_COLOR_RESOLUTION_OFF;
-    
-    k4a_calibration_t calibration = { 0 };
+
+    k4a_calibration_t calibration;
     k4a_result_t result =
         k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_resolution, &calibration);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    k4a_transformation_t transformation = k4a_transformation_create(&calibration);
-    ASSERT_NE(transformation, (k4a_transformation_t)NULL);
+    k4a_transformation_t transformation_depth_only = k4a_transformation_create(&calibration);
+    ASSERT_NE(transformation_depth_only, (k4a_transformation_t)NULL);
+
+    depth_mode = K4A_DEPTH_MODE_OFF;
+    color_resolution = K4A_COLOR_RESOLUTION_720P;
+
+    result = k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_resolution, &calibration);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    k4a_transformation_t transformation_rgb_only = k4a_transformation_create(&calibration);
+    ASSERT_NE(transformation_rgb_only, (k4a_transformation_t)NULL);
 }
 
 int main(int argc, char **argv)
