@@ -66,7 +66,7 @@ uvc_error_t uvc_find_device(uvc_context_t *ctx, uvc_device_t **dev, int vid, int
     return g_mockLibUVC->uvc_find_device(ctx, dev, vid, pid, sn);
 }
 
-void EXPECT_uvc_find_device(MockLibUVC &mockLibUVC)
+void EXPECT_uvc_find_device(MockLibUVC &mockLibUVC, const char *serial_number)
 {
     EXPECT_CALL(mockLibUVC,
                 uvc_find_device(_, // uvc_context_t * ctx
@@ -75,7 +75,7 @@ void EXPECT_uvc_find_device(MockLibUVC &mockLibUVC)
                                 _, // int pid
                                 _  // const char *sn
                                 ))
-        .WillRepeatedly(Invoke([](uvc_context_t *ctx, uvc_device_t **dev, int vid, int pid, const char *sn) {
+        .WillRepeatedly(Invoke([=](uvc_context_t *ctx, uvc_device_t **dev, int vid, int pid, const char *sn) {
             uvc_error_t res = UVC_SUCCESS;
             (void)sn;
 
@@ -87,7 +87,7 @@ void EXPECT_uvc_find_device(MockLibUVC &mockLibUVC)
                 }
                 else
                 {
-                    if (vid == 0x045e && pid == 0x097d)
+                    if (vid == 0x045e && pid == 0x097d && strcmp(sn, serial_number) == 0)
                     {
                         *dev = g_uvc_device;
                         g_device_ref_count++;

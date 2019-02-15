@@ -75,7 +75,7 @@ extern "C" {
 extern MockLibUVC *g_mockLibUVC;
 
 void EXPECT_uvc_init(MockLibUVC &mockLibUVC);
-void EXPECT_uvc_find_device(MockLibUVC &mockLibUVC);
+void EXPECT_uvc_find_device(MockLibUVC &mockLibUVC, const char *serial_number);
 void EXPECT_uvc_open(MockLibUVC &mockLibUVC);
 void EXPECT_uvc_get_stream_ctrl_format_size(MockLibUVC &mockLibUVC);
 void EXPECT_uvc_start_streaming(MockLibUVC &mockLibUVC);
