@@ -39,27 +39,17 @@ typedef struct _color_context_t
 
 K4A_DECLARE_CONTEXT(color_t, color_context_t);
 
-#ifdef _WIN32
 k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
                           const guid_t *container_id,
-                          color_cb_streaming_capture_t capture_ready,
-                          void *capture_ready_context,
-                          color_t *color_handle)
-#else
-k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
                           const char *serial_number,
                           color_cb_streaming_capture_t capture_ready,
                           void *capture_ready_context,
                           color_t *color_handle)
-#endif
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, tick_handle == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, color_handle == NULL);
-#ifdef _WIN32
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, container_id == NULL);
-#else
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, serial_number == NULL);
-#endif
 
     color_context_t *color = color_t_create(color_handle);
     k4a_result_t result = K4A_RESULT_FROM_BOOL(color != NULL);
@@ -72,20 +62,19 @@ k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
         color->tick = tick_handle;
     }
 
-#ifdef _WIN32
     if (K4A_SUCCEEDED(result))
     {
+#ifdef _WIN32
+        (void)serial_number;
         static_assert(sizeof(guid_t) == sizeof(GUID), "Windows GUID and this guid_t are not the same");
         result = K4A_RESULT_FROM_BOOL(SUCCEEDED(
             Microsoft::WRL::MakeAndInitialize<CMFCameraReader>(&color->m_spCameraReader, (GUID *)container_id)));
-    }
 #else
-    if (K4A_SUCCEEDED(result))
-    {
+        (void)container_id;
         color->m_spCameraReader.reset(new UVCCameraReader);
-        result = color->m_spCameraReader->Init(serial_number);
-    }
+        result = TRACE_CALL(color->m_spCameraReader->Init(serial_number));
 #endif
+    }
 
     if (K4A_FAILED(result))
     {

@@ -48,10 +48,10 @@ K4A_DECLARE_HANDLE(color_t);
  * Handle to access the system tick
  *
  * \param container_id [IN]
- * container id associated with the device being using by this instance of k4a_device_open for Windows
+ * container id associated with the device being using by this instance of k4a_device_open
  *
  * \param serial_number [IN]
- * serial number associated with the device being using by this instance of k4a_device_open for Linux
+ * serial number associated with the device being using by this instance of k4a_device_open
  *
  * \param capture_ready_cb [IN]
  *    A function pointer to call when new depth captures are ready
@@ -70,19 +70,13 @@ K4A_DECLARE_HANDLE(color_t);
  *
  * When done with the device, close the handle with \ref color_destroy
  */
-#ifdef _WIN32
 k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
                           const guid_t *container_id,
-                          color_cb_streaming_capture_t capture_ready_cb,
-                          void *capture_ready_cb_context,
-                          color_t *color_handle);
-#else
-k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
                           const char *serial_number,
                           color_cb_streaming_capture_t capture_ready_cb,
                           void *capture_ready_cb_context,
                           color_t *color_handle);
-#endif
+
 /** Closes the handle to the color device.
  *
  * \param color_handle

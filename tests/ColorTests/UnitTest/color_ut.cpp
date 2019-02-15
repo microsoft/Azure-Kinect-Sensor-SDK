@@ -11,7 +11,6 @@
 #include "color_mock_libuvc.h"
 #endif // _WIN32
 
-#ifdef _WIN32
 // Fake container ID
 static const guid_t guid_FakeGoodContainerId = {
     { 0x4e, 0x66, 0x6a, 0xbb, 0x31, 0xe9, 0x44, 0x25, 0xaf, 0x9f, 0x11, 0x81, 0x2e, 0x64, 0x34, 0xde }
@@ -19,11 +18,10 @@ static const guid_t guid_FakeGoodContainerId = {
 static const guid_t guid_FakeBadContainerId = {
     { 0xff, 0x66, 0x6a, 0xbb, 0x31, 0xe9, 0x44, 0x25, 0xaf, 0x9f, 0x11, 0x81, 0x2e, 0x64, 0x34, 0xde }
 };
-#else
+
 // Fake serial number
 static const char *str_FakeGoodSerialNumber = "0123456789";
 static const char *str_FakeBadSerialNumber = "9876543210";
-#endif
 
 using namespace testing;
 
@@ -117,41 +115,29 @@ TEST_F(color_ut, create)
 
     ASSERT_NE((TICK_COUNTER_HANDLE)0, (tick = tickcounter_create()));
 
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, NULL, NULL, NULL));
-#ifdef _WIN32
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, &guid_FakeBadContainerId, NULL, NULL, NULL));
-#else
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, str_FakeBadSerialNumber, NULL, NULL, NULL));
-#endif
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, NULL, NULL, &color_handle1));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, NULL, NULL, NULL, NULL));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, &guid_FakeBadContainerId, NULL, NULL, NULL, NULL));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, str_FakeBadSerialNumber, NULL, NULL, NULL));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, &guid_FakeBadContainerId, str_FakeBadSerialNumber, NULL, NULL, NULL));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, NULL, NULL, NULL, &color_handle1));
     ASSERT_EQ(color_handle1, (color_t)NULL);
-#ifdef _WIN32
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, &guid_FakeBadContainerId, NULL, NULL, &color_handle1));
-#else
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, str_FakeBadSerialNumber, NULL, NULL, &color_handle1));
-#endif
+
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, &guid_FakeBadContainerId, NULL, NULL, NULL, &color_handle1));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(0, NULL, str_FakeBadSerialNumber, NULL, NULL, &color_handle1));
     ASSERT_EQ(color_handle1, (color_t)NULL);
-#ifdef _WIN32
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(tick, &guid_FakeBadContainerId, NULL, NULL, &color_handle1));
-#else
-    ASSERT_EQ(K4A_RESULT_FAILED, color_create(tick, str_FakeBadSerialNumber, NULL, NULL, &color_handle1));
-#endif
+
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(tick, &guid_FakeBadContainerId, NULL, NULL, NULL, &color_handle1));
+    ASSERT_EQ(K4A_RESULT_FAILED, color_create(tick, NULL, str_FakeBadSerialNumber, NULL, NULL, &color_handle1));
     ASSERT_EQ(color_handle1, (color_t)NULL);
 
     // Create an instance
-#ifdef _WIN32
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, &guid_FakeGoodContainerId, NULL, NULL, &color_handle1));
-#else
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, str_FakeGoodSerialNumber, NULL, NULL, &color_handle1));
-#endif
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              color_create(tick, &guid_FakeGoodContainerId, str_FakeGoodSerialNumber, NULL, NULL, &color_handle1));
     ASSERT_NE(color_handle1, (color_t)NULL);
 
     // Create a second instance
-#ifdef _WIN32
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, &guid_FakeGoodContainerId, NULL, NULL, &color_handle2));
-#else
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, str_FakeGoodSerialNumber, NULL, NULL, &color_handle2));
-#endif
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              color_create(tick, &guid_FakeGoodContainerId, str_FakeGoodSerialNumber, NULL, NULL, &color_handle2));
     ASSERT_NE(color_handle2, (color_t)NULL);
 
     // Verify the instances are unique
@@ -171,11 +157,8 @@ TEST_F(color_ut, streaming)
     ASSERT_NE((TICK_COUNTER_HANDLE)0, (tick = tickcounter_create()));
 
     // test color_create()
-#ifdef _WIN32
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, &guid_FakeGoodContainerId, NULL, NULL, &color_handle));
-#else
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, str_FakeGoodSerialNumber, NULL, NULL, &color_handle));
-#endif
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              color_create(tick, &guid_FakeGoodContainerId, str_FakeGoodSerialNumber, NULL, NULL, &color_handle));
     ASSERT_NE(color_handle, (color_t)NULL);
 
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
@@ -202,11 +185,8 @@ TEST_F(color_ut, exposure_control)
     ASSERT_NE((TICK_COUNTER_HANDLE)0, (tick = tickcounter_create()));
 
     // test color_create()
-#ifdef _WIN32
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, &guid_FakeGoodContainerId, NULL, NULL, &color_handle));
-#else
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_create(tick, str_FakeGoodSerialNumber, NULL, NULL, &color_handle));
-#endif
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              color_create(tick, &guid_FakeGoodContainerId, str_FakeGoodSerialNumber, NULL, NULL, &color_handle));
     ASSERT_NE(color_handle, (color_t)NULL);
 
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;

@@ -86,10 +86,8 @@ k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     k4a_device_t handle = NULL;
     const guid_t *container_id = NULL;
-#ifndef _WIN32
-    char serial_number[128];
+    char serial_number[MAX_SERIAL_NUMBER_LENGTH];
     size_t serial_number_size = sizeof(serial_number);
-#endif
 
     allocator_initialize();
 
@@ -128,6 +126,15 @@ k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
 
     if (K4A_SUCCEEDED(result))
     {
+        if (TRACE_BUFFER_CALL(depthmcu_get_serialnum(device->depthmcu, serial_number, &serial_number_size) !=
+                              K4A_BUFFER_RESULT_SUCCEEDED))
+        {
+            result = K4A_RESULT_FAILED;
+        }
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
         result = TRACE_CALL(colormcu_create(container_id, &device->colormcu));
     }
 
@@ -149,27 +156,11 @@ k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
             depth_create(device->depthmcu, device->calibration, depth_capture_ready, handle, &device->depth));
     }
 
-#ifndef _WIN32
-    if (K4A_SUCCEEDED(result))
-    {
-        if (TRACE_BUFFER_CALL(depthmcu_get_serialnum(device->depthmcu, serial_number, &serial_number_size) !=
-                              K4A_BUFFER_RESULT_SUCCEEDED))
-        {
-            result = K4A_RESULT_FAILED;
-        }
-    }
-#endif
-
     // Create color Module
     if (K4A_SUCCEEDED(result))
     {
-#ifdef _WIN32
-        result = TRACE_CALL(
-            color_create(device->tick_handle, container_id, color_capture_ready, handle, &device->color));
-#else
-        result = TRACE_CALL(
-            color_create(device->tick_handle, serial_number, color_capture_ready, handle, &device->color));
-#endif
+        result = TRACE_CALL(color_create(
+            device->tick_handle, container_id, serial_number, color_capture_ready, handle, &device->color));
     }
 
     // Create imu Module
