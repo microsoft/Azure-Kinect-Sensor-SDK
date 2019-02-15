@@ -158,8 +158,9 @@ float connection_exerciser::get_current_reading()
         return -1;
     }
 
-    // Is this calculation correct? If the current is negative, I am seeing this return the current plus 1000.
-    if (rawValue > 1000)
+    // The "1000" digit appears to be a sign digit. A negative number would be 1000 + the value. With this scheme
+    // "negative zero" is possible and needs to be converted to 0.
+    if (rawValue >= 1000)
     {
         rawValue = 1000 - rawValue;
     }

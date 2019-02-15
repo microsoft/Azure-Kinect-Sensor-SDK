@@ -8,6 +8,7 @@ The K4A repo has four categories of tests
 * Functional tests
 * Stress tests
 * Perf tests
+* Firmware tests
 
 ### Unit Tests
 
@@ -43,6 +44,13 @@ Perf tests are tests who results are purely statistics and not Pass/Fail.
 These tests will be run on a rolling build and may require hardware. Perf
 tests are built using the GoogleTest framework. After compiling, perf tests
 can be run using "ctest -L perf" in the build directory.
+
+### Firmware Tests
+
+Firmware tests are used to validate new firmware drops. They are run manually
+when a new firmware candidate is given and will require hardware. Firmware
+tests are built using the GoogleTest framework. After compiling, firmware tests
+can be run using "ctest -L firmware" in the build directory.
 
 ## Running tests
 

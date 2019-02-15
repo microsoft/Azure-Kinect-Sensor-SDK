@@ -42,11 +42,12 @@ The Azure Kinect Sensor SDK uses semantic versioning.
 
 ## Testing
 
-K4A has four types of tests:
+K4A has five types of tests:
 * Unit tests
 * Functional tests
 * Stress tests
 * Performance tests
+* Firmware tests
 
 For more instructions on running and writing tests see
 [testing](docs/testing.md).
