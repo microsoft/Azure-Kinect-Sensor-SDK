@@ -65,10 +65,14 @@ void K4ASourceSelectionDockControl::Show()
 
         ImGui::TreePop();
     }
-    else
+
+    ImGui::NewLine();
+    ImGui::Separator();
+    ImGui::NewLine();
+
+    if (ImGui::TreeNode("Open Recording"))
     {
-        ImGuiExtensions::ButtonColorChanger cc(ImGuiExtensions::ButtonColor::Red);
-        if (ImGui::SmallButton("Close device"))
+        if (m_filePicker.Show())
         {
             OpenRecording(m_filePicker.GetPath());
         }
