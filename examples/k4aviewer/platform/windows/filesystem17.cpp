@@ -119,6 +119,18 @@ path path::filename() const
     return path(filename.c_str());
 }
 
+path path::extension() const
+{
+    std::string filenameStr = filename().string();
+    size_t lastPeriod = filenameStr.rfind('.');
+    if (lastPeriod == std::string::npos || lastPeriod == 0 || filenameStr == "..")
+    {
+        return path("");
+    }
+
+    return path(filenameStr.substr(lastPeriod).c_str());
+}
+
 path path::parent_path() const
 {
     std::wstring wsParentPath(m_path.begin(), m_path.end());

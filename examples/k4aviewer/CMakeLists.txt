@@ -6,7 +6,6 @@ set(SOURCE_FILES
     k4acalibrationtransformdata.cpp
     k4acapture.cpp
     k4acolorframevisualizer.cpp
-    k4adepthframevisualizer.cpp
     k4adevice.cpp
     k4adevicedockcontrol.cpp
     k4afilepicker.cpp

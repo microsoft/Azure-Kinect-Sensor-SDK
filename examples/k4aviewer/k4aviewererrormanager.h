@@ -10,6 +10,7 @@
 
 // System headers
 //
+#include <mutex>
 #include <queue>
 #include <string>
 
@@ -43,11 +44,13 @@ public:
 
     bool IsErrorSet() const
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
         return !m_errors.empty();
     }
 
     const std::string &GetErrorMessage() const
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
         return m_errors.front();
     }
 
@@ -55,6 +58,7 @@ private:
     K4AViewerErrorManager() = default;
 
     std::queue<std::string> m_errors;
+    mutable std::mutex m_mutex;
 };
 
 } // namespace k4aviewer

@@ -44,6 +44,10 @@ private:
     //
     static constexpr int GraphSampleCount = 150;
 
+    // Number of data samples we average together to compute a graph sample
+    //
+    static constexpr int DataSamplesPerGraphSample = 20;
+
     void PlotGraph(const char *name, const std::array<float, GraphSampleCount> &data, ImVec2 graphSize);
 
     const std::string m_title;
@@ -63,6 +67,9 @@ private:
     std::array<float, GraphSampleCount> m_x = {};
     std::array<float, GraphSampleCount> m_y = {};
     std::array<float, GraphSampleCount> m_z = {};
+
+    k4a_float3_t m_nextSampleAccumulator{ { 0.f, 0.f, 0.f } };
+    int m_nextSampleAccumulatorCount = 0;
 
     const std::string m_scaleTitle;
 };

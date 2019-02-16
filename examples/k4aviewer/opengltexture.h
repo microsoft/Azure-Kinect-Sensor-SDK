@@ -40,7 +40,7 @@ public:
         return m_dimensions;
     }
 
-    GLenum UpdateTexture(uint8_t *data);
+    GLenum UpdateTexture(const uint8_t *data);
 
     ~OpenGlTexture();
 

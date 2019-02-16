@@ -78,6 +78,9 @@ public:
     k4a_wait_result_t PollCameras(std::unique_ptr<K4ACapture> &capture);
     k4a_wait_result_t PollImu(k4a_imu_sample_t &sample);
 
+    k4a_wait_result_t PollCameras(int32_t timeoutMs, std::unique_ptr<K4ACapture> &capture);
+    k4a_wait_result_t PollImu(int32_t timeoutMs, k4a_imu_sample_t &sample);
+
     // Devices are not copyable.
     //
     K4ADevice(const K4ADevice &) = delete;
@@ -89,9 +92,6 @@ private:
     friend class K4ADeviceFactory;
 
     explicit K4ADevice(k4a_device_t device);
-
-    k4a_wait_result_t PollCameras(int32_t timeoutMs, std::unique_ptr<K4ACapture> &capture);
-    k4a_wait_result_t PollImu(int32_t timeoutMs, k4a_imu_sample_t &sample);
 
     k4a_device_t m_device;
     k4a_device_configuration_t m_configuration{};

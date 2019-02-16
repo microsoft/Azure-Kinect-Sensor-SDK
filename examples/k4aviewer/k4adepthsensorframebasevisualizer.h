@@ -21,7 +21,6 @@
 #include "assertionexception.h"
 #include "ik4aframevisualizer.h"
 #include "k4adepthpixelcolorizer.h"
-#include "k4anonbufferingframesource.h"
 #include "k4aviewerutil.h"
 #include "perfcounter.h"
 
@@ -34,43 +33,51 @@ public:
     explicit K4ADepthSensorFrameBaseVisualizer(const k4a_depth_mode_t depthMode,
                                                const ExpectedValueRange expectedValueRange) :
         m_dimensions(GetImageDimensionsForDepthMode(depthMode)),
-        m_expectedValueRange(expectedValueRange)
+        m_expectedValueRange(expectedValueRange),
+        m_expectedBufferSize(static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(RgbPixel))
     {
-        m_outputBuffer.resize(static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(RgbPixel));
     }
 
     GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) override
     {
-        return OpenGlTextureFactory::CreateTexture(texture,
-                                                   &m_outputBuffer[0],
-                                                   m_dimensions,
-                                                   GL_RGB,
-                                                   GL_RGB,
-                                                   GL_UNSIGNED_BYTE);
+        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
     }
 
-    ImageVisualizationResult UpdateTexture(std::shared_ptr<OpenGlTexture> &result,
-                                           const K4AImage<ImageFormat> &image) override
+    void InitializeBuffer(K4ATextureBuffer<ImageFormat> &buffer) override
+    {
+        buffer.Data.resize(m_expectedBufferSize);
+    }
+
+    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<ImageFormat>> &image,
+                                          K4ATextureBuffer<ImageFormat> &buffer) override
     {
         const size_t srcImageSize = static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(DepthPixel);
 
-        if (image.GetSize() != srcImageSize)
+        if (image->GetSize() != srcImageSize)
         {
             return ImageVisualizationResult::InvalidBufferSizeError;
         }
 
         // Convert the image into an OpenGL texture
         //
-        const uint8_t *src = image.GetBuffer();
+        const uint8_t *src = image->GetBuffer();
 
         static PerfCounter render(std::string("Depth sensor<T") + std::to_string(int(ImageFormat)) + "> render");
         PerfSample renderSample(&render);
-        RenderImage(src, static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(DepthPixel));
+        RenderImage(src,
+                    static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(DepthPixel),
+                    &buffer.Data[0]);
         renderSample.End();
 
+        buffer.SourceImage = image;
+        return ImageVisualizationResult::Success;
+    }
+
+    ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<ImageFormat> &buffer, OpenGlTexture &texture) override
+    {
         static PerfCounter upload(std::string("Depth sensor<T") + std::to_string(int(ImageFormat)) + "> upload");
         PerfSample uploadSample(&upload);
-        return GLEnumToImageVisualizationResult(result->UpdateTexture(&m_outputBuffer[0]));
+        return GLEnumToImageVisualizationResult(texture.UpdateTexture(&buffer.Data[0]));
     }
 
     ~K4ADepthSensorFrameBaseVisualizer() override = default;
@@ -87,10 +94,8 @@ protected:
     }
 
 private:
-    void RenderImage(const uint8_t *src, const size_t srcSize)
+    void RenderImage(const uint8_t *src, const size_t srcSize, uint8_t *dst)
     {
-        uint8_t *dst = &m_outputBuffer[0];
-
         const uint8_t *currentSrc = src;
         const uint8_t *srcEnd = src + srcSize;
         while (currentSrc < srcEnd)
@@ -127,8 +132,7 @@ private:
 
     const ImageDimensions m_dimensions;
     const ExpectedValueRange m_expectedValueRange;
-
-    std::vector<uint8_t> m_outputBuffer;
+    const size_t m_expectedBufferSize;
 };
 
 } // namespace k4aviewer

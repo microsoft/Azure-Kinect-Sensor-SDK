@@ -53,22 +53,38 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &
         break;
     }
 
+    constexpr char noneStr[] = "(None)";
+
     // We don't record a depth track if the camera is started in passive IR mode
     //
-    m_recordingHasDepth = recordConfig.depth_mode != K4A_DEPTH_MODE_OFF &&
-                          recordConfig.depth_mode != K4A_DEPTH_MODE_PASSIVE_IR;
+    m_recordingHasDepth = recordConfig.depth_track_enabled;
     std::stringstream depthSS;
-    depthSS << recordConfig.depth_mode;
+    if (m_recordingHasDepth)
+    {
+        depthSS << recordConfig.depth_mode;
+    }
+    else
+    {
+        depthSS << noneStr;
+    }
     m_depthModeLabel = depthSS.str();
 
-    m_recordingHasColor = recordConfig.color_resolution != K4A_COLOR_RESOLUTION_OFF;
+    m_recordingHasColor = recordConfig.color_track_enabled;
     std::stringstream colorResolutionSS;
-    colorResolutionSS << recordConfig.color_resolution;
-    m_colorResolutionLabel = colorResolutionSS.str();
-
     std::stringstream colorFormatSS;
-    colorFormatSS << recordConfig.color_format;
+    if (m_recordingHasColor)
+    {
+        colorFormatSS << recordConfig.color_format;
+        colorResolutionSS << recordConfig.color_resolution;
+    }
+    else
+    {
+        colorFormatSS << noneStr;
+        colorResolutionSS << noneStr;
+    }
+
     m_colorFormatLabel = colorFormatSS.str();
+    m_colorResolutionLabel = colorResolutionSS.str();
 
     SetViewType(K4AWindowSet::ViewType::Normal);
 }

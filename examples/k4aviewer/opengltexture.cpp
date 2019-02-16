@@ -37,7 +37,7 @@ void OpenGlTexture::SetTextureActive()
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 }
 
-GLenum OpenGlTexture::UpdateTexture(uint8_t *data)
+GLenum OpenGlTexture::UpdateTexture(const uint8_t *data)
 {
     SetTextureActive();
 

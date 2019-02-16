@@ -51,6 +51,7 @@ public:
     static bool is_directory(const path &path);
 
     path filename() const;
+    path extension() const;
 
     path parent_path() const;
 
