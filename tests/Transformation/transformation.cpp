@@ -297,6 +297,108 @@ TEST_F(transformation_ut, transformation_2d_to_2d)
     ASSERT_EQ_FLT2(point2d, m_depth_point2d_reference);
 }
 
+TEST_F(transformation_ut, transformation_create_depth_only)
+{
+    k4a_depth_mode_t depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    k4a_color_resolution_t color_resolution = K4A_COLOR_RESOLUTION_OFF;
+
+    k4a_calibration_t calibration;
+    k4a_result_t result =
+        k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_resolution, &calibration);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    k4a_transformation_t transformation = k4a_transformation_create(&calibration);
+    ASSERT_NE(transformation, (k4a_transformation_t)NULL);
+
+    k4a_image_t depth_image = NULL;
+    k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16, 640, 576, 640 * 1 * (int)sizeof(uint16_t), &depth_image);
+
+    k4a_image_t color_image = NULL;
+    k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16, 1920, 1080, 1920 * 4 * (int)sizeof(uint8_t), &color_image);
+
+    k4a_image_t transformed_color_image = NULL;
+    k4a_image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                     k4a_image_get_width_pixels(depth_image),
+                     k4a_image_get_height_pixels(depth_image),
+                     k4a_image_get_width_pixels(depth_image) * 4 * (int)sizeof(uint8_t),
+                     &transformed_color_image);
+
+    k4a_image_t transformed_depth_image = NULL;
+    k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16,
+                     k4a_image_get_width_pixels(color_image),
+                     k4a_image_get_height_pixels(color_image),
+                     k4a_image_get_width_pixels(color_image) * 1 * (int)sizeof(uint16_t),
+                     &transformed_depth_image);
+
+    ASSERT_NE(k4a_transformation_color_image_to_depth_camera(transformation,
+                                                             depth_image,
+                                                             color_image,
+                                                             transformed_color_image),
+              K4A_RESULT_SUCCEEDED);
+
+    ASSERT_NE(k4a_transformation_depth_image_to_color_camera(transformation, depth_image, transformed_depth_image),
+              K4A_RESULT_SUCCEEDED);
+
+    k4a_image_t point_cloud_image = NULL;
+    k4a_image_create(K4A_IMAGE_FORMAT_CUSTOM,
+                     k4a_image_get_width_pixels(depth_image),
+                     k4a_image_get_height_pixels(depth_image),
+                     k4a_image_get_width_pixels(depth_image) * 3 * (int)sizeof(int16_t),
+                     &point_cloud_image);
+
+    ASSERT_EQ(k4a_transformation_depth_image_to_point_cloud(transformation,
+                                                            depth_image,
+                                                            K4A_CALIBRATION_TYPE_DEPTH,
+                                                            point_cloud_image),
+              K4A_RESULT_SUCCEEDED);
+}
+
+TEST_F(transformation_ut, transformation_create_color_only)
+{
+    k4a_depth_mode_t depth_mode = K4A_DEPTH_MODE_OFF;
+    k4a_color_resolution_t color_resolution = K4A_COLOR_RESOLUTION_720P;
+
+    k4a_calibration_t calibration;
+    k4a_result_t result =
+        k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_resolution, &calibration);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    k4a_transformation_t transformation = k4a_transformation_create(&calibration);
+    ASSERT_NE(transformation, (k4a_transformation_t)NULL);
+
+    k4a_image_t depth_image = NULL;
+    k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16, 640, 576, 640 * 1 * (int)sizeof(uint16_t), &depth_image);
+
+    k4a_image_t color_image = NULL;
+    k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16, 1920, 1080, 1920 * 4 * (int)sizeof(uint8_t), &color_image);
+
+    k4a_image_t transformed_color_image = NULL;
+    k4a_image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                     k4a_image_get_width_pixels(depth_image),
+                     k4a_image_get_height_pixels(depth_image),
+                     k4a_image_get_width_pixels(depth_image) * 4 * (int)sizeof(uint8_t),
+                     &transformed_color_image);
+
+    k4a_image_t transformed_depth_image = NULL;
+    k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16,
+                     k4a_image_get_width_pixels(color_image),
+                     k4a_image_get_height_pixels(color_image),
+                     k4a_image_get_width_pixels(color_image) * 1 * (int)sizeof(uint16_t),
+                     &transformed_depth_image);
+
+    ASSERT_NE(k4a_transformation_color_image_to_depth_camera(transformation,
+                                                             depth_image,
+                                                             color_image,
+                                                             transformed_color_image),
+              K4A_RESULT_SUCCEEDED);
+
+    ASSERT_NE(k4a_transformation_depth_image_to_color_camera(transformation, depth_image, transformed_depth_image),
+              K4A_RESULT_SUCCEEDED);
+
+    ASSERT_EQ(calibration.depth_camera_calibration.resolution_width, 0);
+    ASSERT_EQ(calibration.depth_camera_calibration.resolution_width, 0);
+}
+
 int main(int argc, char **argv)
 {
     return k4a_test_commmon_main(argc, argv);

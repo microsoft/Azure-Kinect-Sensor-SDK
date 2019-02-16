@@ -13,6 +13,9 @@ k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_
                                                           const k4a_color_resolution_t color_resolution,
                                                           k4a_calibration_t *calibration)
 {
+    memset(&calibration->color_camera_calibration, 0, sizeof(k4a_calibration_camera_t));
+    memset(&calibration->depth_camera_calibration, 0, sizeof(k4a_calibration_camera_t));
+
     if (K4A_FAILED(
             K4A_RESULT_FROM_BOOL(color_resolution != K4A_COLOR_RESOLUTION_OFF || depth_mode != K4A_DEPTH_MODE_OFF)))
     {
@@ -334,7 +337,8 @@ typedef struct _k4a_transformation_context_t
     float *memory_depth_camera_xy_tables;
     k4a_transformation_xy_tables_t color_camera_xy_tables;
     float *memory_color_camera_xy_tables;
-    bool gpu_optimization;
+    bool enable_gpu_optimization;
+    bool enable_depth_color_transform;
     k4a_transform_engine_context_t *transform_engine;
 } k4a_transformation_context_t;
 
@@ -365,8 +369,12 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration,
         return 0;
     }
 
-    transformation_context->gpu_optimization = gpu_optimization;
-    if (transformation_context->gpu_optimization)
+    transformation_context->enable_gpu_optimization = gpu_optimization;
+    transformation_context->enable_depth_color_transform = transformation_context->calibration.color_resolution !=
+                                                               K4A_COLOR_RESOLUTION_OFF &&
+                                                           transformation_context->calibration.depth_mode !=
+                                                               K4A_DEPTH_MODE_OFF;
+    if (transformation_context->enable_gpu_optimization && transformation_context->enable_depth_color_transform)
     {
         // Set up transform engine expected calibration struct
         k4a_transform_engine_calibration_t transform_engine_calibration;
@@ -432,7 +440,13 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_transformation_t, transformation_handle);
     k4a_transformation_context_t *transformation_context = k4a_transformation_t_get_context(transformation_handle);
 
-    if (transformation_context->gpu_optimization)
+    if (!transformation_context->enable_depth_color_transform)
+    {
+        LOG_ERROR("Require both depth camera and color camera are opened to transform depth image to color camera.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    if (transformation_context->enable_gpu_optimization)
     {
         size_t depth_image_size = (size_t)(depth_image_descriptor->stride_bytes *
                                            depth_image_descriptor->height_pixels);
@@ -493,7 +507,13 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_transformation_t, transformation_handle);
     k4a_transformation_context_t *transformation_context = k4a_transformation_t_get_context(transformation_handle);
 
-    if (transformation_context->gpu_optimization)
+    if (!transformation_context->enable_depth_color_transform)
+    {
+        LOG_ERROR("Require both depth camera and color camera are opened to transform color image to depth camera.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    if (transformation_context->enable_gpu_optimization)
     {
         size_t depth_image_size = (size_t)(depth_image_descriptor->stride_bytes *
                                            depth_image_descriptor->height_pixels);
