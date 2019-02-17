@@ -79,7 +79,7 @@ GLenum K4APointCloudVisualizer::InitializeTexture(std::shared_ptr<OpenGlTexture>
 }
 
 GLenum K4APointCloudVisualizer::UpdateTexture(std::shared_ptr<OpenGlTexture> &texture,
-                                              const K4AImage<K4A_IMAGE_FORMAT_DEPTH16> &frame)
+                                              const k4a::image &frame)
 {
     // Set up rendering to a texture
     //
@@ -169,9 +169,9 @@ K4APointCloudVisualizer::~K4APointCloudVisualizer()
     glDeleteFramebuffers(1, &m_frameBuffer);
 }
 
-void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_DEPTH16> &frame)
+void K4APointCloudVisualizer::UpdatePointClouds(const k4a::image &frame)
 {
-    const size_t pointCount = frame.GetSize() / sizeof(DepthPixel);
+    const size_t pointCount = frame.get_size() / sizeof(DepthPixel);
     if (m_vertexBuffer.size() < pointCount)
     {
         m_vertexBuffer.resize(pointCount);
@@ -182,8 +182,8 @@ void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_
                                  m_calibrationTransformData->DepthWidth,
                                  m_calibrationTransformData->DepthHeight,
                                  m_calibrationTransformData->DepthWidth * int(sizeof(uint16_t)),
-                                 frame.GetBuffer(),
-                                 frame.GetSize(),
+                                 frame.get_buffer(),
+                                 frame.get_size(),
                                  nullptr,
                                  nullptr,
                                  &depthImage);
@@ -200,8 +200,8 @@ void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_
         k4a_image_get_buffer(m_calibrationTransformData->PointCloudImage));
 
     size_t dstIndex = 0;
-    const int frameHeight = frame.GetHeightPixels();
-    const int frameWidth = frame.GetWidthPixels();
+    const int frameHeight = frame.get_height_pixels();
+    const int frameWidth = frame.get_width_pixels();
     for (int h = 0; h < frameHeight; ++h)
     {
         for (int w = 0; w < frameWidth; ++w)

@@ -14,11 +14,10 @@
 
 // Library headers
 //
-#include <k4a/k4a.h>
+#include <k4a/k4a_cpp.h>
 
 // Project headers
 //
-#include "k4acapture.h"
 
 namespace k4aviewer
 {
@@ -29,24 +28,24 @@ class K4AImageExtractor
 {
 public:
     template<k4a_image_format_t T>
-    static std::shared_ptr<K4AImage<T>> GetImageFromCapture(const std::shared_ptr<K4ACapture> &capture)
+    static k4a::image GetImageFromCapture(const k4a::capture &capture)
     {
-        return capture->GetColorImage<T>();
+        return capture.get_color_image();
     }
 };
 
 template<>
-inline std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_DEPTH16>>
-K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_DEPTH16>(const std::shared_ptr<K4ACapture> &capture)
+inline k4a::image
+K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_DEPTH16>(const k4a::capture &capture)
 {
-    return capture->GetDepthImage();
+    return capture.get_depth_image();
 }
 
 template<>
-inline std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_IR16>>
-K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_IR16>(const std::shared_ptr<K4ACapture> &capture)
+inline k4a::image
+K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_IR16>(const k4a::capture &capture)
 {
-    return capture->GetIrImage();
+    return capture.get_ir_image();
 }
 
 } // namespace k4aviewer

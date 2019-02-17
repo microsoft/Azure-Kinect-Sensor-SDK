@@ -44,7 +44,7 @@ public:
                                  const std::function<void(ViewType)> &changeViewFn);
 
     static void StartNormalWindows(const char *sourceIdentifier,
-                                   K4ADataSource<std::shared_ptr<K4ACapture>> *cameraDataSource,
+                                   K4ADataSource<k4a::capture> *cameraDataSource,
                                    K4ADataSource<k4a_imu_sample_t> *imuDataSource,
                                    std::shared_ptr<K4AMicrophoneListener> &&microphoneDataSource,
                                    bool enableDepthCamera,
@@ -55,7 +55,7 @@ public:
 
     static void StartPointCloudWindow(const char *sourceIdentifier,
                                       std::unique_ptr<K4ACalibrationTransformData> &&calibrationData,
-                                      K4ADataSource<std::shared_ptr<K4ACapture>> &cameraDataSource,
+                                      K4ADataSource<k4a::capture> &cameraDataSource,
                                       k4a_depth_mode_t depthMode);
 };
 } // namespace k4aviewer

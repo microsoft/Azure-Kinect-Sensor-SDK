@@ -91,8 +91,8 @@ void K4ASourceSelectionDockControl::RefreshDevices()
 
     for (uint8_t i = 0; i < installedDevices; i++)
     {
-        std::shared_ptr<K4ADevice> device;
-        const k4a_result_t openResult = K4ADeviceFactory::OpenDevice(device, i);
+        k4a::device device;
+        const k4a_result_t openResult = k4a::device::open(i, device);
 
         // We can't have 2 handles to the same device, and we need to open a device handle to check
         // its serial number, so we expect devices we already have open to fail here.  Ignore those.
@@ -102,7 +102,7 @@ void K4ASourceSelectionDockControl::RefreshDevices()
             continue;
         }
 
-        m_connectedDevices.emplace_back(std::make_pair(i, device->GetSerialNumber()));
+        m_connectedDevices.emplace_back(std::make_pair(i, device.get_serialnum()));
     }
 
     if (!m_connectedDevices.empty())
@@ -129,8 +129,8 @@ void K4ASourceSelectionDockControl::OpenDevice()
         return;
     }
 
-    std::shared_ptr<K4ADevice> device;
-    const k4a_result_t result = K4ADeviceFactory::OpenDevice(device, static_cast<uint8_t>(m_selectedDevice));
+    k4a::device device;
+    const k4a_result_t result = k4a::device::open(static_cast<uint8_t>(m_selectedDevice), device);
 
     if (result != K4A_RESULT_SUCCEEDED)
     {

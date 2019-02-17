@@ -14,13 +14,12 @@
 
 // Library headers
 //
-#include <k4a/k4a.h>
+#include <k4a/k4a_cpp.h>
 
 // Project headers
 //
 #include "ik4adockcontrol.h"
 #include "k4adatasource.h"
-#include "k4adevice.h"
 #include "k4amicrophone.h"
 #include "k4apollingthread.h"
 #include "k4aviewersettingsmanager.h"
@@ -31,7 +30,7 @@ namespace k4aviewer
 class K4ADeviceDockControl : public IK4ADockControl
 {
 public:
-    explicit K4ADeviceDockControl(std::shared_ptr<K4ADevice> device);
+    explicit K4ADeviceDockControl(k4a::device device);
     K4ADeviceDockControl(K4ADeviceDockControl &other) = delete;
     K4ADeviceDockControl(K4ADeviceDockControl &&other) = delete;
     K4ADeviceDockControl operator=(K4ADeviceDockControl &other) = delete;
@@ -110,10 +109,10 @@ private:
 
     K4ADeviceConfiguration m_pendingDeviceConfiguration;
 
-    std::shared_ptr<K4ADevice> m_device;
+    k4a::device m_device;
     std::shared_ptr<K4AMicrophone> m_microphone;
 
-    K4ADataSource<std::shared_ptr<K4ACapture>> m_cameraDataSource;
+    K4ADataSource<k4a::capture> m_cameraDataSource;
     K4ADataSource<k4a_imu_sample_t> m_imuDataSource;
 
     bool m_firstRun = true;
@@ -125,7 +124,7 @@ private:
 
     std::string m_windowTitle;
 
-    std::unique_ptr<K4APollingThread<std::shared_ptr<K4ACapture>>> m_cameraPollingThread;
+    std::unique_ptr<K4APollingThread<k4a::capture>> m_cameraPollingThread;
     std::unique_ptr<K4APollingThread<k4a_imu_sample_t>> m_imuPollingThread;
 };
 } // namespace k4aviewer

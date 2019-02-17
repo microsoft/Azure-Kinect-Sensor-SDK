@@ -54,12 +54,12 @@ K4ARecording::~K4ARecording()
     }
 }
 
-std::unique_ptr<K4ACapture> K4ARecording::GetNextCapture()
+k4a::capture K4ARecording::GetNextCapture()
 {
     return GetCapture(false);
 }
 
-std::unique_ptr<K4ACapture> K4ARecording::GetPreviousCapture()
+k4a::capture K4ARecording::GetPreviousCapture()
 {
     return GetCapture(true);
 }
@@ -94,7 +94,7 @@ K4ARecording::K4ARecording(k4a_playback_t playback,
 {
 }
 
-std::unique_ptr<K4ACapture> K4ARecording::GetCapture(bool backward)
+k4a::capture K4ARecording::GetCapture(bool backward)
 {
     static PerfCounter getNextCapturePerfCounter("Playback: Get Next Capture");
     PerfSample ps(&getNextCapturePerfCounter);
@@ -107,5 +107,5 @@ std::unique_ptr<K4ACapture> K4ARecording::GetCapture(bool backward)
         return nullptr;
     }
 
-    return std14::make_unique<K4ACapture>(nextCapture);
+    return nextCapture;
 }

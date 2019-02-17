@@ -36,7 +36,7 @@ template<k4a_image_format_t ImageFormat> class K4AConvertingFrameSourceImpl : pu
 {
 public:
     inline ImageVisualizationResult GetNextFrame(OpenGlTexture &textureToUpdate,
-                                                 std::shared_ptr<K4AImage<ImageFormat>> &sourceImage)
+                                                 k4a::image &sourceImage)
     {
         if (!HasData())
         {
@@ -74,7 +74,7 @@ public:
         return !m_textureBuffers.Empty();
     }
 
-    void NotifyData(const std::shared_ptr<K4ACapture> &data) override
+    void NotifyData(const k4a::capture &data) override
     {
         NotifyDataImpl(data);
     }
@@ -109,13 +109,13 @@ public:
     K4AConvertingFrameSourceImpl operator=(K4AConvertingFrameSourceImpl &&) = delete;
 
 protected:
-    void NotifyDataImpl(const std::shared_ptr<K4ACapture> &data)
+    void NotifyDataImpl(const k4a::capture &data)
     {
         // If the capture we're being notified of doesn't contain data
         // from the mode we're listening for, we don't want to update
         // our data.
         //
-        std::shared_ptr<K4AImage<ImageFormat>> image = K4AImageExtractor::GetImageFromCapture<ImageFormat>(data);
+        k4a::image image = K4AImageExtractor::GetImageFromCapture<ImageFormat>(data);
         if (image != nullptr)
         {
             // Hand the image off to our worker thread.
@@ -144,7 +144,7 @@ private:
             {
                 // Take the image from the frame source
                 //
-                std::shared_ptr<K4AImage<ImageFormat>> imageToConvert = std::move(fs->m_inputImageBuffer.CurrentItem());
+                k4a::image imageToConvert = std::move(fs->m_inputImageBuffer.CurrentItem());
                 fs->m_inputImageBuffer.AdvanceRead();
                 lock.unlock();
 
@@ -181,7 +181,7 @@ private:
 
     static constexpr size_t BufferSize = 2;
     K4ARingBuffer<K4ATextureBuffer<ImageFormat>, BufferSize> m_textureBuffers;
-    K4ARingBuffer<std::shared_ptr<K4AImage<ImageFormat>>, BufferSize> m_inputImageBuffer;
+    K4ARingBuffer<k4a::image, BufferSize> m_inputImageBuffer;
 
     K4AFramerateTracker m_framerateTracker;
 
@@ -217,9 +217,9 @@ public:
         return m_lastSensorTemperature;
     }
 
-    void NotifyData(const std::shared_ptr<K4ACapture> &data) override
+    void NotifyData(const k4a::capture &data) override
     {
-        m_lastSensorTemperature = data->GetTemperature();
+        m_lastSensorTemperature = data.get_temperature_c();
         NotifyDataImpl(data);
     }
 

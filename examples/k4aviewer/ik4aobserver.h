@@ -14,11 +14,10 @@
 
 // Library headers
 //
-#include <k4a/k4a.h>
+#include <k4a/k4a_cpp.h>
 
 // Project headers
 //
-#include "k4acapture.h"
 
 namespace k4aviewer
 {
@@ -37,7 +36,7 @@ public:
     IK4AObserver &operator=(const IK4AObserver &&) = delete;
 };
 
-using IK4ACaptureObserver = IK4AObserver<std::shared_ptr<K4ACapture>>;
+using IK4ACaptureObserver = IK4AObserver<k4a::capture>;
 using IK4AImuObserver = IK4AObserver<k4a_imu_sample_t>;
 } // namespace k4aviewer
 

@@ -31,7 +31,7 @@ namespace k4aviewer
 template<k4a_image_format_t ImageFormat> class K4ANonBufferingFrameSourceImpl : public IK4ACaptureObserver
 {
 public:
-    inline std::shared_ptr<K4AImage<ImageFormat>> GetLastFrame()
+    inline k4a::image GetLastFrame()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         return GetLastFrameImpl();
@@ -52,7 +52,7 @@ public:
         return m_lastImage != nullptr;
     }
 
-    void NotifyData(const std::shared_ptr<K4ACapture> &data) override
+    void NotifyData(const k4a::capture &data) override
     {
         NotifyDataImpl(data);
     }
@@ -71,14 +71,14 @@ public:
     K4ANonBufferingFrameSourceImpl operator=(K4ANonBufferingFrameSourceImpl &&) = delete;
 
 protected:
-    void NotifyDataImpl(const std::shared_ptr<K4ACapture> &data)
+    void NotifyDataImpl(const k4a::capture &data)
     {
         // If the capture we're being notified of doesn't contain data
         // from the mode we're listening for, we don't want to update
         // our data.  If GetTimestamp() == 0, it means the capture doesn't
         // have data for the mode we gave it.
         //
-        std::shared_ptr<K4AImage<ImageFormat>> image = K4AImageExtractor::GetImageFromCapture<ImageFormat>(data);
+        k4a::image image = K4AImageExtractor::GetImageFromCapture<ImageFormat>(data);
         if (image != nullptr)
         {
             std::lock_guard<std::mutex> lock(m_mutex);
@@ -112,12 +112,12 @@ private:
         m_lastSampleTime = newSampleTime;
     }
 
-    std::shared_ptr<K4AImage<ImageFormat>> GetLastFrameImpl() const
+    k4a::image GetLastFrameImpl() const
     {
         return m_lastImage;
     }
 
-    std::shared_ptr<K4AImage<ImageFormat>> m_lastImage;
+    k4a::image m_lastImage;
 
     bool m_failed = false;
 
@@ -151,10 +151,10 @@ public:
         return m_lastSensorTemperature;
     }
 
-    void NotifyData(const std::shared_ptr<K4ACapture> &data) override
+    void NotifyData(const k4a::capture &data) override
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_lastSensorTemperature = data->GetTemperature();
+        m_lastSensorTemperature = data.get_temperature_c();
         NotifyDataImpl(data);
     }
 

@@ -41,7 +41,7 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
 
     if (m_depthFrameSource->HasData())
     {
-        m_pointCloudVisualizer.UpdateTexture(m_texture, *(m_depthFrameSource->GetLastFrame()));
+        m_pointCloudVisualizer.UpdateTexture(m_texture, m_depthFrameSource->GetLastFrame());
     }
 
     ImVec2 availableSize = placementInfo.Size;

@@ -30,7 +30,7 @@ class K4APointCloudVisualizer
 {
 public:
     GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) const;
-    GLenum UpdateTexture(std::shared_ptr<OpenGlTexture> &texture, const K4AImage<K4A_IMAGE_FORMAT_DEPTH16> &frame);
+    GLenum UpdateTexture(std::shared_ptr<OpenGlTexture> &texture, const k4a::image &frame);
 
     void ProcessPositionalMovement(ViewMovement direction, float deltaTime);
     void ProcessMouseMovement(float xoffset, float yoffset);
@@ -49,7 +49,7 @@ public:
     K4APointCloudVisualizer &operator=(const K4APointCloudVisualizer &&) = delete;
 
 private:
-    void UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_DEPTH16> &frame);
+    void UpdatePointClouds(const k4a::image &frame);
 
     ExpectedValueRange m_expectedValueRange;
     ImageDimensions m_dimensions;
