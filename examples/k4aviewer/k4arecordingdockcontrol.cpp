@@ -32,6 +32,8 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &
 {
     m_filenameLabel = m_recording->GetPath().filename().c_str();
 
+    // Recording config
+    //
     k4a_record_configuration_t recordConfig = m_recording->GetRecordConfiguation();
     std::stringstream fpsSS;
     fpsSS << recordConfig.camera_fps;
@@ -86,6 +88,32 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &
     m_colorFormatLabel = colorFormatSS.str();
     m_colorResolutionLabel = colorResolutionSS.str();
 
+    // Sync info
+    //
+    m_depthDelayOffColorUsec = recordConfig.depth_delay_off_color_usec;
+
+    std::stringstream syncModeSS;
+    syncModeSS << recordConfig.wired_sync_mode;
+    m_wiredSyncModeLabel = syncModeSS.str();
+
+    m_subordinateDelayOffMasterUsec = recordConfig.subordinate_delay_off_master_usec;
+    m_startTimestampOffsetUsec = recordConfig.start_timestamp_offset_usec;
+
+    // Device info
+    //
+    if (K4A_BUFFER_RESULT_SUCCEEDED != m_recording->GetTag("K4A_DEVICE_SERIAL_NUMBER", m_deviceSerialNumber))
+    {
+        m_deviceSerialNumber = noneStr;
+    }
+    if (K4A_BUFFER_RESULT_SUCCEEDED != m_recording->GetTag("K4A_COLOR_FIRMWARE_VERSION", m_colorFirmwareVersion))
+    {
+        m_colorFirmwareVersion = noneStr;
+    }
+    if (K4A_BUFFER_RESULT_SUCCEEDED != m_recording->GetTag("K4A_DEPTH_FIRMWARE_VERSION", m_depthFirmwareVersion))
+    {
+        m_depthFirmwareVersion = noneStr;
+    }
+
     SetViewType(K4AWindowSet::ViewType::Normal);
 }
 
@@ -103,10 +131,25 @@ void K4ARecordingDockControl::Show()
     cc.Clear();
     ImGui::Separator();
 
+    ImGui::Text("%s", "Image formats");
     ImGui::Text("FPS:              %s", m_fpsLabel.c_str());
     ImGui::Text("Depth mode:       %s", m_depthModeLabel.c_str());
     ImGui::Text("Color format:     %s", m_colorFormatLabel.c_str());
     ImGui::Text("Color resolution: %s", m_colorResolutionLabel.c_str());
+    ImGui::Separator();
+
+    ImGui::Text("%s", "Sync settings");
+    ImGui::Text("Depth/color delay (us): %d", m_depthDelayOffColorUsec);
+    ImGui::Text("Sync mode:              %s", m_wiredSyncModeLabel.c_str());
+    ImGui::Text("Subordinate delay (us): %d", m_subordinateDelayOffMasterUsec);
+    ImGui::Text("Start timestamp offset: %d", m_startTimestampOffsetUsec);
+    ImGui::Separator();
+
+    ImGui::Text("%s", "Device info");
+    ImGui::Text("Device S/N:      %s", m_deviceSerialNumber.c_str());
+    ImGui::Text("RGB camera FW:   %s", m_colorFirmwareVersion.c_str());
+    ImGui::Text("Depth camera FW: %s", m_depthFirmwareVersion.c_str());
+    ImGui::Separator();
 
     bool forceReadNext = false;
 

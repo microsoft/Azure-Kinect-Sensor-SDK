@@ -50,6 +50,15 @@ private:
     std::string m_colorFormatLabel;
     std::string m_colorResolutionLabel;
 
+    int32_t m_depthDelayOffColorUsec;
+    std::string m_wiredSyncModeLabel;
+    uint32_t m_subordinateDelayOffMasterUsec;
+    uint32_t m_startTimestampOffsetUsec;
+
+    std::string m_deviceSerialNumber;
+    std::string m_colorFirmwareVersion;
+    std::string m_depthFirmwareVersion;
+
     bool m_recordingHasColor = false;
     bool m_recordingHasDepth = false;
 
