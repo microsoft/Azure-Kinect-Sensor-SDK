@@ -70,8 +70,6 @@ typedef struct _k4a_record_context_t
 
     // std::list and std::vector can't be memset to 0, so we need to use a pointer.
     std::unique_ptr<std::list<cluster_t *>> pending_clusters;
-    std::unique_ptr<std::vector<uint8_t>> imu_buffer;
-    uint64_t imu_buffer_start_ns;
     LOCK_HANDLE pending_cluster_lock; // Locks last_written_timestamp, most_recent_timestamp, and pending_clusters
 
     bool writer_stopping;
@@ -105,8 +103,6 @@ libmatroska::KaxTrackEntry *add_track(k4a_record_context_t *context,
                                       size_t codec_private_size = 0);
 
 void set_track_info_video(libmatroska::KaxTrackEntry *track, uint64_t width, uint64_t height, uint64_t frame_rate);
-
-k4a_result_t flush_imu_buffer(k4a_record_context_t *context);
 
 k4a_result_t write_track_data(k4a_record_context_t *context,
                               libmatroska::KaxTrackEntry *track,
