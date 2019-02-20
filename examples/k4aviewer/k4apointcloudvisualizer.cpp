@@ -147,11 +147,17 @@ void K4APointCloudVisualizer::EnableShading(bool enable)
 }
 
 K4APointCloudVisualizer::K4APointCloudVisualizer(const k4a_depth_mode_t depthMode,
-                                                 std::unique_ptr<K4ACalibrationTransformData> &&calibrationData) :
+                                                 k4a::calibration &&calibrationData) :
     m_expectedValueRange(GetRangeForDepthMode(depthMode)),
     m_dimensions(PointCloudVisualizerTextureDimensions),
-    m_calibrationTransformData(std::move(calibrationData))
+    m_calibrationData(std::move(calibrationData)),
+    m_transformation(m_calibrationData)
 {
+    m_pointCloudImage = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16,
+                                           m_calibrationData.depth_camera_calibration.resolution_width,
+                                           m_calibrationData.depth_camera_calibration.resolution_height,
+                                           m_calibrationData.depth_camera_calibration.resolution_width * 3 * sizeof(int16_t));
+
     glGenFramebuffers(1, &m_frameBuffer);
 
     glGenRenderbuffers(1, &m_depthBuffer);
@@ -177,27 +183,18 @@ void K4APointCloudVisualizer::UpdatePointClouds(const k4a::image &frame)
         m_vertexBuffer.resize(pointCount);
     }
 
-    k4a_image_t depthImage = nullptr;
-    k4a_image_create_from_buffer(K4A_IMAGE_FORMAT_DEPTH16,
-                                 m_calibrationTransformData->DepthWidth,
-                                 m_calibrationTransformData->DepthHeight,
-                                 m_calibrationTransformData->DepthWidth * int(sizeof(uint16_t)),
-                                 frame.get_buffer(),
-                                 frame.get_size(),
-                                 nullptr,
-                                 nullptr,
-                                 &depthImage);
-
-    k4a_transformation_depth_image_to_point_cloud(m_calibrationTransformData->TransformationHandle,
-                                                  depthImage,
-                                                  K4A_CALIBRATION_TYPE_DEPTH,
-                                                  m_calibrationTransformData->PointCloudImage);
+    k4a_result_t result = m_transformation.depth_image_to_point_cloud(frame, K4A_CALIBRATION_TYPE_DEPTH, m_pointCloudImage);
+    if (result != K4A_RESULT_SUCCEEDED)
+    {
+        // Drop the frame
+        //
+        return;
+    }
 
     // pointCloudBuffer stores interleaved 3d coordinates. To access the x-, y- and z- coordinates of the ith pixel use
     // pointCloudBuffer[3 * i], pointCloudBuffer[3 * i + 1] and pointCloudBuffer[3 * i + 2], respectively.
     //
-    auto *pointCloudBuffer = reinterpret_cast<int16_t *>(
-        k4a_image_get_buffer(m_calibrationTransformData->PointCloudImage));
+    auto *pointCloudBuffer = reinterpret_cast<int16_t *>(m_pointCloudImage.get_buffer());
 
     size_t dstIndex = 0;
     const int frameHeight = frame.get_height_pixels();
@@ -297,6 +294,4 @@ void K4APointCloudVisualizer::UpdatePointClouds(const k4a::image &frame)
 
     m_pointCloudRenderer.UpdatePointClouds(reinterpret_cast<Vertex *>(&m_vertexBuffer[0]),
                                            static_cast<unsigned int>(dstIndex));
-
-    k4a_image_release(depthImage);
 }

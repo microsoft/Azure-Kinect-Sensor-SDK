@@ -79,10 +79,9 @@ const std17::filesystem::path &K4ARecording::GetPath() const
     return m_path;
 }
 
-k4a_result_t K4ARecording::GetCalibrationTransformData(std::unique_ptr<K4ACalibrationTransformData> &calibrationData)
+k4a_result_t K4ARecording::GetCalibration(k4a::calibration &calibration)
 {
-    calibrationData.reset(new K4ACalibrationTransformData);
-    return calibrationData->Initialize(m_playback);
+    return k4a_playback_get_calibration(m_playback, &calibration);
 }
 
 K4ARecording::K4ARecording(k4a_playback_t playback,

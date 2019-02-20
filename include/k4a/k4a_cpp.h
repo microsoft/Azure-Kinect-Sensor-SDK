@@ -1,4 +1,5 @@
-#pragma once
+#ifndef K4A_CPP_H
+#define K4A_CPP_H
 
 #include "k4a.h"
 
@@ -15,7 +16,7 @@ namespace k4a
     {
     public:
         result_error(k4a_result_t result)
-            : std::runtime_error("K4A result not success")
+            : std::runtime_error("K4A result not successful")
             , m_result(result)
         {
         }
@@ -33,7 +34,7 @@ namespace k4a
     {
     public:
         wait_result_error(k4a_wait_result_t result)
-            : std::runtime_error("K4A wait result not success")
+            : std::runtime_error("K4A wait operation not successful")
             , m_result(result)
         {
         }
@@ -45,6 +46,24 @@ namespace k4a
 
     private:
         k4a_wait_result_t m_result;
+    };
+
+    class buffer_result_error : public std::runtime_error
+    {
+    public:
+        buffer_result_error(k4a_buffer_result_t result)
+            : std::runtime_error("K4A buffer operation not successful")
+            , m_result(result)
+        {
+        }
+
+        k4a_buffer_result_t result() const
+        {
+            return m_result;
+        }
+
+    private:
+        k4a_buffer_result_t m_result;
     };
 
     inline void check_result(k4a_result_t result)
@@ -60,6 +79,14 @@ namespace k4a
         if (result != K4A_WAIT_RESULT_SUCCEEDED)
         {
             throw wait_result_error(result);
+        }
+    }
+
+    inline void check_result(k4a_buffer_result_t result)
+    {
+        if (result != K4A_BUFFER_RESULT_SUCCEEDED)
+        {
+            throw buffer_result_error(result);
         }
     }
 
@@ -103,9 +130,12 @@ namespace k4a
 
         image& operator=(image&& other)
         {
-            release();
-            m_handle = other.m_handle;
-            other.m_handle = nullptr;
+            if (this != &other)
+            {
+                release();
+                m_handle = other.m_handle;
+                other.m_handle = nullptr;
+            }
             return *this;
         }
 
@@ -121,12 +151,12 @@ namespace k4a
 
         bool operator!=(const image& other) const
         {
-            return m_handle == other.m_handle;
+            return m_handle != other.m_handle;
         }
 
         bool operator!=(std::nullptr_t) const
         {
-            return m_handle == nullptr;
+            return m_handle != nullptr;
         }
 
         operator bool() const
@@ -171,7 +201,7 @@ namespace k4a
             return img;
         }
 
-        static k4a_result_t crate_from_buffer(
+        static k4a_result_t create_from_buffer(
             k4a_image_format_t format,
             int width_pixels,
             int height_pixels,
@@ -198,7 +228,7 @@ namespace k4a
             return result;
         }
 
-        static image crate_from_buffer(
+        static image create_from_buffer(
             k4a_image_format_t format,
             int width_pixels,
             int height_pixels,
@@ -209,7 +239,7 @@ namespace k4a
             void *buffer_release_cb_context)
         {
             image img;
-            k4a_result_t result = crate_from_buffer(format,
+            k4a_result_t result = create_from_buffer(format,
                 width_pixels,
                 height_pixels,
                 stride_bytes,
@@ -337,9 +367,12 @@ namespace k4a
 
         capture& operator=(capture&& other)
         {
-            release();
-            m_handle = other.m_handle;
-            other.m_handle = nullptr;
+            if (this != &other)
+            {
+                release();
+                m_handle = other.m_handle;
+                other.m_handle = nullptr;
+            }
             return *this;
         }
 
@@ -355,12 +388,12 @@ namespace k4a
 
         bool operator!=(const capture& other) const
         {
-            return m_handle == other.m_handle;
+            return m_handle != other.m_handle;
         }
 
         bool operator!=(std::nullptr_t) const
         {
-            return m_handle == nullptr;
+            return m_handle != nullptr;
         }
 
         operator bool() const
@@ -394,17 +427,17 @@ namespace k4a
 
         void set_color_image(const image& color_image)
         {
-        	k4a_capture_set_color_image(m_handle, color_image.handle());
+            k4a_capture_set_color_image(m_handle, color_image.handle());
         }
 
         void set_depth_image(const image& depth)
         {
-        	k4a_capture_set_depth_image(m_handle, depth.handle());
+            k4a_capture_set_depth_image(m_handle, depth.handle());
         }
 
         void set_ir_image(const image& ir)
         {
-        	k4a_capture_set_ir_image(m_handle, ir.handle());
+            k4a_capture_set_ir_image(m_handle, ir.handle());
         }
 
         float get_temperature_c() const
@@ -652,9 +685,13 @@ namespace k4a
 
         transformation& operator=(transformation&& other)
         {
-            destroy();
-            m_handle = other.m_handle;
-            other.m_handle = nullptr;
+            if (this != &other)
+            {
+                destroy();
+                m_handle = other.m_handle;
+                other.m_handle = nullptr;
+            }
+
             return *this;
         }
 
@@ -719,9 +756,12 @@ namespace k4a
 
         device& operator=(device&& dev)
         {
-            close();
-            m_handle = dev.m_handle;
-            dev.m_handle = nullptr;
+            if (this != &dev)
+            {
+                close();
+                m_handle = dev.m_handle;
+                dev.m_handle = nullptr;
+            }
             return *this;
         }
 
@@ -827,10 +867,8 @@ namespace k4a
                 }
             }
 
-            if (result != K4A_BUFFER_RESULT_SUCCEEDED)
-            {
-                serialnum = "[Unknown K4A device]";
-            }
+            check_result(result);
+
             return serialnum;
         }
 
@@ -945,3 +983,5 @@ namespace k4a
         k4a_device_t m_handle;
     };
 }
+
+#endif

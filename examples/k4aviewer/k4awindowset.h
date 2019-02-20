@@ -23,7 +23,6 @@
 
 // Project headers
 //
-#include "k4acalibrationtransformdata.h"
 #include "k4adatasource.h"
 #include "k4amicrophonelistener.h"
 #include "k4avideowindow.h"
@@ -54,7 +53,7 @@ public:
                                    k4a_color_resolution_t colorResolution);
 
     static void StartPointCloudWindow(const char *sourceIdentifier,
-                                      std::unique_ptr<K4ACalibrationTransformData> &&calibrationData,
+                                      k4a::calibration &&calibrationData,
                                       K4ADataSource<k4a::capture> &cameraDataSource,
                                       k4a_depth_mode_t depthMode);
 };

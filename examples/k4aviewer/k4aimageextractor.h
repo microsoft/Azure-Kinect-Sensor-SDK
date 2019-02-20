@@ -30,7 +30,12 @@ public:
     template<k4a_image_format_t T>
     static k4a::image GetImageFromCapture(const k4a::capture &capture)
     {
-        return capture.get_color_image();
+        k4a::image img = capture.get_color_image();
+        if (img.get_format() != T)
+        {
+            return k4a::image();
+        }
+        return img;
     }
 };
 

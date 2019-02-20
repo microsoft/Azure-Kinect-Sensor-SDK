@@ -20,7 +20,6 @@
 // Project headers
 //
 #include "filesystem17.h"
-#include "k4acalibrationtransformdata.h"
 
 namespace k4aviewer
 {
@@ -48,7 +47,7 @@ public:
 
     const std17::filesystem::path &GetPath() const;
 
-    k4a_result_t GetCalibrationTransformData(std::unique_ptr<K4ACalibrationTransformData> &calibrationData);
+    k4a_result_t GetCalibration(k4a::calibration &calibration);
 
 private:
     K4ARecording(k4a_playback_t playback,

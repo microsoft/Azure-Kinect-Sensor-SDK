@@ -18,7 +18,6 @@
 // Project headers
 //
 #include "ik4avisualizationwindow.h"
-#include "k4acalibrationtransformdata.h"
 #include "k4anonbufferingframesource.h"
 #include "k4apointcloudvisualizer.h"
 
@@ -33,7 +32,7 @@ public:
     K4APointCloudWindow(std::string &&windowTitle,
                         k4a_depth_mode_t depthMode,
                         std::shared_ptr<K4ANonBufferingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>> &&depthFrameSource,
-                        std::unique_ptr<K4ACalibrationTransformData> &&calibrationData);
+                        k4a::calibration &&calibrationData);
     ~K4APointCloudWindow() override = default;
 
     K4APointCloudWindow(const K4APointCloudWindow &) = delete;

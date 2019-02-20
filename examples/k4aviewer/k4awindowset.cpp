@@ -182,7 +182,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
 }
 
 void K4AWindowSet::StartPointCloudWindow(const char *sourceIdentifier,
-                                         std::unique_ptr<K4ACalibrationTransformData> &&calibrationData,
+                                         k4a::calibration &&calibrationData,
                                          K4ADataSource<k4a::capture> &cameraDataSource,
                                          k4a_depth_mode_t depthMode)
 {

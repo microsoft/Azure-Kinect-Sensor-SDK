@@ -260,16 +260,15 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         break;
 
     case K4AWindowSet::ViewType::PointCloudViewer:
-
-        std::unique_ptr<K4ACalibrationTransformData> calibrationData;
-        const k4a_result_t result = m_recording->GetCalibrationTransformData(calibrationData);
+        k4a::calibration calibration;
+        const k4a_result_t result = m_recording->GetCalibration(calibration);
         if (result != K4A_RESULT_SUCCEEDED)
         {
             return;
         }
 
         K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
-                                            std::move(calibrationData),
+                                            std::move(calibration),
                                             m_cameraDataSource,
                                             m_recording->GetRecordConfiguation().depth_mode);
         break;

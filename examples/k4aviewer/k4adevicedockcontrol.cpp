@@ -39,11 +39,11 @@ bool PollSensor(const char *sensorFriendlyName,
                 k4a::device& device,
                 K4ADataSource<T> *dataSource,
                 bool *paused,
-                std::function<k4a_wait_result_t(K4ADevice &, T &)> pollFn,
-                std::function<void(K4ADevice &)> stopFn)
+                std::function<k4a_wait_result_t(k4a::device &, T &)> pollFn,
+                std::function<void(k4a::device &)> stopFn)
 {
     T data;
-    const k4a_wait_result_t pollStatus = pollFn(*device, data);
+    const k4a_wait_result_t pollStatus = pollFn(device, data);
 
     if (pollStatus == K4A_WAIT_RESULT_SUCCEEDED)
     {
@@ -55,7 +55,7 @@ bool PollSensor(const char *sensorFriendlyName,
     else
     {
         std::stringstream errorBuilder;
-        errorBuilder << sensorFriendlyName << " on device " << device->GetSerialNumber();
+        errorBuilder << sensorFriendlyName << " on device " << device.get_serialnum();
         if (pollStatus == K4A_WAIT_RESULT_TIMEOUT)
         {
             errorBuilder << " timed out!";
@@ -67,7 +67,7 @@ bool PollSensor(const char *sensorFriendlyName,
 
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
         dataSource->NotifyTermination();
-        stopFn(*device);
+        stopFn(device);
         return false;
     }
     return true;
@@ -81,7 +81,7 @@ void K4ADeviceDockControl::CheckFirmwareVersion(const k4a_version_t actualVersio
     if (actualVersion < minVersion)
     {
         std::stringstream sb;
-        sb << "Warning: device " << m_device.get_serialnum() << " has outdated " << type
+        sb << "Warning: device " << m_deviceSerialNumber << " has outdated " << type
            << " firmware and may not work properly!" << std::endl
            << "  Actual:   " << actualVersion.major << "." << actualVersion.minor << "." << actualVersion.iteration
            << std::endl
@@ -229,16 +229,17 @@ void K4ADeviceDockControl::RefreshSyncCableStatus()
 
 bool K4ADeviceDockControl::DeviceIsStarted() const
 {
-    return m_device.CamerasAreStarted() || m_device.ImuIsStarted() || (m_microphone && m_microphone->IsStarted());
+    return m_camerasStarted || m_imuStarted || (m_microphone && m_microphone->IsStarted());
 }
 
 K4ADeviceDockControl::K4ADeviceDockControl(k4a::device device) : m_device(std::move(device))
 {
     ApplyDefaultConfiguration();
 
-    m_windowTitle = m_device.get_serialnum() + ": Configuration";
+    m_deviceSerialNumber = m_device.get_serialnum();
+    m_windowTitle = m_deviceSerialNumber + ": Configuration";
 
-    m_microphone = K4AAudioManager::Instance().GetMicrophoneForDevice(m_device.get_serialnum());
+    m_microphone = K4AAudioManager::Instance().GetMicrophoneForDevice(m_deviceSerialNumber);
 
     // Show warnings if firmware is too old
     //
@@ -258,7 +259,7 @@ K4ADeviceDockControl::~K4ADeviceDockControl()
 void K4ADeviceDockControl::Show()
 {
     std::stringstream labelBuilder;
-    labelBuilder << "Device S/N: " << m_device.get_serialnum();
+    labelBuilder << "Device S/N: " << m_deviceSerialNumber;
     ImGui::Text("%s", labelBuilder.str().c_str());
     ImGui::SameLine();
 
@@ -280,7 +281,7 @@ void K4ADeviceDockControl::Show()
     if (m_microphone && m_microphone->GetStatusCode() != SoundIoErrorNone)
     {
         std::stringstream errorBuilder;
-        errorBuilder << "Microphone on device " << m_device.get_serialnum() << " failed!";
+        errorBuilder << "Microphone on device " << m_deviceSerialNumber << " failed!";
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
         StopMicrophone();
         m_microphone->ClearStatusCode();
@@ -754,7 +755,7 @@ void K4ADeviceDockControl::Show()
 
         const bool pointCloudViewerAvailable = m_pendingDeviceConfiguration.EnableDepthCamera &&
                                                m_pendingDeviceConfiguration.DepthMode != K4A_DEPTH_MODE_PASSIVE_IR &&
-                                               m_device.CamerasAreStarted();
+                                               m_camerasStarted;
 
         K4AWindowSet::ShowModeSelector(&m_currentViewType,
                                        true,
@@ -814,7 +815,7 @@ void K4ADeviceDockControl::Stop()
 
 bool K4ADeviceDockControl::StartCameras()
 {
-    if (m_device.CamerasAreStarted())
+    if (m_camerasStarted)
     {
         return false;
     }
@@ -829,11 +830,14 @@ bool K4ADeviceDockControl::StartCameras()
         return false;
     }
 
+    m_camerasStarted = true;
+
     K4ADataSource<k4a::capture> *pCameraDataSource = &m_cameraDataSource;
     bool *pPaused = &m_paused;
+    bool *pCamerasStarted = &m_camerasStarted;
 
     m_cameraPollingThread = std14::make_unique<K4APollingThread<k4a::capture>>(
-        [this, pCameraDataSource, pPaused]() {
+        [this, pCameraDataSource, pPaused, pCamerasStarted]() {
             return PollSensor<k4a::capture>(
                 "Cameras",
                 m_device,
@@ -843,7 +847,10 @@ bool K4ADeviceDockControl::StartCameras()
                     k4a_wait_result_t status = device.get_capture(capture, CameraPollingTimeout);
                     return status;
                 },
-                [](k4a::device &device) { device.stop_cameras(); });
+                [pCamerasStarted](k4a::device &device) {
+                    device.stop_cameras();
+                    *pCamerasStarted = false;
+                });
         });
 
     return true;
@@ -857,6 +864,7 @@ void K4ADeviceDockControl::StopCameras()
     }
     m_cameraDataSource.NotifyTermination();
     m_device.stop_cameras();
+    m_camerasStarted = false;
 }
 
 bool K4ADeviceDockControl::StartMicrophone()
@@ -864,7 +872,7 @@ bool K4ADeviceDockControl::StartMicrophone()
     if (!m_microphone)
     {
         std::stringstream errorBuilder;
-        errorBuilder << "Failed to find microphone for device: " << m_device.get_serialnum() << "!";
+        errorBuilder << "Failed to find microphone for device: " << m_deviceSerialNumber << "!";
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
         return false;
     }
@@ -896,7 +904,7 @@ void K4ADeviceDockControl::StopMicrophone()
 
 bool K4ADeviceDockControl::StartImu()
 {
-    if (m_device.ImuIsStarted())
+    if (m_imuStarted)
     {
         return false;
     }
@@ -909,10 +917,13 @@ bool K4ADeviceDockControl::StartImu()
         return false;
     }
 
+    m_imuStarted = true;
+
     K4ADataSource<k4a_imu_sample_t> *pImuDataSource = &m_imuDataSource;
     bool *pPaused = &m_paused;
+    bool *pImuStarted = &m_imuStarted;
 
-    m_imuPollingThread = std14::make_unique<K4APollingThread<k4a_imu_sample_t>>([this, pImuDataSource, pPaused]() {
+    m_imuPollingThread = std14::make_unique<K4APollingThread<k4a_imu_sample_t>>([this, pImuDataSource, pPaused, pImuStarted]() {
         return PollSensor<k4a_imu_sample_t>(
             "IMU",
             m_device,
@@ -921,7 +932,10 @@ bool K4ADeviceDockControl::StartImu()
             [](k4a::device &device, k4a_imu_sample_t &sample) {
                 return device.get_imu_sample(&sample, ImuPollingTimeout);
             },
-            [](k4a::device &device) { device.stop_cameras(); });
+            [pImuStarted](k4a::device &device) {
+                 device.stop_imu();
+                 *pImuStarted = false;
+            });
     });
 
     return true;
@@ -934,6 +948,7 @@ void K4ADeviceDockControl::StopImu()
         m_imuPollingThread.reset();
     }
     m_imuDataSource.NotifyTermination();
+    m_imuStarted = false;
 
     m_device.stop_imu();
 }
@@ -957,7 +972,7 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     switch (viewType)
     {
     case K4AWindowSet::ViewType::Normal:
-        K4AWindowSet::StartNormalWindows(m_device.get_serialnum().c_str(),
+        K4AWindowSet::StartNormalWindows(m_deviceSerialNumber.c_str(),
                                          &m_cameraDataSource,
                                          m_pendingDeviceConfiguration.EnableImu ? &m_imuDataSource : nullptr,
                                          std::move(micListener),
@@ -969,21 +984,17 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         break;
 
     case K4AWindowSet::ViewType::PointCloudViewer:
-        std::unique_ptr<K4ACalibrationTransformData> calibrationData;
-
-        const k4a_result_t getCalibrationResult =
-            m_device.GetCalibrationTransformData(calibrationData,
-                                                  m_pendingDeviceConfiguration.DepthMode,
-                                                  m_pendingDeviceConfiguration.ColorResolution);
-
+        k4a::calibration calib;
+        const k4a_result_t getCalibrationResult = m_device.get_calibration(m_pendingDeviceConfiguration.DepthMode,
+        m_pendingDeviceConfiguration.ColorResolution, &calib);
         if (getCalibrationResult != K4A_RESULT_SUCCEEDED)
         {
             K4AViewerErrorManager::Instance().SetErrorStatus("Failed to get calibration data!");
             return;
         }
 
-        K4AWindowSet::StartPointCloudWindow(m_device.get_serialnum().c_str(),
-                                            std::move(calibrationData),
+        K4AWindowSet::StartPointCloudWindow(m_deviceSerialNumber.c_str(),
+                                            std::move(calib),
                                             m_cameraDataSource,
                                             m_pendingDeviceConfiguration.DepthMode);
         break;

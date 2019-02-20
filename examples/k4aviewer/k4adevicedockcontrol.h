@@ -110,6 +110,10 @@ private:
     K4ADeviceConfiguration m_pendingDeviceConfiguration;
 
     k4a::device m_device;
+    bool m_camerasStarted = false;
+    bool m_imuStarted = false;
+
+    std::string m_deviceSerialNumber;
     std::shared_ptr<K4AMicrophone> m_microphone;
 
     K4ADataSource<k4a::capture> m_cameraDataSource;
