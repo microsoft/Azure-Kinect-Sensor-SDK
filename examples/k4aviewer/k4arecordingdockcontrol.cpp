@@ -151,8 +151,6 @@ void K4ARecordingDockControl::Show()
     ImGui::Text("Depth camera FW: %s", m_depthFirmwareVersion.c_str());
     ImGui::Separator();
 
-    bool forceReadNext = false;
-
     if (ImGui::Button("<|"))
     {
         Step(true);
@@ -164,7 +162,10 @@ void K4ARecordingDockControl::Show()
     if (ImGui::SliderScalar("##seek", ImGuiDataType_S64, &m_currentTimestamp, &seekMin, &seekMax, ""))
     {
         m_recording->SeekTimestamp(static_cast<int64_t>(m_currentTimestamp));
-        forceReadNext = true;
+        // The seek timestamp may end up in the middle of a capture, read backwards and forwards again to get a full
+        // capture.
+        (void)m_recording->GetPreviousCapture();
+        Step(false);
     }
     ImGui::SameLine();
 
@@ -176,7 +177,7 @@ void K4ARecordingDockControl::Show()
     if (ImGui::Button("<<"))
     {
         m_recording->SeekTimestamp(0);
-        forceReadNext = true;
+        Step(false);
     }
     ImGui::SameLine();
     if (ImGui::Button(m_paused ? ">" : "||"))
@@ -186,8 +187,7 @@ void K4ARecordingDockControl::Show()
     ImGui::SameLine();
     if (ImGui::Button(">>"))
     {
-        m_recording->SeekTimestamp(static_cast<int64_t>(m_recording->GetRecordingLength() - 1));
-        m_paused = true;
+        m_recording->SeekTimestamp(static_cast<int64_t>(m_recording->GetRecordingLength() + 1));
         Step(true);
     }
 
@@ -195,17 +195,22 @@ void K4ARecordingDockControl::Show()
         return this->SetViewType(t);
     });
 
-    ReadNext(forceReadNext);
+    ReadNext();
 }
 
-void K4ARecordingDockControl::ReadNext(bool force)
+void K4ARecordingDockControl::ReadNext()
 {
-    if (m_paused && !force)
+    if (m_paused)
     {
         return;
     }
 
-    if (m_nextCapture == nullptr)
+    // Only show the next frame if enough time has elapsed since we showed the last one
+    //
+    auto now = std::chrono::high_resolution_clock::now();
+    std::chrono::high_resolution_clock::duration timeSinceLastFrame = now - m_lastFrameShownTime;
+
+    if (m_currentCapture == nullptr || timeSinceLastFrame >= m_timePerFrame)
     {
         std::shared_ptr<K4ACapture> nextCapture(m_recording->GetNextCapture());
         if (nextCapture == nullptr)
@@ -218,22 +223,10 @@ void K4ARecordingDockControl::ReadNext(bool force)
         }
         else
         {
-            m_nextCapture = std::move(nextCapture);
-        }
-    }
+            m_currentCapture = std::move(nextCapture);
 
-    if (m_nextCapture != nullptr)
-    {
-        // Only show the next frame if enough time has elapsed since we showed the last one
-        //
-        auto now = std::chrono::high_resolution_clock::now();
-        std::chrono::high_resolution_clock::duration timeSinceLastFrame = now - m_lastFrameShownTime;
-
-        if (timeSinceLastFrame >= m_timePerFrame)
-        {
-            m_currentTimestamp = GetCaptureTimestamp(m_nextCapture);
-            m_cameraDataSource.NotifyObservers(m_nextCapture);
-            m_nextCapture = m_recording->GetNextCapture();
+            m_currentTimestamp = GetCaptureTimestamp(m_currentCapture);
+            m_cameraDataSource.NotifyObservers(m_currentCapture);
             m_lastFrameShownTime = now;
         }
     }
@@ -242,12 +235,18 @@ void K4ARecordingDockControl::ReadNext(bool force)
 void K4ARecordingDockControl::Step(bool backward)
 {
     m_paused = true;
-    m_nextCapture = nullptr;
     std::shared_ptr<K4ACapture> capture = backward ? m_recording->GetPreviousCapture() : m_recording->GetNextCapture();
     if (capture)
     {
-        m_currentTimestamp = GetCaptureTimestamp(capture);
-        m_cameraDataSource.NotifyObservers(capture);
+        m_currentCapture = std::move(capture);
+
+        m_currentTimestamp = GetCaptureTimestamp(m_currentCapture);
+        m_cameraDataSource.NotifyObservers(m_currentCapture);
+    }
+    else
+    {
+        // End of recording, keep displaying the last capture.
+        m_currentCapture = backward ? m_recording->GetNextCapture() : m_recording->GetPreviousCapture();
     }
 }
 
