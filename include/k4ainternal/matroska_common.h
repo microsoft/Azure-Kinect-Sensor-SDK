@@ -155,19 +155,26 @@ struct BITMAPINFOHEADER
     uint32_t biClrImportant = 0;
 };
 
-template<typename T> size_t write_bytes(uint8_t *buffer, T value)
+#pragma pack(push, 1)
+// Used to serialize imu samples to disk. The struct padding and size must be exact.
+struct matroska_imu_sample_t
 {
-    uint8_t *data = reinterpret_cast<uint8_t *>(&value);
-    memcpy(buffer, data, sizeof(T));
-    return sizeof(T);
-}
+    uint64_t acc_timestamp;
+    float acc_data[3];
+    uint64_t gyro_timestamp;
+    float gyro_data[3];
+};
+#pragma pack(pop)
 
-template<typename T> size_t read_bytes(uint8_t *buffer, T *value)
-{
-    uint8_t *data = reinterpret_cast<uint8_t *>(value);
-    memcpy(data, buffer, sizeof(T));
-    return sizeof(T);
-}
+// Sample is stored as [acc_timestamp, acc_data[3], gyro_timestamp, gyro_data[3]]
+static_assert(sizeof(matroska_imu_sample_t) == (sizeof(float) * 6 + sizeof(uint64_t) * 2),
+              "matroska_imu_sample_t size does not match expected padding.");
+
+// If the size of an IMU sample changes in the SDK, the file format will need to be updated as well.
+static_assert(sizeof(matroska_imu_sample_t) ==
+                  sizeof(k4a_imu_sample_t().acc_sample.v) + sizeof(k4a_imu_sample_t().acc_timestamp_usec) +
+                      sizeof(k4a_imu_sample_t().gyro_timestamp_usec) + sizeof(k4a_imu_sample_t().gyro_sample.v),
+              "Size of IMU data structure has changed from on-disk format.");
 
 static const k4a_color_resolution_t color_resolutions[] = { K4A_COLOR_RESOLUTION_720P,  K4A_COLOR_RESOLUTION_1080P,
                                                             K4A_COLOR_RESOLUTION_1440P, K4A_COLOR_RESOLUTION_1536P,

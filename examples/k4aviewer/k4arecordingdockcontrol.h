@@ -37,7 +37,7 @@ private:
     std::chrono::microseconds GetCaptureTimestamp(const k4a::capture &capture);
     void SetViewType(K4AWindowSet::ViewType viewType);
 
-    void ReadNext(bool force);
+    void ReadNext();
     void Step(bool backward);
 
     std::unique_ptr<K4ARecordingDockControl> m_dockControl;
@@ -50,6 +50,15 @@ private:
     std::string m_colorFormatLabel;
     std::string m_colorResolutionLabel;
 
+    int32_t m_depthDelayOffColorUsec;
+    std::string m_wiredSyncModeLabel;
+    uint32_t m_subordinateDelayOffMasterUsec;
+    uint32_t m_startTimestampOffsetUsec;
+
+    std::string m_deviceSerialNumber;
+    std::string m_colorFirmwareVersion;
+    std::string m_depthFirmwareVersion;
+
     bool m_recordingHasColor = false;
     bool m_recordingHasDepth = false;
 
@@ -59,7 +68,7 @@ private:
 
     std::chrono::high_resolution_clock::time_point m_lastFrameShownTime;
     std::chrono::microseconds m_timePerFrame;
-    k4a::capture m_nextCapture;
+    k4a::capture m_currentCapture;
 
     bool m_paused = false;
     K4AWindowSet::ViewType m_viewType = K4AWindowSet::ViewType::Normal;

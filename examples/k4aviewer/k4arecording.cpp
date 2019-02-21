@@ -84,6 +84,24 @@ k4a_result_t K4ARecording::GetCalibration(k4a::calibration &calibration)
     return k4a_playback_get_calibration(m_playback, &calibration);
 }
 
+k4a_buffer_result_t K4ARecording::GetTag(const char *name, std::string &out) const
+{
+    size_t size = 0;
+    k4a_buffer_result_t result = k4a_playback_get_tag(m_playback, name, nullptr, &size);
+    if (result != K4A_BUFFER_RESULT_TOO_SMALL)
+    {
+        return K4A_BUFFER_RESULT_FAILED;
+    }
+
+    out.resize(size);
+    result = k4a_playback_get_tag(m_playback, name, &out[0], &size);
+
+    // Drop the null terminator since std::string 'hides' it
+    //
+    out.resize(std::max(size_t(0), size - 1));
+    return result;
+}
+
 K4ARecording::K4ARecording(k4a_playback_t playback,
                            std17::filesystem::path path,
                            const k4a_record_configuration_t &recordConfiguration) :
