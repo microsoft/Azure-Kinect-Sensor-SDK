@@ -78,8 +78,7 @@ GLenum K4APointCloudVisualizer::InitializeTexture(std::shared_ptr<OpenGlTexture>
     return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
 }
 
-GLenum K4APointCloudVisualizer::UpdateTexture(std::shared_ptr<OpenGlTexture> &texture,
-                                              const k4a::image &frame)
+GLenum K4APointCloudVisualizer::UpdateTexture(std::shared_ptr<OpenGlTexture> &texture, const k4a::image &frame)
 {
     // Set up rendering to a texture
     //
@@ -146,8 +145,7 @@ void K4APointCloudVisualizer::EnableShading(bool enable)
     m_pointCloudRenderer.EnableShading(enable);
 }
 
-K4APointCloudVisualizer::K4APointCloudVisualizer(const k4a_depth_mode_t depthMode,
-                                                 k4a::calibration &&calibrationData) :
+K4APointCloudVisualizer::K4APointCloudVisualizer(const k4a_depth_mode_t depthMode, k4a::calibration &&calibrationData) :
     m_expectedValueRange(GetRangeForDepthMode(depthMode)),
     m_dimensions(PointCloudVisualizerTextureDimensions),
     m_calibrationData(std::move(calibrationData)),
@@ -156,7 +154,8 @@ K4APointCloudVisualizer::K4APointCloudVisualizer(const k4a_depth_mode_t depthMod
     m_pointCloudImage = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16,
                                            m_calibrationData.depth_camera_calibration.resolution_width,
                                            m_calibrationData.depth_camera_calibration.resolution_height,
-                                           m_calibrationData.depth_camera_calibration.resolution_width * 3 * sizeof(int16_t));
+                                           m_calibrationData.depth_camera_calibration.resolution_width * 3 *
+                                               sizeof(int16_t));
 
     glGenFramebuffers(1, &m_frameBuffer);
 
@@ -183,7 +182,9 @@ void K4APointCloudVisualizer::UpdatePointClouds(const k4a::image &frame)
         m_vertexBuffer.resize(pointCount);
     }
 
-    k4a_result_t result = m_transformation.depth_image_to_point_cloud(frame, K4A_CALIBRATION_TYPE_DEPTH, m_pointCloudImage);
+    k4a_result_t result = m_transformation.depth_image_to_point_cloud(frame,
+                                                                      K4A_CALIBRATION_TYPE_DEPTH,
+                                                                      m_pointCloudImage);
     if (result != K4A_RESULT_SUCCEEDED)
     {
         // Drop the frame

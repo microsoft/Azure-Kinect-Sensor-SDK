@@ -36,7 +36,7 @@ constexpr std::chrono::milliseconds ImuPollingTimeout(2000);
 
 template<typename T>
 bool PollSensor(const char *sensorFriendlyName,
-                k4a::device& device,
+                k4a::device &device,
                 K4ADataSource<T> *dataSource,
                 bool *paused,
                 std::function<k4a_wait_result_t(k4a::device &, T &)> pollFn,
@@ -838,19 +838,19 @@ bool K4ADeviceDockControl::StartCameras()
 
     m_cameraPollingThread = std14::make_unique<K4APollingThread<k4a::capture>>(
         [this, pCameraDataSource, pPaused, pCamerasStarted]() {
-            return PollSensor<k4a::capture>(
-                "Cameras",
-                m_device,
-                pCameraDataSource,
-                pPaused,
-                [](k4a::device &device, k4a::capture &capture) {
-                    k4a_wait_result_t status = device.get_capture(capture, CameraPollingTimeout);
-                    return status;
-                },
-                [pCamerasStarted](k4a::device &device) {
-                    device.stop_cameras();
-                    *pCamerasStarted = false;
-                });
+            return PollSensor<k4a::capture>("Cameras",
+                                            m_device,
+                                            pCameraDataSource,
+                                            pPaused,
+                                            [](k4a::device &device, k4a::capture &capture) {
+                                                k4a_wait_result_t status = device.get_capture(capture,
+                                                                                              CameraPollingTimeout);
+                                                return status;
+                                            },
+                                            [pCamerasStarted](k4a::device &device) {
+                                                device.stop_cameras();
+                                                *pCamerasStarted = false;
+                                            });
         });
 
     return true;
@@ -923,20 +923,20 @@ bool K4ADeviceDockControl::StartImu()
     bool *pPaused = &m_paused;
     bool *pImuStarted = &m_imuStarted;
 
-    m_imuPollingThread = std14::make_unique<K4APollingThread<k4a_imu_sample_t>>([this, pImuDataSource, pPaused, pImuStarted]() {
-        return PollSensor<k4a_imu_sample_t>(
-            "IMU",
-            m_device,
-            pImuDataSource,
-            pPaused,
-            [](k4a::device &device, k4a_imu_sample_t &sample) {
-                return device.get_imu_sample(&sample, ImuPollingTimeout);
-            },
-            [pImuStarted](k4a::device &device) {
-                 device.stop_imu();
-                 *pImuStarted = false;
-            });
-    });
+    m_imuPollingThread = std14::make_unique<K4APollingThread<k4a_imu_sample_t>>(
+        [this, pImuDataSource, pPaused, pImuStarted]() {
+            return PollSensor<k4a_imu_sample_t>("IMU",
+                                                m_device,
+                                                pImuDataSource,
+                                                pPaused,
+                                                [](k4a::device &device, k4a_imu_sample_t &sample) {
+                                                    return device.get_imu_sample(&sample, ImuPollingTimeout);
+                                                },
+                                                [pImuStarted](k4a::device &device) {
+                                                    device.stop_imu();
+                                                    *pImuStarted = false;
+                                                });
+        });
 
     return true;
 }
@@ -986,7 +986,8 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     case K4AWindowSet::ViewType::PointCloudViewer:
         k4a::calibration calib;
         const k4a_result_t getCalibrationResult = m_device.get_calibration(m_pendingDeviceConfiguration.DepthMode,
-        m_pendingDeviceConfiguration.ColorResolution, &calib);
+                                                                           m_pendingDeviceConfiguration.ColorResolution,
+                                                                           &calib);
         if (getCalibrationResult != K4A_RESULT_SUCCEEDED)
         {
             K4AViewerErrorManager::Instance().SetErrorStatus("Failed to get calibration data!");

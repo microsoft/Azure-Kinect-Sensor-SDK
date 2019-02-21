@@ -48,8 +48,7 @@ public:
         buffer.Data.resize(m_expectedBufferSize);
     }
 
-    ImageVisualizationResult ConvertImage(const k4a::image &image,
-                                          K4ATextureBuffer<ImageFormat> &buffer) override
+    ImageVisualizationResult ConvertImage(const k4a::image &image, K4ATextureBuffer<ImageFormat> &buffer) override
     {
         const size_t srcImageSize = static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(DepthPixel);
 

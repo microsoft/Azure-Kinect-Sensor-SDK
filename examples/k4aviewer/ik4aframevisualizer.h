@@ -58,8 +58,7 @@ public:
     // Interprets image as an image and stores it in buffer in a format that is appropriate for
     // a future call to UpdateTexture
     //
-    virtual ImageVisualizationResult ConvertImage(const k4a::image &image,
-                                                  K4ATextureBuffer<ImageFormat> &buffer) = 0;
+    virtual ImageVisualizationResult ConvertImage(const k4a::image &image, K4ATextureBuffer<ImageFormat> &buffer) = 0;
 
     // Updates texture in-place with the image stored in buffer.
     // UpdateTexture expects to get a texture that was previously initialized by InitializeTexture.

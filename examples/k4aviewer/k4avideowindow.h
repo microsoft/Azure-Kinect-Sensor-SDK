@@ -208,9 +208,7 @@ private:
     std::shared_ptr<OpenGlTexture> m_currentTexture;
 };
 
-template<>
-void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &,
-                                                              ImVec2 hoveredPixel);
+template<> void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &, ImVec2 hoveredPixel);
 
 // Template specialization for RenderInfoPane.  Lets us show pixel value for the depth viewer.
 //

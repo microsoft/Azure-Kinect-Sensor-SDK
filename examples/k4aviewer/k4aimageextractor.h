@@ -27,8 +27,7 @@ namespace k4aviewer
 class K4AImageExtractor
 {
 public:
-    template<k4a_image_format_t T>
-    static k4a::image GetImageFromCapture(const k4a::capture &capture)
+    template<k4a_image_format_t T> static k4a::image GetImageFromCapture(const k4a::capture &capture)
     {
         k4a::image img = capture.get_color_image();
         if (img.get_format() != T)
@@ -40,15 +39,12 @@ public:
 };
 
 template<>
-inline k4a::image
-K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_DEPTH16>(const k4a::capture &capture)
+inline k4a::image K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_DEPTH16>(const k4a::capture &capture)
 {
     return capture.get_depth_image();
 }
 
-template<>
-inline k4a::image
-K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_IR16>(const k4a::capture &capture)
+template<> inline k4a::image K4AImageExtractor::GetImageFromCapture<K4A_IMAGE_FORMAT_IR16>(const k4a::capture &capture)
 {
     return capture.get_ir_image();
 }

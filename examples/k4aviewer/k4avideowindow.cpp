@@ -28,8 +28,7 @@ using namespace k4aviewer;
 // Template specialization for RenderInfoPane.  Lets us show pixel value for the depth viewer.
 //
 template<>
-void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &frame,
-                                                              const ImVec2 hoveredPixel)
+void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &frame, const ImVec2 hoveredPixel)
 {
     RenderBasicInfoPane(frame);
 
@@ -37,7 +36,8 @@ void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &
     if (hoveredPixel.x >= 0 && hoveredPixel.y >= 0)
     {
         const DepthPixel *buffer = reinterpret_cast<DepthPixel *>(m_currentImage.get_buffer());
-        pixelValue = buffer[size_t(hoveredPixel.y) * size_t(m_currentImage.get_width_pixels()) + size_t(hoveredPixel.x)];
+        pixelValue =
+            buffer[size_t(hoveredPixel.y) * size_t(m_currentImage.get_width_pixels()) + size_t(hoveredPixel.x)];
     }
 
     ImGui::Text("Current pixel: %d, %d", int(hoveredPixel.x), int(hoveredPixel.y));
