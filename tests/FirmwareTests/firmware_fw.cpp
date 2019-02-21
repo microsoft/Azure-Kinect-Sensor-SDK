@@ -29,6 +29,7 @@ static k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_
 
 typedef enum
 {
+    FIRMWARE_OPERATION_START,
     FIRMWARE_OPERATION_AUDIO,
     FIRMWARE_OPERATION_DEPTH_CONFIG,
     FIRMWARE_OPERATION_DEPTH,
@@ -451,6 +452,11 @@ void firmware_fw::interrupt_device_at_update_stage(firmware_operation_component_
             // Check to see if now is the correct time to interrupt the device.
             switch (component)
             {
+            case FIRMWARE_OPERATION_START:
+                // As early as possible reset the device.
+                interrupt_operation(interruption);
+                return;
+
             case FIRMWARE_OPERATION_AUDIO:
                 if (finalStatus->audio.version_check != FIRMWARE_OPERATION_INPROGRESS)
                 {
@@ -578,11 +584,89 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     perform_device_update(test_firmware_buffer, test_firmware_size, test_firmware_package_info);
 
     // Update back to the LKG firmware, but interrupt...
+    LOG_INFO("Interrupting at the beginning of the update");
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, lkg_firmware_buffer, lkg_firmware_size));
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_START, FIRMWARE_OPERATION_RESET, &finalStatus);
+
+    std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
+              << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
+              << " Depth: " << calculate_overall_component_status(finalStatus.depth)
+              << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
+
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.audio));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth_config));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
+
+    // Check that we are still on the old version...
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, depthmcu_get_version(depthmcu_handle, &current_version));
+    log_device_version(current_version);
+    ASSERT_TRUE(compare_version(current_version.audio_major,
+                                current_version.audio_minor,
+                                current_version.audio_build,
+                                test_firmware_package_info.audio))
+        << "Audio version mismatch";
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor_cfg_major,
+                                     current_version.depth_sensor_cfg_minor,
+                                     test_firmware_package_info.depth_config_number_versions,
+                                     test_firmware_package_info.depth_config_versions))
+        << "Depth Config mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth_major,
+                                current_version.depth_minor,
+                                current_version.depth_build,
+                                test_firmware_package_info.depth))
+        << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb_major,
+                                current_version.rgb_minor,
+                                current_version.rgb_build,
+                                test_firmware_package_info.rgb))
+        << "RGB mismatch";
+
+    // Update back to the LKG firmware, but interrupt...
     LOG_INFO("Interrupting at Audio stage");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, lkg_firmware_buffer, lkg_firmware_size));
     interrupt_device_at_update_stage(FIRMWARE_OPERATION_AUDIO, FIRMWARE_OPERATION_RESET, &finalStatus);
 
-    std::cout << "Audio: " << calculate_overall_component_status(finalStatus.audio)
+    std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
+              << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
+              << " Depth: " << calculate_overall_component_status(finalStatus.depth)
+              << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
+
+    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
+    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
+
+    // Check that we are still on the old version...
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, depthmcu_get_version(depthmcu_handle, &current_version));
+    log_device_version(current_version);
+    ASSERT_TRUE(compare_version(current_version.audio_major,
+                                current_version.audio_minor,
+                                current_version.audio_build,
+                                test_firmware_package_info.audio))
+        << "Audio version mismatch";
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor_cfg_major,
+                                     current_version.depth_sensor_cfg_minor,
+                                     test_firmware_package_info.depth_config_number_versions,
+                                     test_firmware_package_info.depth_config_versions))
+        << "Depth Config mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth_major,
+                                current_version.depth_minor,
+                                current_version.depth_build,
+                                test_firmware_package_info.depth))
+        << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb_major,
+                                current_version.rgb_minor,
+                                current_version.rgb_build,
+                                test_firmware_package_info.rgb))
+        << "RGB mismatch";
+
+    // Update back to the LKG firmware, but interrupt...
+    LOG_INFO("Interrupting at Depth stage");
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, lkg_firmware_buffer, lkg_firmware_size));
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_DEPTH, FIRMWARE_OPERATION_RESET, &finalStatus);
+
+    std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
               << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
               << " Depth: " << calculate_overall_component_status(finalStatus.depth)
               << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
@@ -606,7 +690,6 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     // Update back to the LKG firmware
     LOG_INFO("Updating the device back to the LKG firmware.");
     perform_device_update(lkg_firmware_buffer, lkg_firmware_size, lkg_firmware_package_info);
-    interrupt_device_at_update_stage(FIRMWARE_OPERATION_FULL_DEVICE, FIRMWARE_OPERATION_RESET, &finalStatus);
 }
 
 int main(int argc, char **argv)
