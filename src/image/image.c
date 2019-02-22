@@ -168,6 +168,7 @@ k4a_result_t image_create(k4a_image_format_t format,
     }
     if (K4A_SUCCEEDED(result))
     {
+        image->format = format;
         image->width_pixels = width_pixels;
         image->height_pixels = height_pixels;
         image->stride_bytes = stride_bytes;
