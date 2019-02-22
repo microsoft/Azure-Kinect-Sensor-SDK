@@ -1,4 +1,6 @@
-/** \file record_read.h
+/** \file matroska_read.h
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
  * Kinect For Azure Record SDK.
  * Internal MKV Reading Helpers
  */

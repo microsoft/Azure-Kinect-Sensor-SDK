@@ -1,9 +1,5 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-               Licensed under the MIT License.
-****************************************************************/
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 #ifndef K4APOINTCLOUDTYPES_H
 #define K4APOINTCLOUDTYPES_H

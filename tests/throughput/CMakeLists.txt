@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(throughput_perf throughput_perf.cpp)
 
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)

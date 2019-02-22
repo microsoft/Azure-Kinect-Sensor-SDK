@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_subdirectory(enumerate)
 add_subdirectory(fastpointcloud)
 add_subdirectory(k4arecorder)

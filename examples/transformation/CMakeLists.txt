@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(transformation_example 
     main.cpp
     transformation_helpers.cpp

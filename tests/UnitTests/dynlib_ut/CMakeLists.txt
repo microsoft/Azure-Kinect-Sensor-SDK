@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(dynlib_ut dynlib.cpp)
 
 set(TEST_LIBRARY_NAME "test_dynlib")

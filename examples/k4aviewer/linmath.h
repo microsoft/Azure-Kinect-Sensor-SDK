@@ -1,10 +1,3 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-               Licensed under the MIT License.
-****************************************************************/
-
 // Adapted from https://github.com/datenwolf/linmath.h
 
 #ifndef LINMATH_H

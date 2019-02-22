@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(imu_ut imu_ut.cpp)
 
 target_link_libraries(imu_ut PRIVATE

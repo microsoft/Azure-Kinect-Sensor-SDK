@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 find_package(Git REQUIRED QUIET)
 if (NOT Git_FOUND)
     message(FATAL_ERROR "Unable to find git, which is needed for versioning")

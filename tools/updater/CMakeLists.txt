@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(AzureKinectFirmwareTool main.c ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
 # Include ${CMAKE_CURRENT_BINARY_DIR}/version.rc in the target's sources

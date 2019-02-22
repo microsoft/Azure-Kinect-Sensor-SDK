@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # string(JOIN ...) was added in CMake 3.11 and thus can not be used.
 # string_join was written to mimic string(JOIN ...) functionality and
 # interface.

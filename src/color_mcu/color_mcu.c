@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 // This library *
 #include <k4ainternal/color_mcu.h>
 #include <k4ainternal/common.h>

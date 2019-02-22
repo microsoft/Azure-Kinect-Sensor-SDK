@@ -1,9 +1,5 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-               Licensed under the MIT License.
-****************************************************************/
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 #ifndef K4AVIDEOWINDOW_H
 #define K4AVIDEOWINDOW_H
@@ -36,7 +32,11 @@ public:
         m_title(std::move(title))
     {
         const GLenum initResult = m_frameSource->InitializeTexture(m_currentTexture);
-        CheckImageVisualizationResult(GLEnumToImageVisualizationResult(initResult));
+        const ImageVisualizationResult ivr = GLEnumToImageVisualizationResult(initResult);
+        if (ivr != ImageVisualizationResult::Success)
+        {
+            SetFailed(ivr);
+        }
     }
 
     ~K4AVideoWindow() override = default;
@@ -65,22 +65,21 @@ public:
 private:
     void RenderVideoFrame(ImVec2 maxSize)
     {
-        if (m_frameSource->IsFailed())
+        if (m_failed)
         {
-            K4AViewerErrorManager::Instance().SetErrorStatus(m_title + ": frame source failed!");
-
-            m_failed = true;
             return;
         }
 
-        // If we haven't received data from the camera yet, we just show the default texture (all black).
-        //
-        if (m_frameSource->HasData())
+        const ImageVisualizationResult nextFrameResult = m_frameSource->GetNextFrame(*m_currentTexture, m_currentImage);
+        if (nextFrameResult == ImageVisualizationResult::NoDataError)
         {
-            if (!CheckImageVisualizationResult(m_frameSource->GetNextFrame(*m_currentTexture, m_currentImage)))
-            {
-                return;
-            }
+            // We don't have data from the camera yet; show the window with the default black texture.
+            // Continue rendering the window.
+        }
+        else if (nextFrameResult != ImageVisualizationResult::Success)
+        {
+            SetFailed(nextFrameResult);
+            return;
         }
 
         // The absolute coordinates where the next widget will be drawn.  This call must
@@ -159,16 +158,10 @@ private:
         ImGui::Text("Timestamp: %llu", static_cast<long long unsigned int>(frame.GetTimestampUsec()));
     }
 
-    // If errorCode is successful, returns true; otherwise, raises an error, marks the window
-    // as failed, and raises an error message to the user.
+    // Sets the window failed with an error message derived from errorCode
     //
-    bool CheckImageVisualizationResult(const ImageVisualizationResult errorCode)
+    void SetFailed(const ImageVisualizationResult errorCode)
     {
-        if (errorCode == ImageVisualizationResult::Success)
-        {
-            return true;
-        }
-
         std::stringstream errorBuilder;
         errorBuilder << m_title << ": ";
         switch (errorCode)
@@ -185,10 +178,6 @@ private:
             errorBuilder << "failed to upload image to OpenGL!";
             break;
 
-        case ImageVisualizationResult::NoDataError:
-            errorBuilder << "did not receive image data!";
-            break;
-
         default:
             errorBuilder << "unknown error!";
             break;
@@ -197,7 +186,6 @@ private:
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
 
         m_failed = true;
-        return false;
     }
 
     std::shared_ptr<K4AConvertingFrameSource<ImageFormat>> m_frameSource;
