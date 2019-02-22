@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Used to run google tests generated during build. Takes in a text file
 # containing a list of relative paths to text exectuables to run and path to
 # binary output directory of build. The paths are relative to the binary

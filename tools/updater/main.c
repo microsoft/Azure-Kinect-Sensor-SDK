@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #ifdef _WIN32
 #define _CRT_NONSTDC_NO_DEPRECATE
 #endif

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(transformation_ut transformation.cpp)
 
 target_link_libraries(transformation_ut PRIVATE

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 FROM microsoft/vsts-agent:ubuntu-16.04-standard
 
 # packages for building remotely with visual studio

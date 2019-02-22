@@ -1,4 +1,6 @@
 /** \file k4aplugin.h
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
  * Kinect For Azure Depth Engine Plugin API.
  * Defines the API which must be defined by the depth engine plugin to be used
  * by the K4A SDK.

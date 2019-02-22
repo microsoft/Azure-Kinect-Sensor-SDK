@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # For code, link against the static crt on windows
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     # Remove all previously set dynamic linking flags

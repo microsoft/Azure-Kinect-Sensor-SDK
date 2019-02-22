@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Currently the conn_ex_utility is Windows only, so these tests are only valid during a Windows build.
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
 

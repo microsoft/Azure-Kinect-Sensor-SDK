@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 // Mock for Windows System calls
 #include <initguid.h>
 #define _CFGMGR32_

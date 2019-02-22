@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "color_mock_mediafoundation.h"
 #include <Mferror.h>
 #include <ksproxy.h>

@@ -1,9 +1,5 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-               Licensed under the MIT License.
-****************************************************************/
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 // This causes the explicit template instantiation that we do in this file to not be extern
 //

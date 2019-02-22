@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Make sure incremental linking is turned off, for valid pdb <-> exe checksums
 
 set(INCREMENTAL_REGEX "/INCREMENTAL(:[A-Z0-9]+)?")

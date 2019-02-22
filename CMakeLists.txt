@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Minimum Version determined by the following dev environments
 # Ubuntu 16.04 (Xenial) - CMake 3.5.1
 # Ubuntu 18.04 (Bionic) - CMake 3.10.2

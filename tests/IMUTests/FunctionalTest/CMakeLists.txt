@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(imu_ft imu_ft.cpp)
 
 target_link_libraries(imu_ft PRIVATE 

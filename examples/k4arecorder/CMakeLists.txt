@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(k4arecorder main.cpp recorder.cpp ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
 target_link_libraries(k4arecorder PRIVATE

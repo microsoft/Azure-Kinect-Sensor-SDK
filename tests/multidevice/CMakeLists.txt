@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(multidevice_ft multidevice.cpp)
 
 target_link_libraries(multidevice_ft PRIVATE

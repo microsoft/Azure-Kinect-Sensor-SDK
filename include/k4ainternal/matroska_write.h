@@ -1,4 +1,6 @@
-/** \file record_write.h
+/** \file matroska_write.h
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
  * Kinect For Azure Record SDK.
  * Internal MKV Writing Helpers
  */

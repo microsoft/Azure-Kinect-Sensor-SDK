@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Consumers of this include directory need to #include "k4ainternal/header.h"
 set(K4A_PRIV_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../include ${CMAKE_CURRENT_BINARY_DIR}/sdk/include)
 

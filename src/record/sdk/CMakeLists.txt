@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Define public library
 add_library(k4arecord SHARED
             playback.cpp
