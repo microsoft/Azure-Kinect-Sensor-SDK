@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #ifndef RECORD_TEST_HELPERS_H
 #define RECORD_TEST_HELPERS_H
 

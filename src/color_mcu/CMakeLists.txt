@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_library(k4a_color_mcu STATIC 
             color_mcu.c
             )

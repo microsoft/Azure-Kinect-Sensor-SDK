@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # This uses the Microsoft HMD Exerciser
 # (https://docs.microsoft.com/en-us/windows-hardware/test/hmd/hmd-exerciser-kit-hardware)
 # to reset the connection to the K4A device.

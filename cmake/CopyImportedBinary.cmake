@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Copies the imported binary DLL to the RUNTIME output location
 #
 # This enables executables to be run from the output location without including the dependent DLLs in the PATH

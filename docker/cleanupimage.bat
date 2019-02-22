@@ -1,3 +1,5 @@
+:: Copyright (c) Microsoft Corporation. All rights reserved.
+:: Licensed under the MIT License.
 
 ECHO Stopping k4a
 docker stop k4a > NUL

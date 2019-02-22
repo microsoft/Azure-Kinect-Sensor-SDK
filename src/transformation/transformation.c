@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include <k4ainternal/transformation.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/deloader.h>

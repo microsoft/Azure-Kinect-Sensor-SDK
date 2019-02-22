@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include <ctime>
 #include <iostream>
 #include <sstream>
@@ -54,8 +57,6 @@ k4a_result_t k4a_record_create(const char *path,
         context->device = device;
         context->device_config = device_config;
         context->pending_clusters = make_unique<std::list<cluster_t *>>();
-        context->imu_buffer = make_unique<std::vector<uint8_t>>();
-
         context->pending_cluster_lock = Lock_Init();
 
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
@@ -554,37 +555,24 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
         return K4A_RESULT_FAILED;
     }
 
-    if (context->imu_buffer->empty())
+    matroska_imu_sample_t sample_data = { 0 };
+    sample_data.acc_timestamp = imu_sample.acc_timestamp_usec * 1000;
+    sample_data.gyro_timestamp = imu_sample.gyro_timestamp_usec * 1000;
+    for (size_t i = 0; i < 3; i++)
     {
-        context->imu_buffer_start_ns = imu_sample.acc_timestamp_usec * 1000;
-    }
-    else if (context->imu_buffer_start_ns + (1_s / context->camera_fps) < imu_sample.acc_timestamp_usec * 1000)
-    {
-        // Write imu samples to disk in blocks the same length as a camera frame.
-        k4a_result_t result = TRACE_CALL(flush_imu_buffer(context));
-        if (K4A_FAILED(result))
-        {
-            return result;
-        }
-        context->imu_buffer_start_ns = imu_sample.acc_timestamp_usec * 1000;
+        sample_data.acc_data[i] = imu_sample.acc_sample.v[i];
+        sample_data.gyro_data[i] = imu_sample.gyro_sample.v[i];
     }
 
-    // Sample is stored as [acc_timestamp, acc_data[3], gyro_timestamp, gyro_data[3]]
-    uint8_t sample_data[sizeof(float) * 6 + sizeof(uint64_t) * 2];
-    static_assert(sizeof(sample_data) == sizeof(imu_sample.acc_sample.v) + sizeof(imu_sample.acc_timestamp_usec) +
-                                             sizeof(imu_sample.gyro_timestamp_usec) + sizeof(imu_sample.gyro_sample.v),
-                  "Size of IMU data structure has changed from on-disk format.");
-    uint8_t *data_ptr = &sample_data[0];
-    data_ptr += write_bytes<uint64_t>(data_ptr, imu_sample.acc_timestamp_usec * 1000);
-    data_ptr += write_bytes<float>(data_ptr, imu_sample.acc_sample.v[0]);
-    data_ptr += write_bytes<float>(data_ptr, imu_sample.acc_sample.v[1]);
-    data_ptr += write_bytes<float>(data_ptr, imu_sample.acc_sample.v[2]);
-    data_ptr += write_bytes<uint64_t>(data_ptr, imu_sample.gyro_timestamp_usec * 1000);
-    data_ptr += write_bytes<float>(data_ptr, imu_sample.gyro_sample.v[0]);
-    data_ptr += write_bytes<float>(data_ptr, imu_sample.gyro_sample.v[1]);
-    data_ptr += write_bytes<float>(data_ptr, imu_sample.gyro_sample.v[2]);
-
-    context->imu_buffer->insert(context->imu_buffer->end(), std::begin(sample_data), std::end(sample_data));
+    DataBuffer *data_buffer =
+        new DataBuffer(reinterpret_cast<binary *>(&sample_data), sizeof(matroska_imu_sample_t), NULL, true);
+    k4a_result_t result = write_track_data(context, context->imu_track, sample_data.acc_timestamp, data_buffer);
+    if (K4A_FAILED(result))
+    {
+        data_buffer->FreeBuffer(*data_buffer);
+        delete data_buffer;
+        return result;
+    }
 
     return K4A_RESULT_SUCCEEDED;
 }
@@ -601,12 +589,6 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
     // Lock the writer thread first so we don't have conflicts
     if (Lock(context->writer_lock) == LOCK_OK)
     {
-        if (!context->imu_buffer->empty())
-        {
-            // If this fails, we may still be able to write other pending clusters below.
-            result = TRACE_CALL(flush_imu_buffer(context));
-        }
-
         if (Lock(context->pending_cluster_lock) == LOCK_OK)
         {
             if (!context->pending_clusters->empty())

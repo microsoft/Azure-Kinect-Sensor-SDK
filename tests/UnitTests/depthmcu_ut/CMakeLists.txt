@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(depthmcu_ut depthmcu_ut.cpp)
 
 target_link_libraries(depthmcu_ut PRIVATE

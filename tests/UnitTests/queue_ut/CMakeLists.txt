@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(queue_ut queue.cpp)
 
 target_link_libraries(queue_ut PRIVATE

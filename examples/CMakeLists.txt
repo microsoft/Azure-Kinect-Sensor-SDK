@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_subdirectory(calibration)
 add_subdirectory(enumerate)
 add_subdirectory(fastpointcloud)

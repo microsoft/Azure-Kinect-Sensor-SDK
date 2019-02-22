@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # string(JOIN ...) was added in CMake 3.11 and thus can not be used.
 # string_join was written to mimic string(JOIN ...) functionality and
 # interface.
@@ -24,6 +27,10 @@ set(K4A_VERSION_MINOR ${CMAKE_MATCH_2})
 set(K4A_VERSION_PATCH ${CMAKE_MATCH_3})
 set(K4A_VERSION_PRERELEASE ${CMAKE_MATCH_5})
 set(K4A_VERSION_BUILDMETADATA ${CMAKE_MATCH_7})
+
+if (NOT K4A_VERSION_REVISION)
+    set(K4A_VERSION_REVISION "0")
+endif()
 
 set(K4A_COMPANYNAME "Microsoft")
 set(K4A_PRODUCTNAME "Azure Kinect")

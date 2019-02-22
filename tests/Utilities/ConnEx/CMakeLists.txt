@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_library(conn_ex_utility STATIC ConnEx.cpp)
 
 target_include_directories(conn_ex_utility PUBLIC

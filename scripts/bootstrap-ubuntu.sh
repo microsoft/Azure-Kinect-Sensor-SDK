@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Setup machine to build amd64 and i386
 sudo dpkg --add-architecture amd64
 

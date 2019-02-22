@@ -1,9 +1,5 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-               Licensed under the MIT License.
-****************************************************************/
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 #ifndef K4ARECORDING_H
 #define K4ARECORDING_H
@@ -50,6 +46,8 @@ public:
     const std17::filesystem::path &GetPath() const;
 
     k4a_result_t GetCalibrationTransformData(std::unique_ptr<K4ACalibrationTransformData> &calibrationData);
+
+    k4a_buffer_result_t GetTag(const char *name, std::string &out) const;
 
 private:
     K4ARecording(k4a_playback_t playback,
