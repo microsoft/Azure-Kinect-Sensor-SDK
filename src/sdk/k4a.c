@@ -969,7 +969,7 @@ k4a_result_t k4a_transformation_color_image_to_depth_camera(k4a_transformation_t
     if (!(color_image_format == K4A_IMAGE_FORMAT_COLOR_BGRA32 &&
           transformed_color_image_format == K4A_IMAGE_FORMAT_COLOR_BGRA32))
     {
-        LOG_ERROR("Require color image and transformed color image both have brga32 format.", 0);
+        LOG_ERROR("Require color image and transformed color image both have bgra32 format.", 0);
         return K4A_RESULT_FAILED;
     }
 
