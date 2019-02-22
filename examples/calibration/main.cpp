@@ -6,6 +6,40 @@
 #include <k4a/k4a.h>
 using namespace std;
 
+string get_serial(k4a_device_t device)
+{
+    size_t serial_number_length = 0;
+
+    if (K4A_BUFFER_RESULT_TOO_SMALL != k4a_device_get_serialnum(device, NULL, &serial_number_length))
+    {
+        cout << "Failed to get serial number length" << endl;
+        k4a_device_close(device);
+        exit(-1);
+    }
+
+    char *serial_number = new char[serial_number_length];
+    if (serial_number == NULL)
+    {
+        cout << "Failed to allocate memory for serial number (" << serial_number_length << " bytes)" << endl;
+        k4a_device_close(device);
+        exit(-1);
+    }
+
+    if (K4A_BUFFER_RESULT_SUCCEEDED != k4a_device_get_serialnum(device, serial_number, &serial_number_length))
+    {
+        cout << "Failed to get serial number" << endl;
+        delete serial_number;
+        serial_number = NULL;
+        k4a_device_close(device);
+        exit(-1);
+    }
+
+    string s(serial_number);
+    delete serial_number;
+    serial_number = NULL;
+    return s;
+}
+
 void print_calibration()
 {
     uint32_t device_count = k4a_device_get_installed_count();
@@ -41,7 +75,7 @@ void print_calibration()
 
         auto calib = calibration.depth_camera_calibration;
 
-        cout << "\n===== Device " << (int)deviceIndex << " =====\n";
+        cout << "\n===== Device " << (int)deviceIndex << ": " << get_serial(device) << " =====\n";
         cout << "resolution width: " << calib.resolution_width << endl;
         cout << "resolution height: " << calib.resolution_height << endl;
         cout << "principal point x: " << calib.intrinsics.parameters.param.cx << endl;
@@ -72,7 +106,7 @@ void calibration_blob(uint8_t deviceIndex = 0, string filename = "calibration.js
     if (K4A_RESULT_SUCCEEDED != k4a_device_open(deviceIndex, &device))
     {
         cout << deviceIndex << ": Failed to open device" << endl;
-        return;
+        exit(-1);
     }
 
     size_t calibration_size = 0;
@@ -86,18 +120,19 @@ void calibration_blob(uint8_t deviceIndex = 0, string filename = "calibration.js
             ofstream file(filename, ofstream::binary);
             file.write(reinterpret_cast<const char *>(&calibration_buffer[0]), calibration_size);
             file.close();
-            cout << "Calibration blob for device " << (int)deviceIndex << " is saved to " << filename << endl;
+            cout << "Calibration blob for device " << (int)deviceIndex << " (serial no. " << get_serial(device)
+                 << ") is saved to " << filename << endl;
         }
         else
         {
             cout << "Failed to get calibration blob" << endl;
-            return;
+            exit(-1);
         }
     }
     else
     {
         cout << "Failed to get calibration blob size" << endl;
-        return;
+        exit(-1);
     }
 }
 
