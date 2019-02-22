@@ -553,7 +553,7 @@ void firmware_fw::perform_device_update(uint8_t *firmware_buffer,
     ASSERT_TRUE(compare_version(current_version.rgb, firmware_package_info.rgb)) << "RGB mismatch";
 }
 
-TEST_F(firmware_fw, DISABLED_simple_update)
+TEST_F(firmware_fw, simple_update)
 {
     LOG_INFO("Beginning the basic update test", 0);
     connEx->set_usb_port(k4a_port_number);
