@@ -34,13 +34,13 @@ public:
     inline ImageVisualizationResult GetNextFrame(OpenGlTexture &textureToUpdate,
                                                  std::shared_ptr<K4AImage<ImageFormat>> &sourceImage)
     {
-        if (!HasData())
-        {
-            return ImageVisualizationResult::NoDataError;
-        }
         if (IsFailed())
         {
             return m_failureCode;
+        }
+        if (!HasData())
+        {
+            return ImageVisualizationResult::NoDataError;
         }
 
         ImageVisualizationResult result = m_frameVisualizer->UpdateTexture(m_textureBuffers.CurrentItem(),

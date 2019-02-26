@@ -967,6 +967,15 @@ k4a_result_t k4a_transformation_color_image_to_depth_camera(k4a_transformation_t
     k4a_transformation_image_descriptor_t transformed_color_image_descriptor = k4a_image_get_descriptor(
         transformed_color_image);
 
+    k4a_image_format_t color_image_format = k4a_image_get_format(color_image);
+    k4a_image_format_t transformed_color_image_format = k4a_image_get_format(transformed_color_image);
+    if (!(color_image_format == K4A_IMAGE_FORMAT_COLOR_BGRA32 &&
+          transformed_color_image_format == K4A_IMAGE_FORMAT_COLOR_BGRA32))
+    {
+        LOG_ERROR("Require color image and transformed color image both have bgra32 format.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
     return TRACE_CALL(transformation_color_image_to_depth_camera(transformation_handle,
                                                                  k4a_image_get_buffer(depth_image),
                                                                  &depth_image_descriptor,
