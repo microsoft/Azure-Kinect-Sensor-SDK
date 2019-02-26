@@ -6,7 +6,7 @@
 #include <k4a/k4a.h>
 using namespace std;
 
-string get_serial(k4a_device_t device)
+static string get_serial(k4a_device_t device)
 {
     size_t serial_number_length = 0;
 
@@ -28,19 +28,19 @@ string get_serial(k4a_device_t device)
     if (K4A_BUFFER_RESULT_SUCCEEDED != k4a_device_get_serialnum(device, serial_number, &serial_number_length))
     {
         cout << "Failed to get serial number" << endl;
-        delete serial_number;
+        delete[] serial_number;
         serial_number = NULL;
         k4a_device_close(device);
         exit(-1);
     }
 
     string s(serial_number);
-    delete serial_number;
+    delete[] serial_number;
     serial_number = NULL;
     return s;
 }
 
-void print_calibration()
+static void print_calibration()
 {
     uint32_t device_count = k4a_device_get_installed_count();
     cout << "Found " << device_count << " connected devices:" << endl;
@@ -99,7 +99,7 @@ void print_calibration()
     }
 }
 
-void calibration_blob(uint8_t deviceIndex = 0, string filename = "calibration.json")
+static void calibration_blob(uint8_t deviceIndex = 0, string filename = "calibration.json")
 {
     k4a_device_t device = NULL;
 
@@ -118,7 +118,7 @@ void calibration_blob(uint8_t deviceIndex = 0, string filename = "calibration.js
         if (buffer_result == K4A_BUFFER_RESULT_SUCCEEDED)
         {
             ofstream file(filename, ofstream::binary);
-            file.write(reinterpret_cast<const char *>(&calibration_buffer[0]), calibration_size);
+            file.write(reinterpret_cast<const char *>(&calibration_buffer[0]), (long)calibration_size);
             file.close();
             cout << "Calibration blob for device " << (int)deviceIndex << " (serial no. " << get_serial(device)
                  << ") is saved to " << filename << endl;
@@ -136,7 +136,7 @@ void calibration_blob(uint8_t deviceIndex = 0, string filename = "calibration.js
     }
 }
 
-void print_usage()
+static void print_usage()
 {
     cout << "Usage: calibration_info [device_id] [output_file]" << endl;
     cout << "Using calibration_info.exe without any command line arguments will display" << endl
