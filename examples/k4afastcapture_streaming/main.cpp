@@ -128,14 +128,14 @@ int main(int argc, char *argv[])
                 return EINVAL;
             }
             exposureValue = atoi(argv[i]);
-            if (exposureValue < 2 && exposureValue > -8)
+            if (exposureValue < 2 && exposureValue > -12)
             {
                 std::wcout << exposureValue << "  <exposure value>" << std::endl;
             }
             else
             {
                 exposureValue = INT16_MAX;
-                std::wcout << " !! incorrect exposure value provided [ exposure value range -7 to 1].... Using Auto "
+                std::wcout << " !! incorrect exposure value provided [ exposure value range -11 to 1].... Using Auto "
                               "exposure...."
                            << std::endl;
             }
