@@ -115,14 +115,14 @@ void K4ADeviceDockControl::ShowColorControlAutoButton(k4a_color_control_mode_t c
     ImGui::PushID(id);
     if (currentMode == K4A_COLOR_CONTROL_MODE_MANUAL)
     {
-        if (ImGui::Button("A"))
+        if (ImGui::Button("M"))
         {
             actionToUpdate = ColorControlAction::SetAutomatic;
         }
     }
     else
     {
-        if (ImGui::Button("M"))
+        if (ImGui::Button("A"))
         {
             actionToUpdate = ColorControlAction::SetManual;
         }

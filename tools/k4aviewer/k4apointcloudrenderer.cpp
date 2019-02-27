@@ -110,6 +110,11 @@ void PointCloudRenderer::UpdateViewProjection(mat4x4 view, mat4x4 projection)
 
 void PointCloudRenderer::UpdatePointClouds(Vertex *vertices, const unsigned int numVertices)
 {
+    if (numVertices == 0)
+    {
+        return;
+    }
+
     glBindVertexArray(m_vertexArrayObject);
 
     // Create buffers and bind the geometry
