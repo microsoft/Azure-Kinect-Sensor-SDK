@@ -17,6 +17,18 @@ static k4a_result_t transformation_project_internal(const k4a_calibration_camera
              camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY) &&
             camera_calibration->intrinsics.parameter_count >= 14)))
     {
+        LOG_ERROR("Unexpected camera calibration model type %d, should either be "
+                  "K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT (%d) or "
+                  "K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY (%d).",
+                  camera_calibration->intrinsics.type,
+                  K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT,
+                  K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY);
+        if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY)
+        {
+            LOG_ERROR("Unexpected parameter count %d, should be %d.",
+                      camera_calibration->intrinsics.parameter_count,
+                      14);
+        }
         return K4A_RESULT_FAILED;
     }
 
@@ -40,6 +52,9 @@ static k4a_result_t transformation_project_internal(const k4a_calibration_camera
 
     if (K4A_FAILED(K4A_RESULT_FROM_BOOL(fx > 0.f && fy > 0.f)))
     {
+        LOG_ERROR("Expect both fx and fy are larger than 0, actual values are fx: %lf, fy: %lf.",
+                  (double)fx,
+                  (double)fy);
         return K4A_RESULT_FAILED;
     }
 
@@ -158,7 +173,7 @@ static k4a_result_t transformation_iterative_unproject(const k4a_calibration_cam
         float p[2];
         float J[2 * 2];
 
-        if (K4A_FAILED(transformation_project_internal(camera_calibration, xy, p, valid, J)))
+        if (K4A_FAILED(TRACE_CALL(transformation_project_internal(camera_calibration, xy, p, valid, J))))
         {
             return K4A_RESULT_FAILED;
         }
@@ -211,6 +226,18 @@ static k4a_result_t transformation_unproject_internal(const k4a_calibration_came
              camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY) &&
             camera_calibration->intrinsics.parameter_count >= 14)))
     {
+        LOG_ERROR("Unexpected camera calibration model type %d, should either be "
+                  "K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT (%d) or "
+                  "K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY (%d).",
+                  camera_calibration->intrinsics.type,
+                  K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT,
+                  K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY);
+        if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY)
+        {
+            LOG_ERROR("Unexpected parameter count %d, should be %d.",
+                      camera_calibration->intrinsics.parameter_count,
+                      14);
+        }
         return K4A_RESULT_FAILED;
     }
 
@@ -233,6 +260,9 @@ static k4a_result_t transformation_unproject_internal(const k4a_calibration_came
 
     if (K4A_FAILED(K4A_RESULT_FROM_BOOL(fx > 0.f && fy > 0.f)))
     {
+        LOG_ERROR("Expect both fx and fy are larger than 0, actual values are fx: %lf, fy: %lf.",
+                  (double)fx,
+                  (double)fy);
         return K4A_RESULT_FAILED;
     }
 
@@ -289,7 +319,7 @@ k4a_result_t transformation_unproject(const k4a_calibration_camera_t *camera_cal
         return K4A_RESULT_SUCCEEDED;
     }
 
-    if (K4A_FAILED(transformation_unproject_internal(camera_calibration, point2d, point3d, valid)))
+    if (K4A_FAILED(TRACE_CALL(transformation_unproject_internal(camera_calibration, point2d, point3d, valid))))
     {
         return K4A_RESULT_FAILED;
     }
@@ -318,7 +348,7 @@ k4a_result_t transformation_project(const k4a_calibration_camera_t *camera_calib
     xy[0] = point3d[0] / point3d[2];
     xy[1] = point3d[1] / point3d[2];
 
-    if (K4A_FAILED(transformation_project_internal(camera_calibration, xy, point2d, valid, 0)))
+    if (K4A_FAILED(TRACE_CALL(transformation_project_internal(camera_calibration, xy, point2d, valid, 0))))
     {
         return K4A_RESULT_FAILED;
     }

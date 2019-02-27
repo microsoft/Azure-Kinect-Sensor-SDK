@@ -60,6 +60,14 @@ static bool transformation_compare_image_descriptors(const k4a_transformation_im
         descriptor1->height_pixels != descriptor2->height_pixels ||
         descriptor1->stride_bytes != descriptor2->stride_bytes)
     {
+        LOG_ERROR("Unexpected image descriptor. Expect width_pixels: %d, height_pixels: %d, stride_bytes: %d. "
+                  "Actual width_pixels: %d, height_pixels: %d, stride_bytes: %d.",
+                  descriptor1->width_pixels,
+                  descriptor1->height_pixels,
+                  descriptor1->stride_bytes,
+                  descriptor2->width_pixels,
+                  descriptor2->height_pixels,
+                  descriptor2->stride_bytes);
         return false;
     }
     return true;
@@ -430,6 +438,10 @@ k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
 {
     if (transformed_depth_image_descriptor == 0 || calibration == 0)
     {
+        if (calibration == 0)
+        {
+            LOG_ERROR("Calibration is null.", 0);
+        }
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -446,12 +458,33 @@ k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
         memcpy(transformed_depth_image_descriptor,
                &expected_transformed_depth_image_descriptor,
                sizeof(k4a_transformation_image_descriptor_t));
+
+        if (transformed_depth_image_data == 0)
+        {
+            LOG_ERROR("Transformed depth image data is null.", 0);
+        }
+        else
+        {
+            LOG_ERROR("Unexpected transformed depth image descriptor, see details above.", 0);
+        }
         return K4A_BUFFER_RESULT_TOO_SMALL;
     }
 
     if (xy_tables_depth_camera == 0 || depth_image_data == 0 || depth_image_descriptor == 0 ||
         transformed_depth_image_data == 0)
     {
+        if (xy_tables_depth_camera == 0)
+        {
+            LOG_ERROR("Depth camera xy table is null.", 0);
+        }
+        if (depth_image_data == 0)
+        {
+            LOG_ERROR("Depth image data is null.", 0);
+        }
+        if (transformed_depth_image_data == 0)
+        {
+            LOG_ERROR("Transformed depth image data is null.", 0);
+        }
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -463,6 +496,7 @@ k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
 
     if (transformation_compare_image_descriptors(depth_image_descriptor, &expected_depth_image_descriptor) == false)
     {
+        LOG_ERROR("Unexpected depth image descriptor, see details above.", 0);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -477,7 +511,7 @@ k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
     context.transformed_image = transformation_init_output_image(transformed_depth_image_descriptor,
                                                                  transformed_depth_image_data);
 
-    if (K4A_FAILED(transformation_depth_to_color(&context)))
+    if (K4A_FAILED(TRACE_CALL(transformation_depth_to_color(&context))))
     {
         return K4A_BUFFER_RESULT_FAILED;
     }
@@ -588,6 +622,10 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
 {
     if (transformed_color_image_descriptor == 0 || calibration == 0)
     {
+        if (calibration == 0)
+        {
+            LOG_ERROR("Calibration is null.", 0);
+        }
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -604,12 +642,37 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
         memcpy(transformed_color_image_descriptor,
                &expected_transformed_color_image_descriptor,
                sizeof(k4a_transformation_image_descriptor_t));
+
+        if (transformed_color_image_data == 0)
+        {
+            LOG_ERROR("Transformed color image data is null.", 0);
+        }
+        else
+        {
+            LOG_ERROR("Unexpected transformed color image descriptor, see details above.", 0);
+        }
         return K4A_BUFFER_RESULT_TOO_SMALL;
     }
 
     if (xy_tables_depth_camera == 0 || depth_image_data == 0 || depth_image_descriptor == 0 || color_image_data == 0 ||
         color_image_descriptor == 0 || transformed_color_image_data == 0)
     {
+        if (xy_tables_depth_camera == 0)
+        {
+            LOG_ERROR("Depth camera xy table is null.", 0);
+        }
+        if (depth_image_data == 0)
+        {
+            LOG_ERROR("Depth image data is null.", 0);
+        }
+        if (color_image_data == 0)
+        {
+            LOG_ERROR("Color image data is null.", 0);
+        }
+        if (transformed_color_image_data == 0)
+        {
+            LOG_ERROR("Transformed color image data is null.", 0);
+        }
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -621,6 +684,7 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
 
     if (transformation_compare_image_descriptors(depth_image_descriptor, &expected_depth_image_descriptor) == false)
     {
+        LOG_ERROR("Unexpected depth image descriptor, see details above.", 0);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -632,6 +696,7 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
 
     if (transformation_compare_image_descriptors(color_image_descriptor, &expected_color_image_descriptor) == false)
     {
+        LOG_ERROR("Unexpected color image descriptor, see details above.", 0);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -676,11 +741,24 @@ transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_
         transformation_compare_image_descriptors(xyz_image_descriptor, &expected_xyz_image_descriptor) == false)
     {
         memcpy(xyz_image_descriptor, &expected_xyz_image_descriptor, sizeof(k4a_transformation_image_descriptor_t));
+
+        if (xyz_image_data == 0)
+        {
+            LOG_ERROR("XYZ image data is null.", 0);
+        }
+        else
+        {
+            LOG_ERROR("Unexpected XYZ image descriptor, see details above.", 0);
+        }
         return K4A_BUFFER_RESULT_TOO_SMALL;
     }
 
     if (depth_image_data == 0 || depth_image_descriptor == 0)
     {
+        if (depth_image_data == 0)
+        {
+            LOG_ERROR("Depth image data is null.", 0);
+        }
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -691,6 +769,7 @@ transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_
 
     if (transformation_compare_image_descriptors(depth_image_descriptor, &expected_depth_image_descriptor) == false)
     {
+        LOG_ERROR("Unexpected depth image descriptor, see details above.", 0);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
