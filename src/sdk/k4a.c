@@ -950,10 +950,13 @@ k4a_result_t k4a_transformation_depth_image_to_color_camera(k4a_transformation_t
     k4a_transformation_image_descriptor_t transformed_depth_image_descriptor = k4a_image_get_descriptor(
         transformed_depth_image);
 
+    uint8_t *depth_image_buffer = k4a_image_get_buffer(depth_image);
+    uint8_t *transformed_depth_image_buffer = k4a_image_get_buffer(transformed_depth_image);
+
     return TRACE_CALL(transformation_depth_image_to_color_camera(transformation_handle,
-                                                                 k4a_image_get_buffer(depth_image),
+                                                                 depth_image_buffer,
                                                                  &depth_image_descriptor,
-                                                                 k4a_image_get_buffer(transformed_depth_image),
+                                                                 transformed_depth_image_buffer,
                                                                  &transformed_depth_image_descriptor));
 }
 
@@ -976,12 +979,16 @@ k4a_result_t k4a_transformation_color_image_to_depth_camera(k4a_transformation_t
         return K4A_RESULT_FAILED;
     }
 
+    uint8_t *depth_image_buffer = k4a_image_get_buffer(depth_image);
+    uint8_t *color_image_buffer = k4a_image_get_buffer(color_image);
+    uint8_t *transformed_color_image_buffer = k4a_image_get_buffer(transformed_color_image);
+
     return TRACE_CALL(transformation_color_image_to_depth_camera(transformation_handle,
-                                                                 k4a_image_get_buffer(depth_image),
+                                                                 depth_image_buffer,
                                                                  &depth_image_descriptor,
-                                                                 k4a_image_get_buffer(color_image),
+                                                                 color_image_buffer,
                                                                  &color_image_descriptor,
-                                                                 k4a_image_get_buffer(transformed_color_image),
+                                                                 transformed_color_image_buffer,
                                                                  &transformed_color_image_descriptor));
 }
 
@@ -993,11 +1000,14 @@ k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transformation_t 
     k4a_transformation_image_descriptor_t depth_image_descriptor = k4a_image_get_descriptor(depth_image);
     k4a_transformation_image_descriptor_t xyz_image_descriptor = k4a_image_get_descriptor(xyz_image);
 
+    uint8_t *depth_image_buffer = k4a_image_get_buffer(depth_image);
+    uint8_t *xyz_image_buffer = k4a_image_get_buffer(xyz_image);
+
     return TRACE_CALL(transformation_depth_image_to_point_cloud(transformation_handle,
-                                                                k4a_image_get_buffer(depth_image),
+                                                                depth_image_buffer,
                                                                 &depth_image_descriptor,
                                                                 camera,
-                                                                k4a_image_get_buffer(xyz_image),
+                                                                xyz_image_buffer,
                                                                 &xyz_image_descriptor));
 }
 
