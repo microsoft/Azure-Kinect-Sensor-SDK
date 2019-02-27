@@ -582,6 +582,24 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     // Update to the test firmware
     LOG_INFO("Updating the device to the test firmware.");
     perform_device_update(test_firmware_buffer, test_firmware_size, test_firmware_package_info);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, depthmcu_get_version(depthmcu_handle, &current_version));
+
+    bool audioVersionIsSame = compare_version(current_version.audio_major,
+                                              current_version.audio_minor,
+                                              current_version.audio_build,
+                                              test_firmware_package_info.audio);
+    bool depthConfigVersionIsSame = compare_version_list(current_version.depth_sensor_cfg_major,
+                                                         current_version.depth_sensor_cfg_minor,
+                                                         test_firmware_package_info.depth_config_number_versions,
+                                                         test_firmware_package_info.depth_config_versions);
+    bool depthVersionIsSame = compare_version(current_version.depth_major,
+                                              current_version.depth_minor,
+                                              current_version.depth_build,
+                                              test_firmware_package_info.depth);
+    bool rgbVersionIsSame = compare_version(current_version.rgb_major,
+                                            current_version.rgb_minor,
+                                            current_version.rgb_build,
+                                            test_firmware_package_info.rgb);
 
     // Update back to the LKG firmware, but interrupt...
     LOG_INFO("Interrupting at the beginning of the update");
@@ -632,8 +650,23 @@ TEST_F(firmware_fw, interrupt_update_reboot)
               << " Depth: " << calculate_overall_component_status(finalStatus.depth)
               << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
 
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
+    if (audioVersionIsSame)
+    {
+        ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
+        if (depthConfigVersionIsSame)
+        {
+            ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
+        }
+        else
+        {
+            ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth_config));
+        }
+    }
+    else
+    {
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.audio));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth_config));
+    }
     ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
     ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
 
