@@ -401,6 +401,12 @@ TEST_P(throughput_perf, testTest)
         {
             last_ts = adjusted_max_ts;
         }
+        else if (last_ts > adjusted_max_ts)
+        {
+            // This happens when one queue gets saturated and must drop samples early; i.e. the depth queue is full, but
+            // the color image is delayed due to perf issues. When this happens we just ignore the sample because our
+            // time stamp logic has already moved beyond the time this sample was supposed to arrive at.
+        }
         else if ((adjusted_max_ts - last_ts) >= (fps_in_usec * 15 / 10))
         {
             // Calc how many captures we didn't get. If the delta between the last two time stamps is more than 1.5
@@ -414,8 +420,8 @@ TEST_P(throughput_perf, testTest)
             }
             printf("Missed %d captures before previous capture %lld %lld\n",
                    missed_this_period,
-                   TS_TO_MS(adjusted_max_ts),
-                   TS_TO_MS(last_ts));
+                   (long long)adjusted_max_ts,
+                   (long long)last_ts);
             if (missed_this_period > capture_count)
             {
                 capture_count = 0;

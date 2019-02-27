@@ -270,6 +270,7 @@ static int depth_engine_thread(void *param)
         if (K4A_SUCCEEDED(result) && received_valid_image && outputCaptureInfo.center_of_exposure_in_ticks == 0)
         {
             // We drop samples with a timestamp of zero when starting up.
+            LOG_WARNING("Dropping depth image due to bad timestamp at startup", 0);
             dropped = true;
             result = K4A_RESULT_FAILED;
         }
@@ -313,9 +314,7 @@ static int depth_engine_thread(void *param)
                 cleanup_capture_byte_ptr = false; // buffer is now owned by image;
                 INC_REF_VAR(shared_image_context->ref);
                 image_set_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(outputCaptureInfo.center_of_exposure_in_ticks));
-            }
-            if (K4A_SUCCEEDED(result))
-            {
+
                 capture_set_depth_image(capture, image);
                 image_dec_ref(image);
             }
@@ -345,9 +344,7 @@ static int depth_engine_thread(void *param)
                 cleanup_capture_byte_ptr = false; // buffer is now owned by image;
                 INC_REF_VAR(shared_image_context->ref);
                 image_set_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(outputCaptureInfo.center_of_exposure_in_ticks));
-            }
-            if (K4A_SUCCEEDED(result))
-            {
+
                 capture_set_ir_image(capture, image);
                 image_dec_ref(image);
             }
@@ -357,10 +354,7 @@ static int depth_engine_thread(void *param)
         {
             // set capture attributes
             capture_set_temperature_c(capture, outputCaptureInfo.sensor_temp);
-        }
 
-        if (K4A_SUCCEEDED(result))
-        {
             received_valid_image = true;
             dewrapper->capture_ready_cb(result, capture, dewrapper->capture_ready_cb_context);
         }

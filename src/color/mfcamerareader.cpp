@@ -165,12 +165,19 @@ CFrameContext::~CFrameContext()
     }
 }
 
-void FrameDestoryCallback(void *frame, void *context)
+typedef struct _mf_buffer_wrapper_t
 {
-    UNREFERENCED_PARAMETER(frame);
-    CFrameContext *pFrameContext = (CFrameContext *)context;
+    void *allocator_context;
+    CFrameContext *pFrameContext;
+} mf_buffer_wrapper_t;
 
-    delete pFrameContext;
+void FrameDestroyCallback(void *frame, void *context)
+{
+    (void)frame;
+    mf_buffer_wrapper_t *wrapper = (mf_buffer_wrapper_t *)context;
+
+    delete wrapper->pFrameContext;
+    allocator_free(wrapper, wrapper->allocator_context);
 }
 
 CMFCameraReader::CMFCameraReader()
@@ -734,14 +741,25 @@ int CMFCameraReader::GetStride()
 
 k4a_result_t CMFCameraReader::CreateImage(CFrameContext *pFrameContext, k4a_image_t *image)
 {
+    void *context;
+    mf_buffer_wrapper_t *wrapper;
+
+    // We use a wrapper here so that we can keep track of the MF frame buffers in use; ALLOCATION_SOURCE_COLOR will
+    // count outstanding allocations. If too many are used then MF stops receiving images over USB until the captures
+    // are released.
+    wrapper = (mf_buffer_wrapper_t *)allocator_alloc(ALLOCATION_SOURCE_COLOR, sizeof(mf_buffer_wrapper_t), &context);
+
+    wrapper->allocator_context = context;
+    wrapper->pFrameContext = pFrameContext;
+
     return TRACE_CALL(image_create_from_buffer(m_image_format,
                                                m_width_pixels,
                                                m_height_pixels,
                                                GetStride(),
                                                pFrameContext->GetBuffer(),
                                                pFrameContext->GetFrameSize(),
-                                               FrameDestoryCallback,
-                                               pFrameContext,
+                                               FrameDestroyCallback,
+                                               wrapper,
                                                image));
 }
 
@@ -848,7 +866,7 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
 
                 if (!FrameContextRefd)
                 {
-                    FrameDestoryCallback(0, pFrameContext);
+                    delete pFrameContext;
                 }
 
                 if (image)

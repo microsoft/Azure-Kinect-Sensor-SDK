@@ -49,7 +49,7 @@ void depthmcu_depth_capture_ready(k4a_result_t status, k4a_image_t image_handle,
     }
     else
     {
-        LOG_INFO("Dropping raw image due to invalid size %lld expected, %lld recieved",
+        LOG_INFO("Dropping raw image due to invalid size %lld expected, %lld received",
                  depthmcu->mode_size,
                  image_get_size(image_handle));
     }

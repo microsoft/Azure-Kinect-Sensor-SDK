@@ -68,8 +68,9 @@ K4A_DECLARE_HANDLE(k4a_capture_t);
 /** \class k4a_image_t k4a.h <k4a/k4a.h>
  * Handle to a k4a image.
  *
- * Handles are created with k4a_capture_get_image(), k4a_image_create(), or k4a_image_create_with_buffer() and closed
- * with k4a_image_release(). Invalid handles are set to 0.
+ * Handles are created with k4a_capture_get_color_image(), k4a_capture_get_depth_image(), k4a_capture_get_ir_image(),
+ * k4a_image_create(), or k4a_image_create_with_buffer() and closed with k4a_image_release(). Invalid handles are set to
+ * 0.
  *
  * \xmlonly
  * <requirements>
