@@ -22,6 +22,7 @@ static int32_t g_depth_delay_off_color_usec = 0;
 static uint8_t g_device_index = K4A_DEVICE_DEFAULT;
 static k4a_wired_sync_mode_t g_wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
 static int g_capture_count = 100;
+static bool g_synchronized_images_only = false;
 
 using ::testing::ValuesIn;
 
@@ -234,6 +235,7 @@ TEST_P(throughput_perf, testTest)
     config.camera_fps = as.fps;
     config.depth_delay_off_color_usec = g_depth_delay_off_color_usec;
     config.wired_sync_mode = g_wired_sync_mode;
+    config.synchronized_images_only = g_synchronized_images_only;
     if (g_depth_delay_off_color_usec == 0)
     {
         // Create delay that can be +fps to -fps
@@ -366,6 +368,7 @@ TEST_P(throughput_perf, testTest)
         else // wresult == K4A_WAIT_RESULT_FAILED:
         {
             printf("Failed to read a capture\n");
+            capture_count = 0;
         }
 
         if (depth && color)
@@ -740,6 +743,11 @@ int main(int argc, char **argv)
             g_wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
             printf("Setting g_wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE\n");
         }
+        else if (strcmp(argument, "--synchronized_images_only") == 0)
+        {
+            g_synchronized_images_only = true;
+            printf("g_synchronized_images_only = true\n");
+        }
         else if (strcmp(argument, "--index") == 0)
         {
             if (i + 1 <= argc)
@@ -796,6 +804,9 @@ int main(int argc, char **argv)
         printf("      The device index to target when calling k4a_device_open()\n");
         printf("  --capture_count\n");
         printf("      The number of captures the test should read; default is 100\n");
+        printf("  --synchronized_images_only\n");
+        printf("      By default this setting is false, enabling this will for the test to wait for\n");
+        printf("      both and depth images to be available.\n");
 
         return 1; // Indicates an error or warning
     }

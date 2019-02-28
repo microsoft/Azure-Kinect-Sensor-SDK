@@ -277,7 +277,7 @@ typedef enum
     K4A_IMAGE_FORMAT_COLOR_BGRA32,   /**< Color image type BGRA (8 bits per channel) */
     K4A_IMAGE_FORMAT_DEPTH16,        /**< Depth image type Depth16*/
     K4A_IMAGE_FORMAT_IR16,           /**< Depth image type IR16*/
-    K4A_IMAGE_FORMAT_CUSTOM,         /**< Used inconjuction with user created images */
+    K4A_IMAGE_FORMAT_CUSTOM,         /**< Used in conjuction with user created images */
 } k4a_image_format_t;
 
 /** Color and Depth sensor frame rate
