@@ -228,12 +228,12 @@ void K4AMicrophone::ReadCallback(SoundIoInStream *inStream, const int frameCount
 
             if (areas == nullptr)
             {
-                // Due to an overflow there is a hole. Fill the ring buffer with
-                // silence for the size of the hole.
+                // There is a hole in the buffer; we need to fill it with silence.
+                // This can happen if the microphone is muted by the OS.
+                //
                 memset(listener.WritePtr,
                        0,
                        static_cast<size_t>(readFrameCount * instance->m_inStream->bytes_per_frame));
-                OverflowCallback(inStream);
             }
             else
             {
@@ -260,6 +260,7 @@ void K4AMicrophone::ReadCallback(SoundIoInStream *inStream, const int frameCount
         if (err != SoundIoErrorNone)
         {
             ErrorCallback(inStream, err);
+            return;
         }
 
         remainingFramesToWrite -= readFrameCount;
