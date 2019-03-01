@@ -81,7 +81,7 @@ void color_capture_ready(k4a_result_t result, k4a_capture_t capture_handle, void
     capturesync_add_capture(device->capturesync, result, capture_handle, COLOR_CAPTURE);
 }
 
-k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle)
+k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device_handle == NULL);
     k4a_context_t *device = NULL;
