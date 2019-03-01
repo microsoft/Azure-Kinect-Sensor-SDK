@@ -62,7 +62,7 @@ K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
  * </requirements>
  * \endxmlonly
  */
-K4A_EXPORT k4a_result_t k4a_device_open(uint8_t index, k4a_device_t *device_handle);
+K4A_EXPORT k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle);
 
 /** Closes a k4a device.
  *

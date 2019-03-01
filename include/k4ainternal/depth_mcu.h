@@ -90,7 +90,7 @@ K4A_DECLARE_HANDLE(depthmcu_t);
  *
  * When done with the device, close the handle with \ref depthmcu_destroy
  */
-k4a_result_t depthmcu_create(uint8_t device_index, depthmcu_t *depthmcu_handle);
+k4a_result_t depthmcu_create(uint32_t device_index, depthmcu_t *depthmcu_handle);
 
 /** Closes the depth mcu module and free's it resources
  * */
