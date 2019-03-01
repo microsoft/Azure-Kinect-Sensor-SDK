@@ -18,6 +18,7 @@
 
 #define UPDATE_TIMEOUT_MS 10 * 60 * 1000 // 10 Minutes should be way more than enough.
 #define K4A_DEPTH_MODE_NFOV_UNBINNED_EXPECTED_SIZE 737280
+#define UPDATE_POLL_INTERVAL_MS 50
 
 // This will define the path to the firmware packages to use in testing the firmware update process. The firmware update
 // is executed by the firmware that is currently on the device. In order to test the firmware update process for a
@@ -28,9 +29,9 @@
 // Test firmware - This should be a firmware where all components have different versions than the candidate firmware.
 // Candidate firmware - This should be the firmware that is being validated. It will be passed in via command line
 // parameter.
-#define K4A_FACTORY_FIRMWARE_PATH "..\\..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
-#define K4A_LKG_FIRMWARE_PATH "..\\..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
-#define K4A_TEST_FIRMWARE_PATH "..\\..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
+#define K4A_FACTORY_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
+#define K4A_LKG_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
+#define K4A_TEST_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
 
 static char *g_candidate_firmware_path = nullptr;
 
@@ -121,13 +122,6 @@ public:
         std::cout << "Loading Factory firmware package: " << K4A_FACTORY_FIRMWARE_PATH << std::endl;
         load_firmware_files(K4A_FACTORY_FIRMWARE_PATH, &factory_firmware_buffer, &factory_firmware_size);
         parse_firmware_package(factory_firmware_buffer, factory_firmware_size, &factory_firmware_package_info);
-
-        // Make sure that the Test firmware has all components with a different version when compared to the Release
-        // Candidate firmware.
-        // Depth Config isn't expect to change.
-        ASSERT_FALSE(compare_version(test_firmware_package_info.audio, candidate_firmware_package_info.audio));
-        ASSERT_FALSE(compare_version(test_firmware_package_info.depth, candidate_firmware_package_info.depth));
-        ASSERT_FALSE(compare_version(test_firmware_package_info.rgb, candidate_firmware_package_info.rgb));
     }
 
     static void TearDownTestCase()
@@ -144,10 +138,22 @@ public:
             test_firmware_buffer = nullptr;
         }
 
+        if (candidate_firmware_buffer != nullptr)
+        {
+            free(candidate_firmware_buffer);
+            candidate_firmware_buffer = nullptr;
+        }
+
         if (lkg_firmware_buffer != nullptr)
         {
             free(lkg_firmware_buffer);
             lkg_firmware_buffer = nullptr;
+        }
+
+        if (factory_firmware_buffer != nullptr)
+        {
+            free(factory_firmware_buffer);
+            factory_firmware_buffer = nullptr;
         }
     }
 
@@ -159,6 +165,23 @@ protected:
         LOG_INFO("Disconnecting the device", 0);
         connEx->set_usb_port(0);
         ThreadAPI_Sleep(500);
+
+        // Make sure that all of the firmwares have loaded correctly.
+        ASSERT_TRUE(test_firmware_buffer != nullptr);
+        ASSERT_TRUE(test_firmware_size > 0);
+        ASSERT_TRUE(candidate_firmware_buffer != nullptr);
+        ASSERT_TRUE(candidate_firmware_size > 0);
+        ASSERT_TRUE(lkg_firmware_buffer != nullptr);
+        ASSERT_TRUE(lkg_firmware_size > 0);
+        ASSERT_TRUE(factory_firmware_buffer != nullptr);
+        ASSERT_TRUE(factory_firmware_size > 0);
+
+        // Make sure that the Test firmware has all components with a different version when compared to the Release
+        // Candidate firmware.
+        // Depth Config isn't expect to change.
+        ASSERT_FALSE(compare_version(test_firmware_package_info.audio, candidate_firmware_package_info.audio));
+        ASSERT_FALSE(compare_version(test_firmware_package_info.depth, candidate_firmware_package_info.depth));
+        ASSERT_FALSE(compare_version(test_firmware_package_info.rgb, candidate_firmware_package_info.rgb));
 
         // There should be no other devices.
         uint32_t device_count = 0;
@@ -180,10 +203,12 @@ protected:
     void reset_device();
     void interrupt_device_at_update_stage(firmware_operation_component_t component,
                                           firmware_operation_interruption_t interruption,
-                                          firmware_status_summary_t *finalStatus);
+                                          firmware_status_summary_t *finalStatus,
+                                          bool verbose_logging);
     void perform_device_update(uint8_t *firmware_buffer,
                                size_t firmware_size,
-                               firmware_package_info_t firmware_package_info);
+                               firmware_package_info_t firmware_package_info,
+                               bool verbose_logging);
 
     static int k4a_port_number;
     static connection_exerciser *connEx;
@@ -463,12 +488,14 @@ void firmware_fw::interrupt_operation(firmware_operation_interruption_t interrup
 
 void firmware_fw::interrupt_device_at_update_stage(firmware_operation_component_t component,
                                                    firmware_operation_interruption_t interruption,
-                                                   firmware_status_summary_t *finalStatus)
+                                                   firmware_status_summary_t *finalStatus,
+                                                   bool verbose_logging)
 {
     ASSERT_NE(nullptr, finalStatus);
 
     bool all_complete = false;
     k4a_result_t result = K4A_RESULT_FAILED;
+    firmware_status_summary_t previous_status = {};
 
     tickcounter_ms_t start_time_ms, now;
 
@@ -484,10 +511,56 @@ void firmware_fw::interrupt_device_at_update_stage(firmware_operation_component_
         result = firmware_get_download_status(firmware_handle, finalStatus);
         if (result == K4A_RESULT_SUCCEEDED)
         {
-            std::cout << "Audio: " << calculate_overall_component_status(finalStatus->audio)
-                      << " Depth Config: " << calculate_overall_component_status(finalStatus->depth_config)
-                      << " Depth: " << calculate_overall_component_status(finalStatus->depth)
-                      << " RGB: " << calculate_overall_component_status(finalStatus->rgb) << std::endl;
+            if (verbose_logging)
+            {
+                if (memcmp(&previous_status.audio, &finalStatus->audio, sizeof(firmware_component_status_t)) != 0)
+                {
+                    LOG_INFO("Audio: A:%d V:%d T:%d E:%d W:%d O:%d",
+                             finalStatus->audio.authentication_check,
+                             finalStatus->audio.version_check,
+                             finalStatus->audio.image_transfer,
+                             finalStatus->audio.flash_erase,
+                             finalStatus->audio.flash_write,
+                             finalStatus->audio.overall);
+                }
+
+                if (memcmp(&previous_status.depth_config,
+                           &finalStatus->depth_config,
+                           sizeof(firmware_component_status_t)) != 0)
+                {
+                    LOG_INFO("Depth Config: A:%d V:%d T:%d E:%d W:%d O:%d",
+                             finalStatus->depth_config.authentication_check,
+                             finalStatus->depth_config.version_check,
+                             finalStatus->depth_config.image_transfer,
+                             finalStatus->depth_config.flash_erase,
+                             finalStatus->depth_config.flash_write,
+                             finalStatus->depth_config.overall);
+                }
+
+                if (memcmp(&previous_status.depth, &finalStatus->depth, sizeof(firmware_component_status_t)) != 0)
+                {
+                    LOG_INFO("Depth: A:%d V:%d T:%d E:%d W:%d O:%d",
+                             finalStatus->depth.authentication_check,
+                             finalStatus->depth.version_check,
+                             finalStatus->depth.image_transfer,
+                             finalStatus->depth.flash_erase,
+                             finalStatus->depth.flash_write,
+                             finalStatus->depth.overall);
+                }
+
+                if (memcmp(&previous_status.rgb, &finalStatus->rgb, sizeof(firmware_component_status_t)) != 0)
+                {
+                    LOG_INFO("RGB: A:%d V:%d T:%d E:%d W:%d O:%d",
+                             finalStatus->rgb.authentication_check,
+                             finalStatus->rgb.version_check,
+                             finalStatus->rgb.image_transfer,
+                             finalStatus->rgb.flash_erase,
+                             finalStatus->rgb.flash_write,
+                             finalStatus->rgb.overall);
+                }
+
+                previous_status = *finalStatus;
+            }
 
             all_complete = ((finalStatus->audio.overall > FIRMWARE_OPERATION_INPROGRESS) &&
                             (finalStatus->depth_config.overall > FIRMWARE_OPERATION_INPROGRESS) &&
@@ -558,7 +631,7 @@ void firmware_fw::interrupt_device_at_update_stage(firmware_operation_component_
 
         if (!all_complete)
         {
-            ThreadAPI_Sleep(500);
+            ThreadAPI_Sleep(UPDATE_POLL_INTERVAL_MS);
         }
     } while (!all_complete);
 
@@ -569,7 +642,8 @@ void firmware_fw::interrupt_device_at_update_stage(firmware_operation_component_
 
 void firmware_fw::perform_device_update(uint8_t *firmware_buffer,
                                         size_t firmware_size,
-                                        firmware_package_info_t firmware_package_info)
+                                        firmware_package_info_t firmware_package_info,
+                                        bool verbose_logging)
 {
     firmware_status_summary_t finalStatus;
 
@@ -579,7 +653,10 @@ void firmware_fw::perform_device_update(uint8_t *firmware_buffer,
 
     // Perform upgrade...
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, firmware_buffer, firmware_size));
-    interrupt_device_at_update_stage(FIRMWARE_OPERATION_FULL_DEVICE, FIRMWARE_OPERATION_RESET, &finalStatus);
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_FULL_DEVICE,
+                                     FIRMWARE_OPERATION_RESET,
+                                     &finalStatus,
+                                     verbose_logging);
 
     ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
     ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
@@ -598,6 +675,20 @@ void firmware_fw::perform_device_update(uint8_t *firmware_buffer,
     ASSERT_TRUE(compare_version(current_version.rgb, firmware_package_info.rgb)) << "RGB mismatch";
 }
 
+TEST_F(firmware_fw, MANUAL_update_timing)
+{
+    LOG_INFO("Beginning the manual test to get update timings.", 0);
+    connEx->set_usb_port(k4a_port_number);
+
+    open_firmware_device();
+
+    LOG_INFO("Updating the device to the Candidate firmware.");
+    perform_device_update(candidate_firmware_buffer, candidate_firmware_size, candidate_firmware_package_info, true);
+
+    LOG_INFO("Updating the device to the Test firmware.");
+    perform_device_update(test_firmware_buffer, test_firmware_size, test_firmware_package_info, true);
+}
+
 TEST_F(firmware_fw, simple_update_from_lkg)
 {
     LOG_INFO("Beginning the basic update test from the LKG firmware.", 0);
@@ -606,13 +697,13 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     open_firmware_device();
 
     LOG_INFO("Updating the device to the LKG firmware.");
-    perform_device_update(lkg_firmware_buffer, lkg_firmware_size, lkg_firmware_package_info);
+    perform_device_update(lkg_firmware_buffer, lkg_firmware_size, lkg_firmware_package_info, false);
 
     LOG_INFO("Updating the device to the Candidate firmware.");
-    perform_device_update(candidate_firmware_buffer, candidate_firmware_size, candidate_firmware_package_info);
+    perform_device_update(candidate_firmware_buffer, candidate_firmware_size, candidate_firmware_package_info, false);
 
     LOG_INFO("Updating the device to the Test firmware.");
-    perform_device_update(test_firmware_buffer, test_firmware_size, test_firmware_package_info);
+    perform_device_update(test_firmware_buffer, test_firmware_size, test_firmware_package_info, false);
 }
 
 TEST_F(firmware_fw, simple_update_from_factory)
@@ -623,13 +714,13 @@ TEST_F(firmware_fw, simple_update_from_factory)
     open_firmware_device();
 
     LOG_INFO("Updating the device to the Factory firmware.");
-    perform_device_update(factory_firmware_buffer, factory_firmware_size, factory_firmware_package_info);
+    perform_device_update(factory_firmware_buffer, factory_firmware_size, factory_firmware_package_info, false);
 
     LOG_INFO("Updating the device to the Candidate firmware.");
-    perform_device_update(candidate_firmware_buffer, candidate_firmware_size, candidate_firmware_package_info);
+    perform_device_update(candidate_firmware_buffer, candidate_firmware_size, candidate_firmware_package_info, false);
 
     LOG_INFO("Updating the device to the Test firmware.");
-    perform_device_update(test_firmware_buffer, test_firmware_size, test_firmware_package_info);
+    perform_device_update(test_firmware_buffer, test_firmware_size, test_firmware_package_info, false);
 }
 
 TEST_F(firmware_fw, interrupt_update_reboot)
@@ -644,13 +735,13 @@ TEST_F(firmware_fw, interrupt_update_reboot)
 
     // Update to the Candidate firmware
     LOG_INFO("Updating the device to the Candidate firmware.");
-    perform_device_update(candidate_firmware_buffer, candidate_firmware_size, candidate_firmware_package_info);
+    perform_device_update(candidate_firmware_buffer, candidate_firmware_size, candidate_firmware_package_info, false);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
 
     // Update to the Test firmware, but interrupt at the very beginning...
     LOG_INFO("Interrupting at the beginning of the update");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
-    interrupt_device_at_update_stage(FIRMWARE_OPERATION_START, FIRMWARE_OPERATION_RESET, &finalStatus);
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_START, FIRMWARE_OPERATION_RESET, &finalStatus, false);
 
     std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
               << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
@@ -677,7 +768,7 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     // Update to the Test firmware, but interrupt at the audio stage...
     LOG_INFO("Interrupting at Audio stage");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
-    interrupt_device_at_update_stage(FIRMWARE_OPERATION_AUDIO, FIRMWARE_OPERATION_RESET, &finalStatus);
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_AUDIO, FIRMWARE_OPERATION_RESET, &finalStatus, false);
 
     std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
               << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
@@ -704,7 +795,7 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     // Update to the Test firmware, but interrupt at the depth stage...
     LOG_INFO("Interrupting at Audio stage");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
-    interrupt_device_at_update_stage(FIRMWARE_OPERATION_DEPTH, FIRMWARE_OPERATION_RESET, &finalStatus);
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_DEPTH, FIRMWARE_OPERATION_RESET, &finalStatus, false);
 
     std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
               << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
@@ -731,7 +822,7 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     // Update to the Test firmware, but interrupt at the RGB stage...
     LOG_INFO("Interrupting at RGB stage");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
-    interrupt_device_at_update_stage(FIRMWARE_OPERATION_RGB, FIRMWARE_OPERATION_RESET, &finalStatus);
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_RGB, FIRMWARE_OPERATION_RESET, &finalStatus, false);
 
     std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
               << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
@@ -757,7 +848,7 @@ TEST_F(firmware_fw, interrupt_update_reboot)
 
     // Update back to the LKG firmware
     LOG_INFO("Updating the device back to the LKG firmware.");
-    perform_device_update(lkg_firmware_buffer, lkg_firmware_size, lkg_firmware_package_info);
+    perform_device_update(lkg_firmware_buffer, lkg_firmware_size, lkg_firmware_package_info, false);
 }
 
 int main(int argc, char **argv)
