@@ -33,8 +33,7 @@ install(
 
 install(
     FILES
-        firmware/Firmware_Composite_MSFTCert_Debug_TestSigned_1.105.785813.5006.27_6109.07_0121.bin
-        firmware/Firmware_Composite_MSFTCert_Release_MSFTSigned_1.5.786013_5006.27_6109.07_0122.bin
+        firmware/AzureKinectDK_Fw_1.5.886314.bin
     DESTINATION
         ${CMAKE_INSTALL_DATADIR}/k4a/firmware
 )
