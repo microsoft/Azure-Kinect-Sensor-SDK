@@ -341,18 +341,27 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * Specifies if the seek operation should be done relative to the beginning or end of the recording.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if the seek operation was successful. If the timestamp is out of range ::K4A_RESULT_FAILED is
- * returned. The current seek position is left unchanged if a failure is returned.
+ * ::K4A_RESULT_SUCCEEDED if the seek operation was successful, or ::K4A_RESULT_FAILED if an error occured. The current
+ * seek position is left unchanged if a failure is returned.
  *
  * \relates k4a_playback_t
  *
  * \remarks
+<<<<<<< HEAD
  * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return the first capture
  * with all image timestamps greater than or equal to the seek time.
  *
  * \remarks
  * The first call to k4a_playback_get_previous_capture() after k4a_playback_seek_timestamp() will return the first
  * capture with all image timestamps less than the seek time.
+=======
+ * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return a capture with all
+ * timestamps >= the seek time. This capture may be partially populated if seeking to a point in the middle of a capture.
+ *
+ * \remarks
+ * The first call to k4a_playback_get_previous_capture() after k4a_playback_seek_timestamp() will return a capture with
+ * all timestamps < the seek time. This capture may be partially populated if seeking to a point in the middle of a capture.
+>>>>>>> Update docs around seek_timestamp and make behavior more consistent
  *
  * \remarks
  * The first call to k4a_playback_get_next_imu_sample() after k4a_playback_seek_timestamp() will return the first imu
