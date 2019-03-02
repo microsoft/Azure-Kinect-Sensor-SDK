@@ -18,7 +18,7 @@
 
 #define UPDATE_TIMEOUT_MS 10 * 60 * 1000 // 10 Minutes should be way more than enough.
 #define K4A_DEPTH_MODE_NFOV_UNBINNED_EXPECTED_SIZE 737280
-#define UPDATE_POLL_INTERVAL_MS 50
+#define UPDATE_POLL_INTERVAL_MS 5
 
 // This will define the path to the firmware packages to use in testing the firmware update process. The firmware update
 // is executed by the firmware that is currently on the device. In order to test the firmware update process for a
@@ -43,10 +43,12 @@ static bool compare_version_list(uint16_t major, uint16_t minor, uint8_t count, 
 typedef enum
 {
     FIRMWARE_OPERATION_START,
-    FIRMWARE_OPERATION_AUDIO,
-    FIRMWARE_OPERATION_DEPTH_CONFIG,
-    FIRMWARE_OPERATION_DEPTH,
-    FIRMWARE_OPERATION_RGB,
+    FIRMWARE_OPERATION_AUDIO_ERASE,
+    FIRMWARE_OPERATION_AUDIO_WRITE,
+    FIRMWARE_OPERATION_DEPTH_ERASE,
+    FIRMWARE_OPERATION_DEPTH_WRITE,
+    FIRMWARE_OPERATION_RGB_ERASE,
+    FIRMWARE_OPERATION_RGB_WRITE,
     FIRMWARE_OPERATION_FULL_DEVICE,
 } firmware_operation_component_t;
 
@@ -575,33 +577,82 @@ void firmware_fw::interrupt_device_at_update_stage(firmware_operation_component_
                 interrupt_operation(interruption);
                 return;
 
-            case FIRMWARE_OPERATION_AUDIO:
-                if (finalStatus->audio.version_check != FIRMWARE_OPERATION_INPROGRESS)
+            case FIRMWARE_OPERATION_AUDIO_ERASE:
+                if (finalStatus->audio.image_transfer == FIRMWARE_OPERATION_SUCCEEDED)
                 {
+                    // The erase takes places after the transfer is complete and takes about 7.8 seconds.
+                    int sleepTime = (int)((rand() / (float)RAND_MAX) * 7600);
+                    sleepTime = 3800;
+                    LOG_INFO("Audio Erase started, waiting %dms.\n", sleepTime);
+                    ThreadAPI_Sleep(sleepTime);
+                    firmware_get_download_status(firmware_handle, finalStatus);
                     interrupt_operation(interruption);
                     return;
                 }
                 break;
 
-            case FIRMWARE_OPERATION_DEPTH_CONFIG:
-                if (finalStatus->depth_config.version_check != FIRMWARE_OPERATION_INPROGRESS)
+            case FIRMWARE_OPERATION_AUDIO_WRITE:
+                if (finalStatus->audio.flash_erase == FIRMWARE_OPERATION_SUCCEEDED)
                 {
+                    // The write takes places after the erase is complete and takes about 20 seconds.
+                    int sleepTime = (int)((rand() / (float)RAND_MAX) * 19700);
+                    sleepTime = 9850;
+                    LOG_INFO("Audio Write started, waiting %dms.\n", sleepTime);
+                    ThreadAPI_Sleep(sleepTime);
+                    firmware_get_download_status(firmware_handle, finalStatus);
                     interrupt_operation(interruption);
                     return;
                 }
                 break;
 
-            case FIRMWARE_OPERATION_DEPTH:
-                if (finalStatus->depth.version_check != FIRMWARE_OPERATION_INPROGRESS)
+            case FIRMWARE_OPERATION_DEPTH_ERASE:
+                if (finalStatus->depth.image_transfer == FIRMWARE_OPERATION_SUCCEEDED)
                 {
+                    // The erase takes places after the transfer is complete and takes about 0.25 seconds.
+                    int sleepTime = (int)((rand() / (float)RAND_MAX) * 100);
+                    sleepTime = 50;
+                    LOG_INFO("Depth Erase started, waiting %dms.\n", sleepTime);
+                    ThreadAPI_Sleep(sleepTime);
+                    firmware_get_download_status(firmware_handle, finalStatus);
                     interrupt_operation(interruption);
                     return;
                 }
                 break;
 
-            case FIRMWARE_OPERATION_RGB:
-                if (finalStatus->rgb.version_check != FIRMWARE_OPERATION_INPROGRESS)
+            case FIRMWARE_OPERATION_DEPTH_WRITE:
+                if (finalStatus->depth.flash_erase == FIRMWARE_OPERATION_SUCCEEDED)
                 {
+                    // The write takes places after the transfer is complete and takes about 5.8 seconds.
+                    int sleepTime = (int)((rand() / (float)RAND_MAX) * 5700);
+                    sleepTime = 2850;
+                    LOG_INFO("Depth Write started, waiting %dms.\n", sleepTime);
+                    ThreadAPI_Sleep(sleepTime);
+                    firmware_get_download_status(firmware_handle, finalStatus);
+                    interrupt_operation(interruption);
+                    return;
+                }
+                break;
+
+            case FIRMWARE_OPERATION_RGB_ERASE:
+                if (finalStatus->rgb.image_transfer == FIRMWARE_OPERATION_SUCCEEDED)
+                {
+                    // The erase takes places after the transfer is complete and takes about 0.05 seconds.
+                    LOG_INFO("RGB erase started...\n");
+                    firmware_get_download_status(firmware_handle, finalStatus);
+                    interrupt_operation(interruption);
+                    return;
+                }
+                break;
+
+            case FIRMWARE_OPERATION_RGB_WRITE:
+                if (finalStatus->rgb.flash_erase == FIRMWARE_OPERATION_SUCCEEDED)
+                {
+                    // The write takes places after the transfer is complete and takes about 6.1 seconds.
+                    int sleepTime = (int)((rand() / (float)RAND_MAX) * 6000);
+                    sleepTime = 3000;
+                    LOG_INFO("RGB Write started, waiting %dms.\n", sleepTime);
+                    ThreadAPI_Sleep(sleepTime);
+                    firmware_get_download_status(firmware_handle, finalStatus);
                     interrupt_operation(interruption);
                     return;
                 }
@@ -675,7 +726,7 @@ void firmware_fw::perform_device_update(uint8_t *firmware_buffer,
     ASSERT_TRUE(compare_version(current_version.rgb, firmware_package_info.rgb)) << "RGB mismatch";
 }
 
-TEST_F(firmware_fw, MANUAL_update_timing)
+TEST_F(firmware_fw, DISABLED_update_timing)
 {
     LOG_INFO("Beginning the manual test to get update timings.", 0);
     connEx->set_usb_port(k4a_port_number);
@@ -765,10 +816,10 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     ASSERT_TRUE(compare_version(current_version.depth, candidate_firmware_package_info.depth)) << "Depth mismatch";
     ASSERT_TRUE(compare_version(current_version.rgb, candidate_firmware_package_info.rgb)) << "RGB mismatch";
 
-    // Update to the Test firmware, but interrupt at the audio stage...
-    LOG_INFO("Interrupting at Audio stage");
+    // Update to the Test firmware, but interrupt at the audio erase stage...
+    LOG_INFO("Interrupting at Audio Erase stage");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
-    interrupt_device_at_update_stage(FIRMWARE_OPERATION_AUDIO, FIRMWARE_OPERATION_RESET, &finalStatus, false);
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_AUDIO_ERASE, FIRMWARE_OPERATION_RESET, &finalStatus, false);
 
     std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
               << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
@@ -792,10 +843,49 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     ASSERT_TRUE(compare_version(current_version.depth, candidate_firmware_package_info.depth)) << "Depth mismatch";
     ASSERT_TRUE(compare_version(current_version.rgb, candidate_firmware_package_info.rgb)) << "RGB mismatch";
 
-    // Update to the Test firmware, but interrupt at the depth stage...
-    LOG_INFO("Interrupting at Audio stage");
+    // Update to the Test firmware, but interrupt at the audio write stage...
+    LOG_INFO("Interrupting at Audio Write stage");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
-    interrupt_device_at_update_stage(FIRMWARE_OPERATION_DEPTH, FIRMWARE_OPERATION_RESET, &finalStatus, false);
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_AUDIO_WRITE, FIRMWARE_OPERATION_RESET, &finalStatus, false);
+
+    std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
+              << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
+              << " Depth: " << calculate_overall_component_status(finalStatus.depth)
+              << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
+
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.audio));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth_config));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
+
+    // Check that we are still on the old version
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, depthmcu_get_version(depthmcu_handle, &current_version));
+    log_device_version(current_version);
+    ASSERT_TRUE(compare_version(current_version.audio_major,
+                                current_version.audio_minor,
+                                current_version.audio_build,
+                                candidate_firmware_package_info.audio))
+        << "Audio version mismatch";
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor_cfg_major,
+                                     current_version.depth_sensor_cfg_minor,
+                                     candidate_firmware_package_info.depth_config_number_versions,
+                                     candidate_firmware_package_info.depth_config_versions))
+        << "Depth Config mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth_major,
+                                current_version.depth_minor,
+                                current_version.depth_build,
+                                candidate_firmware_package_info.depth))
+        << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb_major,
+                                current_version.rgb_minor,
+                                current_version.rgb_build,
+                                candidate_firmware_package_info.rgb))
+        << "RGB mismatch";
+
+    // Update to the Test firmware, but interrupt at the depth erase stage...
+    LOG_INFO("Interrupting at Depth Erase stage");
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_DEPTH_ERASE, FIRMWARE_OPERATION_RESET, &finalStatus, false);
 
     std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
               << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
@@ -819,10 +909,88 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     ASSERT_TRUE(compare_version(current_version.depth, candidate_firmware_package_info.depth)) << "Depth mismatch";
     ASSERT_TRUE(compare_version(current_version.rgb, candidate_firmware_package_info.rgb)) << "RGB mismatch";
 
-    // Update to the Test firmware, but interrupt at the RGB stage...
-    LOG_INFO("Interrupting at RGB stage");
+    // Update to the Test firmware, but interrupt at the depth write stage...
+    LOG_INFO("Interrupting at Depth Write stage");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
-    interrupt_device_at_update_stage(FIRMWARE_OPERATION_RGB, FIRMWARE_OPERATION_RESET, &finalStatus, false);
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_DEPTH_WRITE, FIRMWARE_OPERATION_RESET, &finalStatus, false);
+
+    std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
+              << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
+              << " Depth: " << calculate_overall_component_status(finalStatus.depth)
+              << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
+
+    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
+    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
+
+    // Check that we are still on the old version
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, depthmcu_get_version(depthmcu_handle, &current_version));
+    log_device_version(current_version);
+    ASSERT_TRUE(compare_version(current_version.audio_major,
+                                current_version.audio_minor,
+                                current_version.audio_build,
+                                candidate_firmware_package_info.audio))
+        << "Audio version mismatch";
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor_cfg_major,
+                                     current_version.depth_sensor_cfg_minor,
+                                     candidate_firmware_package_info.depth_config_number_versions,
+                                     candidate_firmware_package_info.depth_config_versions))
+        << "Depth Config mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth_major,
+                                current_version.depth_minor,
+                                current_version.depth_build,
+                                candidate_firmware_package_info.depth))
+        << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb_major,
+                                current_version.rgb_minor,
+                                current_version.rgb_build,
+                                candidate_firmware_package_info.rgb))
+        << "RGB mismatch";
+
+    // Update to the Test firmware, but interrupt at the RGB erase stage...
+    LOG_INFO("Interrupting at RGB Erase stage");
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_RGB_ERASE, FIRMWARE_OPERATION_RESET, &finalStatus, false);
+
+    std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
+              << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
+              << " Depth: " << calculate_overall_component_status(finalStatus.depth)
+              << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
+
+    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
+    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
+    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth));
+    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
+
+    // Check that we are still on the old version
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, depthmcu_get_version(depthmcu_handle, &current_version));
+    log_device_version(current_version);
+    ASSERT_TRUE(compare_version(current_version.audio_major,
+                                current_version.audio_minor,
+                                current_version.audio_build,
+                                candidate_firmware_package_info.audio))
+        << "Audio version mismatch";
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor_cfg_major,
+                                     current_version.depth_sensor_cfg_minor,
+                                     candidate_firmware_package_info.depth_config_number_versions,
+                                     candidate_firmware_package_info.depth_config_versions))
+        << "Depth Config mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth_major,
+                                current_version.depth_minor,
+                                current_version.depth_build,
+                                candidate_firmware_package_info.depth))
+        << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb_major,
+                                current_version.rgb_minor,
+                                current_version.rgb_build,
+                                candidate_firmware_package_info.rgb))
+        << "RGB mismatch";
+
+    // Update to the Test firmware, but interrupt at the RGB write stage...
+    LOG_INFO("Interrupting at RGB Write stage");
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, test_firmware_buffer, test_firmware_size));
+    interrupt_device_at_update_stage(FIRMWARE_OPERATION_RGB_WRITE, FIRMWARE_OPERATION_RESET, &finalStatus, false);
 
     std::cout << "Updated completed with Audio: " << calculate_overall_component_status(finalStatus.audio)
               << " Depth Config: " << calculate_overall_component_status(finalStatus.depth_config)
@@ -854,6 +1022,8 @@ TEST_F(firmware_fw, interrupt_update_reboot)
 int main(int argc, char **argv)
 {
     bool error = false;
+
+    srand((unsigned int)time(0)); // use current time as seed for random generator
 
     k4a_unittest_init();
     ::testing::InitGoogleTest(&argc, argv);
