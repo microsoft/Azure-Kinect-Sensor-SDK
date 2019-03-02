@@ -6,7 +6,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
 
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
-add_executable(firmware_fw firmware_fw.cpp)
+add_executable(firmware_fw firmware_helper.cpp firmware_fw.cpp firmware_interrupt_fw.cpp)
 
 target_link_libraries(firmware_fw PRIVATE
     k4ainternal::utcommon

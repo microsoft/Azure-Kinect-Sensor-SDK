@@ -1,62 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#define VC_EXTRALEAN
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
-#define _CRT_NONSTDC_NO_DEPRECATE
+#include "firmware_helper.h"
 
 #include <utcommon.h>
 #include <ConnEx.h>
 
-#include <k4ainternal/firmware.h>
 #include <k4ainternal/logging.h>
 
 #include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/threadapi.h>
-
-#define UPDATE_TIMEOUT_MS 10 * 60 * 1000 // 10 Minutes should be way more than enough.
-#define K4A_DEPTH_MODE_NFOV_UNBINNED_EXPECTED_SIZE 737280
-#define UPDATE_POLL_INTERVAL_MS 5
-
-// This will define the path to the firmware packages to use in testing the firmware update process. The firmware update
-// is executed by the firmware that is currently on the device. In order to test the firmware update process for a
-// candidate, the device must be on the candidate firmware and then updated to a different test firmware where all of
-// the versions are different.
-// Factory firmware - This should be the oldest available firmware that we can roll back to.
-// LKG firmware - This should be the last firmware that was released.
-// Test firmware - This should be a firmware where all components have different versions than the candidate firmware.
-// Candidate firmware - This should be the firmware that is being validated. It will be passed in via command line
-// parameter.
-#define K4A_FACTORY_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
-#define K4A_LKG_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
-#define K4A_TEST_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
-
-static char *g_candidate_firmware_path = nullptr;
-
-static k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer, size_t *firmware_size);
-static bool compare_version(k4a_version_t left_version, k4a_version_t right_version);
-static bool compare_version(uint8_t major, uint8_t minor, uint16_t iteration, k4a_version_t version);
-static bool compare_version_list(uint16_t major, uint16_t minor, uint8_t count, k4a_version_t versions[5]);
-
-typedef enum
-{
-    FIRMWARE_OPERATION_START,
-    FIRMWARE_OPERATION_AUDIO_ERASE,
-    FIRMWARE_OPERATION_AUDIO_WRITE,
-    FIRMWARE_OPERATION_DEPTH_ERASE,
-    FIRMWARE_OPERATION_DEPTH_WRITE,
-    FIRMWARE_OPERATION_RGB_ERASE,
-    FIRMWARE_OPERATION_RGB_WRITE,
-    FIRMWARE_OPERATION_FULL_DEVICE,
-} firmware_operation_component_t;
-
-typedef enum
-{
-    FIRMWARE_OPERATION_RESET,
-    FIRMWARE_OPERATION_DISCONNECT,
-} firmware_operation_interruption_t;
 
 class firmware_fw : public ::testing::Test
 {
@@ -254,195 +207,6 @@ firmware_package_info_t firmware_fw::lkg_firmware_package_info = { 0 };
 uint8_t *firmware_fw::factory_firmware_buffer = nullptr;
 size_t firmware_fw::factory_firmware_size = 0;
 firmware_package_info_t firmware_fw::factory_firmware_package_info = { 0 };
-
-static k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer, size_t *firmware_size)
-{
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_path == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_buffer == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_size == NULL);
-
-    k4a_result_t result = K4A_RESULT_FAILED;
-    FILE *pFirmwareFile = NULL;
-    size_t numRead = 0;
-    uint8_t *tempFirmwareBuffer = NULL;
-
-    if ((pFirmwareFile = fopen(firmware_path, "rb")) != NULL)
-    {
-        fseek(pFirmwareFile, 0, SEEK_END);
-        size_t tempFirmwareSize = (size_t)ftell(pFirmwareFile);
-        if (tempFirmwareSize == (size_t)-1L)
-        {
-            std::cout << "ERROR: Failed to get size of the firmware package." << std::endl;
-            return K4A_RESULT_FAILED;
-        }
-
-        fseek(pFirmwareFile, 0, SEEK_SET);
-
-        tempFirmwareBuffer = (uint8_t *)malloc(tempFirmwareSize);
-        if (tempFirmwareBuffer == NULL)
-        {
-            std::cout << "ERROR: Failed to allocate memory." << std::endl;
-            return K4A_RESULT_FAILED;
-        }
-
-        std::cout << "File size: " << tempFirmwareSize << " bytes" << std::endl;
-        numRead = fread(tempFirmwareBuffer, tempFirmwareSize, 1, pFirmwareFile);
-        fclose(pFirmwareFile);
-
-        if (numRead != 1)
-        {
-            std::cout << "ERROR: Could not read all data from the file" << std::endl;
-        }
-        else
-        {
-            *firmware_buffer = tempFirmwareBuffer;
-            *firmware_size = tempFirmwareSize;
-            tempFirmwareBuffer = NULL;
-            result = K4A_RESULT_SUCCEEDED;
-        }
-    }
-    else
-    {
-        std::cout << "ERROR: Cannot Open (" << firmware_path << ") errno=" << errno << std::endl;
-    }
-
-    if (tempFirmwareBuffer)
-    {
-        free(tempFirmwareBuffer);
-    }
-
-    return result;
-}
-
-static firmware_operation_status_t calculate_overall_component_status(const firmware_component_status_t status)
-{
-    if (status.overall == FIRMWARE_OPERATION_SUCCEEDED)
-    {
-        return FIRMWARE_OPERATION_SUCCEEDED;
-    }
-
-    if (status.overall == FIRMWARE_OPERATION_INPROGRESS)
-    {
-        return FIRMWARE_OPERATION_INPROGRESS;
-    }
-
-    // If the version check failed, this component's update was skipped. This could because the new version is
-    // an unsafe downgrade or the versions are the same and no update is required.
-    if (status.version_check == FIRMWARE_OPERATION_FAILED)
-    {
-        return FIRMWARE_OPERATION_SUCCEEDED;
-    }
-
-    return FIRMWARE_OPERATION_FAILED;
-}
-
-static bool compare_version(k4a_version_t left_version, k4a_version_t right_version)
-{
-    return left_version.major == right_version.major && left_version.minor == right_version.minor &&
-           left_version.iteration == right_version.iteration;
-}
-
-static bool compare_version_list(k4a_version_t device_version, uint8_t count, k4a_version_t versions[5])
-{
-    for (int i = 0; i < count; ++i)
-    {
-        if (device_version.major == versions[i].major && device_version.minor == versions[i].minor)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-static void log_firmware_build_config(k4a_firmware_build_t build_config)
-{
-    std::cout << "  Build Config:             ";
-    switch (build_config)
-    {
-    case K4A_FIRMWARE_BUILD_RELEASE:
-        std::cout << "Production" << std::endl;
-        break;
-
-    case K4A_FIRMWARE_BUILD_DEBUG:
-        std::cout << "Debug" << std::endl;
-        break;
-
-    default:
-        std::cout << "Unknown" << std::endl;
-    }
-}
-
-static void log_firmware_signature_type(k4a_firmware_signature_t signature_type, bool certificate)
-{
-    if (certificate)
-    {
-        std::cout << "  Certificate Type:         ";
-    }
-    else
-    {
-        std::cout << "  Signature Type:           ";
-    }
-
-    switch (signature_type)
-    {
-    case K4A_FIRMWARE_SIGNATURE_MSFT:
-        std::cout << "Microsoft" << std::endl;
-        break;
-
-    case K4A_FIRMWARE_SIGNATURE_TEST:
-        std::cout << "Test" << std::endl;
-        break;
-
-    case K4A_FIRMWARE_SIGNATURE_UNSIGNED:
-        std::cout << "Unsigned" << std::endl;
-        break;
-
-    default:
-        std::cout << "Unknown (" << signature_type << ")" << std::endl;
-    }
-}
-
-static void log_firmware_version(firmware_package_info_t firmware_version)
-{
-    std::cout << "Firmware Package Versions:" << std::endl;
-    std::cout << "  RGB camera firmware:      " << firmware_version.rgb.major << "." << firmware_version.rgb.minor
-              << "." << firmware_version.rgb.iteration << std::endl;
-    std::cout << "  Depth camera firmware:    " << firmware_version.depth.major << "." << firmware_version.depth.minor
-              << "." << firmware_version.depth.iteration << std::endl;
-
-    std::cout << "  Depth config file:        ";
-    for (size_t i = 0; i < firmware_version.depth_config_number_versions; i++)
-    {
-        std::cout << firmware_version.depth_config_versions[i].major << "."
-                  << firmware_version.depth_config_versions[i].minor << " ";
-    }
-    std::cout << std::endl;
-
-    std::cout << "  Audio firmware:           " << firmware_version.audio.major << "." << firmware_version.audio.minor
-              << "." << firmware_version.audio.iteration << std::endl;
-
-    log_firmware_build_config(firmware_version.build_config);
-
-    log_firmware_signature_type(firmware_version.certificate_type, true);
-    log_firmware_signature_type(firmware_version.signature_type, false);
-}
-
-static void log_device_version(k4a_hardware_version_t firmware_version)
-{
-    std::cout << "Current Firmware Versions:" << std::endl;
-    std::cout << "  RGB camera firmware:      " << (uint16_t)firmware_version.rgb.major << "."
-              << (uint16_t)firmware_version.rgb.minor << "." << firmware_version.rgb.iteration << std::endl;
-    std::cout << "  Depth camera firmware:    " << (uint16_t)firmware_version.depth.major << "."
-              << (uint16_t)firmware_version.depth.minor << "." << firmware_version.depth.iteration << std::endl;
-    std::cout << "  Depth config file:        " << firmware_version.depth_sensor.major << "."
-              << firmware_version.depth_sensor.minor << std::endl;
-    std::cout << "  Audio firmware:           " << (uint16_t)firmware_version.audio.major << "."
-              << (uint16_t)firmware_version.audio.minor << "." << firmware_version.audio.iteration << std::endl;
-
-    log_firmware_build_config((k4a_firmware_build_t)firmware_version.firmware_build);
-    log_firmware_signature_type((k4a_firmware_signature_t)firmware_version.firmware_signature, true);
-}
 
 void firmware_fw::open_firmware_device()
 {
@@ -859,28 +623,16 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
 
     // Check that we are still on the old version
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, depthmcu_get_version(depthmcu_handle, &current_version));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
     log_device_version(current_version);
-    ASSERT_TRUE(compare_version(current_version.audio_major,
-                                current_version.audio_minor,
-                                current_version.audio_build,
-                                candidate_firmware_package_info.audio))
+    ASSERT_TRUE(compare_version(current_version.audio, candidate_firmware_package_info.audio))
         << "Audio version mismatch";
-    ASSERT_TRUE(compare_version_list(current_version.depth_sensor_cfg_major,
-                                     current_version.depth_sensor_cfg_minor,
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor,
                                      candidate_firmware_package_info.depth_config_number_versions,
                                      candidate_firmware_package_info.depth_config_versions))
         << "Depth Config mismatch";
-    ASSERT_TRUE(compare_version(current_version.depth_major,
-                                current_version.depth_minor,
-                                current_version.depth_build,
-                                candidate_firmware_package_info.depth))
-        << "Depth mismatch";
-    ASSERT_TRUE(compare_version(current_version.rgb_major,
-                                current_version.rgb_minor,
-                                current_version.rgb_build,
-                                candidate_firmware_package_info.rgb))
-        << "RGB mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth, candidate_firmware_package_info.depth)) << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb, candidate_firmware_package_info.rgb)) << "RGB mismatch";
 
     // Update to the Test firmware, but interrupt at the depth erase stage...
     LOG_INFO("Interrupting at Depth Erase stage");
@@ -925,28 +677,16 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
 
     // Check that we are still on the old version
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, depthmcu_get_version(depthmcu_handle, &current_version));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
     log_device_version(current_version);
-    ASSERT_TRUE(compare_version(current_version.audio_major,
-                                current_version.audio_minor,
-                                current_version.audio_build,
-                                candidate_firmware_package_info.audio))
+    ASSERT_TRUE(compare_version(current_version.audio, candidate_firmware_package_info.audio))
         << "Audio version mismatch";
-    ASSERT_TRUE(compare_version_list(current_version.depth_sensor_cfg_major,
-                                     current_version.depth_sensor_cfg_minor,
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor,
                                      candidate_firmware_package_info.depth_config_number_versions,
                                      candidate_firmware_package_info.depth_config_versions))
         << "Depth Config mismatch";
-    ASSERT_TRUE(compare_version(current_version.depth_major,
-                                current_version.depth_minor,
-                                current_version.depth_build,
-                                candidate_firmware_package_info.depth))
-        << "Depth mismatch";
-    ASSERT_TRUE(compare_version(current_version.rgb_major,
-                                current_version.rgb_minor,
-                                current_version.rgb_build,
-                                candidate_firmware_package_info.rgb))
-        << "RGB mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth, candidate_firmware_package_info.depth)) << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb, candidate_firmware_package_info.rgb)) << "RGB mismatch";
 
     // Update to the Test firmware, but interrupt at the RGB erase stage...
     LOG_INFO("Interrupting at RGB Erase stage");
@@ -964,28 +704,16 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
 
     // Check that we are still on the old version
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, depthmcu_get_version(depthmcu_handle, &current_version));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
     log_device_version(current_version);
-    ASSERT_TRUE(compare_version(current_version.audio_major,
-                                current_version.audio_minor,
-                                current_version.audio_build,
-                                candidate_firmware_package_info.audio))
+    ASSERT_TRUE(compare_version(current_version.audio, candidate_firmware_package_info.audio))
         << "Audio version mismatch";
-    ASSERT_TRUE(compare_version_list(current_version.depth_sensor_cfg_major,
-                                     current_version.depth_sensor_cfg_minor,
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor,
                                      candidate_firmware_package_info.depth_config_number_versions,
                                      candidate_firmware_package_info.depth_config_versions))
         << "Depth Config mismatch";
-    ASSERT_TRUE(compare_version(current_version.depth_major,
-                                current_version.depth_minor,
-                                current_version.depth_build,
-                                candidate_firmware_package_info.depth))
-        << "Depth mismatch";
-    ASSERT_TRUE(compare_version(current_version.rgb_major,
-                                current_version.rgb_minor,
-                                current_version.rgb_build,
-                                candidate_firmware_package_info.rgb))
-        << "RGB mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth, candidate_firmware_package_info.depth)) << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb, candidate_firmware_package_info.rgb)) << "RGB mismatch";
 
     // Update to the Test firmware, but interrupt at the RGB write stage...
     LOG_INFO("Interrupting at RGB Write stage");
@@ -1017,55 +745,4 @@ TEST_F(firmware_fw, interrupt_update_reboot)
     // Update back to the LKG firmware
     LOG_INFO("Updating the device back to the LKG firmware.");
     perform_device_update(lkg_firmware_buffer, lkg_firmware_size, lkg_firmware_package_info, false);
-}
-
-int main(int argc, char **argv)
-{
-    bool error = false;
-
-    srand((unsigned int)time(0)); // use current time as seed for random generator
-
-    k4a_unittest_init();
-    ::testing::InitGoogleTest(&argc, argv);
-
-    for (int i = 1; i < argc; ++i)
-    {
-        char *argument = argv[i];
-
-        for (int j = 0; argument[j]; j++)
-        {
-            argument[j] = (char)tolower(argument[j]);
-        }
-
-        if (strcmp(argument, "--firmware") == 0)
-        {
-            if (i + 1 <= argc)
-            {
-                g_candidate_firmware_path = argv[++i];
-                printf("Setting g_test_firmware_path = %s\n", g_candidate_firmware_path);
-            }
-            else
-            {
-                printf("Error: firmware path parameter missing\n");
-                error = true;
-            }
-        }
-
-        if ((strcmp(argument, "-h") == 0) || (strcmp(argument, "/h") == 0) || (strcmp(argument, "-?") == 0) ||
-            (strcmp(argument, "/?") == 0))
-        {
-            error = true;
-        }
-    }
-
-    if (error)
-    {
-        printf("\n\nCustom Test Settings:\n");
-        printf("  --firmware <firmware path>\n");
-        printf("      This is the path to the candidate firmware that should be tested.\n");
-
-        return 1; // Indicates an error or warning
-    }
-
-    return RUN_ALL_TESTS();
 }
