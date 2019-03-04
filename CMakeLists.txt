@@ -114,12 +114,9 @@ else()
     message(STATUS "clang-format version: ${CLANG_VERSION_STRING}")
 
     if (${CLANG_VERSION_STRING} MATCHES "^.*${VALID_CLANG_FORMAT_VERSION}.*$")
-        find_package(PythonInterp 3)
-        if (NOT ${PYTHONINTERP_FOUND})
-            find_program(PYTHON_EXECUTABLE python3 DOC "python3")
-            if (${PYTHON_EXECUTABLE} STREQUAL "PYTHON_EXECUTABLE-NOTFOUND")
-                message(FATAL_ERROR "Could not find Python3")
-            endif()
+        find_package(Python3 COMPONENTS Interpreter)
+        if (NOT ${Python3_FOUND})
+            message(FATAL_ERROR "Could not find Python3")
         endif()
 
 
@@ -142,7 +139,7 @@ else()
 
             add_custom_command(
                 OUTPUT ${validateoutput}
-                COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --clangformat "${CLANG_FORMAT}" --file ${file} --output ${validateoutput}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --clangformat "${CLANG_FORMAT}" --file ${file} --output ${validateoutput}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
                 DEPENDS ${file}
                 COMMENT "Validating format of ${file}"
@@ -152,7 +149,7 @@ else()
 
             add_custom_command(
                 OUTPUT ${reformatoutput}
-                COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --reformat --clangformat "${CLANG_FORMAT}" --file ${file} --output ${reformatoutput}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --reformat --clangformat "${CLANG_FORMAT}" --file ${file} --output ${reformatoutput}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
                 DEPENDS ${file}
                 COMMENT "Reformatting ${file}"
