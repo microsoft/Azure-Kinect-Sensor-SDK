@@ -22,12 +22,8 @@
 // This will define the path to the new firmware drop to test and the last known good firmware drop. The firmware update
 // process runs from the current firmware. In order to test the firmware update process, the device must be on the
 // firmware you want to test and then updated to a different firmware.
-// Since switching to the MSFTCert, there is no longer a valid LKG firmware that can be used to roll back to. For now
-// this is hard coded to a private firmware. This should be updated to use only checked-in firmwares once the new drop
-// is available.
-#define K4A_TEST_FIRMWARE_PATH "..\\..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
-#define K4A_LKG_FIRMWARE_PATH                                                                                          \
-    "D:\\Temp\\Eden\\DV-FW.190122\\Eden_Composite_MSFTCert_Release_MSFTSigned_1.105.786013_5006.27_6109.07_0122.bin"
+#define K4A_TEST_FIRMWARE_PATH "..\\..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.886314.bin"
+#define K4A_LKG_FIRMWARE_PATH "..\\..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
 
 static k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer, size_t *firmware_size);
 
