@@ -111,6 +111,9 @@ jobs:
       workingDirectory: '$(Build.BinariesDirectory)'
       cmakeArgs: '--build . --config "$(CMakeConfiguration)" --target package'
 
+  - powershell: '$(Build.SourcesDirectory)/scripts/verify-cgmanifest.ps1 -Path "$(Build.SourcesDirectory)"'
+    displayName: 'Verify submodules are listed in cgmanifest.json'
+
   - script: 'ctest -V -C "$(CMakeConfiguration)" -L unit'
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'Unit Tests'

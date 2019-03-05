@@ -12,6 +12,33 @@
       "component": {
        "type": "git",
        "git": {
+         "repositoryUrl": "https://github.com/Azure/azure-ctest.git",
+         "commitHash": "ee4e06f0a5827a98417f389e013122decc1a3765"
+         }
+       }
+    },
+    {
+      "component": {
+       "type": "git",
+       "git": {
+         "repositoryUrl": "https://github.com/Azure/umock-c.git",
+         "commitHash": "fee1b3e19645628c521ea64778e77c64cc614f5d"
+         }
+       }
+    },
+    {
+      "component": {
+       "type": "git",
+       "git": {
+         "repositoryUrl": "https://github.com/Azure/azure-c-testrunnerswitcher.git",
+         "commitHash": "c52b67126e10a2697b6d069e2b3f38b4d4229a42"
+         }
+       }
+    },
+    {
+      "component": {
+       "type": "git",
+       "git": {
          "repositoryUrl": "https://github.com/DaveGamble/cJSON.git",
          "commitHash": "08103f048e5f54c8f60aaefda16761faf37114f2"
          }
@@ -58,7 +85,7 @@
        "type": "git",
        "git": {
          "repositoryUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo.git",
-         "commitHash": "07e304c3bfed605ddbf5333ad284f9de33c1e9f6"
+         "commitHash": "bb3d325624526c91646bb9af9578d7198c082d51"
          }
        }
     },
