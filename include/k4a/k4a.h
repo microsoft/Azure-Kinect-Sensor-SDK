@@ -22,10 +22,10 @@ extern "C" {
 
 /** Gets the number of connected devices
  *
- * \returns number of sensors connected to the PC
+ * \returns Number of sensors connected to the PC.
  *
  * \remarks
- * This API counts the number of K4A devices connected to the host PC
+ * This API counts the number of K4A devices connected to the host PC.
  *
  * \xmlonly
  * <requirements>
@@ -43,9 +43,9 @@ K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
  * The index of the device to open, starting with 0. Optionally pass in #K4A_DEVICE_DEFAULT.
  *
  * \param device_handle
- * Output parameter which on success will return a handle to the device
+ * Output parameter which on success will return a handle to the device.
  *
- * \return ::K4A_RESULT_SUCCEEDED if the device was opened successfully
+ * \return ::K4A_RESULT_SUCCEEDED if the device was opened successfully.
  *
  * \remarks
  * If successful, k4a_device_open() will return a device handle in the device_handle parameter.
@@ -67,14 +67,14 @@ K4A_EXPORT k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_han
 /** Closes a k4a device.
  *
  * \param device_handle
- * Handle obtained by k4a_device_open()
+ * Handle obtained by k4a_device_open().
  *
  * \relates k4a_device_t
  *
  * \remarks Once closed, the handle is no longer valid.
  *
  * \remarks Before closing the handle to the device, ensure that all k4a_capture_t captures have been released with
- * k4a_capture_release()
+ * k4a_capture_release().
  *
  * \xmlonly
  * <requirements>
@@ -92,12 +92,13 @@ K4A_EXPORT void k4a_device_close(k4a_device_t device_handle);
  * Handle obtained by k4a_device_open().
  *
  * \param capture_handle
- * If successful, this contains a handle to a capture object. Caller must call k4a_capture_release() when it's done
- * using this capture
+ * If successful this contains a handle to a capture object. Caller must call k4a_capture_release() when its done using
+ * this capture.
  *
  * \param timeout_in_ms
- * Specifies the time in milliseconds the function should block waiting for the capture. 0 is a check of the queue
- * without blocking. Passing a value of #K4A_WAIT_INFINITE will block indefinitely.
+ * Specifies the time in milliseconds the function should block waiting for the capture. If set to 0, the function will
+ * return without blocking. Passing a value of #K4A_WAIT_INFINITE will block indefinitely until data is available, the
+ * device is disconnected, or another error occurs.
  *
  * \returns
  * ::K4A_WAIT_RESULT_SUCCEEDED if a capture is returned. If a capture is not available before the timeout elapses, the
@@ -107,24 +108,30 @@ K4A_EXPORT void k4a_device_close(k4a_device_t device_handle);
  *
  * \remarks
  * Gets the next capture in the streamed sequence of captures from the camera. If a new capture is not currently
- * available, this function will block up until the timeout is reached. The SDK will buffer at least two captures worth
- * of data before dropping the oldest capture. Callers needing to capture all data need to ensure they call this
- * function at least once per capture interval on average. Capture data read must call k4a_capture_release() to return
- * the allocated memory to the SDK.
+ * available, this function will block until the timeout is reached. The SDK will buffer at least two captures worth
+ * of data before dropping the oldest capture. Callers needing to capture all data need to ensure they read the data as
+ * fast as the data is being produced on average.
  *
  * \remarks
  * Upon successfully reading a capture this function will return success and populate \p capture.
  * If a capture is not available in the configured \p timeout_in_ms, then the API will return ::K4A_WAIT_RESULT_TIMEOUT.
  *
+ * * \remarks
+ * If the call is successful and a capture is returned, callers must call k4a_capture_release() to return the allocated
+ * memory.
+ *
  * \remarks
- * This function returns an error when an internal problem is encountered, such as loss of the USB connection, a low
- * memory condition, or other unexpected issues. Once an error is returned, the API will continue to return an error
- * until k4a_device_stop_cameras() is called to clear the condition.
+ * This function needs to be called while the device is in a running state;
+ * after k4a_device_start_cameras() is called and before k4a_device_stop_cameras() is called.
+ *
+ * \remarks
+ * This function returns an error when an internal problem is encountered; such as loss of the USB connection, inability
+ * to allocate enough memory, and other unexpected issues. Any error returned by this function signals the end of
+ * streaming data, and caller should stop the stream using k4a_device_stop_cameras().
  *
  * \remarks
  * If this function is waiting for data (non-zero timeout) when k4a_device_stop_cameras() or k4a_device_close() is
- * called, this function will return an error. This function needs to be called while the device is in a running state;
- * after k4a_device_start_cameras() is called and before k4a_device_stop_cameras() is called.
+ * called on another thread, this function will return an error.
  *
  * \xmlonly
  * <requirements>
@@ -144,12 +151,13 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,
  * \param device_handle
  * Handle obtained by k4a_device_open().
  *
- * \param imu_sample [out]
- * pointer to a location to write the IMU sample to
+ * \param imu_sample
+ * Pointer to the location for the API to write the IMU sample.
  *
  * \param timeout_in_ms
- * Specifies the time in milliseconds the function should block waiting for the IMU sample. 0 is a check of the queue
- * without blocking. Passing a value of #K4A_WAIT_INFINITE will block indefinitely.
+ * Specifies the time in milliseconds the function should block waiting for the sample. If set to 0, the function will
+ * return without blocking. Passing a value of #K4A_WAIT_INFINITE will block indefinitely until data is available, the
+ * device is disconnected, or another error occurs.
  *
  * \returns
  * ::K4A_WAIT_RESULT_SUCCEEDED if a sample is returned. If a sample is not available before the timeout elapses, the
@@ -158,27 +166,31 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,
  * \relates k4a_device_t
  *
  * \remarks
- * Gets the next sample in the streamed sequence of samples from the device. If a new sample is not currently
- * available, this function will block up until the timeout is reached. The SDK will buffer at least two samples worth
- * of data before dropping the oldest sample. Callers needing to see all data must ensure they call this
- * function at least once per IMU sample interval on average.
+ * Gets the next sample in the streamed sequence of IMU samples from the device. If a new sample is not currently
+ * available, this function will block until the timeout is reached. The API will buffer at least two camera capture
+ * intervals worth of samples before dropping the oldest sample. Callers needing to capture all data need to ensure they
+ * read the data as fast as the data is being produced on average.
  *
  * \remarks
  * Upon successfully reading a sample this function will return success and populate \p imu_sample.
  * If a sample is not available in the configured \p timeout_in_ms, then the API will return ::K4A_WAIT_RESULT_TIMEOUT.
  *
  * \remarks
- * This function returns an error when an internal problem is encountered; such as loss of the USB connection, a low
- * memory condition, or other unexpected issues. Once an error is returned, the API will continue to return an error
- * until k4a_device_stop_imu() is called to clear the condition.
- *
- * \remarks
- * If this function is waiting for data (non-zero timeout) when k4a_device_stop_imu() or k4a_device_close() is
- * called, this function will return an error. This function needs to be called while the device is in a running state;
+ * This function needs to be called while the device is in a running state;
  * after k4a_device_start_imu() is called and before k4a_device_stop_imu() is called.
  *
  * \remarks
- * There is no need to free the imu_sample after using imu_sample.
+ * This function returns an error when an internal problem is encountered; such as loss of the USB connection, inability
+ * to allocate enough memory, and other unexpected issues. Any error returned by this function signals the end of
+ * streaming data, and caller should stop the stream using k4a_device_stop_imu().
+ *
+ * \remarks
+ * If this function is waiting for data (non-zero timeout) when k4a_device_stop_imu() or k4a_device_close() is
+ * called on another thread, this function will return an error.
+ *
+ * \remarks
+ * The memory the IMU sample is written to is allocated and owned by the caller, so there is no need to call a k4a API
+ * to free or release the sample.
  *
  * \xmlonly
  * <requirements>
@@ -192,20 +204,20 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handl
                                                        k4a_imu_sample_t *imu_sample,
                                                        int32_t timeout_in_ms);
 
-/** create an empty capture object
+/** Create an empty capture object.
  *
  * \param capture_handle
- * Pointer to a location to write an empty capture handle
+ * Pointer to a location to store the handle.
  *
  * \relates k4a_capture_t
  *
  * \remarks
- * Call this function to create a capture handle. Release it with k4a_capture_release().
+ * Call this function to create a k4a_capture_t handle for a new capture. Release it with k4a_capture_release().
  *
- * k4a_capture_t is created with a reference of 1.
+ * The new capture is created with a reference of 1.
  *
  * \returns
- * Returns K4A_RESULT_SUCCEEDED on success. Errors are indicated with K4A_RESULT_FAILED and error specific data can be
+ * Returns #K4A_RESULT_SUCCEEDED on success. Errors are indicated with #K4A_RESULT_FAILED and error specific data can be
  * found in the log.
  *
  * \xmlonly
@@ -218,16 +230,15 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handl
  */
 K4A_EXPORT k4a_result_t k4a_capture_create(k4a_capture_t *capture_handle);
 
-/** Release a capture back to the SDK
+/** Release a capture.
  *
  * \param capture_handle
- * capture to return to SDK
+ * Capture to release.
  *
  * \relates k4a_capture_t
  *
  * \remarks
- * Called when the user is finished using the capture. All captures must be released prior to calling
- * k4a_device_close(), not doing so will result in undefined behavior.
+ * Call this function when finished using the capture.
  *
  * \xmlonly
  * <requirements>
@@ -239,16 +250,16 @@ K4A_EXPORT k4a_result_t k4a_capture_create(k4a_capture_t *capture_handle);
  */
 K4A_EXPORT void k4a_capture_release(k4a_capture_t capture_handle);
 
-/** Add a reference to a capture
+/** Add a reference to a capture.
  *
  * \param capture_handle
- * capture to add a reference to
+ * Capture to add a reference to.
  *
  * \relates k4a_capture_t
  *
  * \remarks
- * Called when the user wants to add an additional reference to a capture. This reference must be removed with
- * k4a_capture_release() to allow the capture to be released.
+ * Call this function to add an additional reference to a capture. This reference must be removed with
+ * k4a_capture_release().
  *
  * \xmlonly
  * <requirements>
@@ -260,15 +271,15 @@ K4A_EXPORT void k4a_capture_release(k4a_capture_t capture_handle);
  */
 K4A_EXPORT void k4a_capture_reference(k4a_capture_t capture_handle);
 
-/** Get the color image associated with the given capture
+/** Get the color image associated with the given capture.
  *
  * \param capture_handle
- * Capture handle containing the image
+ * Capture handle containing the image.
  *
  * \relates k4a_capture_t
  *
  * \remarks
- * Call this function to access the given image. Release the image with k4a_image_release();
+ * Call this function to access the color image part of this capture. Release the k4a_image_t with k4a_image_release();
  *
  * \xmlonly
  * <requirements>
@@ -280,15 +291,15 @@ K4A_EXPORT void k4a_capture_reference(k4a_capture_t capture_handle);
  */
 K4A_EXPORT k4a_image_t k4a_capture_get_color_image(k4a_capture_t capture_handle);
 
-/** Get the depth image associated with the given capture
+/** Get the depth image associated with the given capture.
  *
  * \param capture_handle
- * Capture handle containing the image
+ * Capture handle containing the image.
  *
  * \relates k4a_capture_t
  *
  * \remarks
- * Call this function to access the given image. Release the image with k4a_image_release();
+ * Call this function to access the depth image part of this capture. Release the k4a_image_t with k4a_image_release();
  *
  * \xmlonly
  * <requirements>
@@ -300,15 +311,15 @@ K4A_EXPORT k4a_image_t k4a_capture_get_color_image(k4a_capture_t capture_handle)
  */
 K4A_EXPORT k4a_image_t k4a_capture_get_depth_image(k4a_capture_t capture_handle);
 
-/** Get the ir image associated with the given capture
+/** Get the IR image associated with the given capture.
  *
  * \param capture_handle
- * Capture handle containing the image
+ * Capture handle containing the image.
  *
  * \relates k4a_capture_t
  *
  * \remarks
- * Call this function to access the given image. Release the image with k4a_image_release();
+ * Call this function to access the IR image part of this capture. Release the k4a_image_t with k4a_image_release();
  *
  * \xmlonly
  * <requirements>
@@ -320,20 +331,31 @@ K4A_EXPORT k4a_image_t k4a_capture_get_depth_image(k4a_capture_t capture_handle)
  */
 K4A_EXPORT k4a_image_t k4a_capture_get_ir_image(k4a_capture_t capture_handle);
 
-/** Set / add a color image to the associated capture
+/** Set or add a color image to the associated capture.
  *
  * \param capture_handle
- * Capture handle containing to hold the image
+ * Capture handle to hold the image.
  *
  * \param image_handle
- * Image handle containing the image
+ * Image handle containing the image.
  *
  * \relates k4a_capture_t
  *
  * \remarks
- * If there is already an image of this type contained by the capture, it will be dropped. The caller can pass in a NULL
- * image to drop the existing image without having to add a new one. Calling capture_release() will also remove the
- * image reference the capture has on the image and may result in the image being freed.
+ * When a k4a_image_t is added to a k4a_capture_t, the k4a_capture_t will automatically add a reference to the
+ * k4a_image_t.
+ *
+ * \remarks
+ * If there is already a color image contained in the capture, the existing image will be dereferenced and replaced with
+ * the new image.
+ *
+ * \remarks
+ * To remove a color image to the capture without adding a new image, this function can be called with a NULL
+ * image_handle.
+ *
+ * \remarks
+ * Any k4a_image_t contained in this k4a_capture_t will automatically be dereferenced when all references to the
+ * k4a_capture_t are released with k4a_capture_release().
  *
  * \xmlonly
  * <requirements>
@@ -345,20 +367,31 @@ K4A_EXPORT k4a_image_t k4a_capture_get_ir_image(k4a_capture_t capture_handle);
  */
 K4A_EXPORT void k4a_capture_set_color_image(k4a_capture_t capture_handle, k4a_image_t image_handle);
 
-/** Set / add a depth image to the associated capture
+/** Set or add a depth image to the associated capture.
  *
  * \param capture_handle
- * Capture handle containing to hold the image
+ * Capture handle to hold the image.
  *
  * \param image_handle
- * Image handle containing the image
+ * Image handle containing the image.
  *
  * \relates k4a_capture_t
  *
  * \remarks
- * If there is already an image of this type contained by the capture, it will be dropped. The caller can pass in a NULL
- * image to drop the existing image without having to add a new one. Calling capture_release() will also remove the
- * image reference the capture has on the image and may result in the image being freed.
+ * When a k4a_image_t is added to a k4a_capture_t, the k4a_capture_t will automatically add a reference to the
+ * k4a_image_t.
+ *
+ * \remarks
+ * If there is already an image depth image contained in the capture, the existing image will be dereferenced and
+ * replaced with the new image.
+ *
+ * \remarks
+ * To remove a depth image to the capture without adding a new image, this function can be called with a NULL
+ * image_handle.
+ *
+ * \remarks
+ * Any k4a_image_t contained in this k4a_capture_t will automatically be dereferenced when all references to the
+ * k4a_capture_t are released with k4a_capture_release().
  *
  * \xmlonly
  * <requirements>
@@ -370,20 +403,30 @@ K4A_EXPORT void k4a_capture_set_color_image(k4a_capture_t capture_handle, k4a_im
  */
 K4A_EXPORT void k4a_capture_set_depth_image(k4a_capture_t capture_handle, k4a_image_t image_handle);
 
-/** Set / add an IR image to the associated capture
+/** Set or add an IR image to the associated capture.
  *
  * \param capture_handle
- * Capture handle containing to hold the image
+ * Capture handle to hold the image.
  *
  * \param image_handle
- * Image handle containing the image
+ * Image handle containing the image.
  *
  * \relates k4a_capture_t
  *
  * \remarks
- * If there is already an image of this type contained by the capture, it will be dropped. The caller can pass in a NULL
- * image to drop the existing image without having to add a new one. Calling capture_release() will also remove the
- * image reference the capture has on the image and may result in the image being freed.
+ * When a k4a_image_t is added to a k4a_capture_t, the k4a_capture_t will automatically add a reference to the
+ * k4a_image_t.
+ *
+ * \remarks
+ * If there is already an IR image contained in the capture, the existing image will be dereferenced and replaced with
+ * the new image.
+ *
+ * \remarks
+ * To remove a IR image to the capture without adding a new image, this function can be called with a NULL image_handle.
+ *
+ * \remarks
+ * Any k4a_image_t contained in this k4a_capture_t will automatically be dereferenced when all references to the
+ * k4a_capture_t are released with k4a_capture_release().
  *
  * \xmlonly
  * <requirements>
@@ -398,7 +441,7 @@ K4A_EXPORT void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image
 /** Set the temperature associated with the capture.
  *
  * \param capture_handle
- * Capture handle for the temperature to modify
+ * Capture handle to set the temperature on.
  *
  * \param temperature_c
  * Temperature in Celsius to store.
@@ -418,7 +461,11 @@ K4A_EXPORT void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, floa
 /** Get the temperature associated with the capture.
  *
  * \param capture_handle
- * Capture handle for the temperature to access
+ * Capture handle to retrieve the temperature from.
+ *
+ * \return
+ * This function returns the temperature of the device at the time of the capture in Celsius. If
+ * the temperature is unavailable, the function will return NAN.
  *
  * \relates k4a_capture_t
  *
