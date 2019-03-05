@@ -12,7 +12,10 @@
 class firmware_fw : public ::testing::Test
 {
 public:
-    static void SetUpTestCase() {}
+    static void SetUpTestCase()
+    {
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, TRACE_CALL(setup_common_test()));
+    }
 
     static void TearDownTestCase() {}
 

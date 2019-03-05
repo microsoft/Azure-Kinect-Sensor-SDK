@@ -4,6 +4,7 @@
 #ifndef FIRMWARE_HELPER_H
 #define FIRMWARE_HELPER_H
 
+#include <k4a/k4atypes.h>
 #include <k4ainternal/firmware.h>
 #include <ConnEx.h>
 
@@ -60,6 +61,8 @@ extern uint8_t *factory_firmware_buffer;
 extern size_t factory_firmware_size;
 extern firmware_package_info_t factory_firmware_package_info;
 
+k4a_result_t setup_common_test();
+
 k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer, size_t *firmware_size);
 firmware_operation_status_t calculate_overall_component_status(const firmware_component_status_t status);
 
@@ -71,18 +74,18 @@ void log_firmware_signature_type(k4a_firmware_signature_t signature_type, bool c
 void log_firmware_version(firmware_package_info_t firmware_version);
 void log_device_version(k4a_hardware_version_t firmware_version);
 
-void open_firmware_device(firmware_t *firmware_handle);
-void reset_device(firmware_t *firmware_handle);
-void interrupt_operation(firmware_t *firmware_handle, firmware_operation_interruption_t interruption);
-void interrupt_device_at_update_stage(firmware_t *firmware_handle,
-                                      firmware_operation_component_t component,
-                                      firmware_operation_interruption_t interruption,
-                                      firmware_status_summary_t *final_status,
-                                      bool verbose_logging);
-void perform_device_update(firmware_t *firmware_handle,
-                           uint8_t *firmware_buffer,
-                           size_t firmware_size,
-                           firmware_package_info_t firmware_package_info,
-                           bool verbose_logging);
+k4a_result_t open_firmware_device(firmware_t *firmware_handle);
+k4a_result_t reset_device(firmware_t *firmware_handle);
+k4a_result_t interrupt_operation(firmware_t *firmware_handle, firmware_operation_interruption_t interruption);
+k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
+                                              firmware_operation_component_t component,
+                                              firmware_operation_interruption_t interruption,
+                                              firmware_status_summary_t *final_status,
+                                              bool verbose_logging);
+k4a_result_t perform_device_update(firmware_t *firmware_handle,
+                                   uint8_t *firmware_buffer,
+                                   size_t firmware_size,
+                                   firmware_package_info_t firmware_package_info,
+                                   bool verbose_logging);
 
 #endif /* FIRMWARE_HELPER_H */
