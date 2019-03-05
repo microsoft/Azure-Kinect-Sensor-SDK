@@ -25,7 +25,7 @@ extern "C" {
 static k4a_version_t g_min_fw_version_rgb = { 1, 5, 88 };             // 1.5.88
 static k4a_version_t g_min_fw_version_depth = { 1, 5, 63 };           // 1.5.63
 static k4a_version_t g_min_fw_version_audio = { 1, 5, 14 };           // 1.5.14
-static k4a_version_t g_min_fw_version_depth_config = { 5006, 27, 0 }; // 5006.27 (interation is not used, set to zero)
+static k4a_version_t g_min_fw_version_depth_config = { 5006, 27, 0 }; // 5006.27 (iteration is not used, set to zero)
 
 #define MINOR_VERSION_OFFSET_1 100 // Some variants of development FW offset minor version with 100
 #define MINOR_VERSION_OFFSET_2 200 // Some variants of development FW offset minor version with 200

@@ -116,7 +116,7 @@ k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
     // Create MCU modules
     if (K4A_SUCCEEDED(result))
     {
-        // This will block until the depth process is ready to recieve commands
+        // This will block until the depth process is ready to receive commands
         result = TRACE_CALL(depthmcu_create(index, &device->depthmcu));
     }
 
