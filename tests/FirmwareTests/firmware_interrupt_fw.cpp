@@ -25,7 +25,10 @@ class firmware_interrupt_fw : public ::testing::Test,
                               public ::testing::WithParamInterface<firmware_interrupt_parameters>
 {
 public:
-    static void SetUpTestCase() {}
+    static void SetUpTestCase()
+    {
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, TRACE_CALL(setup_common_test()));
+    }
 
     static void TearDownTestCase() {}
 

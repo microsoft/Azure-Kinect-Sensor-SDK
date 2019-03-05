@@ -7,24 +7,40 @@
 #include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/threadapi.h>
 
-#define K4A_RETURN_FAILED_IF_FAILED(_result_)                                                                          \
-    if (K4A_FAILED(_result_))                                                                                          \
+#define K4A_TEST_VERIFY_SUCCEEDED(_result_)                                                                            \
+    if (K4A_FAILED(TRACE_CALL(_result_)))                                                                              \
     {                                                                                                                  \
-        std::cout << "\"" #_result_ "\" Failed" << std::endl;                                                          \
         return K4A_RESULT_FAILED;                                                                                      \
     }
 
-#define K4A_RETURN_FAILED_IF_TRUE(_condition_)                                                                         \
-    if (_condition_)                                                                                                   \
-    {                                                                                                                  \
-        std::cout << "\"" #_condition_ "\" was true and expected to be false." << std::endl;                           \
-        return K4A_RESULT_FAILED;                                                                                      \
-    }
-
-#define K4A_RETURN_FAILED_IF_FALSE(_condition_)                                                                        \
+#define K4A_TEST_VERIFY_TRUE(_condition_)                                                                              \
     if (!(_condition_))                                                                                                \
     {                                                                                                                  \
-        std::cout << "\"" #_condition_ "\"  false and expected to be true." << std::endl;                              \
+        LOG_ERROR("\"" #_condition_ "\" was false but was expected to be true.");                                      \
+        return K4A_RESULT_FAILED;                                                                                      \
+    }
+
+#define K4A_TEST_VERIFY_LE(_val1_, _val2_)                                                                             \
+    if ((_val1_) > (_val2_))                                                                                           \
+    {                                                                                                                  \
+        LOG_ERROR("\"" #_val1_ "\" > \"" #_val2_ "\" but was expected to be less than or equal.");                     \
+        std::cout << "\"" #_val1_ "\" = " << (_val1_) << " \"" #_val2_ "\" = " << (_val2_) << std::endl;               \
+        return K4A_RESULT_FAILED;                                                                                      \
+    }
+
+#define K4A_TEST_VERIFY_EQUAL(_val1_, _val2_)                                                                          \
+    if ((_val1_) != (_val2_))                                                                                          \
+    {                                                                                                                  \
+        LOG_ERROR("\"" #_val1_ "\" != \"" #_val2_ "\" but was expected to be equal.");                                 \
+        std::cout << "\"" #_val1_ "\" = " << (_val1_) << " \"" #_val2_ "\" = " << (_val2_) << std::endl;               \
+        return K4A_RESULT_FAILED;                                                                                      \
+    }
+
+#define K4A_TEST_VERIFY_NOT_EQUAL(_val1_, _val2_)                                                                      \
+    if ((_val1_) == (_val2_))                                                                                          \
+    {                                                                                                                  \
+        LOG_ERROR("\"" #_val1_ "\" == \"" #_val2_ "\" but was expected to not be equal.");                             \
+        std::cout << "\"" #_val1_ "\" = " << (_val1_) << " \"" #_val2_ "\" = " << (_val2_) << std::endl;               \
         return K4A_RESULT_FAILED;                                                                                      \
     }
 
@@ -49,11 +65,18 @@ uint8_t *factory_firmware_buffer = nullptr;
 size_t factory_firmware_size = 0;
 firmware_package_info_t factory_firmware_package_info = { 0 };
 
+static bool common_initialized = false;
+
 k4a_result_t setup_common_test()
 {
     int port;
     float voltage;
     float current;
+
+    if (common_initialized)
+    {
+        return K4A_RESULT_SUCCEEDED;
+    }
 
     if (g_candidate_firmware_path == nullptr)
     {
@@ -65,22 +88,22 @@ k4a_result_t setup_common_test()
     g_connection_exerciser = new (std::nothrow) connection_exerciser();
 
     LOG_INFO("Searching for Connection Exerciser...", 0);
-    K4A_RETURN_FAILED_IF_FAILED(g_connection_exerciser->find_connection_exerciser());
+    K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->find_connection_exerciser());
     LOG_INFO("Clearing port...");
-    K4A_RETURN_FAILED_IF_FAILED(g_connection_exerciser->set_usb_port(0));
+    K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
 
     LOG_INFO("Searching for device...");
 
     for (int i = 0; i < CONN_EX_MAX_NUM_PORTS; ++i)
     {
-        K4A_RETURN_FAILED_IF_FAILED(g_connection_exerciser->set_usb_port(i));
+        K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(i));
         port = g_connection_exerciser->get_usb_port();
-        K4A_RETURN_FAILED_IF_FALSE(port == i);
+        K4A_TEST_VERIFY_EQUAL(port, i);
 
         voltage = g_connection_exerciser->get_voltage_reading();
-        K4A_RETURN_FAILED_IF_TRUE(voltage == -1);
+        K4A_TEST_VERIFY_NOT_EQUAL(voltage, -1);
         current = g_connection_exerciser->get_current_reading();
-        K4A_RETURN_FAILED_IF_TRUE(current == -1);
+        K4A_TEST_VERIFY_NOT_EQUAL(current, -1);
 
         if (current < 0)
         {
@@ -105,7 +128,7 @@ k4a_result_t setup_common_test()
         std::cout << "The Kinect for Azure was not detected on a port of the connection exerciser." << std::endl;
         return K4A_RESULT_FAILED;
     }
-    K4A_RETURN_FAILED_IF_FAILED(g_connection_exerciser->set_usb_port(0));
+    K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
 
     std::cout << "Loading Test firmware package: " << K4A_TEST_FIRMWARE_PATH << std::endl;
     load_firmware_files(K4A_TEST_FIRMWARE_PATH, &test_firmware_buffer, &test_firmware_size);
@@ -123,6 +146,7 @@ k4a_result_t setup_common_test()
     load_firmware_files(K4A_FACTORY_FIRMWARE_PATH, &factory_firmware_buffer, &factory_firmware_size);
     parse_firmware_package(factory_firmware_buffer, factory_firmware_size, &factory_firmware_package_info);
 
+    common_initialized = true;
     return K4A_RESULT_SUCCEEDED;
 }
 
@@ -158,6 +182,8 @@ void tear_down_common_test()
         free(factory_firmware_buffer);
         factory_firmware_buffer = nullptr;
     }
+
+    common_initialized = false;
 }
 
 k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer, size_t *firmware_size)
@@ -247,6 +273,39 @@ bool compare_version(k4a_version_t left_version, k4a_version_t right_version)
            left_version.iteration == right_version.iteration;
 }
 
+bool compare_version(k4a_hardware_version_t device_version, firmware_package_info_t firmware_version)
+{
+    bool equal = true;
+
+    if (compare_version(device_version.audio, firmware_version.audio))
+    {
+        printf("Audio version mismatch");
+        equal = false;
+    }
+
+    if (compare_version_list(device_version.depth_sensor,
+                             firmware_version.depth_config_number_versions,
+                             firmware_version.depth_config_versions))
+    {
+        printf("Depth sensor does not exist in package.");
+        equal = false;
+    }
+
+    if (compare_version(device_version.depth, firmware_version.depth))
+    {
+        printf("Depth version mismatch");
+        equal = false;
+    }
+
+    if (compare_version(device_version.rgb, firmware_version.rgb))
+    {
+        printf("RGB version mismatch");
+        equal = false;
+    }
+
+    return equal;
+}
+
 bool compare_version_list(k4a_version_t device_version, uint8_t count, k4a_version_t versions[5])
 {
     for (int i = 0; i < count; ++i)
@@ -310,22 +369,29 @@ void log_firmware_signature_type(k4a_firmware_signature_t signature_type, bool c
 
 void log_firmware_version(firmware_package_info_t firmware_version)
 {
-    std::cout << "Firmware Package Versions:" << std::endl;
-    std::cout << "  RGB camera firmware:      " << firmware_version.rgb.major << "." << firmware_version.rgb.minor
-              << "." << firmware_version.rgb.iteration << std::endl;
-    std::cout << "  Depth camera firmware:    " << firmware_version.depth.major << "." << firmware_version.depth.minor
-              << "." << firmware_version.depth.iteration << std::endl;
+    printf("Firmware Package Versions:\n");
+    printf("  RGB camera firmware:      %d.%d.%d\n",
+           firmware_version.rgb.major,
+           firmware_version.rgb.minor,
+           firmware_version.rgb.iteration);
+    printf("  Depth camera firmware:    %d.%d.%d\n",
+           firmware_version.depth.major,
+           firmware_version.depth.minor,
+           firmware_version.depth.iteration);
 
-    std::cout << "  Depth config file:        ";
+    printf("  Depth config file:        ");
     for (size_t i = 0; i < firmware_version.depth_config_number_versions; i++)
     {
-        std::cout << firmware_version.depth_config_versions[i].major << "."
-                  << firmware_version.depth_config_versions[i].minor << " ";
+        printf("%d.%d ",
+               firmware_version.depth_config_versions[i].major,
+               firmware_version.depth_config_versions[i].minor);
     }
-    std::cout << std::endl;
+    printf("\n");
 
-    std::cout << "  Audio firmware:           " << firmware_version.audio.major << "." << firmware_version.audio.minor
-              << "." << firmware_version.audio.iteration << std::endl;
+    printf("  Audio firmware:           %d.%d.%d\n",
+           firmware_version.audio.major,
+           firmware_version.audio.minor,
+           firmware_version.audio.iteration);
 
     log_firmware_build_config(firmware_version.build_config);
 
@@ -335,21 +401,28 @@ void log_firmware_version(firmware_package_info_t firmware_version)
 
 void log_device_version(k4a_hardware_version_t firmware_version)
 {
-    std::cout << "Current Firmware Versions:" << std::endl;
-    std::cout << "  RGB camera firmware:      " << (uint16_t)firmware_version.rgb.major << "."
-              << (uint16_t)firmware_version.rgb.minor << "." << firmware_version.rgb.iteration << std::endl;
-    std::cout << "  Depth camera firmware:    " << (uint16_t)firmware_version.depth.major << "."
-              << (uint16_t)firmware_version.depth.minor << "." << firmware_version.depth.iteration << std::endl;
-    std::cout << "  Depth config file:        " << firmware_version.depth_sensor.major << "."
-              << firmware_version.depth_sensor.minor << std::endl;
-    std::cout << "  Audio firmware:           " << (uint16_t)firmware_version.audio.major << "."
-              << (uint16_t)firmware_version.audio.minor << "." << firmware_version.audio.iteration << std::endl;
+    printf("Current Firmware Versions:\n");
+    printf("  RGB camera firmware:      %d.%d.%d\n",
+           firmware_version.rgb.major,
+           firmware_version.rgb.minor,
+           firmware_version.rgb.iteration);
+    printf("  Depth camera firmware:    %d.%d.%d\n",
+           firmware_version.depth.major,
+           firmware_version.depth.minor,
+           firmware_version.depth.iteration);
+    printf("  Depth config file:        %d.%d\n",
+           firmware_version.depth_sensor.major,
+           firmware_version.depth_sensor.minor);
+    printf("  Audio firmware:           %d.%d.%d\n",
+           firmware_version.audio.major,
+           firmware_version.audio.minor,
+           firmware_version.audio.iteration);
 
     log_firmware_build_config((k4a_firmware_build_t)firmware_version.firmware_build);
     log_firmware_signature_type((k4a_firmware_signature_t)firmware_version.firmware_signature, true);
 }
 
-void open_firmware_device(firmware_t *firmware_handle)
+k4a_result_t open_firmware_device(firmware_t *firmware_handle)
 {
     int retry = 0;
     uint32_t device_count = 0;
@@ -357,48 +430,52 @@ void open_firmware_device(firmware_t *firmware_handle)
     while (device_count == 0 && retry++ < 20)
     {
         ThreadAPI_Sleep(500);
-        usb_cmd_get_device_count(&device_count);
+        K4A_TEST_VERIFY_SUCCEEDED(usb_cmd_get_device_count(&device_count));
     }
 
-    ASSERT_LE(retry, 20) << "Device never returned.";
+    K4A_TEST_VERIFY_LE(retry, 20);
 
     LOG_INFO("Opening firmware device...", 0);
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_create(K4A_DEVICE_DEFAULT, firmware_handle)) << "Couldn't open firmware\n";
-    ASSERT_NE(*firmware_handle, nullptr);
+    K4A_TEST_VERIFY_SUCCEEDED(firmware_create(K4A_DEVICE_DEFAULT, firmware_handle));
+    K4A_TEST_VERIFY_TRUE(*firmware_handle != nullptr);
+
+    return K4A_RESULT_SUCCEEDED;
 }
 
-void reset_device(firmware_t *firmware_handle)
+k4a_result_t reset_device(firmware_t *firmware_handle)
 {
     LOG_INFO("Resetting device...", 0);
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_reset_device(*firmware_handle));
+    K4A_TEST_VERIFY_SUCCEEDED(firmware_reset_device(*firmware_handle));
 
     firmware_destroy(*firmware_handle);
     *firmware_handle = nullptr;
 
-    // Re-open the device to ensure it is ready.
-    open_firmware_device(firmware_handle);
+    // Re-open the device to ensure it is ready for use.
+    return TRACE_CALL(open_firmware_device(firmware_handle));
 }
 
-void interrupt_operation(firmware_t *firmware_handle, firmware_operation_interruption_t interruption)
+k4a_result_t interrupt_operation(firmware_t *firmware_handle, firmware_operation_interruption_t interruption)
 {
     switch (interruption)
     {
     case FIRMWARE_OPERATION_RESET:
-        reset_device(firmware_handle);
+        return TRACE_CALL(reset_device(firmware_handle));
         break;
 
     default:
-        ASSERT_TRUE(false) << "Unknown interruption type";
+        LOG_ERROR("Unknown interruption type");
+        return K4A_RESULT_FAILED;
     }
 }
 
-void interrupt_device_at_update_stage(firmware_t *firmware_handle,
-                                      firmware_operation_component_t component,
-                                      firmware_operation_interruption_t interruption,
-                                      firmware_status_summary_t *final_status,
-                                      bool verbose_logging)
+k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
+                                              firmware_operation_component_t component,
+                                              firmware_operation_interruption_t interruption,
+                                              firmware_status_summary_t *final_status,
+                                              bool verbose_logging)
 {
-    ASSERT_NE(nullptr, final_status);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_handle == nullptr);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, final_status == nullptr);
 
     bool all_complete = false;
     k4a_result_t result = K4A_RESULT_FAILED;
@@ -407,9 +484,9 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
     tickcounter_ms_t start_time_ms, now;
 
     TICK_COUNTER_HANDLE tick = tickcounter_create();
-    ASSERT_NE(nullptr, tick) << "Failed to create tick counter.";
+    K4A_TEST_VERIFY_TRUE(tick != nullptr);
 
-    ASSERT_EQ(0, tickcounter_get_current_ms(tick, &start_time_ms));
+    K4A_TEST_VERIFY_EQUAL(0, tickcounter_get_current_ms(tick, &start_time_ms));
 
     do
     {
@@ -479,8 +556,7 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
             {
             case FIRMWARE_OPERATION_START:
                 // As early as possible reset the device.
-                interrupt_operation(firmware_handle, interruption);
-                return;
+                return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
 
             case FIRMWARE_OPERATION_AUDIO_ERASE:
                 if (final_status->audio.image_transfer == FIRMWARE_OPERATION_SUCCEEDED)
@@ -490,9 +566,8 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     sleepTime = 3800;
                     LOG_INFO("Audio Erase started, waiting %dms.\n", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
-                    firmware_get_download_status(*firmware_handle, final_status);
-                    interrupt_operation(firmware_handle, interruption);
-                    return;
+                    TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
+                    return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
                 }
                 break;
 
@@ -504,9 +579,8 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     sleepTime = 9850;
                     LOG_INFO("Audio Write started, waiting %dms.\n", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
-                    firmware_get_download_status(*firmware_handle, final_status);
-                    interrupt_operation(firmware_handle, interruption);
-                    return;
+                    TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
+                    return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
                 }
                 break;
 
@@ -518,9 +592,8 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     sleepTime = 50;
                     LOG_INFO("Depth Erase started, waiting %dms.\n", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
-                    firmware_get_download_status(*firmware_handle, final_status);
-                    interrupt_operation(firmware_handle, interruption);
-                    return;
+                    TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
+                    return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
                 }
                 break;
 
@@ -532,9 +605,8 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     sleepTime = 2850;
                     LOG_INFO("Depth Write started, waiting %dms.\n", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
-                    firmware_get_download_status(*firmware_handle, final_status);
-                    interrupt_operation(firmware_handle, interruption);
-                    return;
+                    TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
+                    return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
                 }
                 break;
 
@@ -543,9 +615,8 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
                 {
                     // The erase takes places after the transfer is complete and takes about 0.05 seconds.
                     LOG_INFO("RGB erase started...\n");
-                    firmware_get_download_status(*firmware_handle, final_status);
-                    interrupt_operation(firmware_handle, interruption);
-                    return;
+                    TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
+                    return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
                 }
                 break;
 
@@ -557,9 +628,8 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     sleepTime = 3000;
                     LOG_INFO("RGB Write started, waiting %dms.\n", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
-                    firmware_get_download_status(*firmware_handle, final_status);
-                    interrupt_operation(firmware_handle, interruption);
-                    return;
+                    TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
+                    return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
                 }
                 break;
 
@@ -571,17 +641,17 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
         {
             // Failed to get the status of the update operation. Break out of the loop to attempt to reset the device
             // and return.
-            EXPECT_TRUE(false) << "ERROR: Failed to get the firmware update status.";
+            LOG_ERROR("Failed to get the firmware update status.");
             break;
         }
 
-        ASSERT_EQ(0, tickcounter_get_current_ms(tick, &now));
+        K4A_TEST_VERIFY_EQUAL(0, tickcounter_get_current_ms(tick, &now));
 
         if (!all_complete && (now - start_time_ms > UPDATE_TIMEOUT_MS))
         {
             // The update hasn't completed and too much time as passed. Break out of the loop to attempt to reset the
             // device and return.
-            EXPECT_TRUE(false) << "ERROR: Timeout waiting for the update to complete.";
+            LOG_ERROR("Timeout waiting for the update to complete.");
             break;
         }
 
@@ -593,45 +663,42 @@ void interrupt_device_at_update_stage(firmware_t *firmware_handle,
 
     // At this point the update has either completed or timed out. Either way the device needs to be reset after the
     // update has progressed.
-    interrupt_operation(firmware_handle, FIRMWARE_OPERATION_RESET);
+    return TRACE_CALL(interrupt_operation(firmware_handle, FIRMWARE_OPERATION_RESET));
 }
 
-void perform_device_update(firmware_t *firmware_handle,
-                           uint8_t *firmware_buffer,
-                           size_t firmware_size,
-                           firmware_package_info_t firmware_package_info,
-                           bool verbose_logging)
+k4a_result_t perform_device_update(firmware_t *firmware_handle,
+                                   uint8_t *firmware_buffer,
+                                   size_t firmware_size,
+                                   firmware_package_info_t firmware_package_info,
+                                   bool verbose_logging)
 {
     firmware_status_summary_t finalStatus;
     k4a_hardware_version_t current_version;
 
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(*firmware_handle, &current_version));
+    K4A_TEST_VERIFY_SUCCEEDED(firmware_get_device_version(*firmware_handle, &current_version));
     log_device_version(current_version);
     log_firmware_version(firmware_package_info);
 
     // Perform upgrade...
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(*firmware_handle, firmware_buffer, firmware_size));
+    K4A_TEST_VERIFY_SUCCEEDED(firmware_download(*firmware_handle, firmware_buffer, firmware_size));
     interrupt_device_at_update_stage(firmware_handle,
                                      FIRMWARE_OPERATION_FULL_DEVICE,
                                      FIRMWARE_OPERATION_RESET,
                                      &finalStatus,
                                      verbose_logging);
 
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth));
-    ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.rgb));
+    K4A_TEST_VERIFY_EQUAL(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
+    K4A_TEST_VERIFY_EQUAL(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
+    K4A_TEST_VERIFY_EQUAL(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth));
+    K4A_TEST_VERIFY_EQUAL(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.rgb));
 
     // Check upgrade...
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(*firmware_handle, &current_version));
+    K4A_TEST_VERIFY_SUCCEEDED(firmware_get_device_version(*firmware_handle, &current_version));
+    printf("Final device version: ");
     log_device_version(current_version);
-    ASSERT_TRUE(compare_version(current_version.audio, firmware_package_info.audio)) << "Audio version mismatch";
-    ASSERT_TRUE(compare_version_list(current_version.depth_sensor,
-                                     firmware_package_info.depth_config_number_versions,
-                                     firmware_package_info.depth_config_versions))
-        << "Depth Config mismatch";
-    ASSERT_TRUE(compare_version(current_version.depth, firmware_package_info.depth)) << "Depth mismatch";
-    ASSERT_TRUE(compare_version(current_version.rgb, firmware_package_info.rgb)) << "RGB mismatch";
+    K4A_TEST_VERIFY_TRUE(compare_version(current_version, factory_firmware_package_info));
+
+    return K4A_RESULT_SUCCEEDED;
 }
 
 int main(int argc, char **argv)
@@ -682,5 +749,8 @@ int main(int argc, char **argv)
         return 1; // Indicates an error or warning
     }
 
-    return RUN_ALL_TESTS();
+    int result = RUN_ALL_TESTS();
+
+    tear_down_common_test();
+    return result;
 }
