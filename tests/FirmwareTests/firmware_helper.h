@@ -52,4 +52,19 @@ void log_firmware_signature_type(k4a_firmware_signature_t signature_type, bool c
 void log_firmware_version(firmware_package_info_t firmware_version);
 void log_device_version(k4a_hardware_version_t firmware_version);
 
+void open_firmware_device(firmware_t *firmware_handle);
+void reset_device(firmware_t *firmware_handle);
+void interrupt_operation(firmware_t *firmware_handle, firmware_operation_interruption_t interruption);
+void interrupt_device_at_update_stage(firmware_t *firmware_handle,
+                                      firmware_operation_component_t component,
+                                      firmware_operation_interruption_t interruption,
+                                      firmware_status_summary_t *final_status,
+                                      bool verbose_logging);
+void perform_device_update(firmware_t *firmware_handle,
+                           uint8_t *firmware_buffer,
+                           size_t firmware_size,
+                           firmware_package_info_t firmware_package_info,
+                           k4a_hardware_version_t *final_version,
+                           bool verbose_logging);
+
 #endif /* FIRMWARE_HELPER_H */
