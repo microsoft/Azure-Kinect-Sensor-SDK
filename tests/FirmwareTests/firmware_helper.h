@@ -5,6 +5,7 @@
 #define FIRMWARE_HELPER_H
 
 #include <k4ainternal/firmware.h>
+#include <ConnEx.h>
 
 #define UPDATE_TIMEOUT_MS 10 * 60 * 1000 // 10 Minutes should be way more than enough.
 #define UPDATE_POLL_INTERVAL_MS 5
@@ -21,8 +22,6 @@
 #define K4A_FACTORY_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
 #define K4A_LKG_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
 #define K4A_TEST_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
-
-extern char *g_candidate_firmware_path;
 
 typedef enum
 {
@@ -42,11 +41,31 @@ typedef enum
     FIRMWARE_OPERATION_DISCONNECT,
 } firmware_operation_interruption_t;
 
+extern int g_k4a_port_number;
+extern connection_exerciser *g_connection_exerciser;
+
+extern uint8_t *test_firmware_buffer;
+extern size_t test_firmware_size;
+extern firmware_package_info_t test_firmware_package_info;
+
+extern uint8_t *candidate_firmware_buffer;
+extern size_t candidate_firmware_size;
+extern firmware_package_info_t candidate_firmware_package_info;
+
+extern uint8_t *lkg_firmware_buffer;
+extern size_t lkg_firmware_size;
+extern firmware_package_info_t lkg_firmware_package_info;
+
+extern uint8_t *factory_firmware_buffer;
+extern size_t factory_firmware_size;
+extern firmware_package_info_t factory_firmware_package_info;
+
 k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer, size_t *firmware_size);
 firmware_operation_status_t calculate_overall_component_status(const firmware_component_status_t status);
 
 bool compare_version(k4a_version_t left_version, k4a_version_t right_version);
 bool compare_version_list(k4a_version_t device_version, uint8_t count, k4a_version_t versions[5]);
+
 void log_firmware_build_config(k4a_firmware_build_t build_config);
 void log_firmware_signature_type(k4a_firmware_signature_t signature_type, bool certificate);
 void log_firmware_version(firmware_package_info_t firmware_version);
@@ -64,7 +83,6 @@ void perform_device_update(firmware_t *firmware_handle,
                            uint8_t *firmware_buffer,
                            size_t firmware_size,
                            firmware_package_info_t firmware_package_info,
-                           k4a_hardware_version_t *final_version,
                            bool verbose_logging);
 
 #endif /* FIRMWARE_HELPER_H */

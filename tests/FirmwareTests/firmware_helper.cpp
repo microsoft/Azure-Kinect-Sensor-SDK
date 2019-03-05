@@ -7,11 +7,157 @@
 #include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/threadapi.h>
 
+#define K4A_RETURN_FAILED_IF_FAILED(_result_)                                                                          \
+    if (K4A_FAILED(_result_))                                                                                          \
+    {                                                                                                                  \
+        std::cout << "\"" #_result_ "\" Failed" << std::endl;                                                          \
+        return K4A_RESULT_FAILED;                                                                                      \
+    }
+
+#define K4A_RETURN_FAILED_IF_TRUE(_condition_)                                                                         \
+    if (_condition_)                                                                                                   \
+    {                                                                                                                  \
+        std::cout << "\"" #_condition_ "\" was true and expected to be false." << std::endl;                           \
+        return K4A_RESULT_FAILED;                                                                                      \
+    }
+
+#define K4A_RETURN_FAILED_IF_FALSE(_condition_)                                                                        \
+    if (!(_condition_))                                                                                                \
+    {                                                                                                                  \
+        std::cout << "\"" #_condition_ "\"  false and expected to be true." << std::endl;                              \
+        return K4A_RESULT_FAILED;                                                                                      \
+    }
+
 char *g_candidate_firmware_path = nullptr;
 
-void setup_common_test()
+int g_k4a_port_number = -1;
+connection_exerciser *g_connection_exerciser = nullptr;
+
+uint8_t *test_firmware_buffer = nullptr;
+size_t test_firmware_size = 0;
+firmware_package_info_t test_firmware_package_info = { 0 };
+
+uint8_t *candidate_firmware_buffer = nullptr;
+size_t candidate_firmware_size = 0;
+firmware_package_info_t candidate_firmware_package_info = { 0 };
+
+uint8_t *lkg_firmware_buffer = nullptr;
+size_t lkg_firmware_size = 0;
+firmware_package_info_t lkg_firmware_package_info = { 0 };
+
+uint8_t *factory_firmware_buffer = nullptr;
+size_t factory_firmware_size = 0;
+firmware_package_info_t factory_firmware_package_info = { 0 };
+
+k4a_result_t setup_common_test()
 {
-    return;
+    int port;
+    float voltage;
+    float current;
+
+    if (g_candidate_firmware_path == nullptr)
+    {
+        std::cout << "The firmware path setting is required and wasn't supplied.\n\n";
+        return K4A_RESULT_FAILED;
+    }
+
+    g_k4a_port_number = -1;
+    g_connection_exerciser = new (std::nothrow) connection_exerciser();
+
+    LOG_INFO("Searching for Connection Exerciser...", 0);
+    K4A_RETURN_FAILED_IF_FAILED(g_connection_exerciser->find_connection_exerciser());
+    LOG_INFO("Clearing port...");
+    K4A_RETURN_FAILED_IF_FAILED(g_connection_exerciser->set_usb_port(0));
+
+    LOG_INFO("Searching for device...");
+
+    for (int i = 0; i < CONN_EX_MAX_NUM_PORTS; ++i)
+    {
+        K4A_RETURN_FAILED_IF_FAILED(g_connection_exerciser->set_usb_port(i));
+        port = g_connection_exerciser->get_usb_port();
+        K4A_RETURN_FAILED_IF_FALSE(port == i);
+
+        voltage = g_connection_exerciser->get_voltage_reading();
+        K4A_RETURN_FAILED_IF_TRUE(voltage == -1);
+        current = g_connection_exerciser->get_current_reading();
+        K4A_RETURN_FAILED_IF_TRUE(current == -1);
+
+        if (current < 0)
+        {
+            current = current * -1;
+        }
+
+        if (voltage > 4.5 && voltage < 5.5 && current > 0.1)
+        {
+            if (g_k4a_port_number != -1)
+            {
+                std::cout << "More than one device was detected on the connection exerciser." << std::endl;
+                return K4A_RESULT_FAILED;
+            }
+            g_k4a_port_number = port;
+        }
+
+        printf("On port #%d: %4.2fV %4.2fA\n", port, voltage, current);
+    }
+
+    if (g_k4a_port_number == -1)
+    {
+        std::cout << "The Kinect for Azure was not detected on a port of the connection exerciser." << std::endl;
+        return K4A_RESULT_FAILED;
+    }
+    K4A_RETURN_FAILED_IF_FAILED(g_connection_exerciser->set_usb_port(0));
+
+    std::cout << "Loading Test firmware package: " << K4A_TEST_FIRMWARE_PATH << std::endl;
+    load_firmware_files(K4A_TEST_FIRMWARE_PATH, &test_firmware_buffer, &test_firmware_size);
+    parse_firmware_package(test_firmware_buffer, test_firmware_size, &test_firmware_package_info);
+
+    std::cout << "Loading Release Candidate firmware package: " << g_candidate_firmware_path << std::endl;
+    load_firmware_files(g_candidate_firmware_path, &candidate_firmware_buffer, &candidate_firmware_size);
+    parse_firmware_package(candidate_firmware_buffer, candidate_firmware_size, &candidate_firmware_package_info);
+
+    std::cout << "Loading LKG firmware package: " << K4A_LKG_FIRMWARE_PATH << std::endl;
+    load_firmware_files(K4A_LKG_FIRMWARE_PATH, &lkg_firmware_buffer, &lkg_firmware_size);
+    parse_firmware_package(lkg_firmware_buffer, lkg_firmware_size, &lkg_firmware_package_info);
+
+    std::cout << "Loading Factory firmware package: " << K4A_FACTORY_FIRMWARE_PATH << std::endl;
+    load_firmware_files(K4A_FACTORY_FIRMWARE_PATH, &factory_firmware_buffer, &factory_firmware_size);
+    parse_firmware_package(factory_firmware_buffer, factory_firmware_size, &factory_firmware_package_info);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+void tear_down_common_test()
+{
+    if (g_connection_exerciser != nullptr)
+    {
+        g_k4a_port_number = -1;
+        delete g_connection_exerciser;
+        g_connection_exerciser = nullptr;
+    }
+
+    if (test_firmware_buffer != nullptr)
+    {
+        free(test_firmware_buffer);
+        test_firmware_buffer = nullptr;
+    }
+
+    if (candidate_firmware_buffer != nullptr)
+    {
+        free(candidate_firmware_buffer);
+        candidate_firmware_buffer = nullptr;
+    }
+
+    if (lkg_firmware_buffer != nullptr)
+    {
+        free(lkg_firmware_buffer);
+        lkg_firmware_buffer = nullptr;
+    }
+
+    if (factory_firmware_buffer != nullptr)
+    {
+        free(factory_firmware_buffer);
+        factory_firmware_buffer = nullptr;
+    }
 }
 
 k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer, size_t *firmware_size)
@@ -454,13 +600,13 @@ void perform_device_update(firmware_t *firmware_handle,
                            uint8_t *firmware_buffer,
                            size_t firmware_size,
                            firmware_package_info_t firmware_package_info,
-                           k4a_hardware_version_t *final_version,
                            bool verbose_logging)
 {
     firmware_status_summary_t finalStatus;
+    k4a_hardware_version_t current_version;
 
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(*firmware_handle, final_version));
-    log_device_version(*final_version);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(*firmware_handle, &current_version));
+    log_device_version(current_version);
     log_firmware_version(firmware_package_info);
 
     // Perform upgrade...
@@ -477,15 +623,15 @@ void perform_device_update(firmware_t *firmware_handle,
     ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.rgb));
 
     // Check upgrade...
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(*firmware_handle, final_version));
-    log_device_version(*final_version);
-    ASSERT_TRUE(compare_version(final_version->audio, firmware_package_info.audio)) << "Audio version mismatch";
-    ASSERT_TRUE(compare_version_list(final_version->depth_sensor,
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(*firmware_handle, &current_version));
+    log_device_version(current_version);
+    ASSERT_TRUE(compare_version(current_version.audio, firmware_package_info.audio)) << "Audio version mismatch";
+    ASSERT_TRUE(compare_version_list(current_version.depth_sensor,
                                      firmware_package_info.depth_config_number_versions,
                                      firmware_package_info.depth_config_versions))
         << "Depth Config mismatch";
-    ASSERT_TRUE(compare_version(final_version->depth, firmware_package_info.depth)) << "Depth mismatch";
-    ASSERT_TRUE(compare_version(final_version->rgb, firmware_package_info.rgb)) << "RGB mismatch";
+    ASSERT_TRUE(compare_version(current_version.depth, firmware_package_info.depth)) << "Depth mismatch";
+    ASSERT_TRUE(compare_version(current_version.rgb, firmware_package_info.rgb)) << "RGB mismatch";
 }
 
 int main(int argc, char **argv)
