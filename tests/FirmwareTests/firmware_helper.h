@@ -45,21 +45,21 @@ typedef enum
 extern int g_k4a_port_number;
 extern connection_exerciser *g_connection_exerciser;
 
-extern uint8_t *test_firmware_buffer;
-extern size_t test_firmware_size;
-extern firmware_package_info_t test_firmware_package_info;
+extern uint8_t *g_test_firmware_buffer;
+extern size_t g_test_firmware_size;
+extern firmware_package_info_t g_test_firmware_package_info;
 
-extern uint8_t *candidate_firmware_buffer;
-extern size_t candidate_firmware_size;
-extern firmware_package_info_t candidate_firmware_package_info;
+extern uint8_t *g_candidate_firmware_buffer;
+extern size_t g_candidate_firmware_size;
+extern firmware_package_info_t g_candidate_firmware_package_info;
 
-extern uint8_t *lkg_firmware_buffer;
-extern size_t lkg_firmware_size;
-extern firmware_package_info_t lkg_firmware_package_info;
+extern uint8_t *g_lkg_firmware_buffer;
+extern size_t g_lkg_firmware_size;
+extern firmware_package_info_t g_lkg_firmware_package_info;
 
-extern uint8_t *factory_firmware_buffer;
-extern size_t factory_firmware_size;
-extern firmware_package_info_t factory_firmware_package_info;
+extern uint8_t *g_factory_firmware_buffer;
+extern size_t g_factory_firmware_size;
+extern firmware_package_info_t g_factory_firmware_package_info;
 
 k4a_result_t setup_common_test();
 
