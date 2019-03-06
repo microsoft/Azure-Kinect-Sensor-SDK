@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <k4a/k4aplugin.h>
+#include <k4ainternal/k4aplugin.h>
 
 #ifdef __cplusplus
 extern "C" {

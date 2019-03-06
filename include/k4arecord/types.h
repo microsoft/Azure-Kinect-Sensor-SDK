@@ -117,7 +117,7 @@ typedef struct _k4a_record_configuration_t
 
     /**
      * The delay between this recording and the externally synced master camera.
-     * This value is 0 unless \p wired_sync_mode is set to K4A_WIRED_SYNC_MODE_SUBORDINATE
+     * This value is 0 unless \p wired_sync_mode is set to ::K4A_WIRED_SYNC_MODE_SUBORDINATE
      */
     uint32_t subordinate_delay_off_master_usec;
 
