@@ -19,7 +19,6 @@ static void clean_up(k4a_device_t device)
 {
     if (device != NULL)
     {
-        k4a_device_stop_cameras(device);
         k4a_device_close(device);
     }
 }
