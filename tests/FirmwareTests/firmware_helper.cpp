@@ -49,21 +49,21 @@ char *g_candidate_firmware_path = nullptr;
 int g_k4a_port_number = -1;
 connection_exerciser *g_connection_exerciser = nullptr;
 
-uint8_t *test_firmware_buffer = nullptr;
-size_t test_firmware_size = 0;
-firmware_package_info_t test_firmware_package_info = { 0 };
+uint8_t *g_test_firmware_buffer = nullptr;
+size_t g_test_firmware_size = 0;
+firmware_package_info_t g_test_firmware_package_info = { 0 };
 
-uint8_t *candidate_firmware_buffer = nullptr;
-size_t candidate_firmware_size = 0;
-firmware_package_info_t candidate_firmware_package_info = { 0 };
+uint8_t *g_candidate_firmware_buffer = nullptr;
+size_t g_candidate_firmware_size = 0;
+firmware_package_info_t g_candidate_firmware_package_info = { 0 };
 
-uint8_t *lkg_firmware_buffer = nullptr;
-size_t lkg_firmware_size = 0;
-firmware_package_info_t lkg_firmware_package_info = { 0 };
+uint8_t *g_lkg_firmware_buffer = nullptr;
+size_t g_lkg_firmware_size = 0;
+firmware_package_info_t g_lkg_firmware_package_info = { 0 };
 
-uint8_t *factory_firmware_buffer = nullptr;
-size_t factory_firmware_size = 0;
-firmware_package_info_t factory_firmware_package_info = { 0 };
+uint8_t *g_factory_firmware_buffer = nullptr;
+size_t g_factory_firmware_size = 0;
+firmware_package_info_t g_factory_firmware_package_info = { 0 };
 
 static bool common_initialized = false;
 
@@ -131,20 +131,20 @@ k4a_result_t setup_common_test()
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
 
     std::cout << "Loading Test firmware package: " << K4A_TEST_FIRMWARE_PATH << std::endl;
-    load_firmware_files(K4A_TEST_FIRMWARE_PATH, &test_firmware_buffer, &test_firmware_size);
-    parse_firmware_package(test_firmware_buffer, test_firmware_size, &test_firmware_package_info);
+    load_firmware_files(K4A_TEST_FIRMWARE_PATH, &g_test_firmware_buffer, &g_test_firmware_size);
+    parse_firmware_package(g_test_firmware_buffer, g_test_firmware_size, &g_test_firmware_package_info);
 
     std::cout << "Loading Release Candidate firmware package: " << g_candidate_firmware_path << std::endl;
-    load_firmware_files(g_candidate_firmware_path, &candidate_firmware_buffer, &candidate_firmware_size);
-    parse_firmware_package(candidate_firmware_buffer, candidate_firmware_size, &candidate_firmware_package_info);
+    load_firmware_files(g_candidate_firmware_path, &g_candidate_firmware_buffer, &g_candidate_firmware_size);
+    parse_firmware_package(g_candidate_firmware_buffer, g_candidate_firmware_size, &g_candidate_firmware_package_info);
 
     std::cout << "Loading LKG firmware package: " << K4A_LKG_FIRMWARE_PATH << std::endl;
-    load_firmware_files(K4A_LKG_FIRMWARE_PATH, &lkg_firmware_buffer, &lkg_firmware_size);
-    parse_firmware_package(lkg_firmware_buffer, lkg_firmware_size, &lkg_firmware_package_info);
+    load_firmware_files(K4A_LKG_FIRMWARE_PATH, &g_lkg_firmware_buffer, &g_lkg_firmware_size);
+    parse_firmware_package(g_lkg_firmware_buffer, g_lkg_firmware_size, &g_lkg_firmware_package_info);
 
     std::cout << "Loading Factory firmware package: " << K4A_FACTORY_FIRMWARE_PATH << std::endl;
-    load_firmware_files(K4A_FACTORY_FIRMWARE_PATH, &factory_firmware_buffer, &factory_firmware_size);
-    parse_firmware_package(factory_firmware_buffer, factory_firmware_size, &factory_firmware_package_info);
+    load_firmware_files(K4A_FACTORY_FIRMWARE_PATH, &g_factory_firmware_buffer, &g_factory_firmware_size);
+    parse_firmware_package(g_factory_firmware_buffer, g_factory_firmware_size, &g_factory_firmware_package_info);
 
     common_initialized = true;
     return K4A_RESULT_SUCCEEDED;
@@ -159,28 +159,28 @@ void tear_down_common_test()
         g_connection_exerciser = nullptr;
     }
 
-    if (test_firmware_buffer != nullptr)
+    if (g_test_firmware_buffer != nullptr)
     {
-        free(test_firmware_buffer);
-        test_firmware_buffer = nullptr;
+        free(g_test_firmware_buffer);
+        g_test_firmware_buffer = nullptr;
     }
 
-    if (candidate_firmware_buffer != nullptr)
+    if (g_candidate_firmware_buffer != nullptr)
     {
-        free(candidate_firmware_buffer);
-        candidate_firmware_buffer = nullptr;
+        free(g_candidate_firmware_buffer);
+        g_candidate_firmware_buffer = nullptr;
     }
 
-    if (lkg_firmware_buffer != nullptr)
+    if (g_lkg_firmware_buffer != nullptr)
     {
-        free(lkg_firmware_buffer);
-        lkg_firmware_buffer = nullptr;
+        free(g_lkg_firmware_buffer);
+        g_lkg_firmware_buffer = nullptr;
     }
 
-    if (factory_firmware_buffer != nullptr)
+    if (g_factory_firmware_buffer != nullptr)
     {
-        free(factory_firmware_buffer);
-        factory_firmware_buffer = nullptr;
+        free(g_factory_firmware_buffer);
+        g_factory_firmware_buffer = nullptr;
     }
 
     common_initialized = false;
@@ -275,35 +275,35 @@ bool compare_version(k4a_version_t left_version, k4a_version_t right_version)
 
 bool compare_version(k4a_hardware_version_t device_version, firmware_package_info_t firmware_version)
 {
-    bool equal = true;
+    bool are_equal = true;
 
     if (compare_version(device_version.audio, firmware_version.audio))
     {
-        printf("Audio version mismatch");
-        equal = false;
+        printf("Audio version mismatch.\n");
+        are_equal = false;
     }
 
     if (compare_version_list(device_version.depth_sensor,
                              firmware_version.depth_config_number_versions,
                              firmware_version.depth_config_versions))
     {
-        printf("Depth sensor does not exist in package.");
-        equal = false;
+        printf("Depth sensor does not exist in package.\n");
+        are_equal = false;
     }
 
     if (compare_version(device_version.depth, firmware_version.depth))
     {
-        printf("Depth version mismatch");
-        equal = false;
+        printf("Depth version mismatch.\n");
+        are_equal = false;
     }
 
     if (compare_version(device_version.rgb, firmware_version.rgb))
     {
-        printf("RGB version mismatch");
-        equal = false;
+        printf("RGB version mismatch.\n");
+        are_equal = false;
     }
 
-    return equal;
+    return are_equal;
 }
 
 bool compare_version_list(k4a_version_t device_version, uint8_t count, k4a_version_t versions[5])
@@ -694,9 +694,9 @@ k4a_result_t perform_device_update(firmware_t *firmware_handle,
 
     // Check upgrade...
     K4A_TEST_VERIFY_SUCCEEDED(firmware_get_device_version(*firmware_handle, &current_version));
-    printf("Final device version: ");
+    printf("Final device version: \n");
     log_device_version(current_version);
-    K4A_TEST_VERIFY_TRUE(compare_version(current_version, factory_firmware_package_info));
+    K4A_TEST_VERIFY_TRUE(compare_version(current_version, firmware_package_info));
 
     return K4A_RESULT_SUCCEEDED;
 }
