@@ -48,8 +48,8 @@ K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
  * \return ::K4A_RESULT_SUCCEEDED if the device was opened successfully
  *
  * \remarks
- * If successful, k4a_device_open() will return a device handle in the device parameter. This handle grants exclusive
- * access to the device and may be used in the other k4a API calls.
+ * If successful, k4a_device_open() will return a device handle in the device_handle parameter.
+ * This handle grants exclusive access to the device and may be used in the other k4a API calls.
  *
  * \remarks
  * When done with the device, close the handle with k4a_device_close()
@@ -92,12 +92,12 @@ K4A_EXPORT void k4a_device_close(k4a_device_t device_handle);
  * Handle obtained by k4a_device_open().
  *
  * \param capture_handle
- * If successful this contains a handle to a capture object. Caller must call k4a_capture_release() when its done using
- * this capture
+ * If successful, this contains a handle to a capture object. Caller must call k4a_capture_release() when it's done
+ * using this capture
  *
  * \param timeout_in_ms
  * Specifies the time in milliseconds the function should block waiting for the capture. 0 is a check of the queue
- * without blocking. Passing a value of #K4A_WAIT_INFINITE will blocking indefinitely.
+ * without blocking. Passing a value of #K4A_WAIT_INFINITE will block indefinitely.
  *
  * \returns
  * ::K4A_WAIT_RESULT_SUCCEEDED if a capture is returned. If a capture is not available before the timeout elapses, the
@@ -117,17 +117,14 @@ K4A_EXPORT void k4a_device_close(k4a_device_t device_handle);
  * If a capture is not available in the configured \p timeout_in_ms, then the API will return ::K4A_WAIT_RESULT_TIMEOUT.
  *
  * \remarks
- * This function returns an error when an internal problem is encountered; such as lost of the USB connection, low
- * memory condition, and other unexpected issues. Once an error is returned the API will continue to return an error
+ * This function returns an error when an internal problem is encountered, such as loss of the USB connection, a low
+ * memory condition, or other unexpected issues. Once an error is returned, the API will continue to return an error
  * until k4a_device_stop_cameras() is called to clear the condition.
  *
  * \remarks
  * If this function is waiting for data (non-zero timeout) when k4a_device_stop_cameras() or k4a_device_close() is
  * called, this function will return an error. This function needs to be called while the device is in a running state;
  * after k4a_device_start_cameras() is called and before k4a_device_stop_cameras() is called.
- *
- * \returns ::K4A_WAIT_RESULT_SUCCEEDED if a capture is returned. If a capture is not available before the timeout
- * elapses, the function will return ::K4A_WAIT_RESULT_TIMEOUT. All other failures will return ::K4A_WAIT_RESULT_FAILED.
  *
  * \xmlonly
  * <requirements>
@@ -142,7 +139,7 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,
                                                     k4a_capture_t *capture_handle,
                                                     int32_t timeout_in_ms);
 
-/** Reads a imu sample.
+/** Reads an IMU sample.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
@@ -151,11 +148,11 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,
  * pointer to a location to write the IMU sample to
  *
  * \param timeout_in_ms
- * Specifies the time in milliseconds the function should block waiting for the capture. 0 is a check of the queue
- * without blocking. Passing a value of #K4A_WAIT_INFINITE will blocking indefinitely.
+ * Specifies the time in milliseconds the function should block waiting for the IMU sample. 0 is a check of the queue
+ * without blocking. Passing a value of #K4A_WAIT_INFINITE will block indefinitely.
  *
  * \returns
- * ::K4A_WAIT_RESULT_SUCCEEDED if a capture is returned. If a capture is not available before the timeout elapses, the
+ * ::K4A_WAIT_RESULT_SUCCEEDED if a sample is returned. If a sample is not available before the timeout elapses, the
  * function will return ::K4A_WAIT_RESULT_TIMEOUT. All other failures will return ::K4A_WAIT_RESULT_FAILED.
  *
  * \relates k4a_device_t
@@ -171,8 +168,8 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,
  * If a sample is not available in the configured \p timeout_in_ms, then the API will return ::K4A_WAIT_RESULT_TIMEOUT.
  *
  * \remarks
- * This function returns an error when an internal problem is encountered; such as loss of the USB connection, low
- * memory condition, and other unexpected issues. Once an error is returned, the API will continue to return an error
+ * This function returns an error when an internal problem is encountered; such as loss of the USB connection, a low
+ * memory condition, or other unexpected issues. Once an error is returned, the API will continue to return an error
  * until k4a_device_stop_imu() is called to clear the condition.
  *
  * \remarks
@@ -182,9 +179,6 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,
  *
  * \remarks
  * There is no need to free the imu_sample after using imu_sample.
- *
- * \returns ::K4A_WAIT_RESULT_SUCCEEDED if a capture is returned. If a capture is not available before the timeout
- * elapses, the function will return ::K4A_WAIT_RESULT_TIMEOUT. All other failures will return ::K4A_WAIT_RESULT_FAILED.
  *
  * \xmlonly
  * <requirements>
@@ -376,7 +370,7 @@ K4A_EXPORT void k4a_capture_set_color_image(k4a_capture_t capture_handle, k4a_im
  */
 K4A_EXPORT void k4a_capture_set_depth_image(k4a_capture_t capture_handle, k4a_image_t image_handle);
 
-/** Set / add a ir image to the associated capture
+/** Set / add an IR image to the associated capture
  *
  * \param capture_handle
  * Capture handle containing to hold the image
@@ -407,7 +401,7 @@ K4A_EXPORT void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image
  * Capture handle for the temperature to modify
  *
  * \param temperature_c
- * Temperature in Kelvin to store.
+ * Temperature in Celsius to store.
  *
  * \relates k4a_capture_t
  *
@@ -457,7 +451,7 @@ K4A_EXPORT float k4a_capture_get_temperature_c(k4a_capture_t capture_handle);
  *
  * \remarks
  * Call this API for image formats that have consistent stride, aka no compression. Image size is calculated by
- * height_pixels * stride_bytes. For advances option use k4a_image_create_from_buffer().
+ * height_pixels * stride_bytes. For advanced options use k4a_image_create_from_buffer().
  *
  * \remarks
  * k4a_image_t is created with a reference of 1.
@@ -579,10 +573,10 @@ K4A_EXPORT uint8_t *k4a_image_get_buffer(k4a_image_t image_handle);
  * Handle of the image for which the get operation is performed on.
  *
  * \remarks
- * Returns the image buffer
+ * Returns the size of the image buffer in bytes
  *
  * \remarks
- * Use this function to know what the size of the image buffer is returned by k4a_image_get_buffer()
+ * Use this function to get the size of the image buffer returned by k4a_image_get_buffer()
  *
  * \returns
  * This function is not expected to return 0, all k4a_image_t's are created with a buffer.
@@ -694,7 +688,7 @@ K4A_EXPORT int k4a_image_get_height_pixels(k4a_image_t image_handle);
  */
 K4A_EXPORT int k4a_image_get_stride_bytes(k4a_image_t image_handle);
 
-/** Get the image timestamp in micro seconds
+/** Get the image timestamp in microseconds
  *
  * \param image_handle
  * Handle of the image for which the get operation is performed on.
@@ -718,13 +712,13 @@ K4A_EXPORT int k4a_image_get_stride_bytes(k4a_image_t image_handle);
  */
 K4A_EXPORT uint64_t k4a_image_get_timestamp_usec(k4a_image_t image_handle);
 
-/** Get the image exposure in micro seconds
+/** Get the image exposure in microseconds
  *
  * \param image_handle
  * Handle of the image for which the get operation is performed on.
  *
  * \remarks
- * Returns an exposure time in micro seconds. This is only supported on Color image formats.
+ * Returns an exposure time in microseconds. This is only supported on color image formats.
  *
  * \returns
  * Returning an exposure of 0 is considered an error.
@@ -741,13 +735,13 @@ K4A_EXPORT uint64_t k4a_image_get_timestamp_usec(k4a_image_t image_handle);
  */
 K4A_EXPORT uint64_t k4a_image_get_exposure_usec(k4a_image_t image_handle);
 
-/** Get the image white_balance
+/** Get the image white balance
  *
  * \param image_handle
  * Handle of the image for which the get operation is performed on.
  *
  * \remarks
- * Returns the images white balance. This function is only valid for color captures, and not for depth captures.
+ * Returns the image's white balance. This function is only valid for color captures, and not for depth captures.
  *
  * \returns
  * White balance in Kelvin, 0 if image format is not supported by the given capture.
@@ -764,13 +758,13 @@ K4A_EXPORT uint64_t k4a_image_get_exposure_usec(k4a_image_t image_handle);
  */
 K4A_EXPORT uint32_t k4a_image_get_white_balance(k4a_image_t image_handle);
 
-/** Get the images ISO speed
+/** Get the image's ISO speed
  *
  * \param image_handle
  * Handle of the image for which the get operation is performed on.
  *
  * \remarks
- * Returns the images ISO speed
+ * Returns the image's ISO speed
  * This function is only valid for color captures, and not for depth captures.
  *
  * \returns
@@ -788,13 +782,13 @@ K4A_EXPORT uint32_t k4a_image_get_white_balance(k4a_image_t image_handle);
  */
 K4A_EXPORT uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle);
 
-/** Set the time stamp, in micro seconds, of the image.
+/** Set the time stamp, in microseconds, of the image.
  *
  * \param image_handle
- * Handle of the image for which the get operation is performed on.
+ * Handle of the image to set the timestamp on.
  *
  * \param timestamp_usec
- * Timestamp of the image in micro seconds.
+ * Timestamp of the image in microseconds.
  *
  * \remarks
  * Use this function in conjunction with k4a_image_create() or k4a_image_create_from_buffer() to construct a
@@ -812,13 +806,13 @@ K4A_EXPORT uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle);
  */
 K4A_EXPORT void k4a_image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
 
-/** Set the exposure time, in micro seconds, of the image.
+/** Set the exposure time, in microseconds, of the image.
  *
  * \param image_handle
- * Handle of the image for which the get operation is performed on.
+ * Handle of the image to set the exposure time on.
  *
  * \param exposure_usec
- * exposure time of the image in micro seconds.
+ * exposure time of the image in microseconds.
  *
  * \remarks
  * Use this function in conjunction with k4a_image_create() or k4a_image_create_from_buffer() to construct a
@@ -839,7 +833,7 @@ K4A_EXPORT void k4a_image_set_exposure_time_usec(k4a_image_t image_handle, uint6
 /** Set the white balance of the image.
  *
  * \param image_handle
- * Handle of the image for which the get operation is performed on.
+ * Handle of the image to set the white balance on.
  *
  * \param white_balance
  * White balance of the image.
@@ -863,7 +857,7 @@ K4A_EXPORT void k4a_image_set_white_balance(k4a_image_t image_handle, uint32_t w
 /** Set the ISO speed of the image.
  *
  * \param image_handle
- * Handle of the image for which the get operation is performed on.
+ * Handle of the image to set the ISO speed on.
  *
  * \param iso_speed
  * ISO speed of the image.
@@ -925,7 +919,7 @@ K4A_EXPORT void k4a_image_reference(k4a_image_t image_handle);
  */
 K4A_EXPORT void k4a_image_release(k4a_image_t image_handle);
 
-/** Starts the K4A device
+/** Starts the K4A device's cameras
  *
  * \param device_handle
  * Handle obtained by k4a_device_open()
@@ -954,7 +948,7 @@ K4A_EXPORT void k4a_image_release(k4a_image_t image_handle);
  */
 K4A_EXPORT k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_configuration_t *config);
 
-/** Stops the K4A device
+/** Stops the K4A device's cameras
  *
  * \param device_handle
  * Handle obtained by k4a_device_open()
@@ -987,10 +981,9 @@ K4A_EXPORT void k4a_device_stop_cameras(k4a_device_t device_handle);
  * \relates k4a_device_t
  *
  * \remarks
- * Call this API to start streaming IMU data. It is not valid to call this API a 2nd time without calling stop after the
- * first call.
- * This function is dependent on the state of the camera's. The color or depth camera must be started before the IMU.
- * K4A_RESULT_FAILED will be returned if one of the cameras is not running.
+ * Call this API to start streaming IMU data. It is not valid to call this API a second time without calling stop after
+ * the first call. This function is dependent on the state of the cameras. The color or depth camera must be started
+ * before the IMU. K4A_RESULT_FAILED will be returned if one of the cameras is not running.
  *
  * \xmlonly
  * <requirements>
@@ -1030,7 +1023,7 @@ K4A_EXPORT void k4a_device_stop_imu(k4a_device_t device_handle);
  * Handle obtained by k4a_device_open()
  *
  * \param serial_number
- * Location to write the serial number to On output, this will be an ASCII null terminated string. This value may be
+ * Location to write the serial number to. On output, this will be an ASCII null terminated string. This value may be
  * NULL, so that \p serial_number_size may be used to return the size of the buffer needed to store the string.
  *
  * \param serial_number_size
@@ -1060,7 +1053,7 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_hand
                                                         char *serial_number,
                                                         size_t *serial_number_size);
 
-/** Get the version numbers of the K4A sub systems
+/** Get the version numbers of the K4A subsystems' firmware
  *
  * \param device_handle
  * Handle obtained by k4a_device_open()
@@ -1131,7 +1124,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle,
  *
  * \returns
  * K4A_RESULT_SUCCEEDED if the value was successfully set, K4A_RESULT_FAILED if an error occurred
-
+ *
  * \relates k4a_device_t
  *
  * \xmlonly
@@ -1224,7 +1217,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle,
  * Upon successful return this value will be set to true if a cable is connected to this sync out jack.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if the connector status was successfully ready.
+ * ::K4A_RESULT_SUCCEEDED if the connector status was successfully read.
  *
  * \relates k4a_device_t
  *
