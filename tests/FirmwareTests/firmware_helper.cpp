@@ -264,6 +264,14 @@ firmware_operation_status_t calculate_overall_component_status(const firmware_co
         return FIRMWARE_OPERATION_SUCCEEDED;
     }
 
+    printf("Overall Component Status failed: A:%d V:%d T:%d E:%d W:%d O:%d\n",
+           status.authentication_check,
+           status.version_check,
+           status.image_transfer,
+           status.flash_erase,
+           status.flash_write,
+           status.overall);
+
     return FIRMWARE_OPERATION_FAILED;
 }
 
@@ -277,27 +285,27 @@ bool compare_version(k4a_hardware_version_t device_version, firmware_package_inf
 {
     bool are_equal = true;
 
-    if (compare_version(device_version.audio, firmware_version.audio))
+    if (!compare_version(device_version.audio, firmware_version.audio))
     {
         printf("Audio version mismatch.\n");
         are_equal = false;
     }
 
-    if (compare_version_list(device_version.depth_sensor,
-                             firmware_version.depth_config_number_versions,
-                             firmware_version.depth_config_versions))
+    if (!compare_version_list(device_version.depth_sensor,
+                              firmware_version.depth_config_number_versions,
+                              firmware_version.depth_config_versions))
     {
         printf("Depth sensor does not exist in package.\n");
         are_equal = false;
     }
 
-    if (compare_version(device_version.depth, firmware_version.depth))
+    if (!compare_version(device_version.depth, firmware_version.depth))
     {
         printf("Depth version mismatch.\n");
         are_equal = false;
     }
 
-    if (compare_version(device_version.rgb, firmware_version.rgb))
+    if (!compare_version(device_version.rgb, firmware_version.rgb))
     {
         printf("RGB version mismatch.\n");
         are_equal = false;
@@ -564,7 +572,7 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     // The erase takes places after the transfer is complete and takes about 7.8 seconds.
                     int sleepTime = (int)((rand() / (float)RAND_MAX) * 7600);
                     sleepTime = 3800;
-                    LOG_INFO("Audio Erase started, waiting %dms.\n", sleepTime);
+                    LOG_INFO("Audio Erase started, waiting %dms.", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
                     TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
                     return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
@@ -577,7 +585,7 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     // The write takes places after the erase is complete and takes about 20 seconds.
                     int sleepTime = (int)((rand() / (float)RAND_MAX) * 19700);
                     sleepTime = 9850;
-                    LOG_INFO("Audio Write started, waiting %dms.\n", sleepTime);
+                    LOG_INFO("Audio Write started, waiting %dms.", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
                     TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
                     return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
@@ -590,7 +598,7 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     // The erase takes places after the transfer is complete and takes about 0.25 seconds.
                     int sleepTime = (int)((rand() / (float)RAND_MAX) * 100);
                     sleepTime = 50;
-                    LOG_INFO("Depth Erase started, waiting %dms.\n", sleepTime);
+                    LOG_INFO("Depth Erase started, waiting %dms.", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
                     TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
                     return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
@@ -603,7 +611,7 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     // The write takes places after the transfer is complete and takes about 5.8 seconds.
                     int sleepTime = (int)((rand() / (float)RAND_MAX) * 5700);
                     sleepTime = 2850;
-                    LOG_INFO("Depth Write started, waiting %dms.\n", sleepTime);
+                    LOG_INFO("Depth Write started, waiting %dms.", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
                     TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
                     return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
@@ -614,7 +622,7 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
                 if (final_status->rgb.image_transfer == FIRMWARE_OPERATION_SUCCEEDED)
                 {
                     // The erase takes places after the transfer is complete and takes about 0.05 seconds.
-                    LOG_INFO("RGB erase started...\n");
+                    LOG_INFO("RGB erase started...");
                     TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
                     return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
                 }
@@ -626,7 +634,7 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
                     // The write takes places after the transfer is complete and takes about 6.1 seconds.
                     int sleepTime = (int)((rand() / (float)RAND_MAX) * 6000);
                     sleepTime = 3000;
-                    LOG_INFO("RGB Write started, waiting %dms.\n", sleepTime);
+                    LOG_INFO("RGB Write started, waiting %dms.", sleepTime);
                     ThreadAPI_Sleep(sleepTime);
                     TRACE_CALL(firmware_get_download_status(*firmware_handle, final_status));
                     return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
@@ -694,7 +702,7 @@ k4a_result_t perform_device_update(firmware_t *firmware_handle,
 
     // Check upgrade...
     K4A_TEST_VERIFY_SUCCEEDED(firmware_get_device_version(*firmware_handle, &current_version));
-    printf("Final device version: \n");
+    printf("Post full update ");
     log_device_version(current_version);
     K4A_TEST_VERIFY_TRUE(compare_version(current_version, firmware_package_info));
 
