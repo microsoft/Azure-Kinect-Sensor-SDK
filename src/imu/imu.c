@@ -136,7 +136,6 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
                          "IMU streaming payload size too small for gyro samples: %u size: %zu",
                          p_metadata->gyro.sample_count,
                          capture_size);
-            //__debugbreak();
             return;
         }
         else

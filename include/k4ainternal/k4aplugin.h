@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  * Kinect For Azure Depth Engine Plugin API.
  * Defines the API which must be defined by the depth engine plugin to be used
- * by the K4A SDK.
+ * by the Azure Kinect SDK.
  */
 
 #ifndef K4A_PLUGIN_H
@@ -28,13 +28,13 @@ extern "C" {
  * \remarks The MAJOR version must be updated to denote any breaking change
  * that would cause an older SDK to not be able to use this plugin.
  */
-#define K4A_PLUGIN_MAJOR_VERSION 1 /**< K4A plugin major version */
-#define K4A_PLUGIN_MINOR_VERSION 0 /**< K4A plugin minor version */
+#define K4A_PLUGIN_MAJOR_VERSION 1 /**< Azure Kinect plugin major version */
+#define K4A_PLUGIN_MINOR_VERSION 0 /**< Azure Kinect plugin minor version */
 
 /**
  * Expected name of plugin's dynamic library
  *
- * \remarks When the K4A SDK tried to load the depth engine, it will attempt to
+ * \remarks When the Azure Kinect SDK tried to load the depth engine, it will attempt to
  * load a dynamic library with name contains "depthengine". The name contains a
  * version number to bind with the matching depth engine plugin interface.
  */
@@ -372,9 +372,9 @@ typedef void(__stdcall *k4a_te_destroy_fn_t)(k4a_transform_engine_context_t **co
 /** Plugin API which must be populated on plugin registration.
  *
  * \remarks
- * The K4A SDK will call k4a_register_plugin, and pass in a pointer to a \ref
+ * The Azure Kinect SDK will call k4a_register_plugin, and pass in a pointer to a \ref
  * k4a_plugin_t. The plugin must properly fill out all fields of the plugin for
- * the K4A SDK to accept the plugin.
+ * the Azure Kinect SDK to accept the plugin.
  *
  */
 typedef struct _k4a_plugin_t
