@@ -190,7 +190,8 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
  *
  * \remarks
  * Capture objects will always contain at least 1 image, but may have images missing if frames were dropped in the
- * original recording. When calling k4a_capture_get_*_image(), the image should be checked for NULL.
+ * original recording. When calling k4a_capture_get_color_image(), k4a_capture_get_depth_image(), or
+ * k4a_capture_get_ir_image(), the image should be checked for NULL.
  *
  * \xmlonly
  * <requirements>
@@ -229,7 +230,8 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_
  *
  * \remarks
  * Capture objects will always contain at least 1 image, but may have images missing if frames were dropped in the
- * original recording. When calling k4a_capture_get_*_image(), the image should be checked for NULL.
+ * original recording. When calling k4a_capture_get_color_image(), k4a_capture_get_depth_image(), or
+ * k4a_capture_get_ir_image(), the image should be checked for NULL.
  *
  * \xmlonly
  * <requirements>

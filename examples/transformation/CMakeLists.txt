@@ -6,5 +6,8 @@ add_executable(transformation_example
     transformation_helpers.cpp
     transformation_helpers.h)
 
-target_link_libraries(transformation_example PRIVATE 
-    k4a::k4a)
+target_link_libraries(transformation_example PRIVATE
+    k4a::k4a
+    k4a::k4arecord
+    libjpeg-turbo::libjpeg-turbo
+    )

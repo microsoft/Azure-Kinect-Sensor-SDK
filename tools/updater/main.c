@@ -5,7 +5,6 @@
 #define _CRT_NONSTDC_NO_DEPRECATE
 #endif
 
-#include <k4a/k4a.h>
 #include <k4ainternal/firmware.h>
 #include <k4ainternal/depth_mcu.h>
 #include <k4ainternal/logging.h>
@@ -55,17 +54,16 @@ typedef struct _updater_command_info_t
     char *firmware_path;
 
     char *device_serial_number;
-    uint8_t device_index;
+    uint32_t device_index;
 
-    depthmcu_t depthmcu_handle;
     firmware_t firmware_handle;
 
     uint8_t *firmware_buffer;
     size_t firmware_size;
     firmware_package_info_t firmware_package_info;
 
-    depthmcu_firmware_versions_t current_version;
-    depthmcu_firmware_versions_t updated_version;
+    k4a_hardware_version_t current_version;
+    k4a_hardware_version_t updated_version;
 } updater_command_info_t;
 
 static void print_supprted_commands()
@@ -91,7 +89,6 @@ static void print_supprted_commands()
     printf("    %s -Update c:\\data\\firmware.bin 0123456\n", EXECUTABLE_NAME);
 }
 
-static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info);
 static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info);
 static void command_list_devices(void);
 static k4a_result_t command_query_device(updater_command_info_t *command_info);
@@ -117,19 +114,15 @@ static int try_parse_device(int argc, char **argv, int current, updater_command_
 
     char *device_serial_number = argv[next];
 
+    // NOTE: Leaving this as depthmcu since we only need access to the serial number and firmware will block until the
+    // device is ready for other commands that aren't needed.
     depthmcu_t device = NULL;
     uint32_t device_count;
     usb_cmd_get_device_count(&device_count);
 
-    if (device_count > UINT8_MAX)
-    {
-        printf("WARNING: There are %d devices connected but can only list the first %d\n", device_count, UINT8_MAX);
-        device_count = UINT8_MAX;
-    }
+    command_info->device_index = UINT32_MAX;
 
-    command_info->device_index = UINT8_MAX;
-
-    for (uint8_t deviceIndex = 0; deviceIndex < device_count; deviceIndex++)
+    for (uint32_t deviceIndex = 0; deviceIndex < device_count; deviceIndex++)
     {
         if (K4A_RESULT_SUCCEEDED != depthmcu_create(deviceIndex, &device))
         {
@@ -184,7 +177,7 @@ static int try_parse_device(int argc, char **argv, int current, updater_command_
         device = NULL;
     }
 
-    if (command_info->device_index == UINT8_MAX)
+    if (command_info->device_index == UINT32_MAX)
     {
         printf("ERROR: Unable to find a device with serial number: %s\n", device_serial_number);
     }
@@ -227,7 +220,7 @@ static int parse_command_line(int argc, char **argv, updater_command_info_t *com
         {
             command_info->requested_command = K4A_FIRMWARE_COMMAND_QUERY_DEVICE;
             i = try_parse_device(argc, argv, i, command_info);
-            if (command_info->device_index == UINT8_MAX)
+            if (command_info->device_index == UINT32_MAX)
             {
                 return EXIT_USAGE;
             }
@@ -247,7 +240,7 @@ static int parse_command_line(int argc, char **argv, updater_command_info_t *com
             command_info->firmware_path = argv[i];
 
             i = try_parse_device(argc, argv, i, command_info);
-            if (command_info->device_index == UINT8_MAX)
+            if (command_info->device_index == UINT32_MAX)
             {
                 return EXIT_USAGE;
             }
@@ -256,7 +249,7 @@ static int parse_command_line(int argc, char **argv, updater_command_info_t *com
         {
             command_info->requested_command = K4A_FIRMWARE_COMMAND_RESET_DEVICE;
             i = try_parse_device(argc, argv, i, command_info);
-            if (command_info->device_index == UINT8_MAX)
+            if (command_info->device_index == UINT32_MAX)
             {
                 return EXIT_USAGE;
             }
@@ -446,7 +439,7 @@ static k4a_result_t print_firmware_package_info(firmware_package_info_t package_
 
 static k4a_result_t print_device_serialnum(updater_command_info_t *command_info)
 {
-    k4a_result_t result = ensure_depth_mcu_open(command_info);
+    k4a_result_t result = ensure_firmware_open(command_info);
     if (!K4A_SUCCEEDED(result))
     {
         return result;
@@ -456,7 +449,7 @@ static k4a_result_t print_device_serialnum(updater_command_info_t *command_info)
     size_t serial_number_length = 0;
 
     if (K4A_BUFFER_RESULT_TOO_SMALL !=
-        depthmcu_get_serialnum(command_info->depthmcu_handle, NULL, &serial_number_length))
+        firmware_get_device_serialnum(command_info->firmware_handle, NULL, &serial_number_length))
     {
         printf("ERROR: Failed to get serial number length\n");
         return K4A_RESULT_FAILED;
@@ -470,7 +463,7 @@ static k4a_result_t print_device_serialnum(updater_command_info_t *command_info)
     }
 
     if (K4A_BUFFER_RESULT_SUCCEEDED !=
-        depthmcu_get_serialnum(command_info->depthmcu_handle, serial_number, &serial_number_length))
+        firmware_get_device_serialnum(command_info->firmware_handle, serial_number, &serial_number_length))
     {
         printf("ERROR: Failed to get serial number\n");
         free(serial_number);
@@ -570,16 +563,17 @@ static char *component_status_to_string(const firmware_component_status_t status
     return "FAILED (Unknown)";
 }
 
-static bool compare_version(uint8_t major, uint8_t minor, uint16_t iteration, k4a_version_t version)
+static bool compare_version(k4a_version_t left_version, k4a_version_t right_version)
 {
-    return major == version.major && minor == version.minor && iteration == version.iteration;
+    return left_version.major == right_version.major && left_version.minor == right_version.minor &&
+           left_version.iteration == right_version.iteration;
 }
 
-static bool compare_version_list(uint16_t major, uint16_t minor, uint8_t count, k4a_version_t versions[5])
+static bool compare_version_list(k4a_version_t device_version, uint8_t count, k4a_version_t versions[5])
 {
     for (int i = 0; i < count; ++i)
     {
-        if (major == versions[i].major && minor == versions[i].minor)
+        if (device_version.major == versions[i].major && device_version.minor == versions[i].minor)
         {
             return true;
         }
@@ -647,14 +641,14 @@ static k4a_result_t wait_update_operation_complete(firmware_t firmware_handle, f
     return K4A_RESULT_SUCCEEDED;
 }
 
-static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
+static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info)
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     bool serial_mismatch = false;
     int retry = 0;
     uint32_t device_count = 0;
 
-    if (command_info->device_serial_number == NULL && command_info->depthmcu_handle == NULL)
+    if (command_info->device_serial_number == NULL && command_info->firmware_handle == NULL)
     {
         // Never connected to the device, connect and save the serial number for future connections
 
@@ -665,7 +659,7 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
             return K4A_RESULT_FAILED;
         }
 
-        result = depthmcu_create(command_info->device_index, &command_info->depthmcu_handle);
+        result = firmware_create(command_info->device_index, &command_info->firmware_handle);
         if (!K4A_SUCCEEDED(result))
         {
             printf("ERROR: Failed to connect to an Azure Kinect device\n");
@@ -676,7 +670,7 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
         size_t serial_number_length = 0;
 
         if (K4A_BUFFER_RESULT_TOO_SMALL !=
-            depthmcu_get_serialnum(command_info->depthmcu_handle, NULL, &serial_number_length))
+            firmware_get_device_serialnum(command_info->firmware_handle, NULL, &serial_number_length))
         {
             printf("ERROR: Failed to get serial number length\n");
             return K4A_RESULT_FAILED;
@@ -690,7 +684,7 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
         }
 
         if (K4A_BUFFER_RESULT_SUCCEEDED !=
-            depthmcu_get_serialnum(command_info->depthmcu_handle, serial_number, &serial_number_length))
+            firmware_get_device_serialnum(command_info->firmware_handle, serial_number, &serial_number_length))
         {
             printf("ERROR: Failed to get serial number\n");
             free(serial_number);
@@ -698,15 +692,9 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
         }
 
         command_info->device_serial_number = serial_number;
-
-        // Wait until the device is responding correctly...
-        if (!depthmcu_wait_is_ready(command_info->depthmcu_handle))
-        {
-            return K4A_RESULT_FAILED;
-        }
     }
 
-    if (command_info->depthmcu_handle == NULL)
+    if (command_info->firmware_handle == NULL)
     {
         // Wait until the device is available...
         do
@@ -714,7 +702,7 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
             usb_cmd_get_device_count(&device_count);
             if (device_count > command_info->device_index)
             {
-                result = depthmcu_create(command_info->device_index, &command_info->depthmcu_handle);
+                result = firmware_create(command_info->device_index, &command_info->firmware_handle);
                 if (!K4A_SUCCEEDED(result))
                 {
                     printf("ERROR: Failed to connect to the Azure Kinect device\n");
@@ -725,7 +713,7 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
                 size_t serial_number_length = 0;
 
                 if (K4A_BUFFER_RESULT_TOO_SMALL !=
-                    depthmcu_get_serialnum(command_info->depthmcu_handle, NULL, &serial_number_length))
+                    firmware_get_device_serialnum(command_info->firmware_handle, NULL, &serial_number_length))
                 {
                     printf("ERROR: Failed to get serial number length\n");
                     return K4A_RESULT_FAILED;
@@ -739,7 +727,7 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
                 }
 
                 if (K4A_BUFFER_RESULT_SUCCEEDED !=
-                    depthmcu_get_serialnum(command_info->depthmcu_handle, serial_number, &serial_number_length))
+                    firmware_get_device_serialnum(command_info->firmware_handle, serial_number, &serial_number_length))
                 {
                     printf("ERROR: Failed to get serial number\n");
                     free(serial_number);
@@ -761,10 +749,10 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
 
             if (!K4A_SUCCEEDED(result))
             {
-                if (command_info->depthmcu_handle != NULL)
+                if (command_info->firmware_handle != NULL)
                 {
-                    depthmcu_destroy(command_info->depthmcu_handle);
-                    command_info->depthmcu_handle = NULL;
+                    firmware_destroy(command_info->firmware_handle);
+                    command_info->firmware_handle = NULL;
                 }
 
                 ThreadAPI_Sleep(500);
@@ -778,33 +766,6 @@ static k4a_result_t ensure_depth_mcu_open(updater_command_info_t *command_info)
                 printf("\nERROR: Product Serial Number does not match\n");
             }
 
-            return result;
-        }
-
-        // Wait until the device is responding correctly...
-        if (!depthmcu_wait_is_ready(command_info->depthmcu_handle))
-        {
-            return K4A_RESULT_FAILED;
-        }
-    }
-
-    return result;
-}
-
-static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info)
-{
-    k4a_result_t result = ensure_depth_mcu_open(command_info);
-    if (!K4A_SUCCEEDED(result))
-    {
-        return result;
-    }
-
-    if (command_info->firmware_handle == NULL)
-    {
-        result = firmware_create(command_info->depthmcu_handle, &command_info->firmware_handle);
-        if (!K4A_SUCCEEDED(result))
-        {
-            printf("ERROR: Failed to create a connection to the Firmware!\n");
             return result;
         }
     }
@@ -826,31 +787,19 @@ static void close_all_handles(updater_command_info_t *command_info)
         firmware_destroy(command_info->firmware_handle);
         command_info->firmware_handle = NULL;
     }
-
-    if (command_info->depthmcu_handle)
-    {
-        depthmcu_destroy(command_info->depthmcu_handle);
-        command_info->depthmcu_handle = NULL;
-    }
 }
 
 static void command_list_devices()
 {
-    depthmcu_t device = NULL;
+    firmware_t device = NULL;
     uint32_t device_count;
 
     usb_cmd_get_device_count(&device_count);
     printf("Found %d connected devices:\n", device_count);
 
-    if (device_count > UINT8_MAX)
+    for (uint32_t deviceIndex = 0; deviceIndex < device_count; deviceIndex++)
     {
-        printf("WARNING: There are %d devices connected but can only list the first %d\n", device_count, UINT8_MAX);
-        device_count = UINT8_MAX;
-    }
-
-    for (uint8_t deviceIndex = 0; deviceIndex < device_count; deviceIndex++)
-    {
-        if (K4A_RESULT_SUCCEEDED != depthmcu_create(deviceIndex, &device))
+        if (K4A_RESULT_SUCCEEDED != firmware_create(deviceIndex, &device))
         {
             printf("ERROR: %d: Failed to open device\n", deviceIndex);
         }
@@ -858,10 +807,10 @@ static void command_list_devices()
         char *serial_number = NULL;
         size_t serial_number_length = 0;
 
-        if (K4A_BUFFER_RESULT_TOO_SMALL != depthmcu_get_serialnum(device, NULL, &serial_number_length))
+        if (K4A_BUFFER_RESULT_TOO_SMALL != firmware_get_device_serialnum(device, NULL, &serial_number_length))
         {
             printf("ERROR: %d: Failed to get serial number length\n", deviceIndex);
-            depthmcu_destroy(device);
+            firmware_destroy(device);
             device = NULL;
             continue;
         }
@@ -872,17 +821,17 @@ static void command_list_devices()
             printf("ERROR: %d: Failed to allocate memory for serial number (%zu bytes)\n",
                    deviceIndex,
                    serial_number_length);
-            depthmcu_destroy(device);
+            firmware_destroy(device);
             device = NULL;
             continue;
         }
 
-        if (K4A_BUFFER_RESULT_SUCCEEDED != depthmcu_get_serialnum(device, serial_number, &serial_number_length))
+        if (K4A_BUFFER_RESULT_SUCCEEDED != firmware_get_device_serialnum(device, serial_number, &serial_number_length))
         {
             printf("ERROR: %d: Failed to get serial number\n", deviceIndex);
             free(serial_number);
             serial_number = NULL;
-            depthmcu_destroy(device);
+            firmware_destroy(device);
             device = NULL;
             continue;
         }
@@ -891,14 +840,14 @@ static void command_list_devices()
 
         free(serial_number);
         serial_number = NULL;
-        depthmcu_destroy(device);
+        firmware_destroy(device);
         device = NULL;
     }
 }
 
 static k4a_result_t command_query_device(updater_command_info_t *command_info)
 {
-    k4a_result_t result = ensure_depth_mcu_open(command_info);
+    k4a_result_t result = ensure_firmware_open(command_info);
     if (!K4A_SUCCEEDED(result))
     {
         return result;
@@ -910,28 +859,28 @@ static k4a_result_t command_query_device(updater_command_info_t *command_info)
         return result;
     }
 
-    result = depthmcu_get_version(command_info->depthmcu_handle, &command_info->current_version);
+    result = firmware_get_device_version(command_info->firmware_handle, &command_info->current_version);
     if (K4A_SUCCEEDED(result))
     {
         printf("Current Firmware Versions:\n");
         printf("  RGB camera firmware:      %d.%d.%d\n",
-               command_info->current_version.rgb_major,
-               command_info->current_version.rgb_minor,
-               command_info->current_version.rgb_build);
+               command_info->current_version.rgb.major,
+               command_info->current_version.rgb.minor,
+               command_info->current_version.rgb.iteration);
         printf("  Depth camera firmware:    %d.%d.%d\n",
-               command_info->current_version.depth_major,
-               command_info->current_version.depth_minor,
-               command_info->current_version.depth_build);
+               command_info->current_version.depth.major,
+               command_info->current_version.depth.minor,
+               command_info->current_version.depth.iteration);
         printf("  Depth config file:        %d.%d\n",
-               command_info->current_version.depth_sensor_cfg_major,
-               command_info->current_version.depth_sensor_cfg_minor);
+               command_info->current_version.depth_sensor.major,
+               command_info->current_version.depth_sensor.minor);
         printf("  Audio firmware:           %d.%d.%d\n",
-               command_info->current_version.audio_major,
-               command_info->current_version.audio_minor,
-               command_info->current_version.audio_build);
+               command_info->current_version.audio.major,
+               command_info->current_version.audio.minor,
+               command_info->current_version.audio.iteration);
 
-        print_firmware_build_config(command_info->current_version.build_config);
-        print_firmware_signature_type(command_info->current_version.signature_type, true);
+        print_firmware_build_config(command_info->current_version.firmware_build);
+        print_firmware_signature_type(command_info->current_version.firmware_signature, true);
         printf("\n");
     }
     else
@@ -995,22 +944,15 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
         return result;
     }
 
-    bool audio_current_version_same = compare_version(command_info->current_version.audio_major,
-                                                      command_info->current_version.audio_minor,
-                                                      command_info->current_version.audio_build,
+    bool audio_current_version_same = compare_version(command_info->current_version.audio,
                                                       command_info->firmware_package_info.audio);
     bool depth_config_current_version_same =
-        compare_version_list(command_info->current_version.depth_sensor_cfg_major,
-                             command_info->current_version.depth_sensor_cfg_minor,
+        compare_version_list(command_info->current_version.depth_sensor,
                              command_info->firmware_package_info.depth_config_number_versions,
                              command_info->firmware_package_info.depth_config_versions);
-    bool depth_current_version_same = compare_version(command_info->current_version.depth_major,
-                                                      command_info->current_version.depth_minor,
-                                                      command_info->current_version.depth_build,
+    bool depth_current_version_same = compare_version(command_info->current_version.depth,
                                                       command_info->firmware_package_info.depth);
-    bool rgb_current_version_same = compare_version(command_info->current_version.rgb_major,
-                                                    command_info->current_version.rgb_minor,
-                                                    command_info->current_version.rgb_build,
+    bool rgb_current_version_same = compare_version(command_info->current_version.rgb,
                                                     command_info->firmware_package_info.rgb);
 
     printf(
@@ -1057,25 +999,18 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
     }
 
     // Pull the updated version number:
-    result = depthmcu_get_version(command_info->depthmcu_handle, &command_info->updated_version);
+    result = firmware_get_device_version(command_info->firmware_handle, &command_info->updated_version);
     if (K4A_SUCCEEDED(result))
     {
-        bool audio_updated_version_same = compare_version(command_info->updated_version.audio_major,
-                                                          command_info->updated_version.audio_minor,
-                                                          command_info->updated_version.audio_build,
+        bool audio_updated_version_same = compare_version(command_info->updated_version.audio,
                                                           command_info->firmware_package_info.audio);
         bool depth_config_updated_version_same =
-            compare_version_list(command_info->updated_version.depth_sensor_cfg_major,
-                                 command_info->updated_version.depth_sensor_cfg_minor,
+            compare_version_list(command_info->updated_version.depth_sensor,
                                  command_info->firmware_package_info.depth_config_number_versions,
                                  command_info->firmware_package_info.depth_config_versions);
-        bool depth_updated_version_same = compare_version(command_info->updated_version.depth_major,
-                                                          command_info->updated_version.depth_minor,
-                                                          command_info->updated_version.depth_build,
+        bool depth_updated_version_same = compare_version(command_info->updated_version.depth,
                                                           command_info->firmware_package_info.depth);
-        bool rgb_updated_version_same = compare_version(command_info->updated_version.rgb_major,
-                                                        command_info->updated_version.rgb_minor,
-                                                        command_info->updated_version.rgb_build,
+        bool rgb_updated_version_same = compare_version(command_info->updated_version.rgb,
                                                         command_info->firmware_package_info.rgb);
 
         if (audio_current_version_same && audio_updated_version_same && depth_config_current_version_same &&
@@ -1093,31 +1028,31 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
         {
             printf("The firmware has been updated to the following firmware Versions:\n");
             printf("  RGB camera firmware:    %d.%d.%d => %d.%d.%d\n",
-                   command_info->current_version.rgb_major,
-                   command_info->current_version.rgb_minor,
-                   command_info->current_version.rgb_build,
-                   command_info->updated_version.rgb_major,
-                   command_info->updated_version.rgb_minor,
-                   command_info->updated_version.rgb_build);
+                   command_info->current_version.rgb.major,
+                   command_info->current_version.rgb.minor,
+                   command_info->current_version.rgb.iteration,
+                   command_info->updated_version.rgb.major,
+                   command_info->updated_version.rgb.minor,
+                   command_info->updated_version.rgb.iteration);
             printf("  Depth camera firmware:  %d.%d.%d => %d.%d.%d\n",
-                   command_info->current_version.depth_major,
-                   command_info->current_version.depth_minor,
-                   command_info->current_version.depth_build,
-                   command_info->updated_version.depth_major,
-                   command_info->updated_version.depth_minor,
-                   command_info->updated_version.depth_build);
+                   command_info->current_version.depth.major,
+                   command_info->current_version.depth.minor,
+                   command_info->current_version.depth.iteration,
+                   command_info->updated_version.depth.major,
+                   command_info->updated_version.depth.minor,
+                   command_info->updated_version.depth.iteration);
             printf("  Depth config file:      %d.%d => %d.%d\n",
-                   command_info->current_version.depth_sensor_cfg_major,
-                   command_info->current_version.depth_sensor_cfg_minor,
-                   command_info->updated_version.depth_sensor_cfg_major,
-                   command_info->updated_version.depth_sensor_cfg_minor);
+                   command_info->current_version.depth_sensor.major,
+                   command_info->current_version.depth_sensor.minor,
+                   command_info->updated_version.depth_sensor.major,
+                   command_info->updated_version.depth_sensor.minor);
             printf("  Audio firmware:         %d.%d.%d => %d.%d.%d\n",
-                   command_info->current_version.audio_major,
-                   command_info->current_version.audio_minor,
-                   command_info->current_version.audio_build,
-                   command_info->updated_version.audio_major,
-                   command_info->updated_version.audio_minor,
-                   command_info->updated_version.audio_build);
+                   command_info->current_version.audio.major,
+                   command_info->current_version.audio.minor,
+                   command_info->current_version.audio.iteration,
+                   command_info->updated_version.audio.major,
+                   command_info->updated_version.audio.minor,
+                   command_info->updated_version.audio.iteration);
         }
     }
     else
@@ -1148,7 +1083,7 @@ static k4a_result_t command_reset_device(updater_command_info_t *command_info)
     ThreadAPI_Sleep(500);
 
     // Re-open the device to ensure it is ready.
-    result = ensure_depth_mcu_open(command_info);
+    result = ensure_firmware_open(command_info);
     printf("\n\n");
 
     return result;

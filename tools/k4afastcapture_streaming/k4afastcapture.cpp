@@ -60,8 +60,6 @@ K4AFastCapture::~K4AFastCapture()
 
     if (m_device != NULL)
     {
-
-        k4a_device_stop_cameras(m_device);
         k4a_device_close(m_device);
     }
 #ifndef _WIN32
