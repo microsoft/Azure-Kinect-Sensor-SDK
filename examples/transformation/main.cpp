@@ -334,13 +334,13 @@ static int playback(char *input_path, int timestamp = 1000, std::string output_f
                       TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE) != 0)
     {
         printf("Failed to decompress color frame\n");
-        if (!tjDestroy(tjHandle))
+        if (tjDestroy(tjHandle))
         {
             printf("Failed to destroy turboJPEG handle\n");
         }
         goto Exit;
     }
-    if (!tjDestroy(tjHandle))
+    if (tjDestroy(tjHandle))
     {
         printf("Failed to destroy turboJPEG handle\n");
     }
