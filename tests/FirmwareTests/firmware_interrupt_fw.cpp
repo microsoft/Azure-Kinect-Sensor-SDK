@@ -75,7 +75,9 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
 {
     firmware_interrupt_parameters parameters = GetParam();
     firmware_status_summary_t finalStatus;
-    LOG_INFO("Beginning the update test with reboots interrupting the update", 0);
+    LOG_INFO("Beginning the update test with interrupts during the update. Stage: %d Interruption: %d",
+             parameters.component,
+             parameters.interruption);
 
     LOG_INFO("Powering on the device...", 0);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, g_connection_exerciser->set_usb_port(g_k4a_port_number));
@@ -91,8 +93,12 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
                                     g_candidate_firmware_package_info,
                                     false));
 
+    // Prepend the "Firmware Package Versions:\n" with "Test".
+    printf("Test ");
+    log_firmware_version(g_test_firmware_package_info);
+
     // Update to the Test firmware, but interrupt...
-    LOG_INFO("Interrupting at the beginning of the update");
+    LOG_INFO("Beginning of the firmware update to the Test Firmware with interruption...");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, g_test_firmware_buffer, g_test_firmware_size));
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               interrupt_device_at_update_stage(&firmware_handle,
@@ -106,11 +112,6 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
               << " Depth: " << calculate_overall_component_status(finalStatus.depth)
               << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
 
-    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.audio));
-    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth_config));
-    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
-    ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
-
     // Check that we are still on the old version
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
     log_device_version(current_version);
@@ -122,10 +123,36 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
 
     switch (parameters.component)
     {
+    case FIRMWARE_OPERATION_START:
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.audio));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth_config));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
+        ASSERT_TRUE(compare_version(current_version.audio, g_candidate_firmware_package_info.audio))
+            << "Audio version mismatch";
+        ASSERT_TRUE(compare_version(current_version.depth, g_candidate_firmware_package_info.depth))
+            << "Depth mismatch";
+        ASSERT_TRUE(compare_version(current_version.rgb, g_candidate_firmware_package_info.rgb)) << "RGB mismatch";
+        break;
+
     case FIRMWARE_OPERATION_AUDIO_ERASE:
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.audio));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth_config));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
+        ASSERT_TRUE(compare_version(current_version.audio, { 0 })) << "Audio version mismatch";
+        ASSERT_TRUE(compare_version(current_version.depth, g_candidate_firmware_package_info.depth))
+            << "Depth mismatch";
+        ASSERT_TRUE(compare_version(current_version.rgb, g_candidate_firmware_package_info.rgb)) << "RGB mismatch";
+        break;
+
     case FIRMWARE_OPERATION_AUDIO_WRITE:
-        // ASSERT_TRUE(compare_version(current_version.audio, candidate_firmware_package_info.audio))
-        //    << "Audio version mismatch";
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.audio));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth_config));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
+        ASSERT_TRUE(compare_version(current_version.audio, g_test_firmware_package_info.audio))
+            << "Audio version mismatch";
         ASSERT_TRUE(compare_version(current_version.depth, g_candidate_firmware_package_info.depth))
             << "Depth mismatch";
         ASSERT_TRUE(compare_version(current_version.rgb, g_candidate_firmware_package_info.rgb)) << "RGB mismatch";
@@ -133,23 +160,32 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
 
     case FIRMWARE_OPERATION_DEPTH_ERASE:
     case FIRMWARE_OPERATION_DEPTH_WRITE:
+        ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
+        ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.depth));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
         ASSERT_TRUE(compare_version(current_version.audio, g_test_firmware_package_info.audio))
             << "Audio version mismatch";
-        // ASSERT_TRUE(compare_version(current_version.depth, candidate_firmware_package_info.depth)) << "Depth
-        // mismatch";
+        // The Depth version appears to be non-deterministic based on when the reset actually happened.
+        // ASSERT_TRUE(compare_version(current_version.depth, { 0 })) << "Depth mismatch";
         ASSERT_TRUE(compare_version(current_version.rgb, g_candidate_firmware_package_info.rgb)) << "RGB mismatch";
         break;
 
     case FIRMWARE_OPERATION_RGB_ERASE:
     case FIRMWARE_OPERATION_RGB_WRITE:
+        ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.audio));
+        ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
+        ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth));
+        ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
         ASSERT_TRUE(compare_version(current_version.audio, g_test_firmware_package_info.audio))
             << "Audio version mismatch";
         ASSERT_TRUE(compare_version(current_version.depth, g_test_firmware_package_info.depth)) << "Depth mismatch";
-        // ASSERT_TRUE(compare_version(current_version.rgb, candidate_firmware_package_info.rgb)) << "RGB mismatch";
+        // The RGB version appears to be non-deterministic based on when the reset actually happened.
+        // ASSERT_TRUE(compare_version(current_version.rgb, { 0 })) << "RGB mismatch";
         break;
 
     default:
-        ASSERT_TRUE(false) << "Unhandled component type.";
+        ASSERT_TRUE(false) << "Unhandled component type. " << parameters.component;
     }
 
     // Update back to the LKG firmware to make sure that works.
