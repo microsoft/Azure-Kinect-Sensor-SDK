@@ -25,7 +25,7 @@ extern "C" {
  * \returns Number of sensors connected to the PC.
  *
  * \remarks
- * This API counts the number of K4A devices connected to the host PC.
+ * This API counts the number of Azure Kinect devices connected to the host PC.
  *
  * \xmlonly
  * <requirements>
@@ -37,7 +37,7 @@ extern "C" {
  */
 K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
 
-/** Open a k4a device.
+/** Open an Azure Kinect device.
  *
  * \param index
  * The index of the device to open, starting with 0. Optionally pass in #K4A_DEVICE_DEFAULT.
@@ -49,7 +49,7 @@ K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
  *
  * \remarks
  * If successful, k4a_device_open() will return a device handle in the device_handle parameter.
- * This handle grants exclusive access to the device and may be used in the other k4a API calls.
+ * This handle grants exclusive access to the device and may be used in the other Azure Kinect API calls.
  *
  * \remarks
  * When done with the device, close the handle with k4a_device_close()
@@ -64,7 +64,7 @@ K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
  */
 K4A_EXPORT k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle);
 
-/** Closes a k4a device.
+/** Closes an Azure Kinect device.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
@@ -192,8 +192,8 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,
  * called on another thread, this function will return an error.
  *
  * \remarks
- * The memory the IMU sample is written to is allocated and owned by the caller, so there is no need to call a k4a API
- * to free or release the sample.
+ * The memory the IMU sample is written to is allocated and owned by the caller, so there is no need to call an Azure
+ * Kinect API to free or release the sample.
  *
  * \xmlonly
  * <requirements>
@@ -1090,7 +1090,7 @@ K4A_EXPORT k4a_result_t k4a_device_start_imu(k4a_device_t device_handle);
  */
 K4A_EXPORT void k4a_device_stop_imu(k4a_device_t device_handle);
 
-/** Get the K4A device serial number.
+/** Get the Azure Kinect device serial number.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
@@ -1155,7 +1155,7 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_hand
  */
 K4A_EXPORT k4a_result_t k4a_device_get_version(k4a_device_t device_handle, k4a_hardware_version_t *version);
 
-/** Get the K4A color sensor control value.
+/** Get the Azure Kinect color sensor control value.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
@@ -1182,6 +1182,10 @@ K4A_EXPORT k4a_result_t k4a_device_get_version(k4a_device_t device_handle, k4a_h
  * Some control commands are only supported in manual mode. When a command is in automatic mode, the \p value for that
  * command is not valid.
  *
+ * \remarks
+ * Control values set on a device are reset only when the device is power cycled. The device will retain the settings
+ * even if the \ref k4a_device_t is closed or the application is restarted.
+ *
  * \relates k4a_device_t
  *
  * \xmlonly
@@ -1197,7 +1201,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle,
                                                      k4a_color_control_mode_t *mode,
                                                      int32_t *value);
 
-/** Set the K4A color sensor control value.
+/** Set the Azure Kinect color sensor control value.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
@@ -1223,6 +1227,10 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle,
  * Some control commands are only supported in manual mode. When a command is in automatic mode, the \p value for that
  * command is not valid.
  *
+ * \remarks
+ * Control values set on a device are reset only when the device is power cycled. The device will retain the settings
+ * even if the \ref k4a_device_t is closed or the application is restarted.
+ *
  * \relates k4a_device_t
  *
  * \xmlonly
@@ -1238,7 +1246,7 @@ K4A_EXPORT k4a_result_t k4a_device_set_color_control(k4a_device_t device_handle,
                                                      k4a_color_control_mode_t mode,
                                                      int32_t value);
 
-/** Get the raw calibration blob for the entire K4A device.
+/** Get the raw calibration blob for the entire Azure Kinect device.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
@@ -1271,7 +1279,7 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
                                                               uint8_t *data,
                                                               size_t *data_size);
 
-/** Get the camera calibration for the entire K4A device.
+/** Get the camera calibration for the entire Azure Kinect device.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
