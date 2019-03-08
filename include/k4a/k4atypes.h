@@ -69,7 +69,7 @@ K4A_DECLARE_HANDLE(k4a_device_t);
  * configured delay.
  *
  * \remarks
- * The capture will add a reference on any \ref k4a_image_t that it are added to it with one of the setters like
+ * The capture will add a reference on any \ref k4a_image_t that is added to it with one of the setters like
  * k4a_capture_set_color_image(). If an existing image is being replaced, the previous image will have the reference
  * released.
  *
