@@ -15,22 +15,31 @@
 extern "C" {
 #endif
 
-/** Opens a new recording file for writing. The file will be created if it doesn't exist, or overwritten if an existing
- * file is specified.
+/** Opens a new recording file for writing.
+ *
+ * The file will be created if it doesn't exist, or overwritten if an existing file is specified.
  *
  * \param path
  * Filesystem path for the new recording.
  *
  * \param device
- * The k4a device that is being recorded. The device handle is used to store device calibration and serial number
- * information. May be NULL if recording user-generated data.
+ * The Azure Kinect device that is being recorded. The device handle is used to store device calibration and serial
+ * number information. May be NULL if recording user-generated data.
  *
  * \param device_config
- * The configuration the k4a device was opened with.
+ * The configuration the Azure Kinect device was started with.
  *
- * \param recording_handle [OUT]
+ * \param recording_handle
  * If successful, this contains a pointer to the new recording handle. Caller must call k4a_record_close()
  * when finished with recording.
+ *
+ * \remarks
+ * Streaming does not need to be started on the device at the time this function is called, but when it is started
+ * it should be started with the same configuration provided in \p device_config.
+ *
+ * \remarks
+ * Subsequent calls to k4a_record_write_capture() will need to have images in the resolution and format defined
+ * in \p device_config.
  *
  * \headerfile record.h <k4arecord/record.h>
  *
@@ -66,7 +75,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_create(const char *path,
  *
  * \relates k4a_record_t
  *
- * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success.
  *
  * \remarks
  * Tags are global to a file, and should store data related to the entire recording, such as camera configuration or
@@ -82,7 +91,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_create(const char *path,
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, const char *name, const char *value);
 
-/** Adds the track header for recording imu. The track needs to be added before the recording header is written.
+/** Adds the track header for recording IMU.
+ *
+ * The track needs to be added before the recording header is written.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
@@ -103,7 +114,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_handle);
 
-/** Writes the recording header and metadata to file. This must be called before captures can be written.
+/** Writes the recording header and metadata to file.
+ *
+ * This must be called before captures can be written.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
@@ -125,6 +138,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_ha
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_header(k4a_record_t recording_handle);
 
 /** Writes a camera capture to file.
+ *
  * Captures must be written in increasing order of timestamp, and the file's header must already be written.
  *
  * \param recording_handle
@@ -154,6 +168,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_header(k4a_record_t recording_han
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_handle, k4a_capture_t capture_handle);
 
 /** Writes an imu sample to file.
+ *
  * Samples must be written in increasing order of timestamp, and the file's header must already be written.
  * When writing imu samples at the same time as captures, the samples should be within 1 second of the most recently
  * written capture.
