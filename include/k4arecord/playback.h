@@ -237,7 +237,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_
  *
  * \remarks
  * The first call to k4a_playback_get_previous_capture() after k4a_playback_seek_timestamp() will return the
- * capture in the recording closest to the seek time with an image timestamp less than the seek time.
+ * capture in the recording closest to the seek time with all image timestamps less than the seek time.
  *
  * \remarks
  * Capture objects returned by this API will always contain at least one image, but may have images missing if frames
@@ -352,7 +352,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  *
  * \remarks
  * The first call to k4a_playback_get_previous_capture() after k4a_playback_seek_timestamp() will return the first
- * capture containing an image timestamp less than the seek time.
+ * capture with all image timestamps less than the seek time.
  *
  * \remarks
  * The first call to k4a_playback_get_next_imu_sample() after k4a_playback_seek_timestamp() will return the first imu
