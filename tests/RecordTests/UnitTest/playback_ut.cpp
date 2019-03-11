@@ -305,10 +305,10 @@ TEST_F(playback_ut, playback_seek_test)
     std::pair<int64_t, k4a_playback_seek_origin_t> middle_seek_combinations[] = {
         // Between captures
         { timestamp_delta * 50 - 500, K4A_PLAYBACK_SEEK_BEGIN },
-        { -recording_length + (timestamp_delta * 50 - 500), K4A_PLAYBACK_SEEK_END },
+        { -recording_length + (int64_t)(timestamp_delta * 50 - 500), K4A_PLAYBACK_SEEK_END },
         // Middle of capture
         { timestamp_delta * 50 + 500, K4A_PLAYBACK_SEEK_BEGIN },
-        { -recording_length + (timestamp_delta * 50 + 500), K4A_PLAYBACK_SEEK_END },
+        { -recording_length + (int64_t)(timestamp_delta * 50 + 500), K4A_PLAYBACK_SEEK_END },
     };
 
     std::cerr << "[          ] Testing seek to start:" << std::endl;
