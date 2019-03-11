@@ -374,10 +374,10 @@ void K4ADeviceDockControl::Show()
         auto *pColorFormat = reinterpret_cast<int *>(&m_pendingDeviceConfiguration.ColorFormat);
         ImGui::Text("Format");
         colorFormatUpdated |=
-            ImGuiExtensions::K4ARadioButton("MJPG", pColorFormat, K4A_IMAGE_FORMAT_COLOR_MJPG, colorSettingsEditable);
+            ImGuiExtensions::K4ARadioButton("BGRA", pColorFormat, K4A_IMAGE_FORMAT_COLOR_BGRA32, colorSettingsEditable);
         ImGui::SameLine();
         colorFormatUpdated |=
-            ImGuiExtensions::K4ARadioButton("BGRA", pColorFormat, K4A_IMAGE_FORMAT_COLOR_BGRA32, colorSettingsEditable);
+            ImGuiExtensions::K4ARadioButton("MJPG", pColorFormat, K4A_IMAGE_FORMAT_COLOR_MJPG, colorSettingsEditable);
         ImGui::SameLine();
         colorFormatUpdated |=
             ImGuiExtensions::K4ARadioButton("NV12", pColorFormat, K4A_IMAGE_FORMAT_COLOR_NV12, colorSettingsEditable);
@@ -1005,10 +1005,12 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         {
             k4a::calibration calib = m_device.get_calibration(m_pendingDeviceConfiguration.DepthMode,
                                                               m_pendingDeviceConfiguration.ColorResolution);
+            bool rgbPointCloudAvailable = m_pendingDeviceConfiguration.EnableColorCamera &&
+                                          m_pendingDeviceConfiguration.ColorFormat == K4A_IMAGE_FORMAT_COLOR_BGRA32;
             K4AWindowSet::StartPointCloudWindow(m_deviceSerialNumber.c_str(),
-                                                std::move(calib),
+                                                calib,
                                                 m_cameraDataSource,
-                                                m_pendingDeviceConfiguration.DepthMode);
+                                                rgbPointCloudAvailable);
         }
         catch (const k4a::error &e)
         {

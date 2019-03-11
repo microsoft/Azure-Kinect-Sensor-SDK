@@ -34,9 +34,9 @@ public:
     {
     }
 
-    GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) override
+    GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture) override
     {
-        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+        return K4AViewerImage::Create(&texture, nullptr, m_dimensions, GL_RGB);
     }
 
     void InitializeBuffer(K4ATextureBuffer<ImageFormat> &buffer) override
@@ -68,7 +68,8 @@ public:
         return ImageVisualizationResult::Success;
     }
 
-    ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<ImageFormat> &buffer, OpenGlTexture &texture) override
+    ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<ImageFormat> &buffer,
+                                           K4AViewerImage &texture) override
     {
         static PerfCounter upload(std::string("Depth sensor<T") + std::to_string(int(ImageFormat)) + "> upload");
         PerfSample uploadSample(&upload);

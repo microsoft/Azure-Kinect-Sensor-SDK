@@ -34,6 +34,14 @@ struct RgbaPixel
     uint8_t Alpha;
 };
 
+struct BgraPixel
+{
+    uint8_t Blue;
+    uint8_t Green;
+    uint8_t Red;
+    uint8_t Alpha;
+};
+
 using DepthPixel = uint16_t;
 } // namespace k4aviewer
 

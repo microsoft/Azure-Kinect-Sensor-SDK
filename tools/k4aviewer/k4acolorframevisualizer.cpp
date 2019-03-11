@@ -84,7 +84,7 @@ class K4AYUY2FrameVisualizer : public K4AColorFrameVisualizerBase,
                                public IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_YUY2>
 {
 public:
-    GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) override
+    GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture) override
     {
         // libyuv does not have a function that directly converts from YUY2 to RGBA,
         // so we either have to have libyuv convert from YUY2 -> BGRA and then again
@@ -92,10 +92,10 @@ public:
         // of texture upload.  Either way, we incur a performance hit by doing this
         // extra conversion.
         //
-        // It looks like OpenGL's conversion is slightly faster than libyuv's, so we
-        // have mismatched format and internalformat here.
+        // It looks like OpenGL's conversion is slightly faster than libyuv's, so
+        // we're using that.
         //
-        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_BGRA, GL_RGBA, GL_UNSIGNED_BYTE);
+        return K4AViewerImage::Create(&texture, nullptr, m_dimensions, GL_BGRA);
     }
 
     void InitializeBuffer(K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_YUY2> &buffer) override
@@ -138,7 +138,7 @@ public:
     }
 
     ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_YUY2> &buffer,
-                                           OpenGlTexture &texture) override
+                                           K4AViewerImage &texture) override
     {
         static PerfCounter upload("YUY2 upload");
         PerfSample uploadSample(&upload);
@@ -152,9 +152,9 @@ class K4ANV12FrameVisualizer : public K4AColorFrameVisualizerBase,
                                public IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_NV12>
 {
 public:
-    GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) override
+    GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture) override
     {
-        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+        return K4AViewerImage::Create(&texture, nullptr, m_dimensions, GL_RGBA);
     }
 
     void InitializeBuffer(K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_NV12> &buffer) override
@@ -205,7 +205,7 @@ public:
     }
 
     ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_NV12> &buffer,
-                                           OpenGlTexture &texture) override
+                                           K4AViewerImage &texture) override
     {
         static PerfCounter upload("NV12 upload");
         PerfSample uploadSample(&upload);
@@ -219,9 +219,9 @@ class K4ABGRA32FrameVisualizer : public K4AColorFrameVisualizerBase,
                                  public IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_BGRA32>
 {
 public:
-    GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) override
+    GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture) override
     {
-        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_BGRA, GL_RGBA, GL_UNSIGNED_BYTE);
+        return K4AViewerImage::Create(&texture, nullptr, m_dimensions, GL_BGRA);
     }
 
     void InitializeBuffer(K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_BGRA32> &buffer) override
@@ -243,7 +243,7 @@ public:
     }
 
     ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_BGRA32> &buffer,
-                                           OpenGlTexture &texture) override
+                                           K4AViewerImage &texture) override
     {
         static PerfCounter upload("BGRA32 upload");
         PerfSample uploadSample(&upload);
@@ -257,9 +257,9 @@ class K4AMJPGFrameVisualizer : public K4AColorFrameVisualizerBase,
                                public IK4AFrameVisualizer<K4A_IMAGE_FORMAT_COLOR_MJPG>
 {
 public:
-    GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) override
+    GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture) override
     {
-        return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+        return K4AViewerImage::Create(&texture, nullptr, m_dimensions, GL_RGBA);
     }
 
     void InitializeBuffer(K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_MJPG> &buffer) override
@@ -293,7 +293,7 @@ public:
     }
 
     ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_MJPG> &buffer,
-                                           OpenGlTexture &texture) override
+                                           K4AViewerImage &texture) override
     {
         static PerfCounter mjpgUpload("MJPG upload");
         PerfSample uploadSample(&mjpgUpload);

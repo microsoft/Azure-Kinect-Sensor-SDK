@@ -305,10 +305,13 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
             return;
         }
 
+        bool colorPointCloudAvailable = m_recording->GetRecordConfiguation().color_track_enabled &&
+                                        m_recording->GetRecordConfiguation().color_format ==
+                                            K4A_IMAGE_FORMAT_COLOR_BGRA32;
         K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
                                             std::move(calibration),
                                             m_cameraDataSource,
-                                            m_recording->GetRecordConfiguation().depth_mode);
+                                            colorPointCloudAvailable);
         break;
     }
 

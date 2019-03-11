@@ -31,7 +31,7 @@ namespace k4aviewer
 template<k4a_image_format_t ImageFormat> class K4AConvertingFrameSourceImpl : public IK4ACaptureObserver
 {
 public:
-    inline ImageVisualizationResult GetNextFrame(OpenGlTexture &textureToUpdate, k4a::image &sourceImage)
+    inline ImageVisualizationResult GetNextFrame(K4AViewerImage &textureToUpdate, k4a::image &sourceImage)
     {
         if (IsFailed())
         {
@@ -49,7 +49,7 @@ public:
         return result;
     }
 
-    inline GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture)
+    inline GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture)
     {
         return m_frameVisualizer->InitializeTexture(texture);
     }

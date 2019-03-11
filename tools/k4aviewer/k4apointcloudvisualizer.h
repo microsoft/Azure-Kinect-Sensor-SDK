@@ -14,19 +14,37 @@
 
 // Project headers
 //
+#include "gpudepthtopointcloudconverter.h"
 #include "k4apointcloudrenderer.h"
-#include "k4apointcloudtypes.h"
 #include "k4apointcloudviewcontrol.h"
 #include "k4aviewerutil.h"
-#include "opengltexture.h"
+#include "k4aviewerimage.h"
 
 namespace k4aviewer
 {
+
+enum class PointCloudVisualizationResult
+{
+    Success,
+    OpenGlError,
+    MissingDepthImage,
+    MissingColorImage,
+    DepthToXyzTransformationFailed,
+    DepthToColorTransformationFailed
+};
+
 class K4APointCloudVisualizer
 {
 public:
-    GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) const;
-    GLenum UpdateTexture(std::shared_ptr<OpenGlTexture> &texture, const k4a::image &frame);
+    enum class ColorizationStrategy
+    {
+        Simple,
+        Shaded,
+        Color
+    };
+
+    GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> *texture) const;
+    PointCloudVisualizationResult UpdateTexture(std::shared_ptr<K4AViewerImage> *texture, const k4a::capture &capture);
 
     void ProcessPositionalMovement(ViewMovement direction, float deltaTime);
     void ProcessMouseMovement(float xoffset, float yoffset);
@@ -34,10 +52,11 @@ public:
 
     void ResetPosition();
 
-    void EnableShading(bool enable);
+    PointCloudVisualizationResult SetColorizationStrategy(ColorizationStrategy strategy);
+    void SetPointSize(int size);
 
-    K4APointCloudVisualizer(k4a_depth_mode_t depthMode, k4a::calibration &&calibrationData);
-    virtual ~K4APointCloudVisualizer();
+    K4APointCloudVisualizer(bool enableColorPointCloud, const k4a::calibration &calibrationData);
+    ~K4APointCloudVisualizer() = default;
 
     K4APointCloudVisualizer(const K4APointCloudVisualizer &) = delete;
     K4APointCloudVisualizer &operator=(const K4APointCloudVisualizer &) = delete;
@@ -45,26 +64,47 @@ public:
     K4APointCloudVisualizer &operator=(const K4APointCloudVisualizer &&) = delete;
 
 private:
-    void UpdatePointClouds(const k4a::image &frame);
+    PointCloudVisualizationResult UpdatePointClouds(const k4a::capture &capture);
 
     ExpectedValueRange m_expectedValueRange;
     ImageDimensions m_dimensions;
 
     PointCloudRenderer m_pointCloudRenderer;
-    bool m_pointCloudRendererBufferInitialized = false;
     ViewControl m_viewControl;
+
+    bool m_enableColorPointCloud = false;
+    ColorizationStrategy m_colorizationStrategy;
 
     linmath::mat4x4 m_projection{};
     linmath::mat4x4 m_view{};
 
-    GLuint m_frameBuffer = 0;
-    GLuint m_depthBuffer = 0;
+    OpenGL::Framebuffer m_frameBuffer = OpenGL::Framebuffer(true);
+    OpenGL::Renderbuffer m_depthBuffer = OpenGL::Renderbuffer(true);
 
     k4a::calibration m_calibrationData;
     k4a::transformation m_transformation;
-    k4a::image m_pointCloudImage;
 
-    std::vector<Vertex> m_vertexBuffer;
+    k4a::capture m_lastCapture;
+
+    // Buffer that holds the depth image transformed to the color coordinate space.
+    // Used in color mode only.
+    //
+    k4a::image m_transformedDepthImage;
+
+    // In color mode, this is just a shallow copy of the latest color image.
+    // In depth mode, this is a buffer that holds the colorization of the depth image.
+    //
+    k4a::image m_pointCloudColorization;
+
+    // Holds the XYZ point cloud as a texture.
+    // Format is XYZA, where A (the alpha channel) is unused.
+    //
+    OpenGL::Texture m_xyzTexture;
+
+    GpuDepthToPointCloudConverter m_pointCloudConverter;
+
+    k4a::image m_colorXyTable;
+    k4a::image m_depthXyTable;
 };
 } // namespace k4aviewer
 

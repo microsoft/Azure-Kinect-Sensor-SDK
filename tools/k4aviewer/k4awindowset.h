@@ -49,9 +49,9 @@ public:
                                    k4a_color_resolution_t colorResolution);
 
     static void StartPointCloudWindow(const char *sourceIdentifier,
-                                      k4a::calibration calibrationData,
+                                      const k4a::calibration &calibrationData,
                                       K4ADataSource<k4a::capture> &cameraDataSource,
-                                      k4a_depth_mode_t depthMode);
+                                      bool enableColorPointCloud);
 };
 } // namespace k4aviewer
 

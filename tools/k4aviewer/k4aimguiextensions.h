@@ -34,8 +34,9 @@ enum class ButtonColor
 // Sets all future buttons to color until cleared or destroyed.
 // Optionally set enabled=false if you don't want to change color under some circumstances
 //
-struct ButtonColorChanger
+class ButtonColorChanger
 {
+public:
     ButtonColorChanger(ButtonColor color, bool enabled = true) : m_active(enabled)
     {
         if (!m_active)
@@ -79,6 +80,57 @@ struct ButtonColorChanger
     }
 
     ~ButtonColorChanger()
+    {
+        if (m_active)
+        {
+            Clear();
+        }
+    }
+
+private:
+    bool m_active;
+};
+
+enum class TextColor
+{
+    Normal,
+    Warning
+};
+
+class TextColorChanger
+{
+public:
+    TextColorChanger(TextColor color, bool enabled = true) : m_active(enabled)
+    {
+        if (!m_active)
+        {
+            return;
+        }
+
+        ImVec4 colorVec(1.0f, 1.0f, 1.0f, 1.0f);
+        switch (color)
+        {
+        case TextColor::Normal:
+            colorVec = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+            break;
+        case TextColor::Warning:
+            colorVec = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+            break;
+        }
+
+        ImGui::PushStyleColor(ImGuiCol_Text, colorVec);
+    }
+
+    void Clear()
+    {
+        if (m_active)
+        {
+            m_active = false;
+            ImGui::PopStyleColor();
+        }
+    }
+
+    ~TextColorChanger()
     {
         if (m_active)
         {

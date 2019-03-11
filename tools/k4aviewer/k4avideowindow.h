@@ -20,7 +20,7 @@
 #include "k4aviewererrormanager.h"
 #include "k4aviewersettingsmanager.h"
 #include "k4awindowsizehelpers.h"
-#include "opengltexture.h"
+#include "k4aviewerimage.h"
 
 namespace k4aviewer
 {
@@ -193,7 +193,7 @@ private:
     bool m_failed = false;
 
     k4a::image m_currentImage;
-    std::shared_ptr<OpenGlTexture> m_currentTexture;
+    std::shared_ptr<K4AViewerImage> m_currentTexture;
 };
 
 template<> void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &, ImVec2 hoveredPixel);
