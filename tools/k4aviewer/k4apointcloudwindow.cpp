@@ -37,7 +37,7 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
 
     if (m_depthFrameSource->HasData())
     {
-        m_pointCloudVisualizer.UpdateTexture(m_texture, *(m_depthFrameSource->GetLastFrame()));
+        m_pointCloudVisualizer.UpdateTexture(m_texture, m_depthFrameSource->GetLastFrame());
     }
 
     ImVec2 availableSize = placementInfo.Size;
@@ -76,7 +76,7 @@ K4APointCloudWindow::K4APointCloudWindow(
     std::string &&windowTitle,
     const k4a_depth_mode_t depthMode,
     std::shared_ptr<K4ANonBufferingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>> &&depthFrameSource,
-    std::unique_ptr<K4ACalibrationTransformData> &&calibrationData) :
+    k4a::calibration &&calibrationData) :
     m_title(std::move(windowTitle)),
     m_pointCloudVisualizer(depthMode, std::move(calibrationData)),
     m_depthFrameSource(std::move(depthFrameSource))

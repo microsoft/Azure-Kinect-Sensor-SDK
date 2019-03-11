@@ -85,20 +85,20 @@ void K4ASourceSelectionDockControl::RefreshDevices()
 
     m_connectedDevices.clear();
 
-    for (uint8_t i = 0; i < installedDevices; i++)
+    for (uint32_t i = 0; i < installedDevices; i++)
     {
-        std::shared_ptr<K4ADevice> device;
-        const k4a_result_t openResult = K4ADeviceFactory::OpenDevice(device, i);
-
-        // We can't have 2 handles to the same device, and we need to open a device handle to check
-        // its serial number, so we expect devices we already have open to fail here.  Ignore those.
-        //
-        if (openResult != K4A_RESULT_SUCCEEDED)
+        try
         {
+            k4a::device device = k4a::device::open(i);
+            m_connectedDevices.emplace_back(std::make_pair(i, device.get_serialnum()));
+        }
+        catch (const k4a::error &)
+        {
+            // We can't have 2 handles to the same device, and we need to open a device handle to check
+            // its serial number, so we expect devices we already have open to fail here.  Ignore those.
+            //
             continue;
         }
-
-        m_connectedDevices.emplace_back(std::make_pair(i, device->GetSerialNumber()));
     }
 
     if (!m_connectedDevices.empty())
@@ -125,16 +125,16 @@ void K4ASourceSelectionDockControl::OpenDevice()
         return;
     }
 
-    std::shared_ptr<K4ADevice> device;
-    const k4a_result_t result = K4ADeviceFactory::OpenDevice(device, static_cast<uint8_t>(m_selectedDevice));
-
-    if (result != K4A_RESULT_SUCCEEDED)
+    try
     {
-        K4AViewerErrorManager::Instance().SetErrorStatus("Failed to open device!");
+        k4a::device device = k4a::device::open(static_cast<uint32_t>(m_selectedDevice));
+        K4AWindowManager::Instance().PushDockControl(std14::make_unique<K4ADeviceDockControl>(std::move(device)));
+    }
+    catch (const k4a::error &e)
+    {
+        K4AViewerErrorManager::Instance().SetErrorStatus(e.what());
         return;
     }
-
-    K4AWindowManager::Instance().PushDockControl(std14::make_unique<K4ADeviceDockControl>(std::move(device)));
 }
 
 void K4ASourceSelectionDockControl::OpenRecording(const std17::filesystem::path &path)

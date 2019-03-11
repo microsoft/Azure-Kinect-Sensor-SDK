@@ -11,11 +11,10 @@
 
 // Library headers
 //
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
 
 // Project headers
 //
-#include "k4aimage.h"
 #include "opengltexture.h"
 
 namespace k4aviewer
@@ -37,7 +36,7 @@ inline ImageVisualizationResult GLEnumToImageVisualizationResult(GLenum error)
 template<k4a_image_format_t ImageFormat> struct K4ATextureBuffer
 {
     std::vector<uint8_t> Data;
-    std::shared_ptr<K4AImage<ImageFormat>> SourceImage;
+    k4a::image SourceImage;
 };
 
 template<k4a_image_format_t ImageFormat> class IK4AFrameVisualizer
@@ -55,8 +54,7 @@ public:
     // Interprets image as an image and stores it in buffer in a format that is appropriate for
     // a future call to UpdateTexture
     //
-    virtual ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<ImageFormat>> &image,
-                                                  K4ATextureBuffer<ImageFormat> &buffer) = 0;
+    virtual ImageVisualizationResult ConvertImage(const k4a::image &image, K4ATextureBuffer<ImageFormat> &buffer) = 0;
 
     // Updates texture in-place with the image stored in buffer.
     // UpdateTexture expects to get a texture that was previously initialized by InitializeTexture.

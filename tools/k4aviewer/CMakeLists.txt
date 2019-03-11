@@ -6,10 +6,7 @@ set(SOURCE_FILES
     k4aaudiochanneldatagraph.cpp
     k4aaudiomanager.cpp
     k4aaudiowindow.cpp
-    k4acalibrationtransformdata.cpp
-    k4acapture.cpp
     k4acolorframevisualizer.cpp
-    k4adevice.cpp
     k4adevicedockcontrol.cpp
     k4afilepicker.cpp
     k4aimguiextensions.cpp

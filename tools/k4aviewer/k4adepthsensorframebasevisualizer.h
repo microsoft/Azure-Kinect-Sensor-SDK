@@ -44,19 +44,18 @@ public:
         buffer.Data.resize(m_expectedBufferSize);
     }
 
-    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<ImageFormat>> &image,
-                                          K4ATextureBuffer<ImageFormat> &buffer) override
+    ImageVisualizationResult ConvertImage(const k4a::image &image, K4ATextureBuffer<ImageFormat> &buffer) override
     {
         const size_t srcImageSize = static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(DepthPixel);
 
-        if (image->GetSize() != srcImageSize)
+        if (image.get_size() != srcImageSize)
         {
             return ImageVisualizationResult::InvalidBufferSizeError;
         }
 
         // Convert the image into an OpenGL texture
         //
-        const uint8_t *src = image->GetBuffer();
+        const uint8_t *src = image.get_buffer();
 
         static PerfCounter render(std::string("Depth sensor<T") + std::to_string(int(ImageFormat)) + "> render");
         PerfSample renderSample(&render);

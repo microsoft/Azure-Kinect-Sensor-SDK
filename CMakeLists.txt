@@ -125,7 +125,8 @@ else()
             file(GLOB_RECURSE CLANG_FORMAT_SOURCES_X CONFIGURE_DEPENDS
                 ${root}/*.c
                 ${root}/*.cpp
-                ${root}/*.h)
+                ${root}/*.h
+                ${root}/*.hpp)
             list(APPEND CLANG_FORMAT_SOURCES ${CLANG_FORMAT_SOURCES_X})
         endforeach()
 

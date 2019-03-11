@@ -103,7 +103,7 @@ public:
         buffer.Data.resize(m_expectedBufferSize);
     }
 
-    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_COLOR_YUY2>> &image,
+    ImageVisualizationResult ConvertImage(const k4a::image &image,
                                           K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_YUY2> &buffer) override
     {
         // YUY2 is a 4:2:2 format, so there are 4 bytes per 'chunk' of data, and each 'chunk' represents 2 pixels.
@@ -112,14 +112,14 @@ public:
 
         const auto expectedBufferSize = static_cast<size_t>(stride * m_dimensions.Height);
 
-        if (image->GetSize() != expectedBufferSize)
+        if (image.get_size() != expectedBufferSize)
         {
             return ImageVisualizationResult::InvalidBufferSizeError;
         }
 
         static PerfCounter decode("YUY2 decode");
         PerfSample decodeSample(&decode);
-        int result = libyuv::YUY2ToARGB(image->GetBuffer(),                                       // src_yuy2,
+        int result = libyuv::YUY2ToARGB(image.get_buffer(),                                       // src_yuy2,
                                         stride,                                                   // src_stride_yuy2,
                                         &buffer.Data[0],                                          // dst_argb,
                                         m_dimensions.Width * static_cast<int>(sizeof(RgbaPixel)), // dst_stride_argb,
@@ -162,18 +162,18 @@ public:
         buffer.Data.resize(m_expectedBufferSize);
     }
 
-    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_COLOR_NV12>> &image,
+    ImageVisualizationResult ConvertImage(const k4a::image &image,
                                           K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_NV12> &buffer) override
     {
         const int luminanceStride = m_dimensions.Width;
         const int hueSatStride = m_dimensions.Width;
-        const uint8_t *hueSatStart = image->GetBuffer() + luminanceStride * m_dimensions.Height;
+        const uint8_t *hueSatStart = image.get_buffer() + luminanceStride * m_dimensions.Height;
 
         // NV12 is a 4:2:0 format, so there are half as many hue/sat pixels as luminance pixels
         //
         const auto expectedBufferSize = static_cast<size_t>(m_dimensions.Height * (luminanceStride + hueSatStride / 2));
 
-        if (image->GetSize() != expectedBufferSize)
+        if (image.get_size() != expectedBufferSize)
         {
             return ImageVisualizationResult::InvalidBufferSizeError;
         }
@@ -184,7 +184,7 @@ public:
         //
         static PerfCounter decode("NV12 decode");
         PerfSample decodeSample(&decode);
-        int result = libyuv::NV12ToABGR(image->GetBuffer(),                                       // src_y
+        int result = libyuv::NV12ToABGR(image.get_buffer(),                                       // src_y
                                         luminanceStride,                                          // src_stride_y
                                         hueSatStart,                                              // src_vu
                                         hueSatStride,                                             // src_stride_vu
@@ -229,15 +229,15 @@ public:
         buffer.Data.resize(m_expectedBufferSize);
     }
 
-    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_COLOR_BGRA32>> &image,
+    ImageVisualizationResult ConvertImage(const k4a::image &image,
                                           K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_BGRA32> &buffer) override
     {
-        if (image->GetSize() != static_cast<size_t>(m_dimensions.Height * m_dimensions.Width) * sizeof(RgbaPixel))
+        if (image.get_size() != static_cast<size_t>(m_dimensions.Height * m_dimensions.Width) * sizeof(RgbaPixel))
         {
             return ImageVisualizationResult::InvalidBufferSizeError;
         }
 
-        std::copy(image->GetBuffer(), image->GetBuffer() + image->GetSize(), buffer.Data.begin());
+        std::copy(image.get_buffer(), image.get_buffer() + image.get_size(), buffer.Data.begin());
         buffer.SourceImage = image;
         return ImageVisualizationResult::Success;
     }
@@ -267,15 +267,15 @@ public:
         buffer.Data.resize(m_expectedBufferSize);
     }
 
-    ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<K4A_IMAGE_FORMAT_COLOR_MJPG>> &image,
+    ImageVisualizationResult ConvertImage(const k4a::image &image,
                                           K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_MJPG> &buffer) override
     {
         static PerfCounter mjpgDecode("MJPG decode");
         PerfSample decodeSample(&mjpgDecode);
 
         const int decompressStatus = tjDecompress2(m_decompressor,
-                                                   image->GetBuffer(),
-                                                   static_cast<unsigned long>(image->GetSize()),
+                                                   image.get_buffer(),
+                                                   static_cast<unsigned long>(image.get_size()),
                                                    &buffer.Data[0],
                                                    m_dimensions.Width,
                                                    0, // pitch

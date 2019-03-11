@@ -10,10 +10,10 @@
 
 // Library headers
 //
+#include <k4a/k4a.hpp>
 
 // Project headers
 //
-#include "k4acalibrationtransformdata.h"
 #include "k4apointcloudrenderer.h"
 #include "k4apointcloudtypes.h"
 #include "k4apointcloudviewcontrol.h"
@@ -26,7 +26,7 @@ class K4APointCloudVisualizer
 {
 public:
     GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) const;
-    GLenum UpdateTexture(std::shared_ptr<OpenGlTexture> &texture, const K4AImage<K4A_IMAGE_FORMAT_DEPTH16> &frame);
+    GLenum UpdateTexture(std::shared_ptr<OpenGlTexture> &texture, const k4a::image &frame);
 
     void ProcessPositionalMovement(ViewMovement direction, float deltaTime);
     void ProcessMouseMovement(float xoffset, float yoffset);
@@ -36,7 +36,7 @@ public:
 
     void EnableShading(bool enable);
 
-    K4APointCloudVisualizer(k4a_depth_mode_t depthMode, std::unique_ptr<K4ACalibrationTransformData> &&calibrationData);
+    K4APointCloudVisualizer(k4a_depth_mode_t depthMode, k4a::calibration &&calibrationData);
     virtual ~K4APointCloudVisualizer();
 
     K4APointCloudVisualizer(const K4APointCloudVisualizer &) = delete;
@@ -45,7 +45,7 @@ public:
     K4APointCloudVisualizer &operator=(const K4APointCloudVisualizer &&) = delete;
 
 private:
-    void UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_DEPTH16> &frame);
+    void UpdatePointClouds(const k4a::image &frame);
 
     ExpectedValueRange m_expectedValueRange;
     ImageDimensions m_dimensions;
@@ -60,7 +60,9 @@ private:
     GLuint m_frameBuffer = 0;
     GLuint m_depthBuffer = 0;
 
-    std::unique_ptr<K4ACalibrationTransformData> m_calibrationTransformData;
+    k4a::calibration m_calibrationData;
+    k4a::transformation m_transformation;
+    k4a::image m_pointCloudImage;
 
     std::vector<Vertex> m_vertexBuffer;
 };

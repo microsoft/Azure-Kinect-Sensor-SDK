@@ -157,7 +157,7 @@ void K4ARecordingDockControl::Show()
     const int64_t seekMax = static_cast<int64_t>(m_recording->GetRecordingLength());
     if (ImGui::SliderScalar("##seek", ImGuiDataType_S64, &m_currentTimestamp, &seekMin, &seekMax, ""))
     {
-        m_recording->SeekTimestamp(static_cast<int64_t>(m_currentTimestamp));
+        m_recording->SeekTimestamp(static_cast<int64_t>(m_currentTimestamp.count()));
         // The seek timestamp may end up in the middle of a capture, read backwards and forwards again to get a full
         // capture.
         (void)m_recording->GetPreviousCapture();
@@ -208,7 +208,7 @@ void K4ARecordingDockControl::ReadNext()
 
     if (m_currentCapture == nullptr || timeSinceLastFrame >= m_timePerFrame)
     {
-        std::shared_ptr<K4ACapture> nextCapture(m_recording->GetNextCapture());
+        k4a::capture nextCapture(m_recording->GetNextCapture());
         if (nextCapture == nullptr)
         {
             // Recording ended
@@ -231,7 +231,7 @@ void K4ARecordingDockControl::ReadNext()
 void K4ARecordingDockControl::Step(bool backward)
 {
     m_paused = true;
-    std::shared_ptr<K4ACapture> capture = backward ? m_recording->GetPreviousCapture() : m_recording->GetNextCapture();
+    k4a::capture capture = backward ? m_recording->GetPreviousCapture() : m_recording->GetNextCapture();
     if (capture)
     {
         m_currentCapture = std::move(capture);
@@ -246,7 +246,7 @@ void K4ARecordingDockControl::Step(bool backward)
     }
 }
 
-uint64_t K4ARecordingDockControl::GetCaptureTimestamp(const std::shared_ptr<K4ACapture> &capture)
+std::chrono::microseconds K4ARecordingDockControl::GetCaptureTimestamp(const k4a::capture &capture)
 {
     // Captures don't actually have timestamps, images do, so we have to look at all the images
     // associated with the capture.  We only need an approximate timestamp for seeking, so we just
@@ -257,37 +257,25 @@ uint64_t K4ARecordingDockControl::GetCaptureTimestamp(const std::shared_ptr<K4AC
     // in passive IR mode, it only has an IR image (i.e. no depth image), but there is no mode
     // where a capture will have a depth image but not an IR image.
     //
-    const auto irImage = capture->GetIrImage();
+    const auto irImage = capture.get_ir_image();
     if (irImage != nullptr)
     {
-        return irImage->GetTimestampUsec();
+        return irImage.get_timestamp();
     }
 
-    const auto mjpgImage = capture->GetColorImage<K4A_IMAGE_FORMAT_COLOR_MJPG>();
-    if (mjpgImage != nullptr)
+    const auto depthImage = capture.get_depth_image();
+    if (depthImage != nullptr)
     {
-        return mjpgImage->GetTimestampUsec();
+        return depthImage.get_timestamp();
     }
 
-    const auto nv12Image = capture->GetColorImage<K4A_IMAGE_FORMAT_COLOR_NV12>();
-    if (nv12Image != nullptr)
+    const auto colorImage = capture.get_color_image();
+    if (colorImage != nullptr)
     {
-        return nv12Image->GetTimestampUsec();
+        return colorImage.get_timestamp();
     }
 
-    const auto yuy2Image = capture->GetColorImage<K4A_IMAGE_FORMAT_COLOR_YUY2>();
-    if (yuy2Image != nullptr)
-    {
-        return yuy2Image->GetTimestampUsec();
-    }
-
-    const auto bgra32Image = capture->GetColorImage<K4A_IMAGE_FORMAT_COLOR_BGRA32>();
-    if (bgra32Image != nullptr)
-    {
-        return bgra32Image->GetTimestampUsec();
-    }
-
-    return 0;
+    return std::chrono::microseconds::zero();
 }
 
 void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
@@ -310,16 +298,15 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         break;
 
     case K4AWindowSet::ViewType::PointCloudViewer:
-
-        std::unique_ptr<K4ACalibrationTransformData> calibrationData;
-        const k4a_result_t result = m_recording->GetCalibrationTransformData(calibrationData);
+        k4a::calibration calibration;
+        const k4a_result_t result = m_recording->GetCalibration(calibration);
         if (result != K4A_RESULT_SUCCEEDED)
         {
             return;
         }
 
         K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
-                                            std::move(calibrationData),
+                                            std::move(calibration),
                                             m_cameraDataSource,
                                             m_recording->GetRecordConfiguation().depth_mode);
         break;

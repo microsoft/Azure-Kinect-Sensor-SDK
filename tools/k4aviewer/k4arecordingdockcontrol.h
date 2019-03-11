@@ -30,7 +30,7 @@ public:
     void Show() override;
 
 private:
-    uint64_t GetCaptureTimestamp(const std::shared_ptr<K4ACapture> &capture);
+    std::chrono::microseconds GetCaptureTimestamp(const k4a::capture &capture);
     void SetViewType(K4AWindowSet::ViewType viewType);
 
     void ReadNext();
@@ -58,13 +58,13 @@ private:
     bool m_recordingHasColor = false;
     bool m_recordingHasDepth = false;
 
-    uint64_t m_currentTimestamp = 0;
+    std::chrono::microseconds m_currentTimestamp = std::chrono::microseconds::zero();
 
-    K4ADataSource<std::shared_ptr<K4ACapture>> m_cameraDataSource;
+    K4ADataSource<k4a::capture> m_cameraDataSource;
 
     std::chrono::high_resolution_clock::time_point m_lastFrameShownTime;
     std::chrono::microseconds m_timePerFrame;
-    std::shared_ptr<K4ACapture> m_currentCapture;
+    k4a::capture m_currentCapture;
 
     bool m_paused = false;
     K4AWindowSet::ViewType m_viewType = K4AWindowSet::ViewType::Normal;
