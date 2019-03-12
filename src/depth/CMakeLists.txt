@@ -1,6 +1,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+if (K4A_MTE_VERSION)
+  add_definitions(-DK4A_MTE_VERSION)
+endif ()
+
 add_library(k4a_depth STATIC 
             depth.c
             )
