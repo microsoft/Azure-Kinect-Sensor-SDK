@@ -398,15 +398,6 @@ static int matroska_writer_thread(void *context_ptr)
 
     while (!context->writer_stopping && result == K4A_RESULT_SUCCEEDED)
     {
-        // Wait for new writes, or up to 100ms
-        COND_RESULT cond = Condition_Wait(context->writer_notify, context->writer_lock, 100);
-        if (cond != COND_OK && cond != COND_TIMEOUT)
-        {
-            logger_error(LOGGER_RECORD, "Writer thread failed Condition_Wait: %d", cond);
-            result = K4A_RESULT_FAILED;
-            break;
-        }
-
         if (Lock(context->pending_cluster_lock) == LOCK_OK)
         {
             // Check the oldest pending cluster to see if we should write to disk.
@@ -436,6 +427,15 @@ static int matroska_writer_thread(void *context_ptr)
                     logger_error(LOGGER_RECORD, "Cluster write failed, dropping cluster.");
                     break;
                 }
+            }
+
+            // Wait until more clusters arrive up to 100ms, or 1ms if the queue is not empty.
+            COND_RESULT cond = Condition_Wait(context->writer_notify, context->writer_lock, oldest_cluster ? 1 : 100);
+            if (cond != COND_OK && cond != COND_TIMEOUT)
+            {
+                logger_error(LOGGER_RECORD, "Writer thread failed Condition_Wait: %d", cond);
+                result = K4A_RESULT_FAILED;
+                break;
             }
         }
     }
