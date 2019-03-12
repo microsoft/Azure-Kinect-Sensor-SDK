@@ -28,9 +28,9 @@ constexpr float AccelMaxRange = 100.0f;
 constexpr float AccelDefaultRange = 20.0f;
 constexpr float AccelScaleFactor = 1.0f;
 
-constexpr float GyroMinRange = 50.0f;
-constexpr float GyroMaxRange = 1000.0f;
-constexpr float GyroDefaultRange = 200.0f;
+constexpr float GyroMinRange = 5.0f;
+constexpr float GyroMaxRange = 50.0f;
+constexpr float GyroDefaultRange = 20.0f;
 constexpr float GyroScaleFactor = 1.0f;
 } // namespace
 
