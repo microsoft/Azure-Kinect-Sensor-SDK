@@ -20,7 +20,7 @@
 #include "k4aviewererrormanager.h"
 #include "k4aviewersettingsmanager.h"
 #include "k4awindowsizehelpers.h"
-#include "opengltexture.h"
+#include "k4aviewerimage.h"
 
 namespace k4aviewer
 {
@@ -136,26 +136,26 @@ private:
                     hoveredImagePixel.y = hoveredUIPixel.y * uiCoordinateToImageCoordinateRatio;
                 }
 
-                RenderInfoPane(*m_currentImage, hoveredImagePixel);
+                RenderInfoPane(m_currentImage, hoveredImagePixel);
             }
             ImGui::End();
         }
     }
 
-    void RenderInfoPane(const K4AImage<ImageFormat> &frame, ImVec2 hoveredPixel)
+    void RenderInfoPane(const k4a::image &frame, ImVec2 hoveredPixel)
     {
         (void)hoveredPixel;
         RenderBasicInfoPane(frame);
     }
 
-    void RenderBasicInfoPane(const K4AImage<ImageFormat> &frame)
+    void RenderBasicInfoPane(const k4a::image &frame)
     {
         if (K4AViewerSettingsManager::Instance().GetShowFrameRateInfo())
         {
             ImGui::Text("Average frame rate: %.2f fps", m_frameSource->GetFrameRate());
         }
 
-        ImGui::Text("Timestamp: %llu", static_cast<long long unsigned int>(frame.GetTimestampUsec()));
+        ImGui::Text("Timestamp: %llu", static_cast<long long int>(frame.get_timestamp().count()));
     }
 
     // Sets the window failed with an error message derived from errorCode
@@ -192,13 +192,11 @@ private:
     std::string m_title;
     bool m_failed = false;
 
-    std::shared_ptr<K4AImage<ImageFormat>> m_currentImage;
-    std::shared_ptr<OpenGlTexture> m_currentTexture;
+    k4a::image m_currentImage;
+    std::shared_ptr<K4AViewerImage> m_currentTexture;
 };
 
-template<>
-void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const K4AImage<K4A_IMAGE_FORMAT_DEPTH16> &,
-                                                              ImVec2 hoveredPixel);
+template<> void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &, ImVec2 hoveredPixel);
 
 // Template specialization for RenderInfoPane.  Lets us show pixel value for the depth viewer.
 //

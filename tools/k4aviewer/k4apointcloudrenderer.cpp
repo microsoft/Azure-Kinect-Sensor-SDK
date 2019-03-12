@@ -16,46 +16,15 @@
 // Project headers
 //
 #include "assertionexception.h"
+#include "gpudepthtopointcloudconverter.h"
+#include "k4apixel.h"
 #include "k4apointcloudshaders.h"
 #include "k4apointcloudviewcontrol.h"
+#include "k4aviewerutil.h"
+#include "perfcounter.h"
 
 using namespace linmath;
 using namespace k4aviewer;
-
-namespace
-{
-// Shader validation functions
-// Should only fail if there's some sort of syntax error in the shader that makes
-// it unable to compile/link, so we crash if these fail.
-//
-void ValidateShader(GLuint shaderIndex)
-{
-    GLint success = GL_FALSE;
-    char infoLog[512];
-    glGetShaderiv(shaderIndex, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(shaderIndex, 512, nullptr, infoLog);
-        std::stringstream errorBuilder;
-        errorBuilder << "Shader compilation error: " << std::endl << infoLog;
-        throw AssertionException(errorBuilder.str().c_str());
-    }
-}
-
-void ValidateProgram(GLuint programIndex)
-{
-    GLint success = GL_FALSE;
-    char infoLog[512];
-    glGetProgramiv(programIndex, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(programIndex, 512, nullptr, infoLog);
-        std::stringstream errorBuilder;
-        errorBuilder << "Program compilation error: " << std::endl << infoLog;
-        throw AssertionException(errorBuilder.str().c_str());
-    }
-}
-} // namespace
 
 PointCloudRenderer::PointCloudRenderer()
 {
@@ -65,41 +34,17 @@ PointCloudRenderer::PointCloudRenderer()
     // Context Settings
     glEnable(GL_PROGRAM_POINT_SIZE);
 
-    m_vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const GLchar *vertexShaderCodeBuffer = PointCloudVertexShader;
-    glShaderSource(m_vertexShader, 1, &vertexShaderCodeBuffer, nullptr);
-    glCompileShader(m_vertexShader);
+    OpenGL::Shader vertexShader(GL_VERTEX_SHADER, PointCloudVertexShader);
+    OpenGL::Shader fragmentShader(GL_FRAGMENT_SHADER, PointCloudFragmentShader);
 
-    ValidateShader(m_vertexShader);
+    m_shaderProgram.AttachShader(std::move(vertexShader));
+    m_shaderProgram.AttachShader(std::move(fragmentShader));
+    m_shaderProgram.Link();
 
-    m_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    const GLchar *fragmentShaderCodeBuffer = PointCloudFragmentShader;
-    glShaderSource(m_fragmentShader, 1, &fragmentShaderCodeBuffer, nullptr);
-    glCompileShader(m_fragmentShader);
-    ValidateShader(m_fragmentShader);
-
-    m_shaderProgram = glCreateProgram();
-    glAttachShader(m_shaderProgram, m_vertexShader);
-    glAttachShader(m_shaderProgram, m_fragmentShader);
-    glLinkProgram(m_shaderProgram);
-    ValidateProgram(m_shaderProgram);
-
-    glGenVertexArrays(1, &m_vertexArrayObject);
-    glBindVertexArray(m_vertexArrayObject);
-    glGenBuffers(1, &m_vertexBufferObject);
-
-    m_viewIndex = glGetUniformLocation(m_shaderProgram, "view");
-    m_projectionIndex = glGetUniformLocation(m_shaderProgram, "projection");
-    m_enableShadingIndex = glGetUniformLocation(m_shaderProgram, "enableShading");
-}
-
-PointCloudRenderer::~PointCloudRenderer()
-{
-    glDeleteBuffers(1, &m_vertexBufferObject);
-
-    glDeleteShader(m_vertexShader);
-    glDeleteShader(m_fragmentShader);
-    glDeleteProgram(m_shaderProgram);
+    m_viewIndex = glGetUniformLocation(m_shaderProgram.Id(), "view");
+    m_projectionIndex = glGetUniformLocation(m_shaderProgram.Id(), "projection");
+    m_enableShadingIndex = glGetUniformLocation(m_shaderProgram.Id(), "enableShading");
+    m_pointCloudTextureIndex = glGetUniformLocation(m_shaderProgram.Id(), "pointCloudTexture");
 }
 
 void PointCloudRenderer::UpdateViewProjection(mat4x4 view, mat4x4 projection)
@@ -108,69 +53,70 @@ void PointCloudRenderer::UpdateViewProjection(mat4x4 view, mat4x4 projection)
     mat4x4_dup(m_projection, projection);
 }
 
-void PointCloudRenderer::UpdatePointClouds(Vertex *vertices, const unsigned int numVertices)
+GLenum PointCloudRenderer::UpdatePointClouds(const k4a::image &color, const OpenGL::Texture &pointCloudTexture)
 {
-    if (numVertices == 0)
-    {
-        return;
-    }
-
-    glBindVertexArray(m_vertexArrayObject);
-
-    // Create buffers and bind the geometry
-    //
-    if (static_cast<GLsizei>(numVertices) > m_vertexArraySizeMax || m_vertexArraySize == 0)
-    {
-        ReservePointCloudBuffer(static_cast<GLsizei>(numVertices));
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices * sizeof(Vertex), vertices);
-
-    // Set the vertex attribute pointers
-    //
-    // Vertex Positions
-    //
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+    glBindVertexArray(m_vertexArrayObject.Id());
 
     // Vertex Colors
     //
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Color));
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertexColorBufferObject.Id());
 
-    // Vertex Neighbors
+    const int colorImageSizeBytes = static_cast<int>(color.get_size());
+
+    if (m_vertexArraySizeBytes != colorImageSizeBytes)
+    {
+        m_vertexArraySizeBytes = colorImageSizeBytes;
+        glBufferData(GL_ARRAY_BUFFER, m_vertexArraySizeBytes, nullptr, GL_STREAM_DRAW);
+    }
+
+    GLubyte *vertexMappedBuffer = reinterpret_cast<GLubyte *>(
+        glMapBufferRange(GL_ARRAY_BUFFER, 0, colorImageSizeBytes, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
+
+    if (!vertexMappedBuffer)
+    {
+        return glGetError();
+    }
+
+    const GLubyte *colorSrc = reinterpret_cast<const GLubyte *>(color.get_buffer());
+    std::copy(colorSrc, colorSrc + colorImageSizeBytes, vertexMappedBuffer);
+    if (!glUnmapBuffer(GL_ARRAY_BUFFER))
+    {
+        return glGetError();
+    }
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, GL_BGRA, GL_UNSIGNED_BYTE, GL_TRUE, 0, 0);
+
+    glUseProgram(m_shaderProgram.Id());
+
+    // Uniforms
     //
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Neighbor));
+    // Bind our point cloud texture
+    //
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, pointCloudTexture.Id());
+    glBindImageTexture(0,
+                       pointCloudTexture.Id(),
+                       0,
+                       GL_FALSE,
+                       0,
+                       GL_READ_ONLY,
+                       GpuDepthToPointCloudConverter::PointCloudTextureFormat);
+    glUniform1i(m_pointCloudTextureIndex, 0);
 
     glBindVertexArray(0);
 
-    m_vertexArraySize = GLsizei(numVertices);
+    return glGetError();
 }
 
-void PointCloudRenderer::ReservePointCloudBuffer(GLsizei numVertices)
+GLenum PointCloudRenderer::Render()
 {
-    GLsizeiptr bufferSize = static_cast<GLsizeiptr>(static_cast<size_t>(numVertices) * sizeof(Vertex));
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STREAM_DRAW);
-    m_vertexArraySize = numVertices;
-    m_vertexArraySizeMax = std::max(m_vertexArraySizeMax, m_vertexArraySize);
-}
-
-void PointCloudRenderer::Render()
-{
-    // Save last shader
-    //
-    GLint lastShader;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &lastShader);
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glPointSize(m_pointCloudSize);
+    glPointSize(static_cast<GLfloat>(m_pointSize));
 
-    glUseProgram(m_shaderProgram);
+    glUseProgram(m_shaderProgram.Id());
 
     // Update view/projective matrices in shader
     //
@@ -183,19 +129,22 @@ void PointCloudRenderer::Render()
 
     // Render point cloud
     //
-    glBindVertexArray(m_vertexArrayObject);
-    glDrawArrays(GL_POINTS, 0, m_vertexArraySize);
+    glBindVertexArray(m_vertexArrayObject.Id());
+    glDrawArrays(GL_POINTS, 0, m_vertexArraySizeBytes / static_cast<GLsizei>(sizeof(BgraPixel)));
 
     glBindVertexArray(0);
 
-    // Restore shader
-    //
-    glUseProgram(static_cast<GLuint>(lastShader));
+    return glGetError();
 }
 
-void PointCloudRenderer::ChangePointCloudSize(const float pointCloudSize)
+int PointCloudRenderer::GetPointSize() const
 {
-    m_pointCloudSize = pointCloudSize;
+    return m_pointSize;
+}
+
+void PointCloudRenderer::SetPointSize(const int pointSize)
+{
+    m_pointSize = pointSize;
 }
 
 void PointCloudRenderer::EnableShading(bool enableShading)

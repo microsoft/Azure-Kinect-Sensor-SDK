@@ -11,12 +11,11 @@
 
 // Library headers
 //
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
 
 // Project headers
 //
-#include "k4aimage.h"
-#include "opengltexture.h"
+#include "k4aviewerimage.h"
 
 namespace k4aviewer
 {
@@ -37,7 +36,7 @@ inline ImageVisualizationResult GLEnumToImageVisualizationResult(GLenum error)
 template<k4a_image_format_t ImageFormat> struct K4ATextureBuffer
 {
     std::vector<uint8_t> Data;
-    std::shared_ptr<K4AImage<ImageFormat>> SourceImage;
+    k4a::image SourceImage;
 };
 
 template<k4a_image_format_t ImageFormat> class IK4AFrameVisualizer
@@ -45,7 +44,7 @@ template<k4a_image_format_t ImageFormat> class IK4AFrameVisualizer
 public:
     // Creates a new OpenGL texture from the video source and stores it in texture.
     //
-    virtual GLenum InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) = 0;
+    virtual GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture) = 0;
 
     // Initializes buffer such that it can hold intermediate images of the type
     // the visualizer handles
@@ -55,14 +54,13 @@ public:
     // Interprets image as an image and stores it in buffer in a format that is appropriate for
     // a future call to UpdateTexture
     //
-    virtual ImageVisualizationResult ConvertImage(const std::shared_ptr<K4AImage<ImageFormat>> &image,
-                                                  K4ATextureBuffer<ImageFormat> &buffer) = 0;
+    virtual ImageVisualizationResult ConvertImage(const k4a::image &image, K4ATextureBuffer<ImageFormat> &buffer) = 0;
 
     // Updates texture in-place with the image stored in buffer.
     // UpdateTexture expects to get a texture that was previously initialized by InitializeTexture.
     //
     virtual ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<ImageFormat> &buffer,
-                                                   OpenGlTexture &texture) = 0;
+                                                   K4AViewerImage &texture) = 0;
 
     virtual ~IK4AFrameVisualizer() = default;
 

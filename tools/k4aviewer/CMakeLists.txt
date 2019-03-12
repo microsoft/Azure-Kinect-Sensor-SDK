@@ -3,13 +3,11 @@
 
 set(SOURCE_FILES
     main.cpp
+    gpudepthtopointcloudconverter.cpp
     k4aaudiochanneldatagraph.cpp
     k4aaudiomanager.cpp
     k4aaudiowindow.cpp
-    k4acalibrationtransformdata.cpp
-    k4acapture.cpp
     k4acolorframevisualizer.cpp
-    k4adevice.cpp
     k4adevicedockcontrol.cpp
     k4afilepicker.cpp
     k4aimguiextensions.cpp
@@ -29,11 +27,11 @@ set(SOURCE_FILES
     k4atypeoperators.cpp
     k4avideowindow.cpp
     k4aviewer.cpp
+    k4aviewerimage.cpp
     k4aviewererrormanager.cpp
     k4aviewersettingsmanager.cpp
     k4awindowmanager.cpp
     k4awindowset.cpp
-    opengltexture.cpp
     perfcounter.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/version.rc
 )

@@ -9,12 +9,13 @@
 
 // Library headers
 //
+#include <k4a/k4a.hpp>
 #include "k4aimgui_all.h"
 #include "linmath.h"
 
 // Project headers
 //
-#include "k4apointcloudtypes.h"
+#include "openglhelpers.h"
 
 namespace k4aviewer
 {
@@ -22,22 +23,17 @@ class PointCloudRenderer
 {
 public:
     PointCloudRenderer();
-    ~PointCloudRenderer();
+    ~PointCloudRenderer() = default;
 
     void UpdateViewProjection(linmath::mat4x4 view, linmath::mat4x4 projection);
 
-    // Hint to the point cloud renderer what the greatest possible number of points it might receive is
-    // to avoid extra OpenGL buffer allocations
-    //
-    void ReservePointCloudBuffer(GLsizei numPoints);
+    GLenum UpdatePointClouds(const k4a::image &color, const OpenGL::Texture &pointCloudTexture);
 
-    void UpdatePointClouds(Vertex *vertices, unsigned int numVertices);
+    GLenum Render();
 
-    void Render();
-
-    void ChangePointCloudSize(float pointCloudSize);
+    void SetPointSize(int pointSize);
+    int GetPointSize() const;
     void EnableShading(bool enableShading);
-
     bool ShadingIsEnabled() const;
 
     PointCloudRenderer(PointCloudRenderer &) = delete;
@@ -50,24 +46,21 @@ private:
     linmath::mat4x4 m_projection;
 
     // Render settings
-    GLfloat m_pointCloudSize = 2.f;
+    int m_pointSize = 2;
     bool m_enableShading = true;
 
     // Point Array Size
-    GLsizei m_vertexArraySize = 0;
-    GLsizei m_vertexArraySizeMax = 0;
+    GLsizei m_vertexArraySizeBytes = 0;
 
     // OpenGL resources
-    GLuint m_shaderProgram;
-    GLuint m_vertexShader;
-    GLuint m_fragmentShader;
-
-    GLuint m_vertexArrayObject;
-    GLuint m_vertexBufferObject;
-
+    OpenGL::Program m_shaderProgram;
     GLint m_viewIndex;
     GLint m_projectionIndex;
     GLint m_enableShadingIndex;
+    GLint m_pointCloudTextureIndex;
+
+    OpenGL::VertexArray m_vertexArrayObject = OpenGL::VertexArray(true);
+    OpenGL::Buffer m_vertexColorBufferObject = OpenGL::Buffer(true);
 };
 } // namespace k4aviewer
 #endif

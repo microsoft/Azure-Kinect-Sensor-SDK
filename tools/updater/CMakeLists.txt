@@ -31,13 +31,6 @@ install(
         ${CMAKE_INSTALL_BINDIR}
 )
 
-install(
-    FILES
-        firmware/AzureKinectDK_Fw_1.5.886314.bin
-    DESTINATION
-        ${CMAKE_INSTALL_DATADIR}/k4a/firmware
-)
-
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     install(
         FILES

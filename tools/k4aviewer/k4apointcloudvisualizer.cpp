@@ -15,8 +15,10 @@
 // Project headers
 //
 #include "assertionexception.h"
+#include "k4acolorframevisualizer.h"
 #include "k4adepthpixelcolorizer.h"
 #include "k4aviewerutil.h"
+#include "perfcounter.h"
 
 using namespace k4aviewer;
 
@@ -28,74 +30,44 @@ const ImVec4 ClearColor = { 0.05f, 0.05f, 0.05f, 0.0f };
 
 // Resolution of the point cloud texture
 //
-constexpr ImageDimensions PointCloudVisualizerTextureDimensions = { 640, 576 };
-
-inline k4a_float3_t ConvertK4AToOpenGLCoordinate(k4a_float3_t pt)
-{
-    // OpenGL and K4A have different conventions on which direction is positive -
-    // we need to flip the X coordinate.
-    //
-    return { { -pt.v[0], pt.v[1], pt.v[2] } };
-}
-
-inline void ConvertK4AFloat3ToLinmathVec3(const k4a_float3_t &in, linmath::vec3 &out)
-{
-    constexpr size_t vecSize = sizeof(in.v) / sizeof(float);
-    std::copy(in.v, in.v + vecSize, out);
-}
-
-bool GetPoint3d(k4a_float3_t &point3d, int16_t *pointCloudBuffer, int depthW, int depthH, int x, int y)
-{
-    if (x < 0 || x >= depthW || y < 0 || y >= depthH)
-    {
-        return false;
-    }
-
-    const int pixelOffset = y * depthW + x;
-    float zVal = static_cast<float>(pointCloudBuffer[3 * pixelOffset + 2]);
-    if (zVal <= 0.0f)
-    {
-        return false;
-    }
-
-    point3d.v[0] = static_cast<float>(pointCloudBuffer[3 * pixelOffset + 0]);
-    point3d.v[1] = static_cast<float>(pointCloudBuffer[3 * pixelOffset + 1]);
-    point3d.v[2] = zVal;
-
-    point3d = ConvertK4AToOpenGLCoordinate(point3d);
-
-    return true;
-}
+constexpr ImageDimensions PointCloudVisualizerTextureDimensions = { 1280, 1152 };
 
 } // namespace
 
-GLenum K4APointCloudVisualizer::InitializeTexture(std::shared_ptr<OpenGlTexture> &texture) const
+GLenum K4APointCloudVisualizer::InitializeTexture(std::shared_ptr<K4AViewerImage> *texture) const
 {
-    return OpenGlTextureFactory::CreateTexture(texture, nullptr, m_dimensions, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+    return K4AViewerImage::Create(texture, nullptr, m_dimensions, GL_RGBA);
 }
 
-GLenum K4APointCloudVisualizer::UpdateTexture(std::shared_ptr<OpenGlTexture> &texture,
-                                              const K4AImage<K4A_IMAGE_FORMAT_DEPTH16> &frame)
+PointCloudVisualizationResult K4APointCloudVisualizer::UpdateTexture(std::shared_ptr<K4AViewerImage> *texture,
+                                                                     const k4a::capture &capture)
 {
+    // Update the point cloud renderer with the latest point data
+    //
+    PointCloudVisualizationResult result = UpdatePointClouds(capture);
+    if (result != PointCloudVisualizationResult::Success)
+    {
+        return result;
+    }
+
     // Set up rendering to a texture
     //
-    glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer.Id());
+    glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer.Id());
     CleanupGuard frameBufferBindingGuard([]() { glBindFramebuffer(GL_FRAMEBUFFER, 0); });
 
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer.Id());
 
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, static_cast<GLuint>(*texture), 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, static_cast<GLuint>(**texture), 0);
     const GLenum drawBuffers = GL_COLOR_ATTACHMENT0;
     glDrawBuffers(1, &drawBuffers);
 
     const GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
     {
-        return frameBufferStatus;
+        return PointCloudVisualizationResult::OpenGlError;
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
     glViewport(0, 0, m_dimensions.Width, m_dimensions.Height);
 
     glEnable(GL_DEPTH_TEST);
@@ -104,17 +76,20 @@ GLenum K4APointCloudVisualizer::UpdateTexture(std::shared_ptr<OpenGlTexture> &te
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Update the point cloud renderer with the latest point data
-    //
-    UpdatePointClouds(frame);
-
     m_viewControl.GetPerspectiveMatrix(m_projection, m_dimensions.Width, m_dimensions.Height);
     m_viewControl.GetViewMatrix(m_view);
 
     m_pointCloudRenderer.UpdateViewProjection(m_view, m_projection);
-    m_pointCloudRenderer.Render();
 
-    return glGetError();
+    GLenum renderStatus = m_pointCloudRenderer.Render();
+
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    if (renderStatus != GL_NO_ERROR)
+    {
+        return PointCloudVisualizationResult::OpenGlError;
+    }
+
+    return PointCloudVisualizationResult::Success;
 }
 
 void K4APointCloudVisualizer::ProcessPositionalMovement(const ViewMovement direction, const float deltaTime)
@@ -137,162 +112,159 @@ void K4APointCloudVisualizer::ResetPosition()
     m_viewControl.ResetPosition();
 }
 
-void K4APointCloudVisualizer::EnableShading(bool enable)
+PointCloudVisualizationResult K4APointCloudVisualizer::SetColorizationStrategy(ColorizationStrategy strategy)
 {
-    m_pointCloudRenderer.EnableShading(enable);
+    if (strategy == ColorizationStrategy::Color && !m_enableColorPointCloud)
+    {
+        throw AssertionException("Attempted to set unsupported point cloud mode!");
+    }
+
+    m_colorizationStrategy = strategy;
+
+    m_pointCloudRenderer.EnableShading(m_colorizationStrategy == ColorizationStrategy::Shaded);
+
+    GLenum xyTableStatus = GL_NO_ERROR;
+    if (m_colorizationStrategy == ColorizationStrategy::Color)
+    {
+        m_transformedDepthImage = k4a::image::create(K4A_IMAGE_FORMAT_CUSTOM,
+                                                     m_calibrationData.color_camera_calibration.resolution_width,
+                                                     m_calibrationData.color_camera_calibration.resolution_height,
+                                                     m_calibrationData.color_camera_calibration.resolution_width *
+                                                         static_cast<int>(sizeof(DepthPixel)));
+
+        xyTableStatus = m_pointCloudConverter.SetActiveXyTable(m_colorXyTable);
+    }
+    else
+    {
+
+        m_pointCloudColorization = k4a::image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                                                      m_calibrationData.depth_camera_calibration.resolution_width,
+                                                      m_calibrationData.depth_camera_calibration.resolution_height,
+                                                      m_calibrationData.depth_camera_calibration.resolution_width * 3 *
+                                                          static_cast<int>(sizeof(int16_t)));
+
+        xyTableStatus = m_pointCloudConverter.SetActiveXyTable(m_depthXyTable);
+    }
+
+    if (xyTableStatus != GL_NO_ERROR)
+    {
+        return PointCloudVisualizationResult::OpenGlError;
+    }
+
+    // Reset our reserved XYZ point cloud texture so it'll get resized the next time we go to render
+    //
+    m_xyzTexture.Reset();
+
+    // If we've had data, force-refresh color pixels uploaded to GPU.
+    // This allows us to switch shading modes while paused.
+    //
+    if (m_lastCapture)
+    {
+        return UpdatePointClouds(m_lastCapture);
+    }
+
+    return PointCloudVisualizationResult::Success;
 }
 
-K4APointCloudVisualizer::K4APointCloudVisualizer(const k4a_depth_mode_t depthMode,
-                                                 std::unique_ptr<K4ACalibrationTransformData> &&calibrationData) :
-    m_expectedValueRange(GetRangeForDepthMode(depthMode)),
-    m_dimensions(PointCloudVisualizerTextureDimensions),
-    m_calibrationTransformData(std::move(calibrationData))
+void K4APointCloudVisualizer::SetPointSize(int size)
 {
-    glGenFramebuffers(1, &m_frameBuffer);
+    m_pointCloudRenderer.SetPointSize(size);
+}
 
-    glGenRenderbuffers(1, &m_depthBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
+K4APointCloudVisualizer::K4APointCloudVisualizer(const bool enableColorPointCloud,
+                                                 const k4a::calibration &calibrationData) :
+    m_dimensions(PointCloudVisualizerTextureDimensions),
+    m_enableColorPointCloud(enableColorPointCloud),
+    m_calibrationData(calibrationData)
+{
+    m_expectedValueRange = GetRangeForDepthMode(m_calibrationData.depth_mode);
+    m_transformation = k4a::transformation(m_calibrationData);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer.Id());
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_dimensions.Width, m_dimensions.Height);
 
     linmath::mat4x4_identity(m_view);
     linmath::mat4x4_identity(m_projection);
 
     m_viewControl.ResetPosition();
+
+    m_colorXyTable = m_pointCloudConverter.GenerateXyTable(m_calibrationData, K4A_CALIBRATION_TYPE_COLOR);
+    m_depthXyTable = m_pointCloudConverter.GenerateXyTable(m_calibrationData, K4A_CALIBRATION_TYPE_DEPTH);
+
+    SetColorizationStrategy(m_colorizationStrategy);
 }
 
-K4APointCloudVisualizer::~K4APointCloudVisualizer()
+PointCloudVisualizationResult K4APointCloudVisualizer::UpdatePointClouds(const k4a::capture &capture)
 {
-    glDeleteFramebuffers(1, &m_frameBuffer);
-}
-
-void K4APointCloudVisualizer::UpdatePointClouds(const K4AImage<K4A_IMAGE_FORMAT_DEPTH16> &frame)
-{
-    const size_t pointCount = frame.GetSize() / sizeof(DepthPixel);
-    if (m_vertexBuffer.size() < pointCount)
+    k4a::image depthImage = capture.get_depth_image();
+    if (!depthImage)
     {
-        m_vertexBuffer.resize(pointCount);
+        // Capture doesn't have depth info; drop the capture
+        //
+        return PointCloudVisualizationResult::MissingDepthImage;
     }
 
-    k4a_image_t depthImage = nullptr;
-    k4a_image_create_from_buffer(K4A_IMAGE_FORMAT_DEPTH16,
-                                 m_calibrationTransformData->DepthWidth,
-                                 m_calibrationTransformData->DepthHeight,
-                                 m_calibrationTransformData->DepthWidth * int(sizeof(uint16_t)),
-                                 frame.GetBuffer(),
-                                 frame.GetSize(),
-                                 nullptr,
-                                 nullptr,
-                                 &depthImage);
+    k4a::image colorImage = capture.get_color_image();
 
-    k4a_transformation_depth_image_to_point_cloud(m_calibrationTransformData->TransformationHandle,
-                                                  depthImage,
-                                                  K4A_CALIBRATION_TYPE_DEPTH,
-                                                  m_calibrationTransformData->PointCloudImage);
-
-    // pointCloudBuffer stores interleaved 3d coordinates. To access the x-, y- and z- coordinates of the ith pixel use
-    // pointCloudBuffer[3 * i], pointCloudBuffer[3 * i + 1] and pointCloudBuffer[3 * i + 2], respectively.
-    //
-    auto *pointCloudBuffer = reinterpret_cast<int16_t *>(
-        k4a_image_get_buffer(m_calibrationTransformData->PointCloudImage));
-
-    size_t dstIndex = 0;
-    const int frameHeight = frame.GetHeightPixels();
-    const int frameWidth = frame.GetWidthPixels();
-    for (int h = 0; h < frameHeight; ++h)
+    if (m_enableColorPointCloud)
     {
-        for (int w = 0; w < frameWidth; ++w)
+        if (!colorImage)
         {
-            Vertex &outputVertex = m_vertexBuffer[dstIndex];
+            // Capture doesn't have color info; drop the capture
+            //
+            return PointCloudVisualizationResult::MissingColorImage;
+        }
 
-            k4a_float3_t position;
-            if (!GetPoint3d(position, pointCloudBuffer, frameWidth, frameHeight, w, h))
+        if (m_colorizationStrategy == ColorizationStrategy::Color)
+        {
+            try
             {
-                continue;
+                m_transformation.depth_image_to_color_camera(depthImage, &m_transformedDepthImage);
+                depthImage = m_transformedDepthImage;
             }
-
-            ConvertK4AFloat3ToLinmathVec3(position, outputVertex.Position);
-
-            // Vertex positions are in millimeters, but everything else is in meters, so we need to convert
-            //
-            for (float &f : outputVertex.Position)
+            catch (const k4a::error &)
             {
-                f /= 1000.0f;
+                return PointCloudVisualizationResult::DepthToColorTransformationFailed;
             }
-
-            // Compute color
-            //
-            const RgbPixel colorization = K4ADepthPixelColorizer::ColorizeRedToBlue(m_expectedValueRange,
-                                                                                    static_cast<DepthPixel>(
-                                                                                        position.xyz.z));
-
-            constexpr auto uint8_t_max = static_cast<float>(std::numeric_limits<uint8_t>::max());
-            outputVertex.Color[0] = colorization.Red / uint8_t_max;
-            outputVertex.Color[1] = colorization.Green / uint8_t_max;
-            outputVertex.Color[2] = colorization.Blue / uint8_t_max;
-            outputVertex.Color[3] = uint8_t_max; // alpha
-
-            // Compute neighbors - only necessary if we're using the fancy shader
-            //
-            if (m_pointCloudRenderer.ShadingIsEnabled())
-            {
-                // Find the neighboring point that is closest to the camera
-                k4a_float3_t closest = position;
-                closest.v[2] += 1000.0f; // If no neighbors have data, default to 1 meter behind point.
-
-                k4a_float3_t pointLeft, pointRight, pointUp, pointDown;
-                if (GetPoint3d(pointLeft, pointCloudBuffer, frameWidth, frameHeight, w - 1, h))
-                {
-                    if (closest.v[2] > pointLeft.v[2])
-                    {
-                        closest = pointLeft;
-                    }
-                }
-                if (GetPoint3d(pointRight, pointCloudBuffer, frameWidth, frameHeight, w + 1, h))
-                {
-                    if (closest.v[2] > pointRight.v[2])
-                    {
-                        closest = pointRight;
-                    }
-                }
-                if (GetPoint3d(pointUp, pointCloudBuffer, frameWidth, frameHeight, w, h - 1))
-                {
-                    if (closest.v[2] > pointUp.v[2])
-                    {
-                        closest = pointUp;
-                    }
-                }
-                if (GetPoint3d(pointDown, pointCloudBuffer, frameWidth, frameHeight, w, h + 1))
-                {
-                    if (closest.v[2] > pointDown.v[2])
-                    {
-                        closest = pointDown;
-                    }
-                }
-
-                ConvertK4AFloat3ToLinmathVec3(closest, outputVertex.Neighbor);
-
-                // Vertex positions are in millimeters, but everything else is in meters, so we need to convert
-                //
-                for (float &f : outputVertex.Neighbor)
-                {
-                    f /= 1000.0f;
-                }
-            }
-
-            // Mark point succeeded
-            //
-            ++dstIndex;
         }
     }
 
-    if (!m_pointCloudRendererBufferInitialized)
+    GLenum glResult = m_pointCloudConverter.Convert(depthImage, &m_xyzTexture);
+    if (glResult != GL_NO_ERROR)
     {
-        m_pointCloudRenderer.ReservePointCloudBuffer(static_cast<GLsizei>(pointCount));
-        m_pointCloudRendererBufferInitialized = true;
+        return PointCloudVisualizationResult::DepthToXyzTransformationFailed;
     }
 
-    m_pointCloudRenderer.UpdatePointClouds(reinterpret_cast<Vertex *>(&m_vertexBuffer[0]),
-                                           static_cast<unsigned int>(dstIndex));
+    m_lastCapture = capture;
 
-    k4a_image_release(depthImage);
+    if (m_colorizationStrategy == ColorizationStrategy::Color)
+    {
+        m_pointCloudColorization = std::move(colorImage);
+    }
+    else
+    {
+        DepthPixel *srcPixel = reinterpret_cast<DepthPixel *>(depthImage.get_buffer());
+        BgraPixel *dstPixel = reinterpret_cast<BgraPixel *>(m_pointCloudColorization.get_buffer());
+        const BgraPixel *endPixel = dstPixel + (depthImage.get_size() / sizeof(DepthPixel));
+
+        while (dstPixel != endPixel)
+        {
+            const RgbPixel colorization = K4ADepthPixelColorizer::ColorizeRedToBlue(m_expectedValueRange, *srcPixel);
+            dstPixel->Red = colorization.Red;
+            dstPixel->Green = colorization.Green;
+            dstPixel->Blue = colorization.Blue;
+            dstPixel->Alpha = 0xFF;
+
+            ++dstPixel;
+            ++srcPixel;
+        }
+    }
+
+    GLenum updatePointCloudResult = m_pointCloudRenderer.UpdatePointClouds(m_pointCloudColorization, m_xyzTexture);
+    if (updatePointCloudResult != GL_NO_ERROR)
+    {
+        return PointCloudVisualizationResult::OpenGlError;
+    }
+
+    return PointCloudVisualizationResult::Success;
 }

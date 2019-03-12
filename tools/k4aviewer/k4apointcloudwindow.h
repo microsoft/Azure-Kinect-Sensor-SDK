@@ -14,8 +14,7 @@
 // Project headers
 //
 #include "ik4avisualizationwindow.h"
-#include "k4acalibrationtransformdata.h"
-#include "k4anonbufferingframesource.h"
+#include "k4anonbufferingcapturesource.h"
 #include "k4apointcloudvisualizer.h"
 
 namespace k4aviewer
@@ -27,9 +26,9 @@ public:
     const char *GetTitle() const override;
 
     K4APointCloudWindow(std::string &&windowTitle,
-                        k4a_depth_mode_t depthMode,
-                        std::shared_ptr<K4ANonBufferingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>> &&depthFrameSource,
-                        std::unique_ptr<K4ACalibrationTransformData> &&calibrationData);
+                        bool enableColorPointCloud,
+                        std::shared_ptr<K4ANonBufferingCaptureSource> &&captureSource,
+                        const k4a::calibration &calibrationData);
     ~K4APointCloudWindow() override = default;
 
     K4APointCloudWindow(const K4APointCloudWindow &) = delete;
@@ -39,15 +38,29 @@ public:
 
 private:
     void ProcessInput();
+    void SetFailed(const char *msg);
+
+    bool CheckVisualizationResult(PointCloudVisualizationResult visualizationResult);
 
     std::string m_title;
     K4APointCloudVisualizer m_pointCloudVisualizer;
-    std::shared_ptr<OpenGlTexture> m_texture;
-    std::shared_ptr<K4ANonBufferingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>> m_depthFrameSource;
+    std::shared_ptr<K4AViewerImage> m_texture;
+    std::shared_ptr<K4ANonBufferingCaptureSource> m_captureSource;
 
-    bool m_enableShading = true;
+    K4APointCloudVisualizer::ColorizationStrategy m_colorizationStrategy =
+        K4APointCloudVisualizer::ColorizationStrategy::Shaded;
+    int m_pointSize;
+
+    bool m_enableColorPointCloud = false;
 
     bool m_failed = false;
+
+    static constexpr int MaxConsecutiveMissingImages = 10;
+    int m_consecutiveMissingImages = 0;
+
+    bool m_haveShownMissingImagesWarning = false;
+    int m_missingColorImages = 0;
+    int m_missingDepthImages = 0;
 
     // OpenGL time
     //

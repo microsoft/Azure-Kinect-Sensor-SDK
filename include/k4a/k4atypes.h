@@ -385,11 +385,13 @@ typedef enum
     /** Color image type NV12.
      *
      * \details
-     * NV12 images separate the luminance and color data such that all the luminance is at the
-     * beginning of the buffer, and the color information follows it.
+     * NV12 images separate the luminance and chroma data such that all the luminance is at the
+     * beginning of the buffer, and the chroma lines follow immediately after.
      *
      * \details
-     * Stride is not relevant to this format.
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each line
+     * of the image in memory. Chroma has half as many lines of height and half the width in pixels of the luminance.
+     * Each chroma line has the same width in bytes as a luminance line.
      */
     K4A_IMAGE_FORMAT_COLOR_NV12,
 
@@ -399,7 +401,8 @@ typedef enum
      * YUY2 stores chroma and luminance data in interleaved pixels.
      *
      * \details
-     * Stride should be used to determine the start location of each line of the image.
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
      */
     K4A_IMAGE_FORMAT_COLOR_YUY2,
 
@@ -410,7 +413,8 @@ typedef enum
      * and Red data. The fourth byte is the alpha channel and is unused in the Azure Kinect APIs.
      *
      * \details
-     * Stride should be used to determine the start location of each line of the image.
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
      *
      * \details
      * The Azure Kinect device does not natively capture in this format. Requesting images of this format
@@ -426,7 +430,8 @@ typedef enum
      * millimeters from the origin of the camera.
      *
      * \details
-     * Stride should be used to determine the start location of each line of the image.
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
      */
     K4A_IMAGE_FORMAT_DEPTH16,
 
@@ -440,7 +445,8 @@ typedef enum
      * This format represents infrared light and is captured by the depth camera.
      *
      * \details
-     * Stride should be used to determine the start location of each line of the image.
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
      */
     K4A_IMAGE_FORMAT_IR16,
 

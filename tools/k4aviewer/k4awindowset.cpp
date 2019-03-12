@@ -31,7 +31,7 @@ namespace
 template<k4a_image_format_t ImageFormat>
 void CreateVideoWindow(const char *sourceIdentifier,
                        const char *windowTitle,
-                       K4ADataSource<std::shared_ptr<K4ACapture>> &cameraDataSource,
+                       K4ADataSource<k4a::capture> &cameraDataSource,
                        std::shared_ptr<K4AConvertingFrameSource<ImageFormat>> &&frameSource)
 {
     std::string title = std::string(sourceIdentifier) + ": " + windowTitle;
@@ -70,7 +70,7 @@ void K4AWindowSet::ShowModeSelector(ViewType *viewType,
 }
 
 void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
-                                      K4ADataSource<std::shared_ptr<K4ACapture>> *cameraDataSource,
+                                      K4ADataSource<k4a::capture> *cameraDataSource,
                                       K4ADataSource<k4a_imu_sample_t> *imuDataSource,
                                       std::shared_ptr<K4AMicrophoneListener> &&microphoneDataSource,
                                       bool enableDepthCamera,
@@ -178,17 +178,17 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
 }
 
 void K4AWindowSet::StartPointCloudWindow(const char *sourceIdentifier,
-                                         std::unique_ptr<K4ACalibrationTransformData> &&calibrationData,
-                                         K4ADataSource<std::shared_ptr<K4ACapture>> &cameraDataSource,
-                                         k4a_depth_mode_t depthMode)
+                                         const k4a::calibration &calibrationData,
+                                         K4ADataSource<k4a::capture> &cameraDataSource,
+                                         bool enableColorPointCloud)
 {
     std::string pointCloudTitle = std::string(sourceIdentifier) + ": Point Cloud Viewer";
-    auto frameSource = std::make_shared<K4ANonBufferingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>>();
-    cameraDataSource.RegisterObserver(frameSource);
+    auto captureSource = std::make_shared<K4ANonBufferingCaptureSource>();
+    cameraDataSource.RegisterObserver(captureSource);
 
     auto &wm = K4AWindowManager::Instance();
     wm.AddWindow(std14::make_unique<K4APointCloudWindow>(std::move(pointCloudTitle),
-                                                         depthMode,
-                                                         std::move(frameSource),
-                                                         std::move(calibrationData)));
+                                                         enableColorPointCloud,
+                                                         std::move(captureSource),
+                                                         calibrationData));
 }
