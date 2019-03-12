@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 // This library
 #include <k4ainternal/firmware.h>
 
@@ -99,17 +102,23 @@ static uint32_t calculate_crc32(const uint8_t *pData, size_t len)
     return crc;
 }
 
-k4a_result_t firmware_create(depthmcu_t depthmcu, firmware_t *firmware_handle)
+k4a_result_t firmware_create(uint32_t index, firmware_t *firmware_handle)
 {
     firmware_context_t *firmware = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, depthmcu == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_handle == NULL);
 
     firmware = firmware_t_create(firmware_handle);
-    firmware->depthmcu = depthmcu;
     firmware->lock = Lock_Init();
+
+    result = TRACE_CALL(depthmcu_create(index, &firmware->depthmcu));
+
+    if (K4A_SUCCEEDED(result))
+    {
+        // Wait until the device is responding correctly...
+        result = TRACE_CALL(K4A_RESULT_FROM_BOOL(depthmcu_wait_is_ready(firmware->depthmcu)));
+    }
 
     if (K4A_FAILED(result))
     {
@@ -127,8 +136,14 @@ void firmware_destroy(firmware_t firmware_handle)
 
     // Make sure that we can get the lock. Hopefully this means that no other process is running.
     Lock(firmware->lock);
-    Unlock(firmware->lock);
 
+    if (firmware->depthmcu)
+    {
+        depthmcu_destroy(firmware->depthmcu);
+        firmware->depthmcu = NULL;
+    }
+
+    Unlock(firmware->lock);
     Lock_Deinit(firmware->lock);
 
     firmware_t_destroy(firmware_handle);
@@ -180,6 +195,83 @@ k4a_result_t firmware_reset_device(firmware_t firmware_handle)
     Lock(firmware->lock);
     result = TRACE_CALL(depthmcu_reset_device(firmware->depthmcu));
     Unlock(firmware->lock);
+    return result;
+}
+
+k4a_buffer_result_t firmware_get_device_serialnum(firmware_t firmware_handle,
+                                                  char *serial_number,
+                                                  size_t *serial_number_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, firmware_t, firmware_handle);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);
+
+    firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
+
+    return TRACE_BUFFER_CALL(depthmcu_get_serialnum(firmware->depthmcu, serial_number, serial_number_size));
+}
+
+k4a_result_t firmware_get_device_version(firmware_t firmware_handle, k4a_hardware_version_t *version)
+{
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, firmware_t, firmware_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, version == NULL);
+
+    firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
+    depthmcu_firmware_versions_t mcu_version;
+
+    result = TRACE_CALL(depthmcu_get_version(firmware->depthmcu, &mcu_version));
+
+    if (K4A_SUCCEEDED(result))
+    {
+        version->rgb.major = mcu_version.rgb_major;
+        version->rgb.minor = mcu_version.rgb_minor;
+        version->rgb.iteration = mcu_version.rgb_build;
+
+        version->depth.major = mcu_version.depth_major;
+        version->depth.minor = mcu_version.depth_minor;
+        version->depth.iteration = mcu_version.depth_build;
+
+        version->audio.major = mcu_version.audio_major;
+        version->audio.minor = mcu_version.audio_minor;
+        version->audio.iteration = mcu_version.audio_build;
+
+        version->depth_sensor.major = mcu_version.depth_sensor_cfg_major;
+        version->depth_sensor.minor = mcu_version.depth_sensor_cfg_minor;
+        version->depth_sensor.iteration = 0;
+
+        switch (mcu_version.build_config)
+        {
+        case 0:
+            version->firmware_build = K4A_FIRMWARE_BUILD_RELEASE;
+            break;
+        case 1:
+            version->firmware_build = K4A_FIRMWARE_BUILD_DEBUG;
+            break;
+        default:
+            LOG_WARNING("Hardware reported unknown firmware build: %d", mcu_version.build_config);
+            version->firmware_build = K4A_FIRMWARE_BUILD_DEBUG;
+            break;
+        }
+
+        switch (mcu_version.signature_type)
+        {
+        case 0:
+            version->firmware_signature = K4A_FIRMWARE_SIGNATURE_MSFT;
+            break;
+        case 1:
+            version->firmware_signature = K4A_FIRMWARE_SIGNATURE_TEST;
+            break;
+        case 2:
+            version->firmware_signature = K4A_FIRMWARE_SIGNATURE_UNSIGNED;
+            break;
+        default:
+            LOG_WARNING("Hardware reported unknown signature type: %d", mcu_version.signature_type);
+            version->firmware_signature = K4A_FIRMWARE_SIGNATURE_UNSIGNED;
+            break;
+        }
+    }
+
     return result;
 }
 

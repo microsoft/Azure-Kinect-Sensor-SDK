@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #ifndef COLOR_MOCK_MEDIAFOUNDATION_H
 #define COLOR_MOCK_MEDIAFOUNDATION_H
 #include <utcommon.h>

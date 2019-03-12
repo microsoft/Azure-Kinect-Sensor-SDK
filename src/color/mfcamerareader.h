@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #ifndef MFCAMERAREADER_H
 #define MFCAMERAREADER_H
 // Platform

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Minimum Version determined by the following dev environments
 # Ubuntu 16.04 (Xenial) - CMake 3.5.1
 # Ubuntu 18.04 (Bionic) - CMake 3.10.2
@@ -44,6 +47,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     include(MSVCStaticCrt)
     include(MSVCLinkerFlags)
+    add_compile_options("/ZH:SHA_256") # Embed hash of source files
 endif()
 
 # Find all dependencies
@@ -110,12 +114,9 @@ else()
     message(STATUS "clang-format version: ${CLANG_VERSION_STRING}")
 
     if (${CLANG_VERSION_STRING} MATCHES "^.*${VALID_CLANG_FORMAT_VERSION}.*$")
-        find_package(PythonInterp 3)
-        if (NOT ${PYTHONINTERP_FOUND})
-            find_program(PYTHON_EXECUTABLE python3 DOC "python3")
-            if (${PYTHON_EXECUTABLE} STREQUAL "PYTHON_EXECUTABLE-NOTFOUND")
-                message(FATAL_ERROR "Could not find Python3")
-            endif()
+        find_package(Python3 COMPONENTS Interpreter)
+        if (NOT ${Python3_FOUND})
+            message(FATAL_ERROR "Could not find Python3")
         endif()
 
 
@@ -124,7 +125,8 @@ else()
             file(GLOB_RECURSE CLANG_FORMAT_SOURCES_X CONFIGURE_DEPENDS
                 ${root}/*.c
                 ${root}/*.cpp
-                ${root}/*.h)
+                ${root}/*.h
+                ${root}/*.hpp)
             list(APPEND CLANG_FORMAT_SOURCES ${CLANG_FORMAT_SOURCES_X})
         endforeach()
 
@@ -138,7 +140,7 @@ else()
 
             add_custom_command(
                 OUTPUT ${validateoutput}
-                COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --clangformat "${CLANG_FORMAT}" --file ${file} --output ${validateoutput}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --clangformat "${CLANG_FORMAT}" --file ${file} --output ${validateoutput}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
                 DEPENDS ${file}
                 COMMENT "Validating format of ${file}"
@@ -148,7 +150,7 @@ else()
 
             add_custom_command(
                 OUTPUT ${reformatoutput}
-                COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --reformat --clangformat "${CLANG_FORMAT}" --file ${file} --output ${reformatoutput}
+                COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ValidateFormat.py --reformat --clangformat "${CLANG_FORMAT}" --file ${file} --output ${reformatoutput}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
                 DEPENDS ${file}
                 COMMENT "Reformatting ${file}"

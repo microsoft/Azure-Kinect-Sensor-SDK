@@ -1,9 +1,5 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-               Licensed under the MIT License.
-****************************************************************/
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 //************************ Includes *****************************
 // This library
@@ -183,7 +179,11 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
                 }
                 else
                 {
-                    LOG_WARNING("Dropped last %d IMU sample due to too large a time stamp", p_imu->dropped_count);
+                    if (p_imu->dropped_count != 0)
+                    {
+                        LOG_WARNING("IMU startup dropped last %d samples, the timestamp is too large",
+                                    p_imu->dropped_count);
+                    }
                     p_imu->dropped_count = 0;
                     p_imu->wait_for_ts_reset = false;
                 }

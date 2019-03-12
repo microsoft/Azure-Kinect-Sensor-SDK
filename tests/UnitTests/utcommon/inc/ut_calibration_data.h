@@ -1,8 +1,5 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-****************************************************************/
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 // We use BrownConrady for the depth camera and Rational6KT for the color camera to test both code paths.
 // BrownConrady uses 14 instead of 15 parameters.

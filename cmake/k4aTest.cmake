@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
 
 # Add a test
 #
@@ -38,7 +40,7 @@ if (NOT is_defined)
     BRIEF_DOCS "List of types of tests"
     FULL_DOCS "Contains full list of all test types")
 
-    set(TEST_TYPES "UNIT" "FUNCTIONAL" "STRESS" "PERF")
+    set(TEST_TYPES "UNIT" "FUNCTIONAL" "STRESS" "PERF" "FIRMWARE")
     set_property(GLOBAL PROPERTY TEST_TYPES ${TEST_TYPES})
 
     foreach(TEST_TYPE ${TEST_TYPES})

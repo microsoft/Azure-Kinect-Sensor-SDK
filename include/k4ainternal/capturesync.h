@@ -1,4 +1,6 @@
 /** \file capturesync.h
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
  * Kinect For Azure SDK.
  *
  * Synchronize depth and color captures

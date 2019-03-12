@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 // This library
 #include <k4ainternal/capturesync.h>
 
@@ -42,7 +45,7 @@ typedef struct _capturesync_context_t
     bool disable_sync;      // Disables synchronizing depth and color captures. Instead releases them as they arrive.
     bool enable_ts_logging; // Write capture timestamps and type to the logger to analysis
     int32_t depth_delay_off_color_usec; // Timing between color and depth image timestamps
-    volatile bool running;              // We have reveived start and should be processing data when true.
+    volatile bool running;              // We have received start and should be processing data when true.
     LOCK_HANDLE lock;
 
 } capturesync_context_t;

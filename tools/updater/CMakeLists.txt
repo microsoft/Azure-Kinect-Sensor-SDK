@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(AzureKinectFirmwareTool main.c ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
 # Include ${CMAKE_CURRENT_BINARY_DIR}/version.rc in the target's sources
@@ -26,14 +29,6 @@ install(
         AzureKinectFirmwareTool
     RUNTIME DESTINATION
         ${CMAKE_INSTALL_BINDIR}
-)
-
-install(
-    FILES
-        firmware/Firmware_Composite_MSFTCert_Debug_TestSigned_1.105.785813.5006.27_6109.07_0121.bin
-        firmware/Firmware_Composite_MSFTCert_Release_MSFTSigned_1.5.786013_5006.27_6109.07_0122.bin
-    DESTINATION
-        ${CMAKE_INSTALL_DATADIR}/k4a/firmware
 )
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")

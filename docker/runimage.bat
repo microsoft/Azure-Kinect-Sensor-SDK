@@ -1,3 +1,6 @@
+:: Copyright (c) Microsoft Corporation. All rights reserved.
+:: Licensed under the MIT License.
+
 @echo off
 docker stop k4a > NUL 2>&1
 docker rm k4a > NUL 2>&1

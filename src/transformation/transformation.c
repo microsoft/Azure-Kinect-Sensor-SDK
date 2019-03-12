@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include <k4ainternal/transformation.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/deloader.h>
@@ -13,9 +16,13 @@ k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_
                                                           const k4a_color_resolution_t color_resolution,
                                                           k4a_calibration_t *calibration)
 {
+    memset(&calibration->color_camera_calibration, 0, sizeof(k4a_calibration_camera_t));
+    memset(&calibration->depth_camera_calibration, 0, sizeof(k4a_calibration_camera_t));
+
     if (K4A_FAILED(
             K4A_RESULT_FROM_BOOL(color_resolution != K4A_COLOR_RESOLUTION_OFF || depth_mode != K4A_DEPTH_MODE_OFF)))
     {
+        LOG_ERROR("Expect color or depth camera is running.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -68,14 +75,17 @@ static k4a_result_t transformation_possible(const k4a_calibration_t *camera_cali
 {
     if (camera >= K4A_CALIBRATION_TYPE_NUM || camera <= K4A_CALIBRATION_TYPE_UNKNOWN)
     {
+        LOG_ERROR("Unexpected camera calibration type %d.", camera);
         return K4A_RESULT_FAILED;
     }
     if (camera == K4A_CALIBRATION_TYPE_DEPTH && camera_calibration->depth_mode == K4A_DEPTH_MODE_OFF)
     {
+        LOG_ERROR("Expect depth camera is running to perform transformation.", 0);
         return K4A_RESULT_FAILED;
     }
     if (camera == K4A_CALIBRATION_TYPE_COLOR && camera_calibration->color_resolution == K4A_COLOR_RESOLUTION_OFF)
     {
+        LOG_ERROR("Expect color camera is running to perform transformation.", 0);
         return K4A_RESULT_FAILED;
     }
     return K4A_RESULT_SUCCEEDED;
@@ -141,6 +151,11 @@ k4a_result_t transformation_2d_to_3d(const k4a_calibration_t *calibration,
     }
     else
     {
+        LOG_ERROR("Unexpected source camera calibration type %d, should either be K4A_CALIBRATION_TYPE_DEPTH (%d) or "
+                  "K4A_CALIBRATION_TYPE_COLOR (%d).",
+                  source_camera,
+                  K4A_CALIBRATION_TYPE_DEPTH,
+                  K4A_CALIBRATION_TYPE_COLOR);
         return K4A_RESULT_FAILED; // unproject only supported for depth and color cameras
     }
 
@@ -195,6 +210,11 @@ k4a_result_t transformation_3d_to_2d(const k4a_calibration_t *calibration,
     }
     else
     {
+        LOG_ERROR("Unexpected target camera calibration type %d, should either be K4A_CALIBRATION_TYPE_DEPTH (%d) or "
+                  "K4A_CALIBRATION_TYPE_COLOR (%d).",
+                  target_camera,
+                  K4A_CALIBRATION_TYPE_DEPTH,
+                  K4A_CALIBRATION_TYPE_COLOR);
         return K4A_RESULT_FAILED; // project only supported for depth and color cameras
     }
 }
@@ -252,6 +272,11 @@ static k4a_buffer_result_t transformation_init_xy_tables(const k4a_calibration_t
         height = calibration->color_camera_calibration.resolution_height;
         break;
     default:
+        LOG_ERROR("Unexpected camera calibration type %d, should either be K4A_CALIBRATION_TYPE_DEPTH (%d) or "
+                  "K4A_CALIBRATION_TYPE_COLOR (%d).",
+                  camera,
+                  K4A_CALIBRATION_TYPE_DEPTH,
+                  K4A_CALIBRATION_TYPE_COLOR);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -265,6 +290,7 @@ static k4a_buffer_result_t transformation_init_xy_tables(const k4a_calibration_t
     {
         if (K4A_FAILED(K4A_RESULT_FROM_BOOL(*data_size >= 2 * table_size)))
         {
+            LOG_ERROR("Unexpected xy table size %d, should be larger or equal than %d.", *data_size, 2 * table_size);
             return K4A_BUFFER_RESULT_FAILED;
         }
 
@@ -282,7 +308,8 @@ static k4a_buffer_result_t transformation_init_xy_tables(const k4a_calibration_t
             for (int x = 0; x < width; x++, idx++)
             {
                 point2d[0] = (float)x;
-                if (K4A_FAILED(transformation_2d_to_3d(calibration, point2d, 1.f, camera, camera, point3d, &valid)))
+                if (K4A_FAILED(TRACE_CALL(
+                        transformation_2d_to_3d(calibration, point2d, 1.f, camera, camera, point3d, &valid))))
                 {
                     return K4A_BUFFER_RESULT_FAILED;
                 }
@@ -312,7 +339,7 @@ static k4a_result_t transformation_allocate_xy_tables(const k4a_calibration_t *c
     *buffer = 0;
     size_t xy_tables_data_size = 0;
     if (K4A_BUFFER_RESULT_TOO_SMALL !=
-        transformation_init_xy_tables(calibration, camera, *buffer, &xy_tables_data_size, xy_tables))
+        TRACE_BUFFER_CALL(transformation_init_xy_tables(calibration, camera, *buffer, &xy_tables_data_size, xy_tables)))
     {
         return K4A_RESULT_FAILED;
     }
@@ -320,7 +347,7 @@ static k4a_result_t transformation_allocate_xy_tables(const k4a_calibration_t *c
     *buffer = malloc(xy_tables_data_size * sizeof(float));
 
     if (K4A_BUFFER_RESULT_SUCCEEDED !=
-        transformation_init_xy_tables(calibration, camera, *buffer, &xy_tables_data_size, xy_tables))
+        TRACE_BUFFER_CALL(transformation_init_xy_tables(calibration, camera, *buffer, &xy_tables_data_size, xy_tables)))
     {
         return K4A_RESULT_FAILED;
     }
@@ -334,7 +361,8 @@ typedef struct _k4a_transformation_context_t
     float *memory_depth_camera_xy_tables;
     k4a_transformation_xy_tables_t color_camera_xy_tables;
     float *memory_color_camera_xy_tables;
-    bool gpu_optimization;
+    bool enable_gpu_optimization;
+    bool enable_depth_color_transform;
     k4a_transform_engine_context_t *transform_engine;
 } k4a_transformation_context_t;
 
@@ -365,8 +393,12 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration,
         return 0;
     }
 
-    transformation_context->gpu_optimization = gpu_optimization;
-    if (transformation_context->gpu_optimization)
+    transformation_context->enable_gpu_optimization = gpu_optimization;
+    transformation_context->enable_depth_color_transform = transformation_context->calibration.color_resolution !=
+                                                               K4A_COLOR_RESOLUTION_OFF &&
+                                                           transformation_context->calibration.depth_mode !=
+                                                               K4A_DEPTH_MODE_OFF;
+    if (transformation_context->enable_gpu_optimization && transformation_context->enable_depth_color_transform)
     {
         // Set up transform engine expected calibration struct
         k4a_transform_engine_calibration_t transform_engine_calibration;
@@ -432,7 +464,13 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_transformation_t, transformation_handle);
     k4a_transformation_context_t *transformation_context = k4a_transformation_t_get_context(transformation_handle);
 
-    if (transformation_context->gpu_optimization)
+    if (!transformation_context->enable_depth_color_transform)
+    {
+        LOG_ERROR("Expect both depth camera and color camera are running to transform depth image to color camera.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    if (transformation_context->enable_gpu_optimization)
     {
         size_t depth_image_size = (size_t)(depth_image_descriptor->stride_bytes *
                                            depth_image_descriptor->height_pixels);
@@ -468,12 +506,13 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
     else
     {
         if (K4A_BUFFER_RESULT_SUCCEEDED !=
-            transformation_depth_image_to_color_camera_internal(&transformation_context->calibration,
-                                                                &transformation_context->depth_camera_xy_tables,
-                                                                depth_image_data,
-                                                                depth_image_descriptor,
-                                                                transformed_depth_image_data,
-                                                                transformed_depth_image_descriptor))
+            TRACE_BUFFER_CALL(
+                transformation_depth_image_to_color_camera_internal(&transformation_context->calibration,
+                                                                    &transformation_context->depth_camera_xy_tables,
+                                                                    depth_image_data,
+                                                                    depth_image_descriptor,
+                                                                    transformed_depth_image_data,
+                                                                    transformed_depth_image_descriptor)))
         {
             return K4A_RESULT_FAILED;
         }
@@ -493,7 +532,13 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_transformation_t, transformation_handle);
     k4a_transformation_context_t *transformation_context = k4a_transformation_t_get_context(transformation_handle);
 
-    if (transformation_context->gpu_optimization)
+    if (!transformation_context->enable_depth_color_transform)
+    {
+        LOG_ERROR("Expect both depth camera and color camera are running to transform color image to depth camera.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    if (transformation_context->enable_gpu_optimization)
     {
         size_t depth_image_size = (size_t)(depth_image_descriptor->stride_bytes *
                                            depth_image_descriptor->height_pixels);
@@ -530,14 +575,15 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
     else
     {
         if (K4A_BUFFER_RESULT_SUCCEEDED !=
-            transformation_color_image_to_depth_camera_internal(&transformation_context->calibration,
-                                                                &transformation_context->depth_camera_xy_tables,
-                                                                depth_image_data,
-                                                                depth_image_descriptor,
-                                                                color_image_data,
-                                                                color_image_descriptor,
-                                                                transformed_color_image_data,
-                                                                transformed_color_image_descriptor))
+            TRACE_BUFFER_CALL(
+                transformation_color_image_to_depth_camera_internal(&transformation_context->calibration,
+                                                                    &transformation_context->depth_camera_xy_tables,
+                                                                    depth_image_data,
+                                                                    depth_image_descriptor,
+                                                                    color_image_data,
+                                                                    color_image_descriptor,
+                                                                    transformed_color_image_data,
+                                                                    transformed_color_image_descriptor)))
         {
             return K4A_RESULT_FAILED;
         }
@@ -567,14 +613,17 @@ transformation_depth_image_to_point_cloud(k4a_transformation_t transformation_ha
     }
     else
     {
+        LOG_ERROR("Unexpected camera calibration type %d, should either be K4A_CALIBRATION_TYPE_DEPTH (%d) or "
+                  "K4A_CALIBRATION_TYPE_COLOR (%d).",
+                  camera,
+                  K4A_CALIBRATION_TYPE_DEPTH,
+                  K4A_CALIBRATION_TYPE_COLOR);
         return K4A_RESULT_FAILED;
     }
 
-    if (K4A_BUFFER_RESULT_SUCCEEDED != transformation_depth_image_to_point_cloud_internal(xy_tables,
-                                                                                          depth_image_data,
-                                                                                          depth_image_descriptor,
-                                                                                          xyz_image_data,
-                                                                                          xyz_image_descriptor))
+    if (K4A_BUFFER_RESULT_SUCCEEDED !=
+        TRACE_BUFFER_CALL(transformation_depth_image_to_point_cloud_internal(
+            xy_tables, depth_image_data, depth_image_descriptor, xyz_image_data, xyz_image_descriptor)))
     {
         return K4A_RESULT_FAILED;
     }

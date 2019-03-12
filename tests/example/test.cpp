@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include <k4a/k4a.h>
 #include <gtest/gtest.h>
 

@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
 
 name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 
@@ -60,6 +62,14 @@ jobs:
     lfs: false
     persistCredentials: true
     submodules: 'recursive'
+
+  # Use Python Version
+  # Retrieves the specified version of Python from the tool cache. Optionally add it to PATH.
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+      addToPath: true
+      architecture: 'x64'
 
   - powershell: '$(Build.SourcesDirectory)/scripts/verify-windows.ps1'
     displayName: 'Run verify-windows.ps1'

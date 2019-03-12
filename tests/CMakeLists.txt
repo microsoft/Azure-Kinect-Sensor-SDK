@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # define the k4a_add_test function which is used for registering tests
 include(k4aTest)
 
@@ -7,8 +10,10 @@ add_subdirectory(ColorTests)
 add_subdirectory(DepthTests)
 add_subdirectory(example)
 add_subdirectory(ExternLibraries)
+add_subdirectory(FirmwareTests)
 add_subdirectory(IMUTests)
 add_subdirectory(multidevice)
+add_subdirectory(projections)
 add_subdirectory(RecordTests)
 add_subdirectory(TestUtil)
 add_subdirectory(Transformation)

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(depth_ut depth_ut.cpp)
 
 target_link_libraries(depth_ut PRIVATE

@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
 
 # Add shader compilation to a target
 #
@@ -47,7 +49,7 @@ function(target_add_shaders)
         set(FX_HEADER ${CMAKE_CURRENT_BINARY_DIR}/compiledshaders/${FILE_WE}.hcs)
 
         set(DEPFILE ${CMAKE_CURRENT_BINARY_DIR}/${FILE_WE}.d)
-        find_package(PythonInterp 3 REQUIRED)
+        find_package(Python3 REQUIRED)
 
         # CaptureFxcDeps.py will capture the output and add any included .h files to the dependencies
         # through a depfile for ninja
@@ -56,7 +58,7 @@ function(target_add_shaders)
         if (${CMAKE_GENERATOR} EQUAL "Ninja")
             add_custom_command(
                 OUTPUT ${FX_HEADER}
-                COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/cmake/CaptureFxcDeps.py --prefix ${PROJECT_BINARY_DIR} --depfile ${DEPFILE} --outputs ${FX_HEADER} --fxc ${FXC} ${FXC_FLAGS} /E"CSMain" /T cs_5_0 /Fh ${FX_HEADER} /Vn ${FILE_WE} ${FILE}
+                COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/cmake/CaptureFxcDeps.py --prefix ${PROJECT_BINARY_DIR} --depfile ${DEPFILE} --outputs ${FX_HEADER} --fxc ${FXC} ${FXC_FLAGS} /E"CSMain" /T cs_5_0 /Fh ${FX_HEADER} /Vn ${FILE_WE} ${FILE}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 DEPENDS ${FILE} ${TARGET_ADD_SHADERS_DEPENDS} ${PROJECT_SOURCE_DIR}/cmake/CaptureFxcDeps.py
                 COMMENT "Building Shader ${FILE_WE}"
@@ -66,7 +68,7 @@ function(target_add_shaders)
             # DEPFILE argument is not compatible with non-Ninja generators
             add_custom_command(
                 OUTPUT ${FX_HEADER}
-                COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/cmake/CaptureFxcDeps.py --prefix ${PROJECT_BINARY_DIR} --depfile ${DEPFILE} --outputs ${FX_HEADER} --fxc ${FXC} ${FXC_FLAGS} /E"CSMain" /T cs_5_0 /Fh ${FX_HEADER} /Vn ${FILE_WE} ${FILE}
+                COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/cmake/CaptureFxcDeps.py --prefix ${PROJECT_BINARY_DIR} --depfile ${DEPFILE} --outputs ${FX_HEADER} --fxc ${FXC} ${FXC_FLAGS} /E"CSMain" /T cs_5_0 /Fh ${FX_HEADER} /Vn ${FILE_WE} ${FILE}
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 DEPENDS ${FILE} ${TARGET_ADD_SHADERS_DEPENDS} ${PROJECT_SOURCE_DIR}/cmake/CaptureFxcDeps.py
                 COMMENT "Building Shader ${FILE_WE}"

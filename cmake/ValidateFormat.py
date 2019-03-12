@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Invokes clang-format and reports formatting errors
 # Optionally can cause clang-format to run the format in place with --reformat
 

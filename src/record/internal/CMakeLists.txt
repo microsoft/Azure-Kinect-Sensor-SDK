@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Define internal library for testing usage
 add_library(k4a_record STATIC 
     iocallback.cpp
