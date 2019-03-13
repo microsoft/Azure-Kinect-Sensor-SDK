@@ -18,13 +18,6 @@ install(
         ${CMAKE_INSTALL_BINDIR}
 )
 
-install(
-    FILES
-        firmware/Firmware_Composite_TestCert_Debug_TestSigned_1.4.705610_5006.27_6109.05_0112.bin
-    DESTINATION
-        ${CMAKE_INSTALL_DATADIR}/k4a/firmware
-)
-
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     install(
         FILES
