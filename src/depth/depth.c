@@ -161,6 +161,7 @@ k4a_result_t depth_create(depthmcu_t depthmcu,
     {
         log_device_info(depth);
 
+#ifndef K4A_MTE_VERSION
         if (!is_fw_version_compatable("RGB", &depth->version.rgb, &g_min_fw_version_rgb) ||
             !is_fw_version_compatable("Depth", &depth->version.depth, &g_min_fw_version_depth) ||
             !is_fw_version_compatable("Audio", &depth->version.audio, &g_min_fw_version_audio) ||
@@ -168,6 +169,7 @@ k4a_result_t depth_create(depthmcu_t depthmcu,
         {
             result = K4A_RESULT_FAILED;
         }
+#endif
     }
 
     if (K4A_SUCCEEDED(result))

@@ -42,9 +42,9 @@ public:
             return ImageVisualizationResult::NoDataError;
         }
 
-        ImageVisualizationResult result = m_frameVisualizer->UpdateTexture(m_textureBuffers.CurrentItem(),
+        ImageVisualizationResult result = m_frameVisualizer->UpdateTexture(*m_textureBuffers.CurrentItem(),
                                                                            textureToUpdate);
-        sourceImage = m_textureBuffers.CurrentItem().SourceImage;
+        sourceImage = m_textureBuffers.CurrentItem()->SourceImage;
         m_textureBuffers.AdvanceRead();
         return result;
     }
@@ -93,7 +93,7 @@ public:
         m_frameVisualizer(std::move(frameVisualizer))
     {
         m_textureBuffers.Initialize(
-            [this](K4ATextureBuffer<ImageFormat> &buffer) { this->m_frameVisualizer->InitializeBuffer(buffer); });
+            [this](K4ATextureBuffer<ImageFormat> *buffer) { this->m_frameVisualizer->InitializeBuffer(*buffer); });
 
         m_workerThread = std::thread(&K4AConvertingFrameSourceImpl::WorkerThread, this);
     }
@@ -124,7 +124,7 @@ protected:
                 return;
             }
 
-            m_inputImageBuffer.InsertionItem() = std::move(image);
+            *m_inputImageBuffer.InsertionItem() = std::move(image);
             m_inputImageBuffer.EndInsert();
         }
     }
@@ -139,7 +139,7 @@ private:
             {
                 // Take the image from the frame source
                 //
-                k4a::image imageToConvert = std::move(fs->m_inputImageBuffer.CurrentItem());
+                k4a::image imageToConvert = std::move(*fs->m_inputImageBuffer.CurrentItem());
                 fs->m_inputImageBuffer.AdvanceRead();
                 lock.unlock();
 
@@ -151,7 +151,7 @@ private:
                 }
 
                 ImageVisualizationResult result =
-                    fs->m_frameVisualizer->ConvertImage(imageToConvert, fs->m_textureBuffers.InsertionItem());
+                    fs->m_frameVisualizer->ConvertImage(imageToConvert, *fs->m_textureBuffers.InsertionItem());
 
                 if (result != ImageVisualizationResult::Success)
                 {

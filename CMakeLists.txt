@@ -24,6 +24,7 @@ project(K4A LANGUAGES C CXX
     VERSION 1.0)
 
 option(K4A_BUILD_DOCS "Build K4A doxygen documentation" OFF)
+option(K4A_MTE_VERSION "Skip FW version check" OFF)
 
 include(GitCommands)
 
