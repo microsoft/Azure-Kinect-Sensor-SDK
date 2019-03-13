@@ -590,12 +590,6 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
     // Lock the writer thread first so we don't have conflicts
     if (Lock(context->writer_lock) == LOCK_OK)
     {
-        LargeFileIOCallback *file_io = dynamic_cast<LargeFileIOCallback *>(context->ebml_file.get());
-        if (file_io != NULL)
-        {
-            file_io->setThreadOwner();
-        }
-
         if (Lock(context->pending_cluster_lock) == LOCK_OK)
         {
             if (!context->pending_clusters->empty())

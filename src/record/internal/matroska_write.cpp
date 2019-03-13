@@ -395,12 +395,6 @@ static int matroska_writer_thread(void *context_ptr)
         result = K4A_RESULT_FAILED;
     }
 
-    LargeFileIOCallback *file_io = dynamic_cast<LargeFileIOCallback *>(context->ebml_file.get());
-    if (file_io != NULL)
-    {
-        file_io->setThreadOwner();
-    }
-
     while (!context->writer_stopping && result == K4A_RESULT_SUCCEEDED)
     {
         if (Lock(context->pending_cluster_lock) == LOCK_OK)
@@ -441,11 +435,6 @@ static int matroska_writer_thread(void *context_ptr)
                 logger_error(LOGGER_RECORD, "Writer thread failed Condition_Wait: %d", cond);
                 result = K4A_RESULT_FAILED;
                 break;
-            }
-
-            if (file_io != NULL)
-            {
-                file_io->setThreadOwner();
             }
         }
     }

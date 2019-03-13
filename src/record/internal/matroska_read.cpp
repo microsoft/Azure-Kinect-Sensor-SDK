@@ -1118,8 +1118,6 @@ std::shared_ptr<KaxCluster> load_cluster(k4a_playback_context_t *context, cluste
         return cluster;
     }
 
-    k4arecord::Timer t("load_cluster");
-
     context->load_count++;
     if (K4A_FAILED(seek_offset(context, cluster_info->file_offset)))
     {
@@ -1344,8 +1342,6 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, capture_handle == NULL);
 
-    k4arecord::Timer t(next ? "get_next_capture" : "get_prev_capture");
-
     track_reader_t *blocks[] = { &context->color_track, &context->depth_track, &context->ir_track };
     std::shared_ptr<read_block_t> next_blocks[] = { nullptr, nullptr, nullptr };
     static_assert(arraysize(blocks) == arraysize(next_blocks), "Track / block mapping does not match");
@@ -1419,24 +1415,21 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
                  timestamp_start_ns / 1_ms,
                  timestamp_end_ns / 1_ms);
 
+    *capture_handle = NULL;
+    for (size_t i = 0; i < arraysize(blocks); i++)
     {
-        k4arecord::Timer t2("Capture create");
-        *capture_handle = NULL;
-        for (size_t i = 0; i < arraysize(blocks); i++)
+        if (next_blocks[i] && next_blocks[i]->block)
         {
-            if (next_blocks[i] && next_blocks[i]->block)
+            blocks[i]->current_block = next_blocks[i];
+            k4a_result_t result = TRACE_CALL(new_capture(context, blocks[i]->current_block, capture_handle));
+            if (K4A_FAILED(result))
             {
-                blocks[i]->current_block = next_blocks[i];
-                k4a_result_t result = TRACE_CALL(new_capture(context, blocks[i]->current_block, capture_handle));
-                if (K4A_FAILED(result))
+                if (*capture_handle != NULL)
                 {
-                    if (*capture_handle != NULL)
-                    {
-                        k4a_capture_release(*capture_handle);
-                        *capture_handle = NULL;
-                    }
-                    return K4A_STREAM_RESULT_FAILED;
+                    k4a_capture_release(*capture_handle);
+                    *capture_handle = NULL;
                 }
+                return K4A_STREAM_RESULT_FAILED;
             }
         }
     }
