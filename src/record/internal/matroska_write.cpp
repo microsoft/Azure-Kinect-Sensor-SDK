@@ -338,7 +338,7 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
         if (!block_blob->IsSimpleBlock())
         {
             // Update the block duration to the last written sample
-            block_group->SetBlockDuration(data.first - block_blob_start);
+            block_group->SetBlockDuration(data.first - block_blob_start + context->timecode_scale);
         }
 
         block_blob->AddFrameAuto(*data.second.track, data.first - context->start_timestamp_offset, *data.second.buffer);
@@ -513,6 +513,8 @@ add_tag(k4a_record_context_t *context, const char *name, const char *value, TagT
     switch (target)
     {
     case TAG_TARGET_TYPE_NONE:
+        // Force KaxTagTargets element to get rendered since it is a "mandatory" element.
+        GetChild<KaxTagTrackUID>(tagTargets).SetValue(0);
         break;
     case TAG_TARGET_TYPE_TRACK:
         GetChild<KaxTagTargetType>(tagTargets).SetValue("TRACK");
