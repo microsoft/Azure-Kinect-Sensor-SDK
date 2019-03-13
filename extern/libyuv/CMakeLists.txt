@@ -3,7 +3,10 @@ if (NOT TARGET yuv)
         add_compile_options("/D_CRT_SECURE_NO_WARNINGS")
     endif()
 
+    set(CMAKE_IMPORT_LIBRARY_SUFFIX_CACHED ${CMAKE_IMPORT_LIBRARY_SUFFIX})
+    unset(CMAKE_IMPORT_LIBRARY_SUFFIX)
     add_subdirectory(src EXCLUDE_FROM_ALL)
+    set(CMAKE_IMPORT_LIBRARY_SUFFIX ${CMAKE_IMPORT_LIBRARY_SUFFIX_CACHED})
 
     target_include_directories(yuv PUBLIC
         src
