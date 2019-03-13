@@ -6,7 +6,7 @@
 
 // Helper structs/typedefs to cast buffers to
 //
-namespace k4aviewer
+namespace simpleviewer
 {
 
 struct BgraPixel
@@ -18,6 +18,6 @@ struct BgraPixel
 };
 
 using DepthPixel = uint16_t;
-} // namespace k4aviewer
+} // namespace simpleviewer
 
 #endif
