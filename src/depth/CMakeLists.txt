@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-if (K4A_MTE_VERSION)
-  add_definitions(-DK4A_MTE_VERSION)
-endif ()
-
 add_library(k4a_depth STATIC 
             depth.c
             )
+
+if (K4A_MTE_VERSION)
+    target_compile_definitions(k4a_depth PRIVATE K4A_MTE_VERSION)
+endif ()
 
 # Consumers should #include <k4ainternal/depth.h>
 target_include_directories(k4a_depth PUBLIC 
