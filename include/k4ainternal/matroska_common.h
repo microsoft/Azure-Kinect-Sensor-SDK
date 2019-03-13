@@ -138,9 +138,11 @@ public:
     size_t write(const void *buffer, size_t size) override;
     uint64 getFilePointer() override;
     void close() override;
+    void setThreadOwner();
 
 private:
     std::fstream m_stream;
+    size_t m_threadowner;
 };
 
 class Timer
@@ -152,7 +154,7 @@ public:
         auto delta = std::chrono::high_resolution_clock::now() - start;
         if (delta.count() > 100000)
         {
-            std::cout << "Timer(" << name << "): " << ((float)delta.count() / 1000000.0f) << " ms" << std::endl;
+            // std::cout << "Timer(" << name << "): " << ((float)delta.count() / 1000000.0f) << " ms" << std::endl;
         }
     }
 

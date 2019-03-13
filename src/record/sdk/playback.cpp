@@ -318,10 +318,10 @@ void k4a_playback_close(const k4a_playback_t playback_handle)
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     if (context != NULL)
     {
-        std::cout << "File stats:" << std::endl;
-        std::cout << "  Seek count: " << context->seek_count << std::endl;
-        std::cout << "  Load count: " << context->load_count << std::endl;
-        std::cout << "  Cache hits: " << context->cache_hits << std::endl;
+        logger_trace(LOGGER_RECORD, "File reading stats:");
+        logger_trace(LOGGER_RECORD, "  Seek count: %llu", context->seek_count);
+        logger_trace(LOGGER_RECORD, "  Cluster load count: %llu", context->load_count);
+        logger_trace(LOGGER_RECORD, "  Cluster cache hits: %llu", context->cache_hits);
         try
         {
             context->ebml_file->close();
