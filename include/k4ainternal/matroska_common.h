@@ -12,6 +12,8 @@
 #include <list>
 #include <fstream>
 #include <memory>
+#include <iostream>
+#include <chrono>
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/condition.h>
 #include <azure_c_shared_utility/lock.h>
@@ -139,6 +141,24 @@ public:
 
 private:
     std::fstream m_stream;
+};
+
+class Timer
+{
+public:
+    Timer(std::string name) : name(name), start(std::chrono::high_resolution_clock::now()) {}
+    ~Timer()
+    {
+        auto delta = std::chrono::high_resolution_clock::now() - start;
+        if (delta.count() > 100000)
+        {
+            // std::cout << "Timer(" << name << "): " << ((float)delta.count() / 1000000.0f) << " ms" << std::endl;
+        }
+    }
+
+private:
+    std::string name;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
 };
 
 // Struct matches https://docs.microsoft.com/en-us/windows/desktop/wmdm/-bitmapinfoheader

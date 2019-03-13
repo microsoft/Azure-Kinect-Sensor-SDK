@@ -4,6 +4,7 @@
 #include <utcommon.h>
 #include <k4a/k4a.h>
 #include <k4ainternal/common.h>
+#include <k4ainternal/matroska_common.h>
 
 #include "test_helpers.h"
 #include <fstream>
@@ -141,6 +142,7 @@ TEST_F(playback_ut, open_large_file)
         timestamps[1] += timestamp_delta;
         timestamps[2] += timestamp_delta;
     }
+    __debugbreak();
     stream_result = k4a_playback_get_next_capture(handle, &capture);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
     ASSERT_EQ(capture, (k4a_capture_t)NULL);
@@ -573,7 +575,7 @@ TEST_F(playback_ut, DISABLED_open_test_file)
     ASSERT_EQ(capture, nullptr);
 
     std::cout << "Next capture x10" << std::endl;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 100; i++)
     {
         playback_result = k4a_playback_get_next_capture(handle, &capture);
         ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
@@ -581,7 +583,7 @@ TEST_F(playback_ut, DISABLED_open_test_file)
         k4a_capture_release(capture);
     }
     std::cout << "Previous capture x10" << std::endl;
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < 99; i++)
     {
         playback_result = k4a_playback_get_previous_capture(handle, &capture);
         ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);

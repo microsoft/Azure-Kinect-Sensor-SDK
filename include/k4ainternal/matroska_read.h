@@ -12,9 +12,24 @@
 
 namespace k4arecord
 {
+typedef struct _cluster_info_t
+{
+    uint64_t timestamp_ns = 0;
+    uint64_t file_offset = 0;
+    uint64_t cluster_size = 0; // Set to 0 until cluster is loaded
+    std::weak_ptr<libmatroska::KaxCluster> cluster;
+
+    bool next_known = false;
+    struct _cluster_info_t *next = NULL;
+    struct _cluster_info_t *previous = NULL;
+} cluster_info_t;
+
+typedef std::unique_ptr<cluster_info_t, void (*)(cluster_info_t *)> cluster_cache_t;
+
 typedef struct _read_block_t
 {
     struct _track_reader_t *reader;
+    cluster_info_t *cluster_info;
     std::shared_ptr<libmatroska::KaxCluster> cluster;
     libmatroska::KaxInternalBlock *block;
 
@@ -56,7 +71,11 @@ typedef struct _k4a_playback_context_t
 
     uint64_t sync_period_ns;
     uint64_t seek_timestamp_ns;
-    std::shared_ptr<libmatroska::KaxCluster> seek_cluster;
+    cluster_info_t *seek_cluster;
+
+    // The cluster cache is initialized with metadata from the Cues block, and may contain gaps.
+    // Once it is known that no gap is present between clusters, next_known is set to true.
+    cluster_cache_t cluster_cache;
 
     track_reader_t color_track;
     track_reader_t depth_track;
@@ -72,7 +91,7 @@ typedef struct _k4a_playback_context_t
     uint64_t attachments_offset;
     uint64_t tags_offset;
 
-    uint64_t last_timestamp_ns;
+    uint64_t last_timestamp_ns, read_count;
 } k4a_playback_context_t;
 
 K4A_DECLARE_CONTEXT(k4a_playback_t, k4a_playback_context_t);
@@ -83,6 +102,7 @@ k4a_result_t skip_element(k4a_playback_context_t *context, EbmlElement *element)
 void match_ebml_id(k4a_playback_context_t *context, EbmlId &id, uint64_t offset);
 bool seek_info_ready(k4a_playback_context_t *context);
 k4a_result_t parse_mkv(k4a_playback_context_t *context);
+k4a_result_t populate_cluster_cache(k4a_playback_context_t *context);
 k4a_result_t parse_recording_config(k4a_playback_context_t *context);
 k4a_result_t read_bitmap_info_header(track_reader_t *track);
 void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestamp_ns);
@@ -95,14 +115,12 @@ libmatroska::KaxAttached *get_attachment_by_name(k4a_playback_context_t *context
 libmatroska::KaxAttached *get_attachment_by_tag(k4a_playback_context_t *context, const char *tag_name);
 
 k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset);
-std::shared_ptr<libmatroska::KaxCluster> seek_timestamp(k4a_playback_context_t *context, uint64_t timestamp_ns);
-libmatroska::KaxCuePoint *find_closest_cue(k4a_playback_context_t *context, uint64_t timestamp_ns);
-std::shared_ptr<libmatroska::KaxCluster> find_cluster(k4a_playback_context_t *context,
-                                                      uint64_t search_offset,
-                                                      uint64_t timestamp_ns);
-std::shared_ptr<libmatroska::KaxCluster> next_cluster(k4a_playback_context_t *context,
-                                                      libmatroska::KaxCluster *current_cluster,
-                                                      bool next);
+k4a_result_t populate_cluster_info(k4a_playback_context_t *context,
+                                   std::shared_ptr<libmatroska::KaxCluster> &cluster,
+                                   cluster_info_t *cluster_info);
+cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp_ns);
+cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *current, bool next);
+std::shared_ptr<libmatroska::KaxCluster> load_cluster(k4a_playback_context_t *context, cluster_info_t *cluster_info);
 std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, track_reader_t *reader, bool next);
 k4a_result_t new_capture(k4a_playback_context_t *context,
                          std::shared_ptr<read_block_t> &block,

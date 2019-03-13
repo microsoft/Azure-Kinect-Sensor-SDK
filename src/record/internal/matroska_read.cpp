@@ -113,7 +113,7 @@ bool seek_info_ready(k4a_playback_context_t *context)
 k4a_result_t parse_mkv(k4a_playback_context_t *context)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->stream == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->stream == nullptr);
 
     // Read and verify the EBML head information from the file
     auto ebmlHead = find_next<EbmlHead>(context);
@@ -201,18 +201,30 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         RETURN_IF_ERROR(read_offset(context, context->tags, context->tags_offset));
 
     RETURN_IF_ERROR(parse_recording_config(context));
+    RETURN_IF_ERROR(populate_cluster_cache(context));
 
     // Find the last timestamp in the file
     context->last_timestamp_ns = 0;
-    std::shared_ptr<KaxCluster> cluster = seek_timestamp(context, UINT64_MAX);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster == nullptr);
+    cluster_info_t *cluster_info = find_cluster(context, UINT64_MAX);
+    if (cluster_info == NULL)
+    {
+        logger_error(LOGGER_RECORD, "Failed to find end of recording.");
+        return K4A_RESULT_FAILED;
+    }
+
     KaxSimpleBlock *simple_block = NULL;
     KaxBlockGroup *block_group = NULL;
-    for (EbmlElement *e : cluster->GetElementList())
+    std::shared_ptr<KaxCluster> last_cluster = load_cluster(context, cluster_info);
+    if (last_cluster == nullptr)
+    {
+        logger_error(LOGGER_RECORD, "Failed to load end of recording.");
+        return K4A_RESULT_FAILED;
+    }
+    for (EbmlElement *e : last_cluster->GetElementList())
     {
         if (check_element_type(e, &simple_block))
         {
-            simple_block->SetParent(*cluster);
+            simple_block->SetParent(*last_cluster);
             uint64_t block_timestamp_ns = simple_block->GlobalTimecode();
             if (block_timestamp_ns > context->last_timestamp_ns)
             {
@@ -221,7 +233,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         }
         else if (check_element_type(e, &block_group))
         {
-            block_group->SetParent(*cluster);
+            block_group->SetParent(*last_cluster);
             uint64_t block_timestamp_ns = block_group->GlobalTimecode();
             if (block_timestamp_ns > context->last_timestamp_ns)
             {
@@ -230,6 +242,88 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         }
     }
     logger_trace(LOGGER_RECORD, "Found last timestamp: %llu", context->last_timestamp_ns);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+static void cluster_cache_deleter(cluster_info_t *cluster_cache)
+{
+    while (cluster_cache)
+    {
+        cluster_info_t *tmp = cluster_cache;
+        cluster_cache = cluster_cache->next;
+        delete tmp;
+    }
+}
+
+k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->cluster_cache != nullptr);
+
+    if (K4A_FAILED(seek_offset(context, context->first_cluster_offset)))
+    {
+        return K4A_RESULT_FAILED;
+    }
+    std::shared_ptr<KaxCluster> first_cluster = find_next<KaxCluster>(context, false, false);
+    if (first_cluster == nullptr)
+    {
+        return K4A_RESULT_FAILED;
+    }
+
+    context->cluster_cache = cluster_cache_t(new cluster_info_t, cluster_cache_deleter);
+    context->seek_cluster = context->cluster_cache.get();
+    if (K4A_FAILED(populate_cluster_info(context, first_cluster, context->cluster_cache.get())))
+    {
+        return K4A_RESULT_FAILED;
+    }
+
+    cluster_info_t *cluster_cache_end = context->cluster_cache.get();
+    if (context->cues)
+    {
+        uint64_t last_offset = 0;
+        uint64_t last_timestamp = 0;
+        KaxCuePoint *cue = NULL;
+        for (EbmlElement *e : context->cues->GetElementList())
+        {
+            if (check_element_type(e, &cue))
+            {
+                const KaxCueTrackPositions *positions = cue->GetSeekPosition();
+                if (positions)
+                {
+                    uint64_t timestamp = GetChild<KaxCueTime>(*cue).GetValue();
+                    uint64_t file_offset = positions->ClusterPosition();
+
+                    // Skip the first cluster because it's already in the cache
+                    if (file_offset > context->first_cluster_offset)
+                    {
+                        if (file_offset > last_offset && timestamp >= last_timestamp)
+                        {
+                            cluster_info_t *cluster_info = new cluster_info_t;
+                            // TODO: This timestamp might not actually be the start of cluster
+                            cluster_info->timestamp_ns = timestamp * context->timecode_scale;
+                            cluster_info->file_offset = file_offset;
+                            cluster_info->previous = cluster_cache_end;
+
+                            cluster_cache_end->next = cluster_info;
+                            cluster_cache_end = cluster_info;
+
+                            last_offset = file_offset;
+                            last_timestamp = timestamp;
+                        }
+                        else
+                        {
+                            logger_warn(LOGGER_RECORD, "Cluster or Cue entry is out of order.");
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        logger_warn(LOGGER_RECORD, "Recording is missing Cue entries, playback performance may be impacted.");
+    }
 
     return K4A_RESULT_SUCCEEDED;
 }
@@ -650,7 +744,7 @@ void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestam
 KaxTrackEntry *get_track_by_name(k4a_playback_context_t *context, const char *name)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
-    RETURN_VALUE_IF_ARG(NULL, context->tracks == NULL);
+    RETURN_VALUE_IF_ARG(NULL, context->tracks == nullptr);
     RETURN_VALUE_IF_ARG(NULL, name == NULL);
 
     std::string search(name);
@@ -798,7 +892,7 @@ KaxAttached *get_attachment_by_tag(k4a_playback_context_t *context, const char *
 k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->segment == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->segment == nullptr);
 
     uint64_t file_offset = context->segment->GetGlobalPosition(offset);
     try
@@ -820,185 +914,203 @@ k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset)
     }
 }
 
-std::shared_ptr<KaxCluster> seek_timestamp(k4a_playback_context_t *context, uint64_t timestamp_ns)
+// Read the cluster metadata from a Matroska element and add it to a cache entry.
+// File read pointer should already be at the start of the cluster.
+k4a_result_t populate_cluster_info(k4a_playback_context_t *context,
+                                   std::shared_ptr<KaxCluster> &cluster,
+                                   cluster_info_t *cluster_info)
 {
-    RETURN_VALUE_IF_ARG(nullptr, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->segment == nullptr);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster == nullptr);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster_info == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster_info->previous && cluster_info->previous->next != cluster_info);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster_info->next && cluster_info->next->previous != cluster_info);
 
-    uint64_t target_offset = context->first_cluster_offset;
-    KaxCuePoint *cue = find_closest_cue(context, timestamp_ns);
-    if (cue)
+    cluster_info->file_offset = context->segment->GetRelativePosition(*cluster.get());
+    cluster_info->cluster_size = cluster->HeadSize() + cluster->GetSize();
+    if (cluster_info->previous &&
+        (cluster_info->previous->file_offset + cluster_info->previous->cluster_size) == cluster_info->file_offset)
     {
-        const KaxCueTrackPositions *positions = cue->GetSeekPosition();
-        if (positions)
+        cluster_info->previous->next_known = true;
+    }
+    if (cluster_info->next &&
+        (cluster_info->file_offset + cluster_info->cluster_size) == cluster_info->next->file_offset)
+    {
+        cluster_info->next_known = true;
+    }
+
+    auto element = next_child(context, cluster.get());
+    while (element != nullptr)
+    {
+        EbmlId element_id(*element);
+        if (element_id == KaxClusterTimecode::ClassInfos.GlobalId)
         {
-            target_offset = positions->ClusterPosition();
+            KaxClusterTimecode *cluster_timecode = read_element<KaxClusterTimecode>(context, element.get());
+            cluster_info->timestamp_ns = cluster_timecode->GetValue() * context->timecode_scale;
+            break;
         }
+        else
+        {
+            skip_element(context, element.get());
+        }
+
+        element = next_child(context, cluster.get());
     }
 
-    std::shared_ptr<KaxCluster> cluster = find_cluster(context, target_offset, timestamp_ns);
-    if (!cluster)
-    {
-        logger_error(LOGGER_RECORD, "Failed to seek to timestamp %llu ns: Cluster not found", timestamp_ns);
-        return nullptr;
-    }
-
-    return cluster;
+    return K4A_RESULT_SUCCEEDED;
 }
 
-// Returns the Cue entry with the closest timestamp less than the given timestamp.
-// Returns NULL if time is before the first entry.
-KaxCuePoint *find_closest_cue(k4a_playback_context_t *context, uint64_t timestamp_ns)
+// Find the cluster containing the specified timestamp and return a pointer to its cache entry.
+// If an exact cluster is not found, the cluster with the closest timestamp will be returned.
+cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp_ns)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
+    RETURN_VALUE_IF_ARG(NULL, context->cluster_cache == nullptr);
 
-    // Only search for the cue if the parent element exists
-    if (context->cues)
+    // Find the closest cluster in the cache
+    cluster_info_t *cluster_info = context->cluster_cache.get();
+    while (cluster_info->next)
     {
-        uint64_t search_time = timestamp_ns / context->timecode_scale;
-        KaxCuePoint *last = NULL;
-        KaxCuePoint *cue = NULL;
-        for (EbmlElement *e : context->cues->GetElementList())
+        if (cluster_info->next->timestamp_ns > timestamp_ns)
         {
-            if (check_element_type(e, &cue))
-            {
-                if (GetChild<KaxCueTime>(*cue).GetValue() > search_time)
-                {
-                    return last;
-                }
-
-                last = cue;
-            }
+            break;
         }
-        return last;
+        cluster_info = cluster_info->next;
     }
 
-    return NULL;
+    cluster_info_t *next_cluster_info = next_cluster(context, cluster_info, true);
+    while (next_cluster_info)
+    {
+        if (next_cluster_info->timestamp_ns > timestamp_ns)
+        {
+            break;
+        }
+        cluster_info = next_cluster_info;
+        next_cluster_info = next_cluster(context, cluster_info, true);
+    }
+    return cluster_info;
 }
 
-// Starts at the specified search offset in the file and searches forward to find the specified timestamp
-std::shared_ptr<KaxCluster> find_cluster(k4a_playback_context_t *context, uint64_t search_offset, uint64_t timestamp_ns)
+// Finds the next or previous cluster given a current cluster. This function checks the cluster_cache first to see if
+// the next cluster is known, otherwise a cache entry will be added. If there is no next cluster, NULL is returned.
+cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *current_cluster, bool next)
 {
-    RETURN_VALUE_IF_ARG(nullptr, context == NULL);
-    RETURN_VALUE_IF_ARG(nullptr, search_offset == 0);
+    RETURN_VALUE_IF_ARG(NULL, context == NULL);
+    RETURN_VALUE_IF_ARG(NULL, context->segment == nullptr);
+    RETURN_VALUE_IF_ARG(NULL, context->cluster_cache == nullptr);
+    RETURN_VALUE_IF_ARG(NULL, current_cluster == NULL);
 
-    uint64_t search_time = timestamp_ns / context->timecode_scale;
-    if (K4A_FAILED(seek_offset(context, search_offset)))
+    if (next)
     {
-        return nullptr;
-    }
-    std::shared_ptr<KaxCluster> previous;
-    uint64_t previous_start = 0;
-    std::shared_ptr<KaxCluster> current = find_next<KaxCluster>(context, false, false);
-    while (current != nullptr)
-    {
-        auto element = next_child(context, current.get());
-        uint64_t current_start = previous_start;
-        bool cluster_start_found = false;
-
-        while (element != nullptr)
+        if (current_cluster->next_known)
         {
-            EbmlId element_id(*element);
-            if (element_id == KaxClusterTimecode::ClassInfos.GlobalId)
+            // If end of file, next will be NULL
+            return current_cluster->next;
+        }
+        else
+        {
+            __debugbreak();
+            // Read forward in file to find next cluster and fill in cache
+            if (K4A_FAILED(seek_offset(context, current_cluster->file_offset)))
             {
-                KaxClusterTimecode *cluster_timecode = read_element<KaxClusterTimecode>(context, element.get());
-                current_start = cluster_timecode->GetValue();
-                cluster_start_found = true;
-                break;
+                return NULL;
+            }
+            std::unique_ptr<KaxCluster> current_element = find_next<KaxCluster>(context, false, false);
+            if (current_element == nullptr)
+            {
+                return NULL;
+            }
+            if (K4A_FAILED(skip_element(context, current_element.get())))
+            {
+                return NULL;
+            }
+
+            std::shared_ptr<KaxCluster> next_cluster = find_next<KaxCluster>(context, true, false);
+            if (next_cluster)
+            {
+                if (current_cluster->next &&
+                    current_cluster->next->file_offset == context->segment->GetRelativePosition(*next_cluster.get()))
+                {
+                    current_cluster->next_known = true;
+                    current_cluster = current_cluster->next;
+                }
+                else
+                {
+                    cluster_info_t *next_cluster_info = new cluster_info_t;
+                    next_cluster_info->previous = current_cluster;
+                    next_cluster_info->next = current_cluster->next;
+                    current_cluster->next = next_cluster_info;
+                    current_cluster->next_known = true;
+                    if (next_cluster_info->next)
+                    {
+                        next_cluster_info->next->previous = next_cluster_info;
+                    }
+                    current_cluster = next_cluster_info;
+                }
+                if (K4A_FAILED(populate_cluster_info(context, next_cluster, current_cluster)))
+                {
+                    return NULL;
+                }
+                return current_cluster;
             }
             else
             {
-                skip_element(context, element.get());
+                // End of file reached
+                current_cluster->next_known = true;
+                return NULL;
             }
-
-            element = next_child(context, current.get());
         }
-
-        if (cluster_start_found)
+    }
+    else
+    {
+        if (current_cluster->previous)
         {
-            if (current_start > search_time)
+            if (current_cluster->previous->next_known)
             {
-                logger_trace(LOGGER_RECORD,
-                             "Found Cluster for timestamp %llu: %llu to %llu",
-                             search_time,
-                             previous_start,
-                             current_start);
-                break;
+                return current_cluster->previous;
+            }
+            else
+            {
+                // Read forward from previous cached cluster to fill in gap
+                // TODO
+                return NULL;
             }
         }
         else
         {
-            logger_warn(LOGGER_RECORD, "Recording cluster is missing a start timestamp");
+            // Beginning of file reached
+            return NULL;
         }
-        previous = std::move(current);
-        previous_start = current_start;
-        current = find_next<KaxCluster>(context, true, false);
     }
-
-    if (previous != nullptr)
-    {
-        // If the timestamp is before the first cluster, return the first cluster.
-        current = std::move(previous);
-    }
-    if (current != nullptr)
-    {
-        if (read_element<KaxCluster>(context, current.get()) == NULL)
-        {
-            logger_error(LOGGER_RECORD, "Failed to read cluster");
-            return nullptr;
-        }
-
-        uint64_t timecode = GetChild<KaxClusterTimecode>(*current).GetValue();
-        assert(context->timecode_scale <= INT64_MAX);
-        current->InitTimecode(timecode, (int64_t)context->timecode_scale);
-    }
-    return current;
 }
 
-// Finds the next or previous cluster given a current cluster.
-// Previous cluster uses the file Cues to search for a close timestamp, and then walks forward.
-std::shared_ptr<libmatroska::KaxCluster> next_cluster(k4a_playback_context_t *context,
-                                                      libmatroska::KaxCluster *current_cluster,
-                                                      bool next)
+std::shared_ptr<KaxCluster> load_cluster(k4a_playback_context_t *context, cluster_info_t *cluster_info)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
-    RETURN_VALUE_IF_ARG(nullptr, context->segment == NULL);
-    RETURN_VALUE_IF_ARG(nullptr, current_cluster == NULL);
+    RETURN_VALUE_IF_ARG(nullptr, context->cluster_cache == nullptr);
+    RETURN_VALUE_IF_ARG(nullptr, cluster_info == NULL);
 
-    uint64_t current_offset = context->segment->GetRelativePosition(*current_cluster);
-    if (next)
+    std::shared_ptr<KaxCluster> cluster = cluster_info->cluster.lock();
+    if (cluster)
     {
-        if (K4A_FAILED(seek_offset(context, current_offset)))
-        {
-            return nullptr;
-        }
-        if (K4A_FAILED(skip_element(context, current_cluster)))
-        {
-            return nullptr;
-        }
+        return cluster;
+    }
 
-        std::shared_ptr<KaxCluster> next_cluster = find_next<KaxCluster>(context, true, true);
-        if (next_cluster)
-        {
-            uint64_t timecode = GetChild<KaxClusterTimecode>(*next_cluster).GetValue();
-            assert(context->timecode_scale <= INT64_MAX);
-            next_cluster->InitTimecode(timecode, (int64_t)context->timecode_scale);
-        }
-        return next_cluster;
-    }
-    else
+    if (K4A_FAILED(seek_offset(context, cluster_info->file_offset)))
     {
-        uint64_t timestamp_ns = current_cluster->GlobalTimecode();
-        if (timestamp_ns == 0)
-        {
-            return nullptr;
-        }
-        std::shared_ptr<KaxCluster> previous_cluster = seek_timestamp(context, timestamp_ns - 1);
-        if (previous_cluster && previous_cluster->GetElementPosition() == current_cluster->GetElementPosition())
-        {
-            return nullptr;
-        }
-        return previous_cluster;
+        return nullptr;
     }
+    cluster = find_next<KaxCluster>(context, true, true);
+    if (cluster)
+    {
+        uint64_t timecode = GetChild<KaxClusterTimecode>(*cluster).GetValue();
+        assert(context->timecode_scale <= INT64_MAX);
+        cluster->InitTimecode(timecode, (int64_t)context->timecode_scale);
+
+        cluster_info->cluster = cluster;
+    }
+    return cluster;
 }
 
 // Search operates in 2 modes:
@@ -1006,10 +1118,12 @@ std::shared_ptr<libmatroska::KaxCluster> next_cluster(k4a_playback_context_t *co
 // - If there is no current_block, find the first block before or after the seek_timestamp
 std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, track_reader_t *reader, bool next)
 {
-    RETURN_VALUE_IF_ARG(NULL, context == NULL);
-    RETURN_VALUE_IF_ARG(NULL, context->seek_cluster == NULL);
-    RETURN_VALUE_IF_ARG(NULL, reader == NULL);
-    RETURN_VALUE_IF_ARG(NULL, reader->track == NULL);
+    RETURN_VALUE_IF_ARG(nullptr, context == NULL);
+    RETURN_VALUE_IF_ARG(nullptr, context->seek_cluster == nullptr);
+    RETURN_VALUE_IF_ARG(nullptr, reader == NULL);
+    RETURN_VALUE_IF_ARG(nullptr, reader->track == NULL);
+
+    k4arecord::Timer t(next ? "find_next_block" : "find_prev_block");
 
     bool timestamp_search = reader->current_block == nullptr;
     uint64_t track_number = reader->track->TrackNumber().GetValue();
@@ -1021,17 +1135,24 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
     if (timestamp_search)
     {
         // Search the whole cluster for the correct timestamp
-        next_block->index = next ? 0 : ((int)context->seek_cluster->ListSize() - 1);
-        next_block->cluster = context->seek_cluster;
+        next_block->cluster_info = context->seek_cluster;
+        next_block->cluster = load_cluster(context, context->seek_cluster);
+        if (next_block->cluster == nullptr)
+        {
+            return nullptr;
+        }
+        next_block->index = next ? 0 : ((int)next_block->cluster->ListSize() - 1);
     }
     else
     {
         // Increment/Decrement the block index and start searching from there.
         next_block->index = reader->current_block->index + (next ? 1 : -1);
+        next_block->cluster_info = reader->current_block->cluster_info;
         next_block->cluster = reader->current_block->cluster;
     }
     while (next_block->cluster != nullptr)
     {
+        k4arecord::Timer t2("Find block in cluster");
         std::vector<EbmlElement *> elements = next_block->cluster->GetElementList();
         KaxSimpleBlock *simple_block = NULL;
         KaxBlockGroup *block_group = NULL;
@@ -1075,11 +1196,16 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
         }
 
         // Block wasn't found in this cluster, go to the next one
-        std::shared_ptr<KaxCluster> found_cluster = next_cluster(context, next_block->cluster.get(), next);
-        if (found_cluster != nullptr)
+        cluster_info_t *found_cluster_info = next_cluster(context, next_block->cluster_info, next);
+        if (found_cluster_info != NULL)
         {
-            next_block->index = next ? 0 : ((int)found_cluster->ListSize() - 1);
-            next_block->cluster = found_cluster;
+            next_block->cluster_info = found_cluster_info;
+            next_block->cluster = load_cluster(context, found_cluster_info);
+            if (next_block->cluster == nullptr)
+            {
+                return nullptr;
+            }
+            next_block->index = next ? 0 : ((int)next_block->cluster->ListSize() - 1);
         }
         else
         {
@@ -1106,7 +1232,7 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, capture_handle == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block == nullptr);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block->reader == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block->block == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block->block->NumberFrames() != 1);
@@ -1116,19 +1242,20 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
         RETURN_IF_ERROR(k4a_capture_create(capture_handle));
     }
 
-    std::shared_ptr<read_block_t> *block_ptr = new std::shared_ptr<read_block_t>(block);
     DataBuffer &data_buffer = block->block->GetBuffer(0);
     std::vector<uint8_t> *buffer = new std::vector<uint8_t>(data_buffer.Buffer(),
                                                             data_buffer.Buffer() + data_buffer.Size());
 
     if (block->reader->format == K4A_IMAGE_FORMAT_DEPTH16 || block->reader->format == K4A_IMAGE_FORMAT_IR16)
     {
+        Timer t("endianness");
         // 16 bit grayscale needs to be converted from big-endian back to little-endian.
         assert(buffer->size() % sizeof(uint16_t) == 0);
         uint16_t *buffer_raw = reinterpret_cast<uint16_t *>(buffer->data());
-        for (size_t j = 0; j < buffer->size() / sizeof(uint16_t); j++)
+        size_t buffer_size = buffer->size() / sizeof(uint16_t);
+        for (size_t i = 0; i < buffer_size; i++)
         {
-            buffer_raw[j] = swap_bytes_16(buffer_raw[j]);
+            buffer_raw[i] = swap_bytes_16(buffer_raw[i]);
         }
     }
 
@@ -1189,11 +1316,6 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
     {
         k4a_image_release(image_handle);
     }
-
-    if (K4A_FAILED(result))
-    {
-        delete block_ptr;
-    }
     return result;
 }
 
@@ -1201,6 +1323,8 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
 {
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, capture_handle == NULL);
+
+    k4arecord::Timer t(next ? "get_next_capture" : "get_prev_capture");
 
     track_reader_t *blocks[] = { &context->color_track, &context->depth_track, &context->ir_track };
     std::shared_ptr<read_block_t> next_blocks[] = { nullptr, nullptr, nullptr };
@@ -1213,6 +1337,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     int enabled_tracks = 0;
     for (size_t i = 0; i < arraysize(blocks); i++)
     {
+        k4arecord::Timer t2("Find next block " + std::to_string(i));
         if (blocks[i]->track != NULL)
         {
             enabled_tracks++;
@@ -1246,6 +1371,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     int valid_blocks = 0;
     if (enabled_tracks > 0)
     {
+        k4arecord::Timer t2("Count sync window");
         for (size_t i = 0; i < arraysize(blocks); i++)
         {
             if (next_blocks[i] && next_blocks[i]->block)
@@ -1275,21 +1401,24 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
                  timestamp_start_ns / 1_ms,
                  timestamp_end_ns / 1_ms);
 
-    *capture_handle = NULL;
-    for (size_t i = 0; i < arraysize(blocks); i++)
     {
-        if (next_blocks[i] && next_blocks[i]->block)
+        k4arecord::Timer t2("Capture create");
+        *capture_handle = NULL;
+        for (size_t i = 0; i < arraysize(blocks); i++)
         {
-            blocks[i]->current_block = next_blocks[i];
-            k4a_result_t result = TRACE_CALL(new_capture(context, blocks[i]->current_block, capture_handle));
-            if (K4A_FAILED(result))
+            if (next_blocks[i] && next_blocks[i]->block)
             {
-                if (*capture_handle != NULL)
+                blocks[i]->current_block = next_blocks[i];
+                k4a_result_t result = TRACE_CALL(new_capture(context, blocks[i]->current_block, capture_handle));
+                if (K4A_FAILED(result))
                 {
-                    k4a_capture_release(*capture_handle);
-                    *capture_handle = NULL;
+                    if (*capture_handle != NULL)
+                    {
+                        k4a_capture_release(*capture_handle);
+                        *capture_handle = NULL;
+                    }
+                    return K4A_STREAM_RESULT_FAILED;
                 }
-                return K4A_STREAM_RESULT_FAILED;
             }
         }
     }
