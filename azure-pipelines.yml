@@ -3,6 +3,10 @@
 
 name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 
+variables:
+- name: 'skipComponentGovernaceDetection'
+  value: true
+
 trigger:
   batch: false
   branches:
@@ -156,9 +160,6 @@ jobs:
       symbolServerType: 'teamServices'
     condition: and(succeeded(), eq(variables['BuildGenerator'], 'Ninja'))
 
-  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-    displayName: 'Component Detection'
-
 - job: LinuxK4ABuildTest
   displayName: Linux K4A Build + Test
   pool:
@@ -263,9 +264,6 @@ jobs:
       parallel: true
       parallelCount: 8
     condition: and(succeeded(), contains(variables['CMakeLinuxTargetTriple'], 'clang'))
-
-  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-    displayName: 'Component Detection'
 
 - job: DocumentationBuild
   displayName: Documentation Build

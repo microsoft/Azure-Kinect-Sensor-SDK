@@ -57,8 +57,6 @@ private:
         ColorSetting PowerlineFrequency;
     } m_colorSettingsCache;
 
-    void CheckFirmwareVersion(k4a_version_t actualVersion, k4a_version_t minVersion, const char *type) const;
-
     // What type of change to the color control, if any, should be taken based on user input to a widget
     //
     enum class ColorControlAction

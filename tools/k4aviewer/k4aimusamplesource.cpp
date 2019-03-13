@@ -25,7 +25,7 @@ void K4AImuSampleSource::NotifyData(const k4a_imu_sample_t &data)
         return;
     }
 
-    m_sampleBuffer.InsertionItem() = data;
+    *m_sampleBuffer.InsertionItem() = data;
 
     m_sampleBuffer.EndInsert();
 }
@@ -43,6 +43,6 @@ bool K4AImuSampleSource::PopSample(k4a_imu_sample_t &out)
         return false;
     }
 
-    out = m_sampleBuffer.CurrentItem();
+    out = *m_sampleBuffer.CurrentItem();
     return true;
 }
