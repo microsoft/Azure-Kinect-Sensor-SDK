@@ -152,7 +152,7 @@ public:
         auto delta = std::chrono::high_resolution_clock::now() - start;
         if (delta.count() > 100000)
         {
-            // std::cout << "Timer(" << name << "): " << ((float)delta.count() / 1000000.0f) << " ms" << std::endl;
+            std::cout << "Timer(" << name << "): " << ((float)delta.count() / 1000000.0f) << " ms" << std::endl;
         }
     }
 

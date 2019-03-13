@@ -297,10 +297,16 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
                     // Skip the first cluster because it's already in the cache
                     if (file_offset > context->first_cluster_offset)
                     {
-                        if (file_offset > last_offset && timestamp >= last_timestamp)
+                        if (file_offset == last_offset)
+                        {
+                            // There is more than one Cue entry for this cluster, skip it.
+                            continue;
+                        }
+                        else if (file_offset > last_offset && timestamp >= last_timestamp)
                         {
                             cluster_info_t *cluster_info = new cluster_info_t;
-                            // TODO: This timestamp might not actually be the start of cluster
+                            // This timestamp might not actually be the start of cluster.
+                            // The start timestamp is not known until populate_cluster_info is called.
                             cluster_info->timestamp_ns = timestamp * context->timecode_scale;
                             cluster_info->file_offset = file_offset;
                             cluster_info->previous = cluster_cache_end;
@@ -894,6 +900,7 @@ k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset)
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->segment == nullptr);
 
+    context->seek_count++;
     uint64_t file_offset = context->segment->GetGlobalPosition(offset);
     try
     {
@@ -926,6 +933,12 @@ k4a_result_t populate_cluster_info(k4a_playback_context_t *context,
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster_info == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster_info->previous && cluster_info->previous->next != cluster_info);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster_info->next && cluster_info->next->previous != cluster_info);
+
+    if (cluster_info->cluster_size > 0)
+    {
+        // If the cluster size is already set, then we have nothing to do.
+        return K4A_RESULT_SUCCEEDED;
+    }
 
     cluster_info->file_offset = context->segment->GetRelativePosition(*cluster.get());
     cluster_info->cluster_size = cluster->HeadSize() + cluster->GetSize();
@@ -1010,14 +1023,17 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
         }
         else
         {
-            __debugbreak();
             // Read forward in file to find next cluster and fill in cache
             if (K4A_FAILED(seek_offset(context, current_cluster->file_offset)))
             {
                 return NULL;
             }
-            std::unique_ptr<KaxCluster> current_element = find_next<KaxCluster>(context, false, false);
+            std::shared_ptr<KaxCluster> current_element = find_next<KaxCluster>(context, false, false);
             if (current_element == nullptr)
+            {
+                return NULL;
+            }
+            if (K4A_FAILED(populate_cluster_info(context, current_element, current_cluster)))
             {
                 return NULL;
             }
@@ -1073,8 +1089,12 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
             else
             {
                 // Read forward from previous cached cluster to fill in gap
-                // TODO
-                return NULL;
+                cluster_info_t *next_cluster_info = next_cluster(context, current_cluster->previous, true);
+                while (next_cluster_info && next_cluster_info != current_cluster)
+                {
+                    next_cluster_info = next_cluster(context, next_cluster_info, true);
+                }
+                return current_cluster->previous;
             }
         }
         else
@@ -1094,9 +1114,13 @@ std::shared_ptr<KaxCluster> load_cluster(k4a_playback_context_t *context, cluste
     std::shared_ptr<KaxCluster> cluster = cluster_info->cluster.lock();
     if (cluster)
     {
+        context->cache_hits++;
         return cluster;
     }
 
+    k4arecord::Timer t("load_cluster");
+
+    context->load_count++;
     if (K4A_FAILED(seek_offset(context, cluster_info->file_offset)))
     {
         return nullptr;
@@ -1122,8 +1146,6 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
     RETURN_VALUE_IF_ARG(nullptr, context->seek_cluster == nullptr);
     RETURN_VALUE_IF_ARG(nullptr, reader == NULL);
     RETURN_VALUE_IF_ARG(nullptr, reader->track == NULL);
-
-    k4arecord::Timer t(next ? "find_next_block" : "find_prev_block");
 
     bool timestamp_search = reader->current_block == nullptr;
     uint64_t track_number = reader->track->TrackNumber().GetValue();
@@ -1152,7 +1174,6 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
     }
     while (next_block->cluster != nullptr)
     {
-        k4arecord::Timer t2("Find block in cluster");
         std::vector<EbmlElement *> elements = next_block->cluster->GetElementList();
         KaxSimpleBlock *simple_block = NULL;
         KaxBlockGroup *block_group = NULL;
@@ -1248,7 +1269,6 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
 
     if (block->reader->format == K4A_IMAGE_FORMAT_DEPTH16 || block->reader->format == K4A_IMAGE_FORMAT_IR16)
     {
-        Timer t("endianness");
         // 16 bit grayscale needs to be converted from big-endian back to little-endian.
         assert(buffer->size() % sizeof(uint16_t) == 0);
         uint16_t *buffer_raw = reinterpret_cast<uint16_t *>(buffer->data());
@@ -1337,7 +1357,6 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     int enabled_tracks = 0;
     for (size_t i = 0; i < arraysize(blocks); i++)
     {
-        k4arecord::Timer t2("Find next block " + std::to_string(i));
         if (blocks[i]->track != NULL)
         {
             enabled_tracks++;
@@ -1371,7 +1390,6 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     int valid_blocks = 0;
     if (enabled_tracks > 0)
     {
-        k4arecord::Timer t2("Count sync window");
         for (size_t i = 0; i < arraysize(blocks); i++)
         {
             if (next_blocks[i] && next_blocks[i]->block)

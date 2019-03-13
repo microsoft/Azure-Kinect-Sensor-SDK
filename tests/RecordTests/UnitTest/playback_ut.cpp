@@ -142,7 +142,6 @@ TEST_F(playback_ut, open_large_file)
         timestamps[1] += timestamp_delta;
         timestamps[2] += timestamp_delta;
     }
-    __debugbreak();
     stream_result = k4a_playback_get_next_capture(handle, &capture);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
     ASSERT_EQ(capture, (k4a_capture_t)NULL);
@@ -554,7 +553,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
 TEST_F(playback_ut, DISABLED_open_test_file)
 {
     k4a_playback_t handle;
-    k4a_result_t result = k4a_playback_open("test.mkv", &handle);
+    k4a_result_t result = k4a_playback_open("F:/test.mkv", &handle);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
     uint8_t buffer[8096];
@@ -574,16 +573,16 @@ TEST_F(playback_ut, DISABLED_open_test_file)
     ASSERT_EQ(playback_result, K4A_STREAM_RESULT_EOF);
     ASSERT_EQ(capture, nullptr);
 
-    std::cout << "Next capture x10" << std::endl;
-    for (int i = 0; i < 100; i++)
+    std::cout << "Next capture x1000" << std::endl;
+    for (int i = 0; i < 1000; i++)
     {
         playback_result = k4a_playback_get_next_capture(handle, &capture);
         ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_NE(capture, nullptr);
         k4a_capture_release(capture);
     }
-    std::cout << "Previous capture x10" << std::endl;
-    for (int i = 0; i < 99; i++)
+    std::cout << "Previous capture x1000" << std::endl;
+    for (int i = 0; i < 999; i++)
     {
         playback_result = k4a_playback_get_previous_capture(handle, &capture);
         ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);

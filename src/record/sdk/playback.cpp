@@ -318,6 +318,10 @@ void k4a_playback_close(const k4a_playback_t playback_handle)
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     if (context != NULL)
     {
+        std::cout << "File stats:" << std::endl;
+        std::cout << "  Seek count: " << context->seek_count << std::endl;
+        std::cout << "  Load count: " << context->load_count << std::endl;
+        std::cout << "  Cache hits: " << context->cache_hits << std::endl;
         try
         {
             context->ebml_file->close();

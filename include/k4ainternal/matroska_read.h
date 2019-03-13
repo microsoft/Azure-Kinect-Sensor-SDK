@@ -14,6 +14,7 @@ namespace k4arecord
 {
 typedef struct _cluster_info_t
 {
+    // If cluster size is 0, the timestamp is not guaranteed to be the start
     uint64_t timestamp_ns = 0;
     uint64_t file_offset = 0;
     uint64_t cluster_size = 0; // Set to 0 until cluster is loaded
@@ -91,7 +92,10 @@ typedef struct _k4a_playback_context_t
     uint64_t attachments_offset;
     uint64_t tags_offset;
 
-    uint64_t last_timestamp_ns, read_count;
+    uint64_t last_timestamp_ns;
+
+    // Stats
+    uint64_t seek_count, load_count, cache_hits;
 } k4a_playback_context_t;
 
 K4A_DECLARE_CONTEXT(k4a_playback_t, k4a_playback_context_t);
