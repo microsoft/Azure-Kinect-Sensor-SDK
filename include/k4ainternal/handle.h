@@ -72,10 +72,11 @@ extern "C" {
     }
 
 #define K4A_DECLARE_CPP_CONTEXT(_public_handle_name_, _internal_context_type_)                                         \
-    static const char _handle_##_public_handle_name_[] = #_internal_context_type_;                                     \
+    extern char _handle_##_public_handle_name_[];                                                                      \
+    KSELECTANY char _handle_##_public_handle_name_[] = #_internal_context_type_;                                       \
     typedef struct                                                                                                     \
     {                                                                                                                  \
-        const char *handleType;                                                                                        \
+        char *handleType;                                                                                              \
         _internal_context_type_ context;                                                                               \
     } _public_handle_name_##_wrapper;                                                                                  \
                                                                                                                        \
@@ -116,7 +117,6 @@ extern "C" {
         ((_public_handle_name_##_wrapper *)handle)->handleType = NULL;                                                 \
         delete (_public_handle_name_##_wrapper *)handle;                                                               \
     }
-
 
 /*
  * Example:
