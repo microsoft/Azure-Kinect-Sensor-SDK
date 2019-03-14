@@ -6,6 +6,29 @@
 
 K4A_DECLARE_HANDLE(foo_t);
 
+static int g_dtor_called = 0;
+
+#define MAGIC_INIT_VALUE 0x10FE50C0
+class cpp_class_for_ctor_dtor_test
+{
+public:
+    cpp_class_for_ctor_dtor_test() : m_ctor(MAGIC_INIT_VALUE)
+    {
+        g_dtor_called = 0;
+    };
+    ~cpp_class_for_ctor_dtor_test()
+    {
+        g_dtor_called = 1;
+    };
+    int is_initialized()
+    {
+        return (m_ctor == MAGIC_INIT_VALUE);
+    }
+
+private:
+    int m_ctor;
+};
+
 typedef struct
 {
     int my;
@@ -16,6 +39,7 @@ typedef struct
 {
     int my;
     int data;
+    cpp_class_for_ctor_dtor_test ctor_dtor_obj;
 } context2_t;
 
 // Declare a handle for the context
@@ -34,6 +58,22 @@ TEST(handle_ut, create_free)
     EXPECT_NE((foo_t)NULL, foo);
 
     foo_t_destroy(foo);
+}
+
+TEST(handle_ut, create_free_for_cpp)
+{
+    bar_t bar = NULL;
+    context2_t *context = bar_t_create(&bar);
+
+    EXPECT_NE((context2_t *)NULL, context);
+    EXPECT_NE((bar_t)NULL, bar);
+
+    EXPECT_NE(context->ctor_dtor_obj.is_initialized(), 0);
+    EXPECT_EQ(g_dtor_called, 0);
+
+    bar_t_destroy(bar);
+
+    EXPECT_NE(g_dtor_called, 0);
 }
 
 TEST(handle_ut, deref_correct)
@@ -88,6 +128,8 @@ TEST(handle_ut, K4A_DECLARE_CONTEXT_in_shared_header)
 
     EXPECT_EQ(context, dual_defined_t_get_context(dual));
     EXPECT_NE(0, is_handle_in_2nd_file_valid(dual));
+
+    EXPECT_NE(0, is_handle_in_c_file_invalid(dual));
 
     dual_defined_t_destroy(dual);
 }

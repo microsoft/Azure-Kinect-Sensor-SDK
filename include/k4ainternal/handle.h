@@ -8,6 +8,7 @@
 #define K4A_INTERNAL_HANDLE_H
 
 #include <k4ainternal/logging.h>
+#include <k4ainternal/common.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -22,20 +23,38 @@ extern "C" {
 #define KSELECTANY __attribute__((weak))
 #endif
 
+#ifdef __cplusplus
+#define ALLOCATE(type) ::new type() /* init to zero */
+#define DESTROY(ptr) delete ptr
+#define PRIV_HANDLE_TYPE(type) _handle_##type##_cpp
+#define PUB_HANDLE_TYPE(type) type##_wrapper_##_cpp
+#define STR_INTERNAL_CONTEXT_TYPE(type) STRINGIFY(type##_cpp)
+#else
+#define ALLOCATE(type) calloc(sizeof(type), 1) /*Zero initialized*/
+#define DESTROY(ptr) free(ptr)
+#define PRIV_HANDLE_TYPE(type) _handle_##type##_c
+#define PUB_HANDLE_TYPE(type) type##_wrapper_##_c
+#define STR_INTERNAL_CONTEXT_TYPE(type) STRINGIFY(type##_c)
+#endif
+
+/* K4A_DECLARE_CONTEXT creates type matched C functions to create, destroy and get the context. The create and destroy
+functions will ensure matched CPP constructor and destructor are called. To protext against the create function being
+used with CPP and destroy being used with C, or vise-vesa, the types get c or cpp appended to them. */
 #define K4A_DECLARE_CONTEXT(_public_handle_name_, _internal_context_type_)                                             \
-    extern char _handle_##_public_handle_name_[];                                                                      \
-    KSELECTANY char _handle_##_public_handle_name_[] = #_internal_context_type_;                                       \
+    extern char PRIV_HANDLE_TYPE(_public_handle_name_)[];                                                              \
+    KSELECTANY char PRIV_HANDLE_TYPE(_public_handle_name_)[] = STR_INTERNAL_CONTEXT_TYPE(_internal_context_type_);     \
     typedef struct                                                                                                     \
     {                                                                                                                  \
         char *handleType;                                                                                              \
-        _internal_context_type_ context;                                                                               \
-    } _public_handle_name_##_wrapper;                                                                                  \
+        _internal_context_type_ *context;                                                                              \
+    } PUB_HANDLE_TYPE(_public_handle_name_);                                                                           \
                                                                                                                        \
     /* Define "context_t* handle_t_create(handle_t* handle)" function */                                               \
     static inline _internal_context_type_ *_public_handle_name_##_create(_public_handle_name_ *handle)                 \
     {                                                                                                                  \
-        _public_handle_name_##_wrapper *pContextWrapper = (_public_handle_name_##_wrapper *)malloc(                    \
-            sizeof(_public_handle_name_##_wrapper));                                                                   \
+        PUB_HANDLE_TYPE(_public_handle_name_) * pContextWrapper;                                                       \
+        pContextWrapper = (PUB_HANDLE_TYPE(_public_handle_name_) *)malloc(                                             \
+            sizeof(PUB_HANDLE_TYPE(_public_handle_name_)));                                                            \
         if (pContextWrapper == NULL)                                                                                   \
         {                                                                                                              \
             IF_LOGGER(logger_error(LOGGER_K4A, "Failed to allocate " #_public_handle_name_);) return NULL;             \
@@ -44,22 +63,31 @@ extern "C" {
         {                                                                                                              \
             IF_LOGGER(logger_trace(LOGGER_K4A, "Created   " #_public_handle_name_ " %p", pContextWrapper);)            \
         }                                                                                                              \
-        memset(pContextWrapper, 0, sizeof(_public_handle_name_##_wrapper));                                            \
-        pContextWrapper->handleType = _handle_##_public_handle_name_;                                                  \
+        pContextWrapper->context = ALLOCATE(_internal_context_type_);                                                  \
+        if (pContextWrapper->context == NULL)                                                                          \
+        {                                                                                                              \
+            DESTROY(pContextWrapper);                                                                                  \
+            IF_LOGGER(logger_error(LOGGER_K4A, "Failed to allocate " #_internal_context_type_);) return NULL;          \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            IF_LOGGER(logger_trace(LOGGER_K4A, "Created   " #_internal_context_type_ " %p", pContextWrapper);)         \
+        }                                                                                                              \
+        pContextWrapper->handleType = PRIV_HANDLE_TYPE(_public_handle_name_);                                          \
         *handle = (_public_handle_name_)pContextWrapper;                                                               \
-        return &pContextWrapper->context;                                                                              \
+        return pContextWrapper->context;                                                                               \
     }                                                                                                                  \
                                                                                                                        \
     /* Define "context_t* handle_t_get_context(handle_t handle)" function */                                           \
     static inline _internal_context_type_ *_public_handle_name_##_get_context(_public_handle_name_ handle)             \
     {                                                                                                                  \
         if ((handle == NULL) ||                                                                                        \
-            ((_public_handle_name_##_wrapper *)handle)->handleType != _handle_##_public_handle_name_)                  \
+            ((PUB_HANDLE_TYPE(_public_handle_name_) *)handle)->handleType != PRIV_HANDLE_TYPE(_public_handle_name_))   \
         {                                                                                                              \
             IF_LOGGER(logger_error(LOGGER_K4A, "Invalid " #_public_handle_name_ " %p", handle);)                       \
             return NULL;                                                                                               \
         }                                                                                                              \
-        return &((_public_handle_name_##_wrapper *)handle)->context;                                                   \
+        return ((PUB_HANDLE_TYPE(_public_handle_name_) *)handle)->context;                                             \
     }                                                                                                                  \
                                                                                                                        \
     /* Define "void handle_t_destroy(handle_t handle) function */                                                      \
@@ -67,7 +95,8 @@ extern "C" {
     {                                                                                                                  \
         (void)_public_handle_name_##_get_context(handle);                                                              \
         IF_LOGGER(logger_trace(LOGGER_K4A, "Destroyed " #_public_handle_name_ " %p", handle);)                         \
-        ((_public_handle_name_##_wrapper *)handle)->handleType = NULL;                                                 \
+        ((PUB_HANDLE_TYPE(_public_handle_name_) *)handle)->handleType = NULL;                                          \
+        DESTROY(((PUB_HANDLE_TYPE(_public_handle_name_) *)handle)->context);                                           \
         free(handle);                                                                                                  \
     }
 
