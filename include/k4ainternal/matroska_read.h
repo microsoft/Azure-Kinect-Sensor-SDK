@@ -14,10 +14,12 @@ namespace k4arecord
 {
 typedef struct _cluster_info_t
 {
-    // If cluster size is 0, the timestamp is not guaranteed to be the start
+    // The cluster size will be 0 until the actual cluster has been read from disk.
+    // If cluster size is 0, the timestamp is not guaranteed to be the start of the cluster
+    // populate_cluster_info() will update the cluster_size and timestamp to the real values.
     uint64_t timestamp_ns = 0;
     uint64_t file_offset = 0;
-    uint64_t cluster_size = 0; // Set to 0 until cluster is loaded
+    uint64_t cluster_size = 0;
     std::weak_ptr<libmatroska::KaxCluster> cluster;
 
     bool next_known = false;
@@ -25,6 +27,9 @@ typedef struct _cluster_info_t
     struct _cluster_info_t *previous = NULL;
 } cluster_info_t;
 
+// The cluster cache is a sparse linked-list index that may contain gaps until real data has been from disk.
+// The list is initialized with metadata from the Cues block, which is used as a hint for seeking in the file.
+// Once it is known that no gap is present between indexed clusters, next_known is set to true.
 typedef std::unique_ptr<cluster_info_t, void (*)(cluster_info_t *)> cluster_cache_t;
 
 typedef struct _read_block_t
@@ -74,8 +79,6 @@ typedef struct _k4a_playback_context_t
     uint64_t seek_timestamp_ns;
     cluster_info_t *seek_cluster;
 
-    // The cluster cache is initialized with metadata from the Cues block, and may contain gaps.
-    // Once it is known that no gap is present between clusters, next_known is set to true.
     cluster_cache_t cluster_cache;
 
     track_reader_t color_track;

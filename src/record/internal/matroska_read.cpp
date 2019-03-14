@@ -261,6 +261,7 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->cluster_cache != nullptr);
 
+    // Read the first cluster to use as the cache root.
     if (K4A_FAILED(seek_offset(context, context->first_cluster_offset)))
     {
         return K4A_RESULT_FAILED;
@@ -278,11 +279,12 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
         return K4A_RESULT_FAILED;
     }
 
+    // Populate the reset of the cache with the Cue data stored in the file.
     cluster_info_t *cluster_cache_end = context->cluster_cache.get();
     if (context->cues)
     {
-        uint64_t last_offset = 0;
-        uint64_t last_timestamp = 0;
+        uint64_t last_offset = context->first_cluster_offset;
+        uint64_t last_timestamp = context->seek_cluster->timestamp_ns;
         KaxCuePoint *cue = NULL;
         for (EbmlElement *e : context->cues->GetElementList())
         {
@@ -291,36 +293,32 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
                 const KaxCueTrackPositions *positions = cue->GetSeekPosition();
                 if (positions)
                 {
-                    uint64_t timestamp = GetChild<KaxCueTime>(*cue).GetValue();
+                    uint64_t timestamp = GetChild<KaxCueTime>(*cue).GetValue() * context->timecode_scale;
                     uint64_t file_offset = positions->ClusterPosition();
 
-                    // Skip the first cluster because it's already in the cache
-                    if (file_offset > context->first_cluster_offset)
+                    if (file_offset == last_offset)
                     {
-                        if (file_offset == last_offset)
-                        {
-                            // There is more than one Cue entry for this cluster, skip it.
-                            continue;
-                        }
-                        else if (file_offset > last_offset && timestamp >= last_timestamp)
-                        {
-                            cluster_info_t *cluster_info = new cluster_info_t;
-                            // This timestamp might not actually be the start of cluster.
-                            // The start timestamp is not known until populate_cluster_info is called.
-                            cluster_info->timestamp_ns = timestamp * context->timecode_scale;
-                            cluster_info->file_offset = file_offset;
-                            cluster_info->previous = cluster_cache_end;
+                        // This cluster is already in the cache, skip it.
+                        continue;
+                    }
+                    else if (file_offset > last_offset && timestamp >= last_timestamp)
+                    {
+                        cluster_info_t *cluster_info = new cluster_info_t;
+                        // This timestamp might not actually be the start of the cluster.
+                        // The start timestamp is not known until populate_cluster_info is called.
+                        cluster_info->timestamp_ns = timestamp;
+                        cluster_info->file_offset = file_offset;
+                        cluster_info->previous = cluster_cache_end;
 
-                            cluster_cache_end->next = cluster_info;
-                            cluster_cache_end = cluster_info;
+                        cluster_cache_end->next = cluster_info;
+                        cluster_cache_end = cluster_info;
 
-                            last_offset = file_offset;
-                            last_timestamp = timestamp;
-                        }
-                        else
-                        {
-                            logger_warn(LOGGER_RECORD, "Cluster or Cue entry is out of order.");
-                        }
+                        last_offset = file_offset;
+                        last_timestamp = timestamp;
+                    }
+                    else
+                    {
+                        logger_warn(LOGGER_RECORD, "Cluster or Cue entry is out of order.");
                     }
                 }
             }
@@ -942,6 +940,8 @@ k4a_result_t populate_cluster_info(k4a_playback_context_t *context,
 
     cluster_info->file_offset = context->segment->GetRelativePosition(*cluster.get());
     cluster_info->cluster_size = cluster->HeadSize() + cluster->GetSize();
+
+    // Check the previous and next cluster entry to see if we can link them together without a gap.
     if (cluster_info->previous &&
         (cluster_info->previous->file_offset + cluster_info->previous->cluster_size) == cluster_info->file_offset)
     {
@@ -953,6 +953,7 @@ k4a_result_t populate_cluster_info(k4a_playback_context_t *context,
         cluster_info->next_known = true;
     }
 
+    // Update the timestamp to the real cluster start read from the file.
     auto element = next_child(context, cluster.get());
     while (element != nullptr)
     {
@@ -992,6 +993,7 @@ cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp
         cluster_info = cluster_info->next;
     }
 
+    // Make sure there are no gaps in the cache and ensure this really is the closest cluster.
     cluster_info_t *next_cluster_info = next_cluster(context, cluster_info, true);
     while (next_cluster_info)
     {
@@ -1037,6 +1039,12 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
             {
                 return NULL;
             }
+            if (current_cluster->next_known)
+            {
+                // If populate_cluster_info() just connected the next entry, we can exit early.
+                return current_cluster->next;
+            }
+
             if (K4A_FAILED(skip_element(context, current_element.get())))
             {
                 return NULL;
@@ -1048,11 +1056,13 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
                 if (current_cluster->next &&
                     current_cluster->next->file_offset == context->segment->GetRelativePosition(*next_cluster.get()))
                 {
+                    // If there is a non-cluster element between these entries, they may not get connected otherwise.
                     current_cluster->next_known = true;
                     current_cluster = current_cluster->next;
                 }
                 else
                 {
+                    // Add a new entry to the cache for the cluster we just found.
                     cluster_info_t *next_cluster_info = new cluster_info_t;
                     next_cluster_info->previous = current_cluster;
                     next_cluster_info->next = current_cluster->next;
@@ -1105,6 +1115,9 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
     }
 }
 
+// Load the actual block data for a cluster off the disk.
+// If the cluster is already in memory, a shared_ptr to it will be returned.
+// This should never fail unless there is a file IO error.
 std::shared_ptr<KaxCluster> load_cluster(k4a_playback_context_t *context, cluster_info_t *cluster_info)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
@@ -1141,7 +1154,7 @@ std::shared_ptr<KaxCluster> load_cluster(k4a_playback_context_t *context, cluste
 std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, track_reader_t *reader, bool next)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
-    RETURN_VALUE_IF_ARG(nullptr, context->seek_cluster == nullptr);
+    RETURN_VALUE_IF_ARG(nullptr, context->seek_cluster == NULL);
     RETURN_VALUE_IF_ARG(nullptr, reader == NULL);
     RETURN_VALUE_IF_ARG(nullptr, reader->track == NULL);
 
@@ -1159,6 +1172,7 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
         next_block->cluster = load_cluster(context, context->seek_cluster);
         if (next_block->cluster == nullptr)
         {
+            logger_error(LOGGER_RECORD, "Failed to load data cluster from disk.");
             return nullptr;
         }
         next_block->index = next ? 0 : ((int)next_block->cluster->ListSize() - 1);
@@ -1222,6 +1236,7 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
             next_block->cluster = load_cluster(context, found_cluster_info);
             if (next_block->cluster == nullptr)
             {
+                logger_error(LOGGER_RECORD, "Failed to load next data cluster from disk.");
                 return nullptr;
             }
             next_block->index = next ? 0 : ((int)next_block->cluster->ListSize() - 1);
@@ -1333,6 +1348,10 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
     if (image_handle != NULL)
     {
         k4a_image_release(image_handle);
+    }
+    if (K4A_FAILED(result))
+    {
+        delete buffer;
     }
     return result;
 }
