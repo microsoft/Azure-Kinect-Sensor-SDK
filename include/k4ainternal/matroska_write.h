@@ -70,6 +70,8 @@ typedef struct _k4a_record_context_t
     libmatroska::KaxTrackEntry *ir_track;
     libmatroska::KaxTrackEntry *imu_track;
 
+    std::unordered_map<std::string, libmatroska::KaxTrackEntry *> custom_tracks;
+
     // std::list and std::vector can't be memset to 0, so we need to use a pointer.
     std::unique_ptr<std::list<cluster_t *>> pending_clusters;
     LOCK_HANDLE pending_cluster_lock; // Locks last_written_timestamp, most_recent_timestamp, and pending_clusters
@@ -82,7 +84,7 @@ typedef struct _k4a_record_context_t
     bool header_written, first_cluster_written;
 } k4a_record_context_t;
 
-K4A_DECLARE_CONTEXT(k4a_record_t, k4a_record_context_t);
+K4A_DECLARE_CONTEXT_CPP(k4a_record_t, k4a_record_context_t);
 
 enum TagTargetType
 {

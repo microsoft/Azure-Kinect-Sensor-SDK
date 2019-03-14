@@ -7,6 +7,7 @@
 
 #include <k4a/k4a.h>
 #include <k4arecord/record.h>
+#include <k4aexperiment/record_experiment.h>
 #include <k4ainternal/matroska_write.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/common.h>
@@ -365,6 +366,38 @@ k4a_result_t k4a_record_add_tag(const k4a_record_t recording_handle, const char 
     return K4A_RESULT_SUCCEEDED;
 }
 
+k4a_result_t k4a_record_add_custom_track_tag(const k4a_record_t recording_handle,
+                                             const char *custom_track_name,
+                                             const char *tag_name,
+                                             const char* tag_value)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, custom_track_name == NULL || tag_name == NULL || tag_value == NULL);
+
+    k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    if (context->header_written)
+    {
+        logger_error(LOGGER_RECORD, "Tags must be added before the recording header is written.");
+        return K4A_RESULT_FAILED;
+    }
+
+    auto itr = context->custom_tracks.find(custom_track_name);
+    if (itr == context->custom_tracks.end())
+    {
+        logger_error(LOGGER_RECORD, "The custom track is not created.");
+        return K4A_RESULT_FAILED;
+    }
+
+    KaxTrackEntry *track = itr->second;
+    uint64_t track_uid = GetChild<KaxTrackUID>(*track).GetValue();
+
+    add_tag(context, tag_name, tag_value, TAG_TARGET_TYPE_TRACK, track_uid);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
@@ -388,6 +421,60 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
 
     uint64_t track_uid = GetChild<KaxTrackUID>(*context->imu_track).GetValue();
     add_tag(context, "K4A_IMU_MODE", "ON", TAG_TARGET_TYPE_TRACK, track_uid);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t k4a_record_add_custom_track(const k4a_record_t recording_handle,
+                                         const char *track_name,
+                                         k4a_record_track_type_t type,
+                                         const char *codec,
+                                         const uint8_t *codec_private,
+                                         size_t codec_private_size,
+                                         const k4a_record_video_info_t *video_info)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL || codec == NULL);
+
+    k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    if (context->header_written)
+    {
+        logger_error(LOGGER_RECORD, "The custom track must be added before the recording header is written.");
+        return K4A_RESULT_FAILED;
+    }
+
+    auto itr = context->custom_tracks.find("Test");
+    if (itr != context->custom_tracks.end())
+    {
+        logger_error(LOGGER_RECORD, "The custom track has already been added to this recording.");
+        return K4A_RESULT_FAILED;
+    }
+
+    track_type mkv_track_type;
+    switch (type)
+    {
+    case K4A_RECORD_TRACK_TYPE_VIDEO:
+        mkv_track_type = track_video;
+        break;
+    case K4A_RECORD_TRACK_TYPE_AUDIO:
+        mkv_track_type = track_audio;
+        break;
+    case K4A_RECORD_TRACK_TYPE_SUBTITLE:
+        mkv_track_type = track_subtitle;
+        break;
+    default:
+        logger_error(LOGGER_RECORD, "The custom track type is not supported.");
+        return K4A_RESULT_FAILED;
+    }
+
+    KaxTrackEntry* track = add_track(context, track_name, mkv_track_type, codec, codec_private, codec_private_size);
+    if (type == K4A_RECORD_TRACK_TYPE_VIDEO && video_info != nullptr)
+    {
+        set_track_info_video(track, video_info->width, video_info->height, video_info->frame_rate);
+    }
+    context->custom_tracks.insert(std::pair<std::string, KaxTrackEntry*>(std::string(track_name), track));
 
     return K4A_RESULT_SUCCEEDED;
 }
@@ -575,6 +662,47 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
     }
 
     return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
+                                                const char *track_name,
+                                                uint64_t timestamp_ns,
+                                                uint8_t *buffer,
+                                                uint32_t buffer_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+
+    k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    if (!context->header_written)
+    {
+        logger_error(LOGGER_RECORD, "The recording header needs to be written before any captures.");
+        return K4A_RESULT_FAILED;
+    }
+
+    auto itr = context->custom_tracks.find(track_name);
+    if (itr == context->custom_tracks.end())
+    {
+        logger_error(LOGGER_RECORD, "The custom track is not created.");
+        return K4A_RESULT_FAILED;
+    }
+
+    KaxTrackEntry *track = itr->second;
+
+    // Create a copy of the image buffer for writing to file.
+    assert(buffer_size <= UINT32_MAX);
+    DataBuffer *data_buffer = new DataBuffer(buffer, (uint32)buffer_size, NULL, true);
+
+    k4a_result_t result = TRACE_CALL(write_track_data(context, track, timestamp_ns, data_buffer));
+    if (K4A_FAILED(result))
+    {
+        // Write as many of the image buffers as possible, even if some fail due to timestamp.
+        data_buffer->FreeBuffer(*data_buffer);
+        delete data_buffer;
+    }
+
+    return result;
 }
 
 k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
