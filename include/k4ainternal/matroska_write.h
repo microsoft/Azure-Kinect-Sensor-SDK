@@ -10,6 +10,8 @@
 
 #include <k4ainternal/matroska_common.h>
 #include <set>
+#include <condition_variable>
+#include <mutex>
 
 namespace k4arecord
 {
@@ -72,12 +74,13 @@ typedef struct _k4a_record_context_t
 
     // std::list can't be memset to 0, so we need to use a pointer.
     std::unique_ptr<std::list<cluster_t *>> pending_clusters;
-    LOCK_HANDLE pending_cluster_lock; // Locks last_written_timestamp, most_recent_timestamp, and pending_clusters
+    std::mutex pending_cluster_lock; // Locks last_written_timestamp, most_recent_timestamp, and pending_clusters
 
     bool writer_stopping;
-    THREAD_HANDLE writer_thread;
-    COND_HANDLE writer_notify;
-    LOCK_HANDLE writer_lock;
+    std::thread writer_thread;
+    // std::condition_variable constructor may through, so wrap this in a pointer.
+    std::unique_ptr<std::condition_variable> writer_notify;
+    std::mutex writer_lock;
 
     bool header_written, first_cluster_written;
 } k4a_record_context_t;
@@ -117,7 +120,7 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
 
 k4a_result_t start_matroska_writer_thread(k4a_record_context_t *context);
 
-k4a_result_t stop_matroska_writer_thread(k4a_record_context_t *context);
+void stop_matroska_writer_thread(k4a_record_context_t *context);
 
 libmatroska::KaxTag *add_tag(k4a_record_context_t *context,
                              const char *name,
