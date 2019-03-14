@@ -75,7 +75,7 @@ typedef struct _k4a_playback_context_t
     uint64_t last_timestamp_ns;
 } k4a_playback_context_t;
 
-K4A_DECLARE_CONTEXT(k4a_playback_t, k4a_playback_context_t);
+K4A_DECLARE_CPP_CONTEXT(k4a_playback_t, k4a_playback_context_t);
 
 std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlElement *parent);
 k4a_result_t skip_element(k4a_playback_context_t *context, EbmlElement *element);

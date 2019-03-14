@@ -71,6 +71,53 @@ extern "C" {
         free(handle);                                                                                                  \
     }
 
+#define K4A_DECLARE_CPP_CONTEXT(_public_handle_name_, _internal_context_type_)                                         \
+    static const char _handle_##_public_handle_name_[] = #_internal_context_type_;                                     \
+    typedef struct                                                                                                     \
+    {                                                                                                                  \
+        const char *handleType;                                                                                        \
+        _internal_context_type_ context;                                                                               \
+    } _public_handle_name_##_wrapper;                                                                                  \
+                                                                                                                       \
+    /* Define "context_t* handle_t_create(handle_t* handle)" function */                                               \
+    static inline _internal_context_type_ *_public_handle_name_##_create(_public_handle_name_ *handle)                 \
+    {                                                                                                                  \
+        _public_handle_name_##_wrapper *pContextWrapper = new (std::nothrow) _public_handle_name_##_wrapper;           \
+        if (pContextWrapper == NULL)                                                                                   \
+        {                                                                                                              \
+            IF_LOGGER(logger_error(LOGGER_K4A, "Failed to allocate " #_public_handle_name_);) return NULL;             \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            IF_LOGGER(logger_trace(LOGGER_K4A, "Created   " #_public_handle_name_ " %p", pContextWrapper);)            \
+        }                                                                                                              \
+        pContextWrapper->handleType = _handle_##_public_handle_name_;                                                  \
+        *handle = (_public_handle_name_)pContextWrapper;                                                               \
+        return &pContextWrapper->context;                                                                              \
+    }                                                                                                                  \
+                                                                                                                       \
+    /* Define "context_t* handle_t_get_context(handle_t handle)" function */                                           \
+    static inline _internal_context_type_ *_public_handle_name_##_get_context(_public_handle_name_ handle)             \
+    {                                                                                                                  \
+        if ((handle == NULL) ||                                                                                        \
+            ((_public_handle_name_##_wrapper *)handle)->handleType != _handle_##_public_handle_name_)                  \
+        {                                                                                                              \
+            IF_LOGGER(logger_error(LOGGER_K4A, "Invalid " #_public_handle_name_ " %p", handle);)                       \
+            return NULL;                                                                                               \
+        }                                                                                                              \
+        return &((_public_handle_name_##_wrapper *)handle)->context;                                                   \
+    }                                                                                                                  \
+                                                                                                                       \
+    /* Define "void handle_t_destroy(handle_t handle) function */                                                      \
+    static inline void _public_handle_name_##_destroy(_public_handle_name_ handle)                                     \
+    {                                                                                                                  \
+        (void)_public_handle_name_##_get_context(handle);                                                              \
+        IF_LOGGER(logger_trace(LOGGER_K4A, "Destroyed " #_public_handle_name_ " %p", handle);)                         \
+        ((_public_handle_name_##_wrapper *)handle)->handleType = NULL;                                                 \
+        delete (_public_handle_name_##_wrapper *)handle;                                                               \
+    }
+
+
 /*
  * Example:
 
