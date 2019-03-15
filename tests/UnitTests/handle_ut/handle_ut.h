@@ -27,7 +27,7 @@ K4A_DECLARE_CONTEXT(dual_defined_t, dual_defined_context_t);
 
 // Shared function prototype
 int is_handle_in_2nd_file_valid(dual_defined_t handle);
-int is_handle_in_c_file_invalid(dual_defined_t handle);
+int is_handle_in_c_file_valid(dual_defined_t handle);
 
 #ifdef __cplusplus
 }

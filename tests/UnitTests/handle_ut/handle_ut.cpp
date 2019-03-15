@@ -129,7 +129,7 @@ TEST(handle_ut, K4A_DECLARE_CONTEXT_in_shared_header)
     EXPECT_EQ(context, dual_defined_t_get_context(dual));
     EXPECT_NE(0, is_handle_in_2nd_file_valid(dual));
 
-    EXPECT_NE(0, is_handle_in_c_file_invalid(dual));
+    EXPECT_EQ(0, is_handle_in_c_file_valid(dual));
 
     dual_defined_t_destroy(dual);
 }
