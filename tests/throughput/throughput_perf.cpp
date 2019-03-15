@@ -17,6 +17,8 @@
 
 #define TS_TO_MS(ts) ((long long)((ts) / 1000)) // TS convertion to milliseconds
 
+#define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
+
 static bool g_skip_delay_off_color_validation = false;
 static int32_t g_depth_delay_off_color_usec = 0;
 static uint8_t g_device_index = K4A_DEVICE_DEFAULT;
@@ -471,7 +473,7 @@ TEST_P(throughput_perf, testTest)
         ASSERT_EQ(thread_result, (int)K4A_RESULT_SUCCEEDED);
     }
 
-    int imu_samples_per_sec_usec = 1000000 / 1666;
+    int imu_samples_per_sec_usec = 1000000 / K4A_IMU_SAMPLE_RATE;
     int target_imu_samples = (g_capture_count * (int)fps_in_usec) / imu_samples_per_sec_usec;
     float imu_percent = ((float)thread.imu_samples - (float)target_imu_samples) / (float)target_imu_samples;
     imu_percent *= 100;
