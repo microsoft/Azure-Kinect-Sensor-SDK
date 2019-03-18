@@ -480,8 +480,8 @@ jobs:
 
       # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
       # Wait a little bit so the device can enumerate, 3 seconds has seemed good.
-    - script: '$(Agent.HomeDirectory)/bin/findconnectedport-linux/findconnectedport && sleep 3'
-      workingDirectory: '$(Agent.HomeDirectory)/bin/findconnectedport-linux/'
+    - script: '~/findconnectedport-linux/findconnectedport && sleep 3'
+      workingDirectory: '~/findconnectedport-linux/'
       displayName: 'Reset K4A Device'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
@@ -500,6 +500,6 @@ jobs:
       continueOnError: true
 
     # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-    - script: '$(Agent.HomeDirectory)/bin/findconnectedport-linux/findconnectedport'
-      workingDirectory: '$(Agent.HomeDirectory)/bin/findconnectedport-linux/'
+    - script: '~/findconnectedport-linux/findconnectedport'
+      workingDirectory: '~/findconnectedport-linux/'
       displayName: 'Reset K4A Device'
