@@ -27,7 +27,7 @@ typedef struct _cluster_info_t
     struct _cluster_info_t *previous = NULL;
 } cluster_info_t;
 
-// The cluster cache is a sparse linked-list index that may contain gaps until real data has been from disk.
+// The cluster cache is a sparse linked-list index that may contain gaps until real data has been read from disk.
 // The list is initialized with metadata from the Cues block, which is used as a hint for seeking in the file.
 // Once it is known that no gap is present between indexed clusters, next_known is set to true.
 typedef std::unique_ptr<cluster_info_t, void (*)(cluster_info_t *)> cluster_cache_t;
