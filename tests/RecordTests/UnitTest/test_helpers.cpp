@@ -188,7 +188,7 @@ create_test_image(uint64_t timestamp_us, k4a_image_format_t format, uint32_t wid
     // Ignore the correct buffer size for testing, and create a 8KB image instead.
     // Generating 1GB+ recordings for testing is too slow.
     size_t buffer_size = 8096;
-    uint8_t *buffer = new (std::nothrow) uint8_t[buffer_size];
+    uint8_t *buffer = new uint8_t[buffer_size];
     for (size_t i = 0; i < buffer_size / sizeof(uint32_t); i++)
     {
         reinterpret_cast<uint32_t *>(buffer)[i] = 0xAABBCCDD;

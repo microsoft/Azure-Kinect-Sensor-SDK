@@ -623,7 +623,7 @@ int main(int argc, char **argv)
 {
     k4a_unittest_init();
 
-    ::testing::AddGlobalTestEnvironment(new (std::nothrow) SampleRecordings());
+    ::testing::AddGlobalTestEnvironment(new SampleRecordings());
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
