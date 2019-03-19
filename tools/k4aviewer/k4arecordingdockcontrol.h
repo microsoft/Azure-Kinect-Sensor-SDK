@@ -35,6 +35,7 @@ private:
 
     void ReadNext();
     void Step(bool backward);
+    void SetCurrentCapture(k4a::capture &&capture);
 
     std::unique_ptr<K4ARecordingDockControl> m_dockControl;
 

@@ -10,6 +10,7 @@
 #include <array>
 #include <chrono>
 #include <map>
+#include <mutex>
 #include <numeric>
 #include <ratio>
 
@@ -35,7 +36,9 @@ public:
     static void ShowPerfWindow(bool *windowOpen);
 
 private:
-    static std::map<std::string, PerfCounter *> m_perfCounters;
+    static PerfCounterManager &Instance();
+    std::map<std::string, PerfCounter *> m_perfCounters;
+    std::mutex m_mutex;
 };
 
 // A wrapper for taking a single perf measurement.  Timing starts when the sample is created.

@@ -18,14 +18,17 @@ using namespace k4aviewer;
 
 void PerfCounterManager::RegisterPerfCounter(const char *name, PerfCounter *perfCounter)
 {
-    m_perfCounters[std::string(name)] = perfCounter;
+    std::lock_guard<std::mutex> lockGuard(Instance().m_mutex);
+    Instance().m_perfCounters[std::string(name)] = perfCounter;
 }
 
 void PerfCounterManager::ShowPerfWindow(bool *windowOpen)
 {
+    std::lock_guard<std::mutex> lockGuard(Instance().m_mutex);
+
     if (ImGui::Begin("Performance Counters (in ms)", windowOpen, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        for (auto &counter : m_perfCounters)
+        for (auto &counter : Instance().m_perfCounters)
         {
             ImGui::Text("%s", counter.first.c_str());
             ImGui::Text("avg: %f", double(counter.second->GetAverage()));
@@ -42,7 +45,7 @@ void PerfCounterManager::ShowPerfWindow(bool *windowOpen)
 
         if (ImGui::Button("Reset perf counters"))
         {
-            for (auto &counter : m_perfCounters)
+            for (auto &counter : Instance().m_perfCounters)
             {
                 counter.second->Reset();
             }
@@ -51,4 +54,8 @@ void PerfCounterManager::ShowPerfWindow(bool *windowOpen)
     ImGui::End();
 }
 
-std::map<std::string, PerfCounter *> PerfCounterManager::m_perfCounters;
+PerfCounterManager &PerfCounterManager::Instance()
+{
+    static PerfCounterManager instance;
+    return instance;
+}
