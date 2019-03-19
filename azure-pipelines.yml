@@ -457,6 +457,10 @@ jobs:
         vstsPackageVersion: "0.1.0"
         downloadDirectory: "$(System.ArtifactsDirectory)/findconnectedport"
 
+    - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Add execution property to findconnectedport'
+
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
       inputs:
