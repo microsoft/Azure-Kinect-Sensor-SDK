@@ -1423,7 +1423,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
  *
  * \param target_point3d_mm
  * Pointer to the output where the new 3D coordinates of the input point in the coordinate space of \p target_camera is
- * stored.
+ * stored in millimeters.
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p target_point3d was successfully written. ::K4A_RESULT_FAILED if \p calibration
@@ -1471,7 +1471,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_3d(const k4a_calibration_t *calibr
  *
  * \param target_point3d_mm
  * Pointer to the output where the 3D coordinates of the input pixel in the coordinate system of \p target_camera is
- * stored.
+ * stored in millimeters.
  *
  * \param valid
  * The output parameter returns a value of 1 if the \p source_point2d is a valid coordinate, and will return 0 if
