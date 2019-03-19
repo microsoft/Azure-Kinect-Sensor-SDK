@@ -286,17 +286,46 @@ jobs:
       filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
       modifyEnvironment: true
 
-  - task: UniversalPackages@0
+  - powershell: |
+      $ErrorActionPreference = "Stop"
+
+      function Download-ToTemp
+      {
+          param
+          (
+              [Parameter(Mandatory)]
+              [string] $url
+          )
+
+          $filename = Split-Path -Path $url -Leaf
+          if (-not ($filename))
+          {
+              Write-Error "Unable to parse filename from $url"
+              return $null
+          }
+
+          $tempDir = [System.IO.Path]::GetTempPath()
+          $path = Join-Path -Path $tempDir -ChildPath $filename
+
+          Write-Host -NoNewline "Downloading $url to $path..."
+          Invoke-WebRequest -Uri $url -OutFile $path
+          Write-Host "Done"
+
+          return $path
+      }
+
+      # Download Doxygen
+      $url = "http://doxygen.nl/files/doxygen-1.8.14.windows.x64.bin.zip"
+      $doxygenzip = Download-ToTemp -url $url
+
+      Expand-Archive $doxygenzip .\doxygenexe
+      Write-Host "Doxygen installed. Please use Visual Studio Developer Command prompt to build."
+
+    workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'Download doxygen'
-    inputs:
-      command: download
-      vstsFeed: 'analog.ai.depthcamera'
-      vstsFeedPackage: 'doxygen'
-      vstsPackageVersion: "1.8.14"
-      downloadDirectory: "$(System.ArtifactsDirectory)/doxygen"
 
   - script: |
-      set PATH=%PATH%;$(System.ArtifactsDirectory)\doxygen
+      set PATH=%PATH%;$(Build.BinariesDirectory)\doxygenexe
       cmake -G Ninja "-DK4A_BUILD_DOCS:BOOL=ON" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)"
 
     workingDirectory: '$(Build.BinariesDirectory)'
