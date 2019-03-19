@@ -22,7 +22,7 @@ extern "C" {
     /* Define "context_t* handle_t_create(handle_t* handle)" function */                                               \
     static inline _internal_context_type_ *_public_handle_name_##_create(_public_handle_name_ *handle)                 \
     {                                                                                                                  \
-        _public_handle_name_##_wrapper *pContextWrapper = new (std::nothrow) _public_handle_name_##_wrapper;           \
+        _public_handle_name_##_wrapper *pContextWrapper = new (std::nothrow) _public_handle_name_##_wrapper();         \
         if (pContextWrapper == NULL)                                                                                   \
         {                                                                                                              \
             IF_LOGGER(logger_error(LOGGER_K4A, "Failed to allocate " #_public_handle_name_);) return NULL;             \
