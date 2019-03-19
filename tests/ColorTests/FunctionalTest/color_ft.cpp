@@ -691,6 +691,9 @@ TEST_P(color_control_test, control_test)
     EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, as.command, initial_mode, initial_value));
 }
 
+
+// Windows internally handles some values different than the underlying UVC layer.
+// This means that the minimum supported value is different between the two platforms.
 #ifdef _WIN32
 static const int32_t EXPOSURE_TIME_ABSOLUTE_CONTROL_MAXIMUM_VALUE = 1;
 static const int32_t POWERLINE_FREQUENCY_CONTROL_MINIMUM_VALUE = 1;

@@ -32,7 +32,7 @@ typedef struct _guid_t
 #define K4A_USEC_TO_90K_HZ_TICK(x) ((x)*9 / 100)
 
 #define MAX_SERIAL_NUMBER_LENGTH                                                                                       \
-    (13 * 2) // Current schema is for 12 digits plus NULL, the extra size is incase that grows in the future.
+    (13 * 2) // Current schema is for 12 digits plus NULL, the extra size is in case that grows in the future.
 
 inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
 {
