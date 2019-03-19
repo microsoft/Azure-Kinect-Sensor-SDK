@@ -44,11 +44,19 @@ template<typename output_type, typename input_type> output_type clamp_cast(input
 {
     static_assert(std::is_arithmetic<input_type>::value, "clamp_cast only supports arithmetic types");
     static_assert(std::is_arithmetic<output_type>::value, "clamp_cast only supports arithmetic types");
-    const input_type minValue = std::is_signed<input_type>() ?
-                                    static_cast<input_type>(std::numeric_limits<output_type>::min()) :
-                                    0;
-    input = std::min(input, static_cast<input_type>(std::numeric_limits<output_type>::max()));
-    input = std::max(input, minValue);
+    const input_type min_value = std::is_signed<input_type>() ?
+                                     static_cast<input_type>(std::numeric_limits<output_type>::min()) :
+                                     0;
+
+    input_type max_value = static_cast<input_type>(std::numeric_limits<output_type>::max());
+    if (max_value < 0)
+    {
+        // Output type is of greater or equal size to input type and we've overflowed.
+        //
+        max_value = std::numeric_limits<input_type>::max();
+    }
+    input = std::min(input, max_value);
+    input = std::max(input, min_value);
     return static_cast<output_type>(input);
 }
 /// @endcond
