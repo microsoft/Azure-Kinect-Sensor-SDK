@@ -1432,8 +1432,8 @@ K4A_EXPORT k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
  * \remarks
  * This function is used to transform 3D points between depth and color camera coordinate systems. The function uses the
  * extrinsic camera calibration. It computes the output via multiplication with a precomputed matrix encoding a 3D
- * rotation and a 3D translation. If \p source_camera and \p target_camera are the same, then \p target_point3d_mm will be
- * identical to \p source_point3d_mm.
+ * rotation and a 3D translation. If \p source_camera and \p target_camera are the same, then \p target_point3d_mm will
+ * be identical to \p source_point3d_mm.
  *
  * \relates k4a_calibration_t
  *
@@ -1480,8 +1480,8 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_3d(const k4a_calibration_t *calibr
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p target_point3d_mm was successfully written. ::K4A_RESULT_FAILED if \p calibration
  * contained invalid transformation parameters. If the function returns ::K4A_RESULT_SUCCEEDED, but \p valid is 0,
- * the transformation was computed, but the results in \p target_point3d_mm are outside of the range of valid calibration
- * and should be ignored.
+ * the transformation was computed, but the results in \p target_point3d_mm are outside of the range of valid
+ * calibration and should be ignored.
  *
  * \remarks
  * This function applies the intrinsic calibration of \p source_camera to compute the 3D ray from the focal point of the
@@ -1547,9 +1547,9 @@ K4A_EXPORT k4a_result_t k4a_calibration_2d_to_3d(const k4a_calibration_t *calibr
  * projected onto the image plane using the intrinsic calibration of \p target_camera.
  *
  * \remarks
- * If \p source_point3d_mm does not map to a valid 2D coordinate in the \p target_camera coordinate system, \p valid is set
- * to 0. If it is valid, \p valid will be set to 1. The user should not use the value of \p target_point2d if \p valid
- * was set to 0.
+ * If \p source_point3d_mm does not map to a valid 2D coordinate in the \p target_camera coordinate system, \p valid is
+ * set to 0. If it is valid, \p valid will be set to 1. The user should not use the value of \p target_point2d if \p
+ * valid was set to 0.
  *
  * \relates k4a_calibration_t
  *
