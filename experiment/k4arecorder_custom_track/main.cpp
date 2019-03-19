@@ -42,6 +42,7 @@ int main(int argc, char **argv)
 
     k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     device_config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    device_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
 
     k4a_device_t device;
     VERIFY(k4a_device_open(0, &device), "Open K4A Device failed!");
@@ -57,17 +58,23 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    k4a_calibration_t sensor_calibration;
+    VERIFY(k4a_device_get_calibration(device, deviceConfig.depth_mode, K4A_COLOR_RESOLUTION_OFF, &sensor_calibration),
+           "Get depth camera calibration failed!");
+    uint32_t depth_width = static_cast<uint32_t>(sensor_calibration.depth_camera_calibration.resolution_width);
+    uint32_t depth_height = static_cast<uint32_t>(sensor_calibration.depth_camera_calibration.resolution_height);
+
     BITMAPINFOHEADER depth_codec_header;
-    depth_codec_header.biWidth = 640;
-    depth_codec_header.biWidth = 576;
+    depth_codec_header.biWidth = depth_width;
+    depth_codec_header.biWidth = depth_height;
     depth_codec_header.biBitCount = 16;
     depth_codec_header.biCompression = 0x32595559; // YUY2 little endian
     depth_codec_header.biSizeImage = sizeof(uint16_t) * 640 * 576;
 
     k4a_record_video_info_t depth_video_info;
-    depth_video_info.width = 640;
-    depth_video_info.height = 576;
-    depth_video_info.frame_rate = 30;
+    depth_video_info.width = depth_width;
+    depth_video_info.height = depth_height;
+    depth_video_info.frame_rate = 30; // In the device configuration, we set the camera_fps to be 30.
 
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     result = k4a_record_add_custom_track(recording,
