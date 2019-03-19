@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "recorder.h"
 #include <ctime>
 #include <atomic>
@@ -6,7 +9,27 @@
 
 #include <k4a/k4a.h>
 #include <k4arecord/record.h>
-#include <k4ainternal/common.h>
+
+inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
+{
+    uint32_t fps_int;
+    switch (fps)
+    {
+    case K4A_FRAMES_PER_SECOND_5:
+        fps_int = 5;
+        break;
+    case K4A_FRAMES_PER_SECOND_15:
+        fps_int = 15;
+        break;
+    case K4A_FRAMES_PER_SECOND_30:
+        fps_int = 30;
+        break;
+    default:
+        fps_int = 0;
+        break;
+    }
+    return fps_int;
+}
 
 // call k4a_device_close on every failed CHECK
 #define CHECK(x, device)                                                                                               \

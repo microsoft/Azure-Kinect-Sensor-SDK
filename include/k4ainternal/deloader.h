@@ -1,12 +1,14 @@
-#pragma once
-
 /** \file deloader.h
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
  * Depth Engine Loader
  * Stub layer to abstract away the dynamic loading of the depth engine and transform engine from our
  * developers usage
  */
 
-#include <k4a/k4aplugin.h>
+#pragma once
+
+#include <k4ainternal/k4aplugin.h>
 
 #ifdef __cplusplus
 extern "C" {

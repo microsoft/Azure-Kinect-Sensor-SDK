@@ -1,6 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include <stdio.h>
 
-#include <k4a/k4aplugin.h>
+#include <k4ainternal/k4aplugin.h>
 #include <k4ainternal/dynlib.h>
 
 static void print_usage()

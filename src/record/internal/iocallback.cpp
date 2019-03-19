@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "k4ainternal/matroska_common.h"
 
 using namespace k4arecord;

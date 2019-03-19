@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 // This library
 #include <k4ainternal/logging.h>
 
@@ -164,6 +167,7 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
         }
     }
 
+    g_logger->flush_on(spdlog::level::warn);
     return K4A_RESULT_SUCCEEDED;
 }
 

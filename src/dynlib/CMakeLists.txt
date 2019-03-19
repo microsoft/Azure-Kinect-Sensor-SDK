@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(DYNLIB_SRCS dynlib_windows.c)
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

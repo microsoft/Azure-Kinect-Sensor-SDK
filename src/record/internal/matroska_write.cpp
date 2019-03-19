@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include <ctime>
 #include <iostream>
 #include <algorithm>
@@ -142,26 +145,6 @@ void set_track_info_video(KaxTrackEntry *track, uint64_t width, uint64_t height,
     auto &video_track = GetChild<KaxTrackVideo>(*track);
     GetChild<KaxVideoPixelWidth>(video_track).SetValue(width);
     GetChild<KaxVideoPixelHeight>(video_track).SetValue(height);
-}
-
-k4a_result_t flush_imu_buffer(k4a_record_context_t *context)
-{
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !context->header_written);
-
-    uint8_t *buffer = context->imu_buffer->data();
-    size_t buffer_size = context->imu_buffer->size();
-    assert(buffer_size <= UINT32_MAX);
-    DataBuffer *data_buffer = new DataBuffer(buffer, (uint32)buffer_size, NULL, true);
-    k4a_result_t result = write_track_data(context, context->imu_track, context->imu_buffer_start_ns, data_buffer);
-    if (K4A_FAILED(result))
-    {
-        data_buffer->FreeBuffer(*data_buffer);
-        delete data_buffer;
-        return result;
-    }
-    context->imu_buffer->clear();
-    return K4A_RESULT_SUCCEEDED;
 }
 
 // Buffer needs to be valid until it is flushed to disk. The DataBuffer free callback can be used to assist with this.
@@ -320,12 +303,43 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     new_cluster->SetParent(*context->file_segment);
     new_cluster->EnableChecksum();
 
+    KaxBlockBlob *block_blob = NULL;
+    KaxBlockGroup *block_group = NULL;
+    KaxTrackEntry *current_track = NULL;
+    uint64_t block_blob_start = 0;
+
     bool first = true;
     for (std::pair<uint64_t, track_data_t> data : cluster->data)
     {
-        KaxBlockBlob *block_blob = new KaxBlockBlob(BLOCK_BLOB_SIMPLE_AUTO);
-        new_cluster->AddBlockBlob(block_blob); // Blob will be freed by libmatroska when the file is closed.
-        block_blob->SetParent(*new_cluster);
+        // Only store IMU samples together in a block group, all other tracks store 1 frame per block.
+        if (block_blob == NULL || current_track != data.second.track || data.second.track != context->imu_track)
+        {
+            // Automatically switching between SimpleBlock and BlockGroup is not implemented in libmatroska,
+            // We need to decide the block type ahead of time to force IMU into a BlockGroup
+            block_blob = new KaxBlockBlob(data.second.track == context->imu_track ? BLOCK_BLOB_NO_SIMPLE :
+                                                                                    BLOCK_BLOB_ALWAYS_SIMPLE);
+            new_cluster->AddBlockBlob(block_blob); // Blob will be freed by libmatroska when the file is closed.
+            block_blob->SetParent(*new_cluster);
+            block_blob_start = data.first;
+
+            if (!block_blob->IsSimpleBlock())
+            {
+                block_group = new KaxBlockGroup();
+                block_blob->SetBlockGroup(*block_group); // Block group will be freed when BlockBlob is destroyed.
+                block_group->SetParentTrack(*data.second.track);
+            }
+            else
+            {
+                block_group = NULL;
+            }
+            current_track = data.second.track;
+        }
+
+        if (!block_blob->IsSimpleBlock())
+        {
+            // Update the block duration to the last written sample
+            block_group->SetBlockDuration(data.first - block_blob_start + context->timecode_scale);
+        }
 
         block_blob->AddFrameAuto(*data.second.track, data.first - context->start_timestamp_offset, *data.second.buffer);
 
@@ -384,15 +398,6 @@ static int matroska_writer_thread(void *context_ptr)
 
     while (!context->writer_stopping && result == K4A_RESULT_SUCCEEDED)
     {
-        // Wait for new writes, or up to 100ms
-        COND_RESULT cond = Condition_Wait(context->writer_notify, context->writer_lock, 100);
-        if (cond != COND_OK && cond != COND_TIMEOUT)
-        {
-            logger_error(LOGGER_RECORD, "Writer thread failed Condition_Wait: %d", cond);
-            result = K4A_RESULT_FAILED;
-            break;
-        }
-
         if (Lock(context->pending_cluster_lock) == LOCK_OK)
         {
             // Check the oldest pending cluster to see if we should write to disk.
@@ -422,6 +427,15 @@ static int matroska_writer_thread(void *context_ptr)
                     logger_error(LOGGER_RECORD, "Cluster write failed, dropping cluster.");
                     break;
                 }
+            }
+
+            // Wait until more clusters arrive up to 100ms, or 1ms if the queue is not empty.
+            COND_RESULT cond = Condition_Wait(context->writer_notify, context->writer_lock, oldest_cluster ? 1 : 100);
+            if (cond != COND_OK && cond != COND_TIMEOUT)
+            {
+                logger_error(LOGGER_RECORD, "Writer thread failed Condition_Wait: %d", cond);
+                result = K4A_RESULT_FAILED;
+                break;
             }
         }
     }
@@ -499,6 +513,8 @@ add_tag(k4a_record_context_t *context, const char *name, const char *value, TagT
     switch (target)
     {
     case TAG_TARGET_TYPE_NONE:
+        // Force KaxTagTargets element to get rendered since it is a "mandatory" element.
+        GetChild<KaxTagTrackUID>(tagTargets).SetValue(0);
         break;
     case TAG_TARGET_TYPE_TRACK:
         GetChild<KaxTagTargetType>(tagTargets).SetValue("TRACK");

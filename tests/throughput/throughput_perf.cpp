@@ -1,9 +1,5 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-               Licensed under the MIT License.
-****************************************************************/
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 //************************ Includes *****************************
 #include <k4a/k4a.h>
@@ -21,11 +17,15 @@
 
 #define TS_TO_MS(ts) ((long long)((ts) / 1000)) // TS convertion to milliseconds
 
+#define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
+
 static bool g_skip_delay_off_color_validation = false;
 static int32_t g_depth_delay_off_color_usec = 0;
 static uint8_t g_device_index = K4A_DEVICE_DEFAULT;
 static k4a_wired_sync_mode_t g_wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
 static int g_capture_count = 100;
+static bool g_synchronized_images_only = false;
+static bool g_no_imu = false;
 
 using ::testing::ValuesIn;
 
@@ -188,6 +188,13 @@ static int _throughput_imu_thread(void *param)
 
                 EXPECT_LT(acc_ts, imu.acc_timestamp_usec);
                 EXPECT_LT(gyro_ts, imu.gyro_timestamp_usec);
+
+                if (acc_ts != 0)
+                {
+                    EXPECT_LT(imu.acc_timestamp_usec, acc_ts + 900);
+                    EXPECT_LT(imu.gyro_timestamp_usec, gyro_ts + 900);
+                }
+
                 acc_ts = imu.acc_timestamp_usec;
                 gyro_ts = imu.gyro_timestamp_usec;
             }
@@ -226,7 +233,7 @@ TEST_P(throughput_perf, testTest)
     FILE *file_handle = NULL;
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     thread_data thread = { 0 };
-    THREAD_HANDLE th1;
+    THREAD_HANDLE th1 = NULL;
 
     printf("Capturing %d frames for test: %s\n", g_capture_count, as.test_name);
 
@@ -238,6 +245,7 @@ TEST_P(throughput_perf, testTest)
     config.camera_fps = as.fps;
     config.depth_delay_off_color_usec = g_depth_delay_off_color_usec;
     config.wired_sync_mode = g_wired_sync_mode;
+    config.synchronized_images_only = g_synchronized_images_only;
     if (g_depth_delay_off_color_usec == 0)
     {
         // Create delay that can be +fps to -fps
@@ -257,8 +265,11 @@ TEST_P(throughput_perf, testTest)
     printf("\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
 
-    thread.device = m_device;
-    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&th1, _throughput_imu_thread, &thread));
+    if (!g_no_imu)
+    {
+        thread.device = m_device;
+        ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&th1, _throughput_imu_thread, &thread));
+    }
 
     //
     // Wait allow streams to start and then purge the data collected
@@ -277,10 +288,15 @@ TEST_P(throughput_perf, testTest)
     }
     while (K4A_WAIT_RESULT_SUCCEEDED == k4a_device_get_capture(m_device, &capture, 0))
     {
+        // Drain the queue
         k4a_capture_release(capture);
     };
 
-    logger_info("throughput_perf", "Queue's Empty, test is starting");
+    // For consistent IMU timing, block entering the while loop until we get 1 sample
+    if (K4A_WAIT_RESULT_SUCCEEDED == k4a_device_get_capture(m_device, &capture, 1000))
+    {
+        k4a_capture_release(capture);
+    }
 
     printf("\n");
     printf("       | TS [Delta TS]          | TS [Delta TS]          | TS [Delta TS]           | TS Delta (C&D)\n");
@@ -370,6 +386,7 @@ TEST_P(throughput_perf, testTest)
         else // wresult == K4A_WAIT_RESULT_FAILED:
         {
             printf("Failed to read a capture\n");
+            capture_count = 0;
         }
 
         if (depth && color)
@@ -405,6 +422,12 @@ TEST_P(throughput_perf, testTest)
         {
             last_ts = adjusted_max_ts;
         }
+        else if (last_ts > adjusted_max_ts)
+        {
+            // This happens when one queue gets saturated and must drop samples early; i.e. the depth queue is full, but
+            // the color image is delayed due to perf issues. When this happens we just ignore the sample because our
+            // time stamp logic has already moved beyond the time this sample was supposed to arrive at.
+        }
         else if ((adjusted_max_ts - last_ts) >= (fps_in_usec * 15 / 10))
         {
             // Calc how many captures we didn't get. If the delta between the last two time stamps is more than 1.5
@@ -418,17 +441,18 @@ TEST_P(throughput_perf, testTest)
             }
             printf("Missed %d captures before previous capture %lld %lld\n",
                    missed_this_period,
-                   TS_TO_MS(adjusted_max_ts),
-                   TS_TO_MS(last_ts));
+                   (long long)adjusted_max_ts,
+                   (long long)last_ts);
             if (missed_this_period > capture_count)
             {
+                missed_count += capture_count;
                 capture_count = 0;
             }
             else
             {
+                missed_count += missed_this_period;
                 capture_count -= missed_this_period;
             }
-            missed_count += missed_this_period;
         }
         last_ts = std::max(last_ts, adjusted_max_ts);
 
@@ -438,17 +462,19 @@ TEST_P(throughput_perf, testTest)
             k4a_capture_release(capture);
         }
     }
-
-    thread.exit = true; // shut down IMU thread
+    thread.enable_counting = false; // stop counting IMU samples
+    thread.exit = true;             // shut down IMU thread
     k4a_device_stop_cameras(m_device);
 
-    int thread_result;
-    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Join(th1, &thread_result));
-    ASSERT_EQ(thread_result, (int)K4A_RESULT_SUCCEEDED);
+    if (!g_no_imu)
+    {
+        int thread_result;
+        ASSERT_EQ(THREADAPI_OK, ThreadAPI_Join(th1, &thread_result));
+        ASSERT_EQ(thread_result, (int)K4A_RESULT_SUCCEEDED);
+    }
 
-    int imu_samples_per_sec_usec = 1000000 / 1667;
-    int target_imu_samples = ((both_count + depth_count + color_count + missed_count) * (int)fps_in_usec) /
-                             imu_samples_per_sec_usec;
+    int imu_samples_per_sec_usec = 1000000 / K4A_IMU_SAMPLE_RATE;
+    int target_imu_samples = (g_capture_count * (int)fps_in_usec) / imu_samples_per_sec_usec;
     float imu_percent = ((float)thread.imu_samples - (float)target_imu_samples) / (float)target_imu_samples;
     imu_percent *= 100;
 
@@ -494,15 +520,19 @@ TEST_P(throughput_perf, testTest)
     }
     {
         bool criteria_failed = false;
-        if (imu_percent > failure_threshold_percent || imu_percent < -failure_threshold_percent)
+        if (!g_no_imu)
         {
-            failed = true;
-            criteria_failed = true;
+            if (imu_percent > failure_threshold_percent || imu_percent < -failure_threshold_percent)
+            {
+                failed = true;
+                criteria_failed = true;
+            }
         }
-        printf("     Imu Samples:%d %0.01f%% of target %s\n",
+        printf("     Imu Samples:%d %0.01f%% of target(%d) %s\n",
                thread.imu_samples,
                (double)imu_percent,
-               criteria_failed ? "FAILED" : "PASSED");
+               target_imu_samples,
+               g_no_imu ? "Disabled" : (criteria_failed ? "FAILED" : "PASSED"));
     }
     {
         bool criteria_failed = false;
@@ -728,6 +758,10 @@ int main(int argc, char **argv)
         {
             g_skip_delay_off_color_validation = true;
         }
+        else if (strcmp(argument, "--no_imu") == 0)
+        {
+            g_no_imu = true;
+        }
         else if (strcmp(argument, "--master") == 0)
         {
             g_wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
@@ -737,6 +771,11 @@ int main(int argc, char **argv)
         {
             g_wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
             printf("Setting g_wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE\n");
+        }
+        else if (strcmp(argument, "--synchronized_images_only") == 0)
+        {
+            g_synchronized_images_only = true;
+            printf("g_synchronized_images_only = true\n");
         }
         else if (strcmp(argument, "--index") == 0)
         {
@@ -792,8 +831,13 @@ int main(int argc, char **argv)
         printf("      Run device in subordinate mode\n");
         printf("  --index\n");
         printf("      The device index to target when calling k4a_device_open()\n");
+        printf("  --no_imu\n");
+        printf("      Disables IMU in the test.\n");
         printf("  --capture_count\n");
         printf("      The number of captures the test should read; default is 100\n");
+        printf("  --synchronized_images_only\n");
+        printf("      By default this setting is false, enabling this will for the test to wait for\n");
+        printf("      both and depth images to be available.\n");
 
         return 1; // Indicates an error or warning
     }

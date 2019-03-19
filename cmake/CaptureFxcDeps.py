@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Calls the FXC compiler and generates a depfile from the compiler's standard output
 # Lines in the standard output matching:
 #   Resolved to [D:\foo\bar.h]

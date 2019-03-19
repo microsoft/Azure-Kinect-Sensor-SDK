@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include <utcommon.h>
 
 // Module being tested
@@ -119,72 +122,6 @@ TEST_F(record_ut, new_cluster_out_of_order)
     }
 
     ASSERT_EQ(context->pending_clusters->size(), 3u);
-}
-
-TEST_F(record_ut, read_write_bytes)
-{
-    uint8_t buffer[32] = { 0 };
-    uint8_t *data_ptr = &buffer[0];
-
-    { // write uint32
-        size_t offset = write_bytes<uint32_t>(data_ptr, 0xFFEEDDCC);
-        ASSERT_EQ(offset, 4u);
-        ASSERT_EQ(buffer[0], 0xCC);
-        ASSERT_EQ(buffer[1], 0xDD);
-        ASSERT_EQ(buffer[2], 0xEE);
-        ASSERT_EQ(buffer[3], 0xFF);
-        data_ptr += offset;
-    }
-
-    { // write float
-        size_t offset = write_bytes<float>(data_ptr, -2.5009765625);
-        ASSERT_EQ(offset, 4u);
-        ASSERT_EQ(buffer[4], 0x00); // -2.5009765625 == 0xC0201000
-        ASSERT_EQ(buffer[5], 0x10);
-        ASSERT_EQ(buffer[6], 0x20);
-        ASSERT_EQ(buffer[7], 0xC0);
-        data_ptr += offset;
-    }
-
-    { // write uint64
-        size_t offset = write_bytes<uint64_t>(data_ptr, 0xFFEEDDCCBBAA9988);
-        ASSERT_EQ(offset, 8u);
-        ASSERT_EQ(buffer[8], 0x88);
-        ASSERT_EQ(buffer[9], 0x99);
-        ASSERT_EQ(buffer[10], 0xAA);
-        ASSERT_EQ(buffer[11], 0xBB);
-        ASSERT_EQ(buffer[12], 0xCC);
-        ASSERT_EQ(buffer[13], 0xDD);
-        ASSERT_EQ(buffer[14], 0xEE);
-        ASSERT_EQ(buffer[15], 0xFF);
-        data_ptr += offset;
-    }
-
-    data_ptr = &buffer[0];
-
-    { // read uint32
-        uint32_t value = 0;
-        size_t offset = read_bytes<uint32_t>(data_ptr, &value);
-        ASSERT_EQ(offset, 4u);
-        ASSERT_EQ(value, 0xFFEEDDCC);
-        data_ptr += offset;
-    }
-
-    { // read float
-        float value = 0;
-        size_t offset = read_bytes<float>(data_ptr, &value);
-        ASSERT_EQ(offset, 4u);
-        ASSERT_EQ(value, -2.5009765625); // 0xC0201000 == -2.5009765625
-        data_ptr += offset;
-    }
-
-    { // read uint64
-        uint64_t value = 0;
-        size_t offset = read_bytes<uint64_t>(data_ptr, &value);
-        ASSERT_EQ(offset, 8u);
-        ASSERT_EQ(value, 0xFFEEDDCCBBAA9988);
-        data_ptr += offset;
-    }
 }
 
 int main(int argc, char **argv)

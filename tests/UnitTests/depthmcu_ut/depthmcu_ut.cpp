@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include <utcommon.h>
 
 // Module being tested
@@ -18,7 +21,7 @@ class MockUsbCmd
 public:
     MOCK_CONST_METHOD4(usb_cmd_create,
                        k4a_result_t(usb_command_device_type_t device_type,
-                                    uint8_t device_index,
+                                    uint32_t device_index,
                                     const guid_t *container_id,
                                     usbcmd_t *p_command_handle));
 
@@ -76,7 +79,7 @@ static MockUsbCmd *g_MockUsbCmd;
 // Define the symbols needed from the usb_cmd module.
 // Only functions required to link the depth module are needed
 k4a_result_t usb_cmd_create(usb_command_device_type_t device_type,
-                            uint8_t device_index,
+                            uint32_t device_index,
                             const guid_t *container_id,
                             usbcmd_t *p_command_handle)
 {
@@ -210,7 +213,7 @@ static void EXPECT_UsbCmdCreateSuccess(MockUsbCmd &usbcmd)
     EXPECT_CALL(usbcmd,
                 usb_cmd_create(
                     /* usb_command_device_type_t device_type  */ USB_DEVICE_DEPTH_PROCESSOR,
-                    /* uint8_t device_index                   */ 0,
+                    /* uint32_t device_index                  */ 0,
                     /* const guid_t *container_id             */ NULL,
                     /* usbcmd_t *p_command_handle */ NotNull()))
         .WillRepeatedly(Invoke([](Unused, // usb_command_device_type_t device_type
@@ -229,7 +232,7 @@ static void EXPECT_UsbCmdCreateFailure3(MockUsbCmd &usbcmd)
     EXPECT_CALL(usbcmd,
                 usb_cmd_create(
                     /* usb_command_device_type_t device_type  */ USB_DEVICE_DEPTH_PROCESSOR,
-                    /* uint8_t device_index                   */ 0,
+                    /* uint32_t device_index                  */ 0,
                     /* const guid_t *container_id             */ NULL,
                     /* usbcmd_t *p_command_handle */ NotNull()))
         .WillOnce(Return(K4A_RESULT_FAILED))

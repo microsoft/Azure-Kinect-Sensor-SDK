@@ -1,9 +1,5 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-               Licensed under the MIT License.
-****************************************************************/
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 //************************ Includes *****************************
 
@@ -193,7 +189,7 @@ static k4a_result_t populate_serialnumber(usbcmd_context_t *usbcmd, struct libus
     return result;
 }
 
-static k4a_result_t find_libusb_device(uint8_t device_index,
+static k4a_result_t find_libusb_device(uint32_t device_index,
                                        const guid_t *container_id,
                                        struct libusb_device_descriptor *desc,
                                        usbcmd_context_t *usbcmd)
@@ -318,7 +314,7 @@ static k4a_result_t find_libusb_device(uint8_t device_index,
 }
 
 k4a_result_t usb_cmd_create(usb_command_device_type_t device_type,
-                            uint8_t device_index,
+                            uint32_t device_index,
                             const guid_t *container_id,
                             usbcmd_t *usbcmd_handle)
 {

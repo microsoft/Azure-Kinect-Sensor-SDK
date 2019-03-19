@@ -1,4 +1,6 @@
-/** \file LOGGER.h
+/** \file logging.h
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
  * Kinect For Azure SDK.
  */
 
@@ -58,7 +60,7 @@ K4A_DECLARE_HANDLE(logger_t);
 
 /** Logger configuration - allows logger to be used in seperate DLL's and
     provide different ENV vars for processes that need to load both instances.
-    For example K4A SDK and potentially K4A playback.
+    For example Azure Kinect SDK and potentially Azure Kinect playback.
  */
 typedef struct
 {
@@ -69,7 +71,7 @@ typedef struct
     size_t max_log_size;               // max log size before rolling over to a new file.
 } logger_config_t;
 
-/** Initialize logger_config_t to the default settings for K4A SDK
+/** Initialize logger_config_t to the default settings for Azure Kinect SDK
  */
 static inline void logger_config_init_default(logger_config_t *config)
 {

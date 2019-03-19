@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 // This library
 #include <k4ainternal/queue.h>
 
@@ -17,7 +20,7 @@ typedef struct _queue_entry_t
     k4a_capture_t capture;
 } queue_entry_t;
 
-typedef struct _queue_context
+typedef struct _queue_context_t
 {
     bool enabled;
     bool error;

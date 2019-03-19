@@ -1,3 +1,6 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved.
+   Licensed under the MIT License. */
+
 #ifndef K4ADYNLIB_H
 #define K4ADYNLIB_H
 

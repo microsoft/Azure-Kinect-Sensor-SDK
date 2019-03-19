@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include <k4a/k4a.h>
 #include <math.h>
 #include <string>
@@ -208,7 +211,6 @@ int main(int argc, char **argv)
 Exit:
     if (device != NULL)
     {
-        k4a_device_stop_cameras(device);
         k4a_device_close(device);
     }
 

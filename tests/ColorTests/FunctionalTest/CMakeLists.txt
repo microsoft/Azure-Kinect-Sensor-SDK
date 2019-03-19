@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(color_ft color_ft.cpp)
 
 target_link_libraries(color_ft PRIVATE 

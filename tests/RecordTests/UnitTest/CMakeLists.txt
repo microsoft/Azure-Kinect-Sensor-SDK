@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(record_ut record_ut.cpp)
 add_executable(playback_ut playback_ut.cpp test_helpers.cpp sample_recordings.cpp)
 

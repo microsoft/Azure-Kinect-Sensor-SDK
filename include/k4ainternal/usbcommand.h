@@ -1,11 +1,6 @@
-/****************************************************************
-                       Copyright (c)
-                    Microsoft Corporation
-                    All Rights Reserved
-               Licensed under the MIT License.
-****************************************************************/
-
-/**
+/** \file usbcommand.h
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
  * Kinect For Azure SDK.
  */
 
@@ -79,7 +74,7 @@ typedef void(usb_cmd_stream_cb_t)(k4a_result_t result, k4a_image_t image_handle,
  * \ref usb_cmd_destroy
  */
 k4a_result_t usb_cmd_create(usb_command_device_type_t device_type,
-                            uint8_t device_index,
+                            uint32_t device_index,
                             const guid_t *container_id,
                             usbcmd_t *usb_handle);
 

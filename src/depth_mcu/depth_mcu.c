@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 // This library
 #include <k4ainternal/depth_mcu.h>
 
@@ -46,13 +49,13 @@ void depthmcu_depth_capture_ready(k4a_result_t status, k4a_image_t image_handle,
     }
     else
     {
-        LOG_INFO("Dropping raw image due to invalid size %lld expected, %lld recieved",
+        LOG_INFO("Dropping raw image due to invalid size %lld expected, %lld received",
                  depthmcu->mode_size,
                  image_get_size(image_handle));
     }
 }
 
-k4a_result_t depthmcu_create(uint8_t device_index, depthmcu_t *depthmcu_handle)
+k4a_result_t depthmcu_create(uint32_t device_index, depthmcu_t *depthmcu_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device_index >= 10);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, depthmcu_handle == NULL);

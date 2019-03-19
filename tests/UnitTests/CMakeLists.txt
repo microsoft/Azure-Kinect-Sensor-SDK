@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Unit tests
 add_subdirectory(allocator_ut)
 add_subdirectory(depthmcu_ut)

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 add_executable(capturesync_ut capturesync.cpp)
 
 target_link_libraries(capturesync_ut PRIVATE

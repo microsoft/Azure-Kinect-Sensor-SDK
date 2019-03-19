@@ -1,5 +1,11 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
 
 name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
+
+variables:
+- name: 'skipComponentGovernaceDetection'
+  value: true
 
 trigger:
   batch: false
@@ -60,6 +66,14 @@ jobs:
     lfs: false
     persistCredentials: true
     submodules: 'recursive'
+
+  # Use Python Version
+  # Retrieves the specified version of Python from the tool cache. Optionally add it to PATH.
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+      addToPath: true
+      architecture: 'x64'
 
   - powershell: '$(Build.SourcesDirectory)/scripts/verify-windows.ps1'
     displayName: 'Run verify-windows.ps1'
@@ -145,9 +159,6 @@ jobs:
       publishSymbols: true
       symbolServerType: 'teamServices'
     condition: and(succeeded(), eq(variables['BuildGenerator'], 'Ninja'))
-
-  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-    displayName: 'Component Detection'
 
 - job: LinuxK4ABuildTest
   displayName: Linux K4A Build + Test
@@ -254,9 +265,6 @@ jobs:
       parallelCount: 8
     condition: and(succeeded(), contains(variables['CMakeLinuxTargetTriple'], 'clang'))
 
-  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-    displayName: 'Component Detection'
-
 - job: DocumentationBuild
   displayName: Documentation Build
   pool:
@@ -340,156 +348,158 @@ jobs:
       parallel: true
       parallelCount: 8
 
-- job: WindowsFunctionalTests
-  displayName: Windows Functional Test
-  dependsOn: WindowsK4ABuildTest
-  pool:
-    name: Analog-FwConnected
-    demands:
-    - Eden
-    - Agent.OS -equals Windows_NT
+- ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
+  - job: WindowsFunctionalTests
+    displayName: Windows Functional Test
+    dependsOn: WindowsK4ABuildTest
+    pool:
+      name: Analog-FwConnected
+      demands:
+      - Eden
+      - Agent.OS -equals Windows_NT
 
-  steps:
-  - checkout: self
-    clean: true
-    lfs: false
-    persistCredentials: true
-    submodules: 'recursive'
+    steps:
+    - checkout: self
+      clean: true
+      lfs: false
+      persistCredentials: true
+      submodules: 'recursive'
 
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download Build Artifacts'
-    inputs:
-      artifactName: 'amd64-windows-msvc-RelWithDebInfo'
-      parallelizationLimit: 8
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Build Artifacts'
+      inputs:
+        artifactName: 'amd64-windows-msvc-RelWithDebInfo'
+        parallelizationLimit: 8
 
-  - task: UniversalPackages@0
-    displayName: 'Download DepthEngine Plugin'
-    inputs:
-      command: download
-      vstsFeed: 'DepthEnginePlugin'
-      vstsFeedPackage: 'depthengine'
-      vstsPackageVersion: "1.0.1"
-      downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
+    - task: UniversalPackages@0
+      displayName: 'Download DepthEngine Plugin'
+      inputs:
+        command: download
+        vstsFeed: 'DepthEnginePlugin'
+        vstsFeedPackage: 'depthengine'
+        vstsPackageVersion: "1.0.1"
+        downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
-  - task: CopyFiles@2
-    displayName: "Copy DepthEnginePlugin into bin folder"
-    inputs:
-      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
-      contents: "depthengine*.dll"
-      targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
-      flattenFolders: true
+    - task: CopyFiles@2
+      displayName: "Copy DepthEnginePlugin into bin folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
+        flattenFolders: true
 
-  - task: PowerShell@2
-    inputs:
-      targetType: 'filePath'
-      filePath: './scripts/Reset-Device.ps1'
-    displayName: 'Reset K4A Device'
+    - task: PowerShell@2
+      inputs:
+        targetType: 'filePath'
+        filePath: './scripts/Reset-Device.ps1'
+      displayName: 'Reset K4A Device'
 
-  - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\enumerate_devices.exe'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Check Device Health'
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\enumerate_devices.exe'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Check Device Health'
 
-  - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list amd64-windows-msvc-RelWithDebInfo/bin/functional_test_list.txt --bin amd64-windows-msvc-RelWithDebInfo/bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Run Functional Tests'
-    timeoutInMinutes: 15
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list amd64-windows-msvc-RelWithDebInfo/bin/functional_test_list.txt --bin amd64-windows-msvc-RelWithDebInfo/bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Run Functional Tests'
+      timeoutInMinutes: 15
 
-  - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list amd64-windows-msvc-RelWithDebInfo/bin/functional_test_list.txt --bin amd64-windows-msvc-RelWithDebInfo/bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Run Functional Tests - Onboarding'
-    timeoutInMinutes: 15
-    continueOnError: true
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list amd64-windows-msvc-RelWithDebInfo/bin/functional_test_list.txt --bin amd64-windows-msvc-RelWithDebInfo/bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Run Functional Tests - Onboarding'
+      timeoutInMinutes: 15
+      continueOnError: true
 
-  - task: PowerShell@2
-    inputs:
-      targetType: 'filePath'
-      filePath: './scripts/Reset-Device.ps1'
-    displayName: 'Reset K4A Device'
+    - task: PowerShell@2
+      inputs:
+        targetType: 'filePath'
+        filePath: './scripts/Reset-Device.ps1'
+      displayName: 'Reset K4A Device'
 
 
-- job: LinuxFunctionalTests
-  displayName: Linux Functional Test
-  dependsOn: LinuxK4ABuildTest
-  pool:
-    name: Analog-FwConnected
-    demands:
-    - Eden
-    - Agent.OS -equals Linux
+- ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
+  - job: LinuxFunctionalTests
+    displayName: Linux Functional Test
+    dependsOn: LinuxK4ABuildTest
+    pool:
+      name: Analog-FwConnected
+      demands:
+      - Eden
+      - Agent.OS -equals Linux
 
-  steps:
-  - checkout: self
-    clean: true
-    lfs: false
-    persistCredentials: true
-    submodules: 'recursive'
+    steps:
+    - checkout: self
+      clean: true
+      lfs: false
+      persistCredentials: true
+      submodules: 'recursive'
 
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download Build Artifacts'
-    inputs:
-      artifactName: 'x86_64-linux-clang-RelWithDebInfo'
-      parallelizationLimit: 8
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Build Artifacts'
+      inputs:
+        artifactName: 'x86_64-linux-clang-RelWithDebInfo'
+        parallelizationLimit: 8
 
-  - task: UniversalPackages@0
-    displayName: 'Download DepthEngine Plugin'
-    inputs:
-      command: download
-      vstsFeed: 'DepthEnginePlugin'
-      vstsFeedPackage: 'depthengine'
-      vstsPackageVersion: "1.0.1"
-      downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
+    - task: UniversalPackages@0
+      displayName: 'Download DepthEngine Plugin'
+      inputs:
+        command: download
+        vstsFeed: 'DepthEnginePlugin'
+        vstsFeedPackage: 'depthengine'
+        vstsPackageVersion: "1.0.1"
+        downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
-  - task: CopyFiles@2
-    displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
-    inputs:
-      sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
-      contents: "libdepthengine.so*"
-      targetFolder: "$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo/bin/"
-      flattenFolders: true
+    - task: CopyFiles@2
+      displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
+        contents: "libdepthengine.so*"
+        targetFolder: "$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo/bin/"
+        flattenFolders: true
 
-  - script: 'chmod +x ./x86_64-linux-clang-relwithdebinfo/bin/*'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Add execution property to binary files'
+    - script: 'chmod +x ./x86_64-linux-clang-relwithdebinfo/bin/*'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Add execution property to binary files'
 
-    # Adding the bin folder to the LD_LIBRARY_PATH, so the executables can find the necessary .so files.
-  - script: 'echo "##vso[task.setvariable variable=LD_LIBRARY_PATH]$BUILD_ARTIFACTSTAGINGDIRECTORY/x86_64-linux-clang-relwithdebinfo/bin/"'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'set LD_LIBRARY_PATH'
+      # Adding the bin folder to the LD_LIBRARY_PATH, so the executables can find the necessary .so files.
+    - script: 'echo "##vso[task.setvariable variable=LD_LIBRARY_PATH]$BUILD_ARTIFACTSTAGINGDIRECTORY/x86_64-linux-clang-relwithdebinfo/bin/"'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'set LD_LIBRARY_PATH'
 
-    # Set the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
-  - script: 'echo "##vso[task.setvariable variable=DISPLAY]:0"'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'set DISPLAY variable'
+      # Set the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
+    - script: 'echo "##vso[task.setvariable variable=DISPLAY]:0"'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'set DISPLAY variable'
 
-  - script: 'env && which xauth && glxinfo | grep "OpenGL"'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Check openGL version'
+    - script: 'env && which xauth && glxinfo | grep "OpenGL"'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Check openGL version'
 
-  - script: 'stty -F /dev/ttyACM0 -hupcl'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Prevent the USB connector from accidentally being reset'
+    - script: 'stty -F /dev/ttyACM0 -hupcl'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Prevent the USB connector from accidentally being reset'
+
+      # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
+      # Wait a little bit so the device can enumerate, 3 seconds has seemed good.
+    - script: '/home/eden/findconnectedport-linux/findconnectedport && sleep 3'
+      workingDirectory: '/home/eden/findconnectedport-linux/'
+      displayName: 'Reset K4A Device'
+
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Check Device Health'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list x86_64-linux-clang-relwithdebinfo/bin/functional_test_list.txt --bin x86_64-linux-clang-relwithdebinfo/bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Run Functional Tests'
+      timeoutInMinutes: 15
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list x86_64-linux-clang-relwithdebinfo/bin/functional_test_list.txt --bin x86_64-linux-clang-relwithdebinfo/bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Run Functional Tests - Onboarding'
+      timeoutInMinutes: 15
+      continueOnError: true
 
     # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-    # Wait a little bit so the device can enumerate, 3 seconds has seemed good.
-  - script: '$(Agent.HomeDirectory)/bin/findconnectedport-linux/findconnectedport && sleep 3'
-    workingDirectory: '$(Agent.HomeDirectory)/bin/findconnectedport-linux/'
-    displayName: 'Reset K4A Device'
-
-  - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Check Device Health'
-
-  - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list x86_64-linux-clang-relwithdebinfo/bin/functional_test_list.txt --bin x86_64-linux-clang-relwithdebinfo/bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Run Functional Tests'
-    timeoutInMinutes: 15
-
-  - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list x86_64-linux-clang-relwithdebinfo/bin/functional_test_list.txt --bin x86_64-linux-clang-relwithdebinfo/bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Run Functional Tests - Onboarding'
-    timeoutInMinutes: 15
-    continueOnError: true
-
-  # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-  - script: '$(Agent.HomeDirectory)/bin/findconnectedport-linux/findconnectedport'
-    workingDirectory: '$(Agent.HomeDirectory)/bin/findconnectedport-linux/'
-    displayName: 'Reset K4A Device'
+    - script: '/home/eden/findconnectedport-linux/findconnectedport'
+      workingDirectory: '/home/eden/findconnectedport-linux/'
+      displayName: 'Reset K4A Device'
