@@ -921,14 +921,14 @@ k4a_result_t k4a_calibration_3d_to_2d(const k4a_calibration_t *calibration,
 
 k4a_result_t k4a_calibration_2d_to_2d(const k4a_calibration_t *calibration,
                                       const k4a_float2_t *source_point2d,
-                                      const float source_depth,
+                                      const float source_depth_in_mm,
                                       const k4a_calibration_type_t source_camera,
                                       const k4a_calibration_type_t target_camera,
                                       k4a_float2_t *target_point2d,
                                       int *valid)
 {
     return TRACE_CALL(transformation_2d_to_2d(
-        calibration, source_point2d->v, source_depth, source_camera, target_camera, target_point2d->v, valid));
+        calibration, source_point2d->v, source_depth_in_mm, source_camera, target_camera, target_point2d->v, valid));
 }
 
 k4a_transformation_t k4a_transformation_create(const k4a_calibration_t *calibration)

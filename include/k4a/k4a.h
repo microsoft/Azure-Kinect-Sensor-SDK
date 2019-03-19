@@ -1577,7 +1577,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_2d(const k4a_calibration_t *calibr
  * \param source_point2d
  * The 2D pixel in \p source_camera coordinates.
  *
- * \param source_depth
+ * \param source_depth_in_mm
  * The depth of \p source_point2d in millimeters.
  *
  * \param source_camera
@@ -1625,7 +1625,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_2d(const k4a_calibration_t *calibr
  */
 K4A_EXPORT k4a_result_t k4a_calibration_2d_to_2d(const k4a_calibration_t *calibration,
                                                  const k4a_float2_t *source_point2d,
-                                                 const float source_depth_mm,
+                                                 const float source_depth_in_mm,
                                                  const k4a_calibration_type_t source_camera,
                                                  const k4a_calibration_type_t target_camera,
                                                  k4a_float2_t *target_point2d,
