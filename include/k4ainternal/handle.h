@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 #ifdef __cplusplus
-#define ALLOCATE(type) ::new type() /* init to zero */
+#define ALLOCATE(type) ::new (std::nothrow) type() /* init to zero */
 #define DESTROY(ptr) delete ptr
 #define PRIV_HANDLE_TYPE(type) _handle_##type##_cpp
 #define PUB_HANDLE_TYPE(type) type##_wrapper_##_cpp

@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <new>
 
 #include "color_priv.h"
 

@@ -819,7 +819,7 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
                 bool dropped = false;
                 bool FrameContextRefd = false;
 
-                CFrameContext *pFrameContext = new CFrameContext(pSample);
+                CFrameContext *pFrameContext = new (std::nothrow) CFrameContext(pSample);
                 result = K4A_RESULT_FROM_BOOL(pFrameContext != NULL);
 
                 if (K4A_SUCCEEDED(result) && pFrameContext->GetPTSTime() == 0)
@@ -999,8 +999,9 @@ HRESULT CMFCameraReader::FindEdenColorCamera(GUID *containerId, ComPtr<IMFActiva
             if (SUCCEEDED(
                     ppDevices[i]->GetStringLength(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK, &length)))
             {
-                symbolicLink = new WCHAR[length + 1];
-                if (SUCCEEDED(ppDevices[i]->GetString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+                symbolicLink = new (std::nothrow) WCHAR[length + 1];
+                if (symbolicLink &&
+                    SUCCEEDED(ppDevices[i]->GetString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
                                                       (LPWSTR)symbolicLink,
                                                       length + 1,
                                                       &outLength)))
@@ -1030,7 +1031,10 @@ HRESULT CMFCameraReader::FindEdenColorCamera(GUID *containerId, ComPtr<IMFActiva
                     }
                 }
             }
-            delete[] symbolicLink;
+            if (symbolicLink)
+            {
+                delete[] symbolicLink;
+            }
         }
     }
 
