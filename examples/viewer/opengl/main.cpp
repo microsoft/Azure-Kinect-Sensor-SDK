@@ -10,7 +10,7 @@
 #include "texture.h"
 #include "viewerwindow.h"
 
-using namespace simpleviewer;
+using namespace viewer;
 
 void ColorizeDepthImage(const k4a::image &depthImage,
                         DepthPixelVisualizationFunction visualizationFn,
@@ -69,6 +69,9 @@ int main()
             //
             // We set the timeout to 0 so we don't block if there isn't an available frame.
             // This prevents the UI from becoming unresponsive.
+            //
+            // If we don't have new image data, we'll just reuse the textures we generated
+            // from the last time we got a capture.
             //
             k4a::capture capture;
             if (dev.get_capture(&capture, std::chrono::milliseconds(0)))

@@ -8,7 +8,7 @@
 
 #include "texture.h"
 
-namespace simpleviewer
+namespace viewer
 {
 class ViewerWindow
 {
@@ -69,6 +69,6 @@ private:
     int m_windowWidth;
     int m_windowHeight;
 };
-} // namespace simpleviewer
+} // namespace viewer
 
 #endif

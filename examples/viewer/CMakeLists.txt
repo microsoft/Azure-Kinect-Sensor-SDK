@@ -2,5 +2,4 @@
 # Licensed under the MIT License.
 
 add_subdirectory(opengl)
-# add_subdirectory(win32)
 

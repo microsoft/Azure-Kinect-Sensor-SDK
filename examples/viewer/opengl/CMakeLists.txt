@@ -7,12 +7,12 @@ include_directories(
     ${OPENGL_INCLUDE_DIRS}
 )
 
-add_executable(simpleviewer_opengl
+add_executable(viewer_opengl
     main.cpp
     texture.cpp
     viewerwindow.cpp)
 
-target_link_libraries(simpleviewer_opengl PRIVATE
+target_link_libraries(viewer_opengl PRIVATE
     k4a::k4a
     glfw::glfw
     imgui::imgui

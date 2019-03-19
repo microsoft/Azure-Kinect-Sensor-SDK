@@ -5,9 +5,9 @@
 
 #include <iostream>
 
-#include "simpleviewerutil.h"
+#include "viewerutil.h"
 
-using namespace simpleviewer;
+using namespace viewer;
 
 namespace
 {

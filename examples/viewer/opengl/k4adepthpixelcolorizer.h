@@ -16,7 +16,7 @@
 //
 #include "k4apixel.h"
 
-namespace simpleviewer
+namespace viewer
 {
 
 using DepthPixelVisualizationFunction = BgraPixel(const DepthPixel &value,
@@ -98,6 +98,6 @@ public:
         return BgraPixel{ normalizedValue, normalizedValue, normalizedValue, PixelMax };
     }
 };
-} // namespace simpleviewer
+} // namespace viewer
 
 #endif

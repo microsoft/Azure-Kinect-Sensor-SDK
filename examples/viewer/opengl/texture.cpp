@@ -3,9 +3,9 @@
 
 #include "texture.h"
 
-#include "simpleviewerutil.h"
+#include "viewerutil.h"
 
-using namespace simpleviewer;
+using namespace viewer;
 
 Texture::Texture(int width, int height) : m_width(width), m_height(height)
 {

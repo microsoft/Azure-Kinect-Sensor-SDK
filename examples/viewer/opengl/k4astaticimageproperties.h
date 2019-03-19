@@ -9,7 +9,7 @@
 
 #include <k4a/k4a.hpp>
 
-namespace simpleviewer
+namespace viewer
 {
 
 // Gets the dimensions of the color images that the color camera will produce for a
@@ -61,7 +61,7 @@ inline std::pair<int, int> GetDepthDimensions(const k4a_depth_mode_t depthMode)
 }
 
 // Gets the range of values that we expect to see from the depth camera
-// when using a given depth mode
+// when using a given depth mode, in millimeters
 //
 inline std::pair<uint16_t, uint16_t> GetDepthModeRange(const k4a_depth_mode_t depthMode)
 {
@@ -99,6 +99,6 @@ inline std::pair<uint16_t, uint16_t> GetIrRange(const k4a_depth_mode_t depthMode
         return { (uint16_t)0, (uint16_t)1000 };
     }
 }
-} // namespace simpleviewer
+} // namespace viewer
 
 #endif

@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#ifndef SIMPLEVIEWERUTIL_H
-#define SIMPLEVIEWERUTIL_H
+#ifndef VIEWERUTIL_H
+#define VIEWERUTIL_H
 
 #include <sstream>
 
 #include "k4aimgui_all.h"
 
-namespace simpleviewer
+namespace viewer
 {
 
 // Throw an error if OpenGL has encountered an error.
@@ -61,6 +61,6 @@ inline ImVec2 GetMaxImageSize(const ImVec2 imageDimensions, const ImVec2 imageMa
     return displayDimensions;
 }
 
-} // namespace simpleviewer
+} // namespace viewer
 
 #endif

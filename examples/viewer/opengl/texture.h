@@ -9,7 +9,7 @@
 #include "k4aimgui_all.h"
 #include "k4apixel.h"
 
-namespace simpleviewer
+namespace viewer
 {
 
 // A simple wrapper for OpenGL textures.
@@ -83,6 +83,6 @@ private:
     int m_height = 0;
 };
 
-} // namespace simpleviewer
+} // namespace viewer
 
 #endif

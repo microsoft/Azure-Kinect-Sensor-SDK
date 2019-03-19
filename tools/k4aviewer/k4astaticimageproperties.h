@@ -61,7 +61,7 @@ inline std::pair<int, int> GetDepthDimensions(const k4a_depth_mode_t depthMode)
 }
 
 // Gets the range of values that we expect to see from the depth camera
-// when using a given depth mode
+// when using a given depth mode, in millimeters
 //
 inline std::pair<uint16_t, uint16_t> GetDepthModeRange(const k4a_depth_mode_t depthMode)
 {
