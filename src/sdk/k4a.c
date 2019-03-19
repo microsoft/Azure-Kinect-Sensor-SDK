@@ -879,48 +879,48 @@ k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
 }
 
 k4a_result_t k4a_calibration_3d_to_3d(const k4a_calibration_t *calibration,
-                                      const k4a_float3_t *source_point3d,
+                                      const k4a_float3_t *source_point3d_mm,
                                       const k4a_calibration_type_t source_camera,
                                       const k4a_calibration_type_t target_camera,
-                                      k4a_float3_t *target_point3d)
+                                      k4a_float3_t *target_point3d_mm)
 {
     return TRACE_CALL(
-        transformation_3d_to_3d(calibration, source_point3d->v, source_camera, target_camera, target_point3d->v));
+        transformation_3d_to_3d(calibration, source_point3d_mm->v, source_camera, target_camera, target_point3d_mm->v));
 }
 
 k4a_result_t k4a_calibration_2d_to_3d(const k4a_calibration_t *calibration,
                                       const k4a_float2_t *source_point2d,
-                                      const float source_depth,
+                                      const float source_depth_mm,
                                       const k4a_calibration_type_t source_camera,
                                       const k4a_calibration_type_t target_camera,
-                                      k4a_float3_t *target_point3d,
+                                      k4a_float3_t *target_point3d_mm,
                                       int *valid)
 {
     return TRACE_CALL(transformation_2d_to_3d(
-        calibration, source_point2d->v, source_depth, source_camera, target_camera, target_point3d->v, valid));
+        calibration, source_point2d->v, source_depth_mm, source_camera, target_camera, target_point3d_mm->v, valid));
 }
 
 k4a_result_t k4a_calibration_3d_to_2d(const k4a_calibration_t *calibration,
-                                      const k4a_float3_t *source_point3d,
+                                      const k4a_float3_t *source_point3d_mm,
                                       const k4a_calibration_type_t source_camera,
                                       const k4a_calibration_type_t target_camera,
                                       k4a_float2_t *target_point2d,
                                       int *valid)
 {
     return TRACE_CALL(transformation_3d_to_2d(
-        calibration, source_point3d->v, source_camera, target_camera, target_point2d->v, valid));
+        calibration, source_point3d_mm->v, source_camera, target_camera, target_point2d->v, valid));
 }
 
 k4a_result_t k4a_calibration_2d_to_2d(const k4a_calibration_t *calibration,
                                       const k4a_float2_t *source_point2d,
-                                      const float source_depth,
+                                      const float source_depth_mm,
                                       const k4a_calibration_type_t source_camera,
                                       const k4a_calibration_type_t target_camera,
                                       k4a_float2_t *target_point2d,
                                       int *valid)
 {
     return TRACE_CALL(transformation_2d_to_2d(
-        calibration, source_point2d->v, source_depth, source_camera, target_camera, target_point2d->v, valid));
+        calibration, source_point2d->v, source_depth_mm, source_camera, target_camera, target_point2d->v, valid));
 }
 
 k4a_transformation_t k4a_transformation_create(const k4a_calibration_t *calibration)
