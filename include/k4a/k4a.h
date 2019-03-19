@@ -1426,14 +1426,14 @@ K4A_EXPORT k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
  * stored in millimeters.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if \p target_point3d was successfully written. ::K4A_RESULT_FAILED if \p calibration
+ * ::K4A_RESULT_SUCCEEDED if \p target_point3d_mm was successfully written. ::K4A_RESULT_FAILED if \p calibration
  * contained invalid transformation parameters.
  *
  * \remarks
  * This function is used to transform 3D points between depth and color camera coordinate systems. The function uses the
  * extrinsic camera calibration. It computes the output via multiplication with a precomputed matrix encoding a 3D
- * rotation and a 3D translation. If \p source_camera and \p target_camera are the same, then \p target_point3d will be
- * identical to \p source_point3d.
+ * rotation and a 3D translation. If \p source_camera and \p target_camera are the same, then \p target_point3d_mm will be
+ * identical to \p source_point3d_mm.
  *
  * \relates k4a_calibration_t
  *
@@ -1478,14 +1478,14 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_3d(const k4a_calibration_t *calibr
  * the coordinate is not valid in the calibration model.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if \p target_point3d was successfully written. ::K4A_RESULT_FAILED if \p calibration
+ * ::K4A_RESULT_SUCCEEDED if \p target_point3d_mm was successfully written. ::K4A_RESULT_FAILED if \p calibration
  * contained invalid transformation parameters. If the function returns ::K4A_RESULT_SUCCEEDED, but \p valid is 0,
- * the transformation was computed, but the results in \p target_point3d are outside of the range of valid calibration
+ * the transformation was computed, but the results in \p target_point3d_mm are outside of the range of valid calibration
  * and should be ignored.
  *
  * \remarks
  * This function applies the intrinsic calibration of \p source_camera to compute the 3D ray from the focal point of the
- * camera through pixel \p source_point2d. The 3D point on this ray is then found using \p source_depth. If \p
+ * camera through pixel \p source_point2d. The 3D point on this ray is then found using \p source_depth_mm. If \p
  * target_camera is different from \p source_camera, the 3D point is transformed to \p target_camera using
  * k4a_calibration_3d_to_3d(). In practice, \p source_camera and \p target_camera will often be identical. In this
  * case, no 3D to 3D transformation is applied.
@@ -1493,7 +1493,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_3d(const k4a_calibration_t *calibr
  * \remarks
  * If \p source_point2d is not considered as valid pixel coordinate
  * according to the intrinsic camera model, \p valid is set to 0. If it is valid, \p valid will be set to 1. The user
- * should not use the value of \p target_point3d if \p valid was set to 0.
+ * should not use the value of \p target_point3d_mm if \p valid was set to 0.
  *
  * \relates k4a_calibration_t
  *
@@ -1531,7 +1531,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_2d_to_3d(const k4a_calibration_t *calibr
  * Pointer to the output where the 2D pixel in \p target_camera coordinates is stored.
  *
  * \param valid
- * The output parameter returns a value of 1 if the \p source_point3d is a valid coordinate in the \p target_camera
+ * The output parameter returns a value of 1 if the \p source_point3d_mm is a valid coordinate in the \p target_camera
  * coordinate system, and will return 0 if the coordinate is not valid in the calibration model.
  *
  * \returns
@@ -1541,13 +1541,13 @@ K4A_EXPORT k4a_result_t k4a_calibration_2d_to_3d(const k4a_calibration_t *calibr
  * and should be ignored.
  *
  * \remarks
- * If \p target_camera is different from \p source_camera, \p source_point3d is transformed to \p target_camera using
+ * If \p target_camera is different from \p source_camera, \p source_point3d_mm is transformed to \p target_camera using
  * k4a_calibration_3d_to_3d(). In practice, \p source_camera and \p target_camera will often be identical. In this
  * case, no 3D to 3D transformation is applied. The 3D point in the coordinate system of \p target_camera is then
  * projected onto the image plane using the intrinsic calibration of \p target_camera.
  *
  * \remarks
- * If \p source_point3d does not map to a valid 2D coordinate in the \p target_camera coordinate system, \p valid is set
+ * If \p source_point3d_mm does not map to a valid 2D coordinate in the \p target_camera coordinate system, \p valid is set
  * to 0. If it is valid, \p valid will be set to 1. The user should not use the value of \p target_point2d if \p valid
  * was set to 0.
  *
