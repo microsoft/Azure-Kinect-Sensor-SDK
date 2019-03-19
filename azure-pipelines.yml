@@ -294,10 +294,15 @@ jobs:
           param
           (
               [Parameter(Mandatory)]
-              [string] $url
+              [string] $url,
+              [string] $filename
           )
 
-          $filename = Split-Path -Path $url -Leaf
+          if (-not ($filename))
+          {
+              $filename = Split-Path -Path $url -Leaf
+          }
+
           if (-not ($filename))
           {
               Write-Error "Unable to parse filename from $url"
@@ -316,7 +321,8 @@ jobs:
 
       # Download Doxygen
       $url = "https://sourceforge.net/projects/doxygen/files/rel-1.8.14/doxygen-1.8.14.windows.bin.zip/download"
-      $doxygenzip = Download-ToTemp -url $url
+      $filename = "doxygen-1.8.14.windows.bin.zip"
+      $doxygenzip = Download-ToTemp -url $url -filename $filename
 
       Expand-Archive $doxygenzip .\doxygenexe
       Write-Host "Doxygen installed. Please use Visual Studio Developer Command prompt to build."
