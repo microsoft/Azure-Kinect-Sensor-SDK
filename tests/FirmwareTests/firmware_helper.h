@@ -20,9 +20,9 @@
 // Test firmware - This should be a firmware where all components have different versions than the candidate firmware.
 // Candidate firmware - This should be the firmware that is being validated. It will be passed in via command line
 // parameter.
-#define K4A_FACTORY_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
-#define K4A_LKG_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
-#define K4A_TEST_FIRMWARE_PATH "..\\tools\\updater\\firmware\\AzureKinectDK_Fw_1.5.786013.bin"
+#define K4A_FACTORY_FIRMWARE_PATH "D:\\Shares\\Eden\\Public\\AzureKinectDK_Fw_1.5.786013.bin"
+#define K4A_LKG_FIRMWARE_PATH "D:\\Shares\\Eden\\Public\\AzureKinectDK_Fw_1.5.886314.bin"
+#define K4A_TEST_FIRMWARE_PATH "D:\\Shares\\Eden\\Public\\AzureKinectDK_Fw_1.5.786013.bin"
 
 typedef enum
 {
@@ -38,8 +38,8 @@ typedef enum
 
 typedef enum
 {
-    FIRMWARE_OPERATION_RESET,
-    FIRMWARE_OPERATION_DISCONNECT,
+    FIRMWARE_INTERRUPTION_RESET,
+    FIRMWARE_INTERRUPTION_DISCONNECT,
 } firmware_operation_interruption_t;
 
 extern int g_k4a_port_number;
@@ -68,6 +68,7 @@ firmware_operation_status_t calculate_overall_component_status(const firmware_co
 
 bool compare_version(k4a_version_t left_version, k4a_version_t right_version);
 bool compare_version_list(k4a_version_t device_version, uint8_t count, k4a_version_t versions[5]);
+bool compare_device_serial_number(firmware_t firmware_handle, char *device_serial_number);
 
 void log_firmware_build_config(k4a_firmware_build_t build_config);
 void log_firmware_signature_type(k4a_firmware_signature_t signature_type, bool certificate);

@@ -327,6 +327,43 @@ bool compare_version_list(k4a_version_t device_version, uint8_t count, k4a_versi
     return false;
 }
 
+bool compare_device_serial_number(firmware_t firmware_handle, char *device_serial_number)
+{
+    char *serial_number = nullptr;
+    size_t serial_number_length = 0;
+
+    if (K4A_BUFFER_RESULT_TOO_SMALL != firmware_get_device_serialnum(firmware_handle, nullptr, &serial_number_length))
+    {
+        printf("ERROR: Failed to get serial number length\n");
+        return false;
+    }
+
+    serial_number = (char *)malloc(serial_number_length);
+    if (serial_number == nullptr)
+    {
+        printf("ERROR: Failed to allocate memory for serial number (%zu bytes)\n", serial_number_length);
+        return false;
+    }
+
+    if (K4A_BUFFER_RESULT_SUCCEEDED !=
+        firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length))
+    {
+        printf("ERROR: Failed to get serial number\n");
+        free(serial_number);
+        return false;
+    }
+
+    if (strcmp(device_serial_number, serial_number) != 0)
+    {
+        printf("\'%s\' != \'%s\'", device_serial_number, serial_number);
+        free(serial_number);
+        return false;
+    }
+
+    free(serial_number);
+    return true;
+}
+
 void log_firmware_build_config(k4a_firmware_build_t build_config)
 {
     std::cout << "  Build Config:             ";
@@ -462,12 +499,33 @@ k4a_result_t reset_device(firmware_t *firmware_handle)
     return TRACE_CALL(open_firmware_device(firmware_handle));
 }
 
+k4a_result_t disconnect_device(firmware_t *firmware_handle)
+{
+    LOG_INFO("Disconnecting device...", 0);
+
+    K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
+
+    ThreadAPI_Sleep(500);
+
+    K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(g_k4a_port_number));
+
+    firmware_destroy(*firmware_handle);
+    *firmware_handle = nullptr;
+
+    // Re-open the device to ensure it is ready for use.
+    return TRACE_CALL(open_firmware_device(firmware_handle));
+}
+
 k4a_result_t interrupt_operation(firmware_t *firmware_handle, firmware_operation_interruption_t interruption)
 {
     switch (interruption)
     {
-    case FIRMWARE_OPERATION_RESET:
+    case FIRMWARE_INTERRUPTION_RESET:
         return TRACE_CALL(reset_device(firmware_handle));
+        break;
+
+    case FIRMWARE_INTERRUPTION_DISCONNECT:
+        return TRACE_CALL(disconnect_device(firmware_handle));
         break;
 
     default:
@@ -671,7 +729,7 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
 
     // At this point the update has either completed or timed out. Either way the device needs to be reset after the
     // update has progressed.
-    return TRACE_CALL(interrupt_operation(firmware_handle, FIRMWARE_OPERATION_RESET));
+    return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
 }
 
 k4a_result_t perform_device_update(firmware_t *firmware_handle,
@@ -691,7 +749,7 @@ k4a_result_t perform_device_update(firmware_t *firmware_handle,
     K4A_TEST_VERIFY_SUCCEEDED(firmware_download(*firmware_handle, firmware_buffer, firmware_size));
     interrupt_device_at_update_stage(firmware_handle,
                                      FIRMWARE_OPERATION_FULL_DEVICE,
-                                     FIRMWARE_OPERATION_RESET,
+                                     FIRMWARE_INTERRUPTION_RESET,
                                      &finalStatus,
                                      verbose_logging);
 

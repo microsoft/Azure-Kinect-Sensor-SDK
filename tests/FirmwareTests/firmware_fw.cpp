@@ -59,79 +59,87 @@ protected:
 TEST_F(firmware_fw, DISABLED_update_timing)
 {
     LOG_INFO("Beginning the manual test to get update timings.", 0);
-    g_connection_exerciser->set_usb_port(g_k4a_port_number);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, g_connection_exerciser->set_usb_port(g_k4a_port_number));
 
-    open_firmware_device(&firmware_handle);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
     LOG_INFO("Updating the device to the Candidate firmware.");
-    perform_device_update(&firmware_handle,
-                          g_candidate_firmware_buffer,
-                          g_candidate_firmware_size,
-                          g_candidate_firmware_package_info,
-                          true);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              perform_device_update(&firmware_handle,
+                                    g_candidate_firmware_buffer,
+                                    g_candidate_firmware_size,
+                                    g_candidate_firmware_package_info,
+                                    true));
 
     LOG_INFO("Updating the device to the Test firmware.");
-    perform_device_update(&firmware_handle,
-                          g_test_firmware_buffer,
-                          g_test_firmware_size,
-                          g_test_firmware_package_info,
-                          true);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              perform_device_update(&firmware_handle,
+                                    g_test_firmware_buffer,
+                                    g_test_firmware_size,
+                                    g_test_firmware_package_info,
+                                    true));
 }
 
 TEST_F(firmware_fw, simple_update_from_lkg)
 {
     LOG_INFO("Beginning the basic update test from the LKG firmware.", 0);
-    g_connection_exerciser->set_usb_port(g_k4a_port_number);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, g_connection_exerciser->set_usb_port(g_k4a_port_number));
 
-    open_firmware_device(&firmware_handle);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
     LOG_INFO("Updating the device to the LKG firmware.");
-    perform_device_update(&firmware_handle,
-                          g_lkg_firmware_buffer,
-                          g_lkg_firmware_size,
-                          g_lkg_firmware_package_info,
-                          false);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              perform_device_update(&firmware_handle,
+                                    g_lkg_firmware_buffer,
+                                    g_lkg_firmware_size,
+                                    g_lkg_firmware_package_info,
+                                    false));
 
     LOG_INFO("Updating the device to the Candidate firmware.");
-    perform_device_update(&firmware_handle,
-                          g_candidate_firmware_buffer,
-                          g_candidate_firmware_size,
-                          g_candidate_firmware_package_info,
-                          false);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              perform_device_update(&firmware_handle,
+                                    g_candidate_firmware_buffer,
+                                    g_candidate_firmware_size,
+                                    g_candidate_firmware_package_info,
+                                    false));
 
     LOG_INFO("Updating the device to the Test firmware.");
-    perform_device_update(&firmware_handle,
-                          g_test_firmware_buffer,
-                          g_test_firmware_size,
-                          g_test_firmware_package_info,
-                          false);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              perform_device_update(&firmware_handle,
+                                    g_test_firmware_buffer,
+                                    g_test_firmware_size,
+                                    g_test_firmware_package_info,
+                                    false));
 }
 
 TEST_F(firmware_fw, simple_update_from_factory)
 {
     LOG_INFO("Beginning the basic update test from the Factory firmware.", 0);
-    g_connection_exerciser->set_usb_port(g_k4a_port_number);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, g_connection_exerciser->set_usb_port(g_k4a_port_number));
 
-    open_firmware_device(&firmware_handle);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
     LOG_INFO("Updating the device to the Factory firmware.");
-    perform_device_update(&firmware_handle,
-                          g_factory_firmware_buffer,
-                          g_factory_firmware_size,
-                          g_factory_firmware_package_info,
-                          false);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              perform_device_update(&firmware_handle,
+                                    g_factory_firmware_buffer,
+                                    g_factory_firmware_size,
+                                    g_factory_firmware_package_info,
+                                    false));
 
     LOG_INFO("Updating the device to the Candidate firmware.");
-    perform_device_update(&firmware_handle,
-                          g_candidate_firmware_buffer,
-                          g_candidate_firmware_size,
-                          g_candidate_firmware_package_info,
-                          false);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              perform_device_update(&firmware_handle,
+                                    g_candidate_firmware_buffer,
+                                    g_candidate_firmware_size,
+                                    g_candidate_firmware_package_info,
+                                    false));
 
     LOG_INFO("Updating the device to the Test firmware.");
-    perform_device_update(&firmware_handle,
-                          g_test_firmware_buffer,
-                          g_test_firmware_size,
-                          g_test_firmware_package_info,
-                          false);
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              perform_device_update(&firmware_handle,
+                                    g_test_firmware_buffer,
+                                    g_test_firmware_size,
+                                    g_test_firmware_package_info,
+                                    false));
 }
