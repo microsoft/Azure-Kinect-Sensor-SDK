@@ -68,19 +68,18 @@ k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
     if (K4A_SUCCEEDED(result))
     {
 #ifdef _WIN32
-        UNREFERENCED_PARAMETER(serial_number);
+        (void)(serial_number);
         static_assert(sizeof(guid_t) == sizeof(GUID), "Windows GUID and this guid_t are not the same");
         result = K4A_RESULT_FROM_BOOL(SUCCEEDED(
             Microsoft::WRL::MakeAndInitialize<CMFCameraReader>(&color->m_spCameraReader, (GUID *)container_id)));
 #else
-        UNREFERENCED_PARAMETER(container_id);
+        (void)(container_id);
         color->m_spCameraReader.reset(new (std::nothrow) UVCCameraReader);
         if (!color->m_spCameraReader)
         {
             result = K4A_RESULT_FAILED;
         }
-
-        if (K4A_SUCCEEDED(result))
+        else
         {
             result = TRACE_CALL(color->m_spCameraReader->Init(serial_number));
         }
