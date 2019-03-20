@@ -6,27 +6,21 @@
 
 K4A_DECLARE_HANDLE(foo_t);
 
-static int g_dtor_called = 0;
-
-#define MAGIC_INIT_VALUE 0x10FE50C0
 class cpp_class_for_ctor_dtor_test
 {
 public:
-    cpp_class_for_ctor_dtor_test() : m_ctor(MAGIC_INIT_VALUE)
+    cpp_class_for_ctor_dtor_test()
     {
-        g_dtor_called = 0;
+        m_ctor = 1;
+        m_dtor = 0;
     };
     ~cpp_class_for_ctor_dtor_test()
     {
-        g_dtor_called = 1;
+        m_dtor = 1;
     };
-    int is_initialized()
-    {
-        return (m_ctor == MAGIC_INIT_VALUE);
-    }
 
-private:
-    int m_ctor;
+    static int m_ctor;
+    static int m_dtor;
 };
 
 typedef struct
@@ -60,20 +54,24 @@ TEST(handle_ut, create_free)
     foo_t_destroy(foo);
 }
 
+int cpp_class_for_ctor_dtor_test::m_ctor = 0;
+int cpp_class_for_ctor_dtor_test::m_dtor = 0;
+
 TEST(handle_ut, create_free_for_cpp)
 {
     bar_t bar = NULL;
     context2_t *context = bar_t_create(&bar);
+    context->ctor_dtor_obj.m_dtor = 0;
 
     EXPECT_NE((context2_t *)NULL, context);
     EXPECT_NE((bar_t)NULL, bar);
+    EXPECT_NE(cpp_class_for_ctor_dtor_test::m_ctor, 0);
+    EXPECT_EQ(cpp_class_for_ctor_dtor_test::m_dtor, 0);
 
-    EXPECT_NE(context->ctor_dtor_obj.is_initialized(), 0);
-    EXPECT_EQ(g_dtor_called, 0);
-
+    // delete bar;
     bar_t_destroy(bar);
 
-    EXPECT_NE(g_dtor_called, 0);
+    EXPECT_NE(cpp_class_for_ctor_dtor_test::m_dtor, 0);
 }
 
 TEST(handle_ut, deref_correct)
