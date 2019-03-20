@@ -52,8 +52,8 @@ int main(int argc, char **argv)
     std::cout << "Device started" << std::endl;
 
     k4a_record_t recording;
-    // In order to test the custom track recording, we disable the default capture recording
-    if (K4A_FAILED(k4a_record_create(recording_filename, device, K4A_DEVICE_CONFIG_INIT_DISABLE_ALL, &recording)))
+    // In order to test the custom track recording, we disable the default capture recording and set the device to be NULL
+    if (K4A_FAILED(k4a_record_create(recording_filename, NULL, K4A_DEVICE_CONFIG_INIT_DISABLE_ALL, &recording)))
     {
         std::cerr << "Unable to create recording file: " << recording_filename << std::endl;
         return 1;
@@ -69,8 +69,8 @@ int main(int argc, char **argv)
         if (buffer_result == K4A_BUFFER_RESULT_SUCCEEDED)
         {
             k4a_record_add_attachment(recording,
-                                      "calibration2.json",
-                                      "K4A_CALIBRATION_FILE2",
+                                      "calibration.json",
+                                      "K4A_CALIBRATION_FILE",
                                       calibration_buffer.data(),
                                       calibration_buffer.size());
         }

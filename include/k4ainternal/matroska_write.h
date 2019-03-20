@@ -84,7 +84,7 @@ typedef struct _k4a_record_context_t
     bool header_written, first_cluster_written;
 } k4a_record_context_t;
 
-K4A_DECLARE_CONTEXT_CPP(k4a_record_t, k4a_record_context_t);
+K4A_DECLARE_CONTEXT(k4a_record_t, k4a_record_context_t);
 
 enum TagTargetType
 {

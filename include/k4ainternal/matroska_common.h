@@ -8,7 +8,7 @@
 #define RECORD_COMMON_H
 
 #include <k4arecord/types.h>
-#include <k4ainternal/handle_cpp.h>
+#include <k4ainternal/handle.h>
 #include <list>
 #include <fstream>
 #include <memory>

@@ -378,6 +378,12 @@ k4a_result_t k4a_record_add_attachment(const k4a_record_t recording_handle,
     k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
 
+    if (context->header_written)
+    {
+        logger_error(LOGGER_RECORD, "Attachment must be added before the recording header is written.");
+        return K4A_RESULT_FAILED;
+    }
+
     KaxAttached *attached = add_attachment(context,
                                            file_name,
                                            "application/octet-stream",
