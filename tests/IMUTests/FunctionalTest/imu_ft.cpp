@@ -3,6 +3,7 @@
 
 //************************ Includes *****************************
 #include <k4a/k4a.h>
+#include <k4ainternal/common.h>
 #include <utcommon.h>
 #include <gtest/gtest.h>
 #include <azure_c_shared_utility/tickcounter.h>
@@ -11,7 +12,6 @@
 //**************Symbolic Constant Macros (defines)  *************
 #define STREAM_RUN_TIME_SEC 4
 #define ERROR_START_STREAM_TIME 10000
-#define IMU_EXPECTED_FPS_1600 1666
 
 // Total ACC range is +/- 147.15 m/s^2.
 #define MIN_ACC_READING -15.0f
@@ -163,7 +163,7 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
  */
 TEST_F(imu_ft, imuStreamFull)
 {
-    RunStreamConfig(m_device, IMU_EXPECTED_FPS_1600);
+    RunStreamConfig(m_device, K4A_IMU_SAMPLE_RATE);
     if (HasFatalFailure())
         return;
 }

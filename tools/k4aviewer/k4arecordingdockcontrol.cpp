@@ -206,7 +206,7 @@ void K4ARecordingDockControl::ReadNext()
     auto now = std::chrono::high_resolution_clock::now();
     std::chrono::high_resolution_clock::duration timeSinceLastFrame = now - m_lastFrameShownTime;
 
-    if (m_currentCapture == nullptr || timeSinceLastFrame >= m_timePerFrame)
+    if (!m_currentCapture || timeSinceLastFrame >= m_timePerFrame)
     {
         k4a::capture nextCapture(m_recording->GetNextCapture());
         if (nextCapture == nullptr)
@@ -219,11 +219,7 @@ void K4ARecordingDockControl::ReadNext()
         }
         else
         {
-            m_currentCapture = std::move(nextCapture);
-
-            m_currentTimestamp = GetCaptureTimestamp(m_currentCapture);
-            m_cameraDataSource.NotifyObservers(m_currentCapture);
-            m_lastFrameShownTime = now;
+            SetCurrentCapture(std::move(nextCapture));
         }
     }
 }
@@ -234,16 +230,42 @@ void K4ARecordingDockControl::Step(bool backward)
     k4a::capture capture = backward ? m_recording->GetPreviousCapture() : m_recording->GetNextCapture();
     if (capture)
     {
-        m_currentCapture = std::move(capture);
-
-        m_currentTimestamp = GetCaptureTimestamp(m_currentCapture);
-        m_cameraDataSource.NotifyObservers(m_currentCapture);
+        SetCurrentCapture(std::move(capture));
     }
     else
     {
         // End of recording, keep displaying the last capture.
-        m_currentCapture = backward ? m_recording->GetNextCapture() : m_recording->GetPreviousCapture();
+        //
+        capture = backward ? m_recording->GetNextCapture() : m_recording->GetPreviousCapture();
+        SetCurrentCapture(std::move(capture));
     }
+}
+
+void K4ARecordingDockControl::SetCurrentCapture(k4a::capture &&capture)
+{
+    m_currentCapture = std::move(capture);
+
+    m_lastFrameShownTime = std::chrono::high_resolution_clock::now();
+    m_currentTimestamp = GetCaptureTimestamp(m_currentCapture);
+
+    // Update the images' timestamps using the timing data embedded in the recording
+    // so we show comparable timestamps whenplaying back synchronized recordings
+    //
+    std::chrono::microseconds offset(m_startTimestampOffsetUsec);
+
+    k4a::image images[] = { m_currentCapture.get_color_image(),
+                            m_currentCapture.get_depth_image(),
+                            m_currentCapture.get_ir_image() };
+
+    for (k4a::image &image : images)
+    {
+        if (image)
+        {
+            image.set_timestamp(image.get_timestamp() + offset);
+        }
+    }
+
+    m_cameraDataSource.NotifyObservers(m_currentCapture);
 }
 
 std::chrono::microseconds K4ARecordingDockControl::GetCaptureTimestamp(const k4a::capture &capture)

@@ -107,7 +107,11 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
         queue_error(p_imu->queue);
     }
 
-    result = K4A_RESULT_FROM_BOOL(image != NULL);
+    if (K4A_SUCCEEDED(result))
+    {
+        result = K4A_RESULT_FROM_BOOL(image != NULL);
+    }
+
     if (K4A_SUCCEEDED(result))
     {
         // Take apart the capture packet data and create captures for each sample

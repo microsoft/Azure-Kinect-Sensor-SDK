@@ -151,7 +151,7 @@ void SampleRecordings::SetUp()
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         { // Force the timestamp offset so the recording starts at a non-zero timestamp.
-            k4arecord::k4a_record_context_t *context = &((k4arecord::k4a_record_t_wrapper *)handle)->context;
+            k4arecord::k4a_record_context_t *context = &((k4arecord::k4a_record_t_wrapper__cpp *)handle)->context;
             context->first_cluster_written = true;
             context->start_timestamp_offset = 1_ms;
         }
