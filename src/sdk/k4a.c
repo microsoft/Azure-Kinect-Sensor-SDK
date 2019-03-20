@@ -89,6 +89,8 @@ k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     k4a_device_t handle = NULL;
     const guid_t *container_id = NULL;
+    char serial_number[MAX_SERIAL_NUMBER_LENGTH];
+    size_t serial_number_size = sizeof(serial_number);
 
     allocator_initialize();
 
@@ -127,6 +129,15 @@ k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
 
     if (K4A_SUCCEEDED(result))
     {
+        if (TRACE_BUFFER_CALL(depthmcu_get_serialnum(device->depthmcu, serial_number, &serial_number_size) !=
+                              K4A_BUFFER_RESULT_SUCCEEDED))
+        {
+            result = K4A_RESULT_FAILED;
+        }
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
         result = TRACE_CALL(colormcu_create(container_id, &device->colormcu));
     }
 
@@ -151,8 +162,8 @@ k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
     // Create color Module
     if (K4A_SUCCEEDED(result))
     {
-        result = TRACE_CALL(
-            color_create(device->tick_handle, container_id, color_capture_ready, handle, &device->color));
+        result = TRACE_CALL(color_create(
+            device->tick_handle, container_id, serial_number, color_capture_ready, handle, &device->color));
     }
 
     // Create imu Module
@@ -676,12 +687,12 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_con
         LOG_INFO("    wired_sync_mode:%d", config->wired_sync_mode);
         LOG_INFO("    subordinate_delay_off_master_usec:%d", config->subordinate_delay_off_master_usec);
         LOG_INFO("    disable_streaming_indicator:%d", config->disable_streaming_indicator);
-        result = validate_configuration(device, config);
+        result = TRACE_CALL(validate_configuration(device, config));
     }
 
     if (K4A_SUCCEEDED(result))
     {
-        result = colormcu_set_multi_device_mode(device->colormcu, config);
+        result = TRACE_CALL(colormcu_set_multi_device_mode(device->colormcu, config));
     }
 
     if (K4A_SUCCEEDED(result))

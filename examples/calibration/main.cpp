@@ -17,7 +17,7 @@ static string get_serial(k4a_device_t device)
         exit(-1);
     }
 
-    char *serial_number = new char[serial_number_length];
+    char *serial_number = new (std::nothrow) char[serial_number_length];
     if (serial_number == NULL)
     {
         cout << "Failed to allocate memory for serial number (" << serial_number_length << " bytes)" << endl;
