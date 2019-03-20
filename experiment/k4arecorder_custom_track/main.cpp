@@ -128,7 +128,7 @@ int main(int argc, char **argv)
                                          sizeof(depth_codec_header));
     if (K4A_SUCCEEDED(result))
     {
-        result = k4a_record_set_custom_track_info_video(recording, "DEPTH", &depth_video_info);
+        result = k4a_record_set_custom_track_info_video(recording, "IR", &depth_video_info);
     }
     VERIFY(result, "Add IR custom track failed!");
 
