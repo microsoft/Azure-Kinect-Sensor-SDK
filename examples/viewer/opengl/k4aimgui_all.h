@@ -21,8 +21,9 @@
 #define NOMINMAX
 
 // Clang parses doxygen-style comments in your source and checks for doxygen syntax errors.
-// Unfortunately, some of our external dependencies have doxygen syntax errors in them, so
-// we need to shut off that warning.
+// Unfortunately, some of our external dependencies have doxygen syntax errors in their
+// headers and clang looks at them when we include them here, so we need to shut off those
+// warnings on these headers.
 //
 #ifdef __clang__
 #pragma clang diagnostic push
