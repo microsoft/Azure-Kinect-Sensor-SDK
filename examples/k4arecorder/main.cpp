@@ -15,6 +15,7 @@
 #include <atomic>
 #include <ctime>
 #include <csignal>
+#include <math.h>
 
 static time_t exiting_timestamp;
 
