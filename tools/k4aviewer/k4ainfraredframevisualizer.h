@@ -21,7 +21,10 @@ class K4AInfraredFrameVisualizer
     : public K4ADepthSensorFrameBaseVisualizer<K4A_IMAGE_FORMAT_IR16, K4ADepthPixelColorizer::ColorizeGreyscale>
 {
 public:
-    explicit K4AInfraredFrameVisualizer(k4a_depth_mode_t depthMode);
+    explicit K4AInfraredFrameVisualizer(k4a_depth_mode_t depthMode) :
+        K4ADepthSensorFrameBaseVisualizer<K4A_IMAGE_FORMAT_IR16, K4ADepthPixelColorizer::ColorizeGreyscale>(
+            depthMode,
+            GetIrLevels(depthMode)){};
 
     ~K4AInfraredFrameVisualizer() override = default;
 

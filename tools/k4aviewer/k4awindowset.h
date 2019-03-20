@@ -50,7 +50,7 @@ public:
 
     static void StartPointCloudWindow(const char *sourceIdentifier,
                                       const k4a::calibration &calibrationData,
-                                      K4ADataSource<k4a::capture> &cameraDataSource,
+                                      K4ADataSource<k4a::capture> *cameraDataSource,
                                       bool enableColorPointCloud);
 };
 } // namespace k4aviewer

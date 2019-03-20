@@ -97,15 +97,15 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &
 
     // Device info
     //
-    if (K4A_BUFFER_RESULT_SUCCEEDED != m_recording->GetTag("K4A_DEVICE_SERIAL_NUMBER", m_deviceSerialNumber))
+    if (K4A_BUFFER_RESULT_SUCCEEDED != m_recording->GetTag("K4A_DEVICE_SERIAL_NUMBER", &m_deviceSerialNumber))
     {
         m_deviceSerialNumber = noneStr;
     }
-    if (K4A_BUFFER_RESULT_SUCCEEDED != m_recording->GetTag("K4A_COLOR_FIRMWARE_VERSION", m_colorFirmwareVersion))
+    if (K4A_BUFFER_RESULT_SUCCEEDED != m_recording->GetTag("K4A_COLOR_FIRMWARE_VERSION", &m_colorFirmwareVersion))
     {
         m_colorFirmwareVersion = noneStr;
     }
-    if (K4A_BUFFER_RESULT_SUCCEEDED != m_recording->GetTag("K4A_DEPTH_FIRMWARE_VERSION", m_depthFirmwareVersion))
+    if (K4A_BUFFER_RESULT_SUCCEEDED != m_recording->GetTag("K4A_DEPTH_FIRMWARE_VERSION", &m_depthFirmwareVersion))
     {
         m_depthFirmwareVersion = noneStr;
     }
@@ -321,7 +321,7 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
 
     case K4AWindowSet::ViewType::PointCloudViewer:
         k4a::calibration calibration;
-        const k4a_result_t result = m_recording->GetCalibration(calibration);
+        const k4a_result_t result = m_recording->GetCalibration(&calibration);
         if (result != K4A_RESULT_SUCCEEDED)
         {
             return;
@@ -332,7 +332,7 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
                                             K4A_IMAGE_FORMAT_COLOR_BGRA32;
         K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
                                             std::move(calibration),
-                                            m_cameraDataSource,
+                                            &m_cameraDataSource,
                                             colorPointCloudAvailable);
         break;
     }

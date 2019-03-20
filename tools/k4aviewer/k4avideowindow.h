@@ -31,7 +31,7 @@ public:
         m_frameSource(std::move(frameSource)),
         m_title(std::move(title))
     {
-        const GLenum initResult = m_frameSource->InitializeTexture(m_currentTexture);
+        const GLenum initResult = m_frameSource->InitializeTexture(&m_currentTexture);
         const ImageVisualizationResult ivr = GLEnumToImageVisualizationResult(initResult);
         if (ivr != ImageVisualizationResult::Success)
         {
@@ -70,7 +70,8 @@ private:
             return;
         }
 
-        const ImageVisualizationResult nextFrameResult = m_frameSource->GetNextFrame(*m_currentTexture, m_currentImage);
+        const ImageVisualizationResult nextFrameResult = m_frameSource->GetNextFrame(m_currentTexture.get(),
+                                                                                     &m_currentImage);
         if (nextFrameResult == ImageVisualizationResult::NoDataError)
         {
             // We don't have data from the camera yet; show the window with the default black texture.

@@ -18,7 +18,6 @@
 
 // Project headers
 //
-#include "assertionexception.h"
 #include "ik4aobserver.h"
 #include "ik4aframevisualizer.h"
 #include "k4aimageextractor.h"
@@ -31,7 +30,7 @@ namespace k4aviewer
 template<k4a_image_format_t ImageFormat> class K4AConvertingFrameSourceImpl : public IK4ACaptureObserver
 {
 public:
-    inline ImageVisualizationResult GetNextFrame(K4AViewerImage &textureToUpdate, k4a::image &sourceImage)
+    inline ImageVisualizationResult GetNextFrame(K4AViewerImage *textureToUpdate, k4a::image *sourceImage)
     {
         if (IsFailed())
         {
@@ -44,12 +43,12 @@ public:
 
         ImageVisualizationResult result = m_frameVisualizer->UpdateTexture(*m_textureBuffers.CurrentItem(),
                                                                            textureToUpdate);
-        sourceImage = m_textureBuffers.CurrentItem()->SourceImage;
+        *sourceImage = m_textureBuffers.CurrentItem()->SourceImage;
         m_textureBuffers.AdvanceRead();
         return result;
     }
 
-    inline GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture)
+    inline GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> *texture)
     {
         return m_frameVisualizer->InitializeTexture(texture);
     }
@@ -93,7 +92,7 @@ public:
         m_frameVisualizer(std::move(frameVisualizer))
     {
         m_textureBuffers.Initialize(
-            [this](K4ATextureBuffer<ImageFormat> *buffer) { this->m_frameVisualizer->InitializeBuffer(*buffer); });
+            [this](K4ATextureBuffer<ImageFormat> *buffer) { this->m_frameVisualizer->InitializeBuffer(buffer); });
 
         m_workerThread = std::thread(&K4AConvertingFrameSourceImpl::WorkerThread, this);
     }
@@ -151,7 +150,7 @@ private:
                 }
 
                 ImageVisualizationResult result =
-                    fs->m_frameVisualizer->ConvertImage(imageToConvert, *fs->m_textureBuffers.InsertionItem());
+                    fs->m_frameVisualizer->ConvertImage(imageToConvert, fs->m_textureBuffers.InsertionItem());
 
                 if (result != ImageVisualizationResult::Success)
                 {
