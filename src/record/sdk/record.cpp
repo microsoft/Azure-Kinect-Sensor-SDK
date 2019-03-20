@@ -481,7 +481,7 @@ k4a_result_t k4a_record_add_custom_track(const k4a_record_t recording_handle,
         return K4A_RESULT_FAILED;
     }
 
-    auto itr = context->custom_tracks.find("Test");
+    auto itr = context->custom_tracks.find(track_name);
     if (itr != context->custom_tracks.end())
     {
         logger_error(LOGGER_RECORD, "The custom track has already been added to this recording.");
@@ -730,7 +730,7 @@ k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_han
 
     // Create a copy of the image buffer for writing to file.
     assert(buffer_size <= UINT32_MAX);
-    DataBuffer *data_buffer = new DataBuffer(buffer, (uint32)buffer_size, NULL, copy_buffer);
+    DataBuffer *data_buffer = new DataBuffer(buffer, (uint32_t)buffer_size, NULL, copy_buffer);
 
     k4a_result_t result = TRACE_CALL(write_track_data(context, track, timestamp_ns, data_buffer));
     if (K4A_FAILED(result))
