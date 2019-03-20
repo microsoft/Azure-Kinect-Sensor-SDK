@@ -29,6 +29,13 @@ typedef struct _k4a_record_video_info_t
     uint64_t frame_rate;
 } k4a_record_video_info_t;
 
+
+K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recording_handle,
+                                                        const char *file_name,
+                                                        const char *tag_name,
+                                                        const uint8_t *buffer,
+                                                        size_t buffer_size);
+
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_track(const k4a_record_t recording_handle,
                                                           const char *track_name,
                                                           k4a_record_track_type_t type,
@@ -41,7 +48,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_track_tag(const k4a_record_t
                                                               const char *custom_track_name,
                                                               const char *tag_name,
                                                               const char *tag_value);
-
 
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
                                                                  const char *track_name,

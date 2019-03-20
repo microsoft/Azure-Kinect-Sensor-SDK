@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 #include <iostream>
+#include <vector>
 
 #include <k4a/k4a.h>
 
@@ -58,24 +59,53 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // Add calibration.json as attachment to the recording by using k4a_record_add_attachment API
+    size_t calibration_size = 0;
+    k4a_buffer_result_t buffer_result = k4a_device_get_raw_calibration(device, NULL, &calibration_size);
+    if (buffer_result == K4A_BUFFER_RESULT_TOO_SMALL)
+    {
+        std::vector<uint8_t> calibration_buffer = std::vector<uint8_t>(calibration_size);
+        buffer_result = k4a_device_get_raw_calibration(device, calibration_buffer.data(), &calibration_size);
+        if (buffer_result == K4A_BUFFER_RESULT_SUCCEEDED)
+        {
+            k4a_record_add_attachment(recording,
+                                      "calibration2.json",
+                                      "K4A_CALIBRATION_FILE2",
+                                      calibration_buffer.data(),
+                                      calibration_buffer.size());
+        }
+        else
+        {
+            std::cerr << "Unable to read calibration.json from device!" << std::endl;
+            return 1;
+        }
+    }
+    else
+    {
+        std::cerr << "Unable to get calibration.json file size from device!" << std::endl;
+        return 1;
+    }
+
+    // Creating BITMAPINFOHEADER for the depth/ir custom track
     k4a_calibration_t sensor_calibration;
-    VERIFY(k4a_device_get_calibration(device, deviceConfig.depth_mode, K4A_COLOR_RESOLUTION_OFF, &sensor_calibration),
+    VERIFY(k4a_device_get_calibration(device, device_config.depth_mode, K4A_COLOR_RESOLUTION_OFF, &sensor_calibration),
            "Get depth camera calibration failed!");
     uint32_t depth_width = static_cast<uint32_t>(sensor_calibration.depth_camera_calibration.resolution_width);
     uint32_t depth_height = static_cast<uint32_t>(sensor_calibration.depth_camera_calibration.resolution_height);
 
     BITMAPINFOHEADER depth_codec_header;
     depth_codec_header.biWidth = depth_width;
-    depth_codec_header.biWidth = depth_height;
+    depth_codec_header.biHeight = depth_height;
     depth_codec_header.biBitCount = 16;
     depth_codec_header.biCompression = 0x32595559; // YUY2 little endian
-    depth_codec_header.biSizeImage = sizeof(uint16_t) * 640 * 576;
+    depth_codec_header.biSizeImage = sizeof(uint16_t) * depth_width * depth_height;
 
     k4a_record_video_info_t depth_video_info;
     depth_video_info.width = depth_width;
     depth_video_info.height = depth_height;
     depth_video_info.frame_rate = 30; // In the device configuration, we set the camera_fps to be 30.
 
+    // Add custom tracks to the k4a_record_t
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     result = k4a_record_add_custom_track(recording,
                                          "DEPTH",

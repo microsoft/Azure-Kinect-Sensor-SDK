@@ -366,6 +366,36 @@ k4a_result_t k4a_record_add_tag(const k4a_record_t recording_handle, const char 
     return K4A_RESULT_SUCCEEDED;
 }
 
+k4a_result_t k4a_record_add_attachment(const k4a_record_t recording_handle,
+                                       const char *file_name,
+                                       const char *tag_name,
+                                       const uint8_t *buffer,
+                                       size_t buffer_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, file_name == NULL || buffer == NULL);
+
+    k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    KaxAttached *attached = add_attachment(context,
+                                           file_name,
+                                           "application/octet-stream",
+                                           buffer,
+                                           buffer_size);
+
+    if (tag_name != NULL)
+    {
+        add_tag(context,
+                tag_name,
+                file_name,
+                TAG_TARGET_TYPE_ATTACHMENT,
+                get_attachment_uid(attached));
+    }
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 k4a_result_t k4a_record_add_custom_track_tag(const k4a_record_t recording_handle,
                                              const char *custom_track_name,
                                              const char *tag_name,
