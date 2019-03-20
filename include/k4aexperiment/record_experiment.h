@@ -53,7 +53,8 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_recor
                                                                  const char *track_name,
                                                                  uint64_t timestamp_ns,
                                                                  uint8_t *buffer,
-                                                                 uint32_t buffer_size);
+                                                                 uint32_t buffer_size,
+                                                                 bool copy_buffer);
 #ifdef __cplusplus
 } // extern "C"
 #endif

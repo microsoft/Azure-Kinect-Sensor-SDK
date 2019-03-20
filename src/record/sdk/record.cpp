@@ -698,7 +698,8 @@ k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_han
                                                 const char *track_name,
                                                 uint64_t timestamp_ns,
                                                 uint8_t *buffer,
-                                                uint32_t buffer_size)
+                                                uint32_t buffer_size,
+                                                bool copy_buffer)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
 
@@ -722,7 +723,7 @@ k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_han
 
     // Create a copy of the image buffer for writing to file.
     assert(buffer_size <= UINT32_MAX);
-    DataBuffer *data_buffer = new DataBuffer(buffer, (uint32)buffer_size, NULL, true);
+    DataBuffer *data_buffer = new DataBuffer(buffer, (uint32)buffer_size, NULL, copy_buffer);
 
     k4a_result_t result = TRACE_CALL(write_track_data(context, track, timestamp_ns, data_buffer));
     if (K4A_FAILED(result))
