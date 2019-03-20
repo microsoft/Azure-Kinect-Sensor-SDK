@@ -112,17 +112,24 @@ int main(int argc, char **argv)
                                          K4A_RECORD_TRACK_TYPE_VIDEO,
                                          "V_MS/VFW/FOURCC",
                                          reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                         sizeof(depth_codec_header),
-                                         &depth_video_info);
+                                         sizeof(depth_codec_header));
+    if (K4A_SUCCEEDED(result))
+    {
+        result = k4a_record_set_custom_track_info_video(recording, "DEPTH", &depth_video_info);
+    }
     VERIFY(result, "Add Depth custom track failed!");
+
 
     result = k4a_record_add_custom_track(recording,
                                          "IR",
                                          K4A_RECORD_TRACK_TYPE_VIDEO,
                                          "V_MS/VFW/FOURCC",
                                          reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                         sizeof(depth_codec_header),
-                                         &depth_video_info);
+                                         sizeof(depth_codec_header));
+    if (K4A_SUCCEEDED(result))
+    {
+        result = k4a_record_set_custom_track_info_video(recording, "DEPTH", &depth_video_info);
+    }
     VERIFY(result, "Add IR custom track failed!");
 
     result = k4a_record_add_custom_track_tag(recording, "DEPTH", "K4A_DEPTH_MODE", "NFOV_UNBINNED");
