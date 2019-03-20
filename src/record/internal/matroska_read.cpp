@@ -1638,25 +1638,29 @@ static void matroska_reader_thread(k4a_playback_context_t *context)
 
                 context->reader_queue_lock.unlock();
 
-                // Read cluster
-                if (K4A_FAILED(seek_offset(context, request.first->file_offset)))
+                std::shared_ptr<KaxCluster> cluster = request.first->cluster.lock();
+                if (!cluster)
                 {
-                    return;
-                }
-                std::shared_ptr<KaxCluster> cluster = find_next<KaxCluster>(context, true);
-                if (cluster)
-                {
-                    if (read_element<KaxCluster>(context, cluster.get()) == NULL)
+                    // Read cluster
+                    if (K4A_FAILED(seek_offset(context, request.first->file_offset)))
                     {
-                        LOG_ERROR("Failed to read cluster data at: %llu", request.first->file_offset);
                         return;
                     }
+                    cluster = find_next<KaxCluster>(context, true);
+                    if (cluster)
+                    {
+                        if (read_element<KaxCluster>(context, cluster.get()) == NULL)
+                        {
+                            LOG_ERROR("Failed to read cluster data at: %llu", request.first->file_offset);
+                            return;
+                        }
 
-                    uint64_t timecode = GetChild<KaxClusterTimecode>(*cluster).GetValue();
-                    assert(context->timecode_scale <= INT64_MAX);
-                    cluster->InitTimecode(timecode, (int64_t)context->timecode_scale);
+                        uint64_t timecode = GetChild<KaxClusterTimecode>(*cluster).GetValue();
+                        assert(context->timecode_scale <= INT64_MAX);
+                        cluster->InitTimecode(timecode, (int64_t)context->timecode_scale);
 
-                    request.first->cluster = cluster;
+                        request.first->cluster = cluster;
+                    }
                 }
 
                 request.second.set_value(cluster);
