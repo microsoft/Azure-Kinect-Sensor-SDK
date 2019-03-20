@@ -718,7 +718,7 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
             // The update hasn't completed and too much time as passed. Break out of the loop to attempt to reset the
             // device and return.
             LOG_ERROR("Timeout waiting for the update to complete.");
-            break;
+            return K4A_RESULT_FAILED;
         }
 
         if (!all_complete)
