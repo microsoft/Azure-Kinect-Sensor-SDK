@@ -293,7 +293,7 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
                                     const UINT32 height,
                                     const float fps,
                                     const k4a_image_format_t imageFormat,
-                                    color_cb_mf_stream_t *pCallback,
+                                    color_cb_stream_t *pCallback,
                                     void *pCallbackContext)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, pCallback == nullptr);
@@ -540,9 +540,9 @@ void CMFCameraReader::Stop()
     }
 }
 
-k4a_result_t CMFCameraReader::GetKsControl(const k4a_color_control_command_t command,
-                                           k4a_color_control_mode_t *mode,
-                                           int32_t *pValue)
+k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t command,
+                                               k4a_color_control_mode_t *mode,
+                                               int32_t *pValue)
 {
     HRESULT hr = S_OK;
     LONG propertyValue = 0;
@@ -630,9 +630,9 @@ k4a_result_t CMFCameraReader::GetKsControl(const k4a_color_control_command_t com
     return k4aResultFromHRESULT(hr);
 }
 
-k4a_result_t CMFCameraReader::SetKsControl(const k4a_color_control_command_t command,
-                                           const k4a_color_control_mode_t mode,
-                                           int32_t newValue)
+k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t command,
+                                               const k4a_color_control_mode_t mode,
+                                               int32_t newValue)
 {
     HRESULT hr = S_OK;
     ULONG flags = KSPROPERTY_CAMERACONTROL_FLAGS_MANUAL;
