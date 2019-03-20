@@ -322,15 +322,16 @@ int main(int argc, char **argv)
                                   subordinate_delay_off_master_usec = (uint32_t)delay;
                               });
     cmd_parser.RegisterOption("-e|--exposure-control",
-                              "Set manual exposure value for the RGB camera (default: auto exposure)",
+                              "Set manual exposure value (-11 to 1) for the RGB camera (default: auto exposure)",
                               1,
                               [&](const std::vector<char *> &args) {
                                   int exposureValue = std::stoi(args[0]);
                                   if (exposureValue < -11 || exposureValue > 1)
                                   {
-                                      throw std::runtime_error("Exposure value range is 1 to -11.");
+                                      throw std::runtime_error("Exposure value range is -11 to 1.");
                                   }
-                                  absoluteExposureValue = (int32_t)(exp2f((float)exposureValue) * 1000000.0f);
+                                  absoluteExposureValue = static_cast<int32_t>(exp2f((float)exposureValue) *
+                                                                               1000000.0f);
                               });
 
     int args_left = 0;
