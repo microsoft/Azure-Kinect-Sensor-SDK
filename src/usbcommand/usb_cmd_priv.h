@@ -60,9 +60,6 @@ extern "C" {
 #define USB_CMD_IMU_OUT_ENDPOINT 0x83
 #define USB_CMD_IMU_STREAM_ENDPOINT 0x82
 
-#define USB_CMD_MAX_SERIAL_NUMBER_LENGTH                                                                               \
-    (13 * 2) // Current schema is for 12 digits plus NULL, the extra size is incase that grows in the future.
-
 //************************ Typedefs *****************************
 typedef struct _usbcmd_context_t
 {
@@ -80,7 +77,7 @@ typedef struct _usbcmd_context_t
     uint8_t stream_endpoint;
     uint32_t transaction_id;
 
-    unsigned char serial_number[32];
+    unsigned char serial_number[MAX_SERIAL_NUMBER_LENGTH];
     guid_t container_id;
 
     usb_cmd_stream_cb_t *callback;
