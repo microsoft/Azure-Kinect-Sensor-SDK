@@ -52,7 +52,7 @@ public:
         float current;
 
         k4a_port_number = -1;
-        connEx = new connection_exerciser();
+        connEx = new (std::nothrow) connection_exerciser();
 
         LOG_INFO("Searching for Connection Exerciser...", 0);
         ASSERT_TRUE(K4A_SUCCEEDED(connEx->find_connection_exerciser()));

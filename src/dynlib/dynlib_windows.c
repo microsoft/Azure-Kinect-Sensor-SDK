@@ -11,7 +11,6 @@
 #include <windows.h>
 #include <stdio.h>
 
-#define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
 typedef struct _dynlib_context_t

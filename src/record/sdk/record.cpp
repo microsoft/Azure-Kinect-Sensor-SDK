@@ -506,7 +506,8 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
                 {
                     // Create a copy of the image buffer for writing to file.
                     assert(buffer_size <= UINT32_MAX);
-                    DataBuffer *data_buffer = new DataBuffer(image_buffer, (uint32)buffer_size, NULL, true);
+                    DataBuffer *data_buffer = new (std::nothrow)
+                        DataBuffer(image_buffer, (uint32)buffer_size, NULL, true);
                     if (image_format == K4A_IMAGE_FORMAT_DEPTH16 || image_format == K4A_IMAGE_FORMAT_IR16)
                     {
                         // 16 bit grayscale needs to be converted to big-endian in the file.
@@ -564,8 +565,8 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
         sample_data.gyro_data[i] = imu_sample.gyro_sample.v[i];
     }
 
-    DataBuffer *data_buffer =
-        new DataBuffer(reinterpret_cast<binary *>(&sample_data), sizeof(matroska_imu_sample_t), NULL, true);
+    DataBuffer *data_buffer = new (std::nothrow)
+        DataBuffer(reinterpret_cast<binary *>(&sample_data), sizeof(matroska_imu_sample_t), NULL, true);
     k4a_result_t result = write_track_data(context, context->imu_track, sample_data.acc_timestamp, data_buffer);
     if (K4A_FAILED(result))
     {
