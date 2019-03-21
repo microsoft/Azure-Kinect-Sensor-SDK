@@ -294,10 +294,15 @@ jobs:
           param
           (
               [Parameter(Mandatory)]
-              [string] $url
+              [string] $url,
+              [string] $filename
           )
 
-          $filename = Split-Path -Path $url -Leaf
+          if (-not ($filename))
+          {
+              $filename = Split-Path -Path $url -Leaf
+          }
+
           if (-not ($filename))
           {
               Write-Error "Unable to parse filename from $url"
@@ -308,15 +313,16 @@ jobs:
           $path = Join-Path -Path $tempDir -ChildPath $filename
 
           Write-Host -NoNewline "Downloading $url to $path..."
-          Invoke-WebRequest -Uri $url -OutFile $path
+          Invoke-WebRequest -Uri $url -OutFile $path -UserAgent "NativeClient"
           Write-Host "Done"
 
           return $path
       }
 
       # Download Doxygen
-      $url = "http://doxygen.nl/files/doxygen-1.8.14.windows.x64.bin.zip"
-      $doxygenzip = Download-ToTemp -url $url
+      $url = "https://sourceforge.net/projects/doxygen/files/rel-1.8.14/doxygen-1.8.14.windows.bin.zip/download"
+      $filename = "doxygen-1.8.14.windows.bin.zip"
+      $doxygenzip = Download-ToTemp -url $url -filename $filename
 
       Expand-Archive $doxygenzip .\doxygenexe
       Write-Host "Doxygen installed. Please use Visual Studio Developer Command prompt to build."
