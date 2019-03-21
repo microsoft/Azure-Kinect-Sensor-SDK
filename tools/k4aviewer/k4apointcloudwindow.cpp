@@ -63,7 +63,7 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
 
     const ImVec2 sourceImageSize = ImVec2(static_cast<float>(m_texture->GetDimensions().Width),
                                           static_cast<float>(m_texture->GetDimensions().Height));
-    const ImVec2 textureSize = GetImageSize(sourceImageSize, availableSize);
+    const ImVec2 textureSize = GetMaxImageSize(sourceImageSize, availableSize);
 
     ImGui::Image(static_cast<ImTextureID>(*m_texture), textureSize);
 
