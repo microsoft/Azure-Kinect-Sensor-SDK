@@ -37,6 +37,12 @@ int main()
         config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
         config.color_resolution = K4A_COLOR_RESOLUTION_720P;
 
+        // This means that we'll only get captures that have both color and
+        // depth images, so we don't need to check if the capture contains
+        // a particular type of image.
+        //
+        config.synchronized_images_only = true;
+
         std::cout << "Started opening K4A device..." << std::endl;
 
         k4a::device dev = k4a::device::open(K4A_DEVICE_DEFAULT);
@@ -68,7 +74,13 @@ int main()
             // Poll the device for new image data.
             //
             // We set the timeout to 0 so we don't block if there isn't an available frame.
-            // This prevents the UI from becoming unresponsive.
+            //
+            // This works here because we're doing the work on the same thread that we're
+            // using for the UI, and the ViewerWindow class caps the framerate at the
+            // display's refresh rate.  If you do the image polling on a separate thread,
+            // calling get_capture with a timeout of 0 in a tight loop will consume an
+            // entire CPU core, so you'll want to set the timeout to something longer to
+            // avoid that.
             //
             // If we don't have new image data, we'll just reuse the textures we generated
             // from the last time we got a capture.
@@ -79,39 +91,24 @@ int main()
                 const k4a::image depthImage = capture.get_depth_image();
                 const k4a::image colorImage = capture.get_color_image();
 
-                // If you're starting both the color and depth cameras and you haven't set
-                // synchronized_images_only=1 in your k4a_device_configuration_t, you might
-                // only get one or the other, so you need to check for validity.
+                // If we hadn't set synchronized_images_only=true above, we'd need to do
+                // if (depthImage) { /* stuff */ } else { /* ignore the image */ } here.
                 //
-                if (depthImage)
-                {
-                    // Depth data is in the form of uint16_t's representing the distance in
-                    // millimeters of the pixel from the camera, so we need to convert it to
-                    // a BGRA image before we can upload and show it.
-                    //
-                    ColorizeDepthImage(depthImage,
-                                       K4ADepthPixelColorizer::ColorizeBlueToRed,
-                                       GetDepthModeRange(config.depth_mode),
-                                       &depthTextureBuffer);
-                    depthTexture.Update(&depthTextureBuffer[0]);
-                }
-                else
-                {
-                    std::cout << "Capture was missing depth image! Ignoring..." << std::endl;
-                }
+                // Depth data is in the form of uint16_t's representing the distance in
+                // millimeters of the pixel from the camera, so we need to convert it to
+                // a BGRA image before we can upload and show it.
+                //
+                ColorizeDepthImage(depthImage,
+                                   K4ADepthPixelColorizer::ColorizeBlueToRed,
+                                   GetDepthModeRange(config.depth_mode),
+                                   &depthTextureBuffer);
+                depthTexture.Update(&depthTextureBuffer[0]);
 
-                if (colorImage)
-                {
-                    // Since we're using BGRA32 mode, we can just upload the color image directly.
-                    // If you want to use one of the other modes, you have to do the conversion
-                    // yourself.
-                    //
-                    colorTexture.Update(reinterpret_cast<const BgraPixel *>(colorImage.get_buffer()));
-                }
-                else
-                {
-                    std::cout << "Capture was missing color image! Ignoring..." << std::endl;
-                }
+                // Since we're using BGRA32 mode, we can just upload the color image directly.
+                // If you want to use one of the other modes, you have to do the conversion
+                // yourself.
+                //
+                colorTexture.Update(reinterpret_cast<const BgraPixel *>(colorImage.get_buffer()));
             }
 
             // Show the windows

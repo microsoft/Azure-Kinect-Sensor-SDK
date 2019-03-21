@@ -86,7 +86,7 @@ void ViewerWindow::Initialize(const char *windowTitle, int defaultWidth, int def
 
     glfwMakeContextCurrent(m_window);
 
-    // Enable vsync
+    // Enable vsync (cap framerate at the display's refresh rate)
     //
     glfwSwapInterval(1);
 
