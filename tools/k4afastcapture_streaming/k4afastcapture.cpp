@@ -70,7 +70,7 @@ K4AFastCapture::~K4AFastCapture()
     std::cout << "[Streaming Service] Stopped." << std::endl;
 }
 
-bool K4AFastCapture::Configure(const char *fileDirectory, int exposureValue, int pcmShiftValue)
+bool K4AFastCapture::Configure(const char *fileDirectory, int32_t exposureValue, int pcmShiftValue)
 {
     unsigned int deviceCount = k4a_device_get_installed_count();
     if (deviceCount == 0)
@@ -97,13 +97,12 @@ bool K4AFastCapture::Configure(const char *fileDirectory, int exposureValue, int
         return false;
     }
 
-    if (exposureValue != INT16_MAX)
+    if (exposureValue != 0)
     {
-        int32_t propertyValue = (int32_t)(exp2f((float)exposureValue) * 1000000.0f);
         if (K4A_RESULT_SUCCEEDED != k4a_device_set_color_control(m_device,
                                                                  K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                                                                  K4A_COLOR_CONTROL_MODE_MANUAL,
-                                                                 propertyValue))
+                                                                 exposureValue))
         {
             std::cout << "[Streaming Service] Failed to set the exposure" << std::endl;
             return false;

@@ -87,7 +87,7 @@ static HANDLE OpenComPort(LPCSTR comPort)
 
 connection_exerciser::connection_exerciser()
 {
-    state = new connection_exerciser_internal_t();
+    state = new (std::nothrow) connection_exerciser_internal_t();
 }
 
 connection_exerciser::~connection_exerciser()

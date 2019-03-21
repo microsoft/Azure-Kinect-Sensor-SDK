@@ -13,7 +13,6 @@
 #include <ctype.h>
 #include <dlfcn.h>
 
-#define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
 typedef struct _dynlib_context_t
