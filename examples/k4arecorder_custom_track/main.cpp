@@ -7,7 +7,6 @@
 #include <k4a/k4a.h>
 
 #include <k4arecord/record.h>
-#include <k4aexperiment/record_experiment.h>
 
 #define VERIFY(result, error)                                                                                          \
     if (result != K4A_RESULT_SUCCEEDED)                                                                                \
@@ -52,7 +51,8 @@ int main(int argc, char **argv)
     std::cout << "Device started" << std::endl;
 
     k4a_record_t recording;
-    // In order to test the custom track recording, we disable the default capture recording and set the device to be NULL
+    // In order to test the custom track recording, we disable the default capture recording and set the device to be
+    // NULL
     if (K4A_FAILED(k4a_record_create(recording_filename, NULL, K4A_DEVICE_CONFIG_INIT_DISABLE_ALL, &recording)))
     {
         std::cerr << "Unable to create recording file: " << recording_filename << std::endl;
@@ -107,29 +107,20 @@ int main(int argc, char **argv)
 
     // Add custom tracks to the k4a_record_t
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
-    result = k4a_record_add_custom_track(recording,
-                                         "DEPTH",
-                                         K4A_RECORD_TRACK_TYPE_VIDEO,
-                                         "V_MS/VFW/FOURCC",
-                                         reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                         sizeof(depth_codec_header));
-    if (K4A_SUCCEEDED(result))
-    {
-        result = k4a_record_set_custom_track_info_video(recording, "DEPTH", &depth_video_info);
-    }
+    result = k4a_record_add_video_track(recording,
+                                        "DEPTH",
+                                        "V_MS/VFW/FOURCC",
+                                        reinterpret_cast<uint8_t *>(&depth_codec_header),
+                                        sizeof(depth_codec_header),
+                                        &depth_video_info);
     VERIFY(result, "Add Depth custom track failed!");
 
-
-    result = k4a_record_add_custom_track(recording,
-                                         "IR",
-                                         K4A_RECORD_TRACK_TYPE_VIDEO,
-                                         "V_MS/VFW/FOURCC",
-                                         reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                         sizeof(depth_codec_header));
-    if (K4A_SUCCEEDED(result))
-    {
-        result = k4a_record_set_custom_track_info_video(recording, "IR", &depth_video_info);
-    }
+    result = k4a_record_add_video_track(recording,
+                                        "IR",
+                                        "V_MS/VFW/FOURCC",
+                                        reinterpret_cast<uint8_t *>(&depth_codec_header),
+                                        sizeof(depth_codec_header),
+                                        &depth_video_info);
     VERIFY(result, "Add IR custom track failed!");
 
     result = k4a_record_add_custom_track_tag(recording, "DEPTH", "K4A_DEPTH_MODE", "NFOV_UNBINNED");
@@ -188,7 +179,6 @@ int main(int argc, char **argv)
     printf("Finished body tracking processing!\n");
 
     k4a_device_stop_cameras(device);
-
 
     std::cout << "Saving recording..." << std::endl;
     VERIFY(k4a_record_flush(recording), "Flush recording failed!");

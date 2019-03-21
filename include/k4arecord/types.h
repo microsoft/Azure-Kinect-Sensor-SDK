@@ -131,6 +131,13 @@ typedef struct _k4a_record_configuration_t
     uint32_t start_timestamp_offset_usec;
 } k4a_record_configuration_t;
 
+typedef struct _k4a_record_video_info_t
+{
+    uint64_t width;
+    uint64_t height;
+    uint64_t frame_rate;
+} k4a_record_video_info_t;
+
 #ifdef __cplusplus
 }
 #endif

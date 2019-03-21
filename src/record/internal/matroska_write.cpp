@@ -136,6 +136,31 @@ KaxTrackEntry *add_track(k4a_record_context_t *context,
     return track;
 }
 
+k4a_result_t check_custom_track_name_valid(k4a_record_context_t *context, const char *track_name)
+{
+    auto itr = context->custom_tracks.find(track_name);
+    if (itr != context->custom_tracks.end())
+    {
+        logger_error(LOGGER_RECORD, "The custom track has already been added to this recording.");
+        return K4A_RESULT_FAILED;
+    }
+
+    // Check whether the track_name is conflicted with the existed default track names
+    bool track_name_conflict = false;
+    std::string track_name_string(track_name);
+    track_name_conflict = (track_name_string == depth_track_name && context->depth_track != nullptr) ||
+                          (track_name_string == ir_track_name && context->ir_track != nullptr) ||
+                          (track_name_string == color_track_name && context->color_track != nullptr) ||
+                          (track_name_string == imu_track_name && context->imu_track != nullptr);
+    if (track_name_conflict)
+    {
+        logger_error(LOGGER_RECORD, "The custom track is conflicted with the existed default track.");
+        return K4A_RESULT_FAILED;
+    }
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 void set_track_info_video(KaxTrackEntry *track, uint64_t width, uint64_t height, uint64_t frame_rate)
 {
     RETURN_VALUE_IF_ARG(VOID_VALUE, track == NULL);

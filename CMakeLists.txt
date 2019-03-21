@@ -67,7 +67,6 @@ set(K4A_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(K4A_VERSION_RC ${CMAKE_CURRENT_LIST_DIR}/version.rc.in)
 
 add_subdirectory(examples)
-add_subdirectory(experiment)
 add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(tools)

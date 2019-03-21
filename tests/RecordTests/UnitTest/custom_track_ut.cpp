@@ -6,7 +6,6 @@
 #include <cstdio>
 #include <k4arecord/record.h>
 #include <k4arecord/playback.h>
-#include <k4aexperiment/record_experiment.h>
 
 using namespace testing;
 
@@ -58,25 +57,20 @@ protected:
         depth_video_info.frame_rate = test_camera_fps;
 
         // Add custom tracks to the k4a_record_t
-        result = k4a_record_add_custom_track(handle,
-                                             "DEPTH",
-                                             K4A_RECORD_TRACK_TYPE_VIDEO,
-                                             "V_MS/VFW/FOURCC",
-                                             reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                             sizeof(depth_codec_header));
+        result = k4a_record_add_video_track(handle,
+                                            "DEPTH",
+                                            "V_MS/VFW/FOURCC",
+                                            reinterpret_cast<uint8_t *>(&depth_codec_header),
+                                            sizeof(depth_codec_header),
+                                            &depth_video_info);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        result = k4a_record_set_custom_track_info_video(handle, "DEPTH", &depth_video_info);
-        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-
-        result = k4a_record_add_custom_track(handle,
-                                             "IR",
-                                             K4A_RECORD_TRACK_TYPE_VIDEO,
-                                             "V_MS/VFW/FOURCC",
-                                             reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                             sizeof(depth_codec_header));
-        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-        result = k4a_record_set_custom_track_info_video(handle, "IR", &depth_video_info);
+        result = k4a_record_add_video_track(handle,
+                                            "IR",
+                                            "V_MS/VFW/FOURCC",
+                                            reinterpret_cast<uint8_t *>(&depth_codec_header),
+                                            sizeof(depth_codec_header),
+                                            &depth_video_info);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         result = k4a_record_add_custom_track_tag(handle, "DEPTH", "K4A_DEPTH_MODE", "NFOV_UNBINNED");

@@ -13,6 +13,12 @@
 
 namespace k4arecord
 {
+// Define all the default track names here
+const std::string depth_track_name = "DEPTH";
+const std::string ir_track_name = "IR";
+const std::string color_track_name = "COLOR";
+const std::string imu_track_name = "IMU";
+
 typedef struct _track_data_t
 {
     libmatroska::KaxTrackEntry *track;
@@ -105,6 +111,8 @@ libmatroska::KaxTrackEntry *add_track(k4a_record_context_t *context,
                                       const char *codec,
                                       const uint8_t *codec_private = NULL,
                                       size_t codec_private_size = 0);
+
+k4a_result_t check_custom_track_name_valid(k4a_record_context_t *context, const char *track_name);
 
 void set_track_info_video(libmatroska::KaxTrackEntry *track, uint64_t width, uint64_t height, uint64_t frame_rate);
 
