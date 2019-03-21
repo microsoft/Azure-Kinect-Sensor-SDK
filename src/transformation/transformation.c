@@ -431,7 +431,7 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration,
 
 void transformation_destroy(k4a_transformation_t transformation_handle)
 {
-    RETURN_VALUE_IF_HANDLE_INVALID(, k4a_transformation_t, transformation_handle);
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_transformation_t, transformation_handle);
     k4a_transformation_context_t *transformation_context = k4a_transformation_t_get_context(transformation_handle);
 
     if (transformation_context->memory_depth_camera_xy_tables != 0)

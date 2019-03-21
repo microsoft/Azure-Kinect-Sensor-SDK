@@ -122,7 +122,7 @@ void color_capture_available(k4a_result_t result, k4a_capture_t capture_handle, 
     if (result != K4A_RESULT_SUCCEEDED)
     {
         assert(capture_handle == NULL);
-        logger_warn(LOGGER_COLOR, "A streaming color transfer failed");
+        LOG_WARNING("A streaming color transfer failed");
         return;
     }
 }

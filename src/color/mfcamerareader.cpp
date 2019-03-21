@@ -44,7 +44,7 @@ CFrameContext::CFrameContext(IMFSample *pSample)
                 if (FAILED(hr = m_sp2DBuffer->Lock2DSize(
                                MF2DBuffer_LockFlags_ReadWrite, &pScanline, &lPitch, &m_pBuffer, &m_bufferLength)))
                 {
-                    logger_error(LOGGER_COLOR, "failed to lock 2D frame buffer: 0x%08x", hr);
+                    LOG_ERROR("failed to lock 2D frame buffer: 0x%08x", hr);
                     assert(0);
                 }
             }
@@ -53,14 +53,14 @@ CFrameContext::CFrameContext(IMFSample *pSample)
                 m_sp2DBuffer = nullptr; // Make sure 2D buffer is not set.
                 if (FAILED(hr = m_spMediaBuffer->Lock(&m_pBuffer, nullptr, &m_bufferLength)))
                 {
-                    logger_error(LOGGER_COLOR, "failed to lock frame buffer: 0x%08x", hr);
+                    LOG_ERROR("failed to lock frame buffer: 0x%08x", hr);
                     assert(0);
                 }
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "failed to get color frame media buffer: 0x%08x", hr);
+            LOG_ERROR("failed to get color frame media buffer: 0x%08x", hr);
             assert(0);
         }
 
@@ -109,9 +109,7 @@ CFrameContext::CFrameContext(IMFSample *pSample)
 
                             if (pItem->Size == 0)
                             {
-                                logger_error(LOGGER_COLOR,
-                                             "frame metadata id %d has zero buffer size",
-                                             pItem->MetadataId);
+                                LOG_ERROR("frame metadata id %d has zero buffer size", pItem->MetadataId);
                                 break;
                             }
 
@@ -128,14 +126,14 @@ CFrameContext::CFrameContext(IMFSample *pSample)
 
                     if (FAILED(hr = spRawMetadataBuffer->Unlock()))
                     {
-                        logger_error(LOGGER_COLOR, "failed to unlock metadata raw buffer: 0x%08x", hr);
+                        LOG_ERROR("failed to unlock metadata raw buffer: 0x%08x", hr);
                     }
                 }
             }
         }
         else
         {
-            logger_warn(LOGGER_COLOR, "No metadata attached to the sample");
+            LOG_WARNING("No metadata attached to the sample");
         }
     }
 }
@@ -150,7 +148,7 @@ CFrameContext::~CFrameContext()
         {
             if (FAILED(hr = m_sp2DBuffer->Unlock2D()))
             {
-                logger_error(LOGGER_COLOR, "failed to unlock 2D frame buffer: 0x%08x", hr);
+                LOG_ERROR("failed to unlock 2D frame buffer: 0x%08x", hr);
                 assert(0);
             }
         }
@@ -158,7 +156,7 @@ CFrameContext::~CFrameContext()
         {
             if (FAILED(hr = m_spMediaBuffer->Unlock()))
             {
-                logger_error(LOGGER_COLOR, "failed to unlock frame buffer: 0x%08x", hr);
+                LOG_ERROR("failed to unlock frame buffer: 0x%08x", hr);
                 assert(0);
             }
         }
@@ -196,7 +194,7 @@ CMFCameraReader::~CMFCameraReader()
         HRESULT hr = MFShutdown();
         if (FAILED(hr))
         {
-            logger_error(LOGGER_COLOR, "MFShutdown failed: 0x%08x", hr);
+            LOG_ERROR("MFShutdown failed: 0x%08x", hr);
         }
     }
 
@@ -219,52 +217,52 @@ HRESULT CMFCameraReader::RuntimeClassInitialize(GUID *containerId)
         // Find Color Camera
         if (FAILED(hr = FindEdenColorCamera(containerId, spDevice)))
         {
-            logger_error(LOGGER_COLOR, "Failed to find color camera in open camera: 0x%08x", hr);
+            LOG_ERROR("Failed to find color camera in open camera: 0x%08x", hr);
             return hr;
         }
 
         // Activate Color Media Source
         if (FAILED(hr = spDevice->ActivateObject(IID_PPV_ARGS(&spColorSource))))
         {
-            logger_error(LOGGER_COLOR, "Failed to activate source in open camera: 0x%08x", hr);
+            LOG_ERROR("Failed to activate source in open camera: 0x%08x", hr);
             return hr;
         }
 
         // Create Source Reader
         if (FAILED(hr = MFCreateAttributes(&spAttributes, 3)))
         {
-            logger_error(LOGGER_COLOR, "Failed to create attribute bag in open camera: 0x%08x", hr);
+            LOG_ERROR("Failed to create attribute bag in open camera: 0x%08x", hr);
             return hr;
         }
 
         if (FAILED(hr = spAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK, this)))
         {
-            logger_error(LOGGER_COLOR, "Failed to register callback in open camera: 0x%08x", hr);
+            LOG_ERROR("Failed to register callback in open camera: 0x%08x", hr);
             return hr;
         }
 
         if (FAILED(hr = spAttributes->SetUINT32(MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, 1)))
         {
-            logger_error(LOGGER_COLOR, "Failed to set Advanced video processing: 0x%08x", hr);
+            LOG_ERROR("Failed to set Advanced video processing: 0x%08x", hr);
             return hr;
         }
 
         if (FAILED(hr = spAttributes->SetUINT32(MF_XVP_DISABLE_FRC, 1)))
         {
-            logger_error(LOGGER_COLOR, "Failed to disable frame rate control: 0x%08x", hr);
+            LOG_ERROR("Failed to disable frame rate control: 0x%08x", hr);
             return hr;
         }
 
         if (FAILED(
                 hr = MFCreateSourceReaderFromMediaSource(spColorSource.Get(), spAttributes.Get(), &m_spSourceReader)))
         {
-            logger_error(LOGGER_COLOR, "Failed to create reader in open camera: 0x%08x", hr);
+            LOG_ERROR("Failed to create reader in open camera: 0x%08x", hr);
             return hr;
         }
 
         if (FAILED(hr = m_spSourceReader->SetStreamSelection((DWORD)MF_SOURCE_READER_ALL_STREAMS, FALSE)))
         {
-            logger_error(LOGGER_COLOR, "Failed to deselect stream in open camera: 0x%08x", hr);
+            LOG_ERROR("Failed to deselect stream in open camera: 0x%08x", hr);
             return hr;
         }
 
@@ -273,7 +271,7 @@ HRESULT CMFCameraReader::RuntimeClassInitialize(GUID *containerId)
                                                               GUID_NULL,
                                                               IID_PPV_ARGS(&m_spKsControl))))
         {
-            logger_error(LOGGER_COLOR, "Failed to get camera control interface in open camera: 0x%08x", hr);
+            LOG_ERROR("Failed to get camera control interface in open camera: 0x%08x", hr);
             return hr;
         }
 
@@ -281,7 +279,7 @@ HRESULT CMFCameraReader::RuntimeClassInitialize(GUID *containerId)
         if (m_hStreamFlushed == NULL || m_hStreamFlushed == INVALID_HANDLE_VALUE)
         {
             hr = HRESULT_FROM_WIN32(GetLastError());
-            logger_error(LOGGER_COLOR, "Failed to create event in open camera: 0x%08x", hr);
+            LOG_ERROR("Failed to create event in open camera: 0x%08x", hr);
             return hr;
         }
     }
@@ -328,7 +326,7 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
         guidOutputSubType = MFVideoFormat_ARGB32;
         break;
     default:
-        logger_error(LOGGER_COLOR, "Image Format %d is invalid", imageFormat);
+        LOG_ERROR("Image Format %d is invalid", imageFormat);
         return K4A_RESULT_FAILED;
     }
 
@@ -355,7 +353,7 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
 
                 if (FAILED(hr = MFGetAttributeSize(spMediaType.Get(), MF_MT_FRAME_SIZE, &tempWidth, &tempHeight)))
                 {
-                    logger_error(LOGGER_COLOR, "Failed to get available frame size at start: 0x%08x", hr);
+                    LOG_ERROR("Failed to get available frame size at start: 0x%08x", hr);
                     return k4aResultFromHRESULT(hr);
                 }
                 if (FAILED(hr = MFGetAttributeRatio(spMediaType.Get(),
@@ -363,12 +361,12 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
                                                     &tempFpsNumerator,
                                                     &tempFpsDenominator)))
                 {
-                    logger_error(LOGGER_COLOR, "Failed to get available frame rate at start: 0x%08x", hr);
+                    LOG_ERROR("Failed to get available frame rate at start: 0x%08x", hr);
                     return k4aResultFromHRESULT(hr);
                 }
                 if (FAILED(hr = spMediaType->GetGUID(MF_MT_SUBTYPE, &tempSubType)))
                 {
-                    logger_error(LOGGER_COLOR, "Failed to get available color format at start: 0x%08x", hr);
+                    LOG_ERROR("Failed to get available color format at start: 0x%08x", hr);
                     return k4aResultFromHRESULT(hr);
                 }
 
@@ -384,7 +382,7 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
             }
             else
             {
-                logger_error(LOGGER_COLOR, "Failed to enumerate media type at start: 0x%08x", hr);
+                LOG_ERROR("Failed to enumerate media type at start: 0x%08x", hr);
                 return k4aResultFromHRESULT(hr);
             }
 
@@ -398,7 +396,7 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
 
             if (FAILED(hr = m_spSourceReader.As(&spSourceReaderEx)))
             {
-                logger_error(LOGGER_COLOR, "Failed to get source reader extension at start: 0x%08x", hr);
+                LOG_ERROR("Failed to get source reader extension at start: 0x%08x", hr);
                 return k4aResultFromHRESULT(hr);
             }
             DWORD dwStreamFlags = 0;
@@ -407,7 +405,7 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
                                                                  spMediaType.Get(),
                                                                  &dwStreamFlags)))
             {
-                logger_error(LOGGER_COLOR, "Failed to set media type at start: 0x%08x", hr);
+                LOG_ERROR("Failed to set media type at start: 0x%08x", hr);
                 return k4aResultFromHRESULT(hr);
             }
 
@@ -416,21 +414,21 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
                 // Create Output Media type
                 if (FAILED(hr = MFCreateMediaType(&spOutputMediaType)))
                 {
-                    logger_error(LOGGER_COLOR, "Failed to create output media type at start: 0x%08x", hr);
+                    LOG_ERROR("Failed to create output media type at start: 0x%08x", hr);
                     return k4aResultFromHRESULT(hr);
                 }
 
                 // Copy all items from device type to output type
                 if (FAILED(hr = spMediaType->CopyAllItems(spOutputMediaType.Get())))
                 {
-                    logger_error(LOGGER_COLOR, "Failed to copy device type to output type at start: 0x%08x", hr);
+                    LOG_ERROR("Failed to copy device type to output type at start: 0x%08x", hr);
                     return k4aResultFromHRESULT(hr);
                 }
 
                 // Modify output media type
                 if (FAILED(hr = spOutputMediaType->SetGUID(MF_MT_SUBTYPE, guidOutputSubType)))
                 {
-                    logger_error(LOGGER_COLOR, "Failed to set output subtype at start: 0x%08x", hr);
+                    LOG_ERROR("Failed to set output subtype at start: 0x%08x", hr);
                     return k4aResultFromHRESULT(hr);
                 }
             }
@@ -443,13 +441,13 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
                                                                   nullptr,
                                                                   spOutputMediaType.Get())))
             {
-                logger_error(LOGGER_COLOR, "Failed to set output media type at start: 0x%08x", hr);
+                LOG_ERROR("Failed to set output media type at start: 0x%08x", hr);
                 return k4aResultFromHRESULT(hr);
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Can not find requested sensor mode");
+            LOG_ERROR("Can not find requested sensor mode");
             return K4A_RESULT_FAILED;
         }
 
@@ -471,17 +469,17 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
             }
             else
             {
-                logger_error(LOGGER_COLOR, "Failed to request first sample at start: 0x%08x", hr);
+                LOG_ERROR("Failed to request first sample at start: 0x%08x", hr);
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Failed to select stream at start: 0x%08x", hr);
+            LOG_ERROR("Failed to select stream at start: 0x%08x", hr);
         }
     }
     else
     {
-        logger_warn(LOGGER_COLOR, "Start request in started state");
+        LOG_WARNING("Start request in started state");
     }
 
     return k4aResultFromHRESULT(hr);
@@ -514,7 +512,7 @@ void CMFCameraReader::Stop()
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Failed to request flush for stop: 0x%08x", hr);
+            LOG_ERROR("Failed to request flush for stop: 0x%08x", hr);
         }
 
         lock.Unlock(); // Wait without lock
@@ -885,14 +883,14 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
             if (FAILED(hr = m_spSourceReader->ReadSample(
                            (DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr, nullptr, nullptr, nullptr)))
             {
-                logger_error(LOGGER_COLOR, "Failed to request sample: 0x%08x", hr);
+                LOG_ERROR("Failed to request sample: 0x%08x", hr);
             }
         }
     }
     else
     {
         hr = hrStatus;
-        logger_error(LOGGER_COLOR, "Pipeline propagate error to callback: 0x%08x", hr);
+        LOG_ERROR("Pipeline propagate error to callback: 0x%08x", hr);
         // Notify upper layers of failed status
         m_pCallback(K4A_RESULT_FAILED, NULL, m_pCallbackContext);
     }
@@ -924,15 +922,13 @@ STDMETHODIMP CMFCameraReader::OnFlush(DWORD dwStreamIndex)
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Failed to deselect stream for stop: 0x%08x", hr);
+            LOG_ERROR("Failed to deselect stream for stop: 0x%08x", hr);
         }
     }
 
     if (SetEvent(m_hStreamFlushed) == 0)
     {
-        logger_error(LOGGER_COLOR,
-                     "Failed to set flushed event after flushing: 0x%08x",
-                     HRESULT_FROM_WIN32(GetLastError()));
+        LOG_ERROR("Failed to set flushed event after flushing: 0x%08x", HRESULT_FROM_WIN32(GetLastError()));
     }
 
     m_flushing = false;
@@ -959,7 +955,7 @@ HRESULT CMFCameraReader::FindEdenColorCamera(GUID *containerId, ComPtr<IMFActiva
     hr = MFCreateAttributes(&spConfig, 2);
     if (FAILED(hr))
     {
-        logger_error(LOGGER_COLOR, "Failed to create attribute bag to find color camera: 0x%08x", hr);
+        LOG_ERROR("Failed to create attribute bag to find color camera: 0x%08x", hr);
         goto exit;
     }
 
@@ -967,7 +963,7 @@ HRESULT CMFCameraReader::FindEdenColorCamera(GUID *containerId, ComPtr<IMFActiva
     hr = spConfig->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
     if (FAILED(hr))
     {
-        logger_error(LOGGER_COLOR, "Failed to set video capture attribute to find color camera: 0x%08x", hr);
+        LOG_ERROR("Failed to set video capture attribute to find color camera: 0x%08x", hr);
         goto exit;
     }
 
@@ -975,7 +971,7 @@ HRESULT CMFCameraReader::FindEdenColorCamera(GUID *containerId, ComPtr<IMFActiva
     hr = spConfig->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_CATEGORY, vidcapCategoryGuid);
     if (FAILED(hr))
     {
-        logger_error(LOGGER_COLOR, "Failed to set video category to find color camera: 0x%08x", hr);
+        LOG_ERROR("Failed to set video category to find color camera: 0x%08x", hr);
         goto exit;
     }
 
@@ -983,7 +979,7 @@ HRESULT CMFCameraReader::FindEdenColorCamera(GUID *containerId, ComPtr<IMFActiva
     hr = MFEnumDeviceSources(spConfig.Get(), &ppDevices, &count);
     if (FAILED(hr))
     {
-        logger_error(LOGGER_COLOR, "Failed to enumerate device: 0x%08x", hr);
+        LOG_ERROR("Failed to enumerate device: 0x%08x", hr);
         goto exit;
     }
 

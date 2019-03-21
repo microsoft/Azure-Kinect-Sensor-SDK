@@ -47,7 +47,7 @@ k4a_result_t k4a_record_create(const char *path,
         }
         catch (std::ios_base::failure e)
         {
-            logger_error(LOGGER_RECORD, "Unable to open file '%s': %s", path, e.what());
+            LOG_ERROR("Unable to open file '%s': %s", path, e.what());
             result = K4A_RESULT_FAILED;
         }
     }
@@ -74,9 +74,7 @@ k4a_result_t k4a_record_create(const char *path,
     {
         if (!k4a_convert_resolution_to_width_height(device_config.color_resolution, &color_width, &color_height))
         {
-            logger_error(LOGGER_RECORD,
-                         "Unsupported color_resolution specified in recording: %d",
-                         device_config.color_resolution);
+            LOG_ERROR("Unsupported color_resolution specified in recording: %d", device_config.color_resolution);
             result = K4A_RESULT_FAILED;
         }
     }
@@ -98,9 +96,7 @@ k4a_result_t k4a_record_create(const char *path,
                 color_mode_str << "MJPG_" << color_height << "P";
                 break;
             default:
-                logger_error(LOGGER_RECORD,
-                             "Unsupported color_format specified in recording: %d",
-                             device_config.color_format);
+                LOG_ERROR("Unsupported color_format specified in recording: %d", device_config.color_format);
                 result = K4A_RESULT_FAILED;
             }
         }
@@ -123,9 +119,7 @@ k4a_result_t k4a_record_create(const char *path,
                 {
                     if (!k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
                     {
-                        logger_error(LOGGER_RECORD,
-                                     "Unsupported depth_mode specified in recording: %d",
-                                     device_config.depth_mode);
+                        LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode);
                         result = K4A_RESULT_FAILED;
                     }
                     depth_mode_str = depth_modes[i].second.c_str();
@@ -134,9 +128,7 @@ k4a_result_t k4a_record_create(const char *path,
             }
             if (depth_width == 0 || depth_height == 0)
             {
-                logger_error(LOGGER_RECORD,
-                             "Unsupported depth_mode specified in recording: %d",
-                             device_config.depth_mode);
+                LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode);
                 result = K4A_RESULT_FAILED;
             }
         }
@@ -356,7 +348,7 @@ k4a_result_t k4a_record_add_tag(const k4a_record_t recording_handle, const char 
 
     if (context->header_written)
     {
-        logger_error(LOGGER_RECORD, "Tags must be added before the recording header is written.");
+        LOG_ERROR("Tags must be added before the recording header is written.");
         return K4A_RESULT_FAILED;
     }
 
@@ -374,13 +366,13 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
 
     if (context->header_written)
     {
-        logger_error(LOGGER_RECORD, "The IMU track must be added before the recording header is written.");
+        LOG_ERROR("The IMU track must be added before the recording header is written.");
         return K4A_RESULT_FAILED;
     }
 
     if (context->imu_track != NULL)
     {
-        logger_error(LOGGER_RECORD, "The IMU track has already been added to this recording.");
+        LOG_ERROR("The IMU track has already been added to this recording.");
         return K4A_RESULT_FAILED;
     }
 
@@ -401,7 +393,7 @@ k4a_result_t k4a_record_write_header(const k4a_record_t recording_handle)
 
     if (context->header_written)
     {
-        logger_error(LOGGER_RECORD, "The header for this recording has already been written.");
+        LOG_ERROR("The header for this recording has already been written.");
         return K4A_RESULT_FAILED;
     }
 
@@ -455,7 +447,7 @@ k4a_result_t k4a_record_write_header(const k4a_record_t recording_handle)
     }
     catch (std::ios_base::failure e)
     {
-        logger_error(LOGGER_RECORD, "Failed to write recording header '%s': %s", context->file_path, e.what());
+        LOG_ERROR("Failed to write recording header '%s': %s", context->file_path, e.what());
         return K4A_RESULT_FAILED;
     }
 
@@ -475,7 +467,7 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
 
     if (!context->header_written)
     {
-        logger_error(LOGGER_RECORD, "The recording header needs to be written before any captures.");
+        LOG_ERROR("The recording header needs to be written before any captures.");
         return K4A_RESULT_FAILED;
     }
 
@@ -532,7 +524,7 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
                 }
                 else
                 {
-                    logger_error(LOGGER_RECORD, "Tried to write capture with unexpected image format.");
+                    LOG_ERROR("Tried to write capture with unexpected image format.");
                     result = K4A_RESULT_FAILED;
                 }
             }
@@ -552,7 +544,7 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
 
     if (!context->header_written)
     {
-        logger_error(LOGGER_RECORD, "The recording header needs to be written before any imu samples.");
+        LOG_ERROR("The recording header needs to be written before any imu samples.");
         return K4A_RESULT_FAILED;
     }
 
@@ -678,7 +670,7 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
                 context->file_segment->SetSizeInfinite(true);
                 if (!context->file_segment->ForceSize(segment_size))
                 {
-                    logger_error(LOGGER_RECORD, "Failed set file segment size.");
+                    LOG_ERROR("Failed set file segment size.");
                 }
                 context->file_segment->OverwriteHead(*context->ebml_file);
 
@@ -688,7 +680,7 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
             }
             catch (std::ios_base::failure e)
             {
-                logger_error(LOGGER_RECORD, "Failed to write recording '%s': %s", context->file_path, e.what());
+                LOG_ERROR("Failed to write recording '%s': %s", context->file_path, e.what());
                 result = K4A_RESULT_FAILED;
             }
             Unlock(context->pending_cluster_lock);
@@ -721,7 +713,7 @@ void k4a_record_close(const k4a_record_t recording_handle)
         }
         catch (std::ios_base::failure e)
         {
-            logger_error(LOGGER_RECORD, "Failed to close recording '%s': %s", context->file_path, e.what());
+            LOG_ERROR("Failed to close recording '%s': %s", context->file_path, e.what());
         }
 
         // After this destroy, logging will no longer happen.

@@ -56,7 +56,7 @@ k4a_result_t queue_create(uint32_t queue_depth, const char *queue_name, queue_t 
     queue->name = queue_name;
     if (queue->name == NULL)
     {
-        queue->name = LOGGER_QUEUE;
+        queue->name = "Unknown queue";
     }
 
     queue->queue = malloc(sizeof(queue_entry_t) * queue->depth);
@@ -109,7 +109,7 @@ k4a_wait_result_t queue_pop(queue_t queue_handle, int32_t wait_in_ms, k4a_captur
 
     if (queue->enabled != true)
     {
-        logger_error(queue->name, "Capture popped from disabled queue");
+        LOG_ERROR("%s: capture popped from disabled queue", queue->name);
         wresult = K4A_WAIT_RESULT_FAILED;
     }
 
@@ -167,7 +167,7 @@ k4a_wait_result_t queue_pop(queue_t queue_handle, int32_t wait_in_ms, k4a_captur
 
     if (queue->dropped_count != 0)
     {
-        logger_warn(queue->name, "Dropped oldest %d captures from queue", queue->dropped_count);
+        LOG_WARNING("%s: Dropped oldest %d captures from queue", queue->name, queue->dropped_count);
         queue->dropped_count = 0;
     }
 
@@ -199,7 +199,7 @@ void queue_push_w_dropped(queue_t queue_handle, k4a_capture_t capture, k4a_captu
 
     if (queue->enabled == false)
     {
-        logger_warn(queue->name, "Capture pushed into disabled queue");
+        LOG_WARNING("Capture pushed into disabled queue", queue->name);
     }
     else
     {
@@ -297,6 +297,6 @@ void queue_error(queue_t queue_handle)
     queue->error = true;
     Unlock(queue->lock);
 
-    logger_warn(LOGGER_QUEUE, "Error detected, shutting down queue and notifying consumers");
+    LOG_WARNING("Error detected, shutting down queue and notifying consumers");
     queue_disable(queue_handle);
 }

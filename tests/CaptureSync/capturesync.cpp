@@ -428,7 +428,7 @@ capturesync_push_single_capture(k4a_result_t status, capturesync_t sync, bool co
             image_dec_ref(image);
             image = NULL;
         }
-        logger_info(zone, "Pushing a capture");
+        LOG_INFO("%s: Pushing a capture", zone);
         capturesync_add_capture(sync, status, capture, color_capture);
         capture_dec_ref(capture);
     }
@@ -478,7 +478,7 @@ static void capturesync_thread_generate_sample_ready(capturesync_test_t *test, k
 
     } while ((timing[i].timestamp_usec != UINT64_MAX) && (*result == K4A_RESULT_SUCCEEDED));
 
-    logger_info(zone, "Thread exiting");
+    LOG_INFO("%s: Thread exiting", zone);
 }
 
 // Simulate either a streaming depth thread or streaming color thread
@@ -550,12 +550,11 @@ static void capturesync_validate_synchronization(capturesync_test_timing_t *test
     int i = 0;
     do
     {
-        logger_info("cs_main_test_thread",
-                    "TS: %10lld C:%lld.%lld type: %s",
-                    test_data[i].timestamp_usec,
-                    test_data[i].timestamp_usec / FPS_30_IN_US,                     // frame period
-                    test_data[i].timestamp_usec % FPS_30_IN_US * 10 / FPS_30_IN_US, // tenths of a frame period
-                    (test_data[i].color_capture ? "color" : "depth"));
+        LOG_INFO("TS: %10lld C:%lld.%lld type: %s",
+                 test_data[i].timestamp_usec,
+                 test_data[i].timestamp_usec / FPS_30_IN_US,                     // frame period
+                 test_data[i].timestamp_usec % FPS_30_IN_US * 10 / FPS_30_IN_US, // tenths of a frame period
+                 (test_data[i].color_capture ? "color" : "depth"));
 
         if (test_data[i].color_result != NO_CAPTURE && test_data[i].depth_result != NO_CAPTURE)
         {
@@ -563,7 +562,7 @@ static void capturesync_validate_synchronization(capturesync_test_timing_t *test
             uint64_t ts_depth = 0;
             uint64_t ts_ir16 = 0;
 
-            logger_info("cs_main_test_thread", "Waiting for capture upto %dms", WAIT_TEST_INFINITE);
+            LOG_INFO("Waiting for capture upto %dms", WAIT_TEST_INFINITE);
 
             while (ts_color == 0 || ts_depth == 0 || ts_ir16 == 0)
             {

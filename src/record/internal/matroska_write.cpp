@@ -97,7 +97,7 @@ populate_bitmap_info_header(BITMAPINFOHEADER *header, uint64_t width, uint64_t h
         header->biSizeImage = sizeof(uint8_t) * header->biWidth * header->biHeight * 2;
         break;
     default:
-        logger_error(LOGGER_RECORD, "Unsupported color format specified in recording: %d", format);
+        LOG_ERROR("Unsupported color format specified in recording: %d", format);
         return K4A_RESULT_FAILED;
     }
 
@@ -159,7 +159,7 @@ write_track_data(k4a_record_context_t *context, KaxTrackEntry *track, uint64_t t
 
     if (Lock(context->pending_cluster_lock) != LOCK_OK)
     {
-        logger_error(LOGGER_RECORD, "Failed to lock pending clusters");
+        LOG_ERROR("Failed to lock pending clusters");
         return K4A_RESULT_FAILED;
     }
 
@@ -182,7 +182,7 @@ write_track_data(k4a_record_context_t *context, KaxTrackEntry *track, uint64_t t
     Unlock(context->pending_cluster_lock);
     if (!context->writer_stopping && Condition_Post(context->writer_notify) != COND_OK)
     {
-        logger_error(LOGGER_RECORD, "Failed to notify writer thread");
+        LOG_ERROR("Failed to notify writer thread");
         // Data was still written in this case, so don't return failure
     }
 
@@ -197,9 +197,7 @@ cluster_t *get_cluster_for_timestamp(k4a_record_context_t *context, uint64_t tim
 
     if (context->last_written_timestamp > timestamp_ns)
     {
-        logger_error(LOGGER_RECORD,
-                     "The cluster containing the timestamp %d has already been written to disk.",
-                     timestamp_ns);
+        LOG_ERROR("The cluster containing the timestamp %d has already been written to disk.", timestamp_ns);
         return NULL;
     }
 
@@ -267,7 +265,7 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     if (cluster->data.size() == 0)
     {
-        logger_warn(LOGGER_RECORD, "Tried to write empty cluster to disk");
+        LOG_WARNING("Tried to write empty cluster to disk");
         return result;
     }
 
@@ -360,7 +358,7 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     }
     catch (std::ios_base::failure e)
     {
-        logger_error(LOGGER_RECORD, "Failed to write recording data '%s': %s", context->file_path, e.what());
+        LOG_ERROR("Failed to write recording data '%s': %s", context->file_path, e.what());
         result = K4A_RESULT_FAILED;
     }
 
@@ -391,7 +389,7 @@ static int matroska_writer_thread(void *context_ptr)
 
     if (Lock(context->writer_lock) != LOCK_OK)
     {
-        logger_error(LOGGER_RECORD, "Writer thread failed Lock");
+        LOG_ERROR("Writer thread failed Lock");
         result = K4A_RESULT_FAILED;
     }
 
@@ -423,7 +421,7 @@ static int matroska_writer_thread(void *context_ptr)
                 if (K4A_FAILED(result))
                 {
                     // write_cluster failures are not recoverable (file IO errors only, the file is likely corrupt)
-                    logger_error(LOGGER_RECORD, "Cluster write failed, dropping cluster.");
+                    LOG_ERROR("Cluster write failed, dropping cluster.");
                     break;
                 }
             }
@@ -432,7 +430,7 @@ static int matroska_writer_thread(void *context_ptr)
             COND_RESULT cond = Condition_Wait(context->writer_notify, context->writer_lock, oldest_cluster ? 1 : 100);
             if (cond != COND_OK && cond != COND_TIMEOUT)
             {
-                logger_error(LOGGER_RECORD, "Writer thread failed Condition_Wait: %d", cond);
+                LOG_ERROR("Writer thread failed Condition_Wait: %d", cond);
                 result = K4A_RESULT_FAILED;
                 break;
             }
@@ -441,7 +439,7 @@ static int matroska_writer_thread(void *context_ptr)
 
     if (Unlock(context->writer_lock) != LOCK_OK)
     {
-        logger_error(LOGGER_RECORD, "Writer thread failed Unlock");
+        LOG_ERROR("Writer thread failed Unlock");
         result = K4A_RESULT_FAILED;
     }
 
@@ -464,7 +462,7 @@ k4a_result_t start_matroska_writer_thread(k4a_record_context_t *context)
     if (ThreadAPI_Create(&context->writer_thread, matroska_writer_thread, context) != THREADAPI_OK)
     {
         context->writer_thread = 0;
-        logger_error(LOGGER_RECORD, "Failed to start recording writer thread.");
+        LOG_ERROR("Failed to start recording writer thread.");
         return K4A_RESULT_FAILED;
     }
 
@@ -481,13 +479,13 @@ k4a_result_t stop_matroska_writer_thread(k4a_record_context_t *context)
     if (Condition_Post(context->writer_notify) != COND_OK)
     {
         // If this fails, the thread will still eventually stop via the writer_stopping flag.
-        logger_warn(LOGGER_RECORD, "Failed to notify writer thread to stop.");
+        LOG_WARNING("Failed to notify writer thread to stop.");
     }
 
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     if (ThreadAPI_Join(context->writer_thread, (int *)&result) != THREADAPI_OK)
     {
-        logger_error(LOGGER_RECORD, "Failed to stop recording writer thread.");
+        LOG_ERROR("Failed to stop recording writer thread.");
         result = K4A_RESULT_FAILED;
     }
 

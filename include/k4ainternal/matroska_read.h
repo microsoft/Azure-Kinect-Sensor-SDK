@@ -124,11 +124,10 @@ template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElemen
     }
     catch (std::ios_base::failure e)
     {
-        logger_error(LOGGER_RECORD,
-                     "Failed to read element %s in recording '%s': %s",
-                     T::ClassInfos.GetName(),
-                     context->file_path,
-                     e.what());
+        LOG_ERROR("Failed to read element %s in recording '%s': %s",
+                  T::ClassInfos.GetName(),
+                  context->file_path,
+                  e.what());
         return nullptr;
     }
 }
@@ -146,9 +145,8 @@ std::unique_ptr<T> find_next(k4a_playback_context_t *context, bool search = fals
             {
                 if (!element->IsFiniteSize())
                 {
-                    logger_error(LOGGER_RECORD,
-                                 "Failed to read recording: Element Id '%x' has unknown size",
-                                 EbmlId(*element).GetValue());
+                    LOG_ERROR("Failed to read recording: Element Id '%x' has unknown size",
+                              EbmlId(*element).GetValue());
                     delete element;
                     return nullptr;
                 }
@@ -170,19 +168,16 @@ std::unique_ptr<T> find_next(k4a_playback_context_t *context, bool search = fals
         {
             if (!search)
             {
-                logger_error(LOGGER_RECORD,
-                             "Failed to read recording: Element Id '%x' not found",
-                             T::ClassInfos.GlobalId.GetValue());
+                LOG_ERROR("Failed to read recording: Element Id '%x' not found", T::ClassInfos.GlobalId.GetValue());
             }
             return nullptr;
         }
         else if (EbmlId(*element) != T::ClassInfos.GlobalId)
         {
-            logger_error(LOGGER_RECORD,
-                         "Failed to read recording: Expected element %s (id %x), found id '%x'",
-                         T::ClassInfos.GetName(),
-                         T::ClassInfos.GlobalId.GetValue(),
-                         EbmlId(*element).GetValue());
+            LOG_ERROR("Failed to read recording: Expected element %s (id %x), found id '%x'",
+                      T::ClassInfos.GetName(),
+                      T::ClassInfos.GlobalId.GetValue(),
+                      EbmlId(*element).GetValue());
             delete element;
             return nullptr;
         }
@@ -198,11 +193,7 @@ std::unique_ptr<T> find_next(k4a_playback_context_t *context, bool search = fals
     }
     catch (std::ios_base::failure e)
     {
-        logger_error(LOGGER_RECORD,
-                     "Failed to find %s in recording '%s': %s",
-                     T::ClassInfos.GetName(),
-                     context->file_path,
-                     e.what());
+        LOG_ERROR("Failed to find %s in recording '%s': %s", T::ClassInfos.GetName(), context->file_path, e.what());
         return nullptr;
     }
 }

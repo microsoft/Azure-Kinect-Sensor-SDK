@@ -237,7 +237,7 @@ k4a_result_t colormcu_set_multi_device_mode(colormcu_t colormcu_handle, k4a_devi
         break;
     default:
         result = K4A_RESULT_FAILED;
-        logger_error("colormcu", "Unexpected value in  config->wired_sync_mode:%d", config->wired_sync_mode);
+        LOG_ERROR("Unexpected value in  config->wired_sync_mode:%d", config->wired_sync_mode);
         break;
     }
 

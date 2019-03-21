@@ -82,10 +82,9 @@ drop_sample(capturesync_context_t *sync, k4a_wait_result_t *wresult, bool color_
     if (drop_into_queue)
     {
         // Log the capture being dropped on the floor
-        logger_info("capturesync_drop",
-                    "Dropping sample TS:%10lld type:%s",
-                    frame_info->ts,
-                    color_capture ? "Color" : "Depth");
+        LOG_INFO("capturesync_drop, Dropping sample TS:%10lld type:%s",
+                 frame_info->ts,
+                 color_capture ? "Color" : "Depth");
 
         // If drop_into_queue is provided, then that caller wants the capture to placed into the provided queue, if no
         // drop_into_queue is provided, then it is dropped on the floor
@@ -139,10 +138,9 @@ drop_sample(capturesync_context_t *sync, k4a_wait_result_t *wresult, bool color_
 static void replace_sample(capturesync_context_t *sync, k4a_capture_t capture_new, frame_info_t *frame_info)
 {
     // Log the capture being dropped
-    logger_error("capturesync_drop",
-                 "Releasing capture early due to full queue TS:%10lld type:%s",
-                 frame_info->ts,
-                 frame_info->color_capture ? "Color" : "Depth");
+    LOG_ERROR("capturesync_drop, releasing capture early due to full queue TS:%10lld type:%s",
+              frame_info->ts,
+              frame_info->color_capture ? "Color" : "Depth");
 
     if (!sync->synchronized_images_only)
     {
@@ -203,7 +201,7 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
         queue_error(sync->depth_ir.queue);
         queue_error(sync->color.queue);
 
-        logger_warn("capturesync_link", "Capture Error Detected, %s", color_capture ? "Color " : "Depth ");
+        LOG_WARNING("Capture Error Detected, %s", color_capture ? "Color " : "Depth ");
 
         // Reflect the low level error in the current result
         result = capture_result;
@@ -246,12 +244,11 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
     {
         if (sync->enable_ts_logging)
         {
-            logger_info("capturesync_ts",
-                        "Arriving capture, TS:%10lld, %s, Color TS:%10lld, Depth TS:%10lld",
-                        ts_raw_capture,
-                        color_capture ? "Color " : "Depth ",
-                        sync->color.ts,
-                        sync->depth_ir.ts);
+            LOG_INFO("capturesync_ts, Arriving capture, TS:%10lld, %s, Color TS:%10lld, Depth TS:%10lld",
+                     ts_raw_capture,
+                     color_capture ? "Color " : "Depth ",
+                     sync->color.ts,
+                     sync->depth_ir.ts);
         }
 
         if (sync->sync_captures == false || sync->disable_sync == true)
@@ -266,7 +263,7 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
             // started. This code protects against the depth timestamps from being reported before the reset happens.
             if (ts_raw_capture / sync->fps_period > 10)
             {
-                logger_warn("capturesync_ts", "Dropping depth capture as TS is too large TS:%10lld", ts_raw_capture);
+                LOG_WARNING("Dropping depth capture as TS is too large TS:%10lld", ts_raw_capture);
                 result = K4A_RESULT_FAILED; // Not an error, just a graceful exit
             }
             else
@@ -362,10 +359,7 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
             {
                 if (sync->enable_ts_logging)
                 {
-                    logger_info("capturesync_link",
-                                ",TS_Color, %10lld, TS_Depth, %10lld,",
-                                sync->color.ts,
-                                sync->depth_ir.ts);
+                    LOG_INFO("capturesync_link,TS_Color, %10lld, TS_Depth, %10lld,", sync->color.ts, sync->depth_ir.ts);
                 }
 
                 k4a_capture_t merged = merge_captures(sync->depth_ir.capture, sync->color.capture);
@@ -382,7 +376,7 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
             if (wresult == K4A_WAIT_RESULT_FAILED)
             {
                 sync->running = false;
-                logger_error("capturesync", "Error encountered access queue");
+                LOG_ERROR("CaptureSync, error encountered access queue");
             }
         }
     }
