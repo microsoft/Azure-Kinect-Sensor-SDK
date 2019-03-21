@@ -374,7 +374,6 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     for (std::pair<uint64_t, track_data_t> data : cluster->data)
     {
         data.second.buffer->FreeBuffer(*data.second.buffer);
-        delete data.second.buffer;
     }
 
     delete cluster;
