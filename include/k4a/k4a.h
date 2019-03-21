@@ -37,6 +37,40 @@ extern "C" {
  */
 K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
 
+/** Sets and unsets a callback function to deliver debug messages from the Azure Kinect device to the caller.
+ *
+ * \param message_cb
+ * Callback function for delivering message to. Set to NULL to unregister a callback function.
+ *
+ * \param message_cb_context
+ * The callback functions context.
+ *
+ * \param min_level
+ * The lest critical error the user wants to be notified about.
+ *
+ * \return ::K4A_RESULT_SUCCEEDED if the callback function was set or unset successfully. ::K4A_RESULT_FAILED if an
+ * error is encountered or the callback function has already been set.
+ *
+ *  \remarks
+ * Call this function to set or clear a callback function that is used to deliver debug messages to the caller. This
+ * callback may be called concurrently, so it is up to the implementation of the callback function to ensure the
+ * parallelization is handled.
+ *
+ * \remarks
+ * Unsetting the callback function will block until all pending calls to the callback function have completed.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_cb_t *message_cb,
+                                                      void *message_cb_context,
+                                                      uint32_t min_level);
+
 /** Open an Azure Kinect device.
  *
  * \param index
