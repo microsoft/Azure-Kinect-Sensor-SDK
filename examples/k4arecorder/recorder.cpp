@@ -49,7 +49,8 @@ int do_recording(uint8_t device_index,
                  char *recording_filename,
                  int recording_length,
                  k4a_device_configuration_t *device_config,
-                 bool record_imu)
+                 bool record_imu,
+                 int32_t absoluteExposureValue)
 {
     const uint32_t installed_devices = k4a_device_get_installed_count();
     if (device_index >= installed_devices)
@@ -88,6 +89,27 @@ int do_recording(uint8_t device_index,
     {
         std::cerr << "Either the color or depth modes must be enabled to record." << std::endl;
         return 1;
+    }
+
+    if (absoluteExposureValue != 0)
+    {
+        if (K4A_FAILED(k4a_device_set_color_control(device,
+                                                    K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                                    K4A_COLOR_CONTROL_MODE_MANUAL,
+                                                    absoluteExposureValue)))
+        {
+            std::cerr << "Runtime error: k4a_device_set_color_control() failed " << std::endl;
+        }
+    }
+    else
+    {
+        if (K4A_FAILED(k4a_device_set_color_control(device,
+                                                    K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                                    K4A_COLOR_CONTROL_MODE_AUTO,
+                                                    0)))
+        {
+            std::cerr << "Runtime error: k4a_device_set_color_control() failed " << std::endl;
+        }
     }
 
     CHECK(k4a_device_start_cameras(device, device_config), device);
