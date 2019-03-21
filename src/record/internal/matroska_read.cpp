@@ -119,6 +119,12 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     auto ebmlHead = find_next<EbmlHead>(context);
     if (ebmlHead)
     {
+        if (read_element<EbmlHead>(context, ebmlHead.get()) == NULL)
+        {
+            logger_error(LOGGER_RECORD, "Failed to read EBML head.");
+            return K4A_RESULT_FAILED;
+        }
+
         EDocType &eDocType = GetChild<EDocType>(*ebmlHead);
         EDocTypeVersion &eDocTypeVersion = GetChild<EDocTypeVersion>(*ebmlHead);
         EDocTypeReadVersion &eDocTypeReadVersion = GetChild<EDocTypeReadVersion>(*ebmlHead);
@@ -145,9 +151,14 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
             return K4A_RESULT_FAILED;
         }
     }
+    else
+    {
+        logger_error(LOGGER_RECORD, "Matroska / EBML head is missing, recording is not valid.");
+        return K4A_RESULT_FAILED;
+    }
 
     // Find the offsets for each section of the file
-    context->segment = find_next<KaxSegment>(context, true, false);
+    context->segment = find_next<KaxSegment>(context, true);
     if (context->segment)
     {
         auto element = next_child(context, context->segment.get());
@@ -264,20 +275,19 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
     // Read the first cluster to use as the cache root.
     if (K4A_FAILED(seek_offset(context, context->first_cluster_offset)))
     {
+        logger_error(LOGGER_RECORD, "Failed to seek to first recording cluster.");
         return K4A_RESULT_FAILED;
     }
-    std::shared_ptr<KaxCluster> first_cluster = find_next<KaxCluster>(context, false, false);
+    std::shared_ptr<KaxCluster> first_cluster = find_next<KaxCluster>(context);
     if (first_cluster == nullptr)
     {
+        logger_error(LOGGER_RECORD, "Failed to read element for first recording cluster.");
         return K4A_RESULT_FAILED;
     }
 
     context->cluster_cache = cluster_cache_t(new cluster_info_t, cluster_cache_deleter);
     context->seek_cluster = context->cluster_cache.get();
-    if (K4A_FAILED(populate_cluster_info(context, first_cluster, context->cluster_cache.get())))
-    {
-        return K4A_RESULT_FAILED;
-    }
+    populate_cluster_info(context, first_cluster, context->cluster_cache.get());
 
     // Populate the reset of the cache with the Cue data stored in the file.
     cluster_info_t *cluster_cache_end = context->cluster_cache.get();
@@ -921,21 +931,21 @@ k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset)
 
 // Read the cluster metadata from a Matroska element and add it to a cache entry.
 // File read pointer should already be at the start of the cluster.
-k4a_result_t populate_cluster_info(k4a_playback_context_t *context,
-                                   std::shared_ptr<KaxCluster> &cluster,
-                                   cluster_info_t *cluster_info)
+void populate_cluster_info(k4a_playback_context_t *context,
+                           std::shared_ptr<KaxCluster> &cluster,
+                           cluster_info_t *cluster_info)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->segment == nullptr);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster == nullptr);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster_info == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster_info->previous && cluster_info->previous->next != cluster_info);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster_info->next && cluster_info->next->previous != cluster_info);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, context == NULL);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, context->segment == nullptr);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, cluster == nullptr);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, cluster_info == NULL);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, cluster_info->previous && cluster_info->previous->next != cluster_info);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, cluster_info->next && cluster_info->next->previous != cluster_info);
 
     if (cluster_info->cluster_size > 0)
     {
         // If the cluster size is already set, then we have nothing to do.
-        return K4A_RESULT_SUCCEEDED;
+        return;
     }
 
     cluster_info->file_offset = context->segment->GetRelativePosition(*cluster.get());
@@ -971,8 +981,6 @@ k4a_result_t populate_cluster_info(k4a_playback_context_t *context,
 
         element = next_child(context, cluster.get());
     }
-
-    return K4A_RESULT_SUCCEEDED;
 }
 
 // Find the cluster containing the specified timestamp and return a pointer to its cache entry.
@@ -1028,29 +1036,30 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
             // Read forward in file to find next cluster and fill in cache
             if (K4A_FAILED(seek_offset(context, current_cluster->file_offset)))
             {
+                logger_error(LOGGER_RECORD, "Failed to seek to current cluster element.");
                 return NULL;
             }
-            std::shared_ptr<KaxCluster> current_element = find_next<KaxCluster>(context, false, false);
+            std::shared_ptr<KaxCluster> current_element = find_next<KaxCluster>(context);
             if (current_element == nullptr)
             {
+                logger_error(LOGGER_RECORD, "Failed to find current cluster element.");
                 return NULL;
             }
-            if (K4A_FAILED(populate_cluster_info(context, current_element, current_cluster)))
-            {
-                return NULL;
-            }
+            populate_cluster_info(context, current_element, current_cluster);
             if (current_cluster->next_known)
             {
                 // If populate_cluster_info() just connected the next entry, we can exit early.
                 return current_cluster->next;
             }
 
+            // Seek to the end of the current cluster so that find_next returns the next cluster in the file.
             if (K4A_FAILED(skip_element(context, current_element.get())))
             {
+                logger_error(LOGGER_RECORD, "Failed to seek to next cluster element.");
                 return NULL;
             }
 
-            std::shared_ptr<KaxCluster> next_cluster = find_next<KaxCluster>(context, true, false);
+            std::shared_ptr<KaxCluster> next_cluster = find_next<KaxCluster>(context, true);
             if (next_cluster)
             {
                 if (current_cluster->next &&
@@ -1074,10 +1083,7 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
                     }
                     current_cluster = next_cluster_info;
                 }
-                if (K4A_FAILED(populate_cluster_info(context, next_cluster, current_cluster)))
-                {
-                    return NULL;
-                }
+                populate_cluster_info(context, next_cluster, current_cluster);
                 return current_cluster;
             }
             else
@@ -1134,18 +1140,30 @@ std::shared_ptr<KaxCluster> load_cluster(k4a_playback_context_t *context, cluste
     context->load_count++;
     if (K4A_FAILED(seek_offset(context, cluster_info->file_offset)))
     {
+        logger_error(LOGGER_RECORD, "Failed to seek to cluster at: %llu", cluster_info->file_offset);
         return nullptr;
     }
-    cluster = find_next<KaxCluster>(context, true, true);
+    cluster = find_next<KaxCluster>(context);
     if (cluster)
     {
+        if (read_element<KaxCluster>(context, cluster.get()) == NULL)
+        {
+            logger_error(LOGGER_RECORD, "Failed to read cluster data at: %llu", cluster_info->file_offset);
+            return nullptr;
+        }
+
         uint64_t timecode = GetChild<KaxClusterTimecode>(*cluster).GetValue();
         assert(context->timecode_scale <= INT64_MAX);
         cluster->InitTimecode(timecode, (int64_t)context->timecode_scale);
 
         cluster_info->cluster = cluster;
+        return cluster;
     }
-    return cluster;
+    else
+    {
+        logger_error(LOGGER_RECORD, "Failed to find cluster element at: %llu", cluster_info->file_offset);
+        return nullptr;
+    }
 }
 
 // Search operates in 2 modes:

@@ -9,6 +9,7 @@
 #define RECORD_READ_H
 
 #include <k4ainternal/matroska_common.h>
+#include <functional>
 
 namespace k4arecord
 {
@@ -30,7 +31,7 @@ typedef struct _cluster_info_t
 // The cluster cache is a sparse linked-list index that may contain gaps until real data has been read from disk.
 // The list is initialized with metadata from the Cues block, which is used as a hint for seeking in the file.
 // Once it is known that no gap is present between indexed clusters, next_known is set to true.
-typedef std::unique_ptr<cluster_info_t, void (*)(cluster_info_t *)> cluster_cache_t;
+typedef std::unique_ptr<cluster_info_t, std::function<void(cluster_info_t *)>> cluster_cache_t;
 
 typedef struct _read_block_t
 {
@@ -122,9 +123,9 @@ libmatroska::KaxAttached *get_attachment_by_name(k4a_playback_context_t *context
 libmatroska::KaxAttached *get_attachment_by_tag(k4a_playback_context_t *context, const char *tag_name);
 
 k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset);
-k4a_result_t populate_cluster_info(k4a_playback_context_t *context,
-                                   std::shared_ptr<libmatroska::KaxCluster> &cluster,
-                                   cluster_info_t *cluster_info);
+void populate_cluster_info(k4a_playback_context_t *context,
+                           std::shared_ptr<libmatroska::KaxCluster> &cluster,
+                           cluster_info_t *cluster_info);
 cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp_ns);
 cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *current, bool next);
 std::shared_ptr<libmatroska::KaxCluster> load_cluster(k4a_playback_context_t *context, cluster_info_t *cluster_info);
@@ -158,9 +159,14 @@ template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElemen
     }
 }
 
-// Example usage: find_next<KaxSegment>(context, true, false);
-template<typename T>
-std::unique_ptr<T> find_next(k4a_playback_context_t *context, bool search = false, bool read = true)
+/**
+ * Find the next element of type T at the current file offset.
+ * If \p search is true, this function will keep reading elements until an element of type T is found or EOF is reached.
+ * If \p search is false, this function will only return an element if it exists at the current file offset.
+ *
+ * Example usage: find_next<KaxSegment>(context, true);
+ */
+template<typename T> std::unique_ptr<T> find_next(k4a_playback_context_t *context, bool search = false)
 {
     try
     {
@@ -212,14 +218,7 @@ std::unique_ptr<T> find_next(k4a_playback_context_t *context, bool search = fals
             return nullptr;
         }
 
-        if (read)
-        {
-            return std::unique_ptr<T>(read_element<T>(context, element));
-        }
-        else
-        {
-            return std::unique_ptr<T>(static_cast<T *>(element));
-        }
+        return std::unique_ptr<T>(static_cast<T *>(element));
     }
     catch (std::ios_base::failure e)
     {
@@ -241,7 +240,20 @@ k4a_result_t read_offset(k4a_playback_context_t *context, std::unique_ptr<T> &el
     RETURN_IF_ERROR(seek_offset(context, offset));
     element_out = find_next<T>(context);
 
-    return element_out ? K4A_RESULT_SUCCEEDED : K4A_RESULT_FAILED;
+    if (element_out)
+    {
+        if (read_element<T>(context, element_out.get()) == NULL)
+        {
+            logger_error(LOGGER_RECORD, "Failed to read element: %s at offset %llu", typeid(T).name(), offset);
+            return K4A_RESULT_FAILED;
+        }
+        return K4A_RESULT_SUCCEEDED;
+    }
+    else
+    {
+        logger_error(LOGGER_RECORD, "Element not found at offset: %s at offset %llu", typeid(T).name(), offset);
+        return K4A_RESULT_FAILED;
+    }
 }
 
 template<typename T> bool check_element_type(EbmlElement *element, T **out)
