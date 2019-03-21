@@ -14,9 +14,9 @@
 
 // Project headers
 //
-#include "assertionexception.h"
 #include "ik4aframevisualizer.h"
 #include "k4adepthpixelcolorizer.h"
+#include "k4astaticimageproperties.h"
 #include "k4aviewerutil.h"
 #include "perfcounter.h"
 
@@ -27,16 +27,16 @@ class K4ADepthSensorFrameBaseVisualizer : public IK4AFrameVisualizer<ImageFormat
 {
 public:
     explicit K4ADepthSensorFrameBaseVisualizer(const k4a_depth_mode_t depthMode,
-                                               const ExpectedValueRange expectedValueRange) :
-        m_dimensions(GetImageDimensionsForDepthMode(depthMode)),
+                                               const std::pair<DepthPixel, DepthPixel> expectedValueRange) :
+        m_dimensions(GetDepthDimensions(depthMode)),
         m_expectedValueRange(expectedValueRange),
-        m_expectedBufferSize(static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(RgbPixel))
+        m_expectedBufferSize(static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(BgraPixel))
     {
     }
 
     GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture) override
     {
-        return K4AViewerImage::Create(&texture, nullptr, m_dimensions, GL_RGB);
+        return K4AViewerImage::Create(&texture, nullptr, m_dimensions, GL_BGRA);
     }
 
     void InitializeBuffer(K4ATextureBuffer<ImageFormat> &buffer) override
@@ -98,36 +98,16 @@ private:
         {
             const DepthPixel pixelValue = *reinterpret_cast<const DepthPixel *>(currentSrc);
 
-            RgbPixel *outputPixel = reinterpret_cast<RgbPixel *>(dst);
-            *outputPixel = VisualizationFunction(m_expectedValueRange, pixelValue);
+            BgraPixel *outputPixel = reinterpret_cast<BgraPixel *>(dst);
+            *outputPixel = VisualizationFunction(pixelValue, m_expectedValueRange.first, m_expectedValueRange.second);
 
-            dst += sizeof(RgbPixel);
+            dst += sizeof(BgraPixel);
             currentSrc += sizeof(DepthPixel);
         }
     }
 
-    static ImageDimensions GetImageDimensionsForDepthMode(const k4a_depth_mode_t depthMode)
-    {
-        switch (depthMode)
-        {
-        case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-            return { 320, 288 };
-        case K4A_DEPTH_MODE_NFOV_UNBINNED:
-            return { 640, 576 };
-        case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-            return { 512, 512 };
-        case K4A_DEPTH_MODE_WFOV_UNBINNED:
-            return { 1024, 1024 };
-        case K4A_DEPTH_MODE_PASSIVE_IR:
-            return { 1024, 1024 };
-
-        default:
-            throw AssertionException("Invalid depth dimensions value");
-        }
-    }
-
     const ImageDimensions m_dimensions;
-    const ExpectedValueRange m_expectedValueRange;
+    const std::pair<DepthPixel, DepthPixel> m_expectedValueRange;
     const size_t m_expectedBufferSize;
 };
 

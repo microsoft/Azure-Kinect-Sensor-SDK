@@ -149,6 +149,7 @@ void K4AWindowManager::ShowWindow(const ImVec2 windowAreaPosition,
     K4AWindowPlacementInfo placementInfo;
     placementInfo.Position = windowAreaPosition;
     placementInfo.Size = windowAreaSize;
+    placementInfo.Size.y -= GetTitleBarHeight();
     ImGui::SetNextWindowPos(windowAreaPosition);
     ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), windowAreaSize);
 

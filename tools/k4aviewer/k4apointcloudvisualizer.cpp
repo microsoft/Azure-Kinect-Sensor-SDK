@@ -17,6 +17,7 @@
 #include "assertionexception.h"
 #include "k4acolorframevisualizer.h"
 #include "k4adepthpixelcolorizer.h"
+#include "k4astaticimageproperties.h"
 #include "k4aviewerutil.h"
 #include "perfcounter.h"
 
@@ -177,7 +178,7 @@ K4APointCloudVisualizer::K4APointCloudVisualizer(const bool enableColorPointClou
     m_enableColorPointCloud(enableColorPointCloud),
     m_calibrationData(calibrationData)
 {
-    m_expectedValueRange = GetRangeForDepthMode(m_calibrationData.depth_mode);
+    m_expectedValueRange = GetDepthModeRange(m_calibrationData.depth_mode);
     m_transformation = k4a::transformation(m_calibrationData);
 
     glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer.Id());
@@ -249,11 +250,9 @@ PointCloudVisualizationResult K4APointCloudVisualizer::UpdatePointClouds(const k
 
         while (dstPixel != endPixel)
         {
-            const RgbPixel colorization = K4ADepthPixelColorizer::ColorizeRedToBlue(m_expectedValueRange, *srcPixel);
-            dstPixel->Red = colorization.Red;
-            dstPixel->Green = colorization.Green;
-            dstPixel->Blue = colorization.Blue;
-            dstPixel->Alpha = 0xFF;
+            *dstPixel = K4ADepthPixelColorizer::ColorizeBlueToRed(*srcPixel,
+                                                                  m_expectedValueRange.first,
+                                                                  m_expectedValueRange.second);
 
             ++dstPixel;
             ++srcPixel;
