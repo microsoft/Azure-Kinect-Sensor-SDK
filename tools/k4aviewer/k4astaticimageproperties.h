@@ -82,10 +82,10 @@ inline std::pair<uint16_t, uint16_t> GetDepthModeRange(const k4a_depth_mode_t de
     }
 }
 
-// Gets the range of values that we expect to see from the IR camera
-// when using a given depth mode
+// Gets the expected min/max IR brightness levels that we expect to see
+// from the IR camera when using a given depth mode
 //
-inline std::pair<uint16_t, uint16_t> GetIrRange(const k4a_depth_mode_t depthMode)
+inline std::pair<uint16_t, uint16_t> GetIrLevels(const k4a_depth_mode_t depthMode)
 {
     switch (depthMode)
     {
