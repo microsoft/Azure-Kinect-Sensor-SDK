@@ -77,10 +77,7 @@ int main()
             //
             // This works here because we're doing the work on the same thread that we're
             // using for the UI, and the ViewerWindow class caps the framerate at the
-            // display's refresh rate.  If you do the image polling on a separate thread,
-            // calling get_capture with a timeout of 0 in a tight loop will consume an
-            // entire CPU core, so you'll want to set the timeout to something longer to
-            // avoid that.
+            // display's refresh rate (the EndFrame() call blocks on the display's sync).
             //
             // If we don't have new image data, we'll just reuse the textures we generated
             // from the last time we got a capture.
@@ -118,6 +115,8 @@ int main()
             window.ShowTexture("Depth", depthTexture, ImVec2(0.f, 0.f), windowSize);
             window.ShowTexture("Color", colorTexture, ImVec2(window.GetWidth() / 2.f, 0.f), windowSize);
 
+            // This will tell ImGui/OpenGL to render the frame, and will block until the next vsync.
+            //
             window.EndFrame();
         }
     }
