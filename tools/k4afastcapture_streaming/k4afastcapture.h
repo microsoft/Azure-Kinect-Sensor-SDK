@@ -30,7 +30,7 @@ class K4AFastCapture
 public:
     K4AFastCapture();
     ~K4AFastCapture();
-    bool Configure(const char *filePathPrefix, int exposureValue, int pcmShiftValue);
+    bool Configure(const char *filePathPrefix, int32_t exposureValue, int pcmShiftValue);
     void Run(int streamingLength);
     void Stop();
 
