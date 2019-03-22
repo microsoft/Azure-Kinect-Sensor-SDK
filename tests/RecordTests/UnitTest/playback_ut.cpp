@@ -662,21 +662,27 @@ TEST_F(playback_ut, DISABLED_open_test_file)
     ASSERT_EQ(playback_result, K4A_STREAM_RESULT_EOF);
     ASSERT_EQ(capture, nullptr);
 
-    std::cout << "Next capture x1000" << std::endl;
-    for (int i = 0; i < 1000; i++)
     {
-        playback_result = k4a_playback_get_next_capture(handle, &capture);
-        ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
-        ASSERT_NE(capture, nullptr);
-        k4a_capture_release(capture);
+        std::cout << "Next capture x1000" << std::endl;
+        k4arecord::Timer t("Next capture x1000");
+        for (int i = 0; i < 1000; i++)
+        {
+            playback_result = k4a_playback_get_next_capture(handle, &capture);
+            ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
+            ASSERT_NE(capture, nullptr);
+            k4a_capture_release(capture);
+        }
     }
-    std::cout << "Previous capture x1000" << std::endl;
-    for (int i = 0; i < 999; i++)
     {
-        playback_result = k4a_playback_get_previous_capture(handle, &capture);
-        ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
-        ASSERT_NE(capture, nullptr);
-        k4a_capture_release(capture);
+        std::cout << "Previous capture x1000" << std::endl;
+        k4arecord::Timer t("Previous capture x1000");
+        for (int i = 0; i < 999; i++)
+        {
+            playback_result = k4a_playback_get_previous_capture(handle, &capture);
+            ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
+            ASSERT_NE(capture, nullptr);
+            k4a_capture_release(capture);
+        }
     }
     playback_result = k4a_playback_get_previous_capture(handle, &capture);
     ASSERT_EQ(playback_result, K4A_STREAM_RESULT_EOF);

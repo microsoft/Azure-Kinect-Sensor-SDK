@@ -49,7 +49,8 @@ typedef struct _loaded_cluster_t
     std::shared_ptr<libmatroska::KaxCluster> cluster;
 
     // Pointers to previous and next cluster to keep them preloaded in memory.
-    future_cluster_t neighbor_clusters[2];
+    future_cluster_t previous_cluster;
+    future_cluster_t next_cluster;
 } loaded_cluster_t;
 
 typedef struct _block_info_t
@@ -79,6 +80,7 @@ typedef struct _k4a_playback_context_t
 {
     const char *file_path;
     std::unique_ptr<IOCallback> ebml_file;
+    std::mutex io_lock;
     logger_t logger_handle;
 
     uint64_t timecode_scale;
@@ -98,8 +100,10 @@ typedef struct _k4a_playback_context_t
 
     uint64_t sync_period_ns;
     uint64_t seek_timestamp_ns;
+    std::shared_ptr<loaded_cluster_t> seek_cluster;
 
     cluster_cache_t cluster_cache;
+    std::recursive_mutex cache_lock;
 
     track_reader_t color_track;
     track_reader_t depth_track;
@@ -116,14 +120,6 @@ typedef struct _k4a_playback_context_t
     uint64_t tags_offset;
 
     uint64_t last_timestamp_ns;
-
-    bool reader_stopping;
-    std::thread reader_thread;
-    // std::condition_variable constructor may throw, so wrap this in a pointer.
-    std::unique_ptr<std::condition_variable> reader_notify;
-    std::mutex reader_lock;
-    std::mutex reader_queue_lock;
-    std::queue<cluster_request_t> read_cluster_queue;
 
     // Stats
     uint64_t seek_count, load_count, cache_hits;
@@ -156,6 +152,9 @@ void populate_cluster_info(k4a_playback_context_t *context,
 cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp_ns);
 cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *current, bool next);
 std::shared_ptr<loaded_cluster_t> load_cluster(k4a_playback_context_t *context, cluster_info_t *cluster_info);
+std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *context,
+                                                    loaded_cluster_t *current_cluster,
+                                                    bool next);
 
 std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context,
                                          track_reader_t *reader,
@@ -165,9 +164,6 @@ std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_
 k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k4a_capture_t *capture_handle);
 k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *capture_handle, bool next);
 k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next);
-
-k4a_result_t start_matroska_reader_thread(k4a_playback_context_t *context);
-void stop_matroska_reader_thread(k4a_playback_context_t *context);
 
 // Template helper functions
 template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElement *element)
@@ -260,8 +256,6 @@ k4a_result_t read_offset(k4a_playback_context_t *context, std::unique_ptr<T> &el
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, offset == 0);
-
-    k4arecord::Timer t("read_offset " + std::string(typeid(T).name()));
 
     RETURN_IF_ERROR(seek_offset(context, offset));
     element_out = find_next<T>(context);

@@ -22,8 +22,6 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
     logger_t logger_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4arecord::Timer t("k4a_playback_open");
-
     // Instantiate the logger as early as possible
     logger_config_t logger_config;
     logger_config_init_default(&logger_config);
@@ -54,11 +52,6 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
 
     if (K4A_SUCCEEDED(result))
     {
-        result = start_matroska_reader_thread(context);
-    }
-
-    if (K4A_SUCCEEDED(result))
-    {
         result = TRACE_CALL(parse_mkv(context));
     }
 
@@ -68,7 +61,6 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
     }
     else
     {
-        stop_matroska_reader_thread(context);
 
         if (context && context->ebml_file)
         {
@@ -295,12 +287,19 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
 
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    // cluster_info_t *seek_cluster = find_cluster(context, target_time_ns);
-    // result = K4A_RESULT_FROM_BOOL(seek_cluster != nullptr);
+    std::shared_ptr<loaded_cluster_t> seek_cluster;
+    cluster_info_t *seek_cluster_info = find_cluster(context, target_time_ns);
+    result = K4A_RESULT_FROM_BOOL(seek_cluster_info != nullptr);
 
     if (K4A_SUCCEEDED(result))
     {
-        // context->seek_cluster = seek_cluster;
+        seek_cluster = load_cluster(context, seek_cluster_info);
+        result = K4A_RESULT_FROM_BOOL(seek_cluster != nullptr);
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        context->seek_cluster = seek_cluster;
         reset_seek_pointers(context, target_time_ns);
     }
 
@@ -327,8 +326,6 @@ void k4a_playback_close(const k4a_playback_t playback_handle)
         LOG_TRACE("  Seek count: %llu", context->seek_count);
         LOG_TRACE("  Cluster load count: %llu", context->load_count);
         LOG_TRACE("  Cluster cache hits: %llu", context->cache_hits);
-
-        stop_matroska_reader_thread(context);
 
         try
         {
