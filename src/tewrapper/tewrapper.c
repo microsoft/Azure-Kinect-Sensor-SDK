@@ -123,13 +123,11 @@ static int transform_engine_thread(void *param)
                 }
             }
         }
-        Unlock(tewrapper->worker_lock);
 
         // Notify the API thread that transform engine thread completed a frame processing
-        Lock(tewrapper->main_lock);
         tewrapper->thread_processing_result = result;
         Condition_Post(tewrapper->main_condition);
-        Unlock(tewrapper->main_lock);
+        Unlock(tewrapper->worker_lock);
     }
 
     transform_engine_stop_helper(tewrapper);
@@ -148,6 +146,8 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
 {
     tewrapper_context_t *tewrapper = tewrapper_t_get_context(tewrapper_handle);
 
+    Lock(tewrapper->main_lock);
+
     // Notify the transform engine thread to process a frame
     Lock(tewrapper->worker_lock);
     tewrapper->type = type;
@@ -158,12 +158,10 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
     tewrapper->transformed_image_data = transformed_image_data;
     tewrapper->transformed_image_size = transformed_image_size;
     Condition_Post(tewrapper->worker_condition);
-    Unlock(tewrapper->worker_lock);
 
     // Waiting the transform engine thread to finish processing
-    Lock(tewrapper->main_lock);
     int infinite_timeout = 0;
-    COND_RESULT cond_result = Condition_Wait(tewrapper->main_condition, tewrapper->main_lock, infinite_timeout);
+    COND_RESULT cond_result = Condition_Wait(tewrapper->main_condition, tewrapper->worker_lock, infinite_timeout);
     k4a_result_t result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
 
     if (K4A_SUCCEEDED(result) && K4A_FAILED(tewrapper->thread_processing_result))
@@ -171,6 +169,8 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
         LOG_ERROR("Transform Engine thread failed to process", 0);
         result = tewrapper->thread_processing_result;
     }
+
+    Unlock(tewrapper->worker_lock);
 
     Unlock(tewrapper->main_lock);
 
@@ -198,15 +198,16 @@ tewrapper_t tewrapper_create(k4a_transform_engine_calibration_t *transform_engin
     if (K4A_SUCCEEDED(result))
     {
         tewrapper->main_condition = Condition_Init();
+        result = K4A_RESULT_FROM_BOOL(tewrapper->main_condition != NULL);
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
         tewrapper->worker_condition = Condition_Init();
+        result = K4A_RESULT_FROM_BOOL(tewrapper->worker_condition != NULL);
     }
 
     // Start transform engine thread
-    if (K4A_SUCCEEDED(result))
-    {
-        result = K4A_RESULT_FROM_BOOL(tewrapper->thread == NULL);
-    }
-
     if (K4A_SUCCEEDED(result))
     {
         bool locked = false;
