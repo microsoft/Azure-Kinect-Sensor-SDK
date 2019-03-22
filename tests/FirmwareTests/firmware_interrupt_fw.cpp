@@ -22,6 +22,11 @@ struct firmware_interrupt_parameters
     const char *test_name;
     firmware_operation_component_t component;
     firmware_operation_interruption_t interruption;
+
+    friend std::ostream &operator<<(std::ostream &os, const firmware_interrupt_parameters &obj)
+    {
+        return os << "test " << (int)obj.test_number << ": " << obj.test_name;
+    }
 };
 
 class firmware_interrupt_fw : public ::testing::Test,
@@ -111,12 +116,13 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
                                     g_candidate_firmware_package_info,
                                     false));
 
+    // Update to the Test firmware, but interrupt...
+    LOG_INFO("Beginning of the firmware update to the Test Firmware with interruption...");
+
     // Prepend the "Firmware Package Versions:\n" with "Test".
     printf("Test ");
     log_firmware_version(g_test_firmware_package_info);
 
-    // Update to the Test firmware, but interrupt...
-    LOG_INFO("Beginning of the firmware update to the Test Firmware with interruption...");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_download(firmware_handle, g_test_firmware_buffer, g_test_firmware_size));
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               interrupt_device_at_update_stage(&firmware_handle,
@@ -130,7 +136,7 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
               << " Depth: " << calculate_overall_component_status(finalStatus.depth)
               << " RGB: " << calculate_overall_component_status(finalStatus.rgb) << std::endl;
 
-    // Check that we are still on the old version
+    // Check that we are still on the version we expect
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, firmware_get_device_version(firmware_handle, &current_version));
     log_device_version(current_version);
 
@@ -184,9 +190,14 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
         ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
         ASSERT_TRUE(compare_version(current_version.audio, g_test_firmware_package_info.audio))
             << "Audio version mismatch";
-        // The Depth version appears to be non-deterministic based on when the reset actually happened.
-        // ASSERT_TRUE(compare_version(current_version.depth, { 0 })) << "Depth mismatch";
         ASSERT_TRUE(compare_version(current_version.rgb, g_candidate_firmware_package_info.rgb)) << "RGB mismatch";
+
+        // Don't fail on the Depth version as it appears to be non-deterministic based on when the reset actually
+        // happened.
+        if (!compare_version(current_version.depth, { 0 }))
+        {
+            printf("  The Depth version was not expected\n");
+        }
         break;
 
     case FIRMWARE_OPERATION_RGB_ERASE:
@@ -195,12 +206,21 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
         ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth_config));
         ASSERT_EQ(FIRMWARE_OPERATION_SUCCEEDED, calculate_overall_component_status(finalStatus.depth));
         ASSERT_EQ(FIRMWARE_OPERATION_INPROGRESS, calculate_overall_component_status(finalStatus.rgb));
-        // The Audio and Depth version appears to be the previous version.
-        // The RGB version appears to be non-deterministic based on when the reset actually happened.
-        // ASSERT_TRUE(compare_version(current_version.audio, g_candidate_firmware_package_info.audio))
-        //    << "Audio version mismatch";
-        // ASSERT_TRUE(compare_version(current_version.depth, g_test_firmware_package_info.depth)) << "Depth mismatch";
-        // ASSERT_TRUE(compare_version(current_version.rgb, { 0 })) << "RGB mismatch";
+
+        // Don't fail on the Audio, Depth, and RGB versions as they appear to be non-deterministic based on when the
+        // reset actually happened.
+        if (!compare_version(current_version.audio, g_test_firmware_package_info.audio))
+        {
+            printf("  The Audio version was not expected\n");
+        }
+        if (!compare_version(current_version.depth, g_test_firmware_package_info.depth))
+        {
+            printf("  The Depth version was not expected\n");
+        }
+        if (!compare_version(current_version.rgb, { 0 }))
+        {
+            printf("  The RGB version was not expected\n");
+        }
         break;
 
     default:
@@ -217,32 +237,28 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
                                     false));
 
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
-    // TODO: pull calibration?
 }
 
 static struct firmware_interrupt_parameters tests_interrupt_reboot[] = {
     { 0, "Reset device at update start", FIRMWARE_OPERATION_START, FIRMWARE_INTERRUPTION_RESET },
-    { 1, "Reset device at during Audio erase", FIRMWARE_OPERATION_AUDIO_ERASE, FIRMWARE_INTERRUPTION_RESET },
-    { 2, "Reset device at during Audio write", FIRMWARE_OPERATION_AUDIO_WRITE, FIRMWARE_INTERRUPTION_RESET },
-    // This causes the certificate to get reset on pre-DV devices
-    //{ 3, "Reset device at during Depth erase", FIRMWARE_OPERATION_DEPTH_ERASE, FIRMWARE_INTERRUPTION_RESET },
-    { 4, "Reset device at during Depth write", FIRMWARE_OPERATION_DEPTH_WRITE, FIRMWARE_INTERRUPTION_RESET },
-    { 5, "Reset device at during RGB erase", FIRMWARE_OPERATION_RGB_ERASE, FIRMWARE_INTERRUPTION_RESET },
-    { 6, "Reset device at during RGB write", FIRMWARE_OPERATION_RGB_WRITE, FIRMWARE_INTERRUPTION_RESET },
+    { 1, "Reset device during Audio erase", FIRMWARE_OPERATION_AUDIO_ERASE, FIRMWARE_INTERRUPTION_RESET },
+    { 2, "Reset device during Audio write", FIRMWARE_OPERATION_AUDIO_WRITE, FIRMWARE_INTERRUPTION_RESET },
+    { 3, "Reset device during Depth erase", FIRMWARE_OPERATION_DEPTH_ERASE, FIRMWARE_INTERRUPTION_RESET },
+    { 4, "Reset device during Depth write", FIRMWARE_OPERATION_DEPTH_WRITE, FIRMWARE_INTERRUPTION_RESET },
+    { 5, "Reset device during RGB erase", FIRMWARE_OPERATION_RGB_ERASE, FIRMWARE_INTERRUPTION_RESET },
+    { 6, "Reset device during RGB write", FIRMWARE_OPERATION_RGB_WRITE, FIRMWARE_INTERRUPTION_RESET },
 };
 
 INSTANTIATE_TEST_CASE_P(interrupt_reboot, firmware_interrupt_fw, ::testing::ValuesIn(tests_interrupt_reboot));
 
 static struct firmware_interrupt_parameters tests_interrupt_disconnect[] = {
     { 0, "Disconnect device at update start", FIRMWARE_OPERATION_START, FIRMWARE_INTERRUPTION_DISCONNECT },
-    { 1, "Disconnect device at during Audio erase", FIRMWARE_OPERATION_AUDIO_ERASE, FIRMWARE_INTERRUPTION_DISCONNECT },
-    { 2, "Disconnect device at during Audio write", FIRMWARE_OPERATION_AUDIO_WRITE, FIRMWARE_INTERRUPTION_DISCONNECT },
-    // This causes the certificate to get reset on pre-DV devices
-    //{ 3, "Disconnect device at during Depth erase", FIRMWARE_OPERATION_DEPTH_ERASE, FIRMWARE_INTERRUPTION_DISCONNECT
-    //},
-    { 4, "Disconnect device at during Depth write", FIRMWARE_OPERATION_DEPTH_WRITE, FIRMWARE_INTERRUPTION_DISCONNECT },
-    { 5, "Disconnect device at during RGB erase", FIRMWARE_OPERATION_RGB_ERASE, FIRMWARE_INTERRUPTION_DISCONNECT },
-    { 6, "Disconnect device at during RGB write", FIRMWARE_OPERATION_RGB_WRITE, FIRMWARE_INTERRUPTION_DISCONNECT },
+    { 1, "Disconnect device during Audio erase", FIRMWARE_OPERATION_AUDIO_ERASE, FIRMWARE_INTERRUPTION_DISCONNECT },
+    { 2, "Disconnect device during Audio write", FIRMWARE_OPERATION_AUDIO_WRITE, FIRMWARE_INTERRUPTION_DISCONNECT },
+    { 3, "Disconnect device during Depth erase", FIRMWARE_OPERATION_DEPTH_ERASE, FIRMWARE_INTERRUPTION_DISCONNECT },
+    { 4, "Disconnect device during Depth write", FIRMWARE_OPERATION_DEPTH_WRITE, FIRMWARE_INTERRUPTION_DISCONNECT },
+    { 5, "Disconnect device during RGB erase", FIRMWARE_OPERATION_RGB_ERASE, FIRMWARE_INTERRUPTION_DISCONNECT },
+    { 6, "Disconnect device during RGB write", FIRMWARE_OPERATION_RGB_WRITE, FIRMWARE_INTERRUPTION_DISCONNECT },
 };
 
 INSTANTIATE_TEST_CASE_P(interrupt_disconnect, firmware_interrupt_fw, ::testing::ValuesIn(tests_interrupt_disconnect));

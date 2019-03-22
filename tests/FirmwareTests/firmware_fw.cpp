@@ -51,9 +51,18 @@ protected:
             firmware_destroy(firmware_handle);
             firmware_handle = nullptr;
         }
+
+        if (serial_number != nullptr)
+        {
+            free(serial_number);
+            serial_number = nullptr;
+            serial_number_length = 0;
+        }
     }
 
     firmware_t firmware_handle = nullptr;
+    char *serial_number = nullptr;
+    size_t serial_number_length = 0;
 };
 
 TEST_F(firmware_fw, DISABLED_update_timing)
@@ -63,6 +72,14 @@ TEST_F(firmware_fw, DISABLED_update_timing)
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
+    ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
+
+    serial_number = (char *)malloc(serial_number_length);
+    ASSERT_NE(nullptr, serial_number);
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
+
     LOG_INFO("Updating the device to the Candidate firmware.");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
@@ -71,6 +88,8 @@ TEST_F(firmware_fw, DISABLED_update_timing)
                                     g_candidate_firmware_package_info,
                                     true));
 
+    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
+
     LOG_INFO("Updating the device to the Test firmware.");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
@@ -78,6 +97,8 @@ TEST_F(firmware_fw, DISABLED_update_timing)
                                     g_test_firmware_size,
                                     g_test_firmware_package_info,
                                     true));
+
+    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 }
 
 TEST_F(firmware_fw, simple_update_from_lkg)
@@ -87,6 +108,14 @@ TEST_F(firmware_fw, simple_update_from_lkg)
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
+    ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
+
+    serial_number = (char *)malloc(serial_number_length);
+    ASSERT_NE(nullptr, serial_number);
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
+
     LOG_INFO("Updating the device to the LKG firmware.");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
@@ -94,6 +123,8 @@ TEST_F(firmware_fw, simple_update_from_lkg)
                                     g_lkg_firmware_size,
                                     g_lkg_firmware_package_info,
                                     false));
+
+    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
     LOG_INFO("Updating the device to the Candidate firmware.");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -103,6 +134,8 @@ TEST_F(firmware_fw, simple_update_from_lkg)
                                     g_candidate_firmware_package_info,
                                     false));
 
+    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
+
     LOG_INFO("Updating the device to the Test firmware.");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
@@ -110,6 +143,8 @@ TEST_F(firmware_fw, simple_update_from_lkg)
                                     g_test_firmware_size,
                                     g_test_firmware_package_info,
                                     false));
+
+    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 }
 
 TEST_F(firmware_fw, simple_update_from_factory)
@@ -119,6 +154,14 @@ TEST_F(firmware_fw, simple_update_from_factory)
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
+    ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
+
+    serial_number = (char *)malloc(serial_number_length);
+    ASSERT_NE(nullptr, serial_number);
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
+
     LOG_INFO("Updating the device to the Factory firmware.");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
@@ -126,6 +169,8 @@ TEST_F(firmware_fw, simple_update_from_factory)
                                     g_factory_firmware_size,
                                     g_factory_firmware_package_info,
                                     false));
+
+    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
     LOG_INFO("Updating the device to the Candidate firmware.");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -135,6 +180,8 @@ TEST_F(firmware_fw, simple_update_from_factory)
                                     g_candidate_firmware_package_info,
                                     false));
 
+    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
+
     LOG_INFO("Updating the device to the Test firmware.");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
@@ -142,4 +189,6 @@ TEST_F(firmware_fw, simple_update_from_factory)
                                     g_test_firmware_size,
                                     g_test_firmware_package_info,
                                     false));
+
+    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 }

@@ -556,8 +556,8 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
 
     do
     {
-        // This is not the necessarily the final status we will get, but at any point could return and the caller needs
-        // to know the state of the update when we return.
+        // This is not necessarily the final status we will get, but at any point could return and the caller needs to
+        // know the state of the update when we return.
         result = firmware_get_download_status(*firmware_handle, final_status);
         if (result == K4A_RESULT_SUCCEEDED)
         {
@@ -705,19 +705,19 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
         }
         else
         {
-            // Failed to get the status of the update operation. Break out of the loop to attempt to reset the device
-            // and return.
+            // Failed to get the status of the update operation. Attempt to reset the device and return.
             LOG_ERROR("Failed to get the firmware update status.");
-            break;
+            TRACE_CALL(interrupt_operation(firmware_handle, interruption));
+            return K4A_RESULT_FAILED;
         }
 
         K4A_TEST_VERIFY_EQUAL(0, tickcounter_get_current_ms(tick, &now));
 
         if (!all_complete && (now - start_time_ms > UPDATE_TIMEOUT_MS))
         {
-            // The update hasn't completed and too much time as passed. Break out of the loop to attempt to reset the
-            // device and return.
+            // The update hasn't completed and too much time as passed. Attempt to reset the device and return.
             LOG_ERROR("Timeout waiting for the update to complete.");
+            TRACE_CALL(interrupt_operation(firmware_handle, interruption));
             return K4A_RESULT_FAILED;
         }
 
@@ -727,7 +727,7 @@ k4a_result_t interrupt_device_at_update_stage(firmware_t *firmware_handle,
         }
     } while (!all_complete);
 
-    // At this point the update has either completed or timed out. Either way the device needs to be reset after the
+    // At this point the update has completed, the device needs to be reset after the
     // update has progressed.
     return TRACE_CALL(interrupt_operation(firmware_handle, interruption));
 }
