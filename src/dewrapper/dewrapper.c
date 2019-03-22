@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// This library Device Engine Wrapper
+// This library Depth Engine Wrapper
 #include <k4ainternal/dewrapper.h>
 
 // Dependent libraries

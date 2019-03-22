@@ -363,7 +363,7 @@ typedef struct _k4a_transformation_context_t
     float *memory_color_camera_xy_tables;
     bool enable_gpu_optimization;
     bool enable_depth_color_transform;
-    tewrapper_t tewrapper_handle;
+    tewrapper_t tewrapper;
 } k4a_transformation_context_t;
 
 K4A_DECLARE_CONTEXT(k4a_transformation_t, k4a_transformation_context_t);
@@ -418,14 +418,14 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration,
                &transformation_context->depth_camera_xy_tables,
                sizeof(k4a_transformation_xy_tables_t));
 
-        transformation_context->tewrapper_handle = tewrapper_create(&transform_engine_calibration);
-        if (transformation_context->tewrapper_handle == NULL)
+        transformation_context->tewrapper = tewrapper_create(&transform_engine_calibration);
+        if (transformation_context->tewrapper == NULL)
         {
             transformation_destroy(transformation_handle);
             return 0;
         }
 
-        if (K4A_FAILED(TRACE_CALL(tewrapper_start(transformation_context->tewrapper_handle))))
+        if (K4A_FAILED(TRACE_CALL(tewrapper_start(transformation_context->tewrapper))))
         {
             transformation_destroy(transformation_handle);
             return 0;
@@ -448,9 +448,9 @@ void transformation_destroy(k4a_transformation_t transformation_handle)
     {
         free(transformation_context->memory_color_camera_xy_tables);
     }
-    if (transformation_context->tewrapper_handle)
+    if (transformation_context->tewrapper)
     {
-        tewrapper_destroy(transformation_context->tewrapper_handle);
+        tewrapper_destroy(transformation_context->tewrapper);
     }
     k4a_transformation_t_destroy(transformation_handle);
 }
@@ -478,15 +478,15 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
         size_t transformed_depth_image_size = (size_t)(transformed_depth_image_descriptor->stride_bytes *
                                                        transformed_depth_image_descriptor->height_pixels);
 
-        if (K4A_FAILED(TRACE_CALL(tewrapper_process(transformation_context->tewrapper_handle,
-                                                    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR,
-                                                    depth_image_data,
-                                                    depth_image_size,
-                                                    NULL, // Color image data is not needed when transform depth image
-                                                          // to the geometry of color camera
-                                                    0,
-                                                    transformed_depth_image_data,
-                                                    transformed_depth_image_size))))
+        if (K4A_FAILED(TRACE_CALL(tewrapper_process_frame(transformation_context->tewrapper,
+                                                          K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR,
+                                                          depth_image_data,
+                                                          depth_image_size,
+                                                          NULL, // Color image data is not needed when transform depth
+                                                                // image to the geometry of color camera
+                                                          0,
+                                                          transformed_depth_image_data,
+                                                          transformed_depth_image_size))))
         {
             return K4A_RESULT_FAILED;
         }
@@ -535,14 +535,14 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
         size_t transformed_color_image_size = (size_t)(transformed_color_image_descriptor->stride_bytes *
                                                        transformed_color_image_descriptor->height_pixels);
 
-        if (K4A_FAILED(TRACE_CALL(tewrapper_process(transformation_context->tewrapper_handle,
-                                                    K4A_TRANSFORM_ENGINE_TYPE_COLOR_TO_DEPTH,
-                                                    depth_image_data,
-                                                    depth_image_size,
-                                                    color_image_data,
-                                                    color_image_size,
-                                                    transformed_color_image_data,
-                                                    transformed_color_image_size))))
+        if (K4A_FAILED(TRACE_CALL(tewrapper_process_frame(transformation_context->tewrapper,
+                                                          K4A_TRANSFORM_ENGINE_TYPE_COLOR_TO_DEPTH,
+                                                          depth_image_data,
+                                                          depth_image_size,
+                                                          color_image_data,
+                                                          color_image_size,
+                                                          transformed_color_image_data,
+                                                          transformed_color_image_size))))
         {
             return K4A_RESULT_FAILED;
         }
