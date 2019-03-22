@@ -419,13 +419,7 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration,
                sizeof(k4a_transformation_xy_tables_t));
 
         transformation_context->tewrapper = tewrapper_create(&transform_engine_calibration);
-        if (transformation_context->tewrapper == NULL)
-        {
-            transformation_destroy(transformation_handle);
-            return 0;
-        }
-
-        if (K4A_FAILED(TRACE_CALL(tewrapper_start(transformation_context->tewrapper))))
+        if (K4A_FAILED(K4A_RESULT_FROM_BOOL(transformation_context->tewrapper != NULL)))
         {
             transformation_destroy(transformation_handle);
             return 0;

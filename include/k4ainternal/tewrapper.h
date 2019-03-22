@@ -26,8 +26,6 @@ K4A_DECLARE_HANDLE(tewrapper_t);
 
 tewrapper_t tewrapper_create(k4a_transform_engine_calibration_t *transform_engine_calibration);
 void tewrapper_destroy(tewrapper_t tewrapper_handle);
-k4a_result_t tewrapper_start(tewrapper_t tewrapper_handle);
-void tewrapper_stop(tewrapper_t tewrapper_handle);
 k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
                                      k4a_transform_engine_type_t type,
                                      const void *depth_image_data,

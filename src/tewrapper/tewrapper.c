@@ -21,10 +21,10 @@ typedef struct _tewrapper_context_t
     k4a_transform_engine_context_t *transform_engine;
 
     THREAD_HANDLE thread;
-    LOCK_HANDLE main_thread_lock;
-    COND_HANDLE main_thread_condition;
-    LOCK_HANDLE transform_engine_thread_lock;
-    COND_HANDLE transform_engine_thread_condition;
+    LOCK_HANDLE main_lock;
+    COND_HANDLE main_condition;
+    LOCK_HANDLE worker_lock;
+    COND_HANDLE worker_condition;
     volatile bool thread_stop;
     k4a_result_t thread_start_result;
     k4a_result_t thread_processing_result;
@@ -77,19 +77,17 @@ static int transform_engine_thread(void *param)
 
     // The Start routine is blocked waiting for this thread to complete startup, so we signal it here and share our
     // startup status.
-    Lock(tewrapper->main_thread_lock);
+    Lock(tewrapper->main_lock);
     tewrapper->thread_start_result = result;
-    Condition_Post(tewrapper->main_thread_condition);
-    Unlock(tewrapper->main_thread_lock);
+    Condition_Post(tewrapper->main_condition);
+    Unlock(tewrapper->main_lock);
 
     while (result != K4A_RESULT_FAILED && tewrapper->thread_stop == false)
     {
         // Waiting the main thread to request processing a frame
-        Lock(tewrapper->transform_engine_thread_lock);
+        Lock(tewrapper->worker_lock);
         int infinite_timeout = 0;
-        COND_RESULT cond_result = Condition_Wait(tewrapper->transform_engine_thread_condition,
-                                                 tewrapper->transform_engine_thread_lock,
-                                                 infinite_timeout);
+        COND_RESULT cond_result = Condition_Wait(tewrapper->worker_condition, tewrapper->worker_lock, infinite_timeout);
         result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
 
         if (tewrapper->thread_stop == false)
@@ -124,14 +122,14 @@ static int transform_engine_thread(void *param)
                     result = K4A_RESULT_FAILED;
                 }
             }
-
-            // Notify the main thread that transform engine thread completed a frame processing
-            Lock(tewrapper->main_thread_lock);
-            tewrapper->thread_processing_result = result;
-            Condition_Post(tewrapper->main_thread_condition);
-            Unlock(tewrapper->main_thread_lock);
         }
-        Unlock(tewrapper->transform_engine_thread_lock);
+        Unlock(tewrapper->worker_lock);
+
+        // Notify the API thread that transform engine thread completed a frame processing
+        Lock(tewrapper->main_lock);
+        tewrapper->thread_processing_result = result;
+        Condition_Post(tewrapper->main_condition);
+        Unlock(tewrapper->main_lock);
     }
 
     transform_engine_stop_helper(tewrapper);
@@ -151,7 +149,7 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
     tewrapper_context_t *tewrapper = tewrapper_t_get_context(tewrapper_handle);
 
     // Notify the transform engine thread to process a frame
-    Lock(tewrapper->transform_engine_thread_lock);
+    Lock(tewrapper->worker_lock);
     tewrapper->type = type;
     tewrapper->depth_image_data = (void *)depth_image_data;
     tewrapper->depth_image_size = depth_image_size;
@@ -159,15 +157,13 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
     tewrapper->color_image_size = color_image_size;
     tewrapper->transformed_image_data = transformed_image_data;
     tewrapper->transformed_image_size = transformed_image_size;
-    Condition_Post(tewrapper->transform_engine_thread_condition);
-    Unlock(tewrapper->transform_engine_thread_lock);
+    Condition_Post(tewrapper->worker_condition);
+    Unlock(tewrapper->worker_lock);
 
     // Waiting the transform engine thread to finish processing
-    Lock(tewrapper->main_thread_lock);
+    Lock(tewrapper->main_lock);
     int infinite_timeout = 0;
-    COND_RESULT cond_result = Condition_Wait(tewrapper->main_thread_condition,
-                                             tewrapper->main_thread_lock,
-                                             infinite_timeout);
+    COND_RESULT cond_result = Condition_Wait(tewrapper->main_condition, tewrapper->main_lock, infinite_timeout);
     k4a_result_t result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
 
     if (K4A_SUCCEEDED(result) && K4A_FAILED(tewrapper->thread_processing_result))
@@ -176,7 +172,7 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
         result = tewrapper->thread_processing_result;
     }
 
-    Unlock(tewrapper->main_thread_lock);
+    Unlock(tewrapper->main_lock);
 
     return result;
 }
@@ -191,67 +187,25 @@ tewrapper_t tewrapper_create(k4a_transform_engine_calibration_t *transform_engin
     tewrapper->transform_engine_calibration = transform_engine_calibration;
     tewrapper->thread_start_result = K4A_RESULT_FAILED;
 
-    tewrapper->main_thread_lock = Lock_Init();
-    k4a_result_t result = K4A_RESULT_FROM_BOOL(tewrapper->main_thread_lock != NULL);
+    tewrapper->main_lock = Lock_Init();
+    k4a_result_t result = K4A_RESULT_FROM_BOOL(tewrapper->main_lock != NULL);
     if (K4A_SUCCEEDED(result))
     {
-        tewrapper->transform_engine_thread_lock = Lock_Init();
-        result = K4A_RESULT_FROM_BOOL(tewrapper->transform_engine_thread_lock != NULL);
+        tewrapper->worker_lock = Lock_Init();
+        result = K4A_RESULT_FROM_BOOL(tewrapper->worker_lock != NULL);
     }
 
     if (K4A_SUCCEEDED(result))
     {
-        tewrapper->main_thread_condition = Condition_Init();
-        tewrapper->transform_engine_thread_condition = Condition_Init();
+        tewrapper->main_condition = Condition_Init();
+        tewrapper->worker_condition = Condition_Init();
     }
 
-    if (K4A_FAILED(result))
+    // Start transform engine thread
+    if (K4A_SUCCEEDED(result))
     {
-        tewrapper_t_destroy(tewrapper_handle);
-        tewrapper_handle = NULL;
+        result = K4A_RESULT_FROM_BOOL(tewrapper->thread == NULL);
     }
-
-    return tewrapper_handle;
-}
-
-void tewrapper_destroy(tewrapper_t tewrapper_handle)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, tewrapper_t, tewrapper_handle);
-    tewrapper_context_t *tewrapper = tewrapper_t_get_context(tewrapper_handle);
-
-    tewrapper_stop(tewrapper_handle);
-
-    if (tewrapper->main_thread_condition)
-    {
-        Condition_Deinit(tewrapper->main_thread_condition);
-    }
-
-    if (tewrapper->transform_engine_thread_condition)
-    {
-        Condition_Deinit(tewrapper->transform_engine_thread_condition);
-    }
-
-    if (tewrapper->main_thread_lock)
-    {
-        Lock_Deinit(tewrapper->main_thread_lock);
-    }
-
-    if (tewrapper->transform_engine_thread_lock)
-    {
-        Lock_Deinit(tewrapper->transform_engine_thread_lock);
-    }
-
-    tewrapper_t_destroy(tewrapper_handle);
-}
-
-k4a_result_t tewrapper_start(tewrapper_t tewrapper_handle)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, tewrapper_t, tewrapper_handle);
-    tewrapper_context_t *tewrapper = tewrapper_t_get_context(tewrapper_handle);
-
-    tewrapper->thread_start_result = K4A_RESULT_FAILED;
-
-    k4a_result_t result = K4A_RESULT_FROM_BOOL(tewrapper->thread == NULL);
 
     if (K4A_SUCCEEDED(result))
     {
@@ -263,12 +217,10 @@ k4a_result_t tewrapper_start(tewrapper_t tewrapper_handle)
 
         if (K4A_SUCCEEDED(result))
         {
-            Lock(tewrapper->main_thread_lock);
+            Lock(tewrapper->main_lock);
             locked = true;
             int infinite_timeout = 0;
-            COND_RESULT cond_result = Condition_Wait(tewrapper->main_thread_condition,
-                                                     tewrapper->main_thread_lock,
-                                                     infinite_timeout);
+            COND_RESULT cond_result = Condition_Wait(tewrapper->main_condition, tewrapper->main_lock, infinite_timeout);
             result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
         }
 
@@ -280,33 +232,35 @@ k4a_result_t tewrapper_start(tewrapper_t tewrapper_handle)
 
         if (locked)
         {
-            Unlock(tewrapper->main_thread_lock);
+            Unlock(tewrapper->main_lock);
             locked = false;
         }
     }
 
     if (K4A_FAILED(result))
     {
-        tewrapper_stop(tewrapper_handle);
+        tewrapper_destroy(tewrapper_handle);
+        tewrapper_handle = NULL;
     }
-    return result;
+
+    return tewrapper_handle;
 }
 
-void tewrapper_stop(tewrapper_t tewrapper_handle)
+void tewrapper_destroy(tewrapper_t tewrapper_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, tewrapper_t, tewrapper_handle);
     tewrapper_context_t *tewrapper = tewrapper_t_get_context(tewrapper_handle);
 
     // Notify the transform engine thread to stop
-    Lock(tewrapper->transform_engine_thread_lock);
+    Lock(tewrapper->worker_lock);
     tewrapper->thread_stop = true;
-    Condition_Post(tewrapper->transform_engine_thread_condition);
-    Unlock(tewrapper->transform_engine_thread_lock);
+    Condition_Post(tewrapper->worker_condition);
+    Unlock(tewrapper->worker_lock);
 
-    Lock(tewrapper->main_thread_lock);
+    Lock(tewrapper->main_lock);
     THREAD_HANDLE thread = tewrapper->thread;
     tewrapper->thread = NULL;
-    Unlock(tewrapper->main_thread_lock);
+    Unlock(tewrapper->main_lock);
 
     if (thread)
     {
@@ -314,4 +268,26 @@ void tewrapper_stop(tewrapper_t tewrapper_handle)
         THREADAPI_RESULT tresult = ThreadAPI_Join(thread, &thread_result);
         (void)K4A_RESULT_FROM_BOOL(tresult == THREADAPI_OK); // Trace the issue, but we don't return a failure
     }
+
+    if (tewrapper->main_condition)
+    {
+        Condition_Deinit(tewrapper->main_condition);
+    }
+
+    if (tewrapper->worker_condition)
+    {
+        Condition_Deinit(tewrapper->worker_condition);
+    }
+
+    if (tewrapper->main_lock)
+    {
+        Lock_Deinit(tewrapper->main_lock);
+    }
+
+    if (tewrapper->worker_lock)
+    {
+        Lock_Deinit(tewrapper->worker_lock);
+    }
+
+    tewrapper_t_destroy(tewrapper_handle);
 }
