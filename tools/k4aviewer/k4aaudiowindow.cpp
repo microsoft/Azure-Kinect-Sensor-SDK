@@ -22,6 +22,11 @@
 
 using namespace k4aviewer;
 
+namespace
+{
+constexpr float MinHeight = 140.f;
+}
+
 K4AAudioWindow::K4AAudioWindow(std::string &&title, std::shared_ptr<K4AMicrophoneListener> listener) :
     m_title(std::move(title)),
     m_listener(std::move(listener)),
@@ -63,6 +68,8 @@ void K4AAudioWindow::Show(K4AWindowPlacementInfo placementInfo)
     sliderSize.y -= GetTitleBarHeight();
     sliderSize.y -= 2 * style.WindowPadding.y;
     sliderSize.y -= 2 * style.ItemSpacing.y;
+
+    sliderSize.y = std::max(sliderSize.y, MinHeight);
 
     ImVec2 graphSize;
     graphSize.x = placementInfo.Size.x;

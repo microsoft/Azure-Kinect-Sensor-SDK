@@ -32,7 +32,7 @@ K4ASourceSelectionDockControl::K4ASourceSelectionDockControl()
     RefreshDevices();
 }
 
-void K4ASourceSelectionDockControl::Show()
+K4ADockControlStatus K4ASourceSelectionDockControl::Show()
 {
     ImGui::SetNextTreeNodeOpen(true, ImGuiCond_FirstUseEver);
     if (ImGui::TreeNode("Open Device"))
@@ -75,6 +75,8 @@ void K4ASourceSelectionDockControl::Show()
 
         ImGui::TreePop();
     }
+
+    return K4ADockControlStatus::Ok;
 }
 
 void K4ASourceSelectionDockControl::RefreshDevices()
@@ -128,7 +130,7 @@ void K4ASourceSelectionDockControl::OpenDevice()
     try
     {
         k4a::device device = k4a::device::open(static_cast<uint32_t>(m_selectedDevice));
-        K4AWindowManager::Instance().PushDockControl(std14::make_unique<K4ADeviceDockControl>(std::move(device)));
+        K4AWindowManager::Instance().PushLeftDockControl(std14::make_unique<K4ADeviceDockControl>(std::move(device)));
     }
     catch (const k4a::error &e)
     {
@@ -146,5 +148,5 @@ void K4ASourceSelectionDockControl::OpenRecording(const std17::filesystem::path 
         return;
     }
 
-    K4AWindowManager::Instance().PushDockControl(std14::make_unique<K4ARecordingDockControl>(std::move(recording)));
+    K4AWindowManager::Instance().PushLeftDockControl(std14::make_unique<K4ARecordingDockControl>(std::move(recording)));
 }

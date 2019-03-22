@@ -126,16 +126,15 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &
     SetViewType(K4AWindowSet::ViewType::Normal);
 }
 
-void K4ARecordingDockControl::Show()
+K4ADockControlStatus K4ARecordingDockControl::Show()
 {
     ImGui::Text("%s", m_filenameLabel.c_str());
-
+    ImGui::SameLine();
     ImGuiExtensions::ButtonColorChanger cc(ImGuiExtensions::ButtonColor::Red);
     if (ImGui::SmallButton("Close"))
     {
         K4AWindowManager::Instance().ClearWindows();
-        K4AWindowManager::Instance().PopDockControl();
-        return;
+        return K4ADockControlStatus::ShouldClose;
     }
     cc.Clear();
     ImGui::Separator();
@@ -220,6 +219,8 @@ void K4ARecordingDockControl::Show()
     K4AWindowSet::ShowModeSelector(&m_viewType, true, m_recordingHasDepth, [this](K4AWindowSet::ViewType t) {
         return this->SetViewType(t);
     });
+
+    return K4ADockControlStatus::Ok;
 }
 
 bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)

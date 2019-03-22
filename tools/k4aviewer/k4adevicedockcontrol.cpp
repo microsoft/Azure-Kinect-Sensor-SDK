@@ -247,19 +247,17 @@ K4ADeviceDockControl::~K4ADeviceDockControl()
     Stop();
 }
 
-void K4ADeviceDockControl::Show()
+K4ADockControlStatus K4ADeviceDockControl::Show()
 {
     std::stringstream labelBuilder;
     labelBuilder << "Device S/N: " << m_deviceSerialNumber;
     ImGui::Text("%s", labelBuilder.str().c_str());
     ImGui::SameLine();
-
     {
         ImGuiExtensions::ButtonColorChanger cc(ImGuiExtensions::ButtonColor::Red);
         if (ImGui::SmallButton("Close device"))
         {
-            K4AWindowManager::Instance().PopDockControl();
-            return;
+            return K4ADockControlStatus::ShouldClose;
         }
     }
 
@@ -804,6 +802,7 @@ void K4ADeviceDockControl::Show()
     }
 
     m_firstRun = false;
+    return K4ADockControlStatus::Ok;
 }
 
 void K4ADeviceDockControl::Start()

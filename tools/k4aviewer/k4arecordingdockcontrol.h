@@ -28,7 +28,7 @@ class K4ARecordingDockControl : public IK4ADockControl
 public:
     explicit K4ARecordingDockControl(std::unique_ptr<K4ARecording> &&recording);
 
-    void Show() override;
+    K4ADockControlStatus Show() override;
 
 private:
     enum class StepDirection
