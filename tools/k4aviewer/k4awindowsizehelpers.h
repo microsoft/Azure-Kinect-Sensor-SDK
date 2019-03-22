@@ -20,31 +20,31 @@ inline float GetStandardVerticalSliderWidth()
 {
     // Width of the slider is 1 character, plus half the normal padding
     //
-    return ImGui::GetDefaultFont()->FontSize + ImGui::GetStyle().FramePadding.x;
+    return ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.x;
 }
 
 inline float GetTitleBarHeight()
 {
-    return ImGui::GetDefaultFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2;
+    return ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2;
 }
 
 inline float GetDefaultButtonHeight()
 {
-    return ImGui::GetDefaultFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetStyle().ItemSpacing.y;
+    return ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetStyle().ItemSpacing.y;
 }
 
 // Gets the maximum dimensions that an image of size imageDimensions can be scaled to in order
-// to fit in a window with imageMaxSize available space.
-// imageMaxSize is expected to include space for the title bar and window padding, but does not
-// account for any potential other widgets in your window, so you'll need to subtract those from
-// imageMaxSize, if applicable.
+// to fit in a window with imageMaxSize available space while maintaining its aspect ratio.
+// imageMaxSize is expected to include space for window padding, but does not account for the
+// title bar or any any potential other widgets in your window, so you'll need to subtract those
+// from imageMaxSize, if applicable.
 //
-inline ImVec2 GetImageSize(const ImVec2 imageDimensions, const ImVec2 imageMaxSize)
+inline ImVec2 GetMaxImageSize(const ImVec2 imageDimensions, const ImVec2 imageMaxSize)
 {
     const float sourceAspectRatio = imageDimensions.x / imageDimensions.y;
 
-    const float verticalPadding = GetTitleBarHeight() + ImGui::GetStyle().WindowPadding.y * 2;
-    const float horizontalPadding = ImGui::GetStyle().FramePadding.x * 2 + ImGui::GetStyle().WindowPadding.x * 2;
+    const float verticalPadding = ImGui::GetStyle().WindowPadding.y * 2;
+    const float horizontalPadding = ImGui::GetStyle().WindowPadding.x * 2;
 
     const float horizontalMaxSize = imageMaxSize.x - horizontalPadding;
     const float verticalMaxSize = imageMaxSize.y - verticalPadding;

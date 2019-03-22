@@ -44,11 +44,19 @@ template<typename output_type, typename input_type> output_type clamp_cast(input
 {
     static_assert(std::is_arithmetic<input_type>::value, "clamp_cast only supports arithmetic types");
     static_assert(std::is_arithmetic<output_type>::value, "clamp_cast only supports arithmetic types");
-    const input_type minValue = std::is_signed<input_type>() ?
-                                    static_cast<input_type>(std::numeric_limits<output_type>::min()) :
-                                    0;
-    input = std::min(input, static_cast<input_type>(std::numeric_limits<output_type>::max()));
-    input = std::max(input, minValue);
+    const input_type min_value = std::is_signed<input_type>() ?
+                                     static_cast<input_type>(std::numeric_limits<output_type>::min()) :
+                                     0;
+
+    input_type max_value = static_cast<input_type>(std::numeric_limits<output_type>::max());
+    if (max_value < 0)
+    {
+        // Output type is of greater or equal size to input type and we've overflowed.
+        //
+        max_value = std::numeric_limits<input_type>::max();
+    }
+    input = std::min(input, max_value);
+    input = std::max(input, min_value);
     return static_cast<output_type>(input);
 }
 /// @endcond
@@ -64,7 +72,10 @@ template<typename output_type, typename input_type> output_type clamp_cast(input
 class image
 {
 public:
-    /** Creates an image from a k4a_image_t
+    /** Creates an image from a k4a_image_t.
+     * Takes ownership of the handle, i.e. assuming that handle has a refcount
+     * of 1, you should not call k4a_image_release on the handle after giving
+     * it to the image; the image will take care of that.
      */
     image(k4a_image_t handle = nullptr) noexcept : m_handle(handle) {}
 
@@ -72,7 +83,10 @@ public:
      */
     image(const image &other) noexcept : m_handle(other.m_handle)
     {
-        add_reference();
+        if (m_handle != nullptr)
+        {
+            k4a_image_reference(m_handle);
+        }
     }
 
     /** Moves another image into a new image
@@ -95,7 +109,10 @@ public:
         {
             reset();
             m_handle = other.m_handle;
-            add_reference();
+            if (m_handle != nullptr)
+            {
+                k4a_image_reference(m_handle);
+            }
         }
         return *this;
     }
@@ -357,18 +374,6 @@ public:
     }
 
 private:
-    /** Increments the refcount on the image, if applicable
-     *
-     * \sa k4a_image_reference
-     */
-    void add_reference()
-    {
-        if (m_handle != nullptr)
-        {
-            k4a_image_reference(m_handle);
-        }
-    }
-
     k4a_image_t m_handle;
 };
 
@@ -381,6 +386,9 @@ class capture
 {
 public:
     /** Creates a capture from a k4a_capture_t
+     * Takes ownership of the handle, i.e. assuming that handle has a refcount
+     * of 1, you should not call k4a_capture_release on the handle after giving
+     * it to the capture; the capture will take care of that.
      */
     capture(k4a_capture_t handle = nullptr) noexcept : m_handle(handle) {}
 
@@ -388,7 +396,10 @@ public:
      */
     capture(const capture &other) noexcept : m_handle(other.m_handle)
     {
-        add_reference();
+        if (m_handle != nullptr)
+        {
+            k4a_capture_reference(m_handle);
+        }
     }
 
     /** Moves another capture into a new capture
@@ -411,7 +422,10 @@ public:
         {
             reset();
             m_handle = other.m_handle;
-            add_reference();
+            if (m_handle != nullptr)
+            {
+                k4a_capture_reference(m_handle);
+            }
         }
         return *this;
     }
@@ -572,18 +586,6 @@ public:
     }
 
 private:
-    /** Increments the refcount on the capture, if applicable
-     *
-     * \sa k4a_capture_reference
-     */
-    void add_reference()
-    {
-        if (m_handle != nullptr)
-        {
-            k4a_capture_reference(m_handle);
-        }
-    }
-
     k4a_capture_t m_handle;
 };
 
@@ -755,6 +757,9 @@ public:
     transformation(const k4a_calibration_t &calibration) noexcept : m_handle(k4a_transformation_create(&calibration)) {}
 
     /** Creates a transformation from a k4a_transformation_t
+     * Takes ownership of the handle, i.e. you should not call
+     * k4a_transformation_destroy on the handle after giving
+     * it to the transformation; the transformation will take care of that.
      */
     transformation(k4a_transformation_t handle = nullptr) noexcept : m_handle(handle) {}
 
@@ -870,6 +875,9 @@ class device
 {
 public:
     /** Creates a device from a k4a_image_t
+     * Takes ownership of the handle, i.e. you should not call
+     * k4a_device_close on the handle after giving it to the
+     * device; the device will take care of that.
      */
     device(k4a_device_t handle = nullptr) noexcept : m_handle(handle) {}
 

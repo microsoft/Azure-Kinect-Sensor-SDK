@@ -19,7 +19,7 @@ typedef struct _guid_t
     uint8_t id[16];
 } guid_t;
 
-#define K4A_IMU_SAMPLE_RATE 1666
+#define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
 
 #define MAX_FPS_IN_MS (33) // 30 FPS
 
@@ -30,6 +30,9 @@ typedef struct _guid_t
 // Clock tick runs 90kHz and convert sec to micro sec
 #define K4A_90K_HZ_TICK_TO_USEC(x) ((uint64_t)(x)*100 / 9)
 #define K4A_USEC_TO_90K_HZ_TICK(x) ((x)*9 / 100)
+
+#define MAX_SERIAL_NUMBER_LENGTH                                                                                       \
+    (13 * 2) // Current schema is for 12 digits plus NULL, the extra size is in case that grows in the future.
 
 inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
 {

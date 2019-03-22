@@ -8,6 +8,7 @@
 // System headers
 //
 #include <memory>
+#include <ratio>
 #include <sstream>
 #include <utility>
 
@@ -79,22 +80,6 @@ bool PollSensor(const char *sensorFriendlyName,
     return false;
 }
 } // namespace
-
-void K4ADeviceDockControl::CheckFirmwareVersion(const k4a_version_t actualVersion,
-                                                const k4a_version_t minVersion,
-                                                const char *type) const
-{
-    if (actualVersion < minVersion)
-    {
-        std::stringstream sb;
-        sb << "Warning: device " << m_deviceSerialNumber << " has outdated " << type
-           << " firmware and may not work properly!" << std::endl
-           << "  Actual:   " << actualVersion.major << "." << actualVersion.minor << "." << actualVersion.iteration
-           << std::endl
-           << "  Minimum: " << minVersion.major << "." << minVersion.minor << "." << minVersion.iteration;
-        K4AViewerErrorManager::Instance().SetErrorStatus(sb.str());
-    }
-}
 
 void K4ADeviceDockControl::ShowColorControl(k4a_color_control_command_t command,
                                             ColorSetting &cacheEntry,
@@ -252,12 +237,6 @@ K4ADeviceDockControl::K4ADeviceDockControl(k4a::device device) : m_device(std::m
     m_windowTitle = m_deviceSerialNumber + ": Configuration";
 
     m_microphone = K4AAudioManager::Instance().GetMicrophoneForDevice(m_deviceSerialNumber);
-
-    // Show warnings if firmware is too old
-    //
-    CheckFirmwareVersion(m_device.get_version().rgb, { 1, 2, 29 }, "RGB");
-    CheckFirmwareVersion(m_device.get_version().depth, { 1, 2, 21 }, "Depth");
-    CheckFirmwareVersion(m_device.get_version().audio, { 0, 3, 1 }, "Microphone");
 
     LoadColorSettingsCache();
     RefreshSyncCableStatus();
@@ -607,11 +586,16 @@ void K4ADeviceDockControl::Show()
 
     ImGui::Text("Framerate");
     auto *pFramerate = reinterpret_cast<int *>(&m_pendingDeviceConfiguration.Framerate);
-    ImGuiExtensions::K4ARadioButton("30 FPS", pFramerate, K4A_FRAMES_PER_SECOND_30, enableFramerate && supports30fps);
+    bool framerateUpdated = false;
+    framerateUpdated |= ImGuiExtensions::K4ARadioButton("30 FPS",
+                                                        pFramerate,
+                                                        K4A_FRAMES_PER_SECOND_30,
+                                                        enableFramerate && supports30fps);
     ImGui::SameLine();
-    ImGuiExtensions::K4ARadioButton("15 FPS", pFramerate, K4A_FRAMES_PER_SECOND_15, enableFramerate);
+    framerateUpdated |=
+        ImGuiExtensions::K4ARadioButton("15 FPS", pFramerate, K4A_FRAMES_PER_SECOND_15, enableFramerate);
     ImGui::SameLine();
-    ImGuiExtensions::K4ARadioButton(" 5 FPS", pFramerate, K4A_FRAMES_PER_SECOND_5, enableFramerate);
+    framerateUpdated |= ImGuiExtensions::K4ARadioButton(" 5 FPS", pFramerate, K4A_FRAMES_PER_SECOND_5, enableFramerate);
 
     ImGuiExtensions::K4ACheckbox("Disable streaming LED",
                                  &m_pendingDeviceConfiguration.DisableStreamingIndicator,
@@ -647,13 +631,40 @@ void K4ADeviceDockControl::Show()
 
         ImGui::PushItemWidth(ImGui::CalcItemWidth() * InputScalarScaleFactor);
         constexpr int stepSize = 1;
-        ImGuiExtensions::K4AInputScalar("Depth delay (us)",
-                                        ImGuiDataType_S32,
-                                        &m_pendingDeviceConfiguration.DepthDelayOffColorUsec,
-                                        &stepSize,
-                                        nullptr,
-                                        "%d",
-                                        !deviceIsStarted);
+        const bool depthDelayUpdated =
+            ImGuiExtensions::K4AInputScalar("Depth delay (us)",
+                                            ImGuiDataType_S32,
+                                            &m_pendingDeviceConfiguration.DepthDelayOffColorUsec,
+                                            &stepSize,
+                                            nullptr,
+                                            "%d",
+                                            !deviceIsStarted);
+        if (framerateUpdated || depthDelayUpdated)
+        {
+            // InputScalar doesn't do bounds-checks, so we have to do it ourselves whenever
+            // the user interacts with the control
+            //
+            int maxDepthDelay = 0;
+            switch (m_pendingDeviceConfiguration.Framerate)
+            {
+            case K4A_FRAMES_PER_SECOND_30:
+                maxDepthDelay = std::micro::den / 30;
+                break;
+            case K4A_FRAMES_PER_SECOND_15:
+                maxDepthDelay = std::micro::den / 15;
+                break;
+            case K4A_FRAMES_PER_SECOND_5:
+                maxDepthDelay = std::micro::den / 5;
+                break;
+            default:
+                throw std::logic_error("Invalid framerate!");
+            }
+            m_pendingDeviceConfiguration.DepthDelayOffColorUsec =
+                std::max(m_pendingDeviceConfiguration.DepthDelayOffColorUsec, -maxDepthDelay);
+            m_pendingDeviceConfiguration.DepthDelayOffColorUsec =
+                std::min(m_pendingDeviceConfiguration.DepthDelayOffColorUsec, maxDepthDelay);
+        }
+
         ImGui::PopItemWidth();
         ImGui::TreePop();
     }

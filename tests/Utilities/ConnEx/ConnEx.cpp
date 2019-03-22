@@ -87,7 +87,7 @@ static HANDLE OpenComPort(LPCSTR comPort)
 
 connection_exerciser::connection_exerciser()
 {
-    state = new connection_exerciser_internal_t();
+    state = new (std::nothrow) connection_exerciser_internal_t();
 }
 
 connection_exerciser::~connection_exerciser()
@@ -254,7 +254,7 @@ k4a_result_t connection_exerciser::find_connection_exerciser()
     for (int i = 1; i < 10; ++i)
     {
         sprintf_s(comPort, "COM%d", i);
-        LOG_ERROR("Opening %s", comPort);
+        LOG_INFO("Opening %s", comPort);
         state->serialHandle = OpenComPort(comPort);
 
         if (state->serialHandle != INVALID_HANDLE_VALUE)

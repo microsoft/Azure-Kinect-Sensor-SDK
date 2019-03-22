@@ -338,7 +338,7 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
         if (!block_blob->IsSimpleBlock())
         {
             // Update the block duration to the last written sample
-            block_group->SetBlockDuration(data.first - block_blob_start);
+            block_group->SetBlockDuration(data.first - block_blob_start + context->timecode_scale);
         }
 
         block_blob->AddFrameAuto(*data.second.track, data.first - context->start_timestamp_offset, *data.second.buffer);
@@ -374,7 +374,6 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     for (std::pair<uint64_t, track_data_t> data : cluster->data)
     {
         data.second.buffer->FreeBuffer(*data.second.buffer);
-        delete data.second.buffer;
     }
 
     delete cluster;
@@ -398,15 +397,6 @@ static int matroska_writer_thread(void *context_ptr)
 
     while (!context->writer_stopping && result == K4A_RESULT_SUCCEEDED)
     {
-        // Wait for new writes, or up to 100ms
-        COND_RESULT cond = Condition_Wait(context->writer_notify, context->writer_lock, 100);
-        if (cond != COND_OK && cond != COND_TIMEOUT)
-        {
-            logger_error(LOGGER_RECORD, "Writer thread failed Condition_Wait: %d", cond);
-            result = K4A_RESULT_FAILED;
-            break;
-        }
-
         if (Lock(context->pending_cluster_lock) == LOCK_OK)
         {
             // Check the oldest pending cluster to see if we should write to disk.
@@ -436,6 +426,15 @@ static int matroska_writer_thread(void *context_ptr)
                     logger_error(LOGGER_RECORD, "Cluster write failed, dropping cluster.");
                     break;
                 }
+            }
+
+            // Wait until more clusters arrive up to 100ms, or 1ms if the queue is not empty.
+            COND_RESULT cond = Condition_Wait(context->writer_notify, context->writer_lock, oldest_cluster ? 1 : 100);
+            if (cond != COND_OK && cond != COND_TIMEOUT)
+            {
+                logger_error(LOGGER_RECORD, "Writer thread failed Condition_Wait: %d", cond);
+                result = K4A_RESULT_FAILED;
+                break;
             }
         }
     }
@@ -513,6 +512,8 @@ add_tag(k4a_record_context_t *context, const char *name, const char *value, TagT
     switch (target)
     {
     case TAG_TARGET_TYPE_NONE:
+        // Force KaxTagTargets element to get rendered since it is a "mandatory" element.
+        GetChild<KaxTagTrackUID>(tagTargets).SetValue(0);
         break;
     case TAG_TARGET_TYPE_TRACK:
         GetChild<KaxTagTargetType>(tagTargets).SetValue("TRACK");

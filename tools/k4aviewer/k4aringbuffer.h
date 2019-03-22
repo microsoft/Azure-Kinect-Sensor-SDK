@@ -30,32 +30,31 @@ public:
     // This function is not thread-safe and should be called before making any
     // other calls
     //
-    void Initialize(const std::function<void(T &)> &initFn)
+    void Initialize(const std::function<void(T *)> &initFn)
     {
         for (T &element : m_buffer)
         {
-            initFn(element);
+            initFn(&element);
         }
     }
 
     bool Empty()
     {
-        return m_readIndex == m_writeIndex;
+        return m_count == 0;
     }
 
     bool Full()
     {
-        size_t nextWriteIndex = AdvanceIndex(m_writeIndex);
-        return nextWriteIndex == m_readIndex;
+        return m_buffer.size() == m_count;
     }
 
-    // Returns a reference to the first item in the buffer.
+    // Returns a pointer to the first item in the buffer.
     // If the buffer is empty, behavior is undefined.
     // Using the result of CurrentItem() after calling AdvanceRead() is undefined.
     //
-    T &CurrentItem()
+    T *CurrentItem()
     {
-        return m_buffer[m_readIndex];
+        return &m_buffer[m_readIndex];
     }
 
     // Attempt to advance the item referenced by CurrentItem().
@@ -67,6 +66,7 @@ public:
         if (!Empty())
         {
             m_readIndex = AdvanceIndex(m_readIndex);
+            m_count--;
             return true;
         }
 
@@ -94,15 +94,15 @@ public:
         return true;
     }
 
-    // Returns a reference to the item the insert is to update.
+    // Returns a pointer to the item the insert is to update.
     // The behavior of calling InsertionItem when you have not
     //      A) previously made a successful call to BeginInsert(), and
     //      B) not yet made a corresponding call to EndInsert() or AbortInsert()
     // is undefined.
     //
-    T &InsertionItem()
+    T *InsertionItem()
     {
-        return m_buffer[m_writeIndex];
+        return &m_buffer[m_writeIndex];
     }
 
     // Ends the insertion operation and commits the write operation.
@@ -112,6 +112,7 @@ public:
         std::lock_guard<std::mutex> lock(m_mutex);
         m_writeIndex = AdvanceIndex(m_writeIndex);
         m_inserting = false;
+        ++m_count;
     }
 
     // Ends the insertion operation and aborts the write operation (i.e. does not advance the write pointer).
@@ -131,6 +132,7 @@ private:
     std::array<T, size> m_buffer;
     size_t m_readIndex = 0;
     size_t m_writeIndex = 0;
+    size_t m_count = 0;
     bool m_inserting = false;
 
     std::mutex m_mutex;
