@@ -33,36 +33,11 @@
 
 // Project headers
 //
-#include "assertionexception.h"
+#include "k4astaticimageproperties.h"
 #include "k4aviewererrormanager.h"
 #include "perfcounter.h"
 
 using namespace k4aviewer;
-
-namespace
-{
-ImageDimensions GetDimensionsForColorResolution(const k4a_color_resolution_t resolution)
-{
-    switch (resolution)
-    {
-    case K4A_COLOR_RESOLUTION_720P:
-        return { 1280, 720 };
-    case K4A_COLOR_RESOLUTION_2160P:
-        return { 3840, 2160 };
-    case K4A_COLOR_RESOLUTION_1440P:
-        return { 2560, 1440 };
-    case K4A_COLOR_RESOLUTION_1080P:
-        return { 1920, 1080 };
-    case K4A_COLOR_RESOLUTION_3072P:
-        return { 4096, 3072 };
-    case K4A_COLOR_RESOLUTION_1536P:
-        return { 2048, 1536 };
-
-    default:
-        throw AssertionException("Invalid color dimensions value");
-    }
-}
-} // namespace
 
 class K4AColorFrameVisualizerBase
 {
@@ -71,9 +46,9 @@ public:
 
 protected:
     explicit K4AColorFrameVisualizerBase(k4a_color_resolution_t colorResolution) :
-        m_dimensions(GetDimensionsForColorResolution(colorResolution))
+        m_dimensions(GetColorDimensions(colorResolution))
     {
-        m_expectedBufferSize = sizeof(RgbaPixel) * static_cast<size_t>(m_dimensions.Width * m_dimensions.Height);
+        m_expectedBufferSize = sizeof(BgraPixel) * static_cast<size_t>(m_dimensions.Width * m_dimensions.Height);
     }
 
     size_t m_expectedBufferSize;
@@ -122,7 +97,7 @@ public:
         int result = libyuv::YUY2ToARGB(image.get_buffer(),                                       // src_yuy2,
                                         stride,                                                   // src_stride_yuy2,
                                         &buffer.Data[0],                                          // dst_argb,
-                                        m_dimensions.Width * static_cast<int>(sizeof(RgbaPixel)), // dst_stride_argb,
+                                        m_dimensions.Width * static_cast<int>(sizeof(BgraPixel)), // dst_stride_argb,
                                         m_dimensions.Width,                                       // width,
                                         m_dimensions.Height                                       // height
         );
@@ -189,7 +164,7 @@ public:
                                         hueSatStart,                                              // src_vu
                                         hueSatStride,                                             // src_stride_vu
                                         &buffer.Data[0],                                          // dst_argb
-                                        m_dimensions.Width * static_cast<int>(sizeof(RgbaPixel)), // dst_stride_argb
+                                        m_dimensions.Width * static_cast<int>(sizeof(BgraPixel)), // dst_stride_argb
                                         m_dimensions.Width,                                       // width
                                         m_dimensions.Height                                       // height
         );
@@ -232,7 +207,7 @@ public:
     ImageVisualizationResult ConvertImage(const k4a::image &image,
                                           K4ATextureBuffer<K4A_IMAGE_FORMAT_COLOR_BGRA32> &buffer) override
     {
-        if (image.get_size() != static_cast<size_t>(m_dimensions.Height * m_dimensions.Width) * sizeof(RgbaPixel))
+        if (image.get_size() != static_cast<size_t>(m_dimensions.Height * m_dimensions.Width) * sizeof(BgraPixel))
         {
             return ImageVisualizationResult::InvalidBufferSizeError;
         }

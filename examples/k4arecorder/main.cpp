@@ -15,6 +15,7 @@
 #include <atomic>
 #include <ctime>
 #include <csignal>
+#include <math.h>
 
 static time_t exiting_timestamp;
 
@@ -118,6 +119,7 @@ int main(int argc, char **argv)
     k4a_wired_sync_mode_t wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
     int32_t depth_delay_off_color_usec = 0;
     uint32_t subordinate_delay_off_master_usec = 0;
+    int absoluteExposureValue = 0;
     char *recording_filename;
 
     CmdParser::OptionParser cmd_parser;
@@ -320,6 +322,18 @@ int main(int argc, char **argv)
                                   }
                                   subordinate_delay_off_master_usec = (uint32_t)delay;
                               });
+    cmd_parser.RegisterOption("-e|--exposure-control",
+                              "Set manual exposure value (-11 to 1) for the RGB camera (default: auto exposure)",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  int exposureValue = std::stoi(args[0]);
+                                  if (exposureValue < -11 || exposureValue > 1)
+                                  {
+                                      throw std::runtime_error("Exposure value range is -11 to 1.");
+                                  }
+                                  absoluteExposureValue = static_cast<int32_t>(exp2f((float)exposureValue) *
+                                                                               1000000.0f);
+                              });
 
     int args_left = 0;
     try
@@ -394,5 +408,6 @@ int main(int argc, char **argv)
                         recording_filename,
                         recording_length,
                         &device_config,
-                        recording_imu_enabled);
+                        recording_imu_enabled,
+                        absoluteExposureValue);
 }

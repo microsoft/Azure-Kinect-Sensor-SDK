@@ -59,25 +59,29 @@ void APIENTRY glDebugOutput(GLenum source,
 {
     (void)userParam;
 
-    // Really noisy event that just says a texture was loaded into memory; skip.
-    //
-    if (id == 131185)
-        return;
+    constexpr GLuint noisyMessages[] = {
+        131185, // Event that says a texture was loaded into memory
+        131169, // Event that says a buffer was allocated
+    };
 
-    // Info message saying a buffer was allocated.  Happens during normal execution.
-    //
-    if (id == 131169)
-        return;
+    for (GLuint noisyMessageId : noisyMessages)
+    {
+        if (id == noisyMessageId)
+        {
+            return;
+        }
+    }
 
     std::ofstream msgLogger;
     msgLogger.open("k4aviewer.log", std::ofstream::out | std::ofstream::app);
-    msgLogger << "source: " << source << std::endl
-              << "type:   " << type << std::endl
-              << "id:     " << id << std::endl
-              << "sev:    " << severity << std::endl
-              << "len:    " << length << std::endl
-              << "msg:    " << message << std::endl
-              << std::endl;
+    msgLogger << "OpenGL debug message:" << std::endl
+              << "  source: " << source << std::endl
+              << "  type:   " << type << std::endl
+              << "  id:     " << id << std::endl
+              << "  sev:    " << severity << std::endl
+              << "  len:    " << length << std::endl
+              << "  msg:    " << message << std::endl
+              << "---------------------------" << std::endl;
 
     msgLogger.close();
 }
@@ -98,10 +102,6 @@ K4AViewer::K4AViewer(const K4AViewerOptions &args)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef K4AVIEWER_ENABLE_OPENGL_DEBUGGING
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#endif
-
     m_window = glfwCreateWindow(1440, 900, "Azure Kinect Viewer", nullptr, nullptr);
 
     glfwMakeContextCurrent(m_window);
@@ -109,6 +109,7 @@ K4AViewer::K4AViewer(const K4AViewerOptions &args)
     gl3wInit();
 
 #ifdef K4AVIEWER_ENABLE_OPENGL_DEBUGGING
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(glDebugOutput, nullptr);
@@ -210,7 +211,6 @@ void K4AViewer::Run()
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwMakeContextCurrent(m_window);
         glfwSwapBuffers(m_window);
     }
 }

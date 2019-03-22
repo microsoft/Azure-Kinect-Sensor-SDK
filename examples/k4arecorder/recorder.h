@@ -13,6 +13,7 @@ int do_recording(uint8_t device_index,
                  char *recording_filename,
                  int recording_length,
                  k4a_device_configuration_t *device_config,
-                 bool record_imu);
+                 bool record_imu,
+                 int32_t absoluteExposureValue);
 
 #endif /* RECORDER_H */

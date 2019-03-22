@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     const char *fileDirectory = ".";
     int streamingLength = 60; // the length of time for streaming from the sensors until automatically exit.
     int shiftValue = 4;
-    int exposureValue = INT16_MAX; // range -7 to 1
+    int absoluteExposureValue = 0;
 
     if (argc == 1)
     {
@@ -127,14 +127,14 @@ int main(int argc, char *argv[])
             {
                 return EINVAL;
             }
-            exposureValue = atoi(argv[i]);
+            int exposureValue = atoi(argv[i]);
             if (exposureValue < 2 && exposureValue > -12)
             {
                 std::wcout << exposureValue << "  <exposure value>" << std::endl;
+                absoluteExposureValue = (int32_t)(exp2f((float)exposureValue) * 1000000.0f);
             }
             else
             {
-                exposureValue = INT16_MAX;
                 std::wcout << " !! incorrect exposure value provided [ exposure value range -11 to 1].... Using Auto "
                               "exposure...."
                            << std::endl;
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
         std::cout << streamingLength << "  <Streaming Length in seconds>" << std::endl;
     }
 
-    if (Capturer.Configure(fileDirectory, exposureValue, shiftValue))
+    if (Capturer.Configure(fileDirectory, absoluteExposureValue, shiftValue))
     {
         Capturer.Run(streamingLength);
     }

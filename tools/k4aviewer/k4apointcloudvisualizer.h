@@ -66,7 +66,7 @@ public:
 private:
     PointCloudVisualizationResult UpdatePointClouds(const k4a::capture &capture);
 
-    ExpectedValueRange m_expectedValueRange;
+    std::pair<DepthPixel, DepthPixel> m_expectedValueRange;
     ImageDimensions m_dimensions;
 
     PointCloudRenderer m_pointCloudRenderer;
