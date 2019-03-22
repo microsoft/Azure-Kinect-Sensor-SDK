@@ -162,7 +162,8 @@ private:
 
     void RenderHoveredDepthPixelValue(const k4a::image &depthImage, const ImVec2 hoveredPixel, const char *units)
     {
-        if (hoveredPixel.x == InvalidHoveredPixel.x && hoveredPixel.y == InvalidHoveredPixel.y)
+        if (static_cast<int>(hoveredPixel.x) == static_cast<int>(InvalidHoveredPixel.x) &&
+            static_cast<int>(hoveredPixel.y) == static_cast<int>(InvalidHoveredPixel.y))
         {
             return;
         }
