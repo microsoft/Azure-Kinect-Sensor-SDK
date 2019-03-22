@@ -131,6 +131,21 @@ typedef struct _k4a_record_configuration_t
     uint32_t start_timestamp_offset_usec;
 } k4a_record_configuration_t;
 
+/** TODO
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">types.h (include k4arecord/types.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef struct _k4a_record_video_info_t
+{
+    uint64_t width;      /**< Frame width of the video */
+    uint64_t height;     /**< Frame height of the video  */
+    uint64_t frame_rate; /**< Frame rate (frame-per-second) of the video */
+} k4a_record_video_info_t;
+
 #ifdef __cplusplus
 }
 #endif

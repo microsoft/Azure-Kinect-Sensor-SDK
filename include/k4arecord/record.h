@@ -114,6 +114,162 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_handle);
 
+/** TODO
+ *
+ * TODO
+ *
+ * \param recording_handle
+ * TODO
+ *
+ * \param file_name
+ * TODO
+ *
+ * \param tag_name
+ * TODO
+ *
+ * \param buffer
+ * TODO
+ *
+ * \param buffer_size
+ * TODO
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recording_handle,
+                                                        const char *file_name,
+                                                        const char *tag_name,
+                                                        const uint8_t *buffer,
+                                                        size_t buffer_size);
+
+/** TODO
+ *
+ * TODO
+ *
+ * \param recording_handle
+ * TODO
+ *
+ * \param track_name
+ * TODO
+ *
+ * \param codec
+ * TODO
+ *
+ * \param codec_private
+ * TODO
+ *
+ * \param codec_private_size
+ * TODO
+ *
+ * \param video_info
+ * TODO
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
+                                                         const char *track_name,
+                                                         const char *codec,
+                                                         const uint8_t *codec_private,
+                                                         size_t codec_private_size,
+                                                         const k4a_record_video_info_t *video_info);
+
+/** TODO
+ *
+ * TODO
+ *
+ * \param recording_handle
+ * TODO
+ *
+ * \param track_name
+ * TODO
+ *
+ * \param codec
+ * TODO
+ *
+ * \param codec_private
+ * TODO
+ *
+ * \param codec_private_size
+ * TODO
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
+                                                            const char *track_name,
+                                                            const char *codec,
+                                                            const uint8_t *codec_private,
+                                                            size_t codec_private_size);
+
+/** TODO
+ *
+ * TODO
+ *
+ * \param recording_handle
+ * TODO
+ *
+ * \param track_name
+ * TODO
+ *
+ * \param tag_name
+ * TODO
+ *
+ * \param tag_value
+ * TODO
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_track_tag(const k4a_record_t recording_handle,
+                                                              const char *track_name,
+                                                              const char *tag_name,
+                                                              const char *tag_value);
+
 /** Writes the recording header and metadata to file.
  *
  * This must be called before captures can be written.
@@ -194,6 +350,49 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_ha
  * \endxmlonly
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording_handle, k4a_imu_sample_t imu_sample);
+
+/** TODO
+ *
+ * TODO
+ *
+ * \param recording_handle
+ * TODO
+ *
+ * \param track_name
+ * TODO
+ *
+ * \param timestamp_ns
+ * TODO
+ *
+ * \param buffer
+ * TODO
+ *
+ * \param buffer_size
+ * TODO
+ *
+ * \param copy_buffer
+ * TODO
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
+                                                                 const char *track_name,
+                                                                 uint64_t timestamp_ns,
+                                                                 uint8_t *buffer,
+                                                                 uint32_t buffer_size,
+                                                                 bool copy_buffer);
 
 /** Flushes all pending recording data to disk.
  *

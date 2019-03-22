@@ -13,6 +13,12 @@
 
 namespace k4arecord
 {
+// Define all the default track names here
+const std::string depth_track_name = "DEPTH";
+const std::string ir_track_name = "IR";
+const std::string color_track_name = "COLOR";
+const std::string imu_track_name = "IMU";
+
 typedef struct _track_data_t
 {
     libmatroska::KaxTrackEntry *track;
@@ -70,6 +76,8 @@ typedef struct _k4a_record_context_t
     libmatroska::KaxTrackEntry *ir_track;
     libmatroska::KaxTrackEntry *imu_track;
 
+    std::unordered_map<std::string, libmatroska::KaxTrackEntry *> custom_tracks;
+
     // std::list and std::vector can't be memset to 0, so we need to use a pointer.
     std::unique_ptr<std::list<cluster_t *>> pending_clusters;
     LOCK_HANDLE pending_cluster_lock; // Locks last_written_timestamp, most_recent_timestamp, and pending_clusters
@@ -103,6 +111,8 @@ libmatroska::KaxTrackEntry *add_track(k4a_record_context_t *context,
                                       const char *codec,
                                       const uint8_t *codec_private = NULL,
                                       size_t codec_private_size = 0);
+
+k4a_result_t check_custom_track_name_valid(k4a_record_context_t *context, const char *track_name);
 
 void set_track_info_video(libmatroska::KaxTrackEntry *track, uint64_t width, uint64_t height, uint64_t frame_rate);
 

@@ -12,6 +12,7 @@
 #include <list>
 #include <fstream>
 #include <memory>
+#include <unordered_map>
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/condition.h>
 #include <azure_c_shared_utility/lock.h>
