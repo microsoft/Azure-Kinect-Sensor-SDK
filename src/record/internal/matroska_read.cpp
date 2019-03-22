@@ -196,16 +196,15 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         return K4A_RESULT_FAILED;
     }
 
-    { // Populate each element from the file (minus the actual Cluster data)
-        RETURN_IF_ERROR(read_offset(context, context->segment_info, context->segment_info_offset));
-        RETURN_IF_ERROR(read_offset(context, context->tracks, context->tracks_offset));
-        if (context->cues_offset > 0)
-            RETURN_IF_ERROR(read_offset(context, context->cues, context->cues_offset));
-        if (context->attachments_offset > 0)
-            RETURN_IF_ERROR(read_offset(context, context->attachments, context->attachments_offset));
-        if (context->tags_offset > 0)
-            RETURN_IF_ERROR(read_offset(context, context->tags, context->tags_offset));
-    }
+    // Populate each element from the file (minus the actual Cluster data)
+    RETURN_IF_ERROR(read_offset(context, context->segment_info, context->segment_info_offset));
+    RETURN_IF_ERROR(read_offset(context, context->tracks, context->tracks_offset));
+    if (context->cues_offset > 0)
+        RETURN_IF_ERROR(read_offset(context, context->cues, context->cues_offset));
+    if (context->attachments_offset > 0)
+        RETURN_IF_ERROR(read_offset(context, context->attachments, context->attachments_offset));
+    if (context->tags_offset > 0)
+        RETURN_IF_ERROR(read_offset(context, context->tags, context->tags_offset));
 
     RETURN_IF_ERROR(parse_recording_config(context));
     RETURN_IF_ERROR(populate_cluster_cache(context));
@@ -983,15 +982,13 @@ cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp
 
         // Find the closest cluster in the cache
         cluster_info_t *cluster_info = context->cluster_cache.get();
+        while (cluster_info->next)
         {
-            while (cluster_info->next)
+            if (cluster_info->next->timestamp_ns > timestamp_ns)
             {
-                if (cluster_info->next->timestamp_ns > timestamp_ns)
-                {
-                    break;
-                }
-                cluster_info = cluster_info->next;
+                break;
             }
+            cluster_info = cluster_info->next;
         }
 
         // Make sure there are no gaps in the cache and ensure this really is the closest cluster.
@@ -1046,11 +1043,13 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
                 // Read forward in file to find next cluster and fill in cache
                 if (K4A_FAILED(seek_offset(context, current_cluster->file_offset)))
                 {
+                    LOG_ERROR("Failed to seek to current cluster element.", 0);
                     return NULL;
                 }
                 std::shared_ptr<KaxCluster> current_element = find_next<KaxCluster>(context);
                 if (current_element == nullptr)
                 {
+                    LOG_ERROR("Failed to find current cluster element.", 0);
                     return NULL;
                 }
                 populate_cluster_info(context, current_element, current_cluster);
@@ -1060,8 +1059,10 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
                     return current_cluster->next;
                 }
 
+                // Seek to the end of the current cluster so that find_next returns the next cluster in the file.
                 if (K4A_FAILED(skip_element(context, current_element.get())))
                 {
+                    LOG_ERROR("Failed to seek to next cluster element.", 0);
                     return NULL;
                 }
 
@@ -1134,15 +1135,16 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
     }
 }
 
+// Load a cluster from the cluster cache / disk without any neighbor preloading.
+// This should never fail unless there is a file IO error.
 static std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t *context, cluster_info_t *cluster_info)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
     RETURN_VALUE_IF_ARG(nullptr, context->ebml_file == nullptr);
 
-    LargeFileIOCallback *file_io = dynamic_cast<LargeFileIOCallback *>(context->ebml_file.get());
-
     try
     {
+        // Check if the cluster already exists in memory, and if so, return it.
         std::shared_ptr<KaxCluster> cluster = cluster_info->cluster.lock();
         if (cluster)
         {
@@ -1151,6 +1153,9 @@ static std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t 
         else
         {
             std::lock_guard<std::mutex> lock(context->io_lock);
+
+            // The cluster may have been loaded while we were acquiring the io lock, check again before actually loading
+            // from disk.
             cluster = cluster_info->cluster.lock();
             if (cluster)
             {
@@ -1159,12 +1164,14 @@ static std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t 
             else
             {
                 context->load_count++;
+
+                // Start reading the actual cluster data from disk.
+                LargeFileIOCallback *file_io = dynamic_cast<LargeFileIOCallback *>(context->ebml_file.get());
                 if (file_io != NULL)
                 {
                     file_io->setOwnerThread();
                 }
 
-                // Read cluster
                 if (K4A_FAILED(seek_offset(context, cluster_info->file_offset)))
                 {
                     LOG_ERROR("Failed to seek to cluster cluster at: %llu", cluster_info->file_offset);
@@ -1197,8 +1204,7 @@ static std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t 
 }
 
 // Load the actual block data for a cluster off the disk, and start preloading the neighboring clusters.
-// If the cluster is already in memory, the cluster will be returned immediately, otherwise the function will block
-// until the reader thread loads it from disk. This should never fail unless there is a file IO error.
+// This should never fail unless there is a file IO error.
 std::shared_ptr<loaded_cluster_t> load_cluster(k4a_playback_context_t *context, cluster_info_t *cluster_info)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
@@ -1217,6 +1223,7 @@ std::shared_ptr<loaded_cluster_t> load_cluster(k4a_playback_context_t *context, 
 
     try
     {
+        // Preload the neighboring clusters immediately
         cluster_info_t *previous_cluster_info = next_cluster(context, cluster_info, false);
         cluster_info_t *next_cluster_info = next_cluster(context, cluster_info, true);
 
@@ -1238,6 +1245,8 @@ std::shared_ptr<loaded_cluster_t> load_cluster(k4a_playback_context_t *context, 
     return result;
 }
 
+// Load the next or previous cluster off the disk using the existing preloaded neighbors.
+// The next neighbor in sequence will start being preloaded asynchronously.
 std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *context,
                                                     loaded_cluster_t *current_cluster,
                                                     bool next)
@@ -1258,6 +1267,7 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
 
     try
     {
+        // Use the current cluster as one of the neightbors, and then wait for the target cluster to be available.
         std::shared_ptr<KaxCluster> old_cluster = current_cluster->cluster;
         if (next)
         {
@@ -1274,6 +1284,7 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
             result->cluster = current_cluster->previous_cluster.get();
         }
 
+        // Spawn a new async task to preload the next cluster in sequence.
         if (next)
         {
             result->next_cluster = std::async([context, cluster_info] {
@@ -1670,23 +1681,21 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
               timestamp_start_ns / 1_ms,
               timestamp_end_ns / 1_ms);
 
+    *capture_handle = NULL;
+    for (size_t i = 0; i < arraysize(blocks); i++)
     {
-        *capture_handle = NULL;
-        for (size_t i = 0; i < arraysize(blocks); i++)
+        if (next_blocks[i] && next_blocks[i]->block)
         {
-            if (next_blocks[i] && next_blocks[i]->block)
+            blocks[i]->current_block = next_blocks[i];
+            k4a_result_t result = TRACE_CALL(new_capture(context, blocks[i]->current_block, capture_handle));
+            if (K4A_FAILED(result))
             {
-                blocks[i]->current_block = next_blocks[i];
-                k4a_result_t result = TRACE_CALL(new_capture(context, blocks[i]->current_block, capture_handle));
-                if (K4A_FAILED(result))
+                if (*capture_handle != NULL)
                 {
-                    if (*capture_handle != NULL)
-                    {
-                        k4a_capture_release(*capture_handle);
-                        *capture_handle = NULL;
-                    }
-                    return K4A_STREAM_RESULT_FAILED;
+                    k4a_capture_release(*capture_handle);
+                    *capture_handle = NULL;
                 }
+                return K4A_STREAM_RESULT_FAILED;
             }
         }
     }
@@ -1708,4 +1717,5 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
 
     return K4A_STREAM_RESULT_FAILED;
 }
+
 } // namespace k4arecord

@@ -57,6 +57,26 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
 
     if (K4A_SUCCEEDED(result))
     {
+        // Seek to the first cluster
+        cluster_info_t *seek_cluster_info = find_cluster(context, 0);
+        if (seek_cluster_info == NULL)
+        {
+            LOG_ERROR("Failed to parse recording, recording is empty.", 0);
+            result = K4A_RESULT_FAILED;
+        }
+        else
+        {
+            context->seek_cluster = load_cluster(context, seek_cluster_info);
+            if (context->seek_cluster == nullptr)
+            {
+                LOG_ERROR("Failed to load first data cluster of recording.", 0);
+                result = K4A_RESULT_FAILED;
+            }
+        }
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
         reset_seek_pointers(context, 0);
     }
     else
@@ -285,25 +305,24 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
         target_time_ns = (uint64_t)offset_usec * 1000;
     }
 
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
-
-    std::shared_ptr<loaded_cluster_t> seek_cluster;
     cluster_info_t *seek_cluster_info = find_cluster(context, target_time_ns);
-    result = K4A_RESULT_FROM_BOOL(seek_cluster_info != nullptr);
-
-    if (K4A_SUCCEEDED(result))
+    if (seek_cluster_info == NULL)
     {
-        seek_cluster = load_cluster(context, seek_cluster_info);
-        result = K4A_RESULT_FROM_BOOL(seek_cluster != nullptr);
+        LOG_ERROR("Failed to find cluster for timestamp: %llu ns", target_time_ns);
+        return K4A_RESULT_FAILED;
     }
 
-    if (K4A_SUCCEEDED(result))
+    std::shared_ptr<loaded_cluster_t> seek_cluster = load_cluster(context, seek_cluster_info);
+    if (seek_cluster == nullptr)
     {
-        context->seek_cluster = seek_cluster;
-        reset_seek_pointers(context, target_time_ns);
+        LOG_ERROR("Failed to load data cluster at timestamp: %llu ns", target_time_ns);
+        return K4A_RESULT_FAILED;
     }
 
-    return result;
+    context->seek_cluster = seek_cluster;
+    reset_seek_pointers(context, target_time_ns);
+
+    return K4A_RESULT_SUCCEEDED;
 }
 
 uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle)

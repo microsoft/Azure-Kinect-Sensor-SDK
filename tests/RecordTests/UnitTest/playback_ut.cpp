@@ -664,7 +664,7 @@ TEST_F(playback_ut, DISABLED_open_test_file)
 
     {
         std::cout << "Next capture x1000" << std::endl;
-        k4arecord::Timer t("Next capture x1000");
+        Timer t("Next capture x1000");
         for (int i = 0; i < 1000; i++)
         {
             playback_result = k4a_playback_get_next_capture(handle, &capture);
@@ -675,7 +675,7 @@ TEST_F(playback_ut, DISABLED_open_test_file)
     }
     {
         std::cout << "Previous capture x1000" << std::endl;
-        k4arecord::Timer t("Previous capture x1000");
+        Timer t("Previous capture x1000");
         for (int i = 0; i < 999; i++)
         {
             playback_result = k4a_playback_get_previous_capture(handle, &capture);

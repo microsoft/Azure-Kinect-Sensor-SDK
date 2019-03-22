@@ -6,6 +6,8 @@
 
 #include <utcommon.h>
 #include <k4a/k4a.h>
+#include <chrono>
+#include <iostream>
 
 static const char *const format_names[] = { "K4A_IMAGE_FORMAT_COLOR_MJPG", "K4A_IMAGE_FORMAT_COLOR_NV12",
                                             "K4A_IMAGE_FORMAT_COLOR_YUY2", "K4A_IMAGE_FORMAT_COLOR_BGRA32",
@@ -50,6 +52,24 @@ public:
 protected:
     void SetUp() override;
     void TearDown() override;
+};
+
+class Timer
+{
+public:
+    Timer(std::string name) : name(name), start(std::chrono::high_resolution_clock::now()) {}
+    ~Timer()
+    {
+        auto delta = std::chrono::high_resolution_clock::now() - start;
+        if (delta.count() > 100000)
+        {
+            std::cout << "Timer(" << name << "): " << ((float)delta.count() / 1000000.0f) << " ms" << std::endl;
+        }
+    }
+
+private:
+    std::string name;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
 };
 
 #endif /* RECORD_TEST_HELPERS_H */

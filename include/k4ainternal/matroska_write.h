@@ -78,7 +78,7 @@ typedef struct _k4a_record_context_t
 
     bool writer_stopping;
     std::thread writer_thread;
-    // std::condition_variable constructor may through, so wrap this in a pointer.
+    // std::condition_variable constructor may throw, so wrap this in a pointer.
     std::unique_ptr<std::condition_variable> writer_notify;
     std::mutex writer_lock;
 

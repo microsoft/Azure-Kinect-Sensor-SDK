@@ -10,10 +10,8 @@
 
 #include <k4ainternal/matroska_common.h>
 #include <functional>
-#include <condition_variable>
 #include <mutex>
 #include <future>
-#include <queue>
 
 namespace k4arecord
 {
@@ -40,9 +38,6 @@ typedef std::unique_ptr<cluster_info_t, std::function<void(cluster_info_t *)>> c
 // A pointer to a cluster that is still being loaded from disk.
 typedef std::shared_future<std::shared_ptr<libmatroska::KaxCluster>> future_cluster_t;
 
-// An asynchronous request for a cluster to be loaded by the reader thread.
-typedef std::pair<cluster_info_t *, std::promise<std::shared_ptr<libmatroska::KaxCluster>>> cluster_request_t;
-
 typedef struct _loaded_cluster_t
 {
     cluster_info_t *cluster_info = NULL;
@@ -56,13 +51,12 @@ typedef struct _loaded_cluster_t
 typedef struct _block_info_t
 {
     struct _track_reader_t *reader = NULL;
-
     std::shared_ptr<loaded_cluster_t> cluster;
     libmatroska::KaxInternalBlock *block = NULL;
-    int index = -1;
 
     uint64_t timestamp_ns = 0;      // The timestamp of the block as written in the file.
     uint64_t sync_timestamp_ns = 0; // The timestamp of the block, including sychronization offsets.
+    int index = -1;                 // Index of the block element within the cluster.
 } block_info_t;
 
 typedef struct _track_reader_t
