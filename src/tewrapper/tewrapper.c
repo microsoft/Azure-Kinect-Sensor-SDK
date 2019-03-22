@@ -82,7 +82,7 @@ static int transform_engine_thread(void *param)
     Condition_Post(tewrapper->main_thread_condition);
     Unlock(tewrapper->main_thread_lock);
 
-    while (result != K4A_RESULT_FAILED)
+    while (result != K4A_RESULT_FAILED && tewrapper->thread_stop == false)
     {
         // Waiting the main thread to request processing a frame
         Lock(tewrapper->transform_engine_thread_lock);
@@ -92,48 +92,46 @@ static int transform_engine_thread(void *param)
                                                  infinite_timeout);
         result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
 
-        if (tewrapper->thread_stop)
+        if (tewrapper->thread_stop == false)
         {
-            break;
-        }
-
-        if (K4A_SUCCEEDED(result))
-        {
-            size_t transform_engine_output_buffer_size =
-                deloader_transform_engine_get_output_frame_size(tewrapper->transform_engine, tewrapper->type);
-            if (tewrapper->transformed_image_size != transform_engine_output_buffer_size)
+            if (K4A_SUCCEEDED(result))
             {
-                LOG_ERROR("Transform engine output buffer size not expected. Expect: %d, Actual: %d. Type: %s",
-                          transform_engine_output_buffer_size,
-                          tewrapper->transformed_image_size);
-                result = K4A_RESULT_FAILED;
+                size_t transform_engine_output_buffer_size =
+                    deloader_transform_engine_get_output_frame_size(tewrapper->transform_engine, tewrapper->type);
+                if (tewrapper->transformed_image_size != transform_engine_output_buffer_size)
+                {
+                    LOG_ERROR("Transform engine output buffer size not expected. Expect: %d, Actual: %d. Type: %s",
+                              transform_engine_output_buffer_size,
+                              tewrapper->transformed_image_size);
+                    result = K4A_RESULT_FAILED;
+                }
             }
-        }
 
-        if (K4A_SUCCEEDED(result))
-        {
-            k4a_depth_engine_result_code_t teresult =
-                deloader_transform_engine_process_frame(tewrapper->transform_engine,
-                                                        tewrapper->type,
-                                                        tewrapper->depth_image_data,
-                                                        tewrapper->depth_image_size,
-                                                        tewrapper->color_image_data,
-                                                        tewrapper->color_image_size,
-                                                        tewrapper->transformed_image_data,
-                                                        tewrapper->transformed_image_size);
-            if (teresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
+            if (K4A_SUCCEEDED(result))
             {
-                LOG_ERROR("Transform engine process frame failed with error code: %d.", teresult);
-                result = K4A_RESULT_FAILED;
+                k4a_depth_engine_result_code_t teresult =
+                    deloader_transform_engine_process_frame(tewrapper->transform_engine,
+                                                            tewrapper->type,
+                                                            tewrapper->depth_image_data,
+                                                            tewrapper->depth_image_size,
+                                                            tewrapper->color_image_data,
+                                                            tewrapper->color_image_size,
+                                                            tewrapper->transformed_image_data,
+                                                            tewrapper->transformed_image_size);
+                if (teresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
+                {
+                    LOG_ERROR("Transform engine process frame failed with error code: %d.", teresult);
+                    result = K4A_RESULT_FAILED;
+                }
             }
+
+            // Notify the main thread that transform engine thread completed a frame processing
+            Lock(tewrapper->main_thread_lock);
+            tewrapper->thread_processing_result = result;
+            Condition_Post(tewrapper->main_thread_condition);
+            Unlock(tewrapper->main_thread_lock);
         }
         Unlock(tewrapper->transform_engine_thread_lock);
-
-        // Notify the main thread that transform engine thread completed a frame processing
-        Lock(tewrapper->main_thread_lock);
-        tewrapper->thread_processing_result = result;
-        Condition_Post(tewrapper->main_thread_condition);
-        Unlock(tewrapper->main_thread_lock);
     }
 
     transform_engine_stop_helper(tewrapper);
