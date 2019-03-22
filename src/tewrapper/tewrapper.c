@@ -30,9 +30,9 @@ typedef struct _tewrapper_context_t
     k4a_result_t thread_processing_result;
 
     k4a_transform_engine_type_t type;
-    void *depth_image_data;
+    const void *depth_image_data;
     size_t depth_image_size;
-    void *color_image_data;
+    const void *color_image_data;
     size_t color_image_size;
     void *transformed_image_data;
     size_t transformed_image_size;
@@ -151,9 +151,9 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
     // Notify the transform engine thread to process a frame
     Lock(tewrapper->worker_lock);
     tewrapper->type = type;
-    tewrapper->depth_image_data = (void *)depth_image_data;
+    tewrapper->depth_image_data = depth_image_data;
     tewrapper->depth_image_size = depth_image_size;
-    tewrapper->color_image_data = (void *)color_image_data;
+    tewrapper->color_image_data = color_image_data;
     tewrapper->color_image_size = color_image_size;
     tewrapper->transformed_image_data = transformed_image_data;
     tewrapper->transformed_image_size = transformed_image_size;
