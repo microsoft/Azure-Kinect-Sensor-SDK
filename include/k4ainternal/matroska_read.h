@@ -14,23 +14,30 @@ namespace k4arecord
 {
 typedef struct _read_block_t
 {
-    struct _track_reader_t *reader;
+    struct _track_reader_t *reader = nullptr;
     std::shared_ptr<libmatroska::KaxCluster> cluster;
-    libmatroska::KaxInternalBlock *block;
+    libmatroska::KaxInternalBlock *block = nullptr;
 
-    uint64_t timestamp_ns;
-    uint64_t sync_timestamp_ns;
-    int index;
+    uint64_t timestamp_ns = 0;
+    uint64_t sync_timestamp_ns = 0;
+    int index = 0;
 } read_block_t;
 
 typedef struct _track_reader_t
 {
-    libmatroska::KaxTrackEntry *track;
-    uint32_t width, height, stride;
-    k4a_image_format_t format;
-    uint64_t sync_delay_ns;
-    BITMAPINFOHEADER *bitmap_header;
+    libmatroska::KaxTrackEntry *track = nullptr;
+    uint64_t sync_delay_ns = 0;
+    std::string codec_id;
+    std::vector<uint8_t> codec_private;
     std::shared_ptr<read_block_t> current_block;
+    uint64_t frame_period_ns = 0;
+    track_type type;
+
+    // Fields specific to video track
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t stride = 0;
+    k4a_image_format_t format = K4A_IMAGE_FORMAT_CUSTOM;
 } track_reader_t;
 
 typedef struct _k4a_playback_context_t
@@ -63,6 +70,9 @@ typedef struct _k4a_playback_context_t
     track_reader_t ir_track;
 
     track_reader_t imu_track;
+
+    std::unordered_map<std::string, track_reader_t> custom_track_map;
+
     int imu_sample_index;
 
     uint64_t segment_info_offset;
@@ -88,6 +98,8 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track);
 void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestamp_ns);
 
 libmatroska::KaxTrackEntry *get_track_by_name(k4a_playback_context_t *context, const char *name);
+track_reader_t *get_track_reader_by_name(k4a_playback_context_t *context, std::string track_name);
+k4a_result_t get_all_custom_tracks(k4a_playback_context_t *context);
 libmatroska::KaxTrackEntry *get_track_by_tag(k4a_playback_context_t *context, const char *tag_name);
 libmatroska::KaxTag *get_tag(k4a_playback_context_t *context, const char *name);
 std::string get_tag_string(libmatroska::KaxTag *tag);

@@ -127,6 +127,20 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_calibration(k4a_playback_t playba
 K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle,
                                                                     k4a_record_configuration_t *config);
 
+K4ARECORD_EXPORT k4a_result_t k4a_playback_get_track_video_info(k4a_playback_t playback_handle,
+                                                                const char *track_name,
+                                                                k4a_record_video_info_t *video_info);
+
+K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_track_codec_id(k4a_playback_t playback_handle,
+                                                                     const char *track_name,
+                                                                     uint8_t *data,
+                                                                     size_t *data_size);
+
+K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_track_private_codec(k4a_playback_t playback_handle,
+                                                                          const char *track_name,
+                                                                          uint8_t *data,
+                                                                          size_t *data_size);
+
 /** Read the value of a tag from a recording.
  *
  * \param playback_handle
@@ -167,6 +181,11 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
                                                           const char *name,
                                                           char *value,
                                                           size_t *value_size);
+
+K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_attachment(k4a_playback_t playback_handle,
+                                                                 const char *file_name,
+                                                                 uint8_t *data,
+                                                                 size_t *data_size);
 
 /** Read the next capture in the recording sequence.
  *
@@ -328,6 +347,22 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playba
  */
 K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback_handle,
                                                                           k4a_imu_sample_t *imu_sample);
+
+K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_procceed_to_next_data_block(k4a_playback_t playback_handle,
+                                                                              const char *custom_track_name,
+                                                                              uint64_t *timestamp_ns,
+                                                                              uint64_t *block_size);
+
+K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_procceed_to_previous_data_block(k4a_playback_t playback_handle,
+                                                                                  const char *custom_track_name,
+                                                                                  uint64_t *timestamp_ns,
+                                                                                  uint64_t *block_size);
+
+K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_read_current_data_block(k4a_playback_t playback_handle,
+                                                                          const char *custom_track_name,
+                                                                          uint64_t *timestamp_ns,
+                                                                          uint8_t *block_data,
+                                                                          uint64_t *block_size);
 
 /** Seek to a specific timestamp within a recording.
  *

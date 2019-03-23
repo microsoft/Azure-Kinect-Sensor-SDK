@@ -13,11 +13,6 @@
 
 namespace k4arecord
 {
-// Define all the default track names here
-const std::string depth_track_name = "DEPTH";
-const std::string ir_track_name = "IR";
-const std::string color_track_name = "COLOR";
-const std::string imu_track_name = "IMU";
 
 typedef struct _track_data_t
 {

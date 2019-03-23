@@ -183,6 +183,94 @@ k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handl
     return K4A_RESULT_SUCCEEDED;
 }
 
+k4a_result_t k4a_playback_get_track_video_info(k4a_playback_t playback_handle,
+                                               const char *track_name,
+                                               k4a_record_video_info_t *video_info)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL || track_name == NULL || video_info == NULL);
+
+    track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
+    if (track_reader == nullptr)
+    {
+        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        return K4A_RESULT_FAILED;
+    }
+
+    if (track_reader->type != track_type::track_video)
+    {
+        logger_error(LOGGER_RECORD, "The track is not a video track.");
+        return K4A_RESULT_FAILED;
+    }
+
+    video_info->width = track_reader->width;
+    video_info->height = track_reader->height;
+    video_info->frame_rate = static_cast<uint64_t>(1_s / track_reader->frame_period_ns);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_buffer_result_t k4a_playback_get_track_codec_id(k4a_playback_t playback_handle,
+                                                    const char *track_name,
+                                                    uint8_t *data,
+                                                    size_t *data_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context == NULL || track_name == NULL || data_size == NULL);
+
+    track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
+
+    if (track_reader == nullptr)
+    {
+        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        return K4A_BUFFER_RESULT_FAILED;
+    }
+
+    if (data != NULL && *data_size >= track_reader->codec_id.size())
+    {
+        memcpy(data, track_reader->codec_id.data(), track_reader->codec_id.size());
+        *data_size = track_reader->codec_id.size();
+        return K4A_BUFFER_RESULT_SUCCEEDED;
+    }
+    else
+    {
+        *data_size = track_reader->codec_id.size();
+        return K4A_BUFFER_RESULT_TOO_SMALL;
+    }
+}
+
+k4a_buffer_result_t k4a_playback_get_track_private_codec(k4a_playback_t playback_handle,
+                                                         const char *track_name,
+                                                         uint8_t *data,
+                                                         size_t *data_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context == NULL || track_name == NULL || data_size == NULL);
+
+    track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
+
+    if (track_reader == nullptr)
+    {
+        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        return K4A_BUFFER_RESULT_FAILED;
+    }
+
+    if (data != NULL && *data_size >= track_reader->codec_private.size())
+    {
+        memcpy(data, track_reader->codec_private.data(), track_reader->codec_private.size());
+        *data_size = track_reader->codec_private.size();
+        return K4A_BUFFER_RESULT_SUCCEEDED;
+    }
+    else
+    {
+        *data_size = track_reader->codec_private.size();
+        return K4A_BUFFER_RESULT_TOO_SMALL;
+    }
+}
+
 k4a_buffer_result_t
 k4a_playback_get_tag(k4a_playback_t playback_handle, const char *name, char *value, size_t *value_size)
 {
@@ -207,6 +295,37 @@ k4a_playback_get_tag(k4a_playback_t playback_handle, const char *name, char *val
             memset(value, '\0', input_buffer_size);
             memcpy(value, tag_str.c_str(), tag_str.size());
             return K4A_BUFFER_RESULT_SUCCEEDED;
+        }
+    }
+    else
+    {
+        return K4A_BUFFER_RESULT_FAILED;
+    }
+}
+
+k4a_buffer_result_t
+k4a_playback_get_attachment(k4a_playback_t playback_handle, const char *file_name, uint8_t *data, size_t *data_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, data_size == NULL);
+
+    KaxAttached *attachment = get_attachment_by_name(context, file_name);
+    if (attachment != NULL)
+    {
+        KaxFileData &file_data = GetChild<KaxFileData>(*context->calibration_attachment);
+        // Attachment is stored in binary, not a string, so null termination is not guaranteed.
+        if (data != NULL && *data_size >= file_data.GetSize())
+        {
+            memcpy(data, static_cast<uint8_t *>(file_data.GetBuffer()), (size_t)file_data.GetSize());
+            *data_size = (size_t)file_data.GetSize();
+            return K4A_BUFFER_RESULT_SUCCEEDED;
+        }
+        else
+        {
+            *data_size = (size_t)file_data.GetSize();
+            return K4A_BUFFER_RESULT_TOO_SMALL;
         }
     }
     else
@@ -253,6 +372,107 @@ k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, imu_sample == NULL);
 
     return get_imu_sample(context, imu_sample, false);
+}
+
+k4a_stream_result_t k4a_playback_procceed_to_next_data_block(k4a_playback_t playback_handle,
+                                                             const char *custom_track_name,
+                                                             uint64_t *timestamp_ns,
+                                                             uint64_t *block_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED,
+                        context == NULL || custom_track_name == NULL || timestamp_ns == NULL || block_size == NULL);
+
+    auto itr = context->custom_track_map.find(custom_track_name);
+    if (itr == context->custom_track_map.end())
+    {
+        logger_error(LOGGER_RECORD, "Custom track name cannot be found.");
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
+    track_reader_t &track_reader = itr->second;
+    std::shared_ptr<read_block_t> read_block = find_next_block(context, &track_reader, true);
+
+    // Reach EOF
+    if (read_block->block == nullptr)
+    {
+        return K4A_STREAM_RESULT_EOF;
+    }
+
+    track_reader.current_block = read_block;
+    *timestamp_ns = track_reader.current_block->block->GlobalTimecode();
+    *block_size = track_reader.current_block->block->GetBuffer(0).Size();
+
+    return K4A_STREAM_RESULT_SUCCEEDED;
+}
+
+k4a_stream_result_t k4a_playback_procceed_to_previous_data_block(k4a_playback_t playback_handle,
+                                                                 const char *custom_track_name,
+                                                                 uint64_t *timestamp_ns,
+                                                                 uint64_t *block_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED,
+                        context == NULL || custom_track_name == NULL || timestamp_ns == NULL || block_size == NULL);
+
+    auto itr = context->custom_track_map.find(custom_track_name);
+    if (itr == context->custom_track_map.end())
+    {
+        logger_error(LOGGER_RECORD, "Custom track name cannot be found.");
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
+    track_reader_t &track_reader = itr->second;
+    std::shared_ptr<read_block_t> read_block = find_next_block(context, &track_reader, false);
+
+    // Reach EOF
+    if (read_block->block == nullptr)
+    {
+        return K4A_STREAM_RESULT_EOF;
+    }
+
+    track_reader.current_block = read_block;
+    *timestamp_ns = track_reader.current_block->block->GlobalTimecode();
+    *block_size = track_reader.current_block->block->GetBuffer(0).Size();
+
+    return K4A_STREAM_RESULT_SUCCEEDED;
+}
+
+k4a_stream_result_t k4a_playback_read_current_data_block(k4a_playback_t playback_handle,
+                                                         const char *custom_track_name,
+                                                         uint64_t *timestamp_ns,
+                                                         uint8_t *block_data,
+                                                         uint64_t *block_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED,
+                        context == NULL || custom_track_name == NULL || timestamp_ns == NULL || block_size == NULL);
+
+    auto itr = context->custom_track_map.find(custom_track_name);
+    if (itr == context->custom_track_map.end())
+    {
+        logger_error(LOGGER_RECORD, "Custom track name cannot be found.");
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
+    track_reader_t &track_reader = itr->second;
+    if (track_reader.current_block->block == nullptr)
+    {
+        logger_error(LOGGER_RECORD, "Current data block doesn't point to any data. Try to call \
+            k4a_playback_procceed_to_previous_data_block or k4a_playback_procceed_to_next_data_block \
+            to change the data block pointer.");
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
+    *timestamp_ns = track_reader.current_block->block->GlobalTimecode();
+    DataBuffer &data_buffer = track_reader.current_block->block->GetBuffer(0);
+    *block_size = data_buffer.Size();
+    memcpy(block_data, data_buffer.Buffer(), data_buffer.Size());
+
+    return K4A_STREAM_RESULT_SUCCEEDED;
 }
 
 k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
