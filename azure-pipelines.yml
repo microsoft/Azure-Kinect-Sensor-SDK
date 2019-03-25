@@ -134,21 +134,21 @@ jobs:
        exit /b 0
     displayName: 'Check Line Endings'
 
-  ${{ if eq(variables['vmImage'], 'vs2017-win2016') }}:
-    - task: BatchScript@1
-      displayName: 'Setup VS Env'
-      inputs:
-        filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-        arguments: '-arch=$(CMakeArch)'
-        modifyEnvironment: true
+  - task: BatchScript@1
+    displayName: 'Setup VS Env'
+    inputs:
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
+      arguments: '-arch=$(CMakeArch)'
+      modifyEnvironment: true
+    condition: and(succeeded(), eq(variables['vmImage'], 'vs2017-win2016'))
 
-  ${{ if eq(variables['vmImage'], 'windows-2019') }}:
-    - task: BatchScript@1
-      displayName: 'Setup VS Env'
-      inputs:
-        filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\Tools\VsDevCmd.bat'
-        arguments: '-arch=$(CMakeArch)'
-        modifyEnvironment: true
+  - task: BatchScript@1
+    displayName: 'Setup VS Env'
+    inputs:
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\Tools\VsDevCmd.bat'
+      arguments: '-arch=$(CMakeArch)'
+      modifyEnvironment: true
+    condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
 
   - script: |
        cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
