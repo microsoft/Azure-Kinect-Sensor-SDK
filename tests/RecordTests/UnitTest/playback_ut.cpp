@@ -281,89 +281,177 @@ TEST_F(playback_ut, playback_seek_test)
         validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
     k4a_capture_release(capture);
 
-    // Test seek to beginning
-    result = k4a_playback_seek_timestamp(handle, 0, K4A_PLAYBACK_SEEK_BEGIN);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    int64_t recording_length = (int64_t)k4a_playback_get_last_timestamp_usec(handle) + 1;
+    std::pair<int64_t, k4a_playback_seek_origin_t> start_seek_combinations[] = { // Beginning
+                                                                                 { 0, K4A_PLAYBACK_SEEK_BEGIN },
+                                                                                 { -recording_length,
+                                                                                   K4A_PLAYBACK_SEEK_END },
+                                                                                 // Past beginning
+                                                                                 { -10, K4A_PLAYBACK_SEEK_BEGIN },
+                                                                                 { -recording_length - 10,
+                                                                                   K4A_PLAYBACK_SEEK_END }
+    };
 
-    stream_result = k4a_playback_get_previous_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
-    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+    std::pair<int64_t, k4a_playback_seek_origin_t> end_seek_combinations[] = { // End
+                                                                               { 0, K4A_PLAYBACK_SEEK_END },
+                                                                               { recording_length,
+                                                                                 K4A_PLAYBACK_SEEK_BEGIN },
+                                                                               // Past end
+                                                                               { 10, K4A_PLAYBACK_SEEK_END },
+                                                                               { recording_length + 10,
+                                                                                 K4A_PLAYBACK_SEEK_BEGIN }
+    };
 
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
-    k4a_capture_release(capture);
+    std::pair<int64_t, k4a_playback_seek_origin_t> middle_seek_combinations[] = {
+        // Between captures
+        { timestamp_delta * 50 - 500, K4A_PLAYBACK_SEEK_BEGIN },
+        { -recording_length + (int64_t)(timestamp_delta * 50 - 500), K4A_PLAYBACK_SEEK_END },
+        // Middle of capture
+        { timestamp_delta * 50 + 500, K4A_PLAYBACK_SEEK_BEGIN },
+        { -recording_length + (int64_t)(timestamp_delta * 50 + 500), K4A_PLAYBACK_SEEK_END },
+    };
 
-    // Test seek past beginning
-    result = k4a_playback_seek_timestamp(handle,
-                                         -(int64_t)k4a_playback_get_last_timestamp_usec(handle) - 10,
-                                         K4A_PLAYBACK_SEEK_END);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    std::cerr << "[          ] Testing seek to start:" << std::endl;
+    // Test seek combinations around beginning of recording
+    for (auto seek : start_seek_combinations)
+    {
+        std::cerr << "[          ]     Seeking to " << seek.first << " from "
+                  << (seek.second == K4A_PLAYBACK_SEEK_BEGIN ? "beginning" : "end") << std::endl;
 
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
-    k4a_capture_release(capture);
+        // Seek then read backward
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    // Test seek to end
-    result = k4a_playback_seek_timestamp(handle, 0, K4A_PLAYBACK_SEEK_END);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+        ASSERT_EQ(capture, (k4a_capture_t)NULL);
+
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+
+        // Seek then read forward
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+    }
+
+    std::cerr << "[          ] Testing seek to end:" << std::endl;
+    // Test seek combinations around end of recording
     timestamps[0] += timestamp_delta * 99;
     timestamps[1] += timestamp_delta * 99;
     timestamps[2] += timestamp_delta * 99;
+    for (auto seek : end_seek_combinations)
+    {
+        std::cerr << "[          ]     Seeking to " << seek.first << " from "
+                  << (seek.second == K4A_PLAYBACK_SEEK_BEGIN ? "beginning" : "end") << std::endl;
 
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
-    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+        // Seek then read forward
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    stream_result = k4a_playback_get_previous_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
-    k4a_capture_release(capture);
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+        ASSERT_EQ(capture, (k4a_capture_t)NULL);
 
-    // Test seek to end, relative to start
-    result = k4a_playback_seek_timestamp(handle,
-                                         (int64_t)k4a_playback_get_last_timestamp_usec(handle) + 1,
-                                         K4A_PLAYBACK_SEEK_BEGIN);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
 
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
-    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+        // Seek then read backward
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    stream_result = k4a_playback_get_previous_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
-    k4a_capture_release(capture);
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+    }
 
-    // Test seeking to the middle of a capture, then read forward
-    timestamps[0] -= timestamp_delta * 50;
-    timestamps[1] -= timestamp_delta * 50;
-    timestamps[2] -= timestamp_delta * 50;
-    result = k4a_playback_seek_timestamp(handle, (int64_t)timestamps[0] + 500, K4A_PLAYBACK_SEEK_BEGIN);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    std::cerr << "[          ] Testing seek to middle:" << std::endl;
+    // Test seek combinations around middle of recording
+    timestamps[0] -= timestamp_delta * 49;
+    timestamps[1] -= timestamp_delta * 49;
+    timestamps[2] -= timestamp_delta * 49;
+    for (auto seek : middle_seek_combinations)
+    {
+        std::cerr << "[          ]     Seeking to " << seek.first << " from "
+                  << (seek.second == K4A_PLAYBACK_SEEK_BEGIN ? "beginning" : "end") << std::endl;
 
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    // Color image is before the timestamp and will be missing.
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode));
-    k4a_capture_release(capture);
+        // Test next then previous capture
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    // Test seeking to the middle of a capture, then read backward
-    result = k4a_playback_seek_timestamp(handle, (int64_t)timestamps[0] + 500, K4A_PLAYBACK_SEEK_BEGIN);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
 
-    stream_result = k4a_playback_get_previous_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    // Depth and IR images are before the timestamp and will be missing.
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, K4A_DEPTH_MODE_OFF));
-    k4a_capture_release(capture);
+        timestamps[0] -= timestamp_delta;
+        timestamps[1] -= timestamp_delta;
+        timestamps[2] -= timestamp_delta;
+
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+
+        // Test previous then next capture
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+
+        timestamps[0] += timestamp_delta;
+        timestamps[1] += timestamp_delta;
+        timestamps[2] += timestamp_delta;
+
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+    }
 
     k4a_playback_close(handle);
 }
