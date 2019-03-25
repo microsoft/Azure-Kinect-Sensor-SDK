@@ -72,16 +72,17 @@ jobs:
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
         vmImage: 'windows-2019'
-      VS2019_x86_64-pc-windows-msvc_debug_msbuild:
-        CMakeArch: 'amd64'
-        BuildGenerator: 'Visual Studio 16 2019'
-        CMakeConfiguration: 'debug'
-        vmImage: 'windows-2019'
-      VS2019_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
-        CMakeArch: 'amd64'
-        BuildGenerator: 'Visual Studio 16 2019'
-        CMakeConfiguration: 'relwithdebinfo'
-        vmImage: 'windows-2019'
+      # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
+      # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
+      #   CMakeArch: 'amd64'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'debug'
+      #   vmImage: 'windows-2019'
+      # VS2019_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
+      #   CMakeArch: 'amd64'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'relwithdebinfo'
+      #   vmImage: 'windows-2019'
       VS2019_x86-pc-windows-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -92,16 +93,17 @@ jobs:
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
         vmImage: 'windows-2019'
-      VS2019_x86-pc-windows-msvc_debug_msbuild:
-        CMakeArch: 'x86'
-        BuildGenerator: 'Visual Studio 16 2019'
-        CMakeConfiguration: 'debug'
-        vmImage: 'windows-2019'
-      VS2019_x86-pc-windows-msvc_relwithdebinfo_msbuild:
-        CMakeArch: 'x86'
-        BuildGenerator: 'Visual Studio 16 2019'
-        CMakeConfiguration: 'relwithdebinfo'
-        vmImage: 'windows-2019'
+      # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
+      # VS2019_x86-pc-windows-msvc_debug_msbuild:
+      #   CMakeArch: 'x86'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'debug'
+      #   vmImage: 'windows-2019'
+      # VS2019_x86-pc-windows-msvc_relwithdebinfo_msbuild:
+      #   CMakeArch: 'x86'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'relwithdebinfo'
+      #   vmImage: 'windows-2019'
   pool:
     vmImage: $(vmImage)
 
