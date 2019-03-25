@@ -265,15 +265,22 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->segment == nullptr);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin != K4A_PLAYBACK_SEEK_BEGIN && origin != K4A_PLAYBACK_SEEK_END);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin == K4A_PLAYBACK_SEEK_BEGIN && offset_usec < 0);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin == K4A_PLAYBACK_SEEK_END && offset_usec > 0);
+
+    // Clamp the offset timestamp so the seek direction is correct reletive to the specified origin.
+    if (origin == K4A_PLAYBACK_SEEK_BEGIN && offset_usec < 0)
+    {
+        offset_usec = 0;
+    }
+    else if (origin == K4A_PLAYBACK_SEEK_END && offset_usec > 0)
+    {
+        offset_usec = 0;
+    }
 
     uint64_t target_time_ns = 0;
-
     if (origin == K4A_PLAYBACK_SEEK_END)
     {
         uint64_t offset_ns = (uint64_t)(-offset_usec * 1000);
-        if (offset_ns >= context->last_timestamp_ns)
+        if (offset_ns > context->last_timestamp_ns)
         {
             // If the target timestamp is negative, clamp to 0 so we don't underflow.
             target_time_ns = 0;

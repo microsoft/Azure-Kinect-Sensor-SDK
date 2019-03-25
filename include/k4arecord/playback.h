@@ -188,7 +188,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
  *
  * \remarks
  * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return the capture
- * in the recording closest to the seek time with all image timestamps greater than or equal to the seek time.
+ * in the recording closest to the seek time with an image timestamp greater than or equal to the seek time.
  *
  * \remarks
  * If a call was made to k4a_playback_get_previous_capture() that returned ::K4A_STREAM_RESULT_EOF, the playback
@@ -341,14 +341,14 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * Specifies if the seek operation should be done relative to the beginning or end of the recording.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if the seek operation was successful. If the timestamp is out of range ::K4A_RESULT_FAILED is
- * returned. The current seek position is left unchanged if a failure is returned.
+ * ::K4A_RESULT_SUCCEEDED if the seek operation was successful, or ::K4A_RESULT_FAILED if an error occured. The current
+ * seek position is left unchanged if a failure is returned.
  *
  * \relates k4a_playback_t
  *
  * \remarks
  * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return the first capture
- * with all image timestamps greater than or equal to the seek time.
+ * containing an image timestamp greater than or equal to the seek time.
  *
  * \remarks
  * The first call to k4a_playback_get_previous_capture() after k4a_playback_seek_timestamp() will return the first

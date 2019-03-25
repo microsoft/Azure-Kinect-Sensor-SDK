@@ -294,10 +294,15 @@ jobs:
           param
           (
               [Parameter(Mandatory)]
-              [string] $url
+              [string] $url,
+              [string] $filename
           )
 
-          $filename = Split-Path -Path $url -Leaf
+          if (-not ($filename))
+          {
+              $filename = Split-Path -Path $url -Leaf
+          }
+
           if (-not ($filename))
           {
               Write-Error "Unable to parse filename from $url"
@@ -308,15 +313,16 @@ jobs:
           $path = Join-Path -Path $tempDir -ChildPath $filename
 
           Write-Host -NoNewline "Downloading $url to $path..."
-          Invoke-WebRequest -Uri $url -OutFile $path
+          Invoke-WebRequest -Uri $url -OutFile $path -UserAgent "NativeClient"
           Write-Host "Done"
 
           return $path
       }
 
       # Download Doxygen
-      $url = "http://doxygen.nl/files/doxygen-1.8.14.windows.x64.bin.zip"
-      $doxygenzip = Download-ToTemp -url $url
+      $url = "https://sourceforge.net/projects/doxygen/files/rel-1.8.14/doxygen-1.8.14.windows.bin.zip/download"
+      $filename = "doxygen-1.8.14.windows.bin.zip"
+      $doxygenzip = Download-ToTemp -url $url -filename $filename
 
       Expand-Archive $doxygenzip .\doxygenexe
       Write-Host "Doxygen installed. Please use Visual Studio Developer Command prompt to build."
@@ -448,6 +454,19 @@ jobs:
         vstsPackageVersion: "1.0.1"
         downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
+    - task: UniversalPackages@0
+      displayName: 'Download findconnectedport'
+      inputs:
+        command: download
+        vstsFeed: 'analog.ai.depthcamera'
+        vstsFeedPackage: 'findconnectedport'
+        vstsPackageVersion: "0.1.0"
+        downloadDirectory: "$(System.ArtifactsDirectory)/findconnectedport"
+
+    - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Add execution property to findconnectedport'
+
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
       inputs:
@@ -480,8 +499,8 @@ jobs:
 
       # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
       # Wait a little bit so the device can enumerate, 3 seconds has seemed good.
-    - script: '/home/eden/findconnectedport-linux/findconnectedport && sleep 3'
-      workingDirectory: '/home/eden/findconnectedport-linux/'
+    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport && sleep 3'
+      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
       displayName: 'Reset K4A Device'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
@@ -500,6 +519,6 @@ jobs:
       continueOnError: true
 
     # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-    - script: '/home/eden/findconnectedport-linux/findconnectedport'
-      workingDirectory: '/home/eden/findconnectedport-linux/'
+    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport'
+      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
       displayName: 'Reset K4A Device'

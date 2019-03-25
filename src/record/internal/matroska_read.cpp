@@ -1423,6 +1423,15 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     int valid_blocks = 0;
     if (enabled_tracks > 0)
     {
+        if (next)
+        {
+            timestamp_end_ns = timestamp_start_ns;
+        }
+        else
+        {
+            timestamp_start_ns = timestamp_end_ns;
+        }
+
         for (size_t i = 0; i < arraysize(blocks); i++)
         {
             if (next_blocks[i] && next_blocks[i]->block)
@@ -1431,16 +1440,67 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
                 if (next && (next_blocks[i]->sync_timestamp_ns - timestamp_start_ns < context->sync_period_ns / 2))
                 {
                     valid_blocks++;
+                    if (next_blocks[i]->sync_timestamp_ns > timestamp_end_ns)
+                    {
+                        timestamp_end_ns = next_blocks[i]->sync_timestamp_ns;
+                    }
                 }
                 else if (!next && (timestamp_end_ns - next_blocks[i]->sync_timestamp_ns < context->sync_period_ns / 2))
                 {
                     valid_blocks++;
+                    if (next_blocks[i]->sync_timestamp_ns < timestamp_start_ns)
+                    {
+                        timestamp_start_ns = next_blocks[i]->sync_timestamp_ns;
+                    }
                 }
                 else
                 {
                     // Don't use this block as part of the capture
                     next_blocks[i] = nullptr;
                 }
+            }
+        }
+
+        if (valid_blocks < enabled_tracks)
+        {
+            // Try filling in any blocks that were missed due to a seek
+            bool filled = false;
+            for (size_t i = 0; i < arraysize(blocks); i++)
+            {
+                if (!next_blocks[i] && !blocks[i]->current_block)
+                {
+                    std::shared_ptr<read_block_t> test_block = find_next_block(context, blocks[i], !next);
+                    if (test_block && test_block->block)
+                    {
+                        if (next && (timestamp_end_ns - test_block->sync_timestamp_ns < context->sync_period_ns / 2))
+                        {
+                            valid_blocks++;
+                            next_blocks[i] = test_block;
+                            filled = true;
+                        }
+                        else if (!next &&
+                                 (test_block->sync_timestamp_ns - timestamp_start_ns < context->sync_period_ns / 2))
+                        {
+                            valid_blocks++;
+                            next_blocks[i] = test_block;
+                            filled = true;
+                        }
+                    }
+                }
+            }
+            if (!next && filled)
+            {
+                // We seeked to the middle of a capture and then called previous capture, the current state is actually
+                // for next_capture. Save the state and make a call to previous capture.
+                for (size_t i = 0; i < arraysize(blocks); i++)
+                {
+                    if (next_blocks[i])
+                    {
+                        blocks[i]->current_block = next_blocks[i];
+                    }
+                }
+
+                return get_capture(context, capture_handle, false);
             }
         }
     }
