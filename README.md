@@ -53,7 +53,7 @@ For more instructions on running and writing tests see
 [testing](docs/testing.md).
 
 # Contribute
-We welcome your contributions! Please see the [contribution guidelines](CONTRIBUTING.md).
+We welcome your contributions! Please see the [contribution guidelines](docs/contributing.md).
 
 ## Feedback
 For any feedback or to report a bug, please file a [GitHub Issue](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/issues).
