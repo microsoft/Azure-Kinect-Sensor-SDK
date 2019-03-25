@@ -203,7 +203,7 @@ jobs:
       ArtifactName: '$(CMakeArch)-windows-msvc-$(CMakeConfiguration)'
       parallel: true
       parallelCount: 8
-    condition: and(succeeded(), eq(variables['BuildGenerator'], 'Ninja'))
+    condition: and(succeeded(), and(eq(variables['vmImage'], 'vs2017-win2016'), eq(variables['BuildGenerator'], 'Ninja')))
 
   # This will publish symbols created from this build to the Azure DevOps symbol
   # server. This symbol server will be private to Microsoft internal.
@@ -215,7 +215,7 @@ jobs:
       indexSources: true
       publishSymbols: true
       symbolServerType: 'teamServices'
-    condition: and(succeeded(), eq(variables['BuildGenerator'], 'Ninja'))
+    condition: and(succeeded(), and(eq(variables['vmImage'], 'vs2017-win2016'), eq(variables['BuildGenerator'], 'Ninja')))
 
 - job: LinuxK4ABuildTest
   displayName: Linux K4A Build + Test
