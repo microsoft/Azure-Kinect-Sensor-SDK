@@ -19,45 +19,91 @@ trigger:
 jobs:
 - job: WindowsK4ABuildTest
   displayName: Windows K4A Build + Test
-  pool:
-    vmImage: 'vs2017-win2016'
-    demands:
-      - Cmd
   strategy:
     maxParallel: 100
     matrix:
-      x86_64-pc-windows-msvc_debug_ninja:
+      VS2017_x86_64-pc-windows-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
-      x86_64-pc-windows-msvc_relwithdebinfo_ninja:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86_64-pc-windows-msvc_relwithdebinfo_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
-      x86_64-pc-windows-msvc_debug_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86_64-pc-windows-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'debug'
-      x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'relwithdebinfo'
-      x86-pc-windows-msvc_debug_ninja:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
-      x86-pc-windows-msvc_relwithdebinfo_ninja:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_relwithdebinfo_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
-      x86-pc-windows-msvc_debug_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'debug'
-      x86-pc-windows-msvc_relwithdebinfo_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_relwithdebinfo_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'vs2017-win2016'
+      VS2019_x86_64-pc-windows-msvc_debug_ninja:
+        CMakeArch: 'amd64'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'debug'
+        vmImage: 'windows-2019'
+      VS2019_x86_64-pc-windows-msvc_relwithdebinfo_ninja:
+        CMakeArch: 'amd64'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'windows-2019'
+      VS2019_x86_64-pc-windows-msvc_debug_msbuild:
+        CMakeArch: 'amd64'
+        BuildGenerator: 'Visual Studio 16 2019'
+        CMakeConfiguration: 'debug'
+        vmImage: 'windows-2019'
+      VS2019_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
+        CMakeArch: 'amd64'
+        BuildGenerator: 'Visual Studio 16 2019'
+        CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'windows-2019'
+      VS2019_x86-pc-windows-msvc_debug_ninja:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'debug'
+        vmImage: 'windows-2019'
+      VS2019_x86-pc-windows-msvc_relwithdebinfo_ninja:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'windows-2019'
+      VS2019_x86-pc-windows-msvc_debug_msbuild:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Visual Studio 16 2019'
+        CMakeConfiguration: 'debug'
+        vmImage: 'windows-2019'
+      VS2019_x86-pc-windows-msvc_relwithdebinfo_msbuild:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Visual Studio 16 2019'
+        CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'windows-2019'
+  pool:
+    vmImage: $(vmImage)
 
   steps:
   - checkout: self
@@ -88,12 +134,21 @@ jobs:
        exit /b 0
     displayName: 'Check Line Endings'
 
-  - task: BatchScript@1
-    displayName: 'Setup VS2017 Env'
-    inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-      arguments: '-arch=$(CMakeArch)'
-      modifyEnvironment: true
+  ${{ if eq(variables['vmImage'], 'vs2017-win2016') }}:
+    - task: BatchScript@1
+      displayName: 'Setup VS Env'
+      inputs:
+        filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
+        arguments: '-arch=$(CMakeArch)'
+        modifyEnvironment: true
+
+  ${{ if eq(variables['vmImage'], 'windows-2019') }}:
+    - task: BatchScript@1
+      displayName: 'Setup VS Env'
+      inputs:
+        filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\Tools\VsDevCmd.bat'
+        arguments: '-arch=$(CMakeArch)'
+        modifyEnvironment: true
 
   - script: |
        cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
