@@ -94,7 +94,7 @@ private:
 
         // Compute how big we can make the image
         //
-        const ImVec2 displayDimensions = GetImageSize(sourceImageDimensions, maxSize);
+        const ImVec2 displayDimensions = GetMaxImageSize(sourceImageDimensions, maxSize);
 
         ImGui::Image(static_cast<ImTextureID>(*m_currentTexture), displayDimensions);
 

@@ -9,8 +9,4 @@ target_link_libraries(color_ft PRIVATE
     gtest::gtest
     azure::aziotsharedutil)
 
-# Color functional tests do not currently work on Linux so we will not run
-# them.
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    k4a_add_tests(TARGET color_ft HARDWARE_REQUIRED TEST_TYPE FUNCTIONAL)
-endif()
+k4a_add_tests(TARGET color_ft HARDWARE_REQUIRED TEST_TYPE FUNCTIONAL)

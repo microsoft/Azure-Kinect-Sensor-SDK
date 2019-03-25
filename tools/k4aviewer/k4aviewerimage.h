@@ -22,6 +22,10 @@ namespace k4aviewer
 {
 struct ImageDimensions
 {
+    ImageDimensions() = default;
+    constexpr ImageDimensions(int w, int h) : Width(w), Height(h) {}
+    constexpr ImageDimensions(const std::pair<int, int> &pair) : Width(pair.first), Height(pair.second) {}
+
     int Width;
     int Height;
 };

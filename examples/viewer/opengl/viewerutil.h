@@ -1,36 +1,34 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#ifndef K4AWINDOWSIZEHELPERS_H
-#define K4AWINDOWSIZEHELPERS_H
+#ifndef VIEWERUTIL_H
+#define VIEWERUTIL_H
 
-// System headers
-//
+#include <sstream>
 
-// Library headers
-//
 #include "k4aimgui_all.h"
 
-// Project headers
-//
+namespace viewer
+{
 
-namespace k4aviewer
+// Throw an error if OpenGL has encountered an error.
+//
+inline void CheckOpenGLErrors()
 {
-inline float GetStandardVerticalSliderWidth()
-{
-    // Width of the slider is 1 character, plus half the normal padding
-    //
-    return ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.x;
+    const GLenum glStatus = glGetError();
+    if (glStatus != GL_NO_ERROR)
+    {
+        std::stringstream errorBuilder;
+        errorBuilder << "OpenGL error: " << static_cast<int>(glStatus);
+        throw std::runtime_error(errorBuilder.str().c_str());
+    }
 }
 
+// Gets the height of the title bar, in pixels
+//
 inline float GetTitleBarHeight()
 {
     return ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2;
-}
-
-inline float GetDefaultButtonHeight()
-{
-    return ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2 + ImGui::GetStyle().ItemSpacing.y;
 }
 
 // Gets the maximum dimensions that an image of size imageDimensions can be scaled to in order
@@ -62,6 +60,7 @@ inline ImVec2 GetMaxImageSize(const ImVec2 imageDimensions, const ImVec2 imageMa
 
     return displayDimensions;
 }
-} // namespace k4aviewer
+
+} // namespace viewer
 
 #endif
