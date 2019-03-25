@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// This library
+// This library is Transform Engine Wrapper
 #include <k4ainternal/tewrapper.h>
 
 // Dependent libraries
