@@ -9,12 +9,34 @@
 #define RECORD_READ_H
 
 #include <k4ainternal/matroska_common.h>
+#include <functional>
 
 namespace k4arecord
 {
+typedef struct _cluster_info_t
+{
+    // The cluster size will be 0 until the actual cluster has been read from disk.
+    // If cluster size is 0, the timestamp is not guaranteed to be the start of the cluster
+    // populate_cluster_info() will update the cluster_size and timestamp to the real values.
+    uint64_t timestamp_ns = 0;
+    uint64_t file_offset = 0;
+    uint64_t cluster_size = 0;
+    std::weak_ptr<libmatroska::KaxCluster> cluster;
+
+    bool next_known = false;
+    struct _cluster_info_t *next = NULL;
+    struct _cluster_info_t *previous = NULL;
+} cluster_info_t;
+
+// The cluster cache is a sparse linked-list index that may contain gaps until real data has been read from disk.
+// The list is initialized with metadata from the Cues block, which is used as a hint for seeking in the file.
+// Once it is known that no gap is present between indexed clusters, next_known is set to true.
+typedef std::unique_ptr<cluster_info_t, std::function<void(cluster_info_t *)>> cluster_cache_t;
+
 typedef struct _read_block_t
 {
     struct _track_reader_t *reader;
+    cluster_info_t *cluster_info;
     std::shared_ptr<libmatroska::KaxCluster> cluster;
     libmatroska::KaxInternalBlock *block;
 
@@ -56,7 +78,9 @@ typedef struct _k4a_playback_context_t
 
     uint64_t sync_period_ns;
     uint64_t seek_timestamp_ns;
-    std::shared_ptr<libmatroska::KaxCluster> seek_cluster;
+    cluster_info_t *seek_cluster;
+
+    cluster_cache_t cluster_cache;
 
     track_reader_t color_track;
     track_reader_t depth_track;
@@ -73,6 +97,9 @@ typedef struct _k4a_playback_context_t
     uint64_t tags_offset;
 
     uint64_t last_timestamp_ns;
+
+    // Stats
+    uint64_t seek_count, load_count, cache_hits;
 } k4a_playback_context_t;
 
 K4A_DECLARE_CONTEXT(k4a_playback_t, k4a_playback_context_t);
@@ -83,6 +110,7 @@ k4a_result_t skip_element(k4a_playback_context_t *context, EbmlElement *element)
 void match_ebml_id(k4a_playback_context_t *context, EbmlId &id, uint64_t offset);
 bool seek_info_ready(k4a_playback_context_t *context);
 k4a_result_t parse_mkv(k4a_playback_context_t *context);
+k4a_result_t populate_cluster_cache(k4a_playback_context_t *context);
 k4a_result_t parse_recording_config(k4a_playback_context_t *context);
 k4a_result_t read_bitmap_info_header(track_reader_t *track);
 void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestamp_ns);
@@ -95,14 +123,12 @@ libmatroska::KaxAttached *get_attachment_by_name(k4a_playback_context_t *context
 libmatroska::KaxAttached *get_attachment_by_tag(k4a_playback_context_t *context, const char *tag_name);
 
 k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset);
-std::shared_ptr<libmatroska::KaxCluster> seek_timestamp(k4a_playback_context_t *context, uint64_t timestamp_ns);
-libmatroska::KaxCuePoint *find_closest_cue(k4a_playback_context_t *context, uint64_t timestamp_ns);
-std::shared_ptr<libmatroska::KaxCluster> find_cluster(k4a_playback_context_t *context,
-                                                      uint64_t search_offset,
-                                                      uint64_t timestamp_ns);
-std::shared_ptr<libmatroska::KaxCluster> next_cluster(k4a_playback_context_t *context,
-                                                      libmatroska::KaxCluster *current_cluster,
-                                                      bool next);
+void populate_cluster_info(k4a_playback_context_t *context,
+                           std::shared_ptr<libmatroska::KaxCluster> &cluster,
+                           cluster_info_t *cluster_info);
+cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp_ns);
+cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *current, bool next);
+std::shared_ptr<libmatroska::KaxCluster> load_cluster(k4a_playback_context_t *context, cluster_info_t *cluster_info);
 std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, track_reader_t *reader, bool next);
 k4a_result_t new_capture(k4a_playback_context_t *context,
                          std::shared_ptr<read_block_t> &block,
@@ -118,9 +144,9 @@ template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElemen
         int upper_level = 0;
         EbmlElement *dummy = nullptr;
 
-        T *read_element = static_cast<T *>(element);
-        read_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true);
-        return read_element;
+        T *typed_element = static_cast<T *>(element);
+        typed_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true);
+        return typed_element;
     }
     catch (std::ios_base::failure e)
     {
@@ -133,9 +159,14 @@ template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElemen
     }
 }
 
-// Example usage: find_next<KaxSegment>(context, true, false);
-template<typename T>
-std::unique_ptr<T> find_next(k4a_playback_context_t *context, bool search = false, bool read = true)
+/**
+ * Find the next element of type T at the current file offset.
+ * If \p search is true, this function will keep reading elements until an element of type T is found or EOF is reached.
+ * If \p search is false, this function will only return an element if it exists at the current file offset.
+ *
+ * Example usage: find_next<KaxSegment>(context, true);
+ */
+template<typename T> std::unique_ptr<T> find_next(k4a_playback_context_t *context, bool search = false)
 {
     try
     {
@@ -187,14 +218,7 @@ std::unique_ptr<T> find_next(k4a_playback_context_t *context, bool search = fals
             return nullptr;
         }
 
-        if (read)
-        {
-            return std::unique_ptr<T>(read_element<T>(context, element));
-        }
-        else
-        {
-            return std::unique_ptr<T>(static_cast<T *>(element));
-        }
+        return std::unique_ptr<T>(static_cast<T *>(element));
     }
     catch (std::ios_base::failure e)
     {
@@ -216,7 +240,20 @@ k4a_result_t read_offset(k4a_playback_context_t *context, std::unique_ptr<T> &el
     RETURN_IF_ERROR(seek_offset(context, offset));
     element_out = find_next<T>(context);
 
-    return element_out ? K4A_RESULT_SUCCEEDED : K4A_RESULT_FAILED;
+    if (element_out)
+    {
+        if (read_element<T>(context, element_out.get()) == NULL)
+        {
+            logger_error(LOGGER_RECORD, "Failed to read element: %s at offset %llu", typeid(T).name(), offset);
+            return K4A_RESULT_FAILED;
+        }
+        return K4A_RESULT_SUCCEEDED;
+    }
+    else
+    {
+        logger_error(LOGGER_RECORD, "Element not found at offset: %s at offset %llu", typeid(T).name(), offset);
+        return K4A_RESULT_FAILED;
+    }
 }
 
 template<typename T> bool check_element_type(EbmlElement *element, T **out)

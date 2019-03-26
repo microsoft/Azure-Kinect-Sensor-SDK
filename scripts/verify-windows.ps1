@@ -30,11 +30,11 @@ function Download-ToTemp
 }
 
 # Download vswhere to temp dir
-$url = "https://github.com/Microsoft/vswhere/releases/download/2.5.2/vswhere.exe"
+$url = "https://github.com/Microsoft/vswhere/releases/download/2.6.7/vswhere.exe"
 $vswhere = Download-ToTemp -url $url
 
-# Run vswhere to check for Visual Studio 2015 or Visual Studio 2017
-$vsWhereOutput = (& $vswhere -format xml)
+# Run vswhere to check for Visual Studio 2017 or Visual Studio 2019
+$vsWhereOutput = (& $vswhere -prerelease -format xml)
 $vsInstances = [xml]($vsWhereOutput)
 
 if ((-not ($vsInstances)) -or (-not ($vsInstances.instances))) {
@@ -43,16 +43,16 @@ if ((-not ($vsInstances)) -or (-not ($vsInstances.instances))) {
 
 $instances = $vsInstances.SelectNodes("//instances/instance")
 if ($instances.Count -eq 0) {
-    Write-Error "Visual Studio 2017 not installed. Please install Visual Studio 2017"
+    Write-Error "Visual Studio not installed. Please install Visual Studio 2017 or Visual Studio 2019"
 }
 
-$instances = $instances | Where-Object { [Version]$_.installationVersion -ge [Version]"14.0"}
+$instances = $instances | Where-Object { [Version]$_.installationVersion -ge [Version]"15.0"}
 if (-not $instances) {
-    Write-Error "Only Visual Studio 2015 or Visual Studio 2017 are supported"
+    Write-Error "Only Visual Studio 2017 and greater are supported"
 }
 
 # Check for cmake and ninja (installed as part of the Microsoft.VisualStudio.Component.VC.CMake.Project component)
-$vsWhereOutput = (& $vswhere -format xml -requires Microsoft.VisualStudio.Component.VC.CMake.Project)
+$vsWhereOutput = (& $vswhere -prerelease -format xml -requires Microsoft.VisualStudio.Component.VC.CMake.Project)
 $vsInstancesWithCMakeNinja = [xml]$vsWhereOutput
 if ((-not $vsInstancesWithCMakeNinja) -or (-not ($vsInstancesWithCMakeNinja.instances))) {
     if (-not (Get-Command -Name "cmake")) {

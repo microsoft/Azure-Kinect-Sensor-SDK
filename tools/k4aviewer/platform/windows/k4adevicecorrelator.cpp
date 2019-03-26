@@ -7,7 +7,9 @@
 
 // System headers
 //
+#include <codecvt>
 #include <functional>
+#include <locale>
 #include <memory>
 #include <map>
 #include <regex>
@@ -139,7 +141,8 @@ HRESULT GetContainerIdToWasapiIdMap(std::map<GUID, std::string, GuidComparer> *r
         // only use letters A-Z, numbers 0-9, dashes(-), periods(.), and curly braces ({}), all of which
         // have the same numeric value for chars and wchars and don't use the upper byte of the wchar.
         //
-        std::string idString(idWString.begin(), idWString.end());
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        std::string idString = converter.to_bytes(idWString);
 
         ComUniquePtr<IPropertyStore> pProps;
         {

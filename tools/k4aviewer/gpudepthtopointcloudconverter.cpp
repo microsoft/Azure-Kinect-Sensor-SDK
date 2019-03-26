@@ -39,7 +39,17 @@ void main()
     float vertexValue = float(imageLoad(depthImage, pixel));
     vec2 xyValue = imageLoad(xyTable, pixel).xy;
 
+    float alpha = 1.0f;
     vec3 vertexPosition = vec3(vertexValue * xyValue.x, vertexValue * xyValue.y, vertexValue);
+
+    // Invalid pixels have their XY table values set to 0.
+    // Set the rest of their values to 0 so clients can pick them out.
+    //
+    if (xyValue.x == 0.0f && xyValue.y == 0.0f)
+    {
+        alpha = 0.0f;
+        vertexValue = 0.0f;
+    }
 
     // Vertex positions are in millimeters, but everything else is in meters, so we need to convert
     //
@@ -50,7 +60,7 @@ void main()
     //
     vertexPosition.x *= -1;
 
-    imageStore(destTex, pixel, vec4(vertexPosition, 1.0f));
+    imageStore(destTex, pixel, vec4(vertexPosition, alpha));
 }
 )";
 
@@ -250,8 +260,10 @@ k4a::image GpuDepthToPointCloudConverter::GenerateXyTable(const k4a::calibration
             }
             else
             {
-                tableData[idx].xy.x = FP_NAN;
-                tableData[idx].xy.y = FP_NAN;
+                // The pixel is invalid.
+                //
+                tableData[idx].xy.x = 0.0f;
+                tableData[idx].xy.y = 0.0f;
             }
         }
     }

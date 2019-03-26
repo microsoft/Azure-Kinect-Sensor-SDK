@@ -18,7 +18,8 @@ sudo apt install -y \
     gcc-multilib \
     g++-multilib \
     python3 \
-    git-lfs
+    git-lfs \
+    nasm
 
 # Install libraries needed to build
 sudo apt install -y \

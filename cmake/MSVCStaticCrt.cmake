@@ -16,6 +16,6 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 
     # Link against the static crt
     add_compile_options(
-        "$<$<CONFIG:Debug>:/MTd>"
-        "$<$<NOT:$<CONFIG:Debug>>:/MT>")
+        "$<$<AND:$<NOT:$<COMPILE_LANGUAGE:ASM_NASM>>,$<CONFIG:Debug>>:/MTd>"
+        "$<$<AND:$<NOT:$<COMPILE_LANGUAGE:ASM_NASM>>,$<NOT:$<CONFIG:Debug>>>:/MT>")
 endif()

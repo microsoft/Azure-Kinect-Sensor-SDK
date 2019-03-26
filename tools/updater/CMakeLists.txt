@@ -13,7 +13,7 @@ configure_file(
     @ONLY
     )
 
-add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+target_compile_definitions(AzureKinectFirmwareTool PRIVATE _CRT_SECURE_NO_WARNINGS)
 
 target_link_libraries(AzureKinectFirmwareTool PRIVATE
     k4ainternal::depth_mcu
