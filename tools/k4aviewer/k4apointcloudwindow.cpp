@@ -37,7 +37,7 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
 
     if (m_captureSource->IsFailed())
     {
-        K4AViewerErrorManager::Instance().SetErrorStatus(m_title + ": data source failed!");
+        K4AViewerErrorManager::Instance().SetErrorStatus(m_title + ": image source failed!");
         m_failed = true;
         return;
     }

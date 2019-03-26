@@ -96,7 +96,7 @@ public:
             bufferItem->Bgra = k4a::image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   dimensions.Width,
                                                   dimensions.Height,
-                                                  dimensions.Width * sizeof(BgraPixel));
+                                                  dimensions.Width * static_cast<int>(sizeof(BgraPixel)));
         });
 
         m_workerThread = std::thread(&K4AConvertingImageSourceImpl::WorkerThread, this);

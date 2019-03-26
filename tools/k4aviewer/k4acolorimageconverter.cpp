@@ -42,7 +42,7 @@ using namespace k4aviewer;
 template<k4a_image_format_t ImageFormat> class K4AColorImageConverterBase : public IK4AImageConverter<ImageFormat>
 {
 public:
-    virtual ~K4AColorImageConverterBase() = default;
+    virtual ~K4AColorImageConverterBase() override = default;
 
     ImageDimensions GetImageDimensions() const override
     {
@@ -58,7 +58,7 @@ protected:
 
     bool ImagesAreCorrectlySized(const k4a::image &srcImage,
                                  const k4a::image &dstImage,
-                                 const int *srcImageExpectedSize)
+                                 const size_t *srcImageExpectedSize)
     {
         if (srcImageExpectedSize)
         {
@@ -93,7 +93,7 @@ public:
         // YUY2 is a 4:2:2 format, so there are 4 bytes per 'chunk' of data, and each 'chunk' represents 2 pixels.
         //
         const int stride = m_dimensions.Width * 4 / 2;
-        const auto expectedBufferSize = static_cast<int>(stride * m_dimensions.Height);
+        const size_t expectedBufferSize = static_cast<size_t>(stride * m_dimensions.Height);
 
         if (!ImagesAreCorrectlySized(srcImage, *bgraImage, &expectedBufferSize))
         {
@@ -133,7 +133,7 @@ public:
 
         // NV12 is a 4:2:0 format, so there are half as many hue/sat pixels as luminance pixels
         //
-        const auto expectedBufferSize = static_cast<int>(m_dimensions.Height * (luminanceStride + hueSatStride / 2));
+        const auto expectedBufferSize = static_cast<size_t>(m_dimensions.Height * (luminanceStride + hueSatStride / 2));
 
         if (!ImagesAreCorrectlySized(srcImage, *bgraImage, &expectedBufferSize))
         {
@@ -174,7 +174,8 @@ class K4ABGRA32ImageConverter : public K4AColorImageConverterBase<K4A_IMAGE_FORM
 public:
     ImageConversionResult ConvertImage(const k4a::image &srcImage, k4a::image *bgraImage) override
     {
-        const int expectedBufferSize = m_dimensions.Height * m_dimensions.Width * static_cast<int>(sizeof(BgraPixel));
+        const size_t expectedBufferSize = static_cast<size_t>(m_dimensions.Height * m_dimensions.Width) *
+                                          sizeof(BgraPixel);
         if (!ImagesAreCorrectlySized(srcImage, *bgraImage, &expectedBufferSize))
         {
             return ImageConversionResult::InvalidBufferSizeError;
