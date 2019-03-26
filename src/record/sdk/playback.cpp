@@ -58,7 +58,7 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
     if (K4A_SUCCEEDED(result))
     {
         // Seek to the first cluster
-        context->seek_cluster = find_cluster(context, context->first_cluster_offset, 0);
+        context->seek_cluster = find_cluster(context, 0);
         if (context->seek_cluster == nullptr)
         {
             logger_error(LOGGER_RECORD, "Failed to parse recording, recording is empty.");
@@ -297,7 +297,7 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
 
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    std::shared_ptr<KaxCluster> seek_cluster = seek_timestamp(context, target_time_ns);
+    cluster_info_t *seek_cluster = find_cluster(context, target_time_ns);
     result = K4A_RESULT_FROM_BOOL(seek_cluster != nullptr);
 
     if (K4A_SUCCEEDED(result))
@@ -325,6 +325,10 @@ void k4a_playback_close(const k4a_playback_t playback_handle)
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     if (context != NULL)
     {
+        logger_trace(LOGGER_RECORD, "File reading stats:");
+        logger_trace(LOGGER_RECORD, "  Seek count: %llu", context->seek_count);
+        logger_trace(LOGGER_RECORD, "  Cluster load count: %llu", context->load_count);
+        logger_trace(LOGGER_RECORD, "  Cluster cache hits: %llu", context->cache_hits);
         try
         {
             context->ebml_file->close();
