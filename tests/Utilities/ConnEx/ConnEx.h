@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#ifndef CONNECTION_EXERCISER_H
+#define CONNECTION_EXERCISER_H
+
 #include <k4a/k4atypes.h>
 
 // The connection exerciser has 4 active ports plus a everything disconnected "port".
@@ -35,3 +38,5 @@ private:
 
     pconnection_exerciser_internal_t state;
 };
+
+#endif /* CONNECTION_EXERCISER_H */

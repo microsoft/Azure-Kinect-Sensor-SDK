@@ -9,14 +9,11 @@ add_library(k4a_transformation STATIC
             transformation.c
             )
 
-# Consumers should #include <k4ainternal/transformation.h>
-target_include_directories(k4a_transformation PUBLIC 
-    ${K4A_PRIV_INCLUDE_DIR})
-
 # Dependencies of this library
 target_link_libraries(k4a_transformation PUBLIC 
     k4ainternal::math
     k4ainternal::deloader
+    k4ainternal::tewrapper
     )
 
 # Define alias for other targets to link against
