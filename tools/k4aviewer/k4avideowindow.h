@@ -63,6 +63,8 @@ public:
     K4AVideoWindow &operator=(const K4AVideoWindow &&) = delete;
 
 private:
+    const ImVec2 InvalidHoveredPixel = ImVec2(-1, -1);
+
     void RenderVideoFrame(ImVec2 maxSize)
     {
         if (m_failed)
@@ -112,7 +114,7 @@ private:
             std::string overlayTitle = m_title + "##overlay";
             if (ImGui::Begin(overlayTitle.c_str(), nullptr, overlayFlags))
             {
-                ImVec2 hoveredImagePixel(-1, -1);
+                ImVec2 hoveredImagePixel = InvalidHoveredPixel;
 
                 // The overlay obstructs hover detection on the image, so we have to check if the overlay is hovered too
                 //
@@ -142,20 +144,40 @@ private:
         }
     }
 
-    void RenderInfoPane(const k4a::image &frame, ImVec2 hoveredPixel)
+    void RenderInfoPane(const k4a::image &image, ImVec2 hoveredPixel)
     {
         (void)hoveredPixel;
-        RenderBasicInfoPane(frame);
+        RenderBasicInfoPane(image);
     }
 
-    void RenderBasicInfoPane(const k4a::image &frame)
+    void RenderBasicInfoPane(const k4a::image &image)
     {
         if (K4AViewerSettingsManager::Instance().GetShowFrameRateInfo())
         {
             ImGui::Text("Average frame rate: %.2f fps", m_frameSource->GetFrameRate());
         }
 
-        ImGui::Text("Timestamp: %llu", static_cast<long long int>(frame.get_timestamp().count()));
+        ImGui::Text("Timestamp: %llu", static_cast<long long int>(image.get_timestamp().count()));
+    }
+
+    void RenderHoveredDepthPixelValue(const k4a::image &depthImage, const ImVec2 hoveredPixel, const char *units)
+    {
+        if (static_cast<int>(hoveredPixel.x) == static_cast<int>(InvalidHoveredPixel.x) &&
+            static_cast<int>(hoveredPixel.y) == static_cast<int>(InvalidHoveredPixel.y))
+        {
+            return;
+        }
+
+        DepthPixel pixelValue = 0;
+        if (hoveredPixel.x >= 0 && hoveredPixel.y >= 0)
+        {
+            const DepthPixel *buffer = reinterpret_cast<const DepthPixel *>(depthImage.get_buffer());
+            pixelValue =
+                buffer[size_t(hoveredPixel.y) * size_t(depthImage.get_width_pixels()) + size_t(hoveredPixel.x)];
+        }
+
+        ImGui::Text("Current pixel: %d, %d", int(hoveredPixel.x), int(hoveredPixel.y));
+        ImGui::Text("Current pixel value: %d %s", pixelValue, units);
     }
 
     // Sets the window failed with an error message derived from errorCode
@@ -197,11 +219,14 @@ private:
 };
 
 template<> void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &, ImVec2 hoveredPixel);
+template<> void K4AVideoWindow<K4A_IMAGE_FORMAT_IR16>::RenderInfoPane(const k4a::image &, ImVec2 hoveredPixel);
 
-// Template specialization for RenderInfoPane.  Lets us show pixel value for the depth viewer.
+// Template specialization for RenderInfoPane.  Lets us show pixel value for depth and IR sensors and temperature
+// data for the depth sensor.
 //
 #ifndef K4AVIDEOWINDOW_CPP
 extern template class K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>;
+extern template class K4AVideoWindow<K4A_IMAGE_FORMAT_IR16>;
 #endif
 } // namespace k4aviewer
 
