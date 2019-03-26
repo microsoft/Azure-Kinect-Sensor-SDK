@@ -152,8 +152,52 @@ jobs:
       modifyEnvironment: true
     condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
 
+  - powershell: |
+      $ErrorActionPreference = "Stop"
+
+      function Download-ToTemp
+      {
+          param
+          (
+              [Parameter(Mandatory)]
+              [string] $url,
+              [string] $filename
+          )
+
+          if (-not ($filename))
+          {
+              $filename = Split-Path -Path $url -Leaf
+          }
+
+          if (-not ($filename))
+          {
+              Write-Error "Unable to parse filename from $url"
+              return $null
+          }
+
+          $tempDir = [System.IO.Path]::GetTempPath()
+          $path = Join-Path -Path $tempDir -ChildPath $filename
+
+          Write-Host -NoNewline "Downloading $url to $path..."
+          Invoke-WebRequest -Uri $url -OutFile $path -UserAgent "NativeClient"
+          Write-Host "Done"
+
+          return $path
+      }
+
+      # Download NASM
+      $url = "https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/win64/nasm-2.14.02-win64.zip"
+      $nasmzip = Download-ToTemp -url $url
+
+      Expand-Archive $nasmzip .\nasmexe
+      Write-Host "NASM Downloaded"
+
+    workingDirectory: '$(Build.BinariesDirectory)'
+    displayName: 'Download NASM'
+
   - script: |
-       cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
+      set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
+      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:
