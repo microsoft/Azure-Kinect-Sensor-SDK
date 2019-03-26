@@ -3,9 +3,9 @@
 
 add_executable(throughput_perf throughput_perf.cpp)
 
-add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    
-target_link_libraries(throughput_perf PRIVATE 
+target_compile_definitions(throughput_perf PRIVATE _CRT_SECURE_NO_WARNINGS)
+
+target_link_libraries(throughput_perf PRIVATE
     azure::aziotsharedutil
     gtest::gtest
     k4a::k4a
