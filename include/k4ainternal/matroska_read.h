@@ -76,7 +76,7 @@ typedef struct _k4a_playback_context_t
 {
     const char *file_path;
     std::unique_ptr<IOCallback> ebml_file;
-    std::mutex io_lock;
+    std::mutex io_lock; // Locks access to ebml_file
     logger_t logger_handle;
 
     uint64_t timecode_scale;
@@ -99,7 +99,7 @@ typedef struct _k4a_playback_context_t
     std::shared_ptr<loaded_cluster_t> seek_cluster;
 
     cluster_cache_t cluster_cache;
-    std::recursive_mutex cache_lock;
+    std::recursive_mutex cache_lock; // Locks modification of cluster_cache
 
     track_reader_t color_track;
     track_reader_t depth_track;

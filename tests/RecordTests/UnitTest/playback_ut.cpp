@@ -405,7 +405,6 @@ TEST_F(playback_ut, playback_seek_test)
         result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        // __debugbreak();
         stream_result = k4a_playback_get_next_capture(handle, &capture);
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,

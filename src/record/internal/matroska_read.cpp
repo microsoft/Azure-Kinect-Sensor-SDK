@@ -292,7 +292,7 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
         if (context->cues)
         {
             uint64_t last_offset = context->first_cluster_offset;
-            uint64_t last_timestamp = context->cluster_cache->timestamp_ns;
+            uint64_t last_timestamp_ns = context->cluster_cache->timestamp_ns;
             KaxCuePoint *cue = NULL;
             for (EbmlElement *e : context->cues->GetElementList())
             {
@@ -301,7 +301,7 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
                     const KaxCueTrackPositions *positions = cue->GetSeekPosition();
                     if (positions)
                     {
-                        uint64_t timestamp = GetChild<KaxCueTime>(*cue).GetValue() * context->timecode_scale;
+                        uint64_t timestamp_ns = GetChild<KaxCueTime>(*cue).GetValue() * context->timecode_scale;
                         uint64_t file_offset = positions->ClusterPosition();
 
                         if (file_offset == last_offset)
@@ -309,12 +309,12 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
                             // This cluster is already in the cache, skip it.
                             continue;
                         }
-                        else if (file_offset > last_offset && timestamp >= last_timestamp)
+                        else if (file_offset > last_offset && timestamp_ns >= last_timestamp_ns)
                         {
                             cluster_info_t *cluster_info = new cluster_info_t;
                             // This timestamp might not actually be the start of the cluster.
                             // The start timestamp is not known until populate_cluster_info is called.
-                            cluster_info->timestamp_ns = timestamp;
+                            cluster_info->timestamp_ns = timestamp_ns;
                             cluster_info->file_offset = file_offset;
                             cluster_info->previous = cluster_cache_end;
 
@@ -322,7 +322,7 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
                             cluster_cache_end = cluster_info;
 
                             last_offset = file_offset;
-                            last_timestamp = timestamp;
+                            last_timestamp_ns = timestamp_ns;
                         }
                         else
                         {
@@ -1414,7 +1414,7 @@ std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_
     next_block->index += next ? 1 : -1;
 
     std::shared_ptr<loaded_cluster_t> search_cluster = next_block->cluster;
-    while (search_cluster != nullptr)
+    while (search_cluster != nullptr && search_cluster->cluster != nullptr)
     {
         // Search through the current cluster for the next valid block.
         std::vector<EbmlElement *> elements = next_block->cluster->cluster->GetElementList();
@@ -1455,7 +1455,7 @@ std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_
 
         // The next block wasn't found in this cluster, go to the next cluster.
         search_cluster = load_next_cluster(context, next_block->cluster.get(), next);
-        if (search_cluster != nullptr)
+        if (search_cluster != nullptr && search_cluster->cluster != nullptr)
         {
             next_block->cluster = search_cluster;
             next_block->index = next ? 0 : ((int)search_cluster->cluster->ListSize() - 1);
@@ -1677,9 +1677,15 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             bool filled = false;
             for (size_t i = 0; i < arraysize(blocks); i++)
             {
-                if (!next_blocks[i] && !blocks[i]->current_block)
+                if (next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
                 {
-                    std::shared_ptr<read_block_t> test_block = find_next_block(context, blocks[i], !next);
+                    std::shared_ptr<block_info_t> test_block = find_block(context,
+                                                                          blocks[i],
+                                                                          context->seek_timestamp_ns);
+                    if (next)
+                    {
+                        test_block = next_block(context, test_block.get(), false);
+                    }
                     if (test_block && test_block->block)
                     {
                         if (next && (timestamp_end_ns - test_block->sync_timestamp_ns < context->sync_period_ns / 2))

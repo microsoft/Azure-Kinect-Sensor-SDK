@@ -81,7 +81,6 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
     }
     else
     {
-
         if (context && context->ebml_file)
         {
             try
@@ -313,7 +312,7 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     }
 
     std::shared_ptr<loaded_cluster_t> seek_cluster = load_cluster(context, seek_cluster_info);
-    if (seek_cluster == nullptr)
+    if (seek_cluster == nullptr || seek_cluster->cluster == nullptr)
     {
         LOG_ERROR("Failed to load data cluster at timestamp: %llu ns", target_time_ns);
         return K4A_RESULT_FAILED;
