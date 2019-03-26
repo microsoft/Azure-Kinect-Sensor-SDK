@@ -1221,26 +1221,38 @@ std::shared_ptr<loaded_cluster_t> load_cluster(k4a_playback_context_t *context, 
     result->cluster_info = cluster_info;
     result->cluster = cluster;
 
+#if CLUSTER_READ_AHEAD_COUNT
     try
     {
         // Preload the neighboring clusters immediately
-        cluster_info_t *previous_cluster_info = next_cluster(context, cluster_info, false);
-        cluster_info_t *next_cluster_info = next_cluster(context, cluster_info, true);
-
-        result->previous_cluster = std::async(std::launch::deferred, [context, previous_cluster_info] {
-            return previous_cluster_info ? load_cluster_internal(context, previous_cluster_info) : nullptr;
-        });
-        result->next_cluster = std::async(std::launch::deferred, [context, next_cluster_info] {
-            return next_cluster_info ? load_cluster_internal(context, next_cluster_info) : nullptr;
-        });
-        result->previous_cluster.wait();
-        result->next_cluster.wait();
+        cluster_info_t *previous_cluster_info = cluster_info;
+        cluster_info_t *next_cluster_info = cluster_info;
+        for (size_t i = 0; i < CLUSTER_READ_AHEAD_COUNT; i++)
+        {
+            if (previous_cluster_info != NULL)
+            {
+                previous_cluster_info = next_cluster(context, previous_cluster_info, false);
+            }
+            if (next_cluster_info != NULL)
+            {
+                next_cluster_info = next_cluster(context, next_cluster_info, true);
+            }
+            result->previous_clusters[i] = std::async(std::launch::deferred, [context, previous_cluster_info] {
+                return previous_cluster_info ? load_cluster_internal(context, previous_cluster_info) : nullptr;
+            });
+            result->next_clusters[i] = std::async(std::launch::deferred, [context, next_cluster_info] {
+                return next_cluster_info ? load_cluster_internal(context, next_cluster_info) : nullptr;
+            });
+            result->previous_clusters[i].wait();
+            result->next_clusters[i].wait();
+        }
     }
     catch (std::system_error e)
     {
         LOG_ERROR("Failed to load read-ahead clusters: %s", e.what());
         return nullptr;
     }
+#endif
 
     return result;
 }
@@ -1265,37 +1277,62 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
     std::shared_ptr<loaded_cluster_t> result = std::shared_ptr<loaded_cluster_t>(new loaded_cluster_t());
     result->cluster_info = cluster_info;
 
+#if CLUSTER_READ_AHEAD_COUNT
     try
     {
         // Use the current cluster as one of the neightbors, and then wait for the target cluster to be available.
         std::shared_ptr<KaxCluster> old_cluster = current_cluster->cluster;
         if (next)
         {
-            result->previous_cluster = std::async(std::launch::deferred, [old_cluster] { return old_cluster; });
+            result->previous_clusters[0] = std::async(std::launch::deferred, [old_cluster] { return old_cluster; });
+            for (size_t i = 1; i < CLUSTER_READ_AHEAD_COUNT; i++)
+            {
+                result->previous_clusters[i] = current_cluster->previous_clusters[i - 1];
+            }
 
-            current_cluster->next_cluster.wait();
-            result->cluster = current_cluster->next_cluster.get();
+            current_cluster->next_clusters[0].wait();
+            result->cluster = current_cluster->next_clusters[0].get();
         }
         else
         {
-            result->next_cluster = std::async(std::launch::deferred, [old_cluster] { return old_cluster; });
+            result->next_clusters[0] = std::async(std::launch::deferred, [old_cluster] { return old_cluster; });
+            for (size_t i = 1; i < CLUSTER_READ_AHEAD_COUNT; i++)
+            {
+                result->next_clusters[i] = current_cluster->next_clusters[i - 1];
+            }
 
-            current_cluster->previous_cluster.wait();
-            result->cluster = current_cluster->previous_cluster.get();
+            current_cluster->previous_clusters[0].wait();
+            result->cluster = current_cluster->previous_clusters[0].get();
         }
 
         // Spawn a new async task to preload the next cluster in sequence.
         if (next)
         {
-            result->next_cluster = std::async([context, cluster_info] {
-                cluster_info_t *new_cluster = next_cluster(context, cluster_info, true);
+            for (size_t i = 0; i < CLUSTER_READ_AHEAD_COUNT - 1; i++)
+            {
+                result->next_clusters[i] = current_cluster->next_clusters[i + 1];
+            }
+            result->next_clusters[CLUSTER_READ_AHEAD_COUNT - 1] = std::async([context, cluster_info] {
+                cluster_info_t *new_cluster = cluster_info;
+                for (size_t i = 0; i < CLUSTER_READ_AHEAD_COUNT && new_cluster != NULL; i++)
+                {
+                    new_cluster = next_cluster(context, new_cluster, true);
+                }
                 return new_cluster ? load_cluster_internal(context, new_cluster) : nullptr;
             });
         }
         else
         {
-            result->previous_cluster = std::async([context, cluster_info] {
-                cluster_info_t *new_cluster = next_cluster(context, cluster_info, false);
+            for (size_t i = 0; i < CLUSTER_READ_AHEAD_COUNT - 1; i++)
+            {
+                result->previous_clusters[i] = current_cluster->previous_clusters[i + 1];
+            }
+            result->previous_clusters[CLUSTER_READ_AHEAD_COUNT - 1] = std::async([context, cluster_info] {
+                cluster_info_t *new_cluster = cluster_info;
+                for (size_t i = 0; i < CLUSTER_READ_AHEAD_COUNT && new_cluster != NULL; i++)
+                {
+                    new_cluster = next_cluster(context, new_cluster, false);
+                }
                 return new_cluster ? load_cluster_internal(context, new_cluster) : nullptr;
             });
         }
@@ -1305,6 +1342,9 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
         LOG_ERROR("Failed to load next cluster: %s", e.what());
         return nullptr;
     }
+#else
+    result->cluster = load_cluster_internal(context, cluster_info);
+#endif
 
     return result;
 }

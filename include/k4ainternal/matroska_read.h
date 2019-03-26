@@ -43,9 +43,11 @@ typedef struct _loaded_cluster_t
     cluster_info_t *cluster_info = NULL;
     std::shared_ptr<libmatroska::KaxCluster> cluster;
 
-    // Pointers to previous and next cluster to keep them preloaded in memory.
-    future_cluster_t previous_cluster;
-    future_cluster_t next_cluster;
+#if CLUSTER_READ_AHEAD_COUNT
+    // Pointers to previous and next clusters to keep them preloaded in memory.
+    future_cluster_t previous_clusters[CLUSTER_READ_AHEAD_COUNT];
+    future_cluster_t next_clusters[CLUSTER_READ_AHEAD_COUNT];
+#endif
 } loaded_cluster_t;
 
 typedef struct _block_info_t
