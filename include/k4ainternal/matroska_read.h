@@ -144,9 +144,9 @@ template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElemen
         int upper_level = 0;
         EbmlElement *dummy = nullptr;
 
-        T *read_element = static_cast<T *>(element);
-        read_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true);
-        return read_element;
+        T *typed_element = static_cast<T *>(element);
+        typed_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true);
+        return typed_element;
     }
     catch (std::ios_base::failure e)
     {
