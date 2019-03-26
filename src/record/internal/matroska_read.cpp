@@ -1209,20 +1209,21 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
         KaxBlockGroup *block_group = NULL;
         while (next_block->index < (int)elements.size() && next_block->index >= 0)
         {
+            next_block->block = NULL;
             if (check_element_type(elements[(size_t)next_block->index], &simple_block))
             {
-                simple_block->SetParent(*next_block->cluster);
                 if (simple_block->TrackNum() == search_number)
                 {
+                    simple_block->SetParent(*next_block->cluster);
                     next_block->block = simple_block;
                 }
             }
             else if (check_element_type(elements[(size_t)next_block->index], &block_group))
             {
-                block_group->SetParent(*next_block->cluster);
-                block_group->SetParentTrack(*reader->track);
                 if (block_group->TrackNumber() == search_number)
                 {
+                    block_group->SetParent(*next_block->cluster);
+                    block_group->SetParentTrack(*reader->track);
                     next_block->block = &GetChild<KaxBlock>(*block_group);
                 }
             }
