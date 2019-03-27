@@ -119,7 +119,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     {
         if (read_element<EbmlHead>(context, ebmlHead.get()) == NULL)
         {
-            LOG_ERROR("Failed to read EBML head.");
+            LOG_ERROR("Failed to read EBML head.", 0);
             return K4A_RESULT_FAILED;
         }
 
@@ -148,7 +148,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     }
     else
     {
-        LOG_ERROR("Matroska / EBML head is missing, recording is not valid.");
+        LOG_ERROR("Matroska / EBML head is missing, recording is not valid.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -192,7 +192,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
 
     if (context->first_cluster_offset == 0)
     {
-        LOG_ERROR("Recording file does not contain any frames!");
+        LOG_ERROR("Recording file does not contain any frames!", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -214,7 +214,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     cluster_info_t *cluster_info = find_cluster(context, UINT64_MAX);
     if (cluster_info == NULL)
     {
-        LOG_ERROR("Failed to find end of recording.");
+        LOG_ERROR("Failed to find end of recording.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -223,7 +223,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     std::shared_ptr<KaxCluster> last_cluster = load_cluster(context, cluster_info);
     if (last_cluster == nullptr)
     {
-        LOG_ERROR("Failed to load end of recording.");
+        LOG_ERROR("Failed to load end of recording.", 0);
         return K4A_RESULT_FAILED;
     }
     for (EbmlElement *e : last_cluster->GetElementList())
@@ -270,13 +270,13 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
     // Read the first cluster to use as the cache root.
     if (K4A_FAILED(seek_offset(context, context->first_cluster_offset)))
     {
-        LOG_ERROR("Failed to seek to first recording cluster.");
+        LOG_ERROR("Failed to seek to first recording cluster.", 0);
         return K4A_RESULT_FAILED;
     }
     std::shared_ptr<KaxCluster> first_cluster = find_next<KaxCluster>(context);
     if (first_cluster == nullptr)
     {
-        LOG_ERROR("Failed to read element for first recording cluster.");
+        LOG_ERROR("Failed to read element for first recording cluster.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -323,7 +323,7 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
                     }
                     else
                     {
-                        LOG_WARNING("Cluster or Cue entry is out of order.");
+                        LOG_WARNING("Cluster or Cue entry is out of order.", 0);
                     }
                 }
             }
@@ -331,7 +331,7 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
     }
     else
     {
-        LOG_WARNING("Recording is missing Cue entries, playback performance may be impacted.");
+        LOG_WARNING("Recording is missing Cue entries, playback performance may be impacted.", 0);
     }
 
     return K4A_RESULT_SUCCEEDED;
@@ -374,7 +374,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     if (context->calibration_attachment == NULL)
     {
         // The rest of the recording can still be read if no device calibration blob exists.
-        LOG_WARNING("Device calibration is missing from recording.");
+        LOG_WARNING("Device calibration is missing from recording.", 0);
     }
 
     uint64_t frame_period_ns = 0;
@@ -419,7 +419,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     KaxTag *depth_mode_tag = get_tag(context, "K4A_DEPTH_MODE");
     if (depth_mode_tag == NULL && (context->depth_track.track || context->ir_track.track))
     {
-        LOG_ERROR("K4A_DEPTH_MODE tag is missing.");
+        LOG_ERROR("K4A_DEPTH_MODE tag is missing.", 0);
         return K4A_RESULT_FAILED;
     }
     std::string depth_mode_str = get_tag_string(depth_mode_tag);
@@ -1012,13 +1012,13 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
             // Read forward in file to find next cluster and fill in cache
             if (K4A_FAILED(seek_offset(context, current_cluster->file_offset)))
             {
-                LOG_ERROR("Failed to seek to current cluster element.");
+                LOG_ERROR("Failed to seek to current cluster element.", 0);
                 return NULL;
             }
             std::shared_ptr<KaxCluster> current_element = find_next<KaxCluster>(context);
             if (current_element == nullptr)
             {
-                LOG_ERROR("Failed to find current cluster element.");
+                LOG_ERROR("Failed to find current cluster element.", 0);
                 return NULL;
             }
             populate_cluster_info(context, current_element, current_cluster);
@@ -1031,7 +1031,7 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
             // Seek to the end of the current cluster so that find_next returns the next cluster in the file.
             if (K4A_FAILED(skip_element(context, current_element.get())))
             {
-                LOG_ERROR("Failed to seek to next cluster element.");
+                LOG_ERROR("Failed to seek to next cluster element.", 0);
                 return NULL;
             }
 
@@ -1166,7 +1166,7 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
         next_block->cluster = load_cluster(context, context->seek_cluster);
         if (next_block->cluster == nullptr)
         {
-            LOG_ERROR("Failed to load data cluster from disk.");
+            LOG_ERROR("Failed to load data cluster from disk.", 0);
             return nullptr;
         }
         next_block->index = next ? 0 : ((int)next_block->cluster->ListSize() - 1);
@@ -1231,7 +1231,7 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
             next_block->cluster = load_cluster(context, found_cluster_info);
             if (next_block->cluster == nullptr)
             {
-                LOG_ERROR("Failed to load next data cluster from disk.");
+                LOG_ERROR("Failed to load next data cluster from disk.", 0);
                 return nullptr;
             }
             next_block->index = next ? 0 : ((int)next_block->cluster->ListSize() - 1);
@@ -1336,7 +1336,7 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
     }
     else
     {
-        LOG_ERROR("Capture being created from unknown track!");
+        LOG_ERROR("Capture being created from unknown track!", 0);
         result = K4A_RESULT_FAILED;
     }
 
@@ -1519,7 +1519,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
         return K4A_STREAM_RESULT_EOF;
     }
 
-    LOG_ERROR("IMU playback is not yet supported.");
+    LOG_ERROR("IMU playback is not yet supported.", 0);
     (void)next;
 
     return K4A_STREAM_RESULT_FAILED;

@@ -32,7 +32,7 @@ k4a_result_t UVCCameraReader::Init(const char *serialNumber)
 {
     if (IsInitialized())
     {
-        LOG_ERROR("Camera reader is already initialized");
+        LOG_ERROR("Camera reader is already initialized", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -82,13 +82,13 @@ k4a_result_t UVCCameraReader::Start(const uint32_t width,
 
     if (!IsInitialized())
     {
-        LOG_ERROR("Camera reader is not initialized");
+        LOG_ERROR("Camera reader is not initialized", 0);
         return K4A_RESULT_FAILED;
     }
 
     if (m_streaming)
     {
-        LOG_ERROR("Camera stream already started");
+        LOG_ERROR("Camera stream already started", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -173,7 +173,7 @@ void UVCCameraReader::Stop()
     {
         if (!IsInitialized())
         {
-            LOG_WARNING("Camera reader is not initialized but in streaming state");
+            LOG_WARNING("Camera reader is not initialized but in streaming state", 0);
         }
 
         m_streaming = false;
@@ -230,7 +230,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, pValue == NULL);
     if (!IsInitialized())
     {
-        LOG_ERROR("Camera reader is not initialized");
+        LOG_ERROR("Camera reader is not initialized", 0);
         return K4A_RESULT_FAILED;
     }
     uvc_error_t res = UVC_SUCCESS;
@@ -422,7 +422,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
 {
     if (!IsInitialized())
     {
-        LOG_ERROR("Camera reader is not initialized");
+        LOG_ERROR("Camera reader is not initialized", 0);
         return K4A_RESULT_FAILED;
     }
     uvc_error_t res = UVC_SUCCESS;
@@ -459,7 +459,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -475,7 +475,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -491,7 +491,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -507,7 +507,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -523,7 +523,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -539,7 +539,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -571,7 +571,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -587,7 +587,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -603,7 +603,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -619,7 +619,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            LOG_ERROR("Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -801,7 +801,7 @@ UVCCameraReader::DecodeMJPEGtoBGRA32(uint8_t *in_buf, const size_t in_size, uint
         m_decoder = tjInitDecompress();
         if (m_decoder == nullptr)
         {
-            LOG_ERROR("MJPEG decoder initialization failed\n");
+            LOG_ERROR("MJPEG decoder initialization failed\n", 0);
             return K4A_RESULT_FAILED;
         }
     }

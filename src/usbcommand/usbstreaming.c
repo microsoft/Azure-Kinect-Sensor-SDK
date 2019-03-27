@@ -189,7 +189,7 @@ static int usb_cmd_lib_usb_thread(void *var)
             usbcmd->p_bulk_transfer[i] = libusb_alloc_transfer(0);
             if (usbcmd->p_bulk_transfer[i] == NULL)
             {
-                LOG_ERROR("libusb transfer could not be allocated");
+                LOG_ERROR("libusb transfer could not be allocated", 0);
                 result = K4A_RESULT_FAILED;
                 break;
             }
@@ -198,7 +198,7 @@ static int usb_cmd_lib_usb_thread(void *var)
 
             if (K4A_FAILED(result))
             {
-                LOG_ERROR("stream buffer could not be allocated");
+                LOG_ERROR("stream buffer could not be allocated", 0);
                 result = K4A_RESULT_FAILED;
                 break;
             }
@@ -310,7 +310,7 @@ k4a_result_t usb_cmd_stream_start(usbcmd_t usbcmd_handle, size_t payload_size)
         if (usbcmd->stream_going)
         {
             // Steam already going (Error?)
-            LOG_INFO("Stream already in progress");
+            LOG_INFO("Stream already in progress", 0);
         }
         else
         {
@@ -319,7 +319,7 @@ k4a_result_t usb_cmd_stream_start(usbcmd_t usbcmd_handle, size_t payload_size)
             if (ThreadAPI_Create(&(usbcmd->stream_handle), usb_cmd_lib_usb_thread, usbcmd) != THREADAPI_OK)
             {
                 usbcmd->stream_going = false;
-                LOG_ERROR("Could not start stream thread");
+                LOG_ERROR("Could not start stream thread", 0);
             }
             else
             {

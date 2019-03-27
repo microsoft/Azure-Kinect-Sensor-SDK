@@ -297,6 +297,6 @@ void queue_error(queue_t queue_handle)
     queue->error = true;
     Unlock(queue->lock);
 
-    LOG_WARNING("Error detected, shutting down queue and notifying consumers");
+    LOG_WARNING("Error detected, shutting down queue and notifying consumers", 0);
     queue_disable(queue_handle);
 }

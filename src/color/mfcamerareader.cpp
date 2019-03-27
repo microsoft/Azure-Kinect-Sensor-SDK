@@ -133,7 +133,7 @@ CFrameContext::CFrameContext(IMFSample *pSample)
         }
         else
         {
-            LOG_WARNING("No metadata attached to the sample");
+            LOG_WARNING("No metadata attached to the sample", 0);
         }
     }
 }
@@ -447,7 +447,7 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
         }
         else
         {
-            LOG_ERROR("Can not find requested sensor mode");
+            LOG_ERROR("Can not find requested sensor mode", 0);
             return K4A_RESULT_FAILED;
         }
 
@@ -479,7 +479,7 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
     }
     else
     {
-        LOG_WARNING("Start request in started state");
+        LOG_WARNING("Start request in started state", 0);
     }
 
     return k4aResultFromHRESULT(hr);

@@ -376,7 +376,7 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
             if (wresult == K4A_WAIT_RESULT_FAILED)
             {
                 sync->running = false;
-                LOG_ERROR("CaptureSync, error encountered access queue");
+                LOG_ERROR("CaptureSync, error encountered access queue", 0);
             }
         }
     }

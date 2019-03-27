@@ -102,7 +102,7 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
     // place capture in queue
     if (result != K4A_RESULT_SUCCEEDED)
     {
-        LOG_WARNING("A streaming IMU transfer failed");
+        LOG_WARNING("A streaming IMU transfer failed", 0);
         // Notify queue of an error
         queue_error(p_imu->queue);
     }

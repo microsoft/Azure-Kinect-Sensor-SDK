@@ -348,7 +348,7 @@ k4a_result_t k4a_record_add_tag(const k4a_record_t recording_handle, const char 
 
     if (context->header_written)
     {
-        LOG_ERROR("Tags must be added before the recording header is written.");
+        LOG_ERROR("Tags must be added before the recording header is written.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -366,13 +366,13 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
 
     if (context->header_written)
     {
-        LOG_ERROR("The IMU track must be added before the recording header is written.");
+        LOG_ERROR("The IMU track must be added before the recording header is written.", 0);
         return K4A_RESULT_FAILED;
     }
 
     if (context->imu_track != NULL)
     {
-        LOG_ERROR("The IMU track has already been added to this recording.");
+        LOG_ERROR("The IMU track has already been added to this recording.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -393,7 +393,7 @@ k4a_result_t k4a_record_write_header(const k4a_record_t recording_handle)
 
     if (context->header_written)
     {
-        LOG_ERROR("The header for this recording has already been written.");
+        LOG_ERROR("The header for this recording has already been written.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -467,7 +467,7 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
 
     if (!context->header_written)
     {
-        LOG_ERROR("The recording header needs to be written before any captures.");
+        LOG_ERROR("The recording header needs to be written before any captures.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -524,7 +524,7 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
                 }
                 else
                 {
-                    LOG_ERROR("Tried to write capture with unexpected image format.");
+                    LOG_ERROR("Tried to write capture with unexpected image format.", 0);
                     result = K4A_RESULT_FAILED;
                 }
             }
@@ -544,7 +544,7 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
 
     if (!context->header_written)
     {
-        LOG_ERROR("The recording header needs to be written before any imu samples.");
+        LOG_ERROR("The recording header needs to be written before any imu samples.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -670,7 +670,7 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
                 context->file_segment->SetSizeInfinite(true);
                 if (!context->file_segment->ForceSize(segment_size))
                 {
-                    LOG_ERROR("Failed set file segment size.");
+                    LOG_ERROR("Failed set file segment size.", 0);
                 }
                 context->file_segment->OverwriteHead(*context->ebml_file);
 

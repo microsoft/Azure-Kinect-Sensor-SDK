@@ -100,7 +100,7 @@ bool validate_test_capture(k4a_capture_t capture,
             k4a_image_t color_image = k4a_capture_get_color_image(capture);
             if (color_image == NULL)
             {
-                LOG_ERROR("PlaybackTest, Color image is missing");
+                LOG_ERROR("PlaybackTest, Color image is missing", 0);
                 return false;
             }
             bool image_valid =
@@ -108,13 +108,13 @@ bool validate_test_capture(k4a_capture_t capture,
             k4a_image_release(color_image);
             if (!image_valid)
             {
-                LOG_ERROR("PlaybackTest, Color image is invalid");
+                LOG_ERROR("PlaybackTest, Color image is invalid", 0);
                 return false;
             }
         }
         else if (k4a_capture_get_color_image(capture) != NULL)
         {
-            LOG_ERROR("PlaybackTest, Color image is set when it should be NULL");
+            LOG_ERROR("PlaybackTest, Color image is set when it should be NULL", 0);
             return false;
         }
 
@@ -129,7 +129,7 @@ bool validate_test_capture(k4a_capture_t capture,
                 k4a_image_t depth_image = k4a_capture_get_depth_image(capture);
                 if (depth_image == NULL)
                 {
-                    LOG_ERROR("PlaybackTest, Depth image is missing");
+                    LOG_ERROR("PlaybackTest, Depth image is missing", 0);
                     return false;
                 }
                 bool image_valid = validate_test_image(depth_image,
@@ -141,20 +141,20 @@ bool validate_test_capture(k4a_capture_t capture,
                 k4a_image_release(depth_image);
                 if (!image_valid)
                 {
-                    LOG_ERROR("PlaybackTest, Depth image is invalid");
+                    LOG_ERROR("PlaybackTest, Depth image is invalid", 0);
                     return false;
                 }
             }
             else if (k4a_capture_get_depth_image(capture) != NULL)
             {
-                LOG_ERROR("PlaybackTest, Depth image is set when it should be NULL (Passive IR Mode)");
+                LOG_ERROR("PlaybackTest, Depth image is set when it should be NULL (Passive IR Mode)", 0);
                 return false;
             }
 
             k4a_image_t ir_image = k4a_capture_get_ir_image(capture);
             if (ir_image == NULL)
             {
-                LOG_ERROR("PlaybackTest, IR image is missing");
+                LOG_ERROR("PlaybackTest, IR image is missing", 0);
                 return false;
             }
             bool image_valid =
@@ -162,23 +162,23 @@ bool validate_test_capture(k4a_capture_t capture,
             k4a_image_release(ir_image);
             if (!image_valid)
             {
-                LOG_ERROR("PlaybackTest, IR image is invalid");
+                LOG_ERROR("PlaybackTest, IR image is invalid", 0);
                 return false;
             }
         }
         else if (k4a_capture_get_depth_image(capture) != NULL)
         {
-            LOG_ERROR("PlaybackTest, Depth image is set when it should be NULL");
+            LOG_ERROR("PlaybackTest, Depth image is set when it should be NULL", 0);
             return false;
         }
         else if (k4a_capture_get_ir_image(capture) != NULL)
         {
-            LOG_ERROR("PlaybackTest, IR image is set when it should be NULL");
+            LOG_ERROR("PlaybackTest, IR image is set when it should be NULL", 0);
             return false;
         }
         return true;
     }
-    LOG_ERROR("PlaybackTest, Capture is NULL");
+    LOG_ERROR("PlaybackTest, Capture is NULL", 0);
     return false;
 }
 
@@ -244,7 +244,7 @@ bool validate_test_image(k4a_image_t image,
         }
         return true;
     }
-    LOG_ERROR("PlaybackTest, Image is NULL");
+    LOG_ERROR("PlaybackTest, Image is NULL", 0);
     return false;
 }
 

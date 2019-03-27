@@ -61,7 +61,7 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
         context->seek_cluster = find_cluster(context, 0);
         if (context->seek_cluster == nullptr)
         {
-            LOG_ERROR("Failed to parse recording, recording is empty.");
+            LOG_ERROR("Failed to parse recording, recording is empty.", 0);
             result = K4A_RESULT_FAILED;
         }
     }
@@ -104,7 +104,7 @@ k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t playback_han
 
     if (context->calibration_attachment == NULL)
     {
-        LOG_ERROR("The device calibration is missing from the recording.");
+        LOG_ERROR("The device calibration is missing from the recording.", 0);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -143,7 +143,7 @@ k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, k4a_ca
 
     if (context->calibration_attachment == NULL)
     {
-        LOG_ERROR("The device calibration is missing from the recording.");
+        LOG_ERROR("The device calibration is missing from the recording.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -325,7 +325,7 @@ void k4a_playback_close(const k4a_playback_t playback_handle)
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     if (context != NULL)
     {
-        LOG_TRACE("File reading stats:");
+        LOG_TRACE("File reading stats:", 0);
         LOG_TRACE("  Seek count: %llu", context->seek_count);
         LOG_TRACE("  Cluster load count: %llu", context->load_count);
         LOG_TRACE("  Cluster cache hits: %llu", context->cache_hits);

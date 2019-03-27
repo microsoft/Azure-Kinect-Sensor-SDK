@@ -905,7 +905,7 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
 
     if (p_device_count == NULL)
     {
-        LOG_ERROR("Error p_device_count is NULL");
+        LOG_ERROR("Error p_device_count is NULL", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -926,12 +926,12 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
     count = libusb_get_device_list(NULL, &dev_list); // get the list of devices
     if (count > INT32_MAX)
     {
-        LOG_ERROR("List too large");
+        LOG_ERROR("List too large", 0);
         return K4A_RESULT_FAILED;
     }
     if (count == 0)
     {
-        LOG_ERROR("No devices found");
+        LOG_ERROR("No devices found", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -999,7 +999,7 @@ k4a_result_t usb_cmd_path_get(usbcmd_t usbcmd_handle, uint8_t *p_bus, uint8_t *p
     }
     else
     {
-        LOG_ERROR( "Error usbcmd is NULL");
+        LOG_ERROR( "Error usbcmd is NULL",0);
         result = K4A_RESULT_FAILED;
     }
     return result;
