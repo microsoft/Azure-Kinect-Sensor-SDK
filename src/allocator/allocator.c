@@ -156,7 +156,7 @@ long allocator_test_for_leaks(void)
     if (g_allocated_image_count_user || g_allocated_image_count_depth || g_allocated_image_count_color ||
         g_allocated_image_count_imu || g_allocated_image_count_usb_depth || g_allocated_image_count_usb_imu)
     {
-        logger_critical(LOGGER_ALLOCATOR,
+        logger_critical(LOGGER_K4A,
                         "Leaked usr:%d, color:%d, depth:%d, imu:%d, usb depth:%d, usb imu%d",
                         g_allocated_image_count_user,
                         g_allocated_image_count_color,

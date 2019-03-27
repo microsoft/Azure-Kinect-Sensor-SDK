@@ -102,7 +102,7 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
     // place capture in queue
     if (result != K4A_RESULT_SUCCEEDED)
     {
-        logger_warn(LOGGER_IMU, "A streaming IMU transfer failed");
+        LOG_WARNING("A streaming IMU transfer failed", 0);
         // Notify queue of an error
         queue_error(p_imu->queue);
     }
@@ -120,9 +120,7 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
 
         if (capture_size < sizeof(imu_payload_metadata_t))
         {
-            logger_error(LOGGER_IMU,
-                         "IMU streaming payload size too small for imu_payload_metadata_t: %zu",
-                         capture_size);
+            LOG_ERROR("IMU streaming payload size too small for imu_payload_metadata_t: %zu", capture_size);
             return;
         }
         else
@@ -132,10 +130,9 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
 
         if (capture_size < sizeof(imu_payload_metadata_t) + (p_metadata->gyro.sample_count * sizeof(xyz_vector_t)))
         {
-            logger_error(LOGGER_IMU,
-                         "IMU streaming payload size too small for gyro samples: %u size: %zu",
-                         p_metadata->gyro.sample_count,
-                         capture_size);
+            LOG_ERROR("IMU streaming payload size too small for gyro samples: %u size: %zu",
+                      p_metadata->gyro.sample_count,
+                      capture_size);
             return;
         }
         else
@@ -147,10 +144,9 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
         if (capture_size < sizeof(imu_payload_metadata_t) + (p_metadata->gyro.sample_count * sizeof(xyz_vector_t)) +
                                (p_metadata->accel.sample_count * sizeof(xyz_vector_t)))
         {
-            logger_error(LOGGER_IMU,
-                         "IMU streaming payload size too small for accelerometer samples: %u size: %zu",
-                         p_metadata->accel.sample_count,
-                         capture_size);
+            LOG_ERROR("IMU streaming payload size too small for accelerometer samples: %u size: %zu",
+                      p_metadata->accel.sample_count,
+                      capture_size);
             return;
         }
         else
@@ -161,8 +157,7 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
 
         if (p_metadata->gyro.sample_count != p_metadata->accel.sample_count)
         {
-            logger_warn(LOGGER_IMU,
-                        "IMU payload sample accel(%d) != sample gyro(%d)",
+            LOG_WARNING("IMU payload sample accel(%d) != sample gyro(%d)",
                         p_metadata->accel.sample_count,
                         p_metadata->gyro.sample_count);
         }

@@ -32,7 +32,7 @@ k4a_result_t UVCCameraReader::Init(const char *serialNumber)
 {
     if (IsInitialized())
     {
-        logger_error(LOGGER_COLOR, "Camera reader is already initialized");
+        LOG_ERROR("Camera reader is already initialized", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -42,7 +42,7 @@ k4a_result_t UVCCameraReader::Init(const char *serialNumber)
     uvc_error_t res = uvc_init(&m_pContext, NULL);
     if (res < 0)
     {
-        logger_error(LOGGER_COLOR, "Failed to initialize libuvc: %s", uvc_strerror(res));
+        LOG_ERROR("Failed to initialize libuvc: %s", uvc_strerror(res));
         return K4A_RESULT_FAILED;
     }
 
@@ -50,7 +50,7 @@ k4a_result_t UVCCameraReader::Init(const char *serialNumber)
     res = uvc_find_device(m_pContext, &m_pDevice, COLOR_CAMERA_VID, COLOR_CAMERA_PID, serialNumber);
     if (res < 0)
     {
-        logger_error(LOGGER_COLOR, "Can't find UVC device: %s", uvc_strerror(res));
+        LOG_ERROR("Can't find UVC device: %s", uvc_strerror(res));
         Shutdown();
 
         return K4A_RESULT_FAILED;
@@ -60,7 +60,7 @@ k4a_result_t UVCCameraReader::Init(const char *serialNumber)
     res = uvc_open(m_pDevice, &m_pDeviceHandle);
     if (res < 0)
     {
-        logger_error(LOGGER_COLOR, "Can't open UVC device: %s", uvc_strerror(res));
+        LOG_ERROR("Can't open UVC device: %s", uvc_strerror(res));
         Shutdown();
 
         return K4A_RESULT_FAILED;
@@ -82,13 +82,13 @@ k4a_result_t UVCCameraReader::Start(const uint32_t width,
 
     if (!IsInitialized())
     {
-        logger_error(LOGGER_COLOR, "Camera reader is not initialized");
+        LOG_ERROR("Camera reader is not initialized", 0);
         return K4A_RESULT_FAILED;
     }
 
     if (m_streaming)
     {
-        logger_error(LOGGER_COLOR, "Camera stream already started");
+        LOG_ERROR("Camera stream already started", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -121,7 +121,7 @@ k4a_result_t UVCCameraReader::Start(const uint32_t width,
         frameFormat = UVC_COLOR_FORMAT_MJPEG;
         break;
     default:
-        logger_error(LOGGER_COLOR, "Unsupported format %d", imageFormat);
+        LOG_ERROR("Unsupported format %d", imageFormat);
         return K4A_RESULT_FAILED;
     }
 
@@ -134,13 +134,12 @@ k4a_result_t UVCCameraReader::Start(const uint32_t width,
 
     if (res < 0)
     {
-        logger_error(LOGGER_COLOR,
-                     "Failed to get stream control for resolution (%d, %d) - %d fps - format (%d): %s",
-                     width,
-                     height,
-                     (int)fps,
-                     imageFormat,
-                     uvc_strerror(res));
+        LOG_ERROR("Failed to get stream control for resolution (%d, %d) - %d fps - format (%d): %s",
+                  width,
+                  height,
+                  (int)fps,
+                  imageFormat,
+                  uvc_strerror(res));
         return K4A_RESULT_FAILED;
     }
 
@@ -151,7 +150,7 @@ k4a_result_t UVCCameraReader::Start(const uint32_t width,
     res = uvc_start_streaming(m_pDeviceHandle, &ctrl, UVCFrameCallback, this, 0);
     if (res < 0)
     {
-        logger_error(LOGGER_COLOR, "Failed to start streaming: %s", uvc_strerror(res));
+        LOG_ERROR("Failed to start streaming: %s", uvc_strerror(res));
 
         // Clear
         m_width_pixels = 0;
@@ -174,7 +173,7 @@ void UVCCameraReader::Stop()
     {
         if (!IsInitialized())
         {
-            logger_warn(LOGGER_COLOR, "Camera reader is not initialized but in streaming state");
+            LOG_WARNING("Camera reader is not initialized but in streaming state", 0);
         }
 
         m_streaming = false;
@@ -231,7 +230,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, pValue == NULL);
     if (!IsInitialized())
     {
-        logger_error(LOGGER_COLOR, "Camera reader is not initialized");
+        LOG_ERROR("Camera reader is not initialized", 0);
         return K4A_RESULT_FAILED;
     }
     uvc_error_t res = UVC_SUCCESS;
@@ -247,7 +246,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_ae_mode(m_pDeviceHandle, &ae_mode, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get auto exposure mode: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get auto exposure mode: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
 
@@ -261,7 +260,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid auto exposure mode returned: %d", ae_mode);
+            LOG_ERROR("Invalid auto exposure mode returned: %d", ae_mode);
             return K4A_RESULT_FAILED;
         }
 
@@ -269,7 +268,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_exposure_abs(m_pDeviceHandle, &exposure_time, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get exposure time abs: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get exposure time abs: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
 
@@ -282,7 +281,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_ae_priority(m_pDeviceHandle, &priority, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get auto exposure priority: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get auto exposure priority: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
         *pValue = (int32_t)priority;
@@ -294,7 +293,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_brightness(m_pDeviceHandle, &brightness, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get brightness: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get brightness: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
         *pValue = (int32_t)brightness;
@@ -306,7 +305,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_contrast(m_pDeviceHandle, &contrast, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get contrast: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get contrast: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
         *pValue = (int32_t)contrast;
@@ -318,7 +317,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_saturation(m_pDeviceHandle, &saturation, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get saturation: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get saturation: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
         *pValue = (int32_t)saturation;
@@ -330,7 +329,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_sharpness(m_pDeviceHandle, &sharpness, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get sharpness: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get sharpness: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
         *pValue = (int32_t)sharpness;
@@ -344,7 +343,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_white_balance_temperature_auto(m_pDeviceHandle, &wb_mode, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get auto white balance temperature mode: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get auto white balance temperature mode: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
 
@@ -358,7 +357,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid auto white balance temperature mode returned: %d", wb_mode);
+            LOG_ERROR("Invalid auto white balance temperature mode returned: %d", wb_mode);
             return K4A_RESULT_FAILED;
         }
 
@@ -366,7 +365,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_white_balance_temperature(m_pDeviceHandle, &white_balance, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get white balance temperature: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get white balance temperature: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
 
@@ -379,7 +378,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_backlight_compensation(m_pDeviceHandle, &backlight_compensation, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get backlight compensation: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get backlight compensation: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
         *pValue = (int32_t)backlight_compensation;
@@ -391,7 +390,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_gain(m_pDeviceHandle, &gain, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get gain: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get gain: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
         *pValue = (int32_t)gain;
@@ -403,14 +402,14 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         res = uvc_get_power_line_frequency(m_pDeviceHandle, &powerline_freq, UVC_GET_CUR);
         if (res < 0)
         {
-            logger_error(LOGGER_COLOR, "Failed to get powerline frequency: %s", uvc_strerror(res));
+            LOG_ERROR("Failed to get powerline frequency: %s", uvc_strerror(res));
             return K4A_RESULT_FAILED;
         }
         *pValue = (int32_t)powerline_freq;
     }
     break;
     default:
-        logger_error(LOGGER_COLOR, "Unsupported control: %d\n", command);
+        LOG_ERROR("Unsupported control: %d\n", command);
         return K4A_RESULT_FAILED;
     }
 
@@ -423,7 +422,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
 {
     if (!IsInitialized())
     {
-        logger_error(LOGGER_COLOR, "Camera reader is not initialized");
+        LOG_ERROR("Camera reader is not initialized", 0);
         return K4A_RESULT_FAILED;
     }
     uvc_error_t res = UVC_SUCCESS;
@@ -438,14 +437,14 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_ae_mode(m_pDeviceHandle, UVC_AUTO_EXPOSURE_MODE_MANUAL);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set auto exposure mode: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set auto exposure mode: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
 
             res = uvc_set_exposure_abs(m_pDeviceHandle, exposure_time);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set exposure time abs: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set exposure time abs: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
@@ -454,13 +453,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_ae_mode(m_pDeviceHandle, UVC_AUTO_EXPOSURE_MODE_APERTURE_PRIORITY);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set auto exposure mode: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set auto exposure mode: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -470,13 +469,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_ae_priority(m_pDeviceHandle, (uint8_t)newValue);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set auto exposure priority: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set auto exposure priority: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -486,13 +485,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_brightness(m_pDeviceHandle, (int16_t)newValue);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set brightness: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set brightness: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -502,13 +501,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_contrast(m_pDeviceHandle, (uint16_t)newValue);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set contrast: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set contrast: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -518,13 +517,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_saturation(m_pDeviceHandle, (uint16_t)newValue);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set saturation: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set saturation: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -534,13 +533,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_sharpness(m_pDeviceHandle, (uint16_t)newValue);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set sharpness: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set sharpness: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -550,14 +549,14 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_white_balance_temperature_auto(m_pDeviceHandle, 0);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set auto white balance temperature mode: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set auto white balance temperature mode: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
 
             res = uvc_set_white_balance_temperature(m_pDeviceHandle, (uint16_t)newValue);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set white balance temerature: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set white balance temerature: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
@@ -566,13 +565,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_white_balance_temperature_auto(m_pDeviceHandle, 1);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set auto white balance temperature mode: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set auto white balance temperature mode: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -582,13 +581,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_backlight_compensation(m_pDeviceHandle, (uint16_t)newValue);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set backlight compensation: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set backlight compensation: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -598,13 +597,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_gain(m_pDeviceHandle, (uint16_t)newValue);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set gain: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set gain: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
@@ -614,18 +613,18 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_power_line_frequency(m_pDeviceHandle, (uint8_t)newValue);
             if (res < 0)
             {
-                logger_error(LOGGER_COLOR, "Failed to set powerline frequency: %s", uvc_strerror(res));
+                LOG_ERROR("Failed to set powerline frequency: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }
         else
         {
-            logger_error(LOGGER_COLOR, "Invalid color control mode\n");
+            LOG_ERROR("Invalid color control mode\n", 0);
             return K4A_RESULT_FAILED;
         }
         break;
     default:
-        logger_error(LOGGER_COLOR, "Unsupported control: %d\n", command);
+        LOG_ERROR("Unsupported control: %d\n", command);
         return K4A_RESULT_FAILED;
     }
 
@@ -688,7 +687,7 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
 
                 if (pItem->Size == 0)
                 {
-                    logger_warn(LOGGER_COLOR, "frame metadata id %d has zero buffer size", pItem->MetadataId);
+                    LOG_WARNING("frame metadata id %d has zero buffer size", pItem->MetadataId);
                     break;
                 }
 
@@ -802,7 +801,7 @@ UVCCameraReader::DecodeMJPEGtoBGRA32(uint8_t *in_buf, const size_t in_size, uint
         m_decoder = tjInitDecompress();
         if (m_decoder == nullptr)
         {
-            logger_error(LOGGER_COLOR, "MJPEG decoder initialization failed\n");
+            LOG_ERROR("MJPEG decoder initialization failed\n", 0);
             return K4A_RESULT_FAILED;
         }
     }
@@ -819,7 +818,7 @@ UVCCameraReader::DecodeMJPEGtoBGRA32(uint8_t *in_buf, const size_t in_size, uint
 
     if (decompressStatus != 0)
     {
-        logger_error(LOGGER_COLOR, "MJPEG decode failed: %d", decompressStatus);
+        LOG_ERROR("MJPEG decode failed: %d", decompressStatus);
         return K4A_RESULT_FAILED;
     }
 
