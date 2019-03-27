@@ -8,6 +8,8 @@
 #include <limits.h>
 #include <math.h>
 
+#define SKIP_INTERPOLATION_RATIO (0.04693441759f)
+
 typedef struct _k4a_transformation_input_image_t
 {
     const k4a_transformation_image_descriptor_t *descriptor;
@@ -262,6 +264,26 @@ static bool transformation_point_inside_triangle(const k4a_correspondence_t *val
     float area_bottom_right = transformation_area_function(&valid_bottom_right->point2d,
                                                            &valid_intermediate->point2d,
                                                            point);
+
+    // Ignore interpolation at large depth discontinuity without disrupting slanted surface
+    // Skip interpolation threshold is estimated based on the following logic:
+    // - angle between two pixels is: theta = 0.234375 degree (120 degree / 512) in binning resolution mode
+    // - distance between two pixels at same depth approximately is: A ~= sin(theta) * depth
+    // - distance between two pixels at highly slanted surface (e.g. alpha = 85 degree) is: B = A / cos(alpha)
+    // We use B as the threshold that to skip interpolation if the depth difference in the triangle is larger
+    // than B. This is a conservative threshold to estimate largest distance on a highly slanted surface at given depth,
+    // in reality, given distortion, distance, resolution difference, B can be smaller
+    float d1 = valid_top_left->depth;
+    float d2 = valid_intermediate->depth;
+    float d3 = valid_bottom_right->depth;
+    float depth_min = min(min(d1, d2), d3);
+    float depth_max = max(max(d1, d2), d3);
+    float depth_delta = depth_max - depth_min;
+    float skip_interpolation_threshold = SKIP_INTERPOLATION_RATIO * depth_min;
+    if (depth_delta > skip_interpolation_threshold)
+    {
+        return false;
+    }
 
     // Check if point is inside the triangle (area is positive).
     // If counter_clockwise order is not set then we need to negate the areas.
