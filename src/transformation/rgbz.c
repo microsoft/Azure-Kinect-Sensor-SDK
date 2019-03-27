@@ -276,8 +276,8 @@ static bool transformation_point_inside_triangle(const k4a_correspondence_t *val
     float d1 = valid_top_left->depth;
     float d2 = valid_intermediate->depth;
     float d3 = valid_bottom_right->depth;
-    float depth_min = fmin(fmin(d1, d2), d3);
-    float depth_max = fmax(fmax(d1, d2), d3);
+    float depth_min = transformation_min2f(transformation_min2f(d1, d2), d3);
+    float depth_max = transformation_max2f(transformation_max2f(d1, d2), d3);
     float depth_delta = depth_max - depth_min;
     float skip_interpolation_threshold = SKIP_INTERPOLATION_RATIO * depth_min;
     if (depth_delta > skip_interpolation_threshold)
