@@ -23,9 +23,15 @@
 #include "k4awindowmanager.h"
 
 using namespace k4aviewer;
+namespace
+{
+static constexpr std::chrono::microseconds InvalidSeekTime = std::chrono::microseconds(-1);
+}
 
 K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &&recording)
 {
+    m_playbackThreadState.SeekTimestamp = InvalidSeekTime;
+
     m_filenameLabel = recording->GetPath().filename().c_str();
 
     // Recording config
@@ -223,7 +229,7 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
     std::unique_lock<std::mutex> lock(state->Mutex);
 
     k4a::capture backseekCapture;
-    if (state->SeekTimestamp != PlaybackThreadState::InvalidSeekTime)
+    if (state->SeekTimestamp != InvalidSeekTime)
     {
         state->Recording->SeekTimestamp(state->SeekTimestamp.count());
 
@@ -236,7 +242,7 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
         //
         backseekCapture = state->Recording->GetPreviousCapture();
 
-        state->SeekTimestamp = PlaybackThreadState::InvalidSeekTime;
+        state->SeekTimestamp = InvalidSeekTime;
 
         // Force-read the next frame
         //

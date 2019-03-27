@@ -40,8 +40,6 @@ private:
 
     struct PlaybackThreadState
     {
-        static constexpr std::chrono::microseconds InvalidSeekTime = std::chrono::microseconds(-1);
-
         std::mutex Mutex;
 
         // UI control signals
@@ -49,7 +47,7 @@ private:
         bool Paused = false;
         bool RecordingAtEnd = false;
         StepDirection Step = StepDirection::None;
-        std::chrono::microseconds SeekTimestamp = InvalidSeekTime;
+        std::chrono::microseconds SeekTimestamp;
         std::chrono::microseconds CurrentCaptureTimestamp;
 
         // Constant state (expected to be set once, accessible without synchronization)
