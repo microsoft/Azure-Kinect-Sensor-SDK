@@ -1,6 +1,6 @@
 if (NOT TARGET turbojpeg)
     if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-        add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
+        add_compile_options("$<$<NOT:$<COMPILE_LANGUAGE:ASM_NASM>>:-D_CRT_SECURE_NO_WARNINGS>")
     endif()
 
     set(ENABLE_STATIC ON CACHE BOOL "Force libjpeg to enable static lib" FORCE)
