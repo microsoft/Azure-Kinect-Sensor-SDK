@@ -14,7 +14,7 @@
 
 // Project headers
 //
-#include "k4acolorframevisualizer.h"
+#include "k4acolorimageconverter.h"
 #include "k4adepthpixelcolorizer.h"
 #include "k4astaticimageproperties.h"
 #include "k4aviewerutil.h"

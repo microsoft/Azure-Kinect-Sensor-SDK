@@ -16,6 +16,7 @@
 //
 #include "ik4adockcontrol.h"
 #include "k4adatasource.h"
+#include "k4apollingthread.h"
 #include "k4arecording.h"
 #include "k4awindowset.h"
 
@@ -30,16 +31,45 @@ public:
     void Show() override;
 
 private:
-    std::chrono::microseconds GetCaptureTimestamp(const k4a::capture &capture);
+    enum class StepDirection
+    {
+        None,
+        Forward,
+        Backward
+    };
+
+    struct PlaybackThreadState
+    {
+        std::mutex Mutex;
+
+        // UI control signals
+        //
+        bool Paused = false;
+        bool RecordingAtEnd = false;
+        StepDirection Step = StepDirection::None;
+        std::chrono::microseconds SeekTimestamp;
+        std::chrono::microseconds CurrentCaptureTimestamp;
+
+        // Constant state (expected to be set once, accessible without synchronization)
+        //
+        std::chrono::microseconds TimePerFrame;
+        std::chrono::microseconds TimestampOffset = std::chrono::microseconds(0);
+
+        // Recording state
+        //
+        std::shared_ptr<K4ARecording> Recording;
+        K4ADataSource<k4a::capture> DataSource;
+    } m_playbackThreadState;
+
+    static bool PlaybackThreadFn(PlaybackThreadState *state);
+
+    static std::chrono::microseconds GetCaptureTimestamp(const k4a::capture &capture);
+
     void SetViewType(K4AWindowSet::ViewType viewType);
 
-    void ReadNext();
-    void Step(bool backward);
-    void SetCurrentCapture(k4a::capture &&capture);
-
-    std::unique_ptr<K4ARecordingDockControl> m_dockControl;
-
-    std::shared_ptr<K4ARecording> m_recording;
+    // Labels / static UI state
+    //
+    k4a_record_configuration_t m_recordConfiguration;
 
     std::string m_filenameLabel;
     std::string m_fpsLabel;
@@ -51,6 +81,7 @@ private:
     std::string m_wiredSyncModeLabel;
     uint32_t m_subordinateDelayOffMasterUsec;
     uint32_t m_startTimestampOffsetUsec;
+    uint64_t m_recordingLengthUsec;
 
     std::string m_deviceSerialNumber;
     std::string m_colorFirmwareVersion;
@@ -59,16 +90,9 @@ private:
     bool m_recordingHasColor = false;
     bool m_recordingHasDepth = false;
 
-    std::chrono::microseconds m_currentTimestamp = std::chrono::microseconds::zero();
-
-    K4ADataSource<k4a::capture> m_cameraDataSource;
-
-    std::chrono::high_resolution_clock::time_point m_lastFrameShownTime;
-    std::chrono::microseconds m_timePerFrame;
-    k4a::capture m_currentCapture;
-
-    bool m_paused = false;
     K4AWindowSet::ViewType m_viewType = K4AWindowSet::ViewType::Normal;
+
+    std::unique_ptr<K4APollingThread> m_playbackThread;
 };
 
 } // namespace k4aviewer

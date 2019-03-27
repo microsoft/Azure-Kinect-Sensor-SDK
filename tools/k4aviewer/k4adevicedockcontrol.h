@@ -122,8 +122,8 @@ private:
 
     std::string m_windowTitle;
 
-    std::unique_ptr<K4APollingThread<k4a::capture>> m_cameraPollingThread;
-    std::unique_ptr<K4APollingThread<k4a_imu_sample_t>> m_imuPollingThread;
+    std::unique_ptr<K4APollingThread> m_cameraPollingThread;
+    std::unique_ptr<K4APollingThread> m_imuPollingThread;
 };
 } // namespace k4aviewer
 
