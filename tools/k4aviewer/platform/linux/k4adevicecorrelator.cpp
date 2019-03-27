@@ -20,7 +20,7 @@
 using namespace k4aviewer;
 
 bool K4ADeviceCorrelator::GetSoundIoBackendIdToSerialNumberMapping(SoundIo *soundio,
-                                                                   std::map<std::string, std::string> &result)
+                                                                   std::map<std::string, std::string> *result)
 {
     const int inputCount = soundio_input_device_count(soundio);
 
@@ -49,7 +49,7 @@ bool K4ADeviceCorrelator::GetSoundIoBackendIdToSerialNumberMapping(SoundIo *soun
 
             foundDevices = true;
 
-            result[device->id] = match.str(1);
+            (*result)[device->id] = match.str(1);
         }
     }
 

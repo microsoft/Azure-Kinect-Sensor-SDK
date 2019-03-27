@@ -80,15 +80,15 @@ void K4AWindowManager::ShowAll()
     }
     else
     {
-        ShowWindowArea(windowAreaPosition, windowAreaSize, m_windows);
+        ShowWindowArea(windowAreaPosition, windowAreaSize, &m_windows);
     }
 }
 
-void K4AWindowManager::ShowWindowArea(ImVec2 windowAreaPosition, ImVec2 windowAreaSize, WindowListEntry &windowList)
+void K4AWindowManager::ShowWindowArea(ImVec2 windowAreaPosition, ImVec2 windowAreaSize, WindowListEntry *windowList)
 {
-    if (!windowList.IsWindowGroup)
+    if (!windowList->IsWindowGroup)
     {
-        ShowWindow(windowAreaPosition, windowAreaSize, windowList.Window.get(), false);
+        ShowWindow(windowAreaPosition, windowAreaSize, windowList->Window.get(), false);
         return;
     }
 
@@ -99,7 +99,7 @@ void K4AWindowManager::ShowWindowArea(ImVec2 windowAreaPosition, ImVec2 windowAr
 
     bool nextDivisionHorizontal = false;
 
-    size_t divisionsRemaining = windowList.WindowGroup.size();
+    size_t divisionsRemaining = windowList->WindowGroup.size();
     while (divisionsRemaining > 1)
     {
         if (nextDivisionHorizontal)
@@ -120,7 +120,7 @@ void K4AWindowManager::ShowWindowArea(ImVec2 windowAreaPosition, ImVec2 windowAr
 
     int currentRow = 0;
     int currentColumn = 0;
-    for (auto &listEntry : windowList.WindowGroup)
+    for (auto &listEntry : windowList->WindowGroup)
     {
         ImVec2 entryPosition = { windowAreaPosition.x + currentColumn * individualWindowSize.x,
                                  windowAreaPosition.y + currentRow * individualWindowSize.y };
@@ -132,7 +132,7 @@ void K4AWindowManager::ShowWindowArea(ImVec2 windowAreaPosition, ImVec2 windowAr
 
         if (listEntry.IsWindowGroup)
         {
-            ShowWindowArea(entryPosition, entrySize, listEntry);
+            ShowWindowArea(entryPosition, entrySize, &listEntry);
         }
         else
         {

@@ -14,7 +14,6 @@
 
 // Project headers
 //
-#include "assertionexception.h"
 #include "k4acolorframevisualizer.h"
 #include "k4adepthpixelcolorizer.h"
 #include "k4astaticimageproperties.h"
@@ -117,7 +116,7 @@ PointCloudVisualizationResult K4APointCloudVisualizer::SetColorizationStrategy(C
 {
     if (strategy == ColorizationStrategy::Color && !m_enableColorPointCloud)
     {
-        throw AssertionException("Attempted to set unsupported point cloud mode!");
+        throw std::logic_error("Attempted to set unsupported point cloud mode!");
     }
 
     m_colorizationStrategy = strategy;

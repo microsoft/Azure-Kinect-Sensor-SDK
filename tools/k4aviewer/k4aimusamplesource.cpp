@@ -36,13 +36,13 @@ void K4AImuSampleSource::NotifyTermination()
     m_failed = true;
 }
 
-bool K4AImuSampleSource::PopSample(k4a_imu_sample_t &out)
+bool K4AImuSampleSource::PopSample(k4a_imu_sample_t *out)
 {
     if (!m_sampleBuffer.AdvanceRead())
     {
         return false;
     }
 
-    out = *m_sampleBuffer.CurrentItem();
+    *out = *m_sampleBuffer.CurrentItem();
     return true;
 }
