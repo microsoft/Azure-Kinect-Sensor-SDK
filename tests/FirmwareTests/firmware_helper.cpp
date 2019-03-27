@@ -4,6 +4,9 @@
 #include "firmware_helper.h"
 #include <utcommon.h>
 
+#include <k4ainternal/logging.h>
+#include <k4ainternal/usbcommand.h>
+
 #include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/threadapi.h>
 

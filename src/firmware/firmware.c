@@ -4,6 +4,9 @@
 // This library
 #include <k4ainternal/firmware.h>
 
+#include <k4ainternal/depth_mcu.h>
+#include <k4ainternal/color_mcu.h>
+
 // Dependent libraries
 #include <azure_c_shared_utility/lock.h>
 
@@ -53,6 +56,7 @@ typedef struct _firmware_package_header_t
 typedef struct _firmware_context_t
 {
     depthmcu_t depthmcu;
+    colormcu_t colormcu;
     LOCK_HANDLE lock;
 } firmware_context_t;
 
@@ -105,6 +109,7 @@ static uint32_t calculate_crc32(const uint8_t *pData, size_t len)
 k4a_result_t firmware_create(uint32_t index, firmware_t *firmware_handle)
 {
     firmware_context_t *firmware = NULL;
+    const guid_t *container_id = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_handle == NULL);
@@ -113,11 +118,20 @@ k4a_result_t firmware_create(uint32_t index, firmware_t *firmware_handle)
     firmware->lock = Lock_Init();
 
     result = TRACE_CALL(depthmcu_create(index, &firmware->depthmcu));
-
     if (K4A_SUCCEEDED(result))
     {
         // Wait until the device is responding correctly...
         result = TRACE_CALL(K4A_RESULT_FROM_BOOL(depthmcu_wait_is_ready(firmware->depthmcu)));
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        result = K4A_RESULT_FROM_BOOL((container_id = depthmcu_get_container_id(firmware->depthmcu)) != NULL);
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        result = TRACE_CALL(colormcu_create(container_id, &firmware->colormcu));
     }
 
     if (K4A_FAILED(result))
@@ -194,6 +208,12 @@ k4a_result_t firmware_reset_device(firmware_t firmware_handle)
 
     Lock(firmware->lock);
     result = TRACE_CALL(depthmcu_reset_device(firmware->depthmcu));
+
+    if (K4A_FAILED(result))
+    {
+        // Failed to issue the reset to the Depth MCU, try issuing to the Color MCU.
+        result = TRACE_CALL(colormcu_reset_device(firmware->colormcu));
+    }
     Unlock(firmware->lock);
     return result;
 }
