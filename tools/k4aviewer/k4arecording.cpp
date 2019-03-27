@@ -75,12 +75,12 @@ const std17::filesystem::path &K4ARecording::GetPath() const
     return m_path;
 }
 
-k4a_result_t K4ARecording::GetCalibration(k4a::calibration &calibration)
+k4a_result_t K4ARecording::GetCalibration(k4a::calibration *calibration)
 {
-    return k4a_playback_get_calibration(m_playback, &calibration);
+    return k4a_playback_get_calibration(m_playback, calibration);
 }
 
-k4a_buffer_result_t K4ARecording::GetTag(const char *name, std::string &out) const
+k4a_buffer_result_t K4ARecording::GetTag(const char *name, std::string *out) const
 {
     size_t size = 0;
     k4a_buffer_result_t result = k4a_playback_get_tag(m_playback, name, nullptr, &size);
@@ -89,12 +89,12 @@ k4a_buffer_result_t K4ARecording::GetTag(const char *name, std::string &out) con
         return K4A_BUFFER_RESULT_FAILED;
     }
 
-    out.resize(size);
-    result = k4a_playback_get_tag(m_playback, name, &out[0], &size);
+    out->resize(size);
+    result = k4a_playback_get_tag(m_playback, name, &(*out)[0], &size);
 
     // Drop the null terminator since std::string 'hides' it
     //
-    out.resize(std::max(size_t(0), size - 1));
+    out->resize(std::max(size_t(0), size - 1));
     return result;
 }
 

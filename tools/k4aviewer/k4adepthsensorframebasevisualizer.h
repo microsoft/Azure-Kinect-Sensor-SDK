@@ -34,17 +34,17 @@ public:
     {
     }
 
-    GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture) override
+    GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> *texture) override
     {
-        return K4AViewerImage::Create(&texture, nullptr, m_dimensions, GL_BGRA);
+        return K4AViewerImage::Create(texture, nullptr, m_dimensions, GL_BGRA);
     }
 
-    void InitializeBuffer(K4ATextureBuffer<ImageFormat> &buffer) override
+    void InitializeBuffer(K4ATextureBuffer<ImageFormat> *buffer) override
     {
-        buffer.Data.resize(m_expectedBufferSize);
+        buffer->Data.resize(m_expectedBufferSize);
     }
 
-    ImageVisualizationResult ConvertImage(const k4a::image &image, K4ATextureBuffer<ImageFormat> &buffer) override
+    ImageVisualizationResult ConvertImage(const k4a::image &image, K4ATextureBuffer<ImageFormat> *buffer) override
     {
         const size_t srcImageSize = static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(DepthPixel);
 
@@ -61,19 +61,19 @@ public:
         PerfSample renderSample(&render);
         RenderImage(src,
                     static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(DepthPixel),
-                    &buffer.Data[0]);
+                    &buffer->Data[0]);
         renderSample.End();
 
-        buffer.SourceImage = image;
+        buffer->SourceImage = image;
         return ImageVisualizationResult::Success;
     }
 
     ImageVisualizationResult UpdateTexture(const K4ATextureBuffer<ImageFormat> &buffer,
-                                           K4AViewerImage &texture) override
+                                           K4AViewerImage *texture) override
     {
         static PerfCounter upload(std::string("Depth sensor<T") + std::to_string(int(ImageFormat)) + "> upload");
         PerfSample uploadSample(&upload);
-        return GLEnumToImageVisualizationResult(texture.UpdateTexture(&buffer.Data[0]));
+        return GLEnumToImageVisualizationResult(texture->UpdateTexture(&buffer.Data[0]));
     }
 
     ~K4ADepthSensorFrameBaseVisualizer() override = default;

@@ -78,7 +78,7 @@ struct GuidComparer
 
 // Adapted from https://docs.microsoft.com/en-us/windows/desktop/CoreAudio/device-properties
 //
-HRESULT GetContainerIdToWasapiIdMap(std::map<GUID, std::string, GuidComparer> &result)
+HRESULT GetContainerIdToWasapiIdMap(std::map<GUID, std::string, GuidComparer> *result)
 {
     ComUniquePtr<IMMDeviceEnumerator> pEnumerator;
     {
@@ -160,13 +160,13 @@ HRESULT GetContainerIdToWasapiIdMap(std::map<GUID, std::string, GuidComparer> &r
 
         PropVariantClear(&containerIdProperty);
 
-        result[containerId] = std::move(idString);
+        (*result)[containerId] = std::move(idString);
     }
 
     return S_OK;
 }
 
-HRESULT GetSerialNumberToContainerIdMap(std::map<std::string, GUID> &result)
+HRESULT GetSerialNumberToContainerIdMap(std::map<std::string, GUID> *result)
 {
     // WinUSB Device {88BAE032-5A81-49F0-BC3D-A4FF138216D6}
     // see http://msdn.microsoft.com/en-us/library/windows/hardware/ff553426%28v=vs.85%29.aspx
@@ -253,7 +253,7 @@ HRESULT GetSerialNumberToContainerIdMap(std::map<std::string, GUID> &result)
             return HRESULT_FROM_WIN32(GetLastError());
         }
 
-        result[serialNumber] = containerId;
+        (*result)[serialNumber] = containerId;
     }
 
     // SetupDiEnumDeviceInfo is expected to set the last error to ERROR_NO_MORE_ITEMS when
@@ -271,27 +271,27 @@ HRESULT GetSerialNumberToContainerIdMap(std::map<std::string, GUID> &result)
 } // namespace
 
 bool K4ADeviceCorrelator::GetSoundIoBackendIdToSerialNumberMapping(SoundIo *soundio,
-                                                                   std::map<std::string, std::string> &result)
+                                                                   std::map<std::string, std::string> *result)
 {
     (void)soundio;
 
     std::map<std::string, GUID> serialNumberToContainerIdMap;
     std::map<GUID, std::string, GuidComparer> containerIdToWasapiIdMap;
 
-    if (FAILED(GetSerialNumberToContainerIdMap(serialNumberToContainerIdMap)) ||
-        FAILED(GetContainerIdToWasapiIdMap(containerIdToWasapiIdMap)))
+    if (FAILED(GetSerialNumberToContainerIdMap(&serialNumberToContainerIdMap)) ||
+        FAILED(GetContainerIdToWasapiIdMap(&containerIdToWasapiIdMap)))
     {
         return false;
     }
 
-    result.clear();
+    result->clear();
 
     for (auto &serialNumberToContainerIdMapping : serialNumberToContainerIdMap)
     {
         auto containerIdToWasapiIdMapping = containerIdToWasapiIdMap.find(serialNumberToContainerIdMapping.second);
         if (containerIdToWasapiIdMapping != containerIdToWasapiIdMap.end())
         {
-            result[containerIdToWasapiIdMapping->second] = serialNumberToContainerIdMapping.first;
+            (*result)[containerIdToWasapiIdMapping->second] = serialNumberToContainerIdMapping.first;
         }
     }
 
