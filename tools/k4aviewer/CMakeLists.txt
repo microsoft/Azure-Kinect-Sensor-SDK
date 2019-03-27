@@ -14,7 +14,6 @@ set(SOURCE_FILES
     k4aimudatagraph.cpp
     k4aimusamplesource.cpp
     k4aimuwindow.cpp
-    k4ainfraredframevisualizer.cpp
     k4amicrophone.cpp
     k4amicrophonelistener.cpp
     k4apointcloudrenderer.cpp

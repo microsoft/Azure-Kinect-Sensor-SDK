@@ -74,7 +74,7 @@ private:
         std::vector<WindowListEntry> WindowGroup;
     };
 
-    void ShowWindowArea(ImVec2 windowAreaPosition, ImVec2 windowAreaSize, WindowListEntry &windowList);
+    void ShowWindowArea(ImVec2 windowAreaPosition, ImVec2 windowAreaSize, WindowListEntry *windowList);
     void
     ShowWindow(ImVec2 windowAreaPosition, ImVec2 windowAreaSize, IK4AVisualizationWindow *window, bool isMaximized);
 

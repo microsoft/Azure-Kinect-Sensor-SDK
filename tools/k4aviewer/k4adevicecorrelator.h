@@ -25,7 +25,7 @@ namespace k4aviewer
 class K4ADeviceCorrelator
 {
 public:
-    static bool GetSoundIoBackendIdToSerialNumberMapping(SoundIo *soundIo, std::map<std::string, std::string> &result);
+    static bool GetSoundIoBackendIdToSerialNumberMapping(SoundIo *soundIo, std::map<std::string, std::string> *result);
 
     K4ADeviceCorrelator() = delete;
 };

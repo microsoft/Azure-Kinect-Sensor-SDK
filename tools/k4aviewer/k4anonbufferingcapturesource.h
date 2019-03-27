@@ -16,7 +16,6 @@
 
 // Project headers
 //
-#include "assertionexception.h"
 #include "ik4aobserver.h"
 #include "k4aimageextractor.h"
 

@@ -28,11 +28,10 @@ std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlEle
     }
     catch (std::ios_base::failure e)
     {
-        logger_error(LOGGER_RECORD,
-                     "Failed to get next child (parent id %x) in recording '%s': %s",
-                     EbmlId(*parent).GetValue(),
-                     context->file_path,
-                     e.what());
+        LOG_ERROR("Failed to get next child (parent id %x) in recording '%s': %s",
+                  EbmlId(*parent).GetValue(),
+                  context->file_path,
+                  e.what());
         return nullptr;
     }
 }
@@ -49,11 +48,10 @@ k4a_result_t skip_element(k4a_playback_context_t *context, EbmlElement *element)
     }
     catch (std::ios_base::failure e)
     {
-        logger_error(LOGGER_RECORD,
-                     "Failed seek past element (id %x) in recording '%s': %s",
-                     EbmlId(*element).GetValue(),
-                     context->file_path,
-                     e.what());
+        LOG_ERROR("Failed seek past element (id %x) in recording '%s': %s",
+                  EbmlId(*element).GetValue(),
+                  context->file_path,
+                  e.what());
         return K4A_RESULT_FAILED;
     }
 }
@@ -62,7 +60,7 @@ void match_ebml_id(k4a_playback_context_t *context, EbmlId &id, uint64_t offset)
 {
     RETURN_VALUE_IF_ARG(VOID_VALUE, context == NULL);
 
-    logger_trace(LOGGER_RECORD, "Matching seek location: %x -> %llu", id.GetValue(), offset);
+    LOG_TRACE("Matching seek location: %x -> %llu", id.GetValue(), offset);
 
     if (id == KaxSeekHead::ClassInfos.GlobalId || id == KaxChapters::ClassInfos.GlobalId ||
         id == EbmlVoid::ClassInfos.GlobalId)
@@ -98,7 +96,7 @@ void match_ebml_id(k4a_playback_context_t *context, EbmlId &id, uint64_t offset)
     }
     else
     {
-        logger_warn(LOGGER_RECORD, "Unknown element being matched: %x at %llu", id.GetValue(), offset);
+        LOG_WARNING("Unknown element being matched: %x at %llu", id.GetValue(), offset);
     }
 }
 
@@ -121,7 +119,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     {
         if (read_element<EbmlHead>(context, ebmlHead.get()) == NULL)
         {
-            logger_error(LOGGER_RECORD, "Failed to read EBML head.");
+            LOG_ERROR("Failed to read EBML head.", 0);
             return K4A_RESULT_FAILED;
         }
 
@@ -130,30 +128,27 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         EDocTypeReadVersion &eDocTypeReadVersion = GetChild<EDocTypeReadVersion>(*ebmlHead);
         if (eDocType.GetValue() != std::string("matroska"))
         {
-            logger_error(LOGGER_RECORD, "DocType is not matroska: %s", eDocType.GetValue().c_str());
+            LOG_ERROR("DocType is not matroska: %s", eDocType.GetValue().c_str());
             return K4A_RESULT_FAILED;
         }
 
         if (eDocTypeReadVersion.GetValue() > 2)
         {
-            logger_error(LOGGER_RECORD,
-                         "DocTypeReadVersion (%d) > 2 is not supported.",
-                         eDocTypeReadVersion.GetValue());
+            LOG_ERROR("DocTypeReadVersion (%d) > 2 is not supported.", eDocTypeReadVersion.GetValue());
             return K4A_RESULT_FAILED;
         }
 
         if (eDocTypeVersion.GetValue() < eDocTypeReadVersion.GetValue())
         {
-            logger_error(LOGGER_RECORD,
-                         "DocTypeVersion (%d) is great than DocTypeReadVersion (%d)",
-                         eDocTypeVersion.GetValue(),
-                         eDocTypeReadVersion.GetValue());
+            LOG_ERROR("DocTypeVersion (%d) is great than DocTypeReadVersion (%d)",
+                      eDocTypeVersion.GetValue(),
+                      eDocTypeReadVersion.GetValue());
             return K4A_RESULT_FAILED;
         }
     }
     else
     {
-        logger_error(LOGGER_RECORD, "Matroska / EBML head is missing, recording is not valid.");
+        LOG_ERROR("Matroska / EBML head is missing, recording is not valid.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -197,7 +192,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
 
     if (context->first_cluster_offset == 0)
     {
-        logger_error(LOGGER_RECORD, "Recording file does not contain any frames!");
+        LOG_ERROR("Recording file does not contain any frames!", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -219,7 +214,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     cluster_info_t *cluster_info = find_cluster(context, UINT64_MAX);
     if (cluster_info == NULL)
     {
-        logger_error(LOGGER_RECORD, "Failed to find end of recording.");
+        LOG_ERROR("Failed to find end of recording.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -228,7 +223,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     std::shared_ptr<KaxCluster> last_cluster = load_cluster(context, cluster_info);
     if (last_cluster == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Failed to load end of recording.");
+        LOG_ERROR("Failed to load end of recording.", 0);
         return K4A_RESULT_FAILED;
     }
     for (EbmlElement *e : last_cluster->GetElementList())
@@ -252,7 +247,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
             }
         }
     }
-    logger_trace(LOGGER_RECORD, "Found last timestamp: %llu", context->last_timestamp_ns);
+    LOG_TRACE("Found last timestamp: %llu", context->last_timestamp_ns);
 
     return K4A_RESULT_SUCCEEDED;
 }
@@ -275,13 +270,13 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
     // Read the first cluster to use as the cache root.
     if (K4A_FAILED(seek_offset(context, context->first_cluster_offset)))
     {
-        logger_error(LOGGER_RECORD, "Failed to seek to first recording cluster.");
+        LOG_ERROR("Failed to seek to first recording cluster.", 0);
         return K4A_RESULT_FAILED;
     }
     std::shared_ptr<KaxCluster> first_cluster = find_next<KaxCluster>(context);
     if (first_cluster == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Failed to read element for first recording cluster.");
+        LOG_ERROR("Failed to read element for first recording cluster.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -328,7 +323,7 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
                     }
                     else
                     {
-                        logger_warn(LOGGER_RECORD, "Cluster or Cue entry is out of order.");
+                        LOG_WARNING("Cluster or Cue entry is out of order.", 0);
                     }
                 }
             }
@@ -336,7 +331,7 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
     }
     else
     {
-        logger_warn(LOGGER_RECORD, "Recording is missing Cue entries, playback performance may be impacted.");
+        LOG_WARNING("Recording is missing Cue entries, playback performance may be impacted.", 0);
     }
 
     return K4A_RESULT_SUCCEEDED;
@@ -379,7 +374,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     if (context->calibration_attachment == NULL)
     {
         // The rest of the recording can still be read if no device calibration blob exists.
-        logger_warn(LOGGER_RECORD, "Device calibration is missing from recording.");
+        LOG_WARNING("Device calibration is missing from recording.", 0);
     }
 
     uint64_t frame_period_ns = 0;
@@ -407,10 +402,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
         if (context->record_config.color_resolution == K4A_COLOR_RESOLUTION_OFF)
         {
-            logger_error(LOGGER_RECORD,
-                         "Unsupported color resolution: %dx%d",
-                         context->color_track.width,
-                         context->color_track.height);
+            LOG_ERROR("Unsupported color resolution: %dx%d", context->color_track.width, context->color_track.height);
             return K4A_RESULT_FAILED;
         }
 
@@ -427,7 +419,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     KaxTag *depth_mode_tag = get_tag(context, "K4A_DEPTH_MODE");
     if (depth_mode_tag == NULL && (context->depth_track.track || context->ir_track.track))
     {
-        logger_error(LOGGER_RECORD, "K4A_DEPTH_MODE tag is missing.");
+        LOG_ERROR("K4A_DEPTH_MODE tag is missing.", 0);
         return K4A_RESULT_FAILED;
     }
     std::string depth_mode_str = get_tag_string(depth_mode_tag);
@@ -448,7 +440,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     }
     if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
     {
-        logger_error(LOGGER_RECORD, "Unsupported depth mode: %s", depth_mode_str.c_str());
+        LOG_ERROR("Unsupported depth mode: %s", depth_mode_str.c_str());
         return K4A_RESULT_FAILED;
     }
 
@@ -465,20 +457,18 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
         else if (frame_period_ns != depth_period_ns)
         {
-            logger_error(LOGGER_RECORD,
-                         "Track frame durations don't match (Depth): %llu ns != %llu ns",
-                         frame_period_ns,
-                         depth_period_ns);
+            LOG_ERROR("Track frame durations don't match (Depth): %llu ns != %llu ns",
+                      frame_period_ns,
+                      depth_period_ns);
             return K4A_RESULT_FAILED;
         }
 
         if (context->depth_track.width != depth_width || context->depth_track.height != depth_height)
         {
-            logger_error(LOGGER_RECORD,
-                         "Unsupported depth resolution / mode: %dx%d (%s)",
-                         context->depth_track.width,
-                         context->depth_track.height,
-                         depth_mode_str.c_str());
+            LOG_ERROR("Unsupported depth resolution / mode: %dx%d (%s)",
+                      context->depth_track.width,
+                      context->depth_track.height,
+                      depth_mode_str.c_str());
             return K4A_RESULT_FAILED;
         }
 
@@ -500,10 +490,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
         else if (frame_period_ns != ir_period_ns)
         {
-            logger_error(LOGGER_RECORD,
-                         "Track frame durations don't match (IR): %llu ns != %llu ns",
-                         frame_period_ns,
-                         ir_period_ns);
+            LOG_ERROR("Track frame durations don't match (IR): %llu ns != %llu ns", frame_period_ns, ir_period_ns);
             return K4A_RESULT_FAILED;
         }
 
@@ -512,22 +499,20 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             if (context->ir_track.width != context->depth_track.width ||
                 context->ir_track.height != context->depth_track.height)
             {
-                logger_error(LOGGER_RECORD,
-                             "Depth and IR track have different resolutions: Depth %dx%d, IR %dx%d",
-                             context->depth_track.width,
-                             context->depth_track.height,
-                             context->ir_track.width,
-                             context->ir_track.height);
+                LOG_ERROR("Depth and IR track have different resolutions: Depth %dx%d, IR %dx%d",
+                          context->depth_track.width,
+                          context->depth_track.height,
+                          context->ir_track.width,
+                          context->ir_track.height);
                 return K4A_RESULT_FAILED;
             }
         }
         else if (context->ir_track.width != depth_width || context->ir_track.height != depth_height)
         {
-            logger_error(LOGGER_RECORD,
-                         "Unsupported IR resolution / depth mode: %dx%d (%s)",
-                         context->ir_track.width,
-                         context->ir_track.height,
-                         depth_mode_str.c_str());
+            LOG_ERROR("Unsupported IR resolution / depth mode: %dx%d (%s)",
+                      context->ir_track.width,
+                      context->ir_track.height,
+                      depth_mode_str.c_str());
             return K4A_RESULT_FAILED;
         }
 
@@ -551,10 +536,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
             break;
         default:
-            logger_error(LOGGER_RECORD,
-                         "Unsupported recording frame period: %llu ns (%llu fps)",
-                         frame_period_ns,
-                         (1_s / frame_period_ns));
+            LOG_ERROR("Unsupported recording frame period: %llu ns (%llu fps)",
+                      frame_period_ns,
+                      (1_s / frame_period_ns));
             return K4A_RESULT_FAILED;
         }
     }
@@ -589,9 +573,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
         else
         {
-            logger_error(LOGGER_RECORD,
-                         "Tag K4A_DEPTH_DELAY_NS contains invalid value: %s",
-                         get_tag_string(depth_delay_tag).c_str());
+            LOG_ERROR("Tag K4A_DEPTH_DELAY_NS contains invalid value: %s", get_tag_string(depth_delay_tag).c_str());
             return K4A_RESULT_FAILED;
         }
     }
@@ -622,7 +604,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
         if (!sync_mode_found)
         {
-            logger_error(LOGGER_RECORD, "Unsupported wired sync mode: %s", sync_mode_str.c_str());
+            LOG_ERROR("Unsupported wired sync mode: %s", sync_mode_str.c_str());
             return K4A_RESULT_FAILED;
         }
 
@@ -641,9 +623,8 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 }
                 else
                 {
-                    logger_error(LOGGER_RECORD,
-                                 "Tag K4A_SUBORDINATE_DELAY_NS contains invalid value: %s",
-                                 get_tag_string(subordinate_delay_tag).c_str());
+                    LOG_ERROR("Tag K4A_SUBORDINATE_DELAY_NS contains invalid value: %s",
+                              get_tag_string(subordinate_delay_tag).c_str());
                     return K4A_RESULT_FAILED;
                 }
             }
@@ -676,9 +657,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
         else
         {
-            logger_error(LOGGER_RECORD,
-                         "Tag K4A_START_OFFSET_NS contains invalid value: %s",
-                         get_tag_string(start_offset_tag).c_str());
+            LOG_ERROR("Tag K4A_START_OFFSET_NS contains invalid value: %s", get_tag_string(start_offset_tag).c_str());
             return K4A_RESULT_FAILED;
         }
     }
@@ -724,10 +703,9 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track)
             track->stride = track->width * 2;
             break;
         default:
-            logger_error(LOGGER_RECORD,
-                         "Unsupported FOURCC format for track '%s': %x",
-                         GetChild<KaxTrackName>(*track->track).GetValueUTF8().c_str(),
-                         track->bitmap_header->biCompression);
+            LOG_ERROR("Unsupported FOURCC format for track '%s': %x",
+                      GetChild<KaxTrackName>(*track->track).GetValueUTF8().c_str(),
+                      track->bitmap_header->biCompression);
             return K4A_RESULT_FAILED;
         }
 
@@ -735,10 +713,9 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track)
     }
     else
     {
-        logger_error(LOGGER_RECORD,
-                     "Unsupported codec id for track '%s': %s",
-                     GetChild<KaxTrackName>(*track->track).GetValueUTF8().c_str(),
-                     codec_id.c_str());
+        LOG_ERROR("Unsupported codec id for track '%s': %s",
+                  GetChild<KaxTrackName>(*track->track).GetValueUTF8().c_str(),
+                  codec_id.c_str());
         return K4A_RESULT_FAILED;
     }
 }
@@ -912,19 +889,18 @@ k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset)
     uint64_t file_offset = context->segment->GetGlobalPosition(offset);
     try
     {
-        logger_trace(LOGGER_RECORD, "Seeking to file position: %llu", file_offset);
+        LOG_TRACE("Seeking to file position: %llu", file_offset);
         assert(file_offset <= INT64_MAX);
         context->ebml_file->setFilePointer((int64_t)file_offset);
         return K4A_RESULT_SUCCEEDED;
     }
     catch (std::ios_base::failure e)
     {
-        logger_error(LOGGER_RECORD,
-                     "Failed to seek file to %llu (relative %llu) '%s': %s",
-                     file_offset,
-                     offset,
-                     context->file_path,
-                     e.what());
+        LOG_ERROR("Failed to seek file to %llu (relative %llu) '%s': %s",
+                  file_offset,
+                  offset,
+                  context->file_path,
+                  e.what());
         return K4A_RESULT_FAILED;
     }
 }
@@ -1036,13 +1012,13 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
             // Read forward in file to find next cluster and fill in cache
             if (K4A_FAILED(seek_offset(context, current_cluster->file_offset)))
             {
-                logger_error(LOGGER_RECORD, "Failed to seek to current cluster element.");
+                LOG_ERROR("Failed to seek to current cluster element.", 0);
                 return NULL;
             }
             std::shared_ptr<KaxCluster> current_element = find_next<KaxCluster>(context);
             if (current_element == nullptr)
             {
-                logger_error(LOGGER_RECORD, "Failed to find current cluster element.");
+                LOG_ERROR("Failed to find current cluster element.", 0);
                 return NULL;
             }
             populate_cluster_info(context, current_element, current_cluster);
@@ -1055,7 +1031,7 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
             // Seek to the end of the current cluster so that find_next returns the next cluster in the file.
             if (K4A_FAILED(skip_element(context, current_element.get())))
             {
-                logger_error(LOGGER_RECORD, "Failed to seek to next cluster element.");
+                LOG_ERROR("Failed to seek to next cluster element.", 0);
                 return NULL;
             }
 
@@ -1140,7 +1116,7 @@ std::shared_ptr<KaxCluster> load_cluster(k4a_playback_context_t *context, cluste
     context->load_count++;
     if (K4A_FAILED(seek_offset(context, cluster_info->file_offset)))
     {
-        logger_error(LOGGER_RECORD, "Failed to seek to cluster at: %llu", cluster_info->file_offset);
+        LOG_ERROR("Failed to seek to cluster at: %llu", cluster_info->file_offset);
         return nullptr;
     }
     cluster = find_next<KaxCluster>(context);
@@ -1148,7 +1124,7 @@ std::shared_ptr<KaxCluster> load_cluster(k4a_playback_context_t *context, cluste
     {
         if (read_element<KaxCluster>(context, cluster.get()) == NULL)
         {
-            logger_error(LOGGER_RECORD, "Failed to read cluster data at: %llu", cluster_info->file_offset);
+            LOG_ERROR("Failed to read cluster data at: %llu", cluster_info->file_offset);
             return nullptr;
         }
 
@@ -1161,7 +1137,7 @@ std::shared_ptr<KaxCluster> load_cluster(k4a_playback_context_t *context, cluste
     }
     else
     {
-        logger_error(LOGGER_RECORD, "Failed to find cluster element at: %llu", cluster_info->file_offset);
+        LOG_ERROR("Failed to find cluster element at: %llu", cluster_info->file_offset);
         return nullptr;
     }
 }
@@ -1190,7 +1166,7 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
         next_block->cluster = load_cluster(context, context->seek_cluster);
         if (next_block->cluster == nullptr)
         {
-            logger_error(LOGGER_RECORD, "Failed to load data cluster from disk.");
+            LOG_ERROR("Failed to load data cluster from disk.", 0);
             return nullptr;
         }
         next_block->index = next ? 0 : ((int)next_block->cluster->ListSize() - 1);
@@ -1255,7 +1231,7 @@ std::shared_ptr<read_block_t> find_next_block(k4a_playback_context_t *context, t
             next_block->cluster = load_cluster(context, found_cluster_info);
             if (next_block->cluster == nullptr)
             {
-                logger_error(LOGGER_RECORD, "Failed to load next data cluster from disk.");
+                LOG_ERROR("Failed to load next data cluster from disk.", 0);
                 return nullptr;
             }
             next_block->index = next ? 0 : ((int)next_block->cluster->ListSize() - 1);
@@ -1360,7 +1336,7 @@ k4a_result_t new_capture(k4a_playback_context_t *context,
     }
     else
     {
-        logger_error(LOGGER_RECORD, "Capture being created from unknown track!");
+        LOG_ERROR("Capture being created from unknown track!", 0);
         result = K4A_RESULT_FAILED;
     }
 
@@ -1414,7 +1390,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             }
             else
             {
-                logger_trace(LOGGER_RECORD, "%s of recording reached", next ? "End" : "Beginning");
+                LOG_TRACE("%s of recording reached", next ? "End" : "Beginning");
                 blocks[i]->current_block = next_blocks[i];
             }
         }
@@ -1506,12 +1482,11 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
         }
     }
 
-    logger_trace(LOGGER_RECORD,
-                 "Valid blocks: %d/%d, Start: %llu ms, End: %llu ms",
-                 valid_blocks,
-                 enabled_tracks,
-                 timestamp_start_ns / 1_ms,
-                 timestamp_end_ns / 1_ms);
+    LOG_TRACE("Valid blocks: %d/%d, Start: %llu ms, End: %llu ms",
+              valid_blocks,
+              enabled_tracks,
+              timestamp_start_ns / 1_ms,
+              timestamp_end_ns / 1_ms);
 
     *capture_handle = NULL;
     for (size_t i = 0; i < arraysize(blocks); i++)
@@ -1544,7 +1519,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
         return K4A_STREAM_RESULT_EOF;
     }
 
-    logger_error(LOGGER_RECORD, "IMU playback is not yet supported.");
+    LOG_ERROR("IMU playback is not yet supported.", 0);
     (void)next;
 
     return K4A_STREAM_RESULT_FAILED;
