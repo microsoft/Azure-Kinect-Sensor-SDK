@@ -361,7 +361,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
  * \param track_name
  * TODO
  *
- * \param timestamp_ns
+ * \param timestamp_usec
  * TODO
  *
  * \param buffer
@@ -389,9 +389,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
                                                                  const char *track_name,
-                                                                 uint64_t timestamp_ns,
+                                                                 uint64_t timestamp_usec,
                                                                  uint8_t *buffer,
-                                                                 uint32_t buffer_size,
+                                                                 size_t buffer_size,
                                                                  bool copy_buffer);
 
 /** Flushes all pending recording data to disk.

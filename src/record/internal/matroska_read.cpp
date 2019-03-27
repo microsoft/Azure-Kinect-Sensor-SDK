@@ -16,14 +16,26 @@ using namespace LIBMATROSKA_NAMESPACE;
 
 namespace k4arecord
 {
-std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlElement *parent)
+
+// The upperLevel value shows the relationship of the element to the parent element
+// -1 : global element
+//  0 : child
+//  1 : same level
+//  + : further parent
+std::unique_ptr<EbmlElement> next_element(k4a_playback_context_t *context,
+                                          EbmlElement *parent,
+                                          int *upper_level = nullptr)
 {
     try
     {
-        int upper_level = 0;
+        int upper_level_value = 0;
         EbmlElement *element =
-            context->stream->FindNextElement(parent->Generic().Context, upper_level, parent->GetSize(), false, 0);
+            context->stream->FindNextElement(parent->Generic().Context, upper_level_value, parent->GetSize(), false, 0);
 
+        if (upper_level != nullptr)
+        {
+            *upper_level = upper_level_value;
+        }
         return std::unique_ptr<EbmlElement>(element);
     }
     catch (std::ios_base::failure e)
@@ -150,7 +162,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     context->segment = find_next<KaxSegment>(context, true, false);
     if (context->segment)
     {
-        auto element = next_child(context, context->segment.get());
+        auto element = next_element(context, context->segment.get());
 
         while (element != nullptr && !seek_info_ready(context))
         {
@@ -180,7 +192,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
                 skip_element(context, element.get());
             }
 
-            element = next_child(context, context->segment.get());
+            element = next_element(context, context->segment.get());
         }
     }
 
@@ -283,6 +295,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     uint64_t frame_period_ns = 0;
     if (context->color_track.track)
     {
+        context->track_number_name_map.insert(
+            std::pair<uint64_t, std::string>(GetChild<KaxTrackNumber>(*context->color_track.track).GetValue(),
+                                             color_track_name));
         context->color_track.type = static_cast<track_type>(
             GetChild<KaxTrackType>(*context->color_track.track).GetValue());
 
@@ -356,6 +371,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     if (context->depth_track.track)
     {
+        context->track_number_name_map.insert(
+            std::pair<uint64_t, std::string>(GetChild<KaxTrackNumber>(*context->depth_track.track).GetValue(),
+                                             depth_track_name));
         context->depth_track.type = static_cast<track_type>(
             GetChild<KaxTrackType>(*context->depth_track.track).GetValue());
 
@@ -395,6 +413,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     if (context->ir_track.track)
     {
+        context->track_number_name_map.insert(
+            std::pair<uint64_t, std::string>(GetChild<KaxTrackNumber>(*context->ir_track.track).GetValue(),
+                                             ir_track_name));
         context->ir_track.type = static_cast<track_type>(GetChild<KaxTrackType>(*context->ir_track.track).GetValue());
         KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*context->ir_track.track);
         context->ir_track.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
@@ -491,6 +512,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             track_reader.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
             track_reader.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
         }
+
+        context->track_number_name_map.insert(
+            std::pair<uint64_t, std::string>(GetChild<KaxTrackNumber>(*track_reader.track).GetValue(), itr.first));
     }
 
     // Read depth_delay_off_color_usec and set offsets for each default track accordingly.
@@ -617,6 +641,12 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         context->record_config.start_timestamp_offset_usec = 0;
     }
 
+    if (K4A_FAILED(parse_all_timestamps(context)))
+    {
+        // The rest of the recording can still be read if parse track timestamps failed
+        logger_warn(LOGGER_RECORD, "Pre-parsing all track timestamp information failed.");
+    }
+
     return K4A_RESULT_SUCCEEDED;
 }
 
@@ -634,8 +664,8 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track)
 
         BITMAPINFOHEADER *bitmap_header = reinterpret_cast<BITMAPINFOHEADER *>(track->codec_private.data());
 
-        assert(track->width == track->bitmap_header->biWidth);
-        assert(track->height == track->bitmap_header->biHeight);
+        assert(track->width == bitmap_header->biWidth);
+        assert(track->height == bitmap_header->biHeight);
 
         switch (bitmap_header->biCompression)
         {
@@ -898,6 +928,99 @@ KaxAttached *get_attachment_by_tag(k4a_playback_context_t *context, const char *
     return NULL;
 }
 
+k4a_result_t parse_all_timestamps(k4a_playback_context_t *context)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL || context->segment == NULL);
+
+    if (K4A_FAILED(seek_offset(context, context->first_cluster_offset)))
+    {
+        return K4A_RESULT_FAILED;
+    }
+    std::shared_ptr<KaxCluster> cluster = find_next<KaxCluster>(context, false, false);
+
+    while (cluster != nullptr)
+    {
+        std::shared_ptr<EbmlElement> element = next_element(context, cluster.get());
+        bool cluster_start_found = false;
+        int upper_level = 0;
+
+        while (element != nullptr)
+        {
+            uint64_t block_timestamp_ns = 0;
+            uint16_t track_number = 0;
+            bool is_data_block = false;
+
+            EbmlId element_id(*element);
+            if (element_id == KaxClusterTimecode::ClassInfos.GlobalId)
+            {
+                KaxClusterTimecode *cluster_timecode = read_element<KaxClusterTimecode>(context, element.get());
+                cluster->InitTimecode(cluster_timecode->GetValue(), (int64_t)context->timecode_scale);
+                cluster_start_found = true;
+            }
+            else if (element_id == KaxSimpleBlock::ClassInfos.GlobalId)
+            {
+                assert(cluster_start_found);
+                KaxSimpleBlock *simple_block = read_element<KaxSimpleBlock>(context, element.get(), SCOPE_PARTIAL_DATA);
+
+                simple_block->SetParent(*cluster);
+                block_timestamp_ns = simple_block->GlobalTimecode();
+                track_number = simple_block->TrackNum();
+                is_data_block = true;
+            }
+            else if (element_id == KaxBlockGroup::ClassInfos.GlobalId)
+            {
+                assert(cluster_start_found);
+                KaxBlockGroup *block_group = read_element<KaxBlockGroup>(context, element.get(), SCOPE_PARTIAL_DATA);
+
+                block_group->SetParent(*cluster);
+                block_timestamp_ns = block_group->GlobalTimecode();
+                track_number = block_group->TrackNumber();
+                is_data_block = true;
+            }
+            else
+            {
+                skip_element(context, element.get());
+            }
+
+            if (is_data_block)
+            {
+                auto itr = context->track_number_name_map.find(track_number);
+                if (itr != context->track_number_name_map.end())
+                {
+                    track_reader_t *track_reader = get_track_reader_by_name(context, itr->second);
+                    track_reader->block_index_timestamp_usec_map.push_back(block_timestamp_ns / 1000);
+                }
+            }
+
+            element = next_element(context, cluster.get(), &upper_level);
+
+            // The next element is no longer the child, but is same level as cluster
+            if (upper_level > 0)
+            {
+                break;
+            }
+        }
+
+        // There is no more element left
+        if (element == nullptr)
+        {
+            break;
+        }
+        else if (static_cast<EbmlId>(*element) == KaxCluster::ClassInfos.GlobalId)
+        {
+            // The next element happen to be another cluster. Use this as the next cluster pointer
+            cluster = std::static_pointer_cast<KaxCluster, EbmlElement>(element);
+        }
+        else
+        {
+            // The next element is other types. Try to find the next cluster type
+            cluster = find_next<KaxCluster>(context, true, false);
+        }
+    }
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
@@ -994,7 +1117,7 @@ std::shared_ptr<KaxCluster> find_cluster(k4a_playback_context_t *context, uint64
     std::shared_ptr<KaxCluster> current = find_next<KaxCluster>(context, false, false);
     while (current != nullptr)
     {
-        auto element = next_child(context, current.get());
+        auto element = next_element(context, current.get());
         uint64_t current_start = previous_start;
         bool cluster_start_found = false;
 
@@ -1013,7 +1136,7 @@ std::shared_ptr<KaxCluster> find_cluster(k4a_playback_context_t *context, uint64
                 skip_element(context, element.get());
             }
 
-            element = next_child(context, current.get());
+            element = next_element(context, current.get());
         }
 
         if (cluster_start_found)

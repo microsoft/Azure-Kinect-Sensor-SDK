@@ -42,6 +42,9 @@ bool validate_test_image(k4a_image_t image,
 k4a_imu_sample_t create_test_imu_sample(uint64_t timestamp_us);
 bool validate_imu_sample(k4a_imu_sample_t imu_sample, uint64_t timestamp_us);
 
+std::vector<uint8_t> create_test_custom_track_block(uint64_t timestamp_us);
+bool validate_custom_track_block(const std::vector<uint8_t> &block, uint64_t timestamp_us);
+
 class SampleRecordings : public ::testing::Environment
 {
 public:

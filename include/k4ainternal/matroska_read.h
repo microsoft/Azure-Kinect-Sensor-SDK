@@ -31,7 +31,8 @@ typedef struct _track_reader_t
     std::vector<uint8_t> codec_private;
     std::shared_ptr<read_block_t> current_block;
     uint64_t frame_period_ns = 0;
-    track_type type;
+    track_type type = track_video;
+    std::vector<uint64_t> block_index_timestamp_usec_map;
 
     // Fields specific to video track
     uint32_t width = 0;
@@ -72,6 +73,7 @@ typedef struct _k4a_playback_context_t
     track_reader_t imu_track;
 
     std::unordered_map<std::string, track_reader_t> custom_track_map;
+    std::unordered_map<uint64_t, std::string> track_number_name_map;
 
     int imu_sample_index;
 
@@ -106,6 +108,8 @@ std::string get_tag_string(libmatroska::KaxTag *tag);
 libmatroska::KaxAttached *get_attachment_by_name(k4a_playback_context_t *context, const char *file_name);
 libmatroska::KaxAttached *get_attachment_by_tag(k4a_playback_context_t *context, const char *tag_name);
 
+k4a_result_t parse_all_timestamps(k4a_playback_context_t *context);
+
 k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset);
 std::shared_ptr<libmatroska::KaxCluster> seek_timestamp(k4a_playback_context_t *context, uint64_t timestamp_ns);
 libmatroska::KaxCuePoint *find_closest_cue(k4a_playback_context_t *context, uint64_t timestamp_ns);
@@ -123,7 +127,8 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
 k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next);
 
 // Template helper functions
-template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElement *element)
+template<typename T>
+T *read_element(k4a_playback_context_t *context, EbmlElement *element, ScopeMode readFully = SCOPE_ALL_DATA)
 {
     try
     {
@@ -131,7 +136,7 @@ template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElemen
         EbmlElement *dummy = nullptr;
 
         T *read_element = static_cast<T *>(element);
-        read_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true);
+        read_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true, readFully);
         return read_element;
     }
     catch (std::ios_base::failure e)

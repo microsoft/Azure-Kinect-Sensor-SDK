@@ -700,9 +700,9 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
 
 k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
                                                 const char *track_name,
-                                                uint64_t timestamp_ns,
+                                                uint64_t timestamp_usec,
                                                 uint8_t *buffer,
-                                                uint32_t buffer_size,
+                                                size_t buffer_size,
                                                 bool copy_buffer)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
@@ -729,7 +729,7 @@ k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_han
     assert(buffer_size <= UINT32_MAX);
     DataBuffer *data_buffer = new DataBuffer(buffer, (uint32_t)buffer_size, NULL, copy_buffer);
 
-    k4a_result_t result = TRACE_CALL(write_track_data(context, track, timestamp_ns, data_buffer));
+    k4a_result_t result = TRACE_CALL(write_track_data(context, track, timestamp_usec * 1000, data_buffer));
     if (K4A_FAILED(result))
     {
         // Clean up the data_buffer if write_track_data failed.

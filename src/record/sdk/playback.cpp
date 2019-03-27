@@ -211,10 +211,8 @@ k4a_result_t k4a_playback_get_track_video_info(k4a_playback_t playback_handle,
     return K4A_RESULT_SUCCEEDED;
 }
 
-k4a_buffer_result_t k4a_playback_get_track_codec_id(k4a_playback_t playback_handle,
-                                                    const char *track_name,
-                                                    uint8_t *data,
-                                                    size_t *data_size)
+k4a_buffer_result_t
+k4a_playback_get_track_codec_id(k4a_playback_t playback_handle, const char *track_name, char *data, size_t *data_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
@@ -228,15 +226,17 @@ k4a_buffer_result_t k4a_playback_get_track_codec_id(k4a_playback_t playback_hand
         return K4A_BUFFER_RESULT_FAILED;
     }
 
-    if (data != NULL && *data_size >= track_reader->codec_id.size())
+    // std::string doesn't include the appending zero at the end when counting size
+    const size_t append_zero = 1;
+    if (data != NULL && *data_size >= track_reader->codec_id.size() + append_zero)
     {
-        memcpy(data, track_reader->codec_id.data(), track_reader->codec_id.size());
-        *data_size = track_reader->codec_id.size();
+        memcpy(data, track_reader->codec_id.c_str(), track_reader->codec_id.size() + append_zero);
+        *data_size = track_reader->codec_id.size() + append_zero;
         return K4A_BUFFER_RESULT_SUCCEEDED;
     }
     else
     {
-        *data_size = track_reader->codec_id.size();
+        *data_size = track_reader->codec_id.size() + append_zero;
         return K4A_BUFFER_RESULT_TOO_SMALL;
     }
 }
@@ -334,6 +334,38 @@ k4a_playback_get_attachment(k4a_playback_t playback_handle, const char *file_nam
     }
 }
 
+size_t k4a_playback_get_track_frame_count(k4a_playback_t playback_handle, const char *track_name)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(0, context == NULL || track_name == NULL);
+
+    track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
+    if (track_reader != nullptr)
+    {
+        return track_reader->block_index_timestamp_usec_map.size();
+    }
+
+    return 0;
+}
+
+int64_t k4a_playback_get_track_frame_usec_by_index(k4a_playback_t playback_handle,
+                                                   const char *track_name,
+                                                   size_t frame_index)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(0, context == NULL || track_name == NULL);
+
+    track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
+    if (track_reader != nullptr && frame_index < track_reader->block_index_timestamp_usec_map.size())
+    {
+        return track_reader->block_index_timestamp_usec_map[frame_index];
+    }
+
+    return -1;
+}
+
 k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_t playback_handle, k4a_capture_t *capture_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
@@ -376,13 +408,13 @@ k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback
 
 k4a_stream_result_t k4a_playback_procceed_to_next_data_block(k4a_playback_t playback_handle,
                                                              const char *custom_track_name,
-                                                             uint64_t *timestamp_ns,
-                                                             uint64_t *block_size)
+                                                             uint64_t *timestamp_usec,
+                                                             size_t *block_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED,
-                        context == NULL || custom_track_name == NULL || timestamp_ns == NULL || block_size == NULL);
+                        context == NULL || custom_track_name == NULL || timestamp_usec == NULL || block_size == NULL);
 
     auto itr = context->custom_track_map.find(custom_track_name);
     if (itr == context->custom_track_map.end())
@@ -401,7 +433,8 @@ k4a_stream_result_t k4a_playback_procceed_to_next_data_block(k4a_playback_t play
     }
 
     track_reader.current_block = read_block;
-    *timestamp_ns = track_reader.current_block->block->GlobalTimecode();
+    uint64_t timestamp_ns = track_reader.current_block->block->GlobalTimecode();
+    *timestamp_usec = timestamp_ns / 1000;
     *block_size = track_reader.current_block->block->GetBuffer(0).Size();
 
     return K4A_STREAM_RESULT_SUCCEEDED;
@@ -409,13 +442,13 @@ k4a_stream_result_t k4a_playback_procceed_to_next_data_block(k4a_playback_t play
 
 k4a_stream_result_t k4a_playback_procceed_to_previous_data_block(k4a_playback_t playback_handle,
                                                                  const char *custom_track_name,
-                                                                 uint64_t *timestamp_ns,
-                                                                 uint64_t *block_size)
+                                                                 uint64_t *timestamp_usec,
+                                                                 size_t *block_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED,
-                        context == NULL || custom_track_name == NULL || timestamp_ns == NULL || block_size == NULL);
+                        context == NULL || custom_track_name == NULL || timestamp_usec == NULL || block_size == NULL);
 
     auto itr = context->custom_track_map.find(custom_track_name);
     if (itr == context->custom_track_map.end())
@@ -434,7 +467,8 @@ k4a_stream_result_t k4a_playback_procceed_to_previous_data_block(k4a_playback_t 
     }
 
     track_reader.current_block = read_block;
-    *timestamp_ns = track_reader.current_block->block->GlobalTimecode();
+    uint64_t timestamp_ns = track_reader.current_block->block->GlobalTimecode();
+    *timestamp_usec = timestamp_ns / 1000;
     *block_size = track_reader.current_block->block->GetBuffer(0).Size();
 
     return K4A_STREAM_RESULT_SUCCEEDED;
@@ -442,14 +476,14 @@ k4a_stream_result_t k4a_playback_procceed_to_previous_data_block(k4a_playback_t 
 
 k4a_stream_result_t k4a_playback_read_current_data_block(k4a_playback_t playback_handle,
                                                          const char *custom_track_name,
-                                                         uint64_t *timestamp_ns,
+                                                         uint64_t *timestamp_usec,
                                                          uint8_t *block_data,
-                                                         uint64_t *block_size)
+                                                         size_t *block_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED,
-                        context == NULL || custom_track_name == NULL || timestamp_ns == NULL || block_size == NULL);
+                        context == NULL || custom_track_name == NULL || timestamp_usec == NULL || block_size == NULL);
 
     auto itr = context->custom_track_map.find(custom_track_name);
     if (itr == context->custom_track_map.end())
@@ -467,7 +501,8 @@ k4a_stream_result_t k4a_playback_read_current_data_block(k4a_playback_t playback
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    *timestamp_ns = track_reader.current_block->block->GlobalTimecode();
+    uint64_t timestamp_ns = track_reader.current_block->block->GlobalTimecode();
+    *timestamp_usec = timestamp_ns / 1000;
     DataBuffer &data_buffer = track_reader.current_block->block->GetBuffer(0);
     *block_size = data_buffer.Size();
     memcpy(block_data, data_buffer.Buffer(), data_buffer.Size());
