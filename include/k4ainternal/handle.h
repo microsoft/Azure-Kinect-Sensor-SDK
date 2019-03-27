@@ -56,7 +56,7 @@ used with CPP and destroy being used with C, or vise-vesa, the types get c or cp
         pContextWrapper = ALLOCATE(PUB_HANDLE_TYPE(_public_handle_name_));                                             \
         if (pContextWrapper == NULL)                                                                                   \
         {                                                                                                              \
-            IF_LOGGER(LOG_ERROR("Failed to allocate " #_public_handle_name_);) return NULL;                            \
+            IF_LOGGER(LOG_ERROR("Failed to allocate " #_public_handle_name_, 0);) return NULL;                         \
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
