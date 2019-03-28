@@ -43,9 +43,9 @@ public:
 
     const std17::filesystem::path &GetPath() const;
 
-    k4a_result_t GetCalibration(k4a::calibration &calibration);
+    k4a_result_t GetCalibration(k4a::calibration *calibration);
 
-    k4a_buffer_result_t GetTag(const char *name, std::string &out) const;
+    k4a_buffer_result_t GetTag(const char *name, std::string *out) const;
 
 private:
     K4ARecording(k4a_playback_t playback,

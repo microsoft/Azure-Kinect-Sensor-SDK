@@ -37,19 +37,6 @@ K4A_DECLARE_HANDLE(logger_t);
  */
 #define LOGGER_K4A "K4A"
 
-#define LOGGER_ALLOCATOR "Allocator"
-#define LOGGER_API "K4aApi"
-#define LOGGER_CALIBRATION "Calibration"
-#define LOGGER_COLOR "Color"
-#define LOGGER_COLOR_MCU "ColorMcu"
-#define LOGGER_DEPTH "Depth"
-#define LOGGER_DEPTH_MCU "DepthMcu"
-#define LOGGER_IMU "Imu"
-#define LOGGER_LOGGER "Logger"
-#define LOGGER_QUEUE "Queue"
-#define LOGGER_RECORD "K4aRecordApi"
-#define LOGGER_USB_CMD "UsbCmd"
-
 /** Default logging settings
  */
 #define K4A_ENABLE_LOG_TO_A_FILE "K4A_ENABLE_LOG_TO_A_FILE"
@@ -290,6 +277,8 @@ FORCEINLINE void TraceInvalidHandle(int result,
     }
 
 // Logs a message
+#define LOG_TRACE(message, ...)                                                                                        \
+    logger_trace(LOGGER_K4A, "%s (%d): %s(). " message, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define LOG_INFO(message, ...)                                                                                         \
     logger_info(LOGGER_K4A, "%s (%d): %s(). " message, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define LOG_WARNING(message, ...)                                                                                      \

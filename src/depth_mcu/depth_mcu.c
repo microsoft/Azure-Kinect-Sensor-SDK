@@ -153,10 +153,9 @@ k4a_buffer_result_t depthmcu_get_serialnum(depthmcu_t depthmcu_handle, char *ser
             || !isgraph(temp_serial_number[i]) // Non-printable character
         )
         {
-            logger_error(LOGGER_DEPTH_MCU,
-                         "depthmcu_get_serialnum found non-printable serial number (character %d is ASCII value %d)",
-                         i,
-                         temp_serial_number[i]);
+            LOG_ERROR("depthmcu_get_serialnum found non-printable serial number (character %d is ASCII value %d)",
+                      i,
+                      temp_serial_number[i]);
             return K4A_BUFFER_RESULT_FAILED;
         }
     }

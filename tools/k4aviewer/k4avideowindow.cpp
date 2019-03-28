@@ -24,24 +24,26 @@ using namespace k4aviewer;
 // Template specialization for RenderInfoPane.  Lets us show pixel value for the depth viewer.
 //
 template<>
-void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &frame, const ImVec2 hoveredPixel)
+void K4AVideoWindow<K4A_IMAGE_FORMAT_DEPTH16>::RenderInfoPane(const k4a::image &image, const ImVec2 hoveredPixel)
 {
-    RenderBasicInfoPane(frame);
-    RenderHoveredDepthPixelValue(frame, hoveredPixel, "mm");
+    RenderBasicInfoPane(image);
+    RenderHoveredDepthPixelValue(image, hoveredPixel, "mm");
+
+    const float sensorTemp = m_imageSource->GetLastSensorTemperature();
 
     // In recordings, there is no sensor temperature, so it's set to NaN.
     //
-    if (!std::isnan(m_frameSource->GetLastSensorTemperature()))
+    if (!std::isnan(sensorTemp))
     {
-        ImGui::Text("Sensor temperature: %.2f C", double(m_frameSource->GetLastSensorTemperature()));
+        ImGui::Text("Sensor temperature: %.2f C", double(sensorTemp));
     }
 }
 
 template<>
-void K4AVideoWindow<K4A_IMAGE_FORMAT_IR16>::RenderInfoPane(const k4a::image &frame, const ImVec2 hoveredPixel)
+void K4AVideoWindow<K4A_IMAGE_FORMAT_IR16>::RenderInfoPane(const k4a::image &image, const ImVec2 hoveredPixel)
 {
-    RenderBasicInfoPane(frame);
-    RenderHoveredDepthPixelValue(frame, hoveredPixel, "");
+    RenderBasicInfoPane(image);
+    RenderHoveredDepthPixelValue(image, hoveredPixel, "");
 }
 
 #ifdef __clang__

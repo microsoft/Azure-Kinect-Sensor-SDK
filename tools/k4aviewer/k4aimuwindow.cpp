@@ -73,7 +73,7 @@ void K4AImuWindow::Show(K4AWindowPlacementInfo placementInfo)
     }
 
     k4a_imu_sample_t sample;
-    while (m_sampleSource->PopSample(sample))
+    while (m_sampleSource->PopSample(&sample))
     {
         m_accelerometerGraph.AddSample(sample.acc_sample, sample.acc_timestamp_usec);
         m_gyroscopeGraph.AddSample(sample.gyro_sample, sample.gyro_timestamp_usec);
