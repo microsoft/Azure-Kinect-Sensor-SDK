@@ -1489,9 +1489,7 @@ static void free_vector_buffer(void *buffer, void *context)
     delete vector;
 }
 
-k4a_result_t new_capture(k4a_playback_context_t *context,
-                         std::shared_ptr<block_info_t> &block,
-                         k4a_capture_t *capture_handle)
+k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k4a_capture_t *capture_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, capture_handle == NULL);
@@ -1744,7 +1742,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
         if (next_blocks[i] && next_blocks[i]->block)
         {
             blocks[i]->current_block = next_blocks[i];
-            k4a_result_t result = TRACE_CALL(new_capture(context, blocks[i]->current_block, capture_handle));
+            k4a_result_t result = TRACE_CALL(new_capture(context, blocks[i]->current_block.get(), capture_handle));
             if (K4A_FAILED(result))
             {
                 if (*capture_handle != NULL)
