@@ -8,8 +8,6 @@
 #include <limits.h>
 #include <math.h>
 
-#define SKIP_INTERPOLATION_RATIO (0.04693441759f)
-
 typedef struct _k4a_transformation_input_image_t
 {
     const k4a_transformation_image_descriptor_t *descriptor;
@@ -270,16 +268,18 @@ static bool transformation_point_inside_triangle(const k4a_correspondence_t *val
     // - angle between two pixels is: theta = 0.234375 degree (120 degree / 512) in binning resolution mode
     // - distance between two pixels at same depth approximately is: A ~= sin(theta) * depth
     // - distance between two pixels at highly slanted surface (e.g. alpha = 85 degree) is: B = A / cos(alpha)
+    // - skip_interpolation_ratio ~= sin(theta) / cos(alpha)
     // We use B as the threshold that to skip interpolation if the depth difference in the triangle is larger
     // than B. This is a conservative threshold to estimate largest distance on a highly slanted surface at given depth,
     // in reality, given distortion, distance, resolution difference, B can be smaller
+    const float skip_interpolation_ratio = 0.04693441759f;
     float d1 = valid_top_left->depth;
     float d2 = valid_intermediate->depth;
     float d3 = valid_bottom_right->depth;
     float depth_min = transformation_min2f(transformation_min2f(d1, d2), d3);
     float depth_max = transformation_max2f(transformation_max2f(d1, d2), d3);
     float depth_delta = depth_max - depth_min;
-    float skip_interpolation_threshold = SKIP_INTERPOLATION_RATIO * depth_min;
+    float skip_interpolation_threshold = skip_interpolation_ratio * depth_min;
     if (depth_delta > skip_interpolation_threshold)
     {
         return false;
