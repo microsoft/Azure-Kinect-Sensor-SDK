@@ -24,7 +24,6 @@
 
 #include <windows.h>
 #include <combaseapi.h>
-#include <atlbase.h>
 #include <initguid.h>
 #include <mmdeviceapi.h>
 #include <functiondiscoverykeys_devpkey.h>

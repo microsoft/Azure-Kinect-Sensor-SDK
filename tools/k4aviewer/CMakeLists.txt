@@ -77,6 +77,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     list(APPEND EXTERNAL_LIBRARIES
         setupapi.lib
         pathcch.lib
+        Shlwapi.lib
     )
 else()
     list(APPEND SOURCE_FILES
