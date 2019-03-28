@@ -176,7 +176,7 @@ write_track_data(k4a_record_context_t *context, KaxTrackEntry *track, uint64_t t
         track_data_t data = { track, buffer };
         cluster->data.push_back(std::make_pair(timestamp_ns, data));
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to write track data to queue: %s", e.what());
         return K4A_RESULT_FAILED;
@@ -357,7 +357,7 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     {
         new_cluster->Render(*context->ebml_file, cues);
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
         LOG_ERROR("Failed to write recording data '%s': %s", context->file_path, e.what());
         result = K4A_RESULT_FAILED;
@@ -437,7 +437,7 @@ static void matroska_writer_thread(k4a_record_context_t *context)
             }
         }
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Writer thread threw exception: %s", e.what());
     }
@@ -455,7 +455,7 @@ k4a_result_t start_matroska_writer_thread(k4a_record_context_t *context)
         context->writer_stopping = false;
         context->writer_thread = std::thread(matroska_writer_thread, context);
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to start recording writer thread: %s", e.what());
         return K4A_RESULT_FAILED;
@@ -476,7 +476,7 @@ void stop_matroska_writer_thread(k4a_record_context_t *context)
         context->writer_notify->notify_one();
         context->writer_thread.join();
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to stop recording writer thread: %s", e.what());
     }

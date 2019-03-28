@@ -77,6 +77,8 @@ typedef struct _k4a_playback_context_t
     const char *file_path;
     std::unique_ptr<IOCallback> ebml_file;
     std::mutex io_lock; // Locks access to ebml_file
+    bool file_closing;
+
     logger_t logger_handle;
 
     uint64_t timecode_scale;
@@ -173,7 +175,7 @@ template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElemen
         typed_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true);
         return typed_element;
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
         LOG_ERROR("Failed to read element %s in recording '%s': %s",
                   T::ClassInfos.GetName(),
@@ -240,7 +242,7 @@ template<typename T> std::unique_ptr<T> find_next(k4a_playback_context_t *contex
 
         return std::unique_ptr<T>(static_cast<T *>(element));
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
         LOG_ERROR("Failed to find %s in recording '%s': %s", T::ClassInfos.GetName(), context->file_path, e.what());
         return nullptr;

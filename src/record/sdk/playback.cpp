@@ -37,13 +37,14 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
     {
         context->logger_handle = logger_handle;
         context->file_path = path;
+        context->file_closing = false;
 
         try
         {
             context->ebml_file = make_unique<LargeFileIOCallback>(path, MODE_READ);
             context->stream = make_unique<libebml::EbmlStream>(*context->ebml_file);
         }
-        catch (std::ios_base::failure e)
+        catch (std::ios_base::failure &e)
         {
             LOG_ERROR("Unable to open file '%s': %s", path, e.what());
             result = K4A_RESULT_FAILED;
@@ -87,7 +88,7 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
             {
                 context->ebml_file->close();
             }
-            catch (std::ios_base::failure e)
+            catch (std::ios_base::failure &)
             {
                 // The file was opened as read-only, ignore any close failures.
             }
@@ -345,14 +346,26 @@ void k4a_playback_close(const k4a_playback_t playback_handle)
         LOG_TRACE("  Cluster load count: %llu", context->load_count);
         LOG_TRACE("  Cluster cache hits: %llu", context->cache_hits);
 
+        context->file_closing = true;
+
         try
         {
+            try
+            {
+                context->io_lock.lock();
+            }
+            catch (std::system_error &)
+            {
+                // Lock is in a bad state, close the file anyway.
+            }
             context->ebml_file->close();
         }
-        catch (std::ios_base::failure e)
+        catch (std::ios_base::failure &)
         {
             // The file was opened as read-only, ignore any close failures.
         }
+
+        context->io_lock.unlock();
 
         // After this destroy, logging will no longer happen.
         if (context->logger_handle)

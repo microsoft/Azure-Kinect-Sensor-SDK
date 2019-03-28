@@ -26,7 +26,7 @@ std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlEle
 
         return std::unique_ptr<EbmlElement>(element);
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
         LOG_ERROR("Failed to get next child (parent id %x) in recording '%s': %s",
                   EbmlId(*parent).GetValue(),
@@ -46,7 +46,7 @@ k4a_result_t skip_element(k4a_playback_context_t *context, EbmlElement *element)
 
         return K4A_RESULT_SUCCEEDED;
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
         LOG_ERROR("Failed seek past element (id %x) in recording '%s': %s",
                   EbmlId(*element).GetValue(),
@@ -337,7 +337,7 @@ k4a_result_t populate_cluster_cache(k4a_playback_context_t *context)
             LOG_WARNING("Recording is missing Cue entries, playback performance may be impacted.", 0);
         }
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to populate cluster cache: %s", e.what());
         return K4A_RESULT_FAILED;
@@ -903,7 +903,7 @@ k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset)
         context->ebml_file->setFilePointer((int64_t)file_offset);
         return K4A_RESULT_SUCCEEDED;
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
         LOG_ERROR("Failed to seek file to %llu (relative %llu) '%s': %s",
                   file_offset,
@@ -1004,7 +1004,7 @@ cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp
         }
         return cluster_info;
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to find cluster for timestamp %llu: %s", timestamp_ns, e.what());
         return NULL;
@@ -1034,6 +1034,12 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
             else
             {
                 std::lock_guard<std::mutex> io_lock(context->io_lock);
+                if (context->file_closing)
+                {
+                    // User called k4a_playback_close(), return immediately.
+                    return NULL;
+                }
+
                 LargeFileIOCallback *file_io = dynamic_cast<LargeFileIOCallback *>(context->ebml_file.get());
                 if (file_io != NULL)
                 {
@@ -1128,7 +1134,7 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
             }
         }
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to find next cluster: %s", e.what());
         return NULL;
@@ -1153,6 +1159,11 @@ static std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t 
         else
         {
             std::lock_guard<std::mutex> lock(context->io_lock);
+            if (context->file_closing)
+            {
+                // User called k4a_playback_close(), return immediately.
+                return nullptr;
+            }
 
             // The cluster may have been loaded while we were acquiring the io lock, check again before actually loading
             // from disk.
@@ -1196,7 +1207,7 @@ static std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t 
         }
         return cluster;
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to load cluster from disk: %s", e.what());
         return nullptr;
@@ -1247,7 +1258,7 @@ std::shared_ptr<loaded_cluster_t> load_cluster(k4a_playback_context_t *context, 
             result->next_clusters[i].wait();
         }
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to load read-ahead clusters: %s", e.what());
         return nullptr;
@@ -1337,7 +1348,7 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
             });
         }
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to load next cluster: %s", e.what());
         return nullptr;

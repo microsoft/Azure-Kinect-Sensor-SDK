@@ -57,14 +57,16 @@ protected:
 class Timer
 {
 public:
-    Timer(std::string name) : name(name), start(std::chrono::high_resolution_clock::now()) {}
+    Timer(std::string name) : name(name)
+    {
+        std::cout << "Start Timer(" << name << ")" << std::endl;
+        start = std::chrono::high_resolution_clock::now();
+    }
+
     ~Timer()
     {
         auto delta = std::chrono::high_resolution_clock::now() - start;
-        if (delta.count() > 100000)
-        {
-            std::cout << "Timer(" << name << "): " << ((float)delta.count() / 1000000.0f) << " ms" << std::endl;
-        }
+        std::cout << "End Timer(" << name << "): " << ((float)delta.count() / 1000000.0f) << " ms" << std::endl;
     }
 
 private:

@@ -45,7 +45,7 @@ k4a_result_t k4a_record_create(const char *path,
         {
             context->ebml_file = make_unique<LargeFileIOCallback>(path, MODE_CREATE);
         }
-        catch (std::ios_base::failure e)
+        catch (std::ios_base::failure &e)
         {
             LOG_ERROR("Unable to open file '%s': %s", path, e.what());
             result = K4A_RESULT_FAILED;
@@ -320,7 +320,7 @@ k4a_result_t k4a_record_create(const char *path,
             {
                 context->ebml_file->close();
             }
-            catch (std::ios_base::failure e)
+            catch (std::ios_base::failure &)
             {
                 // The file is empty at this point, ignore any close failures.
             }
@@ -444,7 +444,7 @@ k4a_result_t k4a_record_write_header(const k4a_record_t recording_handle)
             context->tags_void->Render(*context->ebml_file);
         }
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
         LOG_ERROR("Failed to write recording header '%s': %s", context->file_path, e.what());
         return K4A_RESULT_FAILED;
@@ -683,12 +683,12 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
         assert(current_position <= INT64_MAX);
         context->ebml_file->setFilePointer((int64_t)current_position);
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
         LOG_ERROR("Failed to write recording '%s': %s", context->file_path, e.what());
         return K4A_RESULT_FAILED;
     }
-    catch (std::system_error e)
+    catch (std::system_error &e)
     {
         LOG_ERROR("Failed to flush recording '%s': %s", context->file_path, e.what());
         return K4A_RESULT_FAILED;
@@ -715,7 +715,7 @@ void k4a_record_close(const k4a_record_t recording_handle)
         {
             context->ebml_file->close();
         }
-        catch (std::ios_base::failure e)
+        catch (std::ios_base::failure &e)
         {
             LOG_ERROR("Failed to close recording '%s': %s", context->file_path, e.what());
         }
