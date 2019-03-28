@@ -17,12 +17,12 @@
 
 namespace k4aviewer
 {
-template<typename T> class K4APollingThread
+class K4APollingThread
 {
 public:
     K4APollingThread(std::function<bool()> &&pollFn) : m_pollFn(std::move(pollFn))
     {
-        m_thread = std::thread(&K4APollingThread<T>::Run, this);
+        m_thread = std::thread(&K4APollingThread::Run, this);
     }
 
     void Stop()
@@ -52,7 +52,7 @@ private:
     }
 
     std::thread m_thread;
-    bool m_shouldExit = false;
+    volatile bool m_shouldExit = false;
 
     std::function<bool()> m_pollFn;
 };

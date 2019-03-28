@@ -39,7 +39,7 @@ public:
     static GLenum Create(std::shared_ptr<K4AViewerImage> *out,
                          const uint8_t *data,
                          ImageDimensions dimensions,
-                         GLenum format,
+                         GLenum format = GL_BGRA,
                          GLenum internalFormat = GL_RGBA8);
 
     explicit operator ImTextureID() const;

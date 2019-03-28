@@ -16,7 +16,7 @@
 // Project headers
 //
 #include "ik4avisualizationwindow.h"
-#include "k4aconvertingframesource.h"
+#include "k4aconvertingimagesource.h"
 #include "k4aviewererrormanager.h"
 #include "k4aviewersettingsmanager.h"
 #include "k4awindowsizehelpers.h"
@@ -27,13 +27,13 @@ namespace k4aviewer
 template<k4a_image_format_t ImageFormat> class K4AVideoWindow : public IK4AVisualizationWindow
 {
 public:
-    K4AVideoWindow(std::string &&title, std::shared_ptr<K4AConvertingFrameSource<ImageFormat>> frameSource) :
-        m_frameSource(std::move(frameSource)),
+    K4AVideoWindow(std::string &&title, std::shared_ptr<K4AConvertingImageSource<ImageFormat>> imageSource) :
+        m_imageSource(std::move(imageSource)),
         m_title(std::move(title))
     {
-        const GLenum initResult = m_frameSource->InitializeTexture(&m_currentTexture);
-        const ImageVisualizationResult ivr = GLEnumToImageVisualizationResult(initResult);
-        if (ivr != ImageVisualizationResult::Success)
+        const GLenum initResult = m_imageSource->InitializeTexture(&m_currentTexture);
+        const ImageConversionResult ivr = GLEnumToImageConversionResult(initResult);
+        if (ivr != ImageConversionResult::Success)
         {
             SetFailed(ivr);
         }
@@ -49,39 +49,21 @@ public:
             return;
         }
 
-        RenderVideoFrame(placementInfo.Size);
-    }
-
-    const char *GetTitle() const override
-    {
-        return m_title.c_str();
-    }
-
-    K4AVideoWindow(const K4AVideoWindow &) = delete;
-    K4AVideoWindow &operator=(const K4AVideoWindow &) = delete;
-    K4AVideoWindow(const K4AVideoWindow &&) = delete;
-    K4AVideoWindow &operator=(const K4AVideoWindow &&) = delete;
-
-private:
-    const ImVec2 InvalidHoveredPixel = ImVec2(-1, -1);
-
-    void RenderVideoFrame(ImVec2 maxSize)
-    {
         if (m_failed)
         {
             return;
         }
 
-        const ImageVisualizationResult nextFrameResult = m_frameSource->GetNextFrame(m_currentTexture.get(),
-                                                                                     &m_currentImage);
-        if (nextFrameResult == ImageVisualizationResult::NoDataError)
+        const ImageConversionResult nextImageResult = m_imageSource->GetNextImage(m_currentTexture.get(),
+                                                                                  &m_currentImage);
+        if (nextImageResult == ImageConversionResult::NoDataError)
         {
             // We don't have data from the camera yet; show the window with the default black texture.
             // Continue rendering the window.
         }
-        else if (nextFrameResult != ImageVisualizationResult::Success)
+        else if (nextImageResult != ImageConversionResult::Success)
         {
-            SetFailed(nextFrameResult);
+            SetFailed(nextImageResult);
             return;
         }
 
@@ -97,7 +79,7 @@ private:
 
         // Compute how big we can make the image
         //
-        const ImVec2 displayDimensions = GetMaxImageSize(sourceImageDimensions, maxSize);
+        const ImVec2 displayDimensions = GetMaxImageSize(sourceImageDimensions, placementInfo.Size);
 
         ImGui::Image(static_cast<ImTextureID>(*m_currentTexture), displayDimensions);
 
@@ -145,6 +127,19 @@ private:
         }
     }
 
+    const char *GetTitle() const override
+    {
+        return m_title.c_str();
+    }
+
+    K4AVideoWindow(const K4AVideoWindow &) = delete;
+    K4AVideoWindow &operator=(const K4AVideoWindow &) = delete;
+    K4AVideoWindow(const K4AVideoWindow &&) = delete;
+    K4AVideoWindow &operator=(const K4AVideoWindow &&) = delete;
+
+private:
+    const ImVec2 InvalidHoveredPixel = ImVec2(-1, -1);
+
     void RenderInfoPane(const k4a::image &image, ImVec2 hoveredPixel)
     {
         (void)hoveredPixel;
@@ -155,7 +150,7 @@ private:
     {
         if (K4AViewerSettingsManager::Instance().GetShowFrameRateInfo())
         {
-            ImGui::Text("Average frame rate: %.2f fps", m_frameSource->GetFrameRate());
+            ImGui::Text("Average frame rate: %.2f fps", m_imageSource->GetFrameRate());
         }
 
         ImGui::Text("Timestamp: %llu", static_cast<long long int>(image.get_timestamp().count()));
@@ -183,21 +178,21 @@ private:
 
     // Sets the window failed with an error message derived from errorCode
     //
-    void SetFailed(const ImageVisualizationResult errorCode)
+    void SetFailed(const ImageConversionResult errorCode)
     {
         std::stringstream errorBuilder;
         errorBuilder << m_title << ": ";
         switch (errorCode)
         {
-        case ImageVisualizationResult::InvalidBufferSizeError:
+        case ImageConversionResult::InvalidBufferSizeError:
             errorBuilder << "received an unexpected amount of data!";
             break;
 
-        case ImageVisualizationResult::InvalidImageDataError:
+        case ImageConversionResult::InvalidImageDataError:
             errorBuilder << "received malformed image data!";
             break;
 
-        case ImageVisualizationResult::OpenGLError:
+        case ImageConversionResult::OpenGLError:
             errorBuilder << "failed to upload image to OpenGL!";
             break;
 
@@ -211,7 +206,7 @@ private:
         m_failed = true;
     }
 
-    std::shared_ptr<K4AConvertingFrameSource<ImageFormat>> m_frameSource;
+    std::shared_ptr<K4AConvertingImageSource<ImageFormat>> m_imageSource;
     std::string m_title;
     bool m_failed = false;
 

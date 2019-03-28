@@ -863,7 +863,7 @@ bool K4ADeviceDockControl::StartCameras()
     bool *pPaused = &m_paused;
     bool *pCamerasStarted = &m_camerasStarted;
 
-    m_cameraPollingThread = std14::make_unique<K4APollingThread<k4a::capture>>(
+    m_cameraPollingThread = std14::make_unique<K4APollingThread>(
         [pDevice, pCameraDataSource, pPaused, pCamerasStarted]() {
             return PollSensor<k4a::capture>("Cameras",
                                             pDevice,
@@ -951,20 +951,19 @@ bool K4ADeviceDockControl::StartImu()
     bool *pPaused = &m_paused;
     bool *pImuStarted = &m_imuStarted;
 
-    m_imuPollingThread = std14::make_unique<K4APollingThread<k4a_imu_sample_t>>(
-        [pDevice, pImuDataSource, pPaused, pImuStarted]() {
-            return PollSensor<k4a_imu_sample_t>("IMU",
-                                                pDevice,
-                                                pImuDataSource,
-                                                pPaused,
-                                                [](k4a::device *device, k4a_imu_sample_t *sample) {
-                                                    return device->get_imu_sample(sample, ImuPollingTimeout);
-                                                },
-                                                [pImuStarted](k4a::device *device) {
-                                                    device->stop_imu();
-                                                    *pImuStarted = false;
-                                                });
-        });
+    m_imuPollingThread = std14::make_unique<K4APollingThread>([pDevice, pImuDataSource, pPaused, pImuStarted]() {
+        return PollSensor<k4a_imu_sample_t>("IMU",
+                                            pDevice,
+                                            pImuDataSource,
+                                            pPaused,
+                                            [](k4a::device *device, k4a_imu_sample_t *sample) {
+                                                return device->get_imu_sample(sample, ImuPollingTimeout);
+                                            },
+                                            [pImuStarted](k4a::device *device) {
+                                                device->stop_imu();
+                                                *pImuStarted = false;
+                                            });
+    });
 
     return true;
 }

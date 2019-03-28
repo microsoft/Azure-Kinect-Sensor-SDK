@@ -31,13 +31,13 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
 {
     if (m_failed)
     {
-        ImGui::Text("Frame source failed!");
+        ImGui::Text("Data source failed!");
         return;
     }
 
     if (m_captureSource->IsFailed())
     {
-        K4AViewerErrorManager::Instance().SetErrorStatus(m_title + ": frame source failed!");
+        K4AViewerErrorManager::Instance().SetErrorStatus(m_title + ": image source failed!");
         m_failed = true;
         return;
     }
