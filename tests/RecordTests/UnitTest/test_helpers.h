@@ -57,7 +57,7 @@ protected:
 class Timer
 {
 public:
-    Timer(std::string name) : name(name)
+    Timer(std::string _name) : name(_name)
     {
         std::cout << "Start Timer(" << name << ")" << std::endl;
         start = std::chrono::high_resolution_clock::now();

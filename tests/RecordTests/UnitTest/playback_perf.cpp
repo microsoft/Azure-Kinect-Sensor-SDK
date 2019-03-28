@@ -128,7 +128,7 @@ TEST_F(playback_perf, test_read_latency_30fps)
     }
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    std::vector<uint64_t> deltas;
+    std::vector<int64_t> deltas;
 
     {
         k4a_capture_t capture = NULL;
@@ -150,13 +150,13 @@ TEST_F(playback_perf, test_read_latency_30fps)
         }
     }
 
-    std::sort(deltas.begin(), deltas.end(), std::less<uint64_t>());
-    uint64_t total_ns = 0;
+    std::sort(deltas.begin(), deltas.end(), std::less<int64_t>());
+    int64_t total_ns = 0;
     for (auto d : deltas)
     {
         total_ns += d;
     }
-    std::cout << "Avg latency: " << (total_ns / deltas.size() / 1000) << " usec" << std::endl;
+    std::cout << "Avg latency: " << (total_ns / (int64_t)deltas.size() / 1000) << " usec" << std::endl;
     std::cout << "P95 latency: " << (deltas[(size_t)((double)deltas.size() * 0.95) - 1] / 1000) << " usec" << std::endl;
     std::cout << "P99 latency: " << (deltas[(size_t)((double)deltas.size() * 0.99) - 1] / 1000) << " usec" << std::endl;
 
