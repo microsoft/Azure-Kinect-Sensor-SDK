@@ -113,7 +113,7 @@ jobs:
     fetchDepth: 20
     lfs: false
     persistCredentials: true
-    submodules: 'recursive'
+    submodules: true
 
   # Use Python Version
   # Retrieves the specified version of Python from the tool cache. Optionally add it to PATH.
@@ -301,7 +301,7 @@ jobs:
     fetchDepth: 20
     lfs: false
     persistCredentials: true
-    submodules: 'recursive'
+    submodules: true
 
   - task: ShellScript@2
     inputs:
@@ -379,7 +379,7 @@ jobs:
     fetchDepth: 20
     lfs: false
     persistCredentials: true
-    submodules: 'recursive'
+    submodules: true
 
   - task: BatchScript@1
     displayName: 'Setup VS2017 Env'
@@ -470,7 +470,7 @@ jobs:
       clean: true
       lfs: false
       persistCredentials: true
-      submodules: 'recursive'
+      submodules: true
 
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
@@ -538,7 +538,7 @@ jobs:
       clean: true
       lfs: false
       persistCredentials: true
-      submodules: 'recursive'
+      submodules: true
 
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
