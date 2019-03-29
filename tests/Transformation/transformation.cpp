@@ -404,6 +404,11 @@ TEST_F(transformation_ut, transformation_create_depth_only)
               K4A_RESULT_SUCCEEDED);
 
     transformation_destroy(transformation_handle);
+    image_dec_ref(depth_image);
+    image_dec_ref(color_image);
+    image_dec_ref(transformed_color_image);
+    image_dec_ref(transformed_depth_image);
+    image_dec_ref(point_cloud_image);
 }
 
 TEST_F(transformation_ut, transformation_create_color_only)
@@ -485,6 +490,11 @@ TEST_F(transformation_ut, transformation_create_color_only)
     ASSERT_EQ(calibration.depth_camera_calibration.resolution_width, 0);
 
     transformation_destroy(transformation_handle);
+
+    image_dec_ref(color_image);
+    image_dec_ref(depth_image);
+    image_dec_ref(transformed_color_image);
+    image_dec_ref(transformed_depth_image);
 }
 
 int main(int argc, char **argv)

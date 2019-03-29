@@ -646,5 +646,7 @@ int main(int argc, char **argv)
 
     ::testing::AddGlobalTestEnvironment(new SampleRecordings());
     ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    int results = RUN_ALL_TESTS();
+    k4a_unittest_deinit();
+    return results;
 }
