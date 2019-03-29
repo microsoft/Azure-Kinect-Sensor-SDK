@@ -61,7 +61,7 @@ private:
     ImVec2 m_regionSize = ImVec2(0.f, 0.f);
 
     // The actual size/location of the dock window, in absolute window coordinates.
-    // Must be within by m_viewRegion*
+    // Must be within by m_region*
     //
     ImVec2 m_size = ImVec2(0.f, 0.f);
 
