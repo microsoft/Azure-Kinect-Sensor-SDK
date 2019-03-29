@@ -60,6 +60,7 @@ typedef struct _k4a_record_context_t
      */
     uint64_t most_recent_timestamp;
 
+    uint64_t last_cues_entry_ns;
     uint32_t track_count;
 
     std::unique_ptr<libmatroska::KaxSegment> file_segment;
