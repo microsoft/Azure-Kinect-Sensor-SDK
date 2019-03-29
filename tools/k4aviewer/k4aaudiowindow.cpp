@@ -69,7 +69,7 @@ void K4AAudioWindow::Show(K4AWindowPlacementInfo placementInfo)
     sliderSize.y -= 2 * style.WindowPadding.y;
     sliderSize.y -= 2 * style.ItemSpacing.y;
 
-    sliderSize.y = std::max(sliderSize.y, MinHeight);
+    sliderSize.y = std::max(MinHeight, sliderSize.y);
 
     ImVec2 graphSize;
     graphSize.x = placementInfo.Size.x;
