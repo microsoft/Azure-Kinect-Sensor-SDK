@@ -34,7 +34,7 @@ public:
 
     ~K4ADeviceDockControl() override;
 
-    void Show() override;
+    K4ADockControlStatus Show() override;
 
 private:
     struct ColorSetting

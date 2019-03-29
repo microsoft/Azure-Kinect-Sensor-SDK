@@ -87,12 +87,13 @@ public:
 
         if (m_currentImage != nullptr && K4AViewerSettingsManager::Instance().GetShowInfoPane())
         {
+            ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, 0.f), displayDimensions);
             ImGui::SetNextWindowPos(imageStartPos, ImGuiCond_Always);
             ImGui::SetNextWindowBgAlpha(0.3f); // Transparent background
             ImGuiWindowFlags overlayFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar |
                                             ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
                                             ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing |
-                                            ImGuiWindowFlags_NoNav;
+                                            ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoScrollbar;
 
             std::string overlayTitle = m_title + "##overlay";
             if (ImGui::Begin(overlayTitle.c_str(), nullptr, overlayFlags))
