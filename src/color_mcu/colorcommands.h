@@ -17,6 +17,7 @@ extern "C" {
 //**************Symbolic Constant Macros (defines)  *************
 
 //************************ Typedefs *****************************
+#define DEV_CMD_RESET 0x80000000
 #define DEV_CMD_SET_SYS_CFG 0x80000001
 #define DEV_CMD_GET_SYS_CFG 0x80000002
 #define DEV_CMD_IMU_STREAM_START 0x80000003
