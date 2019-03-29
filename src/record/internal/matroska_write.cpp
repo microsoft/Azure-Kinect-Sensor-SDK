@@ -555,4 +555,5 @@ k4a_result_t get_matroska_segment(k4a_record_context_t *context,
     *iocallback = context->ebml_file.get();
     return K4A_RESULT_SUCCEEDED;
 }
+
 } // namespace k4arecord
