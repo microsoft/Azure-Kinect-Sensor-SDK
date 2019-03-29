@@ -10,6 +10,7 @@ target_include_directories(k4a_firmware PUBLIC
 
 # Dependencies of this library
 target_link_libraries(k4a_firmware PUBLIC 
+    k4ainternal::color_mcu
     k4ainternal::logging)
 
 # Define alias for other targets to link against
