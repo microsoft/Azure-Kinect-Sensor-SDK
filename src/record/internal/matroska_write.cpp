@@ -342,12 +342,18 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
 
         block_blob->AddFrameAuto(*data.second.track, data.first - context->start_timestamp_offset, *data.second.buffer);
 
-        // Only add a Cue entry once per write (i.e. roughly once per second)
+        // Only add one Cue entry once per cluster
         // We only need to write Cue entries for the first track.
         if (first && GetChild<KaxTrackNumber>(*data.second.track).GetValue() == 1)
         {
-            auto &cues = GetChild<KaxCues>(*context->file_segment);
-            cues.AddBlockBlob(*block_blob);
+            // Add cue entries at a maximum rate specified by CUE_ENTRY_GAP_NS so that the index doesn't get too large.
+            if (context->last_cues_entry_ns == 0 ||
+                data.first - context->start_timestamp_offset >= context->last_cues_entry_ns + CUE_ENTRY_GAP_NS)
+            {
+                context->last_cues_entry_ns = data.first - context->start_timestamp_offset;
+                auto &cues = GetChild<KaxCues>(*context->file_segment);
+                cues.AddBlockBlob(*block_blob);
+            }
             first = false;
         }
     }
