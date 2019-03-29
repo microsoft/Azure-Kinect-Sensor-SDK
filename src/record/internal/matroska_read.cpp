@@ -240,7 +240,28 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         else if (check_element_type(e, &block_group))
         {
             block_group->SetParent(*last_cluster->cluster);
+
+            KaxTrackEntry *parent_track = NULL;
+            for (EbmlElement *e2 : context->tracks->GetElementList())
+            {
+                if (check_element_type(e2, &parent_track))
+                {
+                    if (GetChild<KaxTrackNumber>(*parent_track).GetValue() == (uint64)block_group->TrackNumber())
+                    {
+                        parent_track->SetGlobalTimecodeScale(context->timecode_scale);
+                    }
+                }
+            }
             uint64_t block_timestamp_ns = block_group->GlobalTimecode();
+            if (parent_track)
+            {
+                block_group->SetParentTrack(*parent_track);
+                uint64_t block_duration_ns = 0;
+                if (block_group->GetBlockDuration(block_duration_ns))
+                {
+                    block_timestamp_ns += block_duration_ns - 1;
+                }
+            }
             if (block_timestamp_ns > context->last_timestamp_ns)
             {
                 context->last_timestamp_ns = block_timestamp_ns;
@@ -755,6 +776,7 @@ KaxTrackEntry *get_track_by_name(k4a_playback_context_t *context, const char *na
         {
             if (GetChild<KaxTrackName>(*track).GetValueUTF8() == search)
             {
+                track->SetGlobalTimecodeScale(context->timecode_scale);
                 return track;
             }
         }
@@ -786,6 +808,7 @@ KaxTrackEntry *get_track_by_tag(k4a_playback_context_t *context, const char *tag
             {
                 if (GetChild<KaxTrackUID>(*track).GetValue() == search_uid)
                 {
+                    track->SetGlobalTimecodeScale(context->timecode_scale);
                     return track;
                 }
             }
@@ -1360,8 +1383,9 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
     return result;
 }
 
-// Find the first block with a timestamp >= the specified timestamp. If no blocks are found, a pointer to EOF will be
-// returned, or nullptr if an error occurs.
+// Find the first block with a timestamp >= the specified timestamp. If a block group containing the specified timestamp
+// is found, it will be returned. If no blocks are found, a pointer to EOF will be returned, or nullptr if an error
+// occurs.
 std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context, track_reader_t *reader, uint64_t timestamp_ns)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
@@ -1393,14 +1417,14 @@ std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context, track_
         if (block)
         {
             // Return this block if EOF was reached, or the timestamp is >= the search timestamp.
-            if (block->block == NULL || block->sync_timestamp_ns >= timestamp_ns)
+            if (block->block == NULL || block->sync_timestamp_ns + block->block_duration_ns >= timestamp_ns)
             {
                 return block;
             }
         }
     }
 
-    LOG_ERROR("Failed to read next block from disk.", 0);
+    LOG_ERROR("Failed to find block for timestamp: %llu ns.", timestamp_ns);
     return nullptr;
 }
 
@@ -1442,6 +1466,7 @@ std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_
                 {
                     simple_block->SetParent(*next_block->cluster->cluster);
                     next_block->block = simple_block;
+                    next_block->block_duration_ns = 0;
                 }
             }
             else if (check_element_type(elements[(size_t)next_block->index], &block_group))
@@ -1451,6 +1476,10 @@ std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_
                     block_group->SetParent(*next_block->cluster->cluster);
                     block_group->SetParentTrack(*current->reader->track);
                     next_block->block = &GetChild<KaxBlock>(*block_group);
+                    if (!block_group->GetBlockDuration(next_block->block_duration_ns))
+                    {
+                        next_block->block_duration_ns = 0;
+                    }
                 }
             }
             if (next_block->block != NULL)
@@ -1609,7 +1638,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             if (next_blocks[i] == nullptr)
             {
                 next_blocks[i] = find_block(context, blocks[i], context->seek_timestamp_ns);
-                if (!next)
+                if (!next && next_blocks[i])
                 {
                     next_blocks[i] = next_block(context, next_blocks[i].get(), false);
                 }
@@ -1767,10 +1796,104 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
         return K4A_STREAM_RESULT_EOF;
     }
 
-    LOG_ERROR("IMU playback is not yet supported.", 0);
-    (void)next;
+    std::shared_ptr<block_info_t> block_info = context->imu_track.current_block;
 
-    return K4A_STREAM_RESULT_FAILED;
+    if (block_info == nullptr)
+    {
+        block_info = find_block(context, &context->imu_track, context->seek_timestamp_ns);
+        context->imu_track.current_block = block_info;
+
+        if (block_info && block_info->block)
+        {
+            if (block_info->sync_timestamp_ns <= context->seek_timestamp_ns &&
+                block_info->sync_timestamp_ns + block_info->block_duration_ns > context->seek_timestamp_ns)
+            {
+                // The IMU sample we're looking for is within the found block.
+                size_t sample_count = block_info->block->NumberFrames();
+                context->imu_sample_index = -1;
+                for (size_t i = 0; i < sample_count; i++)
+                {
+                    DataBuffer &data_buffer = block_info->block->GetBuffer((unsigned int)i);
+                    uint32_t buffer_size = data_buffer.Size();
+                    binary *buffer = data_buffer.Buffer();
+                    if (buffer_size != sizeof(matroska_imu_sample_t))
+                    {
+                        LOG_ERROR("Unsupported IMU sample size: %u", buffer_size);
+                        *imu_sample = { 0 };
+                        return K4A_STREAM_RESULT_FAILED;
+                    }
+                    else if (buffer == NULL)
+                    {
+                        LOG_ERROR("Null IMU buffer returned from file.", 0);
+                        *imu_sample = { 0 };
+                        return K4A_STREAM_RESULT_FAILED;
+                    }
+                    else
+                    {
+                        matroska_imu_sample_t *sample = reinterpret_cast<matroska_imu_sample_t *>(data_buffer.Buffer());
+                        if (sample->acc_timestamp_ns >= context->seek_timestamp_ns)
+                        {
+                            context->imu_sample_index = next ? (int)i : (int)i - 1;
+                            break;
+                        }
+                    }
+                }
+                if (context->imu_sample_index >= 0 && context->imu_sample_index < (int)sample_count)
+                {
+                    DataBuffer &data_buffer = block_info->block->GetBuffer((unsigned int)context->imu_sample_index);
+                    matroska_imu_sample_t *sample = reinterpret_cast<matroska_imu_sample_t *>(data_buffer.Buffer());
+                    imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
+                    imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
+                    for (size_t i = 0; i < 3; i++)
+                    {
+                        imu_sample->acc_sample.v[i] = sample->acc_data[i];
+                        imu_sample->gyro_sample.v[i] = sample->gyro_data[i];
+                    }
+                    return K4A_STREAM_RESULT_SUCCEEDED;
+                }
+                else
+                {
+                    __debugbreak();
+                }
+            }
+            else
+            {
+                __debugbreak();
+            }
+        }
+    }
+
+    context->imu_sample_index += next ? 1 : -1;
+    while (block_info && block_info->block)
+    {
+        size_t sample_count = block_info->block->NumberFrames();
+        if (context->imu_sample_index >= 0 && context->imu_sample_index < (int)sample_count)
+        {
+            DataBuffer &data_buffer = block_info->block->GetBuffer((unsigned int)context->imu_sample_index);
+            matroska_imu_sample_t *sample = reinterpret_cast<matroska_imu_sample_t *>(data_buffer.Buffer());
+            imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
+            imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
+            for (size_t i = 0; i < 3; i++)
+            {
+                imu_sample->acc_sample.v[i] = sample->acc_data[i];
+                imu_sample->gyro_sample.v[i] = sample->gyro_data[i];
+            }
+            return K4A_STREAM_RESULT_SUCCEEDED;
+        }
+        else
+        {
+            block_info = next_block(context, block_info.get(), next);
+            if (block_info && block_info->block)
+            {
+                context->imu_track.current_block = block_info;
+                context->imu_sample_index = next ? 0 : (int)(block_info->block->NumberFrames() - 1);
+            }
+        }
+    }
+
+    LOG_TRACE("%s of recording reached", next ? "End" : "Beginning");
+    *imu_sample = { 0 };
+    return K4A_STREAM_RESULT_EOF;
 }
 
 } // namespace k4arecord

@@ -42,7 +42,8 @@ bool validate_test_image(k4a_image_t image,
                          uint32_t height,
                          uint32_t stride);
 k4a_imu_sample_t create_test_imu_sample(uint64_t timestamp_us);
-bool validate_imu_sample(k4a_imu_sample_t imu_sample, uint64_t timestamp_us);
+bool validate_imu_sample(k4a_imu_sample_t &imu_sample, uint64_t timestamp_us);
+bool validate_null_imu_sample(k4a_imu_sample_t &imu_sample);
 
 class SampleRecordings : public ::testing::Environment
 {

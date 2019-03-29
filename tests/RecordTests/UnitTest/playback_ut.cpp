@@ -640,6 +640,63 @@ TEST_F(playback_ut, open_skipped_frames_file)
     k4a_playback_close(handle);
 }
 
+TEST_F(playback_ut, open_imu_playback_file)
+{
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_full.mkv", &handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    // Read recording configuration
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
+    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_TRUE(config.color_track_enabled);
+    ASSERT_TRUE(config.depth_track_enabled);
+    ASSERT_TRUE(config.ir_track_enabled);
+    ASSERT_TRUE(config.imu_track_enabled);
+    ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+    ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_STANDALONE);
+    ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)0);
+    ASSERT_EQ(config.start_timestamp_offset_usec, (uint32_t)0);
+
+    k4a_imu_sample_t imu_sample = { 0 };
+    k4a_imu_sample_t null_imu_sample = { 0 };
+    k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
+    uint64_t imu_timestamp = 0;
+    uint64_t last_timestamp = k4a_playback_get_last_timestamp_usec(handle);
+    ASSERT_EQ(last_timestamp, 3333000);
+
+    // Read forward
+    while (imu_timestamp <= last_timestamp)
+    {
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+        imu_timestamp += 1000;
+    }
+    stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_TRUE(validate_null_imu_sample(imu_sample));
+
+    // Read backward
+    while (imu_timestamp > 0)
+    {
+        imu_timestamp -= 1000;
+        stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+    }
+    stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_TRUE(validate_null_imu_sample(imu_sample));
+
+    k4a_playback_close(handle);
+}
+
 int main(int argc, char **argv)
 {
     k4a_unittest_init();

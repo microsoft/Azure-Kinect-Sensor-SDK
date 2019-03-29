@@ -263,8 +263,10 @@ k4a_imu_sample_t create_test_imu_sample(uint64_t timestamp_us)
 // 1.0, 2.0, and 3.0 are all exact float values, and no math is done. Equals is fine in this case.
 #pragma clang diagnostic ignored "-Wfloat-equal"
 #endif
-bool validate_imu_sample(k4a_imu_sample_t imu_sample, uint64_t timestamp_us)
+bool validate_imu_sample(k4a_imu_sample_t &imu_sample, uint64_t timestamp_us)
 {
+    // std::cout << "Got IMU Sample at " << imu_sample.acc_timestamp_usec << " usec: [" << imu_sample.acc_sample.v[0]
+    //           << ", " << imu_sample.acc_sample.v[1] << ", " << imu_sample.acc_sample.v[2] << "]" << std::endl;
     if (imu_sample.acc_timestamp_usec != timestamp_us || imu_sample.gyro_timestamp_usec != timestamp_us)
     {
         return false;
@@ -275,6 +277,24 @@ bool validate_imu_sample(k4a_imu_sample_t imu_sample, uint64_t timestamp_us)
     }
     if (imu_sample.gyro_sample.v[0] != -1.0f || imu_sample.gyro_sample.v[1] != -2.0f ||
         imu_sample.gyro_sample.v[2] != -3.0f)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool validate_null_imu_sample(k4a_imu_sample_t &imu_sample)
+{
+    if (imu_sample.acc_timestamp_usec != 0 || imu_sample.gyro_timestamp_usec != 0)
+    {
+        return false;
+    }
+    if (imu_sample.acc_sample.v[0] != 0.0f || imu_sample.acc_sample.v[1] != 0.0f || imu_sample.acc_sample.v[2] != 0.0f)
+    {
+        return false;
+    }
+    if (imu_sample.gyro_sample.v[0] != 0.0f || imu_sample.gyro_sample.v[1] != 0.0f ||
+        imu_sample.gyro_sample.v[2] != 0.0f)
     {
         return false;
     }
