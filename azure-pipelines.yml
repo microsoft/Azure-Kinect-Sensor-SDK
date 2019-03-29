@@ -561,7 +561,7 @@ jobs:
         command: download
         vstsFeed: 'analog.ai.depthcamera'
         vstsFeedPackage: 'findconnectedport'
-        vstsPackageVersion: "0.1.0"
+        vstsPackageVersion: "0.1.1"
         downloadDirectory: "$(System.ArtifactsDirectory)/findconnectedport"
 
     - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
