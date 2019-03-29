@@ -8,7 +8,6 @@
 #define FIRMWARE_H
 
 #include <k4a/k4atypes.h>
-#include <k4ainternal/depth_mcu.h>
 
 #ifdef __cplusplus
 extern "C" {

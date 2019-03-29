@@ -1,17 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#define VC_EXTRALEAN
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
-#define _CRT_NONSTDC_NO_DEPRECATE
-
 #include "firmware_helper.h"
-
-#include <gtest/gtest.h>
 #include <utcommon.h>
+
 #include <k4ainternal/logging.h>
+#include <k4ainternal/usbcommand.h>
 
 #include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/threadapi.h>

@@ -123,7 +123,7 @@ k4a_result_t colormcu_get_external_sync_jack_state(colormcu_t colormcu_handle,
 
 // general
 
-k4a_result_t colormcu_reset(colormcu_t colormcu_handle);
+k4a_result_t colormcu_reset_device(colormcu_t colormcu_handle);
 
 // IMU functions
 k4a_result_t colormcu_imu_start_streaming(colormcu_t colormcu_handle);
