@@ -503,7 +503,7 @@ jobs:
         command: download
         vstsFeed: 'analog.ai.depthcamera'
         vstsFeedPackage: 'azure-kinect-firmware'
-        vstsPackageVersion: "$(firmare_version)"
+        vstsPackageVersion: "$(firmware_version)"
         downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
 
     - task: PowerShell@2
