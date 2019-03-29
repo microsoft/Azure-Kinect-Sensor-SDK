@@ -7,7 +7,9 @@
 
 // System headers
 //
+#include <algorithm>
 #include <limits>
+#include <string>
 
 // Library headers
 //
@@ -57,22 +59,30 @@ void K4AWindowManager::ClearWindows()
     ClearFullscreenWindow();
 }
 
-void K4AWindowManager::PushDockControl(std::unique_ptr<IK4ADockControl> &&dockControl)
+void K4AWindowManager::PushLeftDockControl(std::unique_ptr<IK4ADockControl> &&dockControl)
 {
-    m_dockControls.emplace(std::move(dockControl));
+    m_leftDock.PushDockControl(std::move(dockControl));
 }
 
-void K4AWindowManager::PopDockControl()
+void K4AWindowManager::PushBottomDockControl(std::unique_ptr<IK4ADockControl> &&dockControl)
 {
-    m_dockControls.pop();
+    m_bottomDock.PushDockControl(std::move(dockControl));
 }
 
 void K4AWindowManager::ShowAll()
 {
-    ShowDock();
+    const ImVec2 leftDockRegionPos(0.f, m_menuBarHeight);
+    const ImVec2 leftDockRegionSize(m_glWindowSize.x, m_glWindowSize.y - leftDockRegionPos.y);
+    m_leftDock.Show(leftDockRegionPos, leftDockRegionSize);
 
-    const ImVec2 windowAreaPosition(m_dockWidth, m_menuBarHeight);
-    const ImVec2 windowAreaSize(m_glWindowSize.x - windowAreaPosition.x, m_glWindowSize.y - windowAreaPosition.y);
+    const ImVec2 bottomDockRegionPos(m_leftDock.GetSize().x, m_menuBarHeight);
+    const ImVec2 bottomDockRegionSize(m_glWindowSize.x - bottomDockRegionPos.x,
+                                      m_glWindowSize.y - bottomDockRegionPos.y);
+    m_bottomDock.Show(bottomDockRegionPos, bottomDockRegionSize);
+
+    const ImVec2 windowAreaPosition(m_leftDock.GetSize().x, m_menuBarHeight);
+    const ImVec2 windowAreaSize(m_glWindowSize.x - windowAreaPosition.x,
+                                m_glWindowSize.y - windowAreaPosition.y - m_bottomDock.GetSize().y);
 
     if (m_maximizedWindow != nullptr)
     {
@@ -150,6 +160,8 @@ void K4AWindowManager::ShowWindow(const ImVec2 windowAreaPosition,
     placementInfo.Position = windowAreaPosition;
     placementInfo.Size = windowAreaSize;
     placementInfo.Size.y -= GetTitleBarHeight();
+    placementInfo.Size.x = std::max(1.f, placementInfo.Size.x);
+    placementInfo.Size.y = std::max(1.f, placementInfo.Size.y);
     ImGui::SetNextWindowPos(windowAreaPosition);
     ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), windowAreaSize);
 
@@ -167,49 +179,17 @@ void K4AWindowManager::ShowWindow(const ImVec2 windowAreaPosition,
         //
         if (m_windows.WindowGroup.size() != 1)
         {
-            const char *label = isMaximized ? "-" : "+";
-
-            const ImVec2 currentWindowSize = ImGui::GetWindowSize();
-
-            // Make the button fit inside the border of the parent window
-            //
-            const float windowBorderSize = ImGui::GetStyle().WindowBorderSize;
-            const float buttonSize = GetTitleBarHeight() - (2 * windowBorderSize);
-            const ImVec2 minMaxButtonSize(buttonSize, buttonSize);
-            const ImVec2 minMaxPosition(windowAreaPosition.x + currentWindowSize.x - minMaxButtonSize.x -
-                                            windowBorderSize,
-                                        windowAreaPosition.y + windowBorderSize);
-
-            const ImGuiWindowFlags minMaxButtonFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                                                       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-                                                       ImGuiWindowFlags_NoScrollWithMouse |
-                                                       ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize |
-                                                       ImGuiWindowFlags_NoSavedSettings;
-            const std::string minMaxButtonTitle = std::string(window->GetTitle()) + "##minmax";
-
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-
-            ImGui::SetNextWindowPos(minMaxPosition, ImGuiCond_Always);
-            ImGui::SetNextWindowSize(minMaxButtonSize);
-            if (ImGui::Begin(minMaxButtonTitle.c_str(), nullptr, minMaxButtonFlags))
+            if (ShowMinMaxButton("-", "+", isMaximized))
             {
-                if (ImGui::Button(label, minMaxButtonSize))
+                if (m_maximizedWindow == nullptr)
                 {
-                    if (m_maximizedWindow == nullptr)
-                    {
-                        m_maximizedWindow = window;
-                    }
-                    else
-                    {
-                        ClearFullscreenWindow();
-                    }
+                    m_maximizedWindow = window;
+                }
+                else
+                {
+                    ClearFullscreenWindow();
                 }
             }
-            ImGui::End();
-
-            ImGui::PopStyleVar();
-            ImGui::PopStyleVar();
         }
     }
     ImGui::End();
@@ -217,27 +197,48 @@ void K4AWindowManager::ShowWindow(const ImVec2 windowAreaPosition,
     ImGui::PopStyleColor();
 }
 
-void K4AWindowManager::ShowDock()
+bool K4AWindowManager::ShowMinMaxButton(const char *minimizeLabel, const char *maximizeLabel, bool isMaximized)
 {
-    if (!m_dockControls.empty())
+    bool result = false;
+
+    const char *label = isMaximized ? minimizeLabel : maximizeLabel;
+
+    const char *parentWindowTitle = ImGui::GetCurrentWindow()->Name;
+    const ImVec2 currentWindowSize = ImGui::GetWindowSize();
+    const ImVec2 currentWindowPosition = ImGui::GetWindowPos();
+    // Make the button fit inside the border of the parent window
+    //
+    const float windowBorderSize = ImGui::GetStyle().WindowBorderSize;
+    const float buttonSize = GetTitleBarHeight() - (2 * windowBorderSize);
+    ImVec2 minMaxButtonSize(buttonSize, buttonSize);
+    minMaxButtonSize.x = std::min(minMaxButtonSize.x, currentWindowSize.x);
+    minMaxButtonSize.y = std::min(minMaxButtonSize.y, currentWindowSize.y);
+
+    const ImVec2 minMaxPosition(currentWindowPosition.x + currentWindowSize.x - minMaxButtonSize.x - windowBorderSize,
+                                currentWindowPosition.y + windowBorderSize);
+
+    constexpr ImGuiWindowFlags minMaxButtonFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                                                   ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+                                                   ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse |
+                                                   ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings;
+
+    const std::string minMaxButtonTitle = std::string(parentWindowTitle) + "##minmax";
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+    ImGui::SetNextWindowPos(minMaxPosition, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(minMaxButtonSize);
+    if (ImGui::Begin(minMaxButtonTitle.c_str(), nullptr, minMaxButtonFlags))
     {
-        const ImVec2 dockPosition(0, m_menuBarHeight);
-        const float dockHeight = m_glWindowSize.y - dockPosition.y;
-
-        ImGui::SetNextWindowPos(dockPosition);
-        const ImVec2 minSize(0, dockHeight);
-        const ImVec2 maxSize(std::numeric_limits<float>::max(), dockHeight);
-        ImGui::SetNextWindowSizeConstraints(minSize, maxSize);
-
-        ImGui::Begin("Dock",
-                     nullptr,
-                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize |
-                         ImGuiWindowFlags_NoTitleBar);
-
-        m_dockControls.top()->Show();
-
-        m_dockWidth = ImGui::GetWindowSize().x;
-
-        ImGui::End();
+        if (ImGui::Button(label, minMaxButtonSize))
+        {
+            result = true;
+        }
     }
+    ImGui::End();
+
+    ImGui::PopStyleVar(2);
+
+    return result;
 }

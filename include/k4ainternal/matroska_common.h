@@ -81,6 +81,10 @@ constexpr uint64_t operator"" _s(unsigned long long x)
 #define CLUSTER_WRITE_DELAY_NS 2_s
 #endif
 
+#ifndef CUE_ENTRY_GAP_NS
+#define CUE_ENTRY_GAP_NS 1_s
+#endif
+
 #ifndef CLUSTER_READ_AHEAD_COUNT
 #define CLUSTER_READ_AHEAD_COUNT 2
 #endif
