@@ -459,6 +459,8 @@ jobs:
   - job: WindowsFunctionalTests
     displayName: Windows Functional Test
     dependsOn: WindowsK4ABuildTest
+    variables:
+      firmware_version: "1.5.926614"
     pool:
       name: Analog-FwConnected
       demands:
@@ -501,7 +503,7 @@ jobs:
         command: download
         vstsFeed: 'analog.ai.depthcamera'
         vstsFeedPackage: 'azure-kinect-firmware'
-        vstsPackageVersion: "1.5.926614"
+        vstsPackageVersion: "$(firmare_version)"
         downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
 
     - task: PowerShell@2
@@ -510,7 +512,7 @@ jobs:
         filePath: './scripts/Reset-Device.ps1'
       displayName: 'Reset K4A Device'
 
-    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/*.bin'
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinect_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
 
@@ -540,6 +542,8 @@ jobs:
   - job: LinuxFunctionalTests
     displayName: Linux Functional Test
     dependsOn: LinuxK4ABuildTest
+    variables:
+      firmware_version: "1.5.946614"
     pool:
       name: Analog-FwConnected
       demands:
@@ -565,7 +569,7 @@ jobs:
         command: download
         vstsFeed: 'analog.ai.depthcamera'
         vstsFeedPackage: 'azure-kinect-firmware'
-        vstsPackageVersion: "1.5.946614"
+        vstsPackageVersion: "$(firmware_version)"
         downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
 
     - task: UniversalPackages@0
@@ -626,7 +630,7 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
       displayName: 'Reset K4A Device'
 
-    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/*.bin'
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinect_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
 
