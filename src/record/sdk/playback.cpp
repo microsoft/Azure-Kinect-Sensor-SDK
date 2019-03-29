@@ -406,15 +406,14 @@ k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback
     return get_imu_sample(context, imu_sample, false);
 }
 
-k4a_stream_result_t k4a_playback_procceed_to_next_data_block(k4a_playback_t playback_handle,
-                                                             const char *custom_track_name,
-                                                             uint64_t *timestamp_usec,
-                                                             size_t *block_size)
+k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_handle,
+                                                     const char *custom_track_name,
+                                                     k4a_playback_data_block_t *data_block_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED,
-                        context == NULL || custom_track_name == NULL || timestamp_usec == NULL || block_size == NULL);
+                        context == NULL || custom_track_name == NULL || data_block_handle == NULL);
 
     auto itr = context->custom_track_map.find(custom_track_name);
     if (itr == context->custom_track_map.end())
@@ -431,24 +430,34 @@ k4a_stream_result_t k4a_playback_procceed_to_next_data_block(k4a_playback_t play
     {
         return K4A_STREAM_RESULT_EOF;
     }
-
     track_reader.current_block = read_block;
+
+    k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
+    if (data_block_context == nullptr)
+    {
+        logger_error(LOGGER_RECORD, "Creating data block failed.");
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
     uint64_t timestamp_ns = track_reader.current_block->block->GlobalTimecode();
-    *timestamp_usec = timestamp_ns / 1000;
-    *block_size = track_reader.current_block->block->GetBuffer(0).Size();
+    DataBuffer &data_buffer = track_reader.current_block->block->GetBuffer(0);
+
+    data_block_context->timestamp_usec = timestamp_ns / 1000;
+    data_block_context->data_block.resize(data_buffer.Size());
+
+    memcpy(data_block_context->data_block.data(), data_buffer.Buffer(), data_buffer.Size());
 
     return K4A_STREAM_RESULT_SUCCEEDED;
 }
 
-k4a_stream_result_t k4a_playback_procceed_to_previous_data_block(k4a_playback_t playback_handle,
-                                                                 const char *custom_track_name,
-                                                                 uint64_t *timestamp_usec,
-                                                                 size_t *block_size)
+k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback_handle,
+                                                         const char *custom_track_name,
+                                                         k4a_playback_data_block_t *data_block_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED,
-                        context == NULL || custom_track_name == NULL || timestamp_usec == NULL || block_size == NULL);
+                        context == NULL || custom_track_name == NULL || data_block_handle == NULL);
 
     auto itr = context->custom_track_map.find(custom_track_name);
     if (itr == context->custom_track_map.end())
@@ -465,49 +474,51 @@ k4a_stream_result_t k4a_playback_procceed_to_previous_data_block(k4a_playback_t 
     {
         return K4A_STREAM_RESULT_EOF;
     }
-
     track_reader.current_block = read_block;
+
+    k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
+    if (data_block_context == nullptr)
+    {
+        logger_error(LOGGER_RECORD, "Creating data block failed.");
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
     uint64_t timestamp_ns = track_reader.current_block->block->GlobalTimecode();
-    *timestamp_usec = timestamp_ns / 1000;
-    *block_size = track_reader.current_block->block->GetBuffer(0).Size();
+    DataBuffer &data_buffer = track_reader.current_block->block->GetBuffer(0);
+
+    data_block_context->timestamp_usec = timestamp_ns / 1000;
+    data_block_context->data_block.resize(data_buffer.Size());
+
+    memcpy(data_block_context->data_block.data(), data_buffer.Buffer(), data_buffer.Size());
 
     return K4A_STREAM_RESULT_SUCCEEDED;
 }
 
-k4a_stream_result_t k4a_playback_read_current_data_block(k4a_playback_t playback_handle,
-                                                         const char *custom_track_name,
-                                                         uint64_t *timestamp_usec,
-                                                         uint8_t *block_data,
-                                                         size_t *block_size)
+uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playback_data_block_t data_block_handle)
 {
-    RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
-    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
-    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED,
-                        context == NULL || custom_track_name == NULL || timestamp_usec == NULL || block_size == NULL);
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_data_block_t, data_block_handle);
+    k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_get_context(data_block_handle);
+    return data_block_context->timestamp_usec;
+}
 
-    auto itr = context->custom_track_map.find(custom_track_name);
-    if (itr == context->custom_track_map.end())
-    {
-        logger_error(LOGGER_RECORD, "Custom track name cannot be found.");
-        return K4A_STREAM_RESULT_FAILED;
-    }
+size_t k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_block_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_data_block_t, data_block_handle);
+    k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_get_context(data_block_handle);
+    return data_block_context->data_block.size();
+}
 
-    track_reader_t &track_reader = itr->second;
-    if (track_reader.current_block->block == nullptr)
-    {
-        logger_error(LOGGER_RECORD, "Current data block doesn't point to any data. Try to call \
-            k4a_playback_procceed_to_previous_data_block or k4a_playback_procceed_to_next_data_block \
-            to change the data block pointer.");
-        return K4A_STREAM_RESULT_FAILED;
-    }
+uint8_t *k4a_playback_data_block_get_buffer(k4a_playback_data_block_t data_block_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_data_block_t, data_block_handle);
+    k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_get_context(data_block_handle);
+    return data_block_context->data_block.data();
+}
 
-    uint64_t timestamp_ns = track_reader.current_block->block->GlobalTimecode();
-    *timestamp_usec = timestamp_ns / 1000;
-    DataBuffer &data_buffer = track_reader.current_block->block->GetBuffer(0);
-    *block_size = data_buffer.Size();
-    memcpy(block_data, data_buffer.Buffer(), data_buffer.Size());
-
-    return K4A_STREAM_RESULT_SUCCEEDED;
+void k4a_playback_data_block_release(k4a_playback_data_block_t data_block_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_playback_data_block_t, data_block_handle);
+    k4a_playback_data_block_t_destroy(data_block_handle);
 }
 
 k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,

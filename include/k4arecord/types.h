@@ -43,6 +43,8 @@ K4A_DECLARE_HANDLE(k4a_record_t);
  */
 K4A_DECLARE_HANDLE(k4a_playback_t);
 
+K4A_DECLARE_HANDLE(k4a_playback_data_block_t)
+
 /** Return codes returned by Azure Kinect playback API.
  *
  * \xmlonly

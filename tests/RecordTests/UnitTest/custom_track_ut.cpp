@@ -265,31 +265,29 @@ TEST_F(custom_track_ut, read_custom_track_data)
 
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t expected_timestamp_usec = 0;
-    uint64_t timestamp_usec = 0;
-    size_t block_size = 0;
     for (size_t i = 0; i < max_frame_index; i++)
     {
         if (i >= custom_track_start_index)
         {
-            stream_result =
-                k4a_playback_procceed_to_next_data_block(handle, "CUSTOM_TRACK_1", &timestamp_usec, &block_size);
+            k4a_playback_data_block_t data_block = NULL;
+            stream_result = k4a_playback_get_next_data_block(handle, "CUSTOM_TRACK_1", &data_block);
             ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-            ASSERT_EQ(timestamp_usec, expected_timestamp_usec);
-            std::vector<uint8_t> data_block(block_size);
 
-            stream_result = k4a_playback_read_current_data_block(handle,
-                                                                 "CUSTOM_TRACK_1",
-                                                                 &timestamp_usec,
-                                                                 data_block.data(),
-                                                                 &block_size);
-            ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+            uint64_t timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
             ASSERT_EQ(timestamp_usec, expected_timestamp_usec);
-            ASSERT_TRUE(validate_custom_track_block(data_block, timestamp_usec));
+
+            size_t block_size = k4a_playback_data_block_get_buffer_size(data_block);
+            uint8_t *block_buffer = k4a_playback_data_block_get_buffer(data_block);
+
+            ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
+
+            k4a_playback_data_block_release(data_block);
         }
 
         expected_timestamp_usec += test_timestamp_delta_usec;
     }
-    stream_result = k4a_playback_procceed_to_next_data_block(handle, "CUSTOM_TRACK_1", &timestamp_usec, &block_size);
+    k4a_playback_data_block_t data_block = NULL;
+    stream_result = k4a_playback_get_next_data_block(handle, "CUSTOM_TRACK_1", &data_block);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
 
     k4a_playback_close(handle);
@@ -353,15 +351,13 @@ TEST_F(custom_track_ut, seek_custom_track_frame)
     uint64_t max_seek_timestamp = k4a_playback_get_last_timestamp_usec(handle);
 
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
-    uint64_t timestamp_usec = 0;
-    size_t block_size = 0;
     for (size_t i = 0; i < seek_timestamps_usec.size(); i++)
     {
         result = k4a_playback_seek_timestamp(handle, seek_timestamps_usec[i], K4A_PLAYBACK_SEEK_BEGIN);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        stream_result =
-            k4a_playback_procceed_to_next_data_block(handle, "CUSTOM_TRACK_1", &timestamp_usec, &block_size);
+        k4a_playback_data_block_t data_block = NULL;
+        stream_result = k4a_playback_get_next_data_block(handle, "CUSTOM_TRACK_1", &data_block);
 
         if (seek_timestamps_usec[i] > max_seek_timestamp)
         {
@@ -371,18 +367,17 @@ TEST_F(custom_track_ut, seek_custom_track_frame)
         else
         {
             ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-            ASSERT_EQ(timestamp_usec, seek_timestamps_usec[i]);
         }
 
-        std::vector<uint8_t> data_block(block_size);
-        stream_result = k4a_playback_read_current_data_block(handle,
-                                                             "CUSTOM_TRACK_1",
-                                                             &timestamp_usec,
-                                                             data_block.data(),
-                                                             &block_size);
-        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        uint64_t timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
         ASSERT_EQ(timestamp_usec, seek_timestamps_usec[i]);
-        ASSERT_TRUE(validate_custom_track_block(data_block, timestamp_usec));
+
+        size_t block_size = k4a_playback_data_block_get_buffer_size(data_block);
+        uint8_t *block_buffer = k4a_playback_data_block_get_buffer(data_block);
+
+        ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
+
+        k4a_playback_data_block_release(data_block);
     }
 
     k4a_playback_close(handle);

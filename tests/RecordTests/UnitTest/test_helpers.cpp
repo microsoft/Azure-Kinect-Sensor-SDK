@@ -310,12 +310,17 @@ std::vector<uint8_t> create_test_custom_track_block(uint64_t timestamp_us)
     return track_data;
 }
 
-bool validate_custom_track_block(const std::vector<uint8_t> &block, uint64_t timestamp_us)
+bool validate_custom_track_block(const uint8_t *block, size_t block_size, uint64_t timestamp_us)
 {
     std::srand(static_cast<uint32_t>(timestamp_us));
     uint32_t expected_item_number = static_cast<uint32_t>(std::rand()) % 100;
 
-    const uint32_t *block_data = reinterpret_cast<const uint32_t *>(block.data());
+    if (block_size != (expected_item_number + 1) * sizeof(uint32_t))
+    {
+        return false;
+    }
+
+    const uint32_t *block_data = reinterpret_cast<const uint32_t *>(block);
     if (*block_data++ != expected_item_number)
     {
         return false;
