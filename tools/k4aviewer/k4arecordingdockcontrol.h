@@ -14,10 +14,11 @@
 
 // Project headers
 //
+#include "playback.hpp"
+
 #include "ik4adockcontrol.h"
 #include "k4adatasource.h"
 #include "k4apollingthread.h"
-#include "k4arecording.h"
 #include "k4awindowset.h"
 
 namespace k4aviewer
@@ -26,7 +27,7 @@ namespace k4aviewer
 class K4ARecordingDockControl : public IK4ADockControl
 {
 public:
-    explicit K4ARecordingDockControl(std::unique_ptr<K4ARecording> &&recording);
+    explicit K4ARecordingDockControl(std::string &&path, k4a::playback &&recording);
 
     K4ADockControlStatus Show() override;
 
@@ -57,7 +58,7 @@ private:
 
         // Recording state
         //
-        std::shared_ptr<K4ARecording> Recording;
+        k4a::playback Recording;
         K4ADataSource<k4a::capture> DataSource;
     } m_playbackThreadState;
 
