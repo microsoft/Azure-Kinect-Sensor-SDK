@@ -19,6 +19,7 @@
 #include "k4aaudiomanager.h"
 #include "k4asourceselectiondockcontrol.h"
 #include "k4aviewererrormanager.h"
+#include "k4aviewerutil.h"
 #include "k4awindowmanager.h"
 #include "perfcounter.h"
 
@@ -143,7 +144,7 @@ K4AViewer::K4AViewer(const K4AViewerOptions &args)
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str().c_str());
     }
 
-    K4AWindowManager::Instance().PushDockControl(std::unique_ptr<IK4ADockControl>(new K4ASourceSelectionDockControl));
+    K4AWindowManager::Instance().PushLeftDockControl(std14::make_unique<K4ASourceSelectionDockControl>());
 }
 
 K4AViewer::~K4AViewer()
@@ -183,7 +184,9 @@ void K4AViewer::Run()
         if (m_showStyleEditor)
         {
             ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
+            ImGui::Begin("Style editor", &m_showStyleEditor);
             ImGui::ShowStyleEditor();
+            ImGui::End();
         }
 
         if (m_showMetricsWindow)

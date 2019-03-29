@@ -30,6 +30,7 @@ set(SOURCE_FILES
     k4aviewererrormanager.cpp
     k4aviewersettingsmanager.cpp
     k4awindowmanager.cpp
+    k4awindowdock.cpp
     k4awindowset.cpp
     perfcounter.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/version.rc

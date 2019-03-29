@@ -37,6 +37,8 @@ std::string GetScaleTitle(const std::string &title)
     return std::string("##") + title;
 }
 
+constexpr float MinHeight = 50.f;
+
 } // namespace
 
 K4AImuDataGraph::K4AImuDataGraph(std::string &&title,
@@ -98,6 +100,8 @@ void K4AImuDataGraph::Show(ImVec2 maxSize)
 
     sliderSize.x = GetStandardVerticalSliderWidth();
     sliderSize.y = maxSize.y - textHeight;
+
+    sliderSize.y = std::max(MinHeight, sliderSize.y);
 
     ImVec2 graphSize;
     graphSize.x = maxSize.x;
