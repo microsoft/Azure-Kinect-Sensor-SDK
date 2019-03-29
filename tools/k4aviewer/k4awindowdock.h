@@ -11,6 +11,7 @@
 //
 #include <memory>
 #include <stack>
+#include <string>
 
 // Library headers
 //
@@ -66,9 +67,6 @@ private:
 
     bool m_isResizing = false;
     bool m_userHasResized = false;
-
-    static constexpr float ResizeHoverTolerance = 2.f;
-    static constexpr float MinSize = 2.f;
 };
 
 } // namespace k4aviewer

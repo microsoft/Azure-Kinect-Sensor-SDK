@@ -23,7 +23,9 @@ using namespace k4aviewer;
 namespace
 {
 constexpr float MaxRegionPercentage = 0.75;
-}
+constexpr float ResizeHoverTolerance = 2.f;
+constexpr float MinSize = 2.f;
+} // namespace
 
 K4AWindowDock::K4AWindowDock(Edge edge)
 {
