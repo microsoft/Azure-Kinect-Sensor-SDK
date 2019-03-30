@@ -1080,7 +1080,7 @@ static k4a_result_t command_reset_device(updater_command_info_t *command_info)
 
     // We should have just reset, close out all of our connections.
     close_all_handles(command_info);
-    ThreadAPI_Sleep(500);
+    ThreadAPI_Sleep(1000);
 
     // Re-open the device to ensure it is ready.
     result = ensure_firmware_open(command_info);
