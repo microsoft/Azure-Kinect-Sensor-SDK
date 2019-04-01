@@ -8,7 +8,7 @@
 #include <limits.h>
 #include <math.h>
 
-#ifndef ARM64
+#ifdef _M_X64
 #include <emmintrin.h> // SSE2
 #include <tmmintrin.h> // SSE3
 #include <smmintrin.h> // SSE4.1
@@ -726,7 +726,7 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
     return K4A_BUFFER_RESULT_SUCCEEDED;
 }
 
-#ifdef ARM64
+#ifndef _M_X64
 static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
                                         const void *depth_image_data,
                                         void *xyz_image_data)
@@ -853,7 +853,7 @@ transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_
         return K4A_BUFFER_RESULT_FAILED;
     }
 
-#ifndef ARM64
+#ifdef _M_X64
     transformation_depth_to_xyz_sse(xy_tables, (const void *)depth_image_data, (void *)xyz_image_data);
 #else
     transformation_depth_to_xyz(xy_tables, (const void *)depth_image_data, (void *)xyz_image_data);

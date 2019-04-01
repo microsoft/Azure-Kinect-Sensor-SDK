@@ -351,11 +351,17 @@ TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
     }
     check_sum /= (double)(3 * width * height);
 
+    // Comparison against reference hash value computed over the entire image. If result image is changed (e.g., due to
+    // using a different calibration), the reference value needs to be updated.
     const double reference_val = 633.99727884928382;
     if (abs(check_sum - reference_val) > 0.001)
     {
         ASSERT_EQ(check_sum, reference_val);
     }
+
+    image_dec_ref(depth_image);
+    image_dec_ref(xyz_image);
+    transformation_destroy(transformation_handle);
 }
 
 TEST_F(transformation_ut, transformation_create_depth_only)
@@ -451,6 +457,11 @@ TEST_F(transformation_ut, transformation_create_depth_only)
                                                         &point_cloud_image_descriptor),
               K4A_RESULT_SUCCEEDED);
 
+    image_dec_ref(depth_image);
+    image_dec_ref(color_image);
+    image_dec_ref(transformed_color_image);
+    image_dec_ref(transformed_depth_image);
+    image_dec_ref(point_cloud_image);
     transformation_destroy(transformation_handle);
 }
 
@@ -532,6 +543,10 @@ TEST_F(transformation_ut, transformation_create_color_only)
     ASSERT_EQ(calibration.depth_camera_calibration.resolution_width, 0);
     ASSERT_EQ(calibration.depth_camera_calibration.resolution_width, 0);
 
+    image_dec_ref(depth_image);
+    image_dec_ref(color_image);
+    image_dec_ref(transformed_color_image);
+    image_dec_ref(transformed_depth_image);
     transformation_destroy(transformation_handle);
 }
 
