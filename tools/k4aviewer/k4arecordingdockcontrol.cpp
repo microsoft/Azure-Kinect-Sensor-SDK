@@ -29,14 +29,13 @@ static constexpr std::chrono::microseconds InvalidSeekTime = std::chrono::micros
 
 std::string SafeGetTag(const k4a::playback &recording, const char *tagName)
 {
-    try
+    std::string result;
+    if (!recording.get_tag(tagName, &result))
     {
-        return recording.get_tag(tagName);
+        result = "Failed to read tag!";
     }
-    catch (const k4a::error &e)
-    {
-        return e.what();
-    }
+
+    return result;
 }
 } // namespace
 

@@ -194,11 +194,11 @@ public:
     }
 
     /** Reads the value of a tag from the recording
-     * Throws error on failure.
+     * Returns false if the tag does not exist.
      *
      * \sa k4a_playback_get_tag
      */
-    std::string get_tag(const char *name) const
+    bool get_tag(const char *name, std::string *out) const
     {
         std::string tag;
         size_t buffer = 0;
@@ -219,10 +219,12 @@ public:
 
         if (result != K4A_BUFFER_RESULT_SUCCEEDED)
         {
-            throw error("Failed to read recording tag value!");
+            return false;
         }
 
-        return tag;
+        *out = std::move(tag);
+
+        return true;
     }
 
     /** Get the next IMU sample in the recording
