@@ -283,7 +283,7 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
             // cases where we did a seek to EOF.
             //
             const bool backseekSuccessful = state->Recording.get_previous_capture(&nextCapture);
-            if (nextCapture == nullptr)
+            if (!backseekSuccessful)
             {
                 // Couldn't read back the last capture, so continue showing the last one
                 //
