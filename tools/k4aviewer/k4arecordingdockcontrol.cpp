@@ -233,20 +233,9 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
 
         std::unique_lock<std::mutex> lock(state->Mutex);
 
-        k4a::capture backseekCapture;
         if (state->SeekTimestamp != InvalidSeekTime)
         {
             state->Recording.seek_timestamp(state->SeekTimestamp, K4A_PLAYBACK_SEEK_BEGIN);
-
-            // The seek timestamp may end up in the middle of a capture, read backwards and forwards
-            // again to get a full capture.
-            //
-            // If the read-forward fails after this, it means we seeked to the end of the file, and
-            // this capture is the last capture in the file, so we actually do want to use this
-            // capture, so we need to keep it until we determine if that happened.
-            //
-            (void)state->Recording.get_previous_capture(&backseekCapture);
-
             state->SeekTimestamp = InvalidSeekTime;
 
             // Force-read the next frame
@@ -290,16 +279,14 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
             state->RecordingAtEnd = true;
             state->Paused = true;
 
-            if (backseekCapture != nullptr)
+            // Attempt to show the last capture in the file.
+            // We need to do this rather than just leaving the last-posted capture to handle
+            // cases where we did a seek to EOF.
+            //
+            const bool backseekSuccessful = state->Recording.get_previous_capture(&nextCapture);
+            if (nextCapture == nullptr)
             {
-                // We reached EOF as a result of an explicit seek operation, and
-                // the backseek capture is the last capture in the file.
-                //
-                nextCapture = std::move(backseekCapture);
-            }
-            else
-            {
-                // Recording ended
+                // Couldn't read back the last capture, so continue showing the last one
                 //
                 return true;
             }

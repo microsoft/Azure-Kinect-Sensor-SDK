@@ -28,14 +28,14 @@ namespace k4a
 class playback
 {
 public:
-    /** Creates a playback from a k4a_playback_t
+    /** Creates a k4a::playback from a k4a_playback_t
      * Takes ownership of the handle, i.e. you should not call
      * k4a_playback_close on the handle after giving it to the
-     * playback; the playback will take care of that.
+     * k4a::playback; the k4a::playback will take care of that.
      */
     playback(k4a_playback_t handle = nullptr) noexcept : m_handle(handle) {}
 
-    /** Moves another playback into a new playback
+    /** Moves another k4a::playback into a new k4a::playback
      */
     playback(playback &&other) noexcept : m_handle(other.m_handle)
     {
@@ -51,7 +51,7 @@ public:
 
     playback &operator=(const playback &) = delete;
 
-    /** Moves another playback into this playback; other is set to invalid
+    /** Moves another k4a::playback into this k4a::playback; other is set to invalid
      */
     playback &operator=(playback &&other) noexcept
     {
@@ -65,7 +65,7 @@ public:
         return *this;
     }
 
-    /** Returns true if the playback is valid, false otherwise
+    /** Returns true if the k4a::playback is valid, false otherwise
      */
     operator bool() const noexcept
     {
@@ -204,7 +204,7 @@ public:
         size_t buffer = 0;
         k4a_buffer_result_t result = k4a_playback_get_tag(m_handle, name, &tag[0], &buffer);
 
-        if (result == K4A_BUFFER_RESULT_TOO_SMALL && buffer > 1)
+        if (result == K4A_BUFFER_RESULT_TOO_SMALL && buffer > 0)
         {
             tag.resize(buffer);
             result = k4a_playback_get_tag(m_handle, name, &tag[0], &buffer);
