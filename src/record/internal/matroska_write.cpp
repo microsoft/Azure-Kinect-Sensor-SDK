@@ -263,11 +263,11 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !context->header_written);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster == NULL);
 
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
     if (cluster->data.size() == 0)
     {
         LOG_WARNING("Tried to write empty cluster to disk", 0);
-        return result;
+        delete cluster;
+        return K4A_RESULT_FAILED;
     }
 
     // Sort the data in the cluster by timestamp so it can be written in order
@@ -358,6 +358,8 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
         }
     }
 
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
     auto &cues = GetChild<KaxCues>(*context->file_segment);
     try
     {
@@ -382,7 +384,6 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     }
 
     delete cluster;
-
     return result;
 }
 
