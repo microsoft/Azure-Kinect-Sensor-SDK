@@ -726,6 +726,7 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
     return K4A_BUFFER_RESULT_SUCCEEDED;
 }
 
+#ifdef ARM64
 static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
                                         const void *depth_image_data,
                                         void *xyz_image_data)
@@ -744,7 +745,7 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
         xyz_data_int16[3 * i + 2] = z;
     }
 }
-
+#else
 static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_tables,
                                             const void *depth_image_data,
                                             void *xyz_image_data)
@@ -797,6 +798,7 @@ static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_t
         *xyz_data_m128i++ = _mm_blend_epi16(_mm_blend_epi16(x, y, 0x49), z, 0x92);
     }
 }
+#endif
 
 k4a_buffer_result_t
 transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_t *xy_tables,

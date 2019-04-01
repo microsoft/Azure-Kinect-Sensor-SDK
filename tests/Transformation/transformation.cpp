@@ -312,31 +312,35 @@ TEST_F(transformation_ut, transformation_2d_to_2d)
 
 TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
 {
-    k4a_transformation_t transformation_handle = k4a_transformation_create(&m_calibration);
+    k4a_transformation_t transformation_handle = transformation_create(&m_calibration, true);
 
     int width = m_calibration.depth_camera_calibration.resolution_width;
     int height = m_calibration.depth_camera_calibration.resolution_height;
     k4a_image_t depth_image = NULL;
-    ASSERT_EQ(k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16, width, height, width * (int)sizeof(uint16_t), &depth_image),
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_DEPTH16, width, height, width * (int)sizeof(uint16_t), &depth_image),
               K4A_RESULT_SUCCEEDED);
+    k4a_transformation_image_descriptor_t depth_image_descriptor = image_get_descriptor(depth_image);
 
-    uint16_t *depth_image_buffer = (uint16_t *)k4a_image_get_buffer(depth_image);
+    uint16_t *depth_image_buffer = (uint16_t *)image_get_buffer(depth_image);
     for (int i = 0; i < width * height; i++)
     {
         depth_image_buffer[i] = (uint16_t)1000;
     }
 
     k4a_image_t xyz_image = NULL;
-    ASSERT_EQ(k4a_image_create(K4A_IMAGE_FORMAT_CUSTOM, width, height, width * 3 * (int)sizeof(int16_t), &xyz_image),
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM, width, height, width * 3 * (int)sizeof(int16_t), &xyz_image),
+              K4A_RESULT_SUCCEEDED);
+    k4a_transformation_image_descriptor_t xyz_image_descriptor = image_get_descriptor(xyz_image);
+
+    ASSERT_EQ(transformation_depth_image_to_point_cloud(transformation_handle,
+                                                        image_get_buffer(depth_image),
+                                                        &depth_image_descriptor,
+                                                        K4A_CALIBRATION_TYPE_DEPTH,
+                                                        image_get_buffer(xyz_image),
+                                                        &xyz_image_descriptor),
               K4A_RESULT_SUCCEEDED);
 
-    ASSERT_EQ(k4a_transformation_depth_image_to_point_cloud(transformation_handle,
-                                                            depth_image,
-                                                            K4A_CALIBRATION_TYPE_DEPTH,
-                                                            xyz_image),
-              K4A_RESULT_SUCCEEDED);
-
-    int16_t *xyz_image_buffer = (int16_t *)k4a_image_get_buffer(xyz_image);
+    int16_t *xyz_image_buffer = (int16_t *)image_get_buffer(xyz_image);
     double check_sum = 0;
     for (int i = 0; i < 3 * width * height; i++)
     {
