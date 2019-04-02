@@ -12,14 +12,15 @@
 // Library headers
 //
 #include "k4aimgui_all.h"
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
 
 // Project headers
 //
+#include "playback.hpp"
+
 #include "filesystem17.h"
 #include "k4aaudiomanager.h"
 #include "k4aimguiextensions.h"
-#include "k4arecording.h"
 #include "k4aviewererrormanager.h"
 #include "k4arecordingdockcontrol.h"
 #include "k4aviewerutil.h"
@@ -121,32 +122,33 @@ void K4ASourceSelectionDockControl::RefreshDevices()
 
 void K4ASourceSelectionDockControl::OpenDevice()
 {
-    if (m_selectedDevice < 0)
-    {
-        K4AViewerErrorManager::Instance().SetErrorStatus("No device selected!");
-        return;
-    }
-
     try
     {
+        if (m_selectedDevice < 0)
+        {
+            K4AViewerErrorManager::Instance().SetErrorStatus("No device selected!");
+            return;
+        }
+
         k4a::device device = k4a::device::open(static_cast<uint32_t>(m_selectedDevice));
         K4AWindowManager::Instance().PushLeftDockControl(std14::make_unique<K4ADeviceDockControl>(std::move(device)));
     }
     catch (const k4a::error &e)
     {
         K4AViewerErrorManager::Instance().SetErrorStatus(e.what());
-        return;
     }
 }
 
 void K4ASourceSelectionDockControl::OpenRecording(const std17::filesystem::path &path)
 {
-    std::unique_ptr<K4ARecording> recording = K4ARecording::Open(path.c_str());
-    if (!recording)
+    try
     {
-        K4AViewerErrorManager::Instance().SetErrorStatus("Failed to open recording!");
-        return;
+        k4a::playback recording = k4a::playback::open(path.c_str());
+        K4AWindowManager::Instance().PushLeftDockControl(
+            std14::make_unique<K4ARecordingDockControl>(path.string(), std::move(recording)));
     }
-
-    K4AWindowManager::Instance().PushLeftDockControl(std14::make_unique<K4ARecordingDockControl>(std::move(recording)));
+    catch (const k4a::error &e)
+    {
+        K4AViewerErrorManager::Instance().SetErrorStatus(e.what());
+    }
 }

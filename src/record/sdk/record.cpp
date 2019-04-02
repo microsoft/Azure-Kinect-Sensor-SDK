@@ -285,6 +285,11 @@ k4a_result_t k4a_record_create(const char *path,
                 k4a_device_get_raw_calibration(device, calibration_buffer.data(), &calibration_size));
             if (buffer_result == K4A_BUFFER_RESULT_SUCCEEDED)
             {
+                // Remove the null-terminated byte from the file before writing it.
+                if (calibration_size > 0 && calibration_buffer[calibration_size - 1] == '\0')
+                {
+                    calibration_size--;
+                }
                 KaxAttached *attached = add_attachment(context,
                                                        "calibration.json",
                                                        "application/octet-stream",
