@@ -28,7 +28,7 @@ public:
     K4ASourceSelectionDockControl();
     ~K4ASourceSelectionDockControl() override = default;
 
-    void Show() override;
+    K4ADockControlStatus Show() override;
 
     K4ASourceSelectionDockControl(const K4ASourceSelectionDockControl &) = delete;
     K4ASourceSelectionDockControl(const K4ASourceSelectionDockControl &&) = delete;

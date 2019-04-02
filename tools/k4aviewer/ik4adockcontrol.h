@@ -17,10 +17,16 @@
 namespace k4aviewer
 {
 
+enum class K4ADockControlStatus
+{
+    Ok,
+    ShouldClose
+};
+
 class IK4ADockControl
 {
 public:
-    virtual void Show() = 0;
+    virtual K4ADockControlStatus Show() = 0;
 
     IK4ADockControl() = default;
     virtual ~IK4ADockControl() = default;

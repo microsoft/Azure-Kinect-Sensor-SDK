@@ -14,13 +14,12 @@
 
 // Library headers
 //
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
 
 // Project headers
 //
-#include "assertionexception.h"
 #include "ik4aobserver.h"
-#include "ik4aframevisualizer.h"
+#include "ik4aimageconverter.h"
 #include "k4aimageextractor.h"
 #include "k4aframeratetracker.h"
 #include "k4aringbuffer.h"
@@ -28,10 +27,10 @@
 namespace k4aviewer
 {
 
-template<k4a_image_format_t ImageFormat> class K4AConvertingFrameSourceImpl : public IK4ACaptureObserver
+template<k4a_image_format_t ImageFormat> class K4AConvertingImageSourceImpl : public IK4ACaptureObserver
 {
 public:
-    inline ImageVisualizationResult GetNextFrame(K4AViewerImage &textureToUpdate, k4a::image &sourceImage)
+    inline ImageConversionResult GetNextImage(K4AViewerImage *textureToUpdate, k4a::image *sourceImage)
     {
         if (IsFailed())
         {
@@ -39,19 +38,19 @@ public:
         }
         if (!HasData())
         {
-            return ImageVisualizationResult::NoDataError;
+            return ImageConversionResult::NoDataError;
         }
 
-        ImageVisualizationResult result = m_frameVisualizer->UpdateTexture(*m_textureBuffers.CurrentItem(),
-                                                                           textureToUpdate);
-        sourceImage = m_textureBuffers.CurrentItem()->SourceImage;
+        GLenum result = textureToUpdate->UpdateTexture(m_textureBuffers.CurrentItem()->Bgra.get_buffer());
+        *sourceImage = m_textureBuffers.CurrentItem()->Source;
+
         m_textureBuffers.AdvanceRead();
-        return result;
+        return GLEnumToImageConversionResult(result);
     }
 
-    inline GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> &texture)
+    inline GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> *texture)
     {
-        return m_frameVisualizer->InitializeTexture(texture);
+        return K4AViewerImage::Create(texture, nullptr, m_imageConverter->GetImageDimensions());
     }
 
     double GetFrameRate() const
@@ -80,7 +79,7 @@ public:
         m_failed = true;
     }
 
-    ~K4AConvertingFrameSourceImpl() override
+    ~K4AConvertingImageSourceImpl() override
     {
         m_workerThreadShouldExit = true;
         if (m_workerThread.joinable())
@@ -89,19 +88,24 @@ public:
         }
     };
 
-    K4AConvertingFrameSourceImpl(std::unique_ptr<IK4AFrameVisualizer<ImageFormat>> &&frameVisualizer) :
-        m_frameVisualizer(std::move(frameVisualizer))
+    K4AConvertingImageSourceImpl(std::unique_ptr<IK4AImageConverter<ImageFormat>> &&imageConverter) :
+        m_imageConverter(std::move(imageConverter))
     {
-        m_textureBuffers.Initialize(
-            [this](K4ATextureBuffer<ImageFormat> *buffer) { this->m_frameVisualizer->InitializeBuffer(*buffer); });
+        ImageDimensions dimensions = m_imageConverter->GetImageDimensions();
+        m_textureBuffers.Initialize([dimensions](ConvertedImagePair *bufferItem) {
+            bufferItem->Bgra = k4a::image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                                                  dimensions.Width,
+                                                  dimensions.Height,
+                                                  dimensions.Width * static_cast<int>(sizeof(BgraPixel)));
+        });
 
-        m_workerThread = std::thread(&K4AConvertingFrameSourceImpl::WorkerThread, this);
+        m_workerThread = std::thread(&K4AConvertingImageSourceImpl::WorkerThread, this);
     }
 
-    K4AConvertingFrameSourceImpl(K4AConvertingFrameSourceImpl &) = delete;
-    K4AConvertingFrameSourceImpl(K4AConvertingFrameSourceImpl &&) = delete;
-    K4AConvertingFrameSourceImpl operator=(K4AConvertingFrameSourceImpl &) = delete;
-    K4AConvertingFrameSourceImpl operator=(K4AConvertingFrameSourceImpl &&) = delete;
+    K4AConvertingImageSourceImpl(K4AConvertingImageSourceImpl &) = delete;
+    K4AConvertingImageSourceImpl(K4AConvertingImageSourceImpl &&) = delete;
+    K4AConvertingImageSourceImpl operator=(K4AConvertingImageSourceImpl &) = delete;
+    K4AConvertingImageSourceImpl operator=(K4AConvertingImageSourceImpl &&) = delete;
 
 protected:
     void NotifyDataImpl(const k4a::capture &data)
@@ -119,7 +123,7 @@ protected:
 
             if (!m_inputImageBuffer.BeginInsert())
             {
-                // Worker thread is backed up. drop the frame
+                // Worker thread is backed up. drop the image
                 //
                 return;
             }
@@ -130,14 +134,14 @@ protected:
     }
 
 private:
-    static void WorkerThread(K4AConvertingFrameSourceImpl *fs)
+    static void WorkerThread(K4AConvertingImageSourceImpl *fs)
     {
         while (!fs->m_workerThreadShouldExit)
         {
             std::unique_lock<std::mutex> lock(fs->m_mutex);
             if (!fs->m_inputImageBuffer.Empty())
             {
-                // Take the image from the frame source
+                // Take the image from the image source
                 //
                 k4a::image imageToConvert = std::move(*fs->m_inputImageBuffer.CurrentItem());
                 fs->m_inputImageBuffer.AdvanceRead();
@@ -145,15 +149,15 @@ private:
 
                 if (!fs->m_textureBuffers.BeginInsert())
                 {
-                    // Our buffer has overflowed.  Drop the frame.
+                    // Our buffer has overflowed.  Drop the image.
                     //
                     continue;
                 }
 
-                ImageVisualizationResult result =
-                    fs->m_frameVisualizer->ConvertImage(imageToConvert, *fs->m_textureBuffers.InsertionItem());
+                ImageConversionResult result =
+                    fs->m_imageConverter->ConvertImage(imageToConvert, &fs->m_textureBuffers.InsertionItem()->Bgra);
 
-                if (result != ImageVisualizationResult::Success)
+                if (result != ImageConversionResult::Success)
                 {
                     // We treat visualization failures as fatal.  Stop the thread.
                     //
@@ -163,19 +167,30 @@ private:
                     return;
                 }
 
+                // Save off the source image so the viewer can show things like pixel values
+                //
+                fs->m_textureBuffers.InsertionItem()->Source = std::move(imageToConvert);
+
                 fs->m_textureBuffers.EndInsert();
                 fs->m_framerateTracker.NotifyFrame();
             }
         }
     }
 
-    ImageVisualizationResult m_failureCode = ImageVisualizationResult::Success;
+    ImageConversionResult m_failureCode = ImageConversionResult::Success;
     bool m_failed = false;
 
-    std::unique_ptr<IK4AFrameVisualizer<ImageFormat>> m_frameVisualizer;
+    std::unique_ptr<IK4AImageConverter<ImageFormat>> m_imageConverter;
 
     static constexpr size_t BufferSize = 2;
-    K4ARingBuffer<K4ATextureBuffer<ImageFormat>, BufferSize> m_textureBuffers;
+
+    struct ConvertedImagePair
+    {
+        k4a::image Source;
+        k4a::image Bgra;
+    };
+
+    K4ARingBuffer<ConvertedImagePair, BufferSize> m_textureBuffers;
     K4ARingBuffer<k4a::image, BufferSize> m_inputImageBuffer;
 
     K4AFramerateTracker m_framerateTracker;
@@ -187,11 +202,11 @@ private:
 };
 
 template<k4a_image_format_t ImageFormat>
-class K4AConvertingFrameSource : public K4AConvertingFrameSourceImpl<ImageFormat>
+class K4AConvertingImageSource : public K4AConvertingImageSourceImpl<ImageFormat>
 {
 public:
-    K4AConvertingFrameSource(std::unique_ptr<IK4AFrameVisualizer<ImageFormat>> &&frameVisualizer) :
-        K4AConvertingFrameSourceImpl<ImageFormat>(std::move(frameVisualizer))
+    K4AConvertingImageSource(std::unique_ptr<IK4AImageConverter<ImageFormat>> &&imageConverter) :
+        K4AConvertingImageSourceImpl<ImageFormat>(std::move(imageConverter))
     {
     }
 };
@@ -199,11 +214,11 @@ public:
 // On depth captures, we also want to track the temperature
 //
 template<>
-class K4AConvertingFrameSource<K4A_IMAGE_FORMAT_DEPTH16> : public K4AConvertingFrameSourceImpl<K4A_IMAGE_FORMAT_DEPTH16>
+class K4AConvertingImageSource<K4A_IMAGE_FORMAT_DEPTH16> : public K4AConvertingImageSourceImpl<K4A_IMAGE_FORMAT_DEPTH16>
 {
 public:
-    K4AConvertingFrameSource(std::unique_ptr<IK4AFrameVisualizer<K4A_IMAGE_FORMAT_DEPTH16>> &&frameVisualizer) :
-        K4AConvertingFrameSourceImpl<K4A_IMAGE_FORMAT_DEPTH16>(std::move(frameVisualizer))
+    K4AConvertingImageSource(std::unique_ptr<IK4AImageConverter<K4A_IMAGE_FORMAT_DEPTH16>> &&imageConverter) :
+        K4AConvertingImageSourceImpl<K4A_IMAGE_FORMAT_DEPTH16>(std::move(imageConverter))
     {
     }
 

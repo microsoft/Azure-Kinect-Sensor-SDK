@@ -15,7 +15,6 @@
 
 // Project headers
 //
-#include "assertionexception.h"
 #include "gpudepthtopointcloudconverter.h"
 #include "k4apixel.h"
 #include "k4apointcloudshaders.h"

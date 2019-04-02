@@ -19,45 +19,93 @@ trigger:
 jobs:
 - job: WindowsK4ABuildTest
   displayName: Windows K4A Build + Test
-  pool:
-    vmImage: 'vs2017-win2016'
-    demands:
-      - Cmd
   strategy:
     maxParallel: 100
     matrix:
-      x86_64-pc-windows-msvc_debug_ninja:
+      VS2017_x86_64-pc-windows-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
-      x86_64-pc-windows-msvc_relwithdebinfo_ninja:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86_64-pc-windows-msvc_relwithdebinfo_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
-      x86_64-pc-windows-msvc_debug_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86_64-pc-windows-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'debug'
-      x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'relwithdebinfo'
-      x86-pc-windows-msvc_debug_ninja:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
-      x86-pc-windows-msvc_relwithdebinfo_ninja:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_relwithdebinfo_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
-      x86-pc-windows-msvc_debug_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'debug'
-      x86-pc-windows-msvc_relwithdebinfo_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_relwithdebinfo_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'vs2017-win2016'
+      VS2019_x86_64-pc-windows-msvc_debug_ninja:
+        CMakeArch: 'amd64'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'debug'
+        vmImage: 'windows-2019'
+      VS2019_x86_64-pc-windows-msvc_relwithdebinfo_ninja:
+        CMakeArch: 'amd64'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'windows-2019'
+      # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
+      # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
+      #   CMakeArch: 'amd64'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'debug'
+      #   vmImage: 'windows-2019'
+      # VS2019_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
+      #   CMakeArch: 'amd64'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'relwithdebinfo'
+      #   vmImage: 'windows-2019'
+      VS2019_x86-pc-windows-msvc_debug_ninja:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'debug'
+        vmImage: 'windows-2019'
+      VS2019_x86-pc-windows-msvc_relwithdebinfo_ninja:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'windows-2019'
+      # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
+      # VS2019_x86-pc-windows-msvc_debug_msbuild:
+      #   CMakeArch: 'x86'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'debug'
+      #   vmImage: 'windows-2019'
+      # VS2019_x86-pc-windows-msvc_relwithdebinfo_msbuild:
+      #   CMakeArch: 'x86'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'relwithdebinfo'
+      #   vmImage: 'windows-2019'
+  pool:
+    vmImage: $(vmImage)
 
   steps:
   - checkout: self
@@ -65,7 +113,7 @@ jobs:
     fetchDepth: 20
     lfs: false
     persistCredentials: true
-    submodules: 'recursive'
+    submodules: true
 
   # Use Python Version
   # Retrieves the specified version of Python from the tool cache. Optionally add it to PATH.
@@ -89,14 +137,67 @@ jobs:
     displayName: 'Check Line Endings'
 
   - task: BatchScript@1
-    displayName: 'Setup VS2017 Env'
+    displayName: 'Setup VS Env'
     inputs:
       filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
       arguments: '-arch=$(CMakeArch)'
       modifyEnvironment: true
+    condition: and(succeeded(), eq(variables['vmImage'], 'vs2017-win2016'))
+
+  - task: BatchScript@1
+    displayName: 'Setup VS Env'
+    inputs:
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\Tools\VsDevCmd.bat'
+      arguments: '-arch=$(CMakeArch)'
+      modifyEnvironment: true
+    condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
+
+  - powershell: |
+      $ErrorActionPreference = "Stop"
+
+      function Download-ToTemp
+      {
+          param
+          (
+              [Parameter(Mandatory)]
+              [string] $url,
+              [string] $filename
+          )
+
+          if (-not ($filename))
+          {
+              $filename = Split-Path -Path $url -Leaf
+          }
+
+          if (-not ($filename))
+          {
+              Write-Error "Unable to parse filename from $url"
+              return $null
+          }
+
+          $tempDir = [System.IO.Path]::GetTempPath()
+          $path = Join-Path -Path $tempDir -ChildPath $filename
+
+          Write-Host -NoNewline "Downloading $url to $path..."
+          Invoke-WebRequest -Uri $url -OutFile $path -UserAgent "NativeClient"
+          Write-Host "Done"
+
+          return $path
+      }
+
+      # Download NASM
+      $url = "https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/win64/nasm-2.14.02-win64.zip"
+      $nasmzip = Download-ToTemp -url $url
+
+      Expand-Archive $nasmzip .\nasmexe
+      Write-Host "NASM Downloaded"
+
+    workingDirectory: '$(Build.BinariesDirectory)'
+    displayName: 'Download NASM'
 
   - script: |
-       cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
+      set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
+      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:
@@ -146,7 +247,7 @@ jobs:
       ArtifactName: '$(CMakeArch)-windows-msvc-$(CMakeConfiguration)'
       parallel: true
       parallelCount: 8
-    condition: and(succeeded(), eq(variables['BuildGenerator'], 'Ninja'))
+    condition: and(succeeded(), and(eq(variables['vmImage'], 'vs2017-win2016'), eq(variables['BuildGenerator'], 'Ninja')))
 
   # This will publish symbols created from this build to the Azure DevOps symbol
   # server. This symbol server will be private to Microsoft internal.
@@ -158,7 +259,7 @@ jobs:
       indexSources: true
       publishSymbols: true
       symbolServerType: 'teamServices'
-    condition: and(succeeded(), eq(variables['BuildGenerator'], 'Ninja'))
+    condition: and(succeeded(), and(eq(variables['vmImage'], 'vs2017-win2016'), eq(variables['BuildGenerator'], 'Ninja')))
 
 - job: LinuxK4ABuildTest
   displayName: Linux K4A Build + Test
@@ -200,7 +301,7 @@ jobs:
     fetchDepth: 20
     lfs: false
     persistCredentials: true
-    submodules: 'recursive'
+    submodules: true
 
   - task: ShellScript@2
     inputs:
@@ -278,7 +379,7 @@ jobs:
     fetchDepth: 20
     lfs: false
     persistCredentials: true
-    submodules: 'recursive'
+    submodules: true
 
   - task: BatchScript@1
     displayName: 'Setup VS2017 Env'
@@ -369,7 +470,7 @@ jobs:
       clean: true
       lfs: false
       persistCredentials: true
-      submodules: 'recursive'
+      submodules: true
 
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
@@ -437,7 +538,7 @@ jobs:
       clean: true
       lfs: false
       persistCredentials: true
-      submodules: 'recursive'
+      submodules: true
 
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
@@ -460,7 +561,7 @@ jobs:
         command: download
         vstsFeed: 'analog.ai.depthcamera'
         vstsFeedPackage: 'findconnectedport'
-        vstsPackageVersion: "0.1.0"
+        vstsPackageVersion: "0.1.1"
         downloadDirectory: "$(System.ArtifactsDirectory)/findconnectedport"
 
     - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'

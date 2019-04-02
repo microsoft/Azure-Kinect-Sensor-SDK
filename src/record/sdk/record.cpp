@@ -45,9 +45,9 @@ k4a_result_t k4a_record_create(const char *path,
         {
             context->ebml_file = make_unique<LargeFileIOCallback>(path, MODE_CREATE);
         }
-        catch (std::ios_base::failure e)
+        catch (std::ios_base::failure &e)
         {
-            logger_error(LOGGER_RECORD, "Unable to open file '%s': %s", path, e.what());
+            LOG_ERROR("Unable to open file '%s': %s", path, e.what());
             result = K4A_RESULT_FAILED;
         }
     }
@@ -57,7 +57,6 @@ k4a_result_t k4a_record_create(const char *path,
         context->device = device;
         context->device_config = device_config;
         context->pending_clusters = make_unique<std::list<cluster_t *>>();
-        context->pending_cluster_lock = Lock_Init();
 
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
         context->camera_fps = k4a_convert_fps_to_uint(device_config.camera_fps);
@@ -74,9 +73,7 @@ k4a_result_t k4a_record_create(const char *path,
     {
         if (!k4a_convert_resolution_to_width_height(device_config.color_resolution, &color_width, &color_height))
         {
-            logger_error(LOGGER_RECORD,
-                         "Unsupported color_resolution specified in recording: %d",
-                         device_config.color_resolution);
+            LOG_ERROR("Unsupported color_resolution specified in recording: %d", device_config.color_resolution);
             result = K4A_RESULT_FAILED;
         }
     }
@@ -98,9 +95,7 @@ k4a_result_t k4a_record_create(const char *path,
                 color_mode_str << "MJPG_" << color_height << "P";
                 break;
             default:
-                logger_error(LOGGER_RECORD,
-                             "Unsupported color_format specified in recording: %d",
-                             device_config.color_format);
+                LOG_ERROR("Unsupported color_format specified in recording: %d", device_config.color_format);
                 result = K4A_RESULT_FAILED;
             }
         }
@@ -123,9 +118,7 @@ k4a_result_t k4a_record_create(const char *path,
                 {
                     if (!k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
                     {
-                        logger_error(LOGGER_RECORD,
-                                     "Unsupported depth_mode specified in recording: %d",
-                                     device_config.depth_mode);
+                        LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode);
                         result = K4A_RESULT_FAILED;
                     }
                     depth_mode_str = depth_modes[i].second.c_str();
@@ -134,9 +127,7 @@ k4a_result_t k4a_record_create(const char *path,
             }
             if (depth_width == 0 || depth_height == 0)
             {
-                logger_error(LOGGER_RECORD,
-                             "Unsupported depth_mode specified in recording: %d",
-                             device_config.depth_mode);
+                LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode);
                 result = K4A_RESULT_FAILED;
             }
         }
@@ -294,6 +285,11 @@ k4a_result_t k4a_record_create(const char *path,
                 k4a_device_get_raw_calibration(device, calibration_buffer.data(), &calibration_size));
             if (buffer_result == K4A_BUFFER_RESULT_SUCCEEDED)
             {
+                // Remove the null-terminated byte from the file before writing it.
+                if (calibration_size > 0 && calibration_buffer[calibration_size - 1] == '\0')
+                {
+                    calibration_size--;
+                }
                 KaxAttached *attached = add_attachment(context,
                                                        "calibration.json",
                                                        "application/octet-stream",
@@ -329,7 +325,7 @@ k4a_result_t k4a_record_create(const char *path,
             {
                 context->ebml_file->close();
             }
-            catch (std::ios_base::failure e)
+            catch (std::ios_base::failure &)
             {
                 // The file is empty at this point, ignore any close failures.
             }
@@ -356,7 +352,7 @@ k4a_result_t k4a_record_add_tag(const k4a_record_t recording_handle, const char 
 
     if (context->header_written)
     {
-        logger_error(LOGGER_RECORD, "Tags must be added before the recording header is written.");
+        LOG_ERROR("Tags must be added before the recording header is written.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -374,13 +370,13 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
 
     if (context->header_written)
     {
-        logger_error(LOGGER_RECORD, "The IMU track must be added before the recording header is written.");
+        LOG_ERROR("The IMU track must be added before the recording header is written.", 0);
         return K4A_RESULT_FAILED;
     }
 
     if (context->imu_track != NULL)
     {
-        logger_error(LOGGER_RECORD, "The IMU track has already been added to this recording.");
+        LOG_ERROR("The IMU track has already been added to this recording.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -401,7 +397,7 @@ k4a_result_t k4a_record_write_header(const k4a_record_t recording_handle)
 
     if (context->header_written)
     {
-        logger_error(LOGGER_RECORD, "The header for this recording has already been written.");
+        LOG_ERROR("The header for this recording has already been written.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -453,9 +449,9 @@ k4a_result_t k4a_record_write_header(const k4a_record_t recording_handle)
             context->tags_void->Render(*context->ebml_file);
         }
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
-        logger_error(LOGGER_RECORD, "Failed to write recording header '%s': %s", context->file_path, e.what());
+        LOG_ERROR("Failed to write recording header '%s': %s", context->file_path, e.what());
         return K4A_RESULT_FAILED;
     }
 
@@ -475,7 +471,7 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
 
     if (!context->header_written)
     {
-        logger_error(LOGGER_RECORD, "The recording header needs to be written before any captures.");
+        LOG_ERROR("The recording header needs to be written before any captures.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -532,7 +528,7 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
                 }
                 else
                 {
-                    logger_error(LOGGER_RECORD, "Tried to write capture with unexpected image format.");
+                    LOG_ERROR("Tried to write capture with unexpected image format.", 0);
                     result = K4A_RESULT_FAILED;
                 }
             }
@@ -552,7 +548,7 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
 
     if (!context->header_written)
     {
-        logger_error(LOGGER_RECORD, "The recording header needs to be written before any imu samples.");
+        LOG_ERROR("The recording header needs to be written before any imu samples.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -587,113 +583,120 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !context->header_written);
 
-    // Lock the writer thread first so we don't have conflicts
-    if (Lock(context->writer_lock) == LOCK_OK)
+    try
     {
-        if (Lock(context->pending_cluster_lock) == LOCK_OK)
+        // Lock the writer thread first so we don't have conflicts
+        std::lock_guard<std::mutex> writer_lock(context->writer_lock);
+
+        LargeFileIOCallback *file_io = dynamic_cast<LargeFileIOCallback *>(context->ebml_file.get());
+        if (file_io != NULL)
         {
-            if (!context->pending_clusters->empty())
-            {
-                for (cluster_t *cluster : *context->pending_clusters)
-                {
-                    k4a_result_t write_result = TRACE_CALL(
-                        write_cluster(context, cluster, &context->last_written_timestamp));
-                    if (K4A_FAILED(write_result))
-                    {
-                        // Try to flush as much of the recording as possible to disk before returning any errors.
-                        result = write_result;
-                    }
-                }
-                context->pending_clusters->clear();
-            }
-
-            try
-            {
-                auto &segment_info = GetChild<KaxInfo>(*context->file_segment);
-
-                uint64_t current_position = context->ebml_file->getFilePointer();
-
-                // Update segment info
-                GetChild<KaxDuration>(segment_info)
-                    .SetValue((double)((context->most_recent_timestamp - context->start_timestamp_offset) /
-                                       context->timecode_scale));
-                context->segment_info_void->ReplaceWith(segment_info, *context->ebml_file);
-
-                // Render cues
-                auto &cues = GetChild<KaxCues>(*context->file_segment);
-                cues.Render(*context->ebml_file);
-
-                // Update tags
-                auto &tags = GetChild<KaxTags>(*context->file_segment);
-                if (tags.GetElementPosition() > 0)
-                {
-                    context->ebml_file->setFilePointer((int64_t)tags.GetElementPosition());
-                    tags.Render(*context->ebml_file);
-                    if (tags.GetEndPosition() != context->tags_void->GetElementPosition())
-                    {
-                        // Rewrite the void block after tags
-                        EbmlVoid tags_void;
-                        tags_void.SetSize(context->tags_void->GetSize() -
-                                          (tags.GetEndPosition() - context->tags_void->GetElementPosition()));
-                        tags_void.Render(*context->ebml_file);
-                    }
-                }
-
-                { // Update seek info
-                    auto &seek_head = GetChild<KaxSeekHead>(*context->file_segment);
-                    seek_head.RemoveAll(); // Remove any seek entries from previous flushes
-
-                    seek_head.IndexThis(segment_info, *context->file_segment);
-
-                    auto &tracks = GetChild<KaxTracks>(*context->file_segment);
-                    if (tracks.GetElementPosition() > 0)
-                    {
-                        seek_head.IndexThis(tracks, *context->file_segment);
-                    }
-
-                    auto &attachments = GetChild<KaxAttachments>(*context->file_segment);
-                    if (attachments.GetElementPosition() > 0)
-                    {
-                        seek_head.IndexThis(attachments, *context->file_segment);
-                    }
-
-                    if (tags.GetElementPosition() > 0)
-                    {
-                        seek_head.IndexThis(tags, *context->file_segment);
-                    }
-
-                    if (cues.GetElementPosition() > 0)
-                    {
-                        seek_head.IndexThis(cues, *context->file_segment);
-                    }
-
-                    context->seek_void->ReplaceWith(seek_head, *context->ebml_file);
-                }
-
-                // Update the file segment head to write the current size
-                context->ebml_file->setFilePointer(0, seek_end);
-                uint64 segment_size = context->ebml_file->getFilePointer() -
-                                      context->file_segment->GetElementPosition() - context->file_segment->HeadSize();
-                // Segment size can only be set once normally, so force the flag.
-                context->file_segment->SetSizeInfinite(true);
-                if (!context->file_segment->ForceSize(segment_size))
-                {
-                    logger_error(LOGGER_RECORD, "Failed set file segment size.");
-                }
-                context->file_segment->OverwriteHead(*context->ebml_file);
-
-                // Set the write pointer back in case we're not done recording yet.
-                assert(current_position <= INT64_MAX);
-                context->ebml_file->setFilePointer((int64_t)current_position);
-            }
-            catch (std::ios_base::failure e)
-            {
-                logger_error(LOGGER_RECORD, "Failed to write recording '%s': %s", context->file_path, e.what());
-                result = K4A_RESULT_FAILED;
-            }
-            Unlock(context->pending_cluster_lock);
+            file_io->setOwnerThread();
         }
-        Unlock(context->writer_lock);
+
+        std::lock_guard<std::mutex> cluster_lock(context->pending_cluster_lock);
+
+        if (!context->pending_clusters->empty())
+        {
+            for (cluster_t *cluster : *context->pending_clusters)
+            {
+                k4a_result_t write_result = TRACE_CALL(
+                    write_cluster(context, cluster, &context->last_written_timestamp));
+                if (K4A_FAILED(write_result))
+                {
+                    // Try to flush as much of the recording as possible to disk before returning any errors.
+                    result = write_result;
+                }
+            }
+            context->pending_clusters->clear();
+        }
+
+        auto &segment_info = GetChild<KaxInfo>(*context->file_segment);
+
+        uint64_t current_position = context->ebml_file->getFilePointer();
+
+        // Update segment info
+        GetChild<KaxDuration>(segment_info)
+            .SetValue(
+                (double)((context->most_recent_timestamp - context->start_timestamp_offset) / context->timecode_scale));
+        context->segment_info_void->ReplaceWith(segment_info, *context->ebml_file);
+
+        // Render cues
+        auto &cues = GetChild<KaxCues>(*context->file_segment);
+        cues.Render(*context->ebml_file);
+
+        // Update tags
+        auto &tags = GetChild<KaxTags>(*context->file_segment);
+        if (tags.GetElementPosition() > 0)
+        {
+            context->ebml_file->setFilePointer((int64_t)tags.GetElementPosition());
+            tags.Render(*context->ebml_file);
+            if (tags.GetEndPosition() != context->tags_void->GetElementPosition())
+            {
+                // Rewrite the void block after tags
+                EbmlVoid tags_void;
+                tags_void.SetSize(context->tags_void->GetSize() -
+                                  (tags.GetEndPosition() - context->tags_void->GetElementPosition()));
+                tags_void.Render(*context->ebml_file);
+            }
+        }
+
+        { // Update seek info
+            auto &seek_head = GetChild<KaxSeekHead>(*context->file_segment);
+            seek_head.RemoveAll(); // Remove any seek entries from previous flushes
+
+            seek_head.IndexThis(segment_info, *context->file_segment);
+
+            auto &tracks = GetChild<KaxTracks>(*context->file_segment);
+            if (tracks.GetElementPosition() > 0)
+            {
+                seek_head.IndexThis(tracks, *context->file_segment);
+            }
+
+            auto &attachments = GetChild<KaxAttachments>(*context->file_segment);
+            if (attachments.GetElementPosition() > 0)
+            {
+                seek_head.IndexThis(attachments, *context->file_segment);
+            }
+
+            if (tags.GetElementPosition() > 0)
+            {
+                seek_head.IndexThis(tags, *context->file_segment);
+            }
+
+            if (cues.GetElementPosition() > 0)
+            {
+                seek_head.IndexThis(cues, *context->file_segment);
+            }
+
+            context->seek_void->ReplaceWith(seek_head, *context->ebml_file);
+        }
+
+        // Update the file segment head to write the current size
+        context->ebml_file->setFilePointer(0, seek_end);
+        uint64 segment_size = context->ebml_file->getFilePointer() - context->file_segment->GetElementPosition() -
+                              context->file_segment->HeadSize();
+        // Segment size can only be set once normally, so force the flag.
+        context->file_segment->SetSizeInfinite(true);
+        if (!context->file_segment->ForceSize(segment_size))
+        {
+            LOG_ERROR("Failed set file segment size.", 0);
+        }
+        context->file_segment->OverwriteHead(*context->ebml_file);
+
+        // Set the write pointer back in case we're not done recording yet.
+        assert(current_position <= INT64_MAX);
+        context->ebml_file->setFilePointer((int64_t)current_position);
+    }
+    catch (std::ios_base::failure &e)
+    {
+        LOG_ERROR("Failed to write recording '%s': %s", context->file_path, e.what());
+        return K4A_RESULT_FAILED;
+    }
+    catch (std::system_error &e)
+    {
+        LOG_ERROR("Failed to flush recording '%s': %s", context->file_path, e.what());
+        return K4A_RESULT_FAILED;
     }
     return result;
 }
@@ -710,18 +713,16 @@ void k4a_record_close(const k4a_record_t recording_handle)
         {
             // If these fail, there's nothing we can do but log.
             (void)TRACE_CALL(k4a_record_flush(recording_handle));
-            (void)TRACE_CALL(stop_matroska_writer_thread(context));
+            stop_matroska_writer_thread(context);
         }
-
-        Lock_Deinit(context->pending_cluster_lock);
 
         try
         {
             context->ebml_file->close();
         }
-        catch (std::ios_base::failure e)
+        catch (std::ios_base::failure &e)
         {
-            logger_error(LOGGER_RECORD, "Failed to close recording '%s': %s", context->file_path, e.what());
+            LOG_ERROR("Failed to close recording '%s': %s", context->file_path, e.what());
         }
 
         // After this destroy, logging will no longer happen.

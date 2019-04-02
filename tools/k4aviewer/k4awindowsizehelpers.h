@@ -60,6 +60,9 @@ inline ImVec2 GetMaxImageSize(const ImVec2 imageDimensions, const ImVec2 imageMa
         displayDimensions.y = verticalMaxSize;
     }
 
+    displayDimensions.x = std::max(1.f, displayDimensions.x);
+    displayDimensions.y = std::max(1.f, displayDimensions.y);
+
     return displayDimensions;
 }
 } // namespace k4aviewer

@@ -7,21 +7,19 @@ set(SOURCE_FILES
     k4aaudiochanneldatagraph.cpp
     k4aaudiomanager.cpp
     k4aaudiowindow.cpp
-    k4acolorframevisualizer.cpp
+    k4acolorimageconverter.cpp
     k4adevicedockcontrol.cpp
     k4afilepicker.cpp
     k4aimguiextensions.cpp
     k4aimudatagraph.cpp
     k4aimusamplesource.cpp
     k4aimuwindow.cpp
-    k4ainfraredframevisualizer.cpp
     k4amicrophone.cpp
     k4amicrophonelistener.cpp
     k4apointcloudrenderer.cpp
     k4apointcloudviewcontrol.cpp
     k4apointcloudvisualizer.cpp
     k4apointcloudwindow.cpp
-    k4arecording.cpp
     k4arecordingdockcontrol.cpp
     k4asourceselectiondockcontrol.cpp
     k4atypeoperators.cpp
@@ -31,6 +29,7 @@ set(SOURCE_FILES
     k4aviewererrormanager.cpp
     k4aviewersettingsmanager.cpp
     k4awindowmanager.cpp
+    k4awindowdock.cpp
     k4awindowset.cpp
     perfcounter.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/version.rc
@@ -78,6 +77,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     list(APPEND EXTERNAL_LIBRARIES
         setupapi.lib
         pathcch.lib
+        Shlwapi.lib
     )
 else()
     list(APPEND SOURCE_FILES

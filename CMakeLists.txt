@@ -48,7 +48,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     include(MSVCStaticCrt)
     include(MSVCLinkerFlags)
-    add_compile_options("/ZH:SHA_256") # Embed hash of source files
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /ZH:SHA_256")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZH:SHA_256")
 endif()
 
 # Find all dependencies

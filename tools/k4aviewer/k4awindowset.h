@@ -15,7 +15,7 @@
 // Library headers
 //
 #include "k4aimgui_all.h"
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
 
 // Project headers
 //
@@ -50,7 +50,7 @@ public:
 
     static void StartPointCloudWindow(const char *sourceIdentifier,
                                       const k4a::calibration &calibrationData,
-                                      K4ADataSource<k4a::capture> &cameraDataSource,
+                                      K4ADataSource<k4a::capture> *cameraDataSource,
                                       bool enableColorPointCloud);
 };
 } // namespace k4aviewer

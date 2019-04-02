@@ -10,7 +10,7 @@
 
 // Library headers
 //
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
 
 // Project headers
 //
@@ -25,7 +25,7 @@ public:
     void NotifyData(const k4a_imu_sample_t &data) override;
     void NotifyTermination() override;
 
-    bool PopSample(k4a_imu_sample_t &out);
+    bool PopSample(k4a_imu_sample_t *out);
 
     bool IsFailed() const
     {

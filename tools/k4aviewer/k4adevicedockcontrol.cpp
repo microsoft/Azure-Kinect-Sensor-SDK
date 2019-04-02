@@ -33,18 +33,18 @@ constexpr std::chrono::milliseconds ImuPollingTimeout(2000);
 
 template<typename T>
 bool PollSensor(const char *sensorFriendlyName,
-                k4a::device &device,
+                k4a::device *device,
                 K4ADataSource<T> *dataSource,
                 bool *paused,
-                std::function<bool(k4a::device &, T &)> pollFn,
-                std::function<void(k4a::device &)> stopFn)
+                std::function<bool(k4a::device *, T *)> pollFn,
+                std::function<void(k4a::device *)> stopFn)
 {
     bool failureWasTimeout = false;
 
     try
     {
         T data;
-        const bool succeeded = pollFn(device, data);
+        const bool succeeded = pollFn(device, &data);
         if (succeeded)
         {
             if (!*paused)
@@ -82,8 +82,8 @@ bool PollSensor(const char *sensorFriendlyName,
 } // namespace
 
 void K4ADeviceDockControl::ShowColorControl(k4a_color_control_command_t command,
-                                            ColorSetting &cacheEntry,
-                                            const std::function<ColorControlAction(ColorSetting &)> &showControl)
+                                            ColorSetting *cacheEntry,
+                                            const std::function<ColorControlAction(ColorSetting *)> &showControl)
 {
     const ColorControlAction action = showControl(cacheEntry);
     if (action == ColorControlAction::None)
@@ -93,18 +93,18 @@ void K4ADeviceDockControl::ShowColorControl(k4a_color_control_command_t command,
 
     if (action == ColorControlAction::SetManual)
     {
-        cacheEntry.Mode = K4A_COLOR_CONTROL_MODE_MANUAL;
+        cacheEntry->Mode = K4A_COLOR_CONTROL_MODE_MANUAL;
     }
     else if (action == ColorControlAction::SetAutomatic)
     {
-        cacheEntry.Mode = K4A_COLOR_CONTROL_MODE_AUTO;
+        cacheEntry->Mode = K4A_COLOR_CONTROL_MODE_AUTO;
     }
 
     ApplyColorSetting(command, cacheEntry);
 }
 
 void K4ADeviceDockControl::ShowColorControlAutoButton(k4a_color_control_mode_t currentMode,
-                                                      ColorControlAction &actionToUpdate,
+                                                      ColorControlAction *actionToUpdate,
                                                       const char *id)
 {
     ImGui::PushID(id);
@@ -112,24 +112,24 @@ void K4ADeviceDockControl::ShowColorControlAutoButton(k4a_color_control_mode_t c
     {
         if (ImGui::Button("M"))
         {
-            actionToUpdate = ColorControlAction::SetAutomatic;
+            *actionToUpdate = ColorControlAction::SetAutomatic;
         }
     }
     else
     {
         if (ImGui::Button("A"))
         {
-            actionToUpdate = ColorControlAction::SetManual;
+            *actionToUpdate = ColorControlAction::SetManual;
         }
     }
     ImGui::PopID();
 }
 
-void K4ADeviceDockControl::ApplyColorSetting(k4a_color_control_command_t command, ColorSetting &cacheEntry)
+void K4ADeviceDockControl::ApplyColorSetting(k4a_color_control_command_t command, ColorSetting *cacheEntry)
 {
     try
     {
-        m_device.set_color_control(command, cacheEntry.Mode, cacheEntry.Value);
+        m_device.set_color_control(command, cacheEntry->Mode, cacheEntry->Value);
 
         // The camera can decide to set a different value than the one we give it, so rather than just saving off
         // the mode we set, we read it back from the camera and cache that instead.
@@ -150,41 +150,41 @@ void K4ADeviceDockControl::ApplyDefaultColorSettings()
     // them here.
     //
     m_colorSettingsCache.ExposureTimeUs = { K4A_COLOR_CONTROL_MODE_AUTO, 15625 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, m_colorSettingsCache.ExposureTimeUs);
+    ApplyColorSetting(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, &m_colorSettingsCache.ExposureTimeUs);
 
     m_colorSettingsCache.WhiteBalance = { K4A_COLOR_CONTROL_MODE_AUTO, 4500 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_WHITEBALANCE, m_colorSettingsCache.WhiteBalance);
+    ApplyColorSetting(K4A_COLOR_CONTROL_WHITEBALANCE, &m_colorSettingsCache.WhiteBalance);
 
     m_colorSettingsCache.AutoExposurePriority = { K4A_COLOR_CONTROL_MODE_MANUAL, 1 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, m_colorSettingsCache.AutoExposurePriority);
+    ApplyColorSetting(K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, &m_colorSettingsCache.AutoExposurePriority);
 
     m_colorSettingsCache.Brightness = { K4A_COLOR_CONTROL_MODE_MANUAL, 128 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_BRIGHTNESS, m_colorSettingsCache.Brightness);
+    ApplyColorSetting(K4A_COLOR_CONTROL_BRIGHTNESS, &m_colorSettingsCache.Brightness);
 
     m_colorSettingsCache.Contrast = { K4A_COLOR_CONTROL_MODE_MANUAL, 5 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_CONTRAST, m_colorSettingsCache.Contrast);
+    ApplyColorSetting(K4A_COLOR_CONTROL_CONTRAST, &m_colorSettingsCache.Contrast);
 
     m_colorSettingsCache.Saturation = { K4A_COLOR_CONTROL_MODE_MANUAL, 32 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_SATURATION, m_colorSettingsCache.Saturation);
+    ApplyColorSetting(K4A_COLOR_CONTROL_SATURATION, &m_colorSettingsCache.Saturation);
 
     m_colorSettingsCache.Sharpness = { K4A_COLOR_CONTROL_MODE_MANUAL, 2 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_SHARPNESS, m_colorSettingsCache.Sharpness);
+    ApplyColorSetting(K4A_COLOR_CONTROL_SHARPNESS, &m_colorSettingsCache.Sharpness);
 
     m_colorSettingsCache.BacklightCompensation = { K4A_COLOR_CONTROL_MODE_MANUAL, 0 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, m_colorSettingsCache.BacklightCompensation);
+    ApplyColorSetting(K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, &m_colorSettingsCache.BacklightCompensation);
 
     m_colorSettingsCache.Gain = { K4A_COLOR_CONTROL_MODE_MANUAL, 0 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_GAIN, m_colorSettingsCache.Gain);
+    ApplyColorSetting(K4A_COLOR_CONTROL_GAIN, &m_colorSettingsCache.Gain);
 
     m_colorSettingsCache.PowerlineFrequency = { K4A_COLOR_CONTROL_MODE_MANUAL, 2 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, m_colorSettingsCache.PowerlineFrequency);
+    ApplyColorSetting(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, &m_colorSettingsCache.PowerlineFrequency);
 }
 
-void K4ADeviceDockControl::ReadColorSetting(k4a_color_control_command_t command, ColorSetting &cacheEntry)
+void K4ADeviceDockControl::ReadColorSetting(k4a_color_control_command_t command, ColorSetting *cacheEntry)
 {
     try
     {
-        m_device.get_color_control(command, &cacheEntry.Mode, &cacheEntry.Value);
+        m_device.get_color_control(command, &cacheEntry->Mode, &cacheEntry->Value);
     }
     catch (const k4a::error &e)
     {
@@ -199,16 +199,16 @@ void K4ADeviceDockControl::LoadColorSettingsCache()
     static_assert(sizeof(m_colorSettingsCache) == sizeof(ColorSetting) * 10,
                   "Missing color setting in LoadColorSettingsCache()");
 
-    ReadColorSetting(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, m_colorSettingsCache.ExposureTimeUs);
-    ReadColorSetting(K4A_COLOR_CONTROL_WHITEBALANCE, m_colorSettingsCache.WhiteBalance);
-    ReadColorSetting(K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, m_colorSettingsCache.AutoExposurePriority);
-    ReadColorSetting(K4A_COLOR_CONTROL_BRIGHTNESS, m_colorSettingsCache.Brightness);
-    ReadColorSetting(K4A_COLOR_CONTROL_CONTRAST, m_colorSettingsCache.Contrast);
-    ReadColorSetting(K4A_COLOR_CONTROL_SATURATION, m_colorSettingsCache.Saturation);
-    ReadColorSetting(K4A_COLOR_CONTROL_SHARPNESS, m_colorSettingsCache.Sharpness);
-    ReadColorSetting(K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, m_colorSettingsCache.BacklightCompensation);
-    ReadColorSetting(K4A_COLOR_CONTROL_GAIN, m_colorSettingsCache.Gain);
-    ReadColorSetting(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, m_colorSettingsCache.PowerlineFrequency);
+    ReadColorSetting(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, &m_colorSettingsCache.ExposureTimeUs);
+    ReadColorSetting(K4A_COLOR_CONTROL_WHITEBALANCE, &m_colorSettingsCache.WhiteBalance);
+    ReadColorSetting(K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, &m_colorSettingsCache.AutoExposurePriority);
+    ReadColorSetting(K4A_COLOR_CONTROL_BRIGHTNESS, &m_colorSettingsCache.Brightness);
+    ReadColorSetting(K4A_COLOR_CONTROL_CONTRAST, &m_colorSettingsCache.Contrast);
+    ReadColorSetting(K4A_COLOR_CONTROL_SATURATION, &m_colorSettingsCache.Saturation);
+    ReadColorSetting(K4A_COLOR_CONTROL_SHARPNESS, &m_colorSettingsCache.Sharpness);
+    ReadColorSetting(K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, &m_colorSettingsCache.BacklightCompensation);
+    ReadColorSetting(K4A_COLOR_CONTROL_GAIN, &m_colorSettingsCache.Gain);
+    ReadColorSetting(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, &m_colorSettingsCache.PowerlineFrequency);
 }
 
 void K4ADeviceDockControl::RefreshSyncCableStatus()
@@ -229,7 +229,7 @@ bool K4ADeviceDockControl::DeviceIsStarted() const
     return m_camerasStarted || m_imuStarted || (m_microphone && m_microphone->IsStarted());
 }
 
-K4ADeviceDockControl::K4ADeviceDockControl(k4a::device device) : m_device(std::move(device))
+K4ADeviceDockControl::K4ADeviceDockControl(k4a::device &&device) : m_device(std::move(device))
 {
     ApplyDefaultConfiguration();
 
@@ -247,19 +247,17 @@ K4ADeviceDockControl::~K4ADeviceDockControl()
     Stop();
 }
 
-void K4ADeviceDockControl::Show()
+K4ADockControlStatus K4ADeviceDockControl::Show()
 {
     std::stringstream labelBuilder;
     labelBuilder << "Device S/N: " << m_deviceSerialNumber;
     ImGui::Text("%s", labelBuilder.str().c_str());
     ImGui::SameLine();
-
     {
         ImGuiExtensions::ButtonColorChanger cc(ImGuiExtensions::ButtonColor::Red);
         if (ImGui::SmallButton("Close device"))
         {
-            K4AWindowManager::Instance().PopDockControl();
-            return;
+            return K4ADockControlStatus::ShouldClose;
         }
     }
 
@@ -450,14 +448,14 @@ void K4ADeviceDockControl::Show()
 
         const float SliderScaleFactor = 0.5f;
 
-        ShowColorControl(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, m_colorSettingsCache.ExposureTimeUs,
-            [SliderScaleFactor](ColorSetting &cacheEntry) {
+        ShowColorControl(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, &m_colorSettingsCache.ExposureTimeUs,
+            [SliderScaleFactor](ColorSetting *cacheEntry) {
                 ColorControlAction result = ColorControlAction::None;
 
                 // Exposure time supported values are factors off 1,000,000 / 2, so we need an exponential control.
                 // There isn't one for ints, so we use the float control and make it look like an int control.
                 //
-                auto valueFloat = static_cast<float>(cacheEntry.Value);
+                auto valueFloat = static_cast<float>(cacheEntry->Value);
                 ImGui::PushItemWidth(ImGui::CalcItemWidth() * SliderScaleFactor);
                 if (ImGuiExtensions::K4ASliderFloat("Exposure Time",
                                                     &valueFloat,
@@ -465,103 +463,103 @@ void K4ADeviceDockControl::Show()
                                                     1000000.f,
                                                     "%.0f us",
                                                     8.0f,
-                                                    cacheEntry.Mode == K4A_COLOR_CONTROL_MODE_MANUAL))
+                                                    cacheEntry->Mode == K4A_COLOR_CONTROL_MODE_MANUAL))
                 {
                     result = ColorControlAction::SetManual;
-                    cacheEntry.Value = static_cast<int32_t>(valueFloat);
+                    cacheEntry->Value = static_cast<int32_t>(valueFloat);
                 }
                 ImGui::PopItemWidth();
 
                 ImGui::SameLine();
-                ShowColorControlAutoButton(cacheEntry.Mode, result, "exposure");
+                ShowColorControlAutoButton(cacheEntry->Mode, &result, "exposure");
                 return result;
         });
 
-        ShowColorControl(K4A_COLOR_CONTROL_WHITEBALANCE, m_colorSettingsCache.WhiteBalance,
-            [SliderScaleFactor](ColorSetting &cacheEntry) {
+        ShowColorControl(K4A_COLOR_CONTROL_WHITEBALANCE, &m_colorSettingsCache.WhiteBalance,
+            [SliderScaleFactor](ColorSetting *cacheEntry) {
                 ColorControlAction result = ColorControlAction::None;
                 ImGui::PushItemWidth(ImGui::CalcItemWidth() * SliderScaleFactor);
                 if (ImGuiExtensions::K4ASliderInt("White Balance",
-                                                  &cacheEntry.Value,
+                                                  &cacheEntry->Value,
                                                   2500,
                                                   12500,
                                                   "%d K",
-                                                  cacheEntry.Mode == K4A_COLOR_CONTROL_MODE_MANUAL))
+                                                  cacheEntry->Mode == K4A_COLOR_CONTROL_MODE_MANUAL))
                 {
                     result = ColorControlAction::SetManual;
 
                     // White balance must be stepped in units of 10 or the call to update the setting fails.
                     //
-                    cacheEntry.Value -= cacheEntry.Value % 10;
+                    cacheEntry->Value -= cacheEntry->Value % 10;
                 }
                 ImGui::PopItemWidth();
 
                 ImGui::SameLine();
-                ShowColorControlAutoButton(cacheEntry.Mode, result, "whitebalance");
+                ShowColorControlAutoButton(cacheEntry->Mode, &result, "whitebalance");
                 return result;
         });
 
         ImGui::PushItemWidth(ImGui::CalcItemWidth() * SliderScaleFactor);
 
-        ShowColorControl(K4A_COLOR_CONTROL_BRIGHTNESS, m_colorSettingsCache.Brightness,
-            [](ColorSetting &cacheEntry) {
-                return ImGui::SliderInt("Brightness", &cacheEntry.Value, 0, 255) ?
+        ShowColorControl(K4A_COLOR_CONTROL_BRIGHTNESS, &m_colorSettingsCache.Brightness,
+            [](ColorSetting *cacheEntry) {
+                return ImGui::SliderInt("Brightness", &cacheEntry->Value, 0, 255) ?
                     ColorControlAction::SetManual :
                     ColorControlAction::None;
         });
 
-        ShowColorControl(K4A_COLOR_CONTROL_CONTRAST, m_colorSettingsCache.Contrast,
-            [](ColorSetting &cacheEntry) {
-                return ImGui::SliderInt("Contrast", &cacheEntry.Value, 0, 10) ?
+        ShowColorControl(K4A_COLOR_CONTROL_CONTRAST, &m_colorSettingsCache.Contrast,
+            [](ColorSetting *cacheEntry) {
+                return ImGui::SliderInt("Contrast", &cacheEntry->Value, 0, 10) ?
                     ColorControlAction::SetManual :
                     ColorControlAction::None;
         });
 
-        ShowColorControl(K4A_COLOR_CONTROL_SATURATION, m_colorSettingsCache.Saturation,
-            [](ColorSetting &cacheEntry) {
-                return ImGui::SliderInt("Saturation", &cacheEntry.Value, 0, 63) ?
+        ShowColorControl(K4A_COLOR_CONTROL_SATURATION, &m_colorSettingsCache.Saturation,
+            [](ColorSetting *cacheEntry) {
+                return ImGui::SliderInt("Saturation", &cacheEntry->Value, 0, 63) ?
                     ColorControlAction::SetManual :
                     ColorControlAction::None;
         });
 
-        ShowColorControl(K4A_COLOR_CONTROL_SHARPNESS, m_colorSettingsCache.Sharpness,
-            [](ColorSetting &cacheEntry) {
-                return ImGui::SliderInt("Sharpness", &cacheEntry.Value, 0, 4) ?
+        ShowColorControl(K4A_COLOR_CONTROL_SHARPNESS, &m_colorSettingsCache.Sharpness,
+            [](ColorSetting *cacheEntry) {
+                return ImGui::SliderInt("Sharpness", &cacheEntry->Value, 0, 4) ?
                     ColorControlAction::SetManual :
                     ColorControlAction::None;
         });
 
-        ShowColorControl(K4A_COLOR_CONTROL_GAIN, m_colorSettingsCache.Gain,
-            [](ColorSetting &cacheEntry) {
-                return ImGui::SliderInt("Gain", &cacheEntry.Value, 0, 255) ?
+        ShowColorControl(K4A_COLOR_CONTROL_GAIN, &m_colorSettingsCache.Gain,
+            [](ColorSetting *cacheEntry) {
+                return ImGui::SliderInt("Gain", &cacheEntry->Value, 0, 255) ?
                     ColorControlAction::SetManual :
                     ColorControlAction::None;
         });
 
         ImGui::PopItemWidth();
 
-        ShowColorControl(K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, m_colorSettingsCache.AutoExposurePriority,
-            [](ColorSetting &cacheEntry) {
-                return ImGui::Checkbox("Auto Exposure Priority", reinterpret_cast<bool *>(&cacheEntry.Value)) ?
+        ShowColorControl(K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, &m_colorSettingsCache.AutoExposurePriority,
+            [](ColorSetting *cacheEntry) {
+                return ImGui::Checkbox("Auto Exposure Priority", reinterpret_cast<bool *>(&cacheEntry->Value)) ?
                     ColorControlAction::SetManual :
                     ColorControlAction::None;
          });
 
-        ShowColorControl(K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, m_colorSettingsCache.BacklightCompensation,
-            [](ColorSetting &cacheEntry) {
-                return ImGui::Checkbox("Backlight Compensation", reinterpret_cast<bool *>(&cacheEntry.Value)) ?
+        ShowColorControl(K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, &m_colorSettingsCache.BacklightCompensation,
+            [](ColorSetting *cacheEntry) {
+                return ImGui::Checkbox("Backlight Compensation", reinterpret_cast<bool *>(&cacheEntry->Value)) ?
                     ColorControlAction::SetManual :
                     ColorControlAction::None;
          });
 
-        ShowColorControl(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, m_colorSettingsCache.PowerlineFrequency,
-            [](ColorSetting &cacheEntry) {
+        ShowColorControl(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, &m_colorSettingsCache.PowerlineFrequency,
+            [](ColorSetting *cacheEntry) {
                 ImGui::Text("Power Frequency");
                 ImGui::SameLine();
                 bool updated = false;
-                updated |= ImGui::RadioButton("50Hz", &cacheEntry.Value, 1);
+                updated |= ImGui::RadioButton("50Hz", &cacheEntry->Value, 1);
                 ImGui::SameLine();
-                updated |= ImGui::RadioButton("60Hz", &cacheEntry.Value, 2);
+                updated |= ImGui::RadioButton("60Hz", &cacheEntry->Value, 2);
                 return updated ? ColorControlAction::SetManual : ColorControlAction::None;
          });
 
@@ -804,6 +802,7 @@ void K4ADeviceDockControl::Show()
     }
 
     m_firstRun = false;
+    return K4ADockControlStatus::Ok;
 }
 
 void K4ADeviceDockControl::Start()
@@ -863,17 +862,17 @@ bool K4ADeviceDockControl::StartCameras()
     bool *pPaused = &m_paused;
     bool *pCamerasStarted = &m_camerasStarted;
 
-    m_cameraPollingThread = std14::make_unique<K4APollingThread<k4a::capture>>(
+    m_cameraPollingThread = std14::make_unique<K4APollingThread>(
         [pDevice, pCameraDataSource, pPaused, pCamerasStarted]() {
             return PollSensor<k4a::capture>("Cameras",
-                                            *pDevice,
+                                            pDevice,
                                             pCameraDataSource,
                                             pPaused,
-                                            [](k4a::device &device, k4a::capture &capture) {
-                                                return device.get_capture(&capture, CameraPollingTimeout);
+                                            [](k4a::device *device, k4a::capture *capture) {
+                                                return device->get_capture(capture, CameraPollingTimeout);
                                             },
-                                            [pCamerasStarted](k4a::device &device) {
-                                                device.stop_cameras();
+                                            [pCamerasStarted](k4a::device *device) {
+                                                device->stop_cameras();
                                                 *pCamerasStarted = false;
                                             });
         });
@@ -951,20 +950,19 @@ bool K4ADeviceDockControl::StartImu()
     bool *pPaused = &m_paused;
     bool *pImuStarted = &m_imuStarted;
 
-    m_imuPollingThread = std14::make_unique<K4APollingThread<k4a_imu_sample_t>>(
-        [pDevice, pImuDataSource, pPaused, pImuStarted]() {
-            return PollSensor<k4a_imu_sample_t>("IMU",
-                                                *pDevice,
-                                                pImuDataSource,
-                                                pPaused,
-                                                [](k4a::device &device, k4a_imu_sample_t &sample) {
-                                                    return device.get_imu_sample(&sample, ImuPollingTimeout);
-                                                },
-                                                [pImuStarted](k4a::device &device) {
-                                                    device.stop_imu();
-                                                    *pImuStarted = false;
-                                                });
-        });
+    m_imuPollingThread = std14::make_unique<K4APollingThread>([pDevice, pImuDataSource, pPaused, pImuStarted]() {
+        return PollSensor<k4a_imu_sample_t>("IMU",
+                                            pDevice,
+                                            pImuDataSource,
+                                            pPaused,
+                                            [](k4a::device *device, k4a_imu_sample_t *sample) {
+                                                return device->get_imu_sample(sample, ImuPollingTimeout);
+                                            },
+                                            [pImuStarted](k4a::device *device) {
+                                                device->stop_imu();
+                                                *pImuStarted = false;
+                                            });
+    });
 
     return true;
 }
@@ -1020,7 +1018,7 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
                                           m_pendingDeviceConfiguration.ColorFormat == K4A_IMAGE_FORMAT_COLOR_BGRA32;
             K4AWindowSet::StartPointCloudWindow(m_deviceSerialNumber.c_str(),
                                                 calib,
-                                                m_cameraDataSource,
+                                                &m_cameraDataSource,
                                                 rgbPointCloudAvailable);
         }
         catch (const k4a::error &e)
