@@ -874,7 +874,7 @@ private:
 class device
 {
 public:
-    /** Creates a device from a k4a_image_t
+    /** Creates a device from a k4a_device_t
      * Takes ownership of the handle, i.e. you should not call
      * k4a_device_close on the handle after giving it to the
      * device; the device will take care of that.
@@ -897,7 +897,7 @@ public:
 
     device &operator=(const device &) = delete;
 
-    /** Moves another device into this image; other is set to invalid
+    /** Moves another device into this device; other is set to invalid
      */
     device &operator=(device &&dev) noexcept
     {

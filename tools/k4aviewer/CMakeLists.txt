@@ -20,7 +20,6 @@ set(SOURCE_FILES
     k4apointcloudviewcontrol.cpp
     k4apointcloudvisualizer.cpp
     k4apointcloudwindow.cpp
-    k4arecording.cpp
     k4arecordingdockcontrol.cpp
     k4asourceselectiondockcontrol.cpp
     k4atypeoperators.cpp
