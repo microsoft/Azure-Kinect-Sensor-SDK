@@ -144,15 +144,10 @@ jobs:
       modifyEnvironment: true
     condition: and(succeeded(), eq(variables['vmImage'], 'vs2017-win2016'))
 
-  - powershell: |
-      dir "C:\Program Files (x86)\Microsoft Visual Studio\2019\"
-    displayName: 'DEBUG DIR'
-    condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
-
   - task: BatchScript@1
     displayName: 'Setup VS Env'
     inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\Common7\Tools\VsDevCmd.bat'
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat'
       arguments: '-arch=$(CMakeArch)'
       modifyEnvironment: true
     condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
