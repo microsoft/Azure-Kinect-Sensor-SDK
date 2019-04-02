@@ -145,7 +145,7 @@ jobs:
     condition: and(succeeded(), eq(variables['vmImage'], 'vs2017-win2016'))
 
   - powershell: |
-      dir "C:\Program Files (x86)\Microsoft Visual Studio\"
+      dir "C:\Program Files (x86)\Microsoft Visual Studio\2019\"
     displayName: 'DEBUG DIR'
     condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
 
