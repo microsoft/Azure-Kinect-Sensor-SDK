@@ -748,6 +748,36 @@ TEST_F(playback_ut, open_imu_playback_file)
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
     ASSERT_TRUE(validate_null_imu_sample(imu_sample));
 
+    // Test seeking to first 100 samples (covers edge cases around block boundaries)
+    for (int i = 0; i < 100; i++)
+    {
+        // Seek to before sample
+        result = k4a_playback_seek_timestamp(handle, (int64_t)imu_timestamp - 100, K4A_PLAYBACK_SEEK_BEGIN);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        // Seek exactly to sample
+        result = k4a_playback_seek_timestamp(handle, (int64_t)imu_timestamp, K4A_PLAYBACK_SEEK_BEGIN);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        // Seek to after sample
+        result = k4a_playback_seek_timestamp(handle, (int64_t)imu_timestamp + 100, K4A_PLAYBACK_SEEK_BEGIN);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        imu_timestamp += 1000;
+    }
+
     k4a_playback_close(handle);
 }
 
