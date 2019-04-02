@@ -54,7 +54,7 @@ void SampleRecordings::SetUp()
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         uint64_t timestamps[3] = { 0, 1000, 1000 }; // Offset the Depth and IR tracks by 1ms to test
-        uint64_t imu_timestamp = 0;
+        uint64_t imu_timestamp = 1150;
         uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_full.camera_fps);
         k4a_capture_t capture = NULL;
         for (int i = 0; i < 100; i++)

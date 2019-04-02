@@ -1793,6 +1793,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
 
     if (context->imu_track.track == NULL)
     {
+        *imu_sample = { 0 };
         return K4A_STREAM_RESULT_EOF;
     }
 
@@ -1801,15 +1802,30 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
     if (block_info == nullptr)
     {
         block_info = find_block(context, &context->imu_track, context->seek_timestamp_ns);
-        context->imu_track.current_block = block_info;
+        if (block_info && !block_info->block)
+        {
+            // The seek timestamp is past the end of the file, get the last block instead.
+            block_info = next_block(context, block_info.get(), false);
+        }
 
         if (block_info && block_info->block)
         {
-            if (block_info->sync_timestamp_ns <= context->seek_timestamp_ns &&
-                block_info->sync_timestamp_ns + block_info->block_duration_ns > context->seek_timestamp_ns)
+            context->imu_track.current_block = block_info;
+
+            size_t sample_count = block_info->block->NumberFrames();
+            if (block_info->sync_timestamp_ns > context->seek_timestamp_ns)
             {
-                // The IMU sample we're looking for is within the found block.
-                size_t sample_count = block_info->block->NumberFrames();
+                // The timestamp we're looking for is before the found block.
+                context->imu_sample_index = next ? 0 : -1;
+            }
+            else if (block_info->sync_timestamp_ns + block_info->block_duration_ns <= context->seek_timestamp_ns)
+            {
+                // The timestamp we're looking for is after the found block.
+                context->imu_sample_index = (int)sample_count + (next ? 0 : -1);
+            }
+            else
+            {
+                // The timestamp we're looking for is within the found block.
                 context->imu_sample_index = -1;
                 for (size_t i = 0; i < sample_count; i++)
                 {
@@ -1838,32 +1854,14 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
                         }
                     }
                 }
-                if (context->imu_sample_index >= 0 && context->imu_sample_index < (int)sample_count)
-                {
-                    DataBuffer &data_buffer = block_info->block->GetBuffer((unsigned int)context->imu_sample_index);
-                    matroska_imu_sample_t *sample = reinterpret_cast<matroska_imu_sample_t *>(data_buffer.Buffer());
-                    imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
-                    imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
-                    for (size_t i = 0; i < 3; i++)
-                    {
-                        imu_sample->acc_sample.v[i] = sample->acc_data[i];
-                        imu_sample->gyro_sample.v[i] = sample->gyro_data[i];
-                    }
-                    return K4A_STREAM_RESULT_SUCCEEDED;
-                }
-                else
-                {
-                    __debugbreak();
-                }
-            }
-            else
-            {
-                __debugbreak();
             }
         }
     }
+    else
+    {
+        context->imu_sample_index += next ? 1 : -1;
+    }
 
-    context->imu_sample_index += next ? 1 : -1;
     while (block_info && block_info->block)
     {
         size_t sample_count = block_info->block->NumberFrames();

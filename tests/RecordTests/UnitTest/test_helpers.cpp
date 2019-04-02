@@ -265,21 +265,15 @@ k4a_imu_sample_t create_test_imu_sample(uint64_t timestamp_us)
 #endif
 bool validate_imu_sample(k4a_imu_sample_t &imu_sample, uint64_t timestamp_us)
 {
-    // std::cout << "Got IMU Sample at " << imu_sample.acc_timestamp_usec << " usec: [" << imu_sample.acc_sample.v[0]
-    //           << ", " << imu_sample.acc_sample.v[1] << ", " << imu_sample.acc_sample.v[2] << "]" << std::endl;
-    if (imu_sample.acc_timestamp_usec != timestamp_us || imu_sample.gyro_timestamp_usec != timestamp_us)
-    {
-        return false;
-    }
-    if (imu_sample.acc_sample.v[0] != 1.0f || imu_sample.acc_sample.v[1] != 2.0f || imu_sample.acc_sample.v[2] != 3.0f)
-    {
-        return false;
-    }
-    if (imu_sample.gyro_sample.v[0] != -1.0f || imu_sample.gyro_sample.v[1] != -2.0f ||
-        imu_sample.gyro_sample.v[2] != -3.0f)
-    {
-        return false;
-    }
+    VALIDATE_PARAMETER(imu_sample.acc_timestamp_usec, timestamp_us);
+    VALIDATE_PARAMETER(imu_sample.gyro_timestamp_usec, timestamp_us);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[0] == 1.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[1] == 2.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[2] == 3.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[0] == -1.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[1] == -2.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[2] == -3.0f);
+
     return true;
 }
 
