@@ -7,6 +7,7 @@
 
 // System headers
 //
+#include <algorithm>
 
 // Library headers
 //
@@ -26,160 +27,199 @@ inline float Radians(const float angle)
 }
 
 // Default camera values
-const float DefaultSpeed = 2.5f;
-const float DefaultSensitivity = 0.1f;
-const float DefaultZoom = 65.0f;
+//
+constexpr float MinZoom = 1.0f;
+constexpr float MaxZoom = 120.0f;
+constexpr float DefaultZoom = 65.0f;
+constexpr float ZoomSensitivity = 3.f;
+constexpr float TranslationSensitivity = 0.01f;
 
-// clang-format off
-const ViewParameters DefaultView(0.15f, 0.f, -1.25f, // Position
-                                 0.f, 1.f, 0.f, // WorldUp
-                                 -268.f, 0.f); // Yaw and Pitch
-// clang-format on
+// Default point cloud position, chosen such that the entire point cloud
+// should be in the field of view
+//
+const vec3 DefaultPointCloudPosition{ 0.f, 0.f, -8.0f };
+
+// Approximate midpoint of a point cloud.  We need to translate
+// the point cloud by this much before we start applying rotations to the
+// point cloud in order to to get the rotation to be around the point
+// cloud's midpoint instead of its origin.
+//
+const vec3 PointCloudMidpoint{ 0.f, 1.f, -3.0f };
+
+// Version of mat4x4_mul that doesn't modify its non-result inputs (i.e. a, b)
+//
+void MatrixMultiply(mat4x4 out, mat4x4 a, mat4x4 b)
+{
+    mat4x4 atmp;
+    mat4x4 btmp;
+    mat4x4_dup(atmp, a);
+    mat4x4_dup(btmp, b);
+    mat4x4_mul(out, a, b);
+}
+
+// Map XY coordinates to a virtual sphere, which we use for rotation calculations
+//
+void MapToArcball(vec3 out, const vec2 displayDimensions, const vec2 mousePos)
+{
+    // Scale coords to (-1, 1) to simplify some of the math
+    //
+    vec2 scaledMousePos;
+    for (int i = 0; i < 2; ++i)
+    {
+        scaledMousePos[i] = mousePos[i] * (1.0f / ((displayDimensions[i] - 1.0f) * 0.5f)) - 1.0f;
+    }
+
+    float lenSquared = scaledMousePos[0] * scaledMousePos[0] + scaledMousePos[1] * scaledMousePos[1];
+
+    // If the point is 'outside' our virtual sphere, we need to normalize to the sphere
+    // This works because our sphere is of radius 1
+    //
+    if (lenSquared > 1.f)
+    {
+        const float normalizationFactor = 1.f / std::sqrt(lenSquared);
+
+        // Return a point on the edge of the sphere
+        //
+        out[0] = scaledMousePos[0] * normalizationFactor;
+        out[1] = scaledMousePos[1] * normalizationFactor;
+        out[2] = 0.f;
+    }
+    else
+    {
+        // Return a point inside the sphere
+        //
+        out[0] = scaledMousePos[0];
+        out[1] = scaledMousePos[1];
+        out[2] = std::sqrt(1.f - lenSquared);
+    }
+}
+
+// Imagine a virtual sphere of displayDimensions size were drawn on the screen.
+// Returns a quaternion representing the rotation that sphere would undergo if you took the point
+// on that sphere at startPos and rotated it to endPos (i.e. an "arcball" camera).
+//
+void GetArcballRotation(quat rotation, const vec2 displayDimensions, const vec2 startPos, const vec2 endPos)
+{
+    vec3 startVector;
+    MapToArcball(startVector, displayDimensions, startPos);
+
+    vec3 endVector;
+    MapToArcball(endVector, displayDimensions, endPos);
+
+    vec3 cross;
+    vec3_mul_cross(cross, startVector, endVector);
+
+    constexpr float epsilon = 0.001f;
+    if (vec3_len(cross) < epsilon)
+    {
+        // Smooth out floating point error if the user didn't move the mouse
+        // enough that it should register
+        //
+        quat_identity(rotation);
+    }
+    else
+    {
+        // The first 3 elements of the quaternion are the unit vector perpendicular
+        // to the rotation (i.e. the cross product); the last element is the magnitude
+        // of the rotation
+        //
+        vec3_copy(rotation, cross);
+        vec3_norm(cross, cross);
+        rotation[3] = vec3_mul_inner(startVector, endVector);
+    }
+}
 } // namespace
 
-ViewParameters::ViewParameters(const float posX,
-                               const float posY,
-                               const float posZ,
-                               const float upX,
-                               const float upY,
-                               const float upZ,
-                               const float yaw,
-                               const float pitch)
-{
-    vec3_set(Front, 0.f, 0.f, -1.f);
-    vec3_set(Position, posX, posY, posZ);
-    vec3_set(WorldUp, upX, upY, upZ);
-    Yaw = yaw;
-    Pitch = pitch;
-    UpdateRotationVectors();
-}
-
-// Update the rotation vectors based on the updated yaw and pitch values
-// It needs to be called every time after updating the yaw and pitch value
-void ViewParameters::UpdateRotationVectors()
-{
-    // Calculate the new m_viewParams.front vector
-    vec3 frontTemp;
-    frontTemp[0] = static_cast<float>(std::cos(Radians(Yaw)) * std::cos(Radians(Pitch)));
-    frontTemp[1] = static_cast<float>(std::sin(Radians(Pitch)));
-    frontTemp[2] = static_cast<float>(std::sin(Radians(Yaw)) * std::cos(Radians(Pitch)));
-    vec3_norm(Front, frontTemp);
-
-    // Also re-calculate the Right and Up vector
-    vec3 rightTemp;
-    vec3_mul_cross(rightTemp, Front, WorldUp);
-    vec3_norm(Right, rightTemp); // Normalize the vectors, because their length gets closer to 0 the more you look up or
-                                 // down which results in slower movement.
-
-    vec3 upTemp;
-    vec3_mul_cross(upTemp, Right, Front);
-    vec3_norm(Up, upTemp);
-}
-
-ViewControl::ViewControl() :
-    m_viewParams(DefaultView),
-    m_movementSpeed(DefaultSpeed),
-    m_mouseSensitivity(DefaultSensitivity),
-    m_zoom(DefaultZoom)
+ViewControl::ViewControl() : m_zoom(DefaultZoom)
 {
     ResetPosition();
 }
 
-// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
 void ViewControl::GetViewMatrix(mat4x4 viewMatrix)
 {
-    vec3 temp;
-    vec3_add(temp, m_viewParams.Position, m_viewParams.Front);
-    mat4x4_look_at(viewMatrix, m_viewParams.Position, temp, m_viewParams.Up);
+    mat4x4_identity(viewMatrix);
+
+    // Move the center of the point cloud to (0, 0, 0) so we can rotate it
+    //
+    mat4x4 pointCloudMidpointTranslation;
+    mat4x4_translate(pointCloudMidpointTranslation,
+                     PointCloudMidpoint[0],
+                     PointCloudMidpoint[1],
+                     PointCloudMidpoint[2]);
+
+    // Move the point cloud to a point in front of the field of view
+    //
+    mat4x4 pointCloudFinalTranslation;
+    mat4x4_translate(pointCloudFinalTranslation,
+                     m_pointCloudPosition[0],
+                     m_pointCloudPosition[1],
+                     m_pointCloudPosition[2]);
+
+    // Rotate 180 degrees about the Y axis so the scene starts out facing toward the user
+    //
+    quat rotateQuat;
+    vec3 rotateAxis{ 0.f, 1.f, 0.f };
+    mat4x4 rotateMatrix;
+    quat_rotate(rotateQuat, Radians(180), rotateAxis);
+    mat4x4_from_quat(rotateMatrix, rotateQuat);
+
+    // Multiplication order is reversed because we're moving the scene, not the camera
+    //
+
+    // Move the point cloud into the field of view
+    //
+    MatrixMultiply(viewMatrix, viewMatrix, pointCloudFinalTranslation);
+
+    // Set up the point cloud
+    //
+    MatrixMultiply(viewMatrix, viewMatrix, m_userRotations);
+    MatrixMultiply(viewMatrix, viewMatrix, rotateMatrix);
+    MatrixMultiply(viewMatrix, viewMatrix, pointCloudMidpointTranslation);
 }
 
-void ViewControl::GetPerspectiveMatrix(mat4x4 perspectiveMatrix, const int windowWidth, const int windowHeight) const
+void ViewControl::GetPerspectiveMatrix(mat4x4 perspectiveMatrix, const vec2 renderDimensions) const
 {
-    mat4x4_perspective(perspectiveMatrix, Radians(m_zoom), windowWidth / static_cast<float>(windowHeight), 0.1f, 100.f);
+    mat4x4_perspective(perspectiveMatrix, Radians(m_zoom), renderDimensions[0] / renderDimensions[1], 0.1f, 100.f);
 }
 
-// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined
-// ENUM (to abstract it from windowing systems)
-void ViewControl::ProcessPositionalMovement(const ViewMovement direction, const float deltaTime)
+void ViewControl::ProcessMouseMovement(const vec2 displayDimensions,
+                                       const vec2 mousePos,
+                                       const vec2 mouseDelta,
+                                       MouseMovementType movementType)
 {
-    const float velocity = m_movementSpeed * deltaTime;
-    vec3 temp;
-    switch (direction)
+    if (movementType == MouseMovementType::Rotation)
     {
-    case ViewMovement::Forward:
-        vec3_scale(temp, m_viewParams.Front, velocity);
-        vec3_add(m_viewParams.Position, m_viewParams.Position, temp);
-        break;
-    case ViewMovement::Backward:
-        vec3_scale(temp, m_viewParams.Front, velocity);
-        vec3_sub(m_viewParams.Position, m_viewParams.Position, temp);
-        break;
-    case ViewMovement::Left:
-        vec3_scale(temp, m_viewParams.Right, velocity);
-        vec3_sub(m_viewParams.Position, m_viewParams.Position, temp);
-        break;
-    case ViewMovement::Right:
-        vec3_scale(temp, m_viewParams.Right, velocity);
-        vec3_add(m_viewParams.Position, m_viewParams.Position, temp);
-        break;
-    case ViewMovement::Up:
-        vec3_scale(temp, m_viewParams.Up, velocity);
-        vec3_add(m_viewParams.Position, m_viewParams.Position, temp);
-        break;
-    case ViewMovement::Down:
-        vec3_scale(temp, m_viewParams.Up, velocity);
-        vec3_sub(m_viewParams.Position, m_viewParams.Position, temp);
-        break;
-    default:
-        break;
+        vec2 lastMousePos;
+        vec2_copy(lastMousePos, mousePos);
+        vec2_sub(lastMousePos, mousePos, mouseDelta);
+
+        quat newRotationQuat;
+        GetArcballRotation(newRotationQuat, displayDimensions, lastMousePos, mousePos);
+
+        mat4x4 newRotationMtx;
+        mat4x4_from_quat(newRotationMtx, newRotationQuat);
+
+        MatrixMultiply(m_userRotations, newRotationMtx, m_userRotations);
+    }
+    else if (movementType == MouseMovementType::Translation)
+    {
+        m_pointCloudPosition[0] += mouseDelta[0] * TranslationSensitivity;
+        m_pointCloudPosition[1] += mouseDelta[1] * TranslationSensitivity;
     }
 }
 
-// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-void ViewControl::ProcessMouseMovement(float xoffset, float yoffset, const GLboolean constrainPitch)
-{
-    xoffset *= m_mouseSensitivity;
-    yoffset *= m_mouseSensitivity;
-
-    m_viewParams.Yaw += xoffset;
-    m_viewParams.Pitch += yoffset;
-
-    // Make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (constrainPitch)
-    {
-        if (m_viewParams.Pitch > 89.0f)
-        {
-            m_viewParams.Pitch = 89.0f;
-        }
-        if (m_viewParams.Pitch < -89.0f)
-        {
-            m_viewParams.Pitch = -89.0f;
-        }
-    }
-
-    // Update m_viewParams.front, right and up Vectors using the updated Euler angles
-    m_viewParams.UpdateRotationVectors();
-}
-
-// Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
 void ViewControl::ProcessMouseScroll(const float yoffset)
 {
-    if (m_zoom >= 1.0f && m_zoom <= 120.0f)
+    if (m_zoom >= MinZoom && m_zoom <= MaxZoom)
     {
-        m_zoom -= yoffset;
-    }
-    if (m_zoom <= 1.0f)
-    {
-        m_zoom = 1.0f;
-    }
-    if (m_zoom >= 120.0f)
-    {
-        m_zoom = 120.0f;
+        m_zoom -= yoffset * ZoomSensitivity;
+        m_zoom = std::min(MaxZoom, std::max(MinZoom, m_zoom));
     }
 }
 
 void ViewControl::ResetPosition()
 {
-    m_viewParams = DefaultView;
+    vec3_copy(m_pointCloudPosition, DefaultPointCloudPosition);
     m_zoom = DefaultZoom;
+    mat4x4_identity(m_userRotations);
 }
