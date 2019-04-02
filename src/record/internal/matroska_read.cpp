@@ -1786,6 +1786,27 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     return valid_blocks == 0 ? K4A_STREAM_RESULT_EOF : K4A_STREAM_RESULT_SUCCEEDED;
 }
 
+// Returns NULL if the buffer is invalid.
+static matroska_imu_sample_t *parse_imu_sample_buffer(DataBuffer &data_buffer)
+{
+    uint32_t buffer_size = data_buffer.Size();
+    binary *buffer = data_buffer.Buffer();
+    if (buffer_size != sizeof(matroska_imu_sample_t))
+    {
+        LOG_ERROR("Unsupported IMU sample size: %u", buffer_size);
+        return NULL;
+    }
+    else if (buffer == NULL)
+    {
+        LOG_ERROR("IMU sample buffer is NULL.", 0);
+        return NULL;
+    }
+    else
+    {
+        return reinterpret_cast<matroska_imu_sample_t *>(buffer);
+    }
+}
+
 k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next)
 {
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
@@ -1793,6 +1814,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
 
     if (context->imu_track.track == NULL)
     {
+        LOG_WARNING("Recording has no IMU track.", 0);
         *imu_sample = { 0 };
         return K4A_STREAM_RESULT_EOF;
     }
@@ -1801,6 +1823,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
 
     if (block_info == nullptr)
     {
+        // There is no current IMU sample, find the next/previous sample based on seek_timestamp.
         block_info = find_block(context, &context->imu_track, context->seek_timestamp_ns);
         if (block_info && !block_info->block)
         {
@@ -1829,29 +1852,17 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
                 context->imu_sample_index = -1;
                 for (size_t i = 0; i < sample_count; i++)
                 {
-                    DataBuffer &data_buffer = block_info->block->GetBuffer((unsigned int)i);
-                    uint32_t buffer_size = data_buffer.Size();
-                    binary *buffer = data_buffer.Buffer();
-                    if (buffer_size != sizeof(matroska_imu_sample_t))
+                    matroska_imu_sample_t *sample = parse_imu_sample_buffer(
+                        block_info->block->GetBuffer((unsigned int)i));
+                    if (sample == NULL)
                     {
-                        LOG_ERROR("Unsupported IMU sample size: %u", buffer_size);
                         *imu_sample = { 0 };
                         return K4A_STREAM_RESULT_FAILED;
                     }
-                    else if (buffer == NULL)
+                    else if (sample->acc_timestamp_ns >= context->seek_timestamp_ns)
                     {
-                        LOG_ERROR("Null IMU buffer returned from file.", 0);
-                        *imu_sample = { 0 };
-                        return K4A_STREAM_RESULT_FAILED;
-                    }
-                    else
-                    {
-                        matroska_imu_sample_t *sample = reinterpret_cast<matroska_imu_sample_t *>(data_buffer.Buffer());
-                        if (sample->acc_timestamp_ns >= context->seek_timestamp_ns)
-                        {
-                            context->imu_sample_index = next ? (int)i : (int)i - 1;
-                            break;
-                        }
+                        context->imu_sample_index = next ? (int)i : (int)i - 1;
+                        break;
                     }
                 }
             }
@@ -1859,6 +1870,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
     }
     else
     {
+        // Advance to the next IMU sample.
         context->imu_sample_index += next ? 1 : -1;
     }
 
@@ -1867,19 +1879,28 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
         size_t sample_count = block_info->block->NumberFrames();
         if (context->imu_sample_index >= 0 && context->imu_sample_index < (int)sample_count)
         {
-            DataBuffer &data_buffer = block_info->block->GetBuffer((unsigned int)context->imu_sample_index);
-            matroska_imu_sample_t *sample = reinterpret_cast<matroska_imu_sample_t *>(data_buffer.Buffer());
-            imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
-            imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
-            for (size_t i = 0; i < 3; i++)
+            matroska_imu_sample_t *sample = parse_imu_sample_buffer(
+                block_info->block->GetBuffer((unsigned int)context->imu_sample_index));
+            if (sample == NULL)
             {
-                imu_sample->acc_sample.v[i] = sample->acc_data[i];
-                imu_sample->gyro_sample.v[i] = sample->gyro_data[i];
+                *imu_sample = { 0 };
+                return K4A_STREAM_RESULT_FAILED;
             }
-            return K4A_STREAM_RESULT_SUCCEEDED;
+            else
+            {
+                imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
+                imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
+                for (size_t i = 0; i < 3; i++)
+                {
+                    imu_sample->acc_sample.v[i] = sample->acc_data[i];
+                    imu_sample->gyro_sample.v[i] = sample->gyro_data[i];
+                }
+                return K4A_STREAM_RESULT_SUCCEEDED;
+            }
         }
         else
         {
+            // If we've reached the end of the current block, advance to the next one.
             block_info = next_block(context, block_info.get(), next);
             if (block_info && block_info->block)
             {
