@@ -169,9 +169,9 @@ struct BITMAPINFOHEADER
 // Used to serialize imu samples to disk. The struct padding and size must be exact.
 struct matroska_imu_sample_t
 {
-    uint64_t acc_timestamp;
+    uint64_t acc_timestamp_ns;
     float acc_data[3];
-    uint64_t gyro_timestamp;
+    uint64_t gyro_timestamp_ns;
     float gyro_data[3];
 };
 #pragma pack(pop)

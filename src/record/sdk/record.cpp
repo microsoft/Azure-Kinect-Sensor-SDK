@@ -553,8 +553,8 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
     }
 
     matroska_imu_sample_t sample_data = { 0 };
-    sample_data.acc_timestamp = imu_sample.acc_timestamp_usec * 1000;
-    sample_data.gyro_timestamp = imu_sample.gyro_timestamp_usec * 1000;
+    sample_data.acc_timestamp_ns = imu_sample.acc_timestamp_usec * 1000;
+    sample_data.gyro_timestamp_ns = imu_sample.gyro_timestamp_usec * 1000;
     for (size_t i = 0; i < 3; i++)
     {
         sample_data.acc_data[i] = imu_sample.acc_sample.v[i];
@@ -563,7 +563,7 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
 
     DataBuffer *data_buffer = new (std::nothrow)
         DataBuffer(reinterpret_cast<binary *>(&sample_data), sizeof(matroska_imu_sample_t), NULL, true);
-    k4a_result_t result = write_track_data(context, context->imu_track, sample_data.acc_timestamp, data_buffer);
+    k4a_result_t result = write_track_data(context, context->imu_track, sample_data.acc_timestamp_ns, data_buffer);
     if (K4A_FAILED(result))
     {
         data_buffer->FreeBuffer(*data_buffer);

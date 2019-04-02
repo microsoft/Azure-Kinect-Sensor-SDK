@@ -263,21 +263,31 @@ k4a_imu_sample_t create_test_imu_sample(uint64_t timestamp_us)
 // 1.0, 2.0, and 3.0 are all exact float values, and no math is done. Equals is fine in this case.
 #pragma clang diagnostic ignored "-Wfloat-equal"
 #endif
-bool validate_imu_sample(k4a_imu_sample_t imu_sample, uint64_t timestamp_us)
+bool validate_imu_sample(k4a_imu_sample_t &imu_sample, uint64_t timestamp_us)
 {
-    if (imu_sample.acc_timestamp_usec != timestamp_us || imu_sample.gyro_timestamp_usec != timestamp_us)
-    {
-        return false;
-    }
-    if (imu_sample.acc_sample.v[0] != 1.0f || imu_sample.acc_sample.v[1] != 2.0f || imu_sample.acc_sample.v[2] != 3.0f)
-    {
-        return false;
-    }
-    if (imu_sample.gyro_sample.v[0] != -1.0f || imu_sample.gyro_sample.v[1] != -2.0f ||
-        imu_sample.gyro_sample.v[2] != -3.0f)
-    {
-        return false;
-    }
+    VALIDATE_PARAMETER(imu_sample.acc_timestamp_usec, timestamp_us);
+    VALIDATE_PARAMETER(imu_sample.gyro_timestamp_usec, timestamp_us);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[0] == 1.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[1] == 2.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[2] == 3.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[0] == -1.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[1] == -2.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[2] == -3.0f);
+
+    return true;
+}
+
+bool validate_null_imu_sample(k4a_imu_sample_t &imu_sample)
+{
+    VALIDATE_PARAMETER(imu_sample.acc_timestamp_usec, 0);
+    VALIDATE_PARAMETER(imu_sample.gyro_timestamp_usec, 0);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[0] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[1] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[2] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[0] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[1] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[2] == 0.0f);
+
     return true;
 }
 #if defined(__clang__)

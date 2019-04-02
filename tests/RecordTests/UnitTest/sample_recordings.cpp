@@ -54,7 +54,7 @@ void SampleRecordings::SetUp()
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         uint64_t timestamps[3] = { 0, 1000, 1000 }; // Offset the Depth and IR tracks by 1ms to test
-        uint64_t imu_timestamp = 0;
+        uint64_t imu_timestamp = 1150;
         uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_full.camera_fps);
         k4a_capture_t capture = NULL;
         for (int i = 0; i < 100; i++)
@@ -67,19 +67,19 @@ void SampleRecordings::SetUp()
             ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
             k4a_capture_release(capture);
 
+            timestamps[0] += timestamp_delta;
+            timestamps[1] += timestamp_delta;
+            timestamps[2] += timestamp_delta;
+
             while (imu_timestamp < timestamps[0])
             {
                 k4a_imu_sample_t imu_sample = create_test_imu_sample(imu_timestamp);
                 result = k4a_record_write_imu_sample(handle, imu_sample);
                 ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-                // Write IMU samples at ~1000 samples per second (this is an arbitrary for testing)
+                // Write IMU samples at ~1000 samples per second (this is an arbitrary rate for testing)
                 imu_timestamp += 1000; // 1ms
             }
-
-            timestamps[0] += timestamp_delta;
-            timestamps[1] += timestamp_delta;
-            timestamps[2] += timestamp_delta;
         }
 
         result = k4a_record_flush(handle);
