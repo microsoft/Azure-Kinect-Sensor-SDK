@@ -15,7 +15,7 @@
 // Library headers
 //
 #include "k4aimgui_all.h"
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
 
 // Project headers
 //

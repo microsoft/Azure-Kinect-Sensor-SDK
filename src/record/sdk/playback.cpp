@@ -123,7 +123,7 @@ k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t playback_han
     // Check if the binary data is null terminated, and if not append a zero.
     size_t append_zero = 0;
     assert(file_data.GetSize() > 0 && file_data.GetSize() <= SIZE_MAX);
-    if (file_data.GetBuffer()[file_data.GetSize() - 1] != 0)
+    if (file_data.GetBuffer()[file_data.GetSize() - 1] != '\0')
     {
         append_zero = 1;
     }
@@ -132,7 +132,7 @@ k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t playback_han
         memcpy(data, static_cast<uint8_t *>(file_data.GetBuffer()), (size_t)file_data.GetSize());
         if (append_zero)
         {
-            data[file_data.GetSize()] = 0;
+            data[file_data.GetSize()] = '\0';
         }
         *data_size = (size_t)file_data.GetSize() + append_zero;
         return K4A_BUFFER_RESULT_SUCCEEDED;
@@ -165,7 +165,7 @@ k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, k4a_ca
         assert(file_data.GetSize() <= SIZE_MAX);
         std::vector<char> buffer = std::vector<char>((size_t)file_data.GetSize() + 1);
         memcpy(&buffer[0], file_data.GetBuffer(), (size_t)file_data.GetSize());
-        buffer[buffer.size() - 1] = 0;
+        buffer[buffer.size() - 1] = '\0';
         k4a_result_t result = k4a_calibration_get_from_raw(buffer.data(),
                                                            buffer.size(),
                                                            context->record_config.depth_mode,

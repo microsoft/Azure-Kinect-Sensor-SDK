@@ -10,6 +10,12 @@
 
 // Library headers
 //
+
+// On Windows, this ends up including Windows.h, which by default #defines
+// min/max, which overrides std::min/std::max.
+// This disables that behavior.
+//
+#define NOMINMAX
 #include <soundio.h>
 
 // Project headers

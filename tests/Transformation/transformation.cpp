@@ -310,6 +310,60 @@ TEST_F(transformation_ut, transformation_2d_to_2d)
     ASSERT_EQ_FLT2(point2d, m_depth_point2d_reference);
 }
 
+TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
+{
+    k4a_transformation_t transformation_handle = transformation_create(&m_calibration, false);
+    ASSERT_NE(transformation_handle, (k4a_transformation_t)NULL);
+
+    int width = m_calibration.depth_camera_calibration.resolution_width;
+    int height = m_calibration.depth_camera_calibration.resolution_height;
+    k4a_image_t depth_image = NULL;
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_DEPTH16, width, height, width * (int)sizeof(uint16_t), &depth_image),
+              K4A_RESULT_SUCCEEDED);
+    ASSERT_NE(depth_image, (k4a_image_t)NULL);
+    k4a_transformation_image_descriptor_t depth_image_descriptor = image_get_descriptor(depth_image);
+
+    uint16_t *depth_image_buffer = (uint16_t *)(void *)image_get_buffer(depth_image);
+    for (int i = 0; i < width * height; i++)
+    {
+        depth_image_buffer[i] = (uint16_t)1000;
+    }
+
+    k4a_image_t xyz_image = NULL;
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM, width, height, width * 3 * (int)sizeof(int16_t), &xyz_image),
+              K4A_RESULT_SUCCEEDED);
+    ASSERT_NE(xyz_image, (k4a_image_t)NULL);
+    k4a_transformation_image_descriptor_t xyz_image_descriptor = image_get_descriptor(xyz_image);
+
+    ASSERT_EQ(transformation_depth_image_to_point_cloud(transformation_handle,
+                                                        image_get_buffer(depth_image),
+                                                        &depth_image_descriptor,
+                                                        K4A_CALIBRATION_TYPE_DEPTH,
+                                                        image_get_buffer(xyz_image),
+                                                        &xyz_image_descriptor),
+              K4A_RESULT_SUCCEEDED);
+
+    int16_t *xyz_image_buffer = (int16_t *)(void *)image_get_buffer(xyz_image);
+    double check_sum = 0;
+    for (int i = 0; i < 3 * width * height; i++)
+    {
+        check_sum += (double)abs(xyz_image_buffer[i]);
+    }
+    check_sum /= (double)(3 * width * height);
+
+    // Comparison against reference hash value computed over the entire image. If result image is changed (e.g., due to
+    // using a different calibration), the reference value needs to be updated.
+    const double reference_val = 633.99727884928382;
+    if (abs(check_sum - reference_val) > 0.001)
+    {
+        ASSERT_EQ(check_sum, reference_val);
+    }
+
+    image_dec_ref(depth_image);
+    image_dec_ref(xyz_image);
+    transformation_destroy(transformation_handle);
+}
+
 TEST_F(transformation_ut, transformation_create_depth_only)
 {
     k4a_depth_mode_t depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
@@ -403,6 +457,11 @@ TEST_F(transformation_ut, transformation_create_depth_only)
                                                         &point_cloud_image_descriptor),
               K4A_RESULT_SUCCEEDED);
 
+    image_dec_ref(depth_image);
+    image_dec_ref(color_image);
+    image_dec_ref(transformed_color_image);
+    image_dec_ref(transformed_depth_image);
+    image_dec_ref(point_cloud_image);
     transformation_destroy(transformation_handle);
 }
 
@@ -484,6 +543,10 @@ TEST_F(transformation_ut, transformation_create_color_only)
     ASSERT_EQ(calibration.depth_camera_calibration.resolution_width, 0);
     ASSERT_EQ(calibration.depth_camera_calibration.resolution_width, 0);
 
+    image_dec_ref(depth_image);
+    image_dec_ref(color_image);
+    image_dec_ref(transformed_color_image);
+    image_dec_ref(transformed_depth_image);
     transformation_destroy(transformation_handle);
 }
 
