@@ -279,19 +279,15 @@ bool validate_imu_sample(k4a_imu_sample_t &imu_sample, uint64_t timestamp_us)
 
 bool validate_null_imu_sample(k4a_imu_sample_t &imu_sample)
 {
-    if (imu_sample.acc_timestamp_usec != 0 || imu_sample.gyro_timestamp_usec != 0)
-    {
-        return false;
-    }
-    if (imu_sample.acc_sample.v[0] != 0.0f || imu_sample.acc_sample.v[1] != 0.0f || imu_sample.acc_sample.v[2] != 0.0f)
-    {
-        return false;
-    }
-    if (imu_sample.gyro_sample.v[0] != 0.0f || imu_sample.gyro_sample.v[1] != 0.0f ||
-        imu_sample.gyro_sample.v[2] != 0.0f)
-    {
-        return false;
-    }
+    VALIDATE_PARAMETER(imu_sample.acc_timestamp_usec, 0);
+    VALIDATE_PARAMETER(imu_sample.gyro_timestamp_usec, 0);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[0] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[1] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[2] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[0] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[1] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[2] == 0.0f);
+
     return true;
 }
 #if defined(__clang__)
