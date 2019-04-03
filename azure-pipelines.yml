@@ -6,6 +6,10 @@ name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
+- name: 'linux_firmware_version'
+  value: '"1.5.946614'
+- name: 'windows_firmware_version'
+  value: '"1.5.926614'
 
 trigger:
   batch: false
@@ -460,7 +464,7 @@ jobs:
     displayName: Windows Functional Test
     dependsOn: WindowsK4ABuildTest
     variables:
-      firmware_version: "1.5.926614"
+      firmware_version: "$(windows_firmware_version)"
     pool:
       name: Analog-FwConnected
       demands:
@@ -543,7 +547,7 @@ jobs:
     displayName: Linux Functional Test
     dependsOn: LinuxK4ABuildTest
     variables:
-      firmware_version: "1.5.946614"
+      firmware_version: "$(linux_firmware_version)"
     pool:
       name: Analog-FwConnected
       demands:
