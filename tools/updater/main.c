@@ -1080,7 +1080,10 @@ static k4a_result_t command_reset_device(updater_command_info_t *command_info)
 
     // We should have just reset, close out all of our connections.
     close_all_handles(command_info);
-    ThreadAPI_Sleep(500);
+    // Sleeping for a second to allow the device to reset and the system to properly de-enumerate the device. One second
+    // is an arbitrary value that appeared to work on most systems.
+    // Ideally this should be a wait until an event where the OS indicates the device has de-enumerated.
+    ThreadAPI_Sleep(1000);
 
     // Re-open the device to ensure it is ready.
     result = ensure_firmware_open(command_info);
