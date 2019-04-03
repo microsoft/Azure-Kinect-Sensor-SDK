@@ -6,6 +6,10 @@ name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
+- name: 'linux_firmware_version'
+  value: '1.5.946614'
+- name: 'windows_firmware_version'
+  value: '1.5.926614'
 
 trigger:
   batch: false
@@ -459,6 +463,8 @@ jobs:
   - job: WindowsFunctionalTests
     displayName: Windows Functional Test
     dependsOn: WindowsK4ABuildTest
+    variables:
+      firmware_version: "$(windows_firmware_version)"
     pool:
       name: Analog-FwConnected
       demands:
@@ -495,11 +501,24 @@ jobs:
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
         flattenFolders: true
 
+    - task: UniversalPackages@0
+      displayName: 'Download Azure Kinect Firmware'
+      inputs:
+        command: download
+        vstsFeed: 'analog.ai.depthcamera'
+        vstsFeedPackage: 'azure-kinect-firmware'
+        vstsPackageVersion: "$(firmware_version)"
+        downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
+
     - task: PowerShell@2
       inputs:
         targetType: 'filePath'
         filePath: './scripts/Reset-Device.ps1'
       displayName: 'Reset K4A Device'
+
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinect_Fw_$(firmware_version).bin'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Update Device'
 
     - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\enumerate_devices.exe'
       workingDirectory: '$(System.ArtifactsDirectory)'
@@ -527,6 +546,8 @@ jobs:
   - job: LinuxFunctionalTests
     displayName: Linux Functional Test
     dependsOn: LinuxK4ABuildTest
+    variables:
+      firmware_version: "$(linux_firmware_version)"
     pool:
       name: Analog-FwConnected
       demands:
@@ -545,6 +566,15 @@ jobs:
       inputs:
         artifactName: 'x86_64-linux-clang-RelWithDebInfo'
         parallelizationLimit: 8
+
+    - task: UniversalPackages@0
+      displayName: 'Download Azure Kinect Firmware'
+      inputs:
+        command: download
+        vstsFeed: 'analog.ai.depthcamera'
+        vstsFeedPackage: 'azure-kinect-firmware'
+        vstsPackageVersion: "$(firmware_version)"
+        downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
 
     - task: UniversalPackages@0
       displayName: 'Download DepthEngine Plugin'
@@ -603,6 +633,10 @@ jobs:
     - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport && sleep 3'
       workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
       displayName: 'Reset K4A Device'
+
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinect_Fw_$(firmware_version).bin'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Update Device'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
       workingDirectory: '$(System.ArtifactsDirectory)'
