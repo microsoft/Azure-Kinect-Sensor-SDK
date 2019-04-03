@@ -84,6 +84,7 @@ typedef struct _k4a_playback_context_t
 
     uint64_t timecode_scale;
     k4a_record_configuration_t record_config;
+    k4a_image_format_t color_format_conversion;
 
     std::unique_ptr<libebml::EbmlStream> stream;
     std::unique_ptr<libmatroska::KaxSegment> segment;
@@ -160,6 +161,10 @@ std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context,
                                          uint64_t timestamp_ns);
 std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_info_t *current, bool next);
 
+k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
+                                    block_info_t *in_block,
+                                    k4a_image_t *image_out,
+                                    k4a_image_format_t target_format);
 k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k4a_capture_t *capture_handle);
 k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *capture_handle, bool next);
 k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next);

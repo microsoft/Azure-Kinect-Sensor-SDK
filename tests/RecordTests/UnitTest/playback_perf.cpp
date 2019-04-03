@@ -70,6 +70,8 @@ TEST_F(playback_perf, test_1000_reads_forward)
     }
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
+    k4a_playback_set_color_conversion(handle, K4A_IMAGE_FORMAT_COLOR_BGRA32);
+
     {
         k4a_capture_t capture = NULL;
         k4a_stream_result_t playback_result = K4A_STREAM_RESULT_FAILED;

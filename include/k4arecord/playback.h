@@ -168,6 +168,9 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
                                                           char *value,
                                                           size_t *value_size);
 
+K4ARECORD_EXPORT k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle,
+                                                                k4a_image_format_t target_format);
+
 /** Read the next capture in the recording sequence.
  *
  * \param playback_handle

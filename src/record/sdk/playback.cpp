@@ -225,6 +225,28 @@ k4a_playback_get_tag(k4a_playback_t playback_handle, const char *name, char *val
     }
 }
 
+k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle, k4a_image_format_t target_format)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    switch (target_format)
+    {
+    case K4A_IMAGE_FORMAT_COLOR_MJPG:
+    case K4A_IMAGE_FORMAT_COLOR_NV12:
+    case K4A_IMAGE_FORMAT_COLOR_YUY2:
+    case K4A_IMAGE_FORMAT_COLOR_BGRA32:
+        context->color_format_conversion = target_format;
+        break;
+    default:
+        LOG_ERROR("Unsupported target_format specified for format conversion: %d", target_format);
+        return K4A_RESULT_FAILED;
+    }
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_t playback_handle, k4a_capture_t *capture_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);
