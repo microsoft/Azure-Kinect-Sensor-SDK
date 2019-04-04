@@ -1,16 +1,16 @@
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
 # K4A SDK
 
 [![Build Status (develop)](https://microsoft.visualstudio.com/Analog/_apis/build/status/Analog/AI/depthcamera/Microsoft.Azure-Kinect-Sensor-SDK?branchName=develop)](https://microsoft.visualstudio.com/Analog/_build/latest?definitionId=35486&branchName=develop)
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
+contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 ## Introduction
 
 **Azure Kinect Sensor SDK** is a cross platform (Linux and Windows) user mode SDK to read data from your Azure Kinect device.
 
-# Why use the Azure Kinect Sensor SDK 
+### Why use the Azure Kinect Sensor SDK 
 
 The Azure Kinect Sensor SDK enables you to get the most out of your Azure Kinect camera. Features include:
 * Depth camera access
@@ -23,7 +23,7 @@ The Azure Kinect Sensor SDK enables you to get the most out of your Azure Kinect
 
 ## Getting Started
 
-# Installation
+### Installation
 
 To use the SDK please refer to the installation instructions here.
 
@@ -52,16 +52,16 @@ K4A has five types of tests:
 For more instructions on running and writing tests see
 [testing](docs/testing.md).
 
-# Contribute
-We welcome your contributions! Please see the [contribution guidelines](CONTRIBUTING.md).
+## Contribute
+We welcome your contributions! Please see the [contribution guidelines](docs/contributing.md).
 
-## Feedback
+### Feedback
 For any feedback or to report a bug, please file a [GitHub Issue](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/issues).
 
-## Code of Conduct
+### Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
 or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-# License
+## License
 [MIT License](LICENSE)
