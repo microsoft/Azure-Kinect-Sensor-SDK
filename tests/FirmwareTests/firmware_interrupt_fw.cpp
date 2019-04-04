@@ -190,7 +190,7 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
         // happened.
         if (!compare_version(current_version.depth, { 0 }))
         {
-            printf("  The Depth version was not expected\n");
+            printf("  ** The Depth version was not expected\n");
         }
         break;
 
@@ -205,15 +205,15 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
         // reset actually happened.
         if (!compare_version(current_version.audio, g_test_firmware_package_info.audio))
         {
-            printf("  The Audio version was not expected\n");
+            printf("  **  The Audio version was not expected\n");
         }
         if (!compare_version(current_version.depth, g_test_firmware_package_info.depth))
         {
-            printf("  The Depth version was not expected\n");
+            printf("  **  The Depth version was not expected\n");
         }
         if (!compare_version(current_version.rgb, { 0 }))
         {
-            printf("  The RGB version was not expected\n");
+            printf("  **  The RGB version was not expected\n");
         }
         break;
 

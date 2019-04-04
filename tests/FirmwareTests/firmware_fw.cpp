@@ -18,8 +18,8 @@ protected:
     {
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, TRACE_CALL(setup_common_test()));
         const ::testing::TestInfo *const test_info = ::testing::UnitTest::GetInstance()->current_test_info();
-        LOG_INFO("Test %s requires a connection exerciser.", test_info->name());
-        LOG_INFO("Disconnecting the device", 0);
+        printf("\nTest %s requires a connection exerciser.\n", test_info->name());
+        LOG_INFO("Disconnecting the device");
         g_connection_exerciser->set_usb_port(0);
         ThreadAPI_Sleep(500);
 
@@ -40,7 +40,7 @@ protected:
         ASSERT_FALSE(compare_version(g_test_firmware_package_info.depth, g_candidate_firmware_package_info.depth));
         ASSERT_FALSE(compare_version(g_test_firmware_package_info.rgb, g_candidate_firmware_package_info.rgb));
 
-        // There should be no other devices.
+        // There should be no other devices as the tests use the default device to connect to.
         uint32_t device_count = 0;
         usb_cmd_get_device_count(&device_count);
         ASSERT_EQ((uint32_t)0, device_count);
@@ -245,9 +245,7 @@ TEST_F(firmware_fw, simple_update_from_lkg)
 {
     LOG_INFO("Beginning the basic update test from the LKG firmware.", 0);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
-
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_pre_update, &calibration_pre_update_size));
-
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
     ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
@@ -258,7 +256,7 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
 
-    LOG_INFO("Updating the device to the LKG firmware.");
+    printf("\n == Updating the device to the LKG firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_lkg_firmware_buffer,
@@ -275,7 +273,7 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
-    LOG_INFO("Updating the device to the Candidate firmware.");
+    printf("\n == Updating the device to the Candidate firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_candidate_firmware_buffer,
@@ -292,7 +290,7 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
-    LOG_INFO("Updating the device to the Test firmware.");
+    printf("\n == Updating the device to the Test firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_test_firmware_buffer,
@@ -314,9 +312,7 @@ TEST_F(firmware_fw, simple_update_from_factory)
 {
     LOG_INFO("Beginning the basic update test from the Factory firmware.", 0);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
-
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_pre_update, &calibration_pre_update_size));
-
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
     ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
@@ -327,7 +323,7 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
 
-    LOG_INFO("Updating the device to the Factory firmware.");
+    printf("\n == Updating the device to the Factory firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_factory_firmware_buffer,
@@ -344,7 +340,7 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
-    LOG_INFO("Updating the device to the Candidate firmware.");
+    printf("\n == Updating the device to the Candidate firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_candidate_firmware_buffer,
@@ -361,7 +357,7 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
-    LOG_INFO("Updating the device to the Test firmware.");
+    printf("\n == Updating the device to the Test firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_test_firmware_buffer,

@@ -47,23 +47,25 @@
         return K4A_RESULT_FAILED;                                                                                      \
     }
 
-char *g_candidate_firmware_path = nullptr;
-
 int g_k4a_port_number = -1;
 connection_exerciser *g_connection_exerciser = nullptr;
 
-uint8_t *g_test_firmware_buffer = nullptr;
-size_t g_test_firmware_size = 0;
-firmware_package_info_t g_test_firmware_package_info = { 0 };
-
+char *g_candidate_firmware_path = nullptr;
 uint8_t *g_candidate_firmware_buffer = nullptr;
 size_t g_candidate_firmware_size = 0;
 firmware_package_info_t g_candidate_firmware_package_info = { 0 };
 
+char *g_test_firmware_path = nullptr;
+uint8_t *g_test_firmware_buffer = nullptr;
+size_t g_test_firmware_size = 0;
+firmware_package_info_t g_test_firmware_package_info = { 0 };
+
+char *g_lkg_firmware_path = nullptr;
 uint8_t *g_lkg_firmware_buffer = nullptr;
 size_t g_lkg_firmware_size = 0;
 firmware_package_info_t g_lkg_firmware_package_info = { 0 };
 
+char *g_factory_firmware_path = nullptr;
 uint8_t *g_factory_firmware_buffer = nullptr;
 size_t g_factory_firmware_size = 0;
 firmware_package_info_t g_factory_firmware_package_info = { 0 };
@@ -90,12 +92,12 @@ k4a_result_t setup_common_test()
     g_k4a_port_number = -1;
     g_connection_exerciser = new (std::nothrow) connection_exerciser();
 
-    LOG_INFO("Searching for Connection Exerciser...", 0);
+    std::cout << "Searching for the connection exerciser and device..." << std::endl;
+    LOG_INFO("Searching for the connection exerciser...", 0);
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->find_connection_exerciser());
-    LOG_INFO("Clearing port...");
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
 
-    LOG_INFO("Searching for device...");
+    LOG_INFO("Searching for device...", 0);
 
     for (int i = 0; i < CONN_EX_MAX_NUM_PORTS; ++i)
     {
@@ -123,30 +125,30 @@ k4a_result_t setup_common_test()
             g_k4a_port_number = port;
         }
 
-        printf("On port #%d: %4.2fV %4.2fA\n", port, voltage, current);
+        LOG_INFO("On port #%d: %4.2fV %4.2fA\n", port, voltage, current);
     }
 
     if (g_k4a_port_number == -1)
     {
-        std::cout << "The Kinect for Azure was not detected on a port of the connection exerciser." << std::endl;
+        std::cout << "The Azure Kinect DK was not detected on any port of the connection exerciser." << std::endl;
         return K4A_RESULT_FAILED;
     }
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
-
-    std::cout << "Loading Test firmware package: " << K4A_TEST_FIRMWARE_PATH << std::endl;
-    load_firmware_files(K4A_TEST_FIRMWARE_PATH, &g_test_firmware_buffer, &g_test_firmware_size);
-    parse_firmware_package(g_test_firmware_buffer, g_test_firmware_size, &g_test_firmware_package_info);
 
     std::cout << "Loading Release Candidate firmware package: " << g_candidate_firmware_path << std::endl;
     load_firmware_files(g_candidate_firmware_path, &g_candidate_firmware_buffer, &g_candidate_firmware_size);
     parse_firmware_package(g_candidate_firmware_buffer, g_candidate_firmware_size, &g_candidate_firmware_package_info);
 
-    std::cout << "Loading LKG firmware package: " << K4A_LKG_FIRMWARE_PATH << std::endl;
-    load_firmware_files(K4A_LKG_FIRMWARE_PATH, &g_lkg_firmware_buffer, &g_lkg_firmware_size);
+    std::cout << "Loading Test firmware package: " << g_test_firmware_path << std::endl;
+    load_firmware_files(g_test_firmware_path, &g_test_firmware_buffer, &g_test_firmware_size);
+    parse_firmware_package(g_test_firmware_buffer, g_test_firmware_size, &g_test_firmware_package_info);
+
+    std::cout << "Loading LKG firmware package: " << g_lkg_firmware_path << std::endl;
+    load_firmware_files(g_lkg_firmware_path, &g_lkg_firmware_buffer, &g_lkg_firmware_size);
     parse_firmware_package(g_lkg_firmware_buffer, g_lkg_firmware_size, &g_lkg_firmware_package_info);
 
-    std::cout << "Loading Factory firmware package: " << K4A_FACTORY_FIRMWARE_PATH << std::endl;
-    load_firmware_files(K4A_FACTORY_FIRMWARE_PATH, &g_factory_firmware_buffer, &g_factory_firmware_size);
+    std::cout << "Loading Factory firmware package: " << g_factory_firmware_path << std::endl;
+    load_firmware_files(g_factory_firmware_path, &g_factory_firmware_buffer, &g_factory_firmware_size);
     parse_firmware_package(g_factory_firmware_buffer, g_factory_firmware_size, &g_factory_firmware_package_info);
 
     common_initialized = true;
@@ -206,7 +208,7 @@ k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer,
         size_t tempFirmwareSize = (size_t)ftell(pFirmwareFile);
         if (tempFirmwareSize == (size_t)-1L)
         {
-            std::cout << "ERROR: Failed to get size of the firmware package." << std::endl;
+            LOG_ERROR("Failed to get size of the firmware package.", 0);
             return K4A_RESULT_FAILED;
         }
 
@@ -215,17 +217,17 @@ k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer,
         tempFirmwareBuffer = (uint8_t *)malloc(tempFirmwareSize);
         if (tempFirmwareBuffer == NULL)
         {
-            std::cout << "ERROR: Failed to allocate memory." << std::endl;
+            LOG_ERROR("Failed to allocate memory.", 0);
             return K4A_RESULT_FAILED;
         }
 
-        std::cout << "File size: " << tempFirmwareSize << " bytes" << std::endl;
+        LOG_INFO("Loaded: \"%s\", File size: %d bytes.", firmware_path, tempFirmwareSize);
         numRead = fread(tempFirmwareBuffer, tempFirmwareSize, 1, pFirmwareFile);
         fclose(pFirmwareFile);
 
         if (numRead != 1)
         {
-            std::cout << "ERROR: Could not read all data from the file" << std::endl;
+            LOG_ERROR("Failed to read all of the data from the file.", 0);
         }
         else
         {
@@ -237,7 +239,7 @@ k4a_result_t load_firmware_files(char *firmware_path, uint8_t **firmware_buffer,
     }
     else
     {
-        std::cout << "ERROR: Cannot Open (" << firmware_path << ") errno=" << errno << std::endl;
+        LOG_ERROR("Failed to open \"%s\" errno=%d", firmware_path, errno);
     }
 
     if (tempFirmwareBuffer)
@@ -788,16 +790,58 @@ int main(int argc, char **argv)
             argument[j] = (char)tolower(argument[j]);
         }
 
-        if (strcmp(argument, "--firmware") == 0)
+        if (strcmp(argument, "-cf") == 0 || strcmp(argument, "--candidate-firmware") == 0)
         {
             if (i + 1 <= argc)
             {
                 g_candidate_firmware_path = argv[++i];
-                printf("Setting g_test_firmware_path = %s\n", g_candidate_firmware_path);
+                printf("Setting g_candidate_firmware_path = %s\n", g_candidate_firmware_path);
             }
             else
             {
-                printf("Error: firmware path parameter missing\n");
+                printf("Error: candidate firmware path parameter missing\n");
+                error = true;
+            }
+        }
+
+        if (strcmp(argument, "-tf") == 0 || strcmp(argument, "--test-firmware") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_test_firmware_path = argv[++i];
+                printf("Setting g_test_firmware_path = %s\n", g_test_firmware_path);
+            }
+            else
+            {
+                printf("Error: test firmware path parameter missing\n");
+                error = true;
+            }
+        }
+
+        if (strcmp(argument, "-lf") == 0 || strcmp(argument, "--lkg-firmware") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_lkg_firmware_path = argv[++i];
+                printf("Setting g_lkg_firmware_path = %s\n", g_lkg_firmware_path);
+            }
+            else
+            {
+                printf("Error: lkg firmware path parameter missing\n");
+                error = true;
+            }
+        }
+
+        if (strcmp(argument, "-ff") == 0 || strcmp(argument, "--factory-firmware") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_factory_firmware_path = argv[++i];
+                printf("Setting g_factory_firmware_path = %s\n", g_factory_firmware_path);
+            }
+            else
+            {
+                printf("Error: factory firmware path parameter missing\n");
                 error = true;
             }
         }
@@ -812,8 +856,17 @@ int main(int argc, char **argv)
     if (error)
     {
         printf("\n\nCustom Test Settings:\n");
-        printf("  --firmware <firmware path>\n");
+        printf("  -cf | --candidate-firmware <firmware path>\n");
         printf("      This is the path to the candidate firmware that should be tested.\n");
+        printf("  -tf | --test-firmware <firmware path>\n");
+        printf("      This is the path to the test firmware that will be used to test the candidate. It should have a "
+               "different version for all components.\n");
+        printf("  -lf | --lkg-firmware <firmware path>\n");
+        printf("      This is the path to the LKG firmware that will be used as a starting point for updating to the "
+               "candidate.\n");
+        printf("  -ff | --factory-firmware <firmware path>\n");
+        printf("      This is the path to the factory firmware that will be used as a starting point for updating to "
+               "the candidate.\n");
 
         return 1; // Indicates an error or warning
     }

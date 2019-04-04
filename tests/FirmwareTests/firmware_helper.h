@@ -11,19 +11,6 @@
 #define UPDATE_TIMEOUT_MS 10 * 60 * 1000 // 10 Minutes should be way more than enough.
 #define UPDATE_POLL_INTERVAL_MS 5
 
-// This will define the path to the firmware packages to use in testing the firmware update process. The firmware update
-// is executed by the firmware that is currently on the device. In order to test the firmware update process for a
-// candidate, the device must be on the candidate firmware and then updated to a different test firmware where all of
-// the versions are different.
-// Factory firmware - This should be the oldest available firmware that we can roll back to.
-// LKG firmware - This should be the last firmware that was released.
-// Test firmware - This should be a firmware where all components have different versions than the candidate firmware.
-// Candidate firmware - This should be the firmware that is being validated. It will be passed in via command line
-// parameter.
-#define K4A_FACTORY_FIRMWARE_PATH "D:\\Shares\\Eden\\Public\\AzureKinectDK_Fw_1.5.786013.bin"
-#define K4A_LKG_FIRMWARE_PATH "D:\\Shares\\Eden\\Public\\AzureKinectDK_Fw_1.5.886314.bin"
-#define K4A_TEST_FIRMWARE_PATH "D:\\Shares\\Eden\\Public\\AzureKinectDK_Fw_1.5.786013.bin"
-
 typedef enum
 {
     FIRMWARE_OPERATION_START,
@@ -45,18 +32,28 @@ typedef enum
 extern int g_k4a_port_number;
 extern connection_exerciser *g_connection_exerciser;
 
-extern uint8_t *g_test_firmware_buffer;
-extern size_t g_test_firmware_size;
-extern firmware_package_info_t g_test_firmware_package_info;
+// This will define the information about the relevant firmware packages to use in testing the update process. The
+// firmware update is executed by the firmware that is currently on the device. In order to test the firmware update
+// process for a candidate, the device must be on the candidate firmware and then updated to a different test firmware
+// where all of the versions are different.
 
+// Candidate firmware - This is the firmware that is being validated.
 extern uint8_t *g_candidate_firmware_buffer;
 extern size_t g_candidate_firmware_size;
 extern firmware_package_info_t g_candidate_firmware_package_info;
 
+// Test firmware - This is the firmware being used to test the Candidate. All components will have different versions
+// than the candidate firmware.
+extern uint8_t *g_test_firmware_buffer;
+extern size_t g_test_firmware_size;
+extern firmware_package_info_t g_test_firmware_package_info;
+
+// LKG firmware - This should be the last known good firmware that was released.
 extern uint8_t *g_lkg_firmware_buffer;
 extern size_t g_lkg_firmware_size;
 extern firmware_package_info_t g_lkg_firmware_package_info;
 
+// Factory firmware - This should be the oldest available firmware that we can roll back to.
 extern uint8_t *g_factory_firmware_buffer;
 extern size_t g_factory_firmware_size;
 extern firmware_package_info_t g_factory_firmware_package_info;
