@@ -130,44 +130,48 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
     }
     context->logger = g_logger;
 
-    //[2018-08-27 10:44:23.218] [level] [threadID] <message>
-    // https://github.com/gabime/spdlog/wiki/3.-Custom-formatting
-    spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [t=%t] %v");
-
-    // Set the default logging level
-    spdlog::set_level(spdlog::level::err);
-
-    // override the default logging level
-    if (logging_level && logging_level[0] != '\0')
+    if (g_logger)
     {
-        if (logging_level[0] == 't' || logging_level[0] == 'T')
-        {
-            // capture a severity of trace or higher
-            spdlog::set_level(spdlog::level::trace);
-        }
-        else if (logging_level[0] == 'i' || logging_level[0] == 'I')
-        {
-            // capture a severity of info or higher
-            spdlog::set_level(spdlog::level::info);
-        }
-        else if (logging_level[0] == 'w' || logging_level[0] == 'W')
-        {
-            // capture a severity of warning or higher
-            spdlog::set_level(spdlog::level::warn);
-        }
-        else if (logging_level[0] == 'e' || logging_level[0] == 'E')
-        {
-            // capture a severity of error or higher
-            spdlog::set_level(spdlog::level::err);
-        }
-        else if (logging_level[0] == 'c' || logging_level[0] == 'C')
-        {
-            // capture a severity of error or higher
-            spdlog::set_level(spdlog::level::critical);
-        }
-    }
 
-    g_logger->flush_on(spdlog::level::warn);
+        //[2018-08-27 10:44:23.218] [level] [threadID] <message>
+        // https://github.com/gabime/spdlog/wiki/3.-Custom-formatting
+        spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [t=%t] %v");
+
+        // Set the default logging level
+        spdlog::set_level(spdlog::level::err);
+
+        // override the default logging level
+        if (logging_level && logging_level[0] != '\0')
+        {
+            if (logging_level[0] == 't' || logging_level[0] == 'T')
+            {
+                // capture a severity of trace or higher
+                spdlog::set_level(spdlog::level::trace);
+            }
+            else if (logging_level[0] == 'i' || logging_level[0] == 'I')
+            {
+                // capture a severity of info or higher
+                spdlog::set_level(spdlog::level::info);
+            }
+            else if (logging_level[0] == 'w' || logging_level[0] == 'W')
+            {
+                // capture a severity of warning or higher
+                spdlog::set_level(spdlog::level::warn);
+            }
+            else if (logging_level[0] == 'e' || logging_level[0] == 'E')
+            {
+                // capture a severity of error or higher
+                spdlog::set_level(spdlog::level::err);
+            }
+            else if (logging_level[0] == 'c' || logging_level[0] == 'C')
+            {
+                // capture a severity of error or higher
+                spdlog::set_level(spdlog::level::critical);
+            }
+        }
+
+        g_logger->flush_on(spdlog::level::warn);
+    }
     return K4A_RESULT_SUCCEEDED;
 }
 
@@ -178,8 +182,12 @@ void logger_destroy(logger_t logger_handle)
     // destroy the logger
     if (DEC_REF_VAR(g_logger_count) == 0)
     {
+        bool drop_logger = g_logger != NULL;
         g_logger = NULL;
-        spdlog::drop(K4A_LOGGER);
+        if (drop_logger)
+        {
+            spdlog::drop(K4A_LOGGER);
+        }
         g_logger_is_file_based = false;
     }
     context->logger = NULL;

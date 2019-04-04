@@ -841,5 +841,7 @@ int main(int argc, char **argv)
 
         return 1; // Indicates an error or warning
     }
-    return RUN_ALL_TESTS();
+    int results = RUN_ALL_TESTS();
+    k4a_unittest_deinit();
+    return results;
 }

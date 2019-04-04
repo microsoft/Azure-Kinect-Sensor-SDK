@@ -256,6 +256,7 @@ TEST_F(imu_ut, create)
     imu_destroy(imu_handle1);
     imu_destroy(imu_handle2);
     tickcounter_destroy(tick);
+    calibration_destroy(calibration_handle);
 }
 
 TEST_F(imu_ut, start)
@@ -278,6 +279,7 @@ TEST_F(imu_ut, start)
     // Destroy the instance
     imu_destroy(imu_handle);
     tickcounter_destroy(tick);
+    calibration_destroy(calibration_handle);
 }
 
 TEST_F(imu_ut, get_sample)
@@ -344,6 +346,8 @@ TEST_F(imu_ut, get_sample)
     ASSERT_EQ(allocator_test_for_leaks(), 0);
     // Destroy the instance
     imu_destroy(imu_handle);
+    tickcounter_destroy(tick);
+    calibration_destroy(calibration_handle);
 }
 
 int main(int argc, char **argv)

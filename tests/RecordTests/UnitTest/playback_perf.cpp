@@ -176,5 +176,7 @@ int main(int argc, char **argv)
     }
     g_test_file_name = std::string(argv[1]);
 
-    return RUN_ALL_TESTS();
+    int results = RUN_ALL_TESTS();
+    k4a_unittest_deinit();
+    return results;
 }
