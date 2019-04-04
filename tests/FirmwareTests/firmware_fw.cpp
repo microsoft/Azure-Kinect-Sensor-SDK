@@ -117,6 +117,23 @@ protected:
         return result;
     }
 
+    bool compare_calibration()
+    {
+        if (calibration_pre_update_size == calibration_post_update_size &&
+            0 == memcmp(calibration_pre_update, calibration_post_update, calibration_pre_update_size))
+        {
+            return true;
+        }
+        else
+        {
+            printf("Calibration pre and post update do not match!\n");
+            printf("Calibration pre-update: %s\n", (char *)calibration_pre_update);
+            printf("Calibration post-update: %s\n", (char *)calibration_post_update);
+        }
+
+        return false;
+    }
+
     firmware_t firmware_handle = nullptr;
     char *serial_number = nullptr;
     size_t serial_number_length = 0;
@@ -253,8 +270,7 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_post_update, &calibration_post_update_size));
-    ASSERT_EQ(calibration_pre_update_size, calibration_post_update_size);
-    ASSERT_TRUE(0 == memcmp(calibration_pre_update, calibration_post_update, calibration_pre_update_size));
+    ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
@@ -271,8 +287,7 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_post_update, &calibration_post_update_size));
-    ASSERT_EQ(calibration_pre_update_size, calibration_post_update_size);
-    ASSERT_TRUE(0 == memcmp(calibration_pre_update, calibration_post_update, calibration_pre_update_size));
+    ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
@@ -289,13 +304,10 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_post_update, &calibration_post_update_size));
-    ASSERT_EQ(calibration_pre_update_size, calibration_post_update_size);
-    ASSERT_TRUE(0 == memcmp(calibration_pre_update, calibration_post_update, calibration_pre_update_size));
+    ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
-
-    printf("Calibration: %s", calibration_pre_update);
 }
 
 TEST_F(firmware_fw, simple_update_from_factory)
@@ -327,8 +339,7 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_post_update, &calibration_post_update_size));
-    ASSERT_EQ(calibration_pre_update_size, calibration_post_update_size);
-    ASSERT_TRUE(0 == memcmp(calibration_pre_update, calibration_post_update, calibration_pre_update_size));
+    ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
@@ -345,8 +356,7 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_post_update, &calibration_post_update_size));
-    ASSERT_EQ(calibration_pre_update_size, calibration_post_update_size);
-    ASSERT_TRUE(0 == memcmp(calibration_pre_update, calibration_post_update, calibration_pre_update_size));
+    ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
@@ -363,8 +373,7 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_post_update, &calibration_post_update_size));
-    ASSERT_EQ(calibration_pre_update_size, calibration_post_update_size);
-    ASSERT_TRUE(0 == memcmp(calibration_pre_update, calibration_post_update, calibration_pre_update_size));
+    ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
