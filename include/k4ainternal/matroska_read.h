@@ -58,6 +58,7 @@ typedef struct _block_info_t
 
     uint64_t timestamp_ns = 0;      // The timestamp of the block as written in the file.
     uint64_t sync_timestamp_ns = 0; // The timestamp of the block, including sychronization offsets.
+    uint64_t block_duration_ns = 0; // If the block is a KaxBlockGroup, otherwise 0.
     int index = -1;                 // Index of the block element within the cluster.
 } block_info_t;
 
@@ -108,7 +109,7 @@ typedef struct _k4a_playback_context_t
     track_reader_t ir_track;
 
     track_reader_t imu_track;
-    int imu_sample_index;
+    int imu_sample_index = -1;
 
     uint64_t segment_info_offset;
     uint64_t first_cluster_offset;
