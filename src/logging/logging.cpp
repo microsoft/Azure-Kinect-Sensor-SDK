@@ -30,7 +30,7 @@ extern "C" {
 
 //
 // This logger implements two different loggers, that have different lifespans.
-// 1) A streaming callback function can deliver debug messages to a registered callback function. 
+// 1) A streaming callback function can deliver debug messages to a registered callback function.
 // 2) This module and therefore k4a.dll is capable of independently logging to a file or STDOUT through the use of
 // environment variables defined in k4atypes.h
 //
