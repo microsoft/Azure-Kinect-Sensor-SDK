@@ -201,6 +201,8 @@ __attribute__((__format__ (__printf__, 2, 0)))
 #endif
 void logger_trace(
     const char * zone,
+    const char * file,
+    const int line,
     const char * format,
     ...)
 {
@@ -215,7 +217,7 @@ void logger_trace(
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
 
-    g_logger->trace("[{0}] {1}", zone, buffer);
+    g_logger->trace("[{0}] {1} ({2}): {3}", zone, file, line, buffer);
     va_end(args);
 }
 
@@ -225,6 +227,8 @@ __attribute__((__format__ (__printf__, 2, 0)))
 #endif
 void logger_info(
     const char * zone,
+    const char * file,
+    const int line,
     const char * format,
     ...)
 {
@@ -239,7 +243,7 @@ void logger_info(
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
 
-    g_logger->info("[{0}] {1}", zone, buffer);
+    g_logger->info("[{0}] {1} ({2}): {3}", zone, file, line, buffer);
     va_end(args);
 }
 
@@ -249,6 +253,8 @@ __attribute__((__format__ (__printf__, 2, 0)))
 #endif
 void logger_warn(
     const char * zone,
+    const char * file,
+    const int line,
     const char * format,
     ...)
 {
@@ -263,7 +269,7 @@ void logger_warn(
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
 
-    g_logger->warn("[{0}] {1}", zone, buffer);
+    g_logger->warn("[{0}] {1} ({2}): {3}", zone, file, line, buffer);
     va_end(args);
 }
 
@@ -273,6 +279,8 @@ __attribute__((__format__ (__printf__, 2, 0)))
 #endif
 void logger_error(
     const char * zone,
+    const char * file,
+    const int line,
     const char * format,
     ...)
 {
@@ -287,7 +295,7 @@ void logger_error(
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
 
-    g_logger->error("[{0}] {1}", zone, buffer);
+    g_logger->error("[{0}] {1} ({2}): {3}", zone, file, line, buffer);
     va_end(args);
 }
 
@@ -297,6 +305,8 @@ __attribute__((__format__ (__printf__, 2, 0)))
 #endif
 void logger_critical(
     const char * zone,
+    const char * file,
+    const int line,
     const char * format,
     ...)
 {
@@ -311,7 +321,7 @@ void logger_critical(
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
 
-    g_logger->critical("[{0}] {1}", zone, buffer);
+    g_logger->critical("[{0}] {1} ({2}): {3}", zone, file, line, buffer);
     va_end(args);
 }
 

@@ -97,33 +97,30 @@ bool logger_is_file_based(void);
 
 /** Logs a message to the configured logger at an 'critical' level
  * */
-void logger_critical(const char *zone, const char *format, ...);
+void logger_critical(const char *zone, const char *file, const int line, const char *format, ...);
 
 /** Logs a message to the configured logger at an 'error' level
  * */
-void logger_error(const char *zone, const char *format, ...);
+void logger_error(const char *zone, const char *file, const int line, const char *format, ...);
 
 /** Logs a message to the configured logger at an 'warning' level
  * */
-void logger_warn(const char *zone, const char *format, ...);
+void logger_warn(const char *zone, const char *file, const int line, const char *format, ...);
 
 /** Logs a message to the configured logger at an 'informational' level
  * */
-void logger_info(const char *zone, const char *format, ...);
+void logger_info(const char *zone, const char *file, const int line, const char *format, ...);
 
 /** Logs a message to the configured logger at an 'trace' level
  * */
-void logger_trace(const char *zone, const char *format, ...);
+void logger_trace(const char *zone, const char *file, const int line, const char *format, ...);
 
 FORCEINLINE k4a_result_t
 TraceError(k4a_result_t result, const char *szCall, const char *szFile, int line, const char *szFunction)
 {
     if (K4A_FAILED(result))
     {
-        // Example print:
-        //  depth.cpp (86): allocator_create(&depth->allocator) returned failure in depth_create
-
-        logger_error(LOGGER_K4A, "%s (%d): %s returned failure in %s()", szFile, line, szCall, szFunction);
+        logger_error(LOGGER_K4A, szFile, line, "%s returned failure in %s()", szCall, szFunction);
     }
     return result;
 }
@@ -132,10 +129,7 @@ TraceBufferError(k4a_buffer_result_t result, const char *szCall, const char *szF
 {
     if (result == K4A_BUFFER_RESULT_FAILED)
     {
-        // Example print:
-        //  depth.cpp (86): allocator_create(&depth->allocator) returned failure in depth_create
-
-        logger_error(LOGGER_K4A, "%s (%d): %s returned failure in %s()", szFile, line, szCall, szFunction);
+        logger_error(LOGGER_K4A, szFile, line, "%s returned failure in %s()", szCall, szFunction);
     }
     return result;
 }
@@ -144,10 +138,7 @@ TraceWaitError(k4a_wait_result_t result, const char *szCall, const char *szFile,
 {
     if (result == K4A_WAIT_RESULT_FAILED)
     {
-        // Example print:
-        //  depth.cpp (86): allocator_create(&depth->allocator) returned failure in depth_create
-
-        logger_error(LOGGER_K4A, "%s (%d): %s returned failure in %s()", szFile, line, szCall, szFunction);
+        logger_error(LOGGER_K4A, szFile, line, "%s returned failure in %s()", szCall, szFunction);
     }
     return result;
 }
@@ -156,14 +147,11 @@ FORCEINLINE k4a_result_t TraceReturn(k4a_result_t result, const char *szFile, in
 {
     if (K4A_FAILED(result))
     {
-        // Example print:
-        //  depth.cpp (86): depth_create returned failure.
-
-        logger_error(LOGGER_K4A, "%s (%d): %s() returned failure.", szFile, line, szFunction);
+        logger_error(LOGGER_K4A, szFile, line, "%s() returned failure.", szFunction);
     }
     else
     {
-        logger_trace(LOGGER_K4A, "%s (%d): %s() returned success.", szFile, line, szFunction);
+        logger_trace(LOGGER_K4A, szFile, line, "%s() returned success.", szFunction);
     }
     return result;
 }
@@ -172,9 +160,7 @@ FORCEINLINE void TraceArg(int result, const char *szFile, int line, const char *
 {
     if (!result)
     {
-        // Example print:
-        //  depth.cpp (86): Invalid argument to depth_create. depthmcu == NULL.
-        logger_error(LOGGER_K4A, "%s (%d): Invalid argument to %s(). %s", szFile, line, szFunction, szExpression);
+        logger_error(LOGGER_K4A, szFile, line, "Invalid argument to %s(). %s", szFunction, szExpression);
     }
 }
 
@@ -188,13 +174,10 @@ FORCEINLINE void TraceInvalidHandle(int result,
 {
     if (!result)
     {
-        // Example print:
-        //  depth.cpp (86): Invalid argument to depth_create. depth_handle (00000000) is not a valid handle of type
-        //  depth_t
         logger_error(LOGGER_K4A,
-                     "%s (%d): Invalid argument to %s(). %s (%p) is not a valid handle of type %s",
                      szFile,
                      line,
+                     "Invalid argument to %s(). %s (%p) is not a valid handle of type %s",
                      szFunction,
                      szExpression,
                      pHandleValue,
@@ -277,16 +260,11 @@ FORCEINLINE void TraceInvalidHandle(int result,
     }
 
 // Logs a message
-#define LOG_TRACE(message, ...)                                                                                        \
-    logger_trace(LOGGER_K4A, "%s (%d): %s(). " message, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define LOG_INFO(message, ...)                                                                                         \
-    logger_info(LOGGER_K4A, "%s (%d): %s(). " message, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define LOG_WARNING(message, ...)                                                                                      \
-    logger_warn(LOGGER_K4A, "%s (%d): %s(). " message, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define LOG_ERROR(message, ...)                                                                                        \
-    logger_error(LOGGER_K4A, "%s (%d): %s(). " message, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define LOG_HANDLE(message, ...)                                                                                       \
-    logger_info(LOGGER_K4A, "%s (%d): %s(). " message, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_TRACE(message, ...) logger_trace(LOGGER_K4A, __FILE__, __LINE__, "%s(). " message, __func__, __VA_ARGS__)
+#define LOG_INFO(message, ...) logger_info(LOGGER_K4A, __FILE__, __LINE__, "%s(). " message, __func__, __VA_ARGS__)
+#define LOG_WARNING(message, ...) logger_warn(LOGGER_K4A, __FILE__, __LINE__, "%s(). " message, __func__, __VA_ARGS__)
+#define LOG_ERROR(message, ...) logger_error(LOGGER_K4A, __FILE__, __LINE__, "%s(). " message, __func__, __VA_ARGS__)
+#define LOG_HANDLE(message, ...) logger_info(LOGGER_K4A, __FILE__, __LINE__, "%s(). " message, __func__, __VA_ARGS__)
 
 #ifdef __cplusplus
 }
