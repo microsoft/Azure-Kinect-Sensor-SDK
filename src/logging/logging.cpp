@@ -38,7 +38,7 @@ extern "C" {
 // This is the context for the users logger. Otherwise known as the registered callback function.
 typedef struct _logger_user_cb_info_t
 {
-    k4a_logging_cb_t *callback;
+    k4a_logging_message_cb_t *callback;
     void *callback_context;
 } logger_user_cb_info_t;
 
@@ -50,17 +50,16 @@ typedef struct _logger_context_t
 
 K4A_DECLARE_CONTEXT(logger_t, logger_context_t);
 
-// Global logging level
-static k4a_log_level_t g_log_level = K4A_LOG_LEVEL_ERROR;
-
 // Logger data for forwarding debug messages to registered callback.
 static volatile logger_user_cb_info_t *g_user_logger_cb_info = nullptr;
 static volatile long g_user_logger_cb_info_ref = 0;
+static k4a_log_level_t g_user_log_level = K4A_LOG_LEVEL_OFF;
 
 // Logger data used for forwarding debug message to stdout or a dedicated k4a file.
 static std::shared_ptr<spdlog::logger> g_env_logger = nullptr;
 static volatile long g_env_logger_count = 0;
 static bool g_env_logger_is_file_based = false;
+static k4a_log_level_t g_env_log_level = K4A_LOG_LEVEL_OFF;
 
 #define K4A_LOGGER "k4a_logger"
 
@@ -68,13 +67,15 @@ static bool g_env_logger_is_file_based = false;
 #define LOG_FILE_MAX_FILES (3)
 #define LOG_FILE_EXTENSION ".log"
 
-k4a_result_t logger_register_callback(k4a_logging_cb_t *message_cb, void *message_cb_context, k4a_log_level_t min_level)
+k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_cb,
+                                              void *message_cb_context,
+                                              k4a_log_level_t min_level)
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     if (message_cb)
     {
-        result = K4A_RESULT_FROM_BOOL(min_level >= K4A_LOG_LEVEL_CRITICAL && min_level <= K4A_LOG_LEVEL_TRACE);
+        result = K4A_RESULT_FROM_BOOL(min_level >= K4A_LOG_LEVEL_CRITICAL && min_level <= K4A_LOG_LEVEL_OFF);
         if (K4A_SUCCEEDED(result))
         {
             long count_of_registered_callbacks = INC_REF_VAR(g_user_logger_cb_info_ref);
@@ -84,7 +85,13 @@ k4a_result_t logger_register_callback(k4a_logging_cb_t *message_cb, void *messag
                 g_user_logger_cb_info = new logger_user_cb_info_t();
                 g_user_logger_cb_info->callback = message_cb;
                 g_user_logger_cb_info->callback_context = message_cb_context;
-                g_log_level = min_level;
+                g_user_log_level = min_level;
+            }
+            else if (g_user_logger_cb_info->callback == message_cb)
+            {
+                // User is calling to update the min_level
+                g_user_log_level = min_level;
+                DEC_REF_VAR(g_user_logger_cb_info_ref);
             }
             else
             {
@@ -114,13 +121,13 @@ k4a_result_t logger_register_callback(k4a_logging_cb_t *message_cb, void *messag
         }
 
         delete logger_info;
+        g_user_log_level = K4A_LOG_LEVEL_OFF;
     }
     return result;
 }
 
 k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
 {
-    //__debugbreak();
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, logger_handle == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config->max_log_size == 0);
@@ -222,13 +229,14 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
     if (g_env_logger)
     {
         context->logger = g_env_logger;
+        g_env_log_level = K4A_LOG_LEVEL_ERROR;
 
         //[2018-08-27 10:44:23.218] [level] [threadID] <message>
         // https://github.com/gabime/spdlog/wiki/3.-Custom-formatting
         spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [t=%t] %v");
 
-        // Set the default logging level
-        spdlog::set_level(spdlog::level::err);
+        // Set the default logging level SPD will allow. g_env_log_level will furthar refine this.
+        spdlog::set_level(spdlog::level::trace);
 
         // override the default logging level
         if (logging_level && logging_level[0] != '\0')
@@ -236,27 +244,27 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
             if (logging_level[0] == 't' || logging_level[0] == 'T')
             {
                 // capture a severity of trace or higher
-                g_log_level = K4A_LOG_LEVEL_TRACE;
+                g_env_log_level = K4A_LOG_LEVEL_TRACE;
             }
             else if (logging_level[0] == 'i' || logging_level[0] == 'I')
             {
                 // capture a severity of info or higher
-                g_log_level = K4A_LOG_LEVEL_INFO;
+                g_env_log_level = K4A_LOG_LEVEL_INFO;
             }
             else if (logging_level[0] == 'w' || logging_level[0] == 'W')
             {
                 // capture a severity of warning or higher
-                g_log_level = K4A_LOG_LEVEL_WARNING;
+                g_env_log_level = K4A_LOG_LEVEL_WARNING;
             }
             else if (logging_level[0] == 'e' || logging_level[0] == 'E')
             {
                 // capture a severity of error or higher
-                g_log_level = K4A_LOG_LEVEL_ERROR;
+                g_env_log_level = K4A_LOG_LEVEL_ERROR;
             }
             else if (logging_level[0] == 'c' || logging_level[0] == 'C')
             {
                 // capture a severity of error or higher
-                g_log_level = K4A_LOG_LEVEL_CRITICAL;
+                g_env_log_level = K4A_LOG_LEVEL_CRITICAL;
             }
         }
 
@@ -279,6 +287,7 @@ void logger_destroy(logger_t logger_handle)
             spdlog::drop(K4A_LOGGER);
         }
         g_env_logger_is_file_based = false;
+        g_env_log_level = K4A_LOG_LEVEL_OFF;
     }
     context->logger = nullptr;
 
@@ -289,9 +298,10 @@ void logger_destroy(logger_t logger_handle)
 // Enable printf type checking in clang and gcc
 __attribute__((__format__ (__printf__, 2, 0)))
 #endif
-void logger_log(k4a_log_level_t level, const char *format, ...)
+void logger_log(k4a_log_level_t level, const char * file, const int line, const char *format, ...)
 {
-    if (level > g_log_level)
+    // Quick exit if we are not logging the message
+    if (level > g_env_log_level && level > g_user_log_level)
     {
         return;
     }
@@ -304,7 +314,7 @@ void logger_log(k4a_log_level_t level, const char *format, ...)
         vsnprintf(buffer, sizeof(buffer), format, args);
         va_end(args);
 
-        if (g_user_logger_cb_info)
+        if ((level <= g_user_log_level) && (g_user_log_level != K4A_LOG_LEVEL_OFF))
         {
             // must ++ before getting the shared pointer, or the wait in releasing the callback function can return
             // without waiting for all pending instances using this context to complete.
@@ -312,35 +322,36 @@ void logger_log(k4a_log_level_t level, const char *format, ...)
             volatile logger_user_cb_info_t *logger_cb = g_user_logger_cb_info;
             if (logger_cb)
             {
-                int line = 0;              //????
-                const char *file = "null"; //????
                 logger_cb->callback(logger_cb->callback_context, level, file, line, buffer);
                 logger_cb = nullptr;
             }
             DEC_REF_VAR(g_user_logger_cb_info_ref);
         }
-        if (g_env_logger)
+        if ((level <= g_env_log_level) && (g_env_log_level != K4A_LOG_LEVEL_OFF))
         {
-            std::shared_ptr<spdlog::logger> logger = g_env_logger; // Keep a copy of the logger around while we add this
-                                                                   // entry
-            switch (level)
+            // Keep a copy of the logger around while we add this entry
+            std::shared_ptr<spdlog::logger> logger = g_env_logger;
+            if (logger)
             {
-            case K4A_LOG_LEVEL_CRITICAL:
-                logger->critical("{0}", buffer);
-                break;
-            case K4A_LOG_LEVEL_ERROR:
-                logger->error("{0}", buffer);
-                break;
-            case K4A_LOG_LEVEL_WARNING:
-                logger->warn("{0}", buffer);
-                break;
-            case K4A_LOG_LEVEL_INFO:
-                logger->info("{0}", buffer);
-                break;
-            case K4A_LOG_LEVEL_TRACE:
-            default:
-                logger->trace("{0}", buffer);
-                break;
+                switch (level)
+                {
+                case K4A_LOG_LEVEL_CRITICAL:
+                    logger->critical("{0} ({1}): {2}", file, line, buffer);
+                    break;
+                case K4A_LOG_LEVEL_ERROR:
+                    logger->error("{0} ({1}): {2}", file, line, buffer);
+                    break;
+                case K4A_LOG_LEVEL_WARNING:
+                    logger->warn("{0} ({1}): {2}", file, line, buffer);
+                    break;
+                case K4A_LOG_LEVEL_INFO:
+                    logger->info("{0} ({1}): {2}", file, line, buffer);
+                    break;
+                case K4A_LOG_LEVEL_TRACE:
+                default:
+                    logger->trace("{0} ({1}): {2}", file, line, buffer);
+                    break;
+                }
             }
             logger = nullptr;
         }

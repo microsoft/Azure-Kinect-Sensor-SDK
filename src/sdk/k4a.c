@@ -62,11 +62,11 @@ uint32_t k4a_device_get_installed_count(void)
     return device_count;
 }
 
-k4a_result_t k4a_set_debug_message_handler(k4a_logging_cb_t *message_cb,
+k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *message_cb,
                                            void *message_cb_context,
                                            k4a_log_level_t min_level)
 {
-    return logger_register_callback(message_cb, message_cb_context, min_level);
+    return logger_register_message_callback(message_cb, message_cb_context, min_level);
 }
 
 depth_cb_streaming_capture_t depth_capture_ready;

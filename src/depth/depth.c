@@ -240,35 +240,41 @@ static void log_device_info(depth_context_t *depth)
         level = K4A_LOG_LEVEL_INFO;
     }
 
-    logger_log(level, "******************** Device Info ********************");
-    logger_log(level, "K4A SDK version:     %s", K4A_VERSION_STR);
+    logger_log(level, __FILE__, __LINE__, "******************** Device Info ********************");
+    logger_log(level, __FILE__, __LINE__, "K4A SDK version:     %s", K4A_VERSION_STR);
 
     char serial_number[128];
     size_t size = sizeof(serial_number);
     if (depthmcu_get_serialnum(depth->depthmcu, serial_number, &size) == K4A_BUFFER_RESULT_SUCCEEDED)
     {
-        logger_log(level, "Serial Number:       %s", serial_number);
+        logger_log(level, __FILE__, __LINE__, "Serial Number:       %s", serial_number);
     }
 
     k4a_version_t *ver = &depth->version.rgb;
-    logger_log(level, "RGB Sensor Version:  %d.%d.%d", ver->major, ver->minor, ver->iteration);
+    logger_log(level, __FILE__, __LINE__, "RGB Sensor Version:  %d.%d.%d", ver->major, ver->minor, ver->iteration);
 
     ver = &depth->version.depth;
-    logger_log(level, "Depth Sensor Version:%d.%d.%d", ver->major, ver->minor, ver->iteration);
+    logger_log(level, __FILE__, __LINE__, "Depth Sensor Version:%d.%d.%d", ver->major, ver->minor, ver->iteration);
 
     ver = &depth->version.audio;
-    logger_log(level, "Mic Array Version:   %d.%d.%d", ver->major, ver->minor, ver->iteration);
+    logger_log(level, __FILE__, __LINE__, "Mic Array Version:   %d.%d.%d", ver->major, ver->minor, ver->iteration);
 
     ver = &depth->version.depth_sensor;
-    logger_log(level, "Sensor Config:       %d.%d", ver->major, ver->minor);
-    logger_log(level, "Build type:          %s", depth->version.firmware_build == 0 ? "Release" : "Debug");
+    logger_log(level, __FILE__, __LINE__, "Sensor Config:       %d.%d", ver->major, ver->minor);
     logger_log(level,
+               __FILE__,
+               __LINE__,
+               "Build type:          %s",
+               depth->version.firmware_build == 0 ? "Release" : "Debug");
+    logger_log(level,
+               __FILE__,
+               __LINE__,
                "Signature type:      %s",
                depth->version.firmware_signature == K4A_FIRMWARE_SIGNATURE_MSFT ?
                    "MSFT" :
                    (depth->version.firmware_signature == K4A_FIRMWARE_SIGNATURE_TEST ? "Test" : "Unsigned"));
 
-    logger_log(level, "****************************************************");
+    logger_log(level, __FILE__, __LINE__, "****************************************************");
 }
 
 /** see documentation for depthmcu_stream_cb_t

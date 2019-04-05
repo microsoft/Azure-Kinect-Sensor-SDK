@@ -32,7 +32,7 @@ typedef enum
 typedef enum
 {
     CMD_STATUS_PASS = 0,
-} usb_cmd_responces_t;
+} usb_cmd_responses_t;
 
 K4A_DECLARE_HANDLE(usbcmd_t);
 

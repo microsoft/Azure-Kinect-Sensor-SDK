@@ -80,7 +80,7 @@ typedef enum
     DEV_CMD_STATUS_ADC_UNSUPPORTED_SIGNAL = 0x00000485,
     DEV_CMD_STATUS_ADC_INVALID_INPUT = 0x00000486,
     DEV_CMD_STATUS_ADC_DATA_NOT_AVAILABLE = 0x00000487,
-} device_command_responce_t;
+} device_command_response_t;
 
 /* ---------------------------------------*/
 /*   DEV_CMD_NV_DATA_GET        */

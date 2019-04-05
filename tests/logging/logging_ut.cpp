@@ -47,11 +47,11 @@ TEST_F(logging_ut, create)
     // Verify the instances are unique
     ASSERT_NE(logger_handle1, logger_handle2);
 
-    logger_log(K4A_LOG_LEVEL_TRACE, "Test Trace Message");
-    logger_log(K4A_LOG_LEVEL_INFO, "Test Info Message");
-    logger_log(K4A_LOG_LEVEL_WARNING, "Test Warning Message");
-    logger_log(K4A_LOG_LEVEL_ERROR, "Test Error Message");
-    logger_log(K4A_LOG_LEVEL_CRITICAL, "Test Critical Message");
+    LOG_TRACE("Test Trace Message");
+    LOG_INFO("Test Info Message");
+    LOG_WARNING("Test Warning Message");
+    LOG_ERROR("Test Error Message");
+    LOG_CRITICAL("Test Critical Message");
 
     logger_destroy(logger_handle1);
     logger_destroy(logger_handle2);
@@ -66,8 +66,9 @@ typedef struct _logger_test_callback_info_t
     int message_count_critical;
 } logger_test_callback_info_t;
 
-typedef void(k4a_logging_cb_t)(void *context, k4a_log_level_t level, const char *file, int line, const char *message);
-k4a_logging_cb_t logging_callback_function;
+typedef void(
+    k4a_logging_message_cb_t)(void *context, k4a_log_level_t level, const char *file, int line, const char *message);
+k4a_logging_message_cb_t logging_callback_function;
 
 void logging_callback_function(void *context, k4a_log_level_t level, const char *file, int line, const char *message)
 {
@@ -97,7 +98,21 @@ void logging_callback_function(void *context, k4a_log_level_t level, const char 
         info->message_count_trace++;
         break;
     }
-    // printf("logging_callback_function: file:%s line:%d : %s\n", file, line, message);
+}
+
+void logging_callback_function_not_used(void *context,
+                                        k4a_log_level_t level,
+                                        const char *file,
+                                        int line,
+                                        const char *message)
+{
+    ASSERT_TRUE(0);
+
+    (void)context;
+    (void)level;
+    (void)file;
+    (void)line;
+    (void)message;
 }
 
 TEST_F(logging_ut, callback)
@@ -105,27 +120,32 @@ TEST_F(logging_ut, callback)
     logger_test_callback_info_t info = { 0 };
 
     // Validate input checking
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(nullptr, nullptr, (k4a_log_level_t)-1));
-    ASSERT_EQ(K4A_RESULT_FAILED, logger_register_callback(logging_callback_function, &info, (k4a_log_level_t)-1));
-    ASSERT_EQ(K4A_RESULT_FAILED, logger_register_callback(logging_callback_function, &info, (k4a_log_level_t)100));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_message_callback(nullptr, nullptr, (k4a_log_level_t)-1));
+    ASSERT_EQ(K4A_RESULT_FAILED,
+              logger_register_message_callback(logging_callback_function, &info, (k4a_log_level_t)-1));
+    ASSERT_EQ(K4A_RESULT_FAILED,
+              logger_register_message_callback(logging_callback_function, &info, (k4a_log_level_t)100));
 
     // successful register with no context
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(logging_callback_function, nullptr, K4A_LOG_LEVEL_TRACE));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              logger_register_message_callback(logging_callback_function, nullptr, K4A_LOG_LEVEL_TRACE));
     // successful unregister
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(nullptr, nullptr, (k4a_log_level_t)-1));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_message_callback(nullptr, nullptr, (k4a_log_level_t)-1));
     // successful register
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(logging_callback_function, &info, K4A_LOG_LEVEL_TRACE));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              logger_register_message_callback(logging_callback_function, &info, K4A_LOG_LEVEL_TRACE));
 
     // 2nd registration should fail
-    ASSERT_EQ(K4A_RESULT_FAILED, logger_register_callback(logging_callback_function, &info, K4A_LOG_LEVEL_INFO));
+    ASSERT_EQ(K4A_RESULT_FAILED,
+              logger_register_message_callback(logging_callback_function_not_used, &info, K4A_LOG_LEVEL_INFO));
 
     {
         memset(&info, 0, sizeof(info));
-        logger_log(K4A_LOG_LEVEL_TRACE, "Test Trace Message");
-        logger_log(K4A_LOG_LEVEL_INFO, "Test Info Message");
-        logger_log(K4A_LOG_LEVEL_WARNING, "Test Warning Message");
-        logger_log(K4A_LOG_LEVEL_ERROR, "Test Error Message");
-        logger_log(K4A_LOG_LEVEL_CRITICAL, "Test Critical Message");
+        LOG_TRACE("Test Trace Message");
+        LOG_INFO("Test Info Message");
+        LOG_WARNING("Test Warning Message");
+        LOG_ERROR("Test Error Message");
+        LOG_CRITICAL("Test Critical Message");
 
         ASSERT_EQ(info.message_count_critical, 1);
         ASSERT_EQ(info.message_count_error, 1);
@@ -134,37 +154,17 @@ TEST_F(logging_ut, callback)
         ASSERT_EQ(info.message_count_trace, 1);
     }
 
-    // 2nd registration should fail
-    ASSERT_EQ(K4A_RESULT_FAILED, logger_register_callback(logging_callback_function, &info, K4A_LOG_LEVEL_ERROR));
+    // re-registration (same function ptr) should pass and update level
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              logger_register_message_callback(logging_callback_function, &info, K4A_LOG_LEVEL_ERROR));
 
     {
         memset(&info, 0, sizeof(info));
-        logger_log(K4A_LOG_LEVEL_TRACE, "Test Trace Message");
-        logger_log(K4A_LOG_LEVEL_INFO, "Test Info Message");
-        logger_log(K4A_LOG_LEVEL_WARNING, "Test Warning Message");
-        logger_log(K4A_LOG_LEVEL_ERROR, "Test Error Message");
-        logger_log(K4A_LOG_LEVEL_CRITICAL, "Test Critical Message");
-
-        ASSERT_EQ(info.message_count_critical, 1);
-        ASSERT_EQ(info.message_count_error, 1);
-        ASSERT_EQ(info.message_count_warning, 1);
-        ASSERT_EQ(info.message_count_info, 1);
-        ASSERT_EQ(info.message_count_trace, 1);
-    }
-
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(nullptr, &info, K4A_LOG_LEVEL_ERROR));
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(nullptr, &info, K4A_LOG_LEVEL_ERROR));
-
-    // 2nd registration should pass
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(logging_callback_function, &info, K4A_LOG_LEVEL_ERROR));
-
-    {
-        memset(&info, 0, sizeof(info));
-        logger_log(K4A_LOG_LEVEL_TRACE, "Test Trace Message");
-        logger_log(K4A_LOG_LEVEL_INFO, "Test Info Message");
-        logger_log(K4A_LOG_LEVEL_WARNING, "Test Warning Message");
-        logger_log(K4A_LOG_LEVEL_ERROR, "Test Error Message");
-        logger_log(K4A_LOG_LEVEL_CRITICAL, "Test Critical Message");
+        LOG_TRACE("Test Trace Message");
+        LOG_INFO("Test Info Message");
+        LOG_WARNING("Test Warning Message");
+        LOG_ERROR("Test Error Message");
+        LOG_CRITICAL("Test Critical Message");
 
         ASSERT_EQ(info.message_count_critical, 1);
         ASSERT_EQ(info.message_count_error, 1);
@@ -172,8 +172,51 @@ TEST_F(logging_ut, callback)
         ASSERT_EQ(info.message_count_info, 0);
         ASSERT_EQ(info.message_count_trace, 0);
     }
-    ASSERT_EQ(K4A_RESULT_FAILED, logger_register_callback(logging_callback_function, &info, K4A_LOG_LEVEL_ERROR));
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(NULL, NULL, K4A_LOG_LEVEL_ERROR));
+
+    // re-registration (same function ptr) should pass and update level
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              logger_register_message_callback(logging_callback_function, &info, K4A_LOG_LEVEL_OFF));
+
+    {
+        memset(&info, 0, sizeof(info));
+        LOG_TRACE("Test Trace Message");
+        LOG_INFO("Test Info Message");
+        LOG_WARNING("Test Warning Message");
+        LOG_ERROR("Test Error Message");
+        LOG_CRITICAL("Test Critical Message");
+
+        ASSERT_EQ(info.message_count_critical, 0);
+        ASSERT_EQ(info.message_count_error, 0);
+        ASSERT_EQ(info.message_count_warning, 0);
+        ASSERT_EQ(info.message_count_info, 0);
+        ASSERT_EQ(info.message_count_trace, 0);
+    }
+
+    // multiple calls to clear the callback function
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_message_callback(nullptr, &info, K4A_LOG_LEVEL_ERROR));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_message_callback(nullptr, &info, K4A_LOG_LEVEL_ERROR));
+
+    // registration should pass
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              logger_register_message_callback(logging_callback_function, &info, K4A_LOG_LEVEL_INFO));
+
+    {
+        memset(&info, 0, sizeof(info));
+        LOG_TRACE("Test Trace Message");
+        LOG_INFO("Test Info Message");
+        LOG_WARNING("Test Warning Message");
+        LOG_ERROR("Test Error Message");
+        LOG_CRITICAL("Test Critical Message");
+
+        ASSERT_EQ(info.message_count_critical, 1);
+        ASSERT_EQ(info.message_count_error, 1);
+        ASSERT_EQ(info.message_count_warning, 1);
+        ASSERT_EQ(info.message_count_info, 1);
+        ASSERT_EQ(info.message_count_trace, 0);
+    }
+    ASSERT_EQ(K4A_RESULT_FAILED,
+              logger_register_message_callback(logging_callback_function_not_used, &info, K4A_LOG_LEVEL_ERROR));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_message_callback(NULL, NULL, K4A_LOG_LEVEL_ERROR));
 }
 
 #define TEST_RETURN_VALUE (22)
@@ -191,11 +234,11 @@ static int logger_callback_thread(void *param)
     Lock(data->lock);
     do
     {
-        logger_log(K4A_LOG_LEVEL_TRACE, "Test Trace Message");
-        logger_log(K4A_LOG_LEVEL_INFO, "Test Info Message");
-        logger_log(K4A_LOG_LEVEL_WARNING, "Test Warning Message");
-        logger_log(K4A_LOG_LEVEL_ERROR, "Test Error Message");
-        logger_log(K4A_LOG_LEVEL_CRITICAL, "Test Critical Message");
+        LOG_TRACE("Test Trace Message");
+        LOG_INFO("Test Info Message");
+        LOG_WARNING("Test Warning Message");
+        LOG_ERROR("Test Error Message");
+        LOG_CRITICAL("Test Critical Message");
     } while (data->done == 0);
     return TEST_RETURN_VALUE;
 }
@@ -228,11 +271,12 @@ TEST_F(logging_ut, callback_threading)
     {
         // Loop registering and unregistering a callback function while another thread continuous writes messages.
         ThreadAPI_Sleep(20);
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(logging_callback_function, &info, K4A_LOG_LEVEL_TRACE))
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  logger_register_message_callback(logging_callback_function, &info, K4A_LOG_LEVEL_TRACE))
             << " the count is " << count << "\n";
 
         ThreadAPI_Sleep(20);
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_callback(NULL, NULL, K4A_LOG_LEVEL_TRACE))
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_register_message_callback(NULL, NULL, K4A_LOG_LEVEL_TRACE))
             << " the count is " << count << "\n";
 
         ASSERT_EQ(0, tickcounter_get_current_ms(tick, &now));
