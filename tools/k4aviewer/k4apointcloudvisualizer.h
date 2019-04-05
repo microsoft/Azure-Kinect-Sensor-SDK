@@ -46,8 +46,10 @@ public:
     GLenum InitializeTexture(std::shared_ptr<K4AViewerImage> *texture) const;
     PointCloudVisualizationResult UpdateTexture(std::shared_ptr<K4AViewerImage> *texture, const k4a::capture &capture);
 
-    void ProcessPositionalMovement(ViewMovement direction, float deltaTime);
-    void ProcessMouseMovement(float xoffset, float yoffset);
+    void ProcessMouseMovement(const linmath::vec2 displayDimensions,
+                              const linmath::vec2 mousePos,
+                              const linmath::vec2 mouseDelta,
+                              MouseMovementType movementType);
     void ProcessMouseScroll(float yoffset);
 
     void ResetPosition();

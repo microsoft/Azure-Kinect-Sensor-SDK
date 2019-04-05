@@ -57,25 +57,18 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
     }
 
     ImVec2 availableSize = placementInfo.Size;
-    availableSize.y -= 3 * ImGui::GetTextLineHeightWithSpacing(); // Instructions text
-    availableSize.y -= GetDefaultButtonHeight();                  // Mode radio buttons
-    availableSize.y -= GetDefaultButtonHeight();                  // Reset button
+    availableSize.y -= GetDefaultButtonHeight(); // Mode radio buttons
+    availableSize.y -= GetDefaultButtonHeight(); // Reset button
 
     const ImVec2 sourceImageSize = ImVec2(static_cast<float>(m_texture->GetDimensions().Width),
                                           static_cast<float>(m_texture->GetDimensions().Height));
     const ImVec2 textureSize = GetMaxImageSize(sourceImageSize, availableSize);
 
+    const ImVec2 imageStartPos = ImGui::GetCursorScreenPos();
     ImGui::Image(static_cast<ImTextureID>(*m_texture), textureSize);
-
-    ImGui::BeginGroup();
-    ImGui::Text("Movement: W/S/A/D/[Ctrl]/[Space]");
-    ImGui::Text("Look: [Right Mouse] + Drag");
-    ImGui::Text("Zoom: Mouse wheel");
-    ImGui::EndGroup();
 
     if (m_missingColorImages != 0 || m_missingDepthImages != 0)
     {
-        ImGui::SameLine();
         ImGui::BeginGroup();
         {
             ImGuiExtensions::TextColorChanger warningColorChanger(ImGuiExtensions::TextColor::Warning);
@@ -110,10 +103,23 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
                                         static_cast<int>(K4APointCloudVisualizer::ColorizationStrategy::Shaded));
     ImGui::SameLine();
     colorizationStrategyUpdated |=
-        ImGuiExtensions::K4ARadioButton("Color (BGRA only)",
+        ImGuiExtensions::K4ARadioButton("Color",
                                         ipColorizationStrategy,
                                         static_cast<int>(K4APointCloudVisualizer::ColorizationStrategy::Color),
                                         m_enableColorPointCloud);
+    if (!m_enableColorPointCloud)
+    {
+        ImGuiExtensions::K4AShowTooltip("Color mode must be BGRA!");
+    }
+
+    ImGui::SameLine();
+    ImGui::VerticalSeparator();
+    ImGui::SameLine();
+    ImGui::TextDisabled("[Show Controls]");
+    const char *controlsHelpMessage = "Rotate: [Left Mouse] + Drag\n"
+                                      "Pan: [Right Mouse] + Drag\n"
+                                      "Zoom: Mouse wheel";
+    ImGuiExtensions::K4AShowTooltip(controlsHelpMessage);
 
     if (colorizationStrategyUpdated)
     {
@@ -136,7 +142,7 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
         m_pointCloudVisualizer.SetPointSize(m_pointSize);
     }
 
-    ProcessInput();
+    ProcessInput(imageStartPos, textureSize);
 }
 
 const char *K4APointCloudWindow::GetTitle() const
@@ -162,48 +168,33 @@ K4APointCloudWindow::K4APointCloudWindow(std::string &&windowTitle,
 
     m_pointCloudVisualizer.SetPointSize(m_pointSize);
     CheckVisualizationResult(m_pointCloudVisualizer.SetColorizationStrategy(m_colorizationStrategy));
-    m_lastTime = glfwGetTime();
 }
 
-void K4APointCloudWindow::ProcessInput()
+void K4APointCloudWindow::ProcessInput(ImVec2 imageStartPos, ImVec2 displayDimensions)
 {
-    const double currentTime = glfwGetTime();
-    const auto timeDelta = static_cast<float>(currentTime - m_lastTime);
-    m_lastTime = currentTime;
-
     if (ImGui::IsWindowFocused())
     {
         ImGuiIO &io = ImGui::GetIO();
-        if (io.KeysDown[GLFW_KEY_W])
+
+        const bool leftMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_1];
+        const bool rightMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_2];
+
+        const linmath::vec2 mousePos{ io.MousePos.x - imageStartPos.x, io.MousePos.y - imageStartPos.y };
+
+        const linmath::vec2 mouseDelta{ io.MouseDelta.x, io.MouseDelta.y };
+        const linmath::vec2 dimensions{ displayDimensions.x, displayDimensions.y };
+
+        MouseMovementType movementType = MouseMovementType::None;
+        if (leftMouseDown)
         {
-            m_pointCloudVisualizer.ProcessPositionalMovement(ViewMovement::Forward, timeDelta);
+            movementType = MouseMovementType::Rotation;
         }
-        if (io.KeysDown[GLFW_KEY_A])
+        else if (rightMouseDown)
         {
-            m_pointCloudVisualizer.ProcessPositionalMovement(ViewMovement::Left, timeDelta);
-        }
-        if (io.KeysDown[GLFW_KEY_D])
-        {
-            m_pointCloudVisualizer.ProcessPositionalMovement(ViewMovement::Right, timeDelta);
-        }
-        if (io.KeysDown[GLFW_KEY_S])
-        {
-            m_pointCloudVisualizer.ProcessPositionalMovement(ViewMovement::Backward, timeDelta);
-        }
-        if (io.KeysDown[GLFW_KEY_SPACE])
-        {
-            m_pointCloudVisualizer.ProcessPositionalMovement(ViewMovement::Down, timeDelta);
-        }
-        if (io.KeysDown[GLFW_KEY_LEFT_CONTROL])
-        {
-            m_pointCloudVisualizer.ProcessPositionalMovement(ViewMovement::Up, timeDelta);
+            movementType = MouseMovementType::Translation;
         }
 
-        if (io.MouseDown[GLFW_MOUSE_BUTTON_2]) // right-click
-        {
-            m_pointCloudVisualizer.ProcessMouseMovement(io.MouseDelta.x, io.MouseDelta.y);
-        }
-
+        m_pointCloudVisualizer.ProcessMouseMovement(dimensions, mousePos, mouseDelta, movementType);
         m_pointCloudVisualizer.ProcessMouseScroll(io.MouseWheel);
     }
 }
