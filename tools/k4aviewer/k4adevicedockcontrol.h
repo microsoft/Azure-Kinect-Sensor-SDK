@@ -101,7 +101,7 @@ private:
 
     void SetViewType(K4AWindowSet::ViewType viewType);
 
-    K4ADeviceConfiguration m_pendingDeviceConfiguration;
+    K4ADeviceConfiguration m_config;
 
     k4a::device m_device;
     bool m_camerasStarted = false;
