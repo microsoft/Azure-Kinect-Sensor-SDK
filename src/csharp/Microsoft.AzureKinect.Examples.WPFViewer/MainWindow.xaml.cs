@@ -44,7 +44,7 @@ namespace K4aWpfTestApplication
                 int colorHeight = device.GetCalibration().color_camera_calibration.resolution_height;
 
                 // Allocate image buffers for us to manipulate
-                using (ArrayImage<BGRA> modifiedColor = new ArrayImage<BGRA>(ImageFormat.ColorBGRA32, colorWidth, colorWidth))
+                using (ArrayImage<BGRA> modifiedColor = new ArrayImage<BGRA>(ImageFormat.ColorBGRA32, colorWidth, colorHeight))
                 using (ArrayImage<ushort> transformedDepth = new ArrayImage<ushort>(ImageFormat.Depth16, colorWidth, colorHeight))
                 using (Transformation transform = device.GetCalibration().CreateTransformation())
                 {
