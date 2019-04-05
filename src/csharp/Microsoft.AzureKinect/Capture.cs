@@ -27,7 +27,7 @@ namespace Microsoft.AzureKinect
         // If this is the first time calling the property, we construct a new wrapper
         // If the handle is for an Image we have already constructed a wrapper for, we return the existing wrapper
         // If the handle is for a different Image, or if the wrapper has already been disposed, we construct a new wrapper and dispose the old one
-        private Image GetImage(Func<NativeMethods.k4a_capture_t, NativeMethods.k4a_image_t> nativeMethod, 
+        private Image GetImageWrapperAndDisposePrevious(Func<NativeMethods.k4a_capture_t, NativeMethods.k4a_image_t> nativeMethod, 
             ref Image cache)
         {
             // Lock must be held to ensure the Image in cache is not replaced while we are inspecting it
@@ -95,7 +95,7 @@ namespace Microsoft.AzureKinect
         {
             get
             {
-                return GetImage(NativeMethods.k4a_capture_get_color_image, ref _Color);
+                return GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_color_image, ref _Color);
             }
             set
             {
@@ -122,7 +122,7 @@ namespace Microsoft.AzureKinect
         public Image Depth {
             get
             {
-                return GetImage(NativeMethods.k4a_capture_get_depth_image, ref _Depth);
+                return GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_depth_image, ref _Depth);
             }
             set
             {
@@ -148,7 +148,7 @@ namespace Microsoft.AzureKinect
         public Image IR {
             get
             {
-                return GetImage(NativeMethods.k4a_capture_get_ir_image, ref _IR);
+                return GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_ir_image, ref _IR);
             }
             set
             {

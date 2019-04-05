@@ -90,7 +90,7 @@ namespace Microsoft.AzureKinect
             Num
         }
         
-        public Float2 TransformTo2D(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
+        public Float2? TransformTo2D(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_2d(
                 this,
@@ -100,11 +100,12 @@ namespace Microsoft.AzureKinect
                 target_camera,
                 out Float2 target_point2d,
                 out bool valid));
-
-            return valid ? target_point2d : null;
+            if (valid)
+                return target_point2d;
+            return null;
         }
 
-        public Float3 TransformTo3D(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
+        public Float3? TransformTo3D(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_3d(
                 this,
@@ -115,10 +116,12 @@ namespace Microsoft.AzureKinect
                 out Float3 target_point3d,
                 out bool valid));
 
-            return valid ? target_point3d : null;
+            if (valid)
+                return target_point3d;
+            return null;
         }
 
-        public Float2 TransformTo2D(Float3 source_point3d, DeviceType source_camera, DeviceType target_camera)
+        public Float2? TransformTo2D(Float3 source_point3d, DeviceType source_camera, DeviceType target_camera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_2d(
                 this,
@@ -128,10 +131,12 @@ namespace Microsoft.AzureKinect
                 out Float2 target_point2d,
                 out bool valid));
 
-            return valid ? target_point2d : null;
+            if (valid)
+                return target_point2d;
+            return null;
         }
 
-        public Float3 TransformTo3D(Float3 source_point3d, DeviceType source_camera, DeviceType target_camera)
+        public Float3? TransformTo3D(Float3 source_point3d, DeviceType source_camera, DeviceType target_camera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_3d(
                 this,
@@ -141,7 +146,9 @@ namespace Microsoft.AzureKinect
                 out Float3 target_point3d,
                 out bool valid));
 
-            return valid ? target_point3d : null;
+            if (valid)
+                return target_point3d;
+            return null;
         }
 
         public static Calibration GetFromRaw(byte[] raw, DepthMode depth_mode, ColorResolution color_resolution)

@@ -824,9 +824,9 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
                     Assert.AreEqual(0.2f, sample.acc_sample.Z);
                     Assert.AreEqual(0x1000200030004000, sample.acc_timestamp_usec);
 
-                    Assert.AreEqual(0.4f, sample.gyro_sample.V[0]);
-                    Assert.AreEqual(0.5f, sample.gyro_sample.V[1]);
-                    Assert.AreEqual(0.6f, sample.gyro_sample.V[2]);
+                    Assert.AreEqual(0.4f, sample.gyro_sample.X);
+                    Assert.AreEqual(0.5f, sample.gyro_sample.Y);
+                    Assert.AreEqual(0.6f, sample.gyro_sample.Z);
                     Assert.AreEqual(0x2000200030004002, sample.gyro_timestamp_usec);
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_imu_sample"));
