@@ -37,7 +37,7 @@ public:
     K4APointCloudWindow &operator=(const K4APointCloudWindow &&) = delete;
 
 private:
-    void ProcessInput();
+    void ProcessInput(ImVec2 imageStartPos, ImVec2 displayDimensions);
     void SetFailed(const char *msg);
 
     bool CheckVisualizationResult(PointCloudVisualizationResult visualizationResult);
@@ -61,10 +61,6 @@ private:
     bool m_haveShownMissingImagesWarning = false;
     int m_missingColorImages = 0;
     int m_missingDepthImages = 0;
-
-    // OpenGL time
-    //
-    double m_lastTime = 0;
 };
 } // namespace k4aviewer
 
