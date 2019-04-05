@@ -283,20 +283,20 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     constexpr float InputScalarScaleFactor = 0.5f;
 
     bool depthEnabledStateChanged = ImGuiExtensions::K4ACheckbox("Enable Depth Camera",
-                                                                 &m_pendingDeviceConfiguration.EnableDepthCamera,
+                                                                 &m_config.EnableDepthCamera,
                                                                  !deviceIsStarted);
 
     if (m_firstRun || depthEnabledStateChanged)
     {
-        ImGui::SetNextTreeNodeOpen(m_pendingDeviceConfiguration.EnableDepthCamera);
+        ImGui::SetNextTreeNodeOpen(m_config.EnableDepthCamera);
     }
 
     ImGui::Indent();
+    bool depthModeUpdated = depthEnabledStateChanged;
     if (ImGui::TreeNode("Depth Configuration"))
     {
-        const bool depthSettingsEditable = !deviceIsStarted && m_pendingDeviceConfiguration.EnableDepthCamera;
-        bool depthModeUpdated = depthEnabledStateChanged;
-        auto *pDepthMode = reinterpret_cast<int *>(&m_pendingDeviceConfiguration.DepthMode);
+        const bool depthSettingsEditable = !deviceIsStarted && m_config.EnableDepthCamera;
+        auto *pDepthMode = reinterpret_cast<int *>(&m_config.DepthMode);
         ImGui::Text("Depth mode");
         depthModeUpdated |= ImGuiExtensions::K4ARadioButton("NFOV Binned",
                                                             pDepthMode,
@@ -321,34 +321,27 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         depthModeUpdated |=
             ImGuiExtensions::K4ARadioButton("Passive IR", pDepthMode, K4A_DEPTH_MODE_PASSIVE_IR, depthSettingsEditable);
 
-        if (depthModeUpdated || m_firstRun)
-        {
-            if (m_pendingDeviceConfiguration.DepthMode == K4A_DEPTH_MODE_WFOV_UNBINNED)
-            {
-                m_pendingDeviceConfiguration.Framerate = K4A_FRAMES_PER_SECOND_15;
-            }
-        }
-
         ImGui::TreePop();
     }
     ImGui::Unindent();
 
     bool colorEnableStateChanged = ImGuiExtensions::K4ACheckbox("Enable Color Camera",
-                                                                &m_pendingDeviceConfiguration.EnableColorCamera,
+                                                                &m_config.EnableColorCamera,
                                                                 !deviceIsStarted);
 
     if (m_firstRun || colorEnableStateChanged)
     {
-        ImGui::SetNextTreeNodeOpen(m_pendingDeviceConfiguration.EnableColorCamera);
+        ImGui::SetNextTreeNodeOpen(m_config.EnableColorCamera);
     }
 
     ImGui::Indent();
+    bool colorResolutionUpdated = colorEnableStateChanged;
     if (ImGui::TreeNode("Color Configuration"))
     {
-        const bool colorSettingsEditable = !deviceIsStarted && m_pendingDeviceConfiguration.EnableColorCamera;
+        const bool colorSettingsEditable = !deviceIsStarted && m_config.EnableColorCamera;
 
         bool colorFormatUpdated = false;
-        auto *pColorFormat = reinterpret_cast<int *>(&m_pendingDeviceConfiguration.ColorFormat);
+        auto *pColorFormat = reinterpret_cast<int *>(&m_config.ColorFormat);
         ImGui::Text("Format");
         colorFormatUpdated |=
             ImGuiExtensions::K4ARadioButton("BGRA", pColorFormat, K4A_IMAGE_FORMAT_COLOR_BGRA32, colorSettingsEditable);
@@ -364,20 +357,18 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
         // Uncompressed formats are only supported at 720p.
         //
-        const bool imageFormatSupportsHighResolution = m_pendingDeviceConfiguration.ColorFormat !=
-                                                           K4A_IMAGE_FORMAT_COLOR_NV12 &&
-                                                       m_pendingDeviceConfiguration.ColorFormat !=
-                                                           K4A_IMAGE_FORMAT_COLOR_YUY2;
+        const char *imageFormatHelpMessage = "Not supported in NV12 or YUY2 mode!";
+        const bool imageFormatSupportsHighResolution = m_config.ColorFormat != K4A_IMAGE_FORMAT_COLOR_NV12 &&
+                                                       m_config.ColorFormat != K4A_IMAGE_FORMAT_COLOR_YUY2;
         if (colorFormatUpdated || m_firstRun)
         {
             if (!imageFormatSupportsHighResolution)
             {
-                m_pendingDeviceConfiguration.ColorResolution = K4A_COLOR_RESOLUTION_720P;
+                m_config.ColorResolution = K4A_COLOR_RESOLUTION_720P;
             }
         }
 
-        bool colorResolutionUpdated = colorEnableStateChanged;
-        auto *pColorResolution = reinterpret_cast<int *>(&m_pendingDeviceConfiguration.ColorResolution);
+        auto *pColorResolution = reinterpret_cast<int *>(&m_config.ColorResolution);
 
         ImGui::Text("Resolution");
         ImGui::Indent();
@@ -393,18 +384,21 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
                                                                   K4A_COLOR_RESOLUTION_1080P,
                                                                   colorSettingsEditable &&
                                                                       imageFormatSupportsHighResolution);
+        ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
         // New line
         colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1440p",
                                                                   pColorResolution,
                                                                   K4A_COLOR_RESOLUTION_1440P,
                                                                   colorSettingsEditable &&
                                                                       imageFormatSupportsHighResolution);
+        ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
         ImGui::SameLine();
         colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("2160p",
                                                                   pColorResolution,
                                                                   K4A_COLOR_RESOLUTION_2160P,
                                                                   colorSettingsEditable &&
                                                                       imageFormatSupportsHighResolution);
+        ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
         ImGui::Unindent();
         ImGui::Text("4:3");
         ImGui::Indent();
@@ -414,6 +408,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
                                                                   K4A_COLOR_RESOLUTION_1536P,
                                                                   colorSettingsEditable &&
                                                                       imageFormatSupportsHighResolution);
+        ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
 
         ImGui::SameLine();
         colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("3072p",
@@ -421,20 +416,10 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
                                                                   K4A_COLOR_RESOLUTION_3072P,
                                                                   colorSettingsEditable &&
                                                                       imageFormatSupportsHighResolution);
+        ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
 
         ImGui::Unindent();
         ImGui::Unindent();
-
-        if (colorResolutionUpdated || m_firstRun)
-        {
-            if (m_pendingDeviceConfiguration.ColorResolution == K4A_COLOR_RESOLUTION_3072P)
-            {
-                // 4K supports up to 15FPS
-                //
-                m_pendingDeviceConfiguration.Framerate = K4A_FRAMES_PER_SECOND_15;
-            }
-        }
-
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Color Controls"))
@@ -574,48 +559,62 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     }
     ImGui::Unindent();
 
-    const bool supports30fps = !(m_pendingDeviceConfiguration.EnableColorCamera &&
-                                 m_pendingDeviceConfiguration.ColorResolution == K4A_COLOR_RESOLUTION_3072P) &&
-                               !(m_pendingDeviceConfiguration.EnableDepthCamera &&
-                                 m_pendingDeviceConfiguration.DepthMode == K4A_DEPTH_MODE_WFOV_UNBINNED);
+    if (colorResolutionUpdated || m_firstRun)
+    {
+        if (m_config.ColorResolution == K4A_COLOR_RESOLUTION_3072P)
+        {
+            // 4K supports up to 15FPS
+            //
+            m_config.Framerate = K4A_FRAMES_PER_SECOND_15;
+        }
+    }
+    if (depthModeUpdated || m_firstRun)
+    {
+        if (m_config.DepthMode == K4A_DEPTH_MODE_WFOV_UNBINNED)
+        {
+            m_config.Framerate = K4A_FRAMES_PER_SECOND_15;
+        }
+    }
 
-    const bool enableFramerate = !deviceIsStarted && (m_pendingDeviceConfiguration.EnableColorCamera ||
-                                                      m_pendingDeviceConfiguration.EnableDepthCamera);
+    const bool supports30fps = !(m_config.EnableColorCamera &&
+                                 m_config.ColorResolution == K4A_COLOR_RESOLUTION_3072P) &&
+                               !(m_config.EnableDepthCamera && m_config.DepthMode == K4A_DEPTH_MODE_WFOV_UNBINNED);
+
+    const bool enableFramerate = !deviceIsStarted && (m_config.EnableColorCamera || m_config.EnableDepthCamera);
 
     ImGui::Text("Framerate");
-    auto *pFramerate = reinterpret_cast<int *>(&m_pendingDeviceConfiguration.Framerate);
+    auto *pFramerate = reinterpret_cast<int *>(&m_config.Framerate);
     bool framerateUpdated = false;
     framerateUpdated |= ImGuiExtensions::K4ARadioButton("30 FPS",
                                                         pFramerate,
                                                         K4A_FRAMES_PER_SECOND_30,
                                                         enableFramerate && supports30fps);
+    ImGuiExtensions::K4AShowTooltip("Not supported with WFOV Unbinned or 3072p!", !supports30fps);
     ImGui::SameLine();
     framerateUpdated |=
         ImGuiExtensions::K4ARadioButton("15 FPS", pFramerate, K4A_FRAMES_PER_SECOND_15, enableFramerate);
     ImGui::SameLine();
     framerateUpdated |= ImGuiExtensions::K4ARadioButton(" 5 FPS", pFramerate, K4A_FRAMES_PER_SECOND_5, enableFramerate);
 
-    ImGuiExtensions::K4ACheckbox("Disable streaming LED",
-                                 &m_pendingDeviceConfiguration.DisableStreamingIndicator,
-                                 !deviceIsStarted);
+    ImGuiExtensions::K4ACheckbox("Disable streaming LED", &m_config.DisableStreamingIndicator, !deviceIsStarted);
 
     ImGui::Separator();
 
-    ImGuiExtensions::K4ACheckbox("Enable IMU", &m_pendingDeviceConfiguration.EnableImu, !deviceIsStarted);
+    const bool imuSupported = m_config.EnableColorCamera || m_config.EnableDepthCamera;
+    m_config.EnableImu &= imuSupported;
+    ImGuiExtensions::K4ACheckbox("Enable IMU", &m_config.EnableImu, !deviceIsStarted && imuSupported);
+    ImGuiExtensions::K4AShowTooltip("Not supported without at least one camera!", !imuSupported);
 
-    const bool synchronizedImagesAvailable = m_pendingDeviceConfiguration.EnableColorCamera &&
-                                             m_pendingDeviceConfiguration.EnableDepthCamera;
-    m_pendingDeviceConfiguration.SynchronizedImagesOnly &= synchronizedImagesAvailable;
+    const bool synchronizedImagesAvailable = m_config.EnableColorCamera && m_config.EnableDepthCamera;
+    m_config.SynchronizedImagesOnly &= synchronizedImagesAvailable;
 
     if (m_microphone)
     {
-        ImGuiExtensions::K4ACheckbox("Enable Microphone",
-                                     &m_pendingDeviceConfiguration.EnableMicrophone,
-                                     !deviceIsStarted);
+        ImGuiExtensions::K4ACheckbox("Enable Microphone", &m_config.EnableMicrophone, !deviceIsStarted);
     }
     else
     {
-        m_pendingDeviceConfiguration.EnableMicrophone = false;
+        m_config.EnableMicrophone = false;
         ImGui::Text("Microphone not detected!");
     }
 
@@ -624,26 +623,25 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     if (ImGui::TreeNode("Internal Sync"))
     {
         ImGuiExtensions::K4ACheckbox("Synchronized images only",
-                                     &m_pendingDeviceConfiguration.SynchronizedImagesOnly,
+                                     &m_config.SynchronizedImagesOnly,
                                      !deviceIsStarted && synchronizedImagesAvailable);
 
         ImGui::PushItemWidth(ImGui::CalcItemWidth() * InputScalarScaleFactor);
         constexpr int stepSize = 1;
-        const bool depthDelayUpdated =
-            ImGuiExtensions::K4AInputScalar("Depth delay (us)",
-                                            ImGuiDataType_S32,
-                                            &m_pendingDeviceConfiguration.DepthDelayOffColorUsec,
-                                            &stepSize,
-                                            nullptr,
-                                            "%d",
-                                            !deviceIsStarted);
+        const bool depthDelayUpdated = ImGuiExtensions::K4AInputScalar("Depth delay (us)",
+                                                                       ImGuiDataType_S32,
+                                                                       &m_config.DepthDelayOffColorUsec,
+                                                                       &stepSize,
+                                                                       nullptr,
+                                                                       "%d",
+                                                                       !deviceIsStarted);
         if (framerateUpdated || depthDelayUpdated)
         {
             // InputScalar doesn't do bounds-checks, so we have to do it ourselves whenever
             // the user interacts with the control
             //
             int maxDepthDelay = 0;
-            switch (m_pendingDeviceConfiguration.Framerate)
+            switch (m_config.Framerate)
             {
             case K4A_FRAMES_PER_SECOND_30:
                 maxDepthDelay = std::micro::den / 30;
@@ -657,10 +655,8 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             default:
                 throw std::logic_error("Invalid framerate!");
             }
-            m_pendingDeviceConfiguration.DepthDelayOffColorUsec =
-                std::max(m_pendingDeviceConfiguration.DepthDelayOffColorUsec, -maxDepthDelay);
-            m_pendingDeviceConfiguration.DepthDelayOffColorUsec =
-                std::min(m_pendingDeviceConfiguration.DepthDelayOffColorUsec, maxDepthDelay);
+            m_config.DepthDelayOffColorUsec = std::max(m_config.DepthDelayOffColorUsec, -maxDepthDelay);
+            m_config.DepthDelayOffColorUsec = std::min(m_config.DepthDelayOffColorUsec, maxDepthDelay);
         }
 
         ImGui::PopItemWidth();
@@ -683,32 +679,34 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             RefreshSyncCableStatus();
         }
 
+        const char *syncModesSupportedTooltip = "Requires at least one camera and a connected sync cable!";
         const bool syncModesSupported = (m_syncInConnected || m_syncOutConnected) &&
-                                        (m_pendingDeviceConfiguration.EnableColorCamera ||
-                                         m_pendingDeviceConfiguration.EnableDepthCamera);
+                                        (m_config.EnableColorCamera || m_config.EnableDepthCamera);
         if (!syncModesSupported)
         {
-            m_pendingDeviceConfiguration.WiredSyncMode = K4A_WIRED_SYNC_MODE_STANDALONE;
+            m_config.WiredSyncMode = K4A_WIRED_SYNC_MODE_STANDALONE;
         }
 
-        auto *pSyncMode = reinterpret_cast<int *>(&m_pendingDeviceConfiguration.WiredSyncMode);
+        auto *pSyncMode = reinterpret_cast<int *>(&m_config.WiredSyncMode);
         ImGuiExtensions::K4ARadioButton("Standalone", pSyncMode, K4A_WIRED_SYNC_MODE_STANDALONE, !deviceIsStarted);
         ImGui::SameLine();
         ImGuiExtensions::K4ARadioButton("Master",
                                         pSyncMode,
                                         K4A_WIRED_SYNC_MODE_MASTER,
                                         !deviceIsStarted && syncModesSupported);
+        ImGuiExtensions::K4AShowTooltip(syncModesSupportedTooltip, !syncModesSupported);
         ImGui::SameLine();
         ImGuiExtensions::K4ARadioButton("Sub",
                                         pSyncMode,
                                         K4A_WIRED_SYNC_MODE_SUBORDINATE,
                                         !deviceIsStarted && syncModesSupported);
+        ImGuiExtensions::K4AShowTooltip(syncModesSupportedTooltip, !syncModesSupported);
 
         constexpr int stepSize = 1;
         ImGui::PushItemWidth(ImGui::CalcItemWidth() * InputScalarScaleFactor);
         ImGuiExtensions::K4AInputScalar("Delay off master (us)",
                                         ImGuiDataType_U32,
-                                        &m_pendingDeviceConfiguration.SubordinateDelayOffMasterUsec,
+                                        &m_config.SubordinateDelayOffMasterUsec,
                                         &stepSize,
                                         nullptr,
                                         "%d",
@@ -750,15 +748,13 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     if (ImGuiExtensions::K4AButton("Reset", !deviceIsStarted))
         ResetDefaultConfiguration();
 
-    const bool enableCameras = m_pendingDeviceConfiguration.EnableColorCamera ||
-                               m_pendingDeviceConfiguration.EnableDepthCamera;
+    const bool enableCameras = m_config.EnableColorCamera || m_config.EnableDepthCamera;
 
     const ImVec2 buttonSize{ 275, 0 };
     if (!deviceIsStarted)
     {
         ImGuiExtensions::ButtonColorChanger colorChanger(ImGuiExtensions::ButtonColor::Green);
-        const bool validStartMode = enableCameras || m_pendingDeviceConfiguration.EnableMicrophone ||
-                                    m_pendingDeviceConfiguration.EnableImu;
+        const bool validStartMode = enableCameras || m_config.EnableMicrophone || m_config.EnableImu;
         if (ImGuiExtensions::K4AButton("Start", buttonSize, validStartMode))
         {
             Start();
@@ -774,9 +770,8 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
         ImGui::Separator();
 
-        const bool pointCloudViewerAvailable = m_pendingDeviceConfiguration.EnableDepthCamera &&
-                                               m_pendingDeviceConfiguration.DepthMode != K4A_DEPTH_MODE_PASSIVE_IR &&
-                                               m_camerasStarted;
+        const bool pointCloudViewerAvailable = m_config.EnableDepthCamera &&
+                                               m_config.DepthMode != K4A_DEPTH_MODE_PASSIVE_IR && m_camerasStarted;
 
         K4AWindowSet::ShowModeSelector(&m_currentViewType,
                                        true,
@@ -807,17 +802,16 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
 void K4ADeviceDockControl::Start()
 {
-    const bool enableCameras = m_pendingDeviceConfiguration.EnableColorCamera ||
-                               m_pendingDeviceConfiguration.EnableDepthCamera;
+    const bool enableCameras = m_config.EnableColorCamera || m_config.EnableDepthCamera;
     if (enableCameras)
     {
         StartCameras();
     }
-    if (m_pendingDeviceConfiguration.EnableImu)
+    if (m_config.EnableImu)
     {
         StartImu();
     }
-    if (m_pendingDeviceConfiguration.EnableMicrophone)
+    if (m_config.EnableMicrophone)
     {
         StartMicrophone();
     }
@@ -842,7 +836,7 @@ bool K4ADeviceDockControl::StartCameras()
         return false;
     }
 
-    k4a_device_configuration_t deviceConfig = m_pendingDeviceConfiguration.ToK4ADeviceConfiguration();
+    k4a_device_configuration_t deviceConfig = m_config.ToK4ADeviceConfiguration();
 
     try
     {
@@ -984,7 +978,7 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     K4AWindowManager::Instance().ClearWindows();
 
     std::shared_ptr<K4AMicrophoneListener> micListener = nullptr;
-    if (m_pendingDeviceConfiguration.EnableMicrophone)
+    if (m_config.EnableMicrophone)
     {
         micListener = m_microphone->CreateListener();
         if (micListener == nullptr)
@@ -1000,22 +994,21 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     case K4AWindowSet::ViewType::Normal:
         K4AWindowSet::StartNormalWindows(m_deviceSerialNumber.c_str(),
                                          &m_cameraDataSource,
-                                         m_pendingDeviceConfiguration.EnableImu ? &m_imuDataSource : nullptr,
+                                         m_config.EnableImu ? &m_imuDataSource : nullptr,
                                          std::move(micListener),
-                                         m_pendingDeviceConfiguration.EnableDepthCamera,
-                                         m_pendingDeviceConfiguration.DepthMode,
-                                         m_pendingDeviceConfiguration.EnableColorCamera,
-                                         m_pendingDeviceConfiguration.ColorFormat,
-                                         m_pendingDeviceConfiguration.ColorResolution);
+                                         m_config.EnableDepthCamera,
+                                         m_config.DepthMode,
+                                         m_config.EnableColorCamera,
+                                         m_config.ColorFormat,
+                                         m_config.ColorResolution);
         break;
 
     case K4AWindowSet::ViewType::PointCloudViewer:
         try
         {
-            k4a::calibration calib = m_device.get_calibration(m_pendingDeviceConfiguration.DepthMode,
-                                                              m_pendingDeviceConfiguration.ColorResolution);
-            bool rgbPointCloudAvailable = m_pendingDeviceConfiguration.EnableColorCamera &&
-                                          m_pendingDeviceConfiguration.ColorFormat == K4A_IMAGE_FORMAT_COLOR_BGRA32;
+            k4a::calibration calib = m_device.get_calibration(m_config.DepthMode, m_config.ColorResolution);
+            bool rgbPointCloudAvailable = m_config.EnableColorCamera &&
+                                          m_config.ColorFormat == K4A_IMAGE_FORMAT_COLOR_BGRA32;
             K4AWindowSet::StartPointCloudWindow(m_deviceSerialNumber.c_str(),
                                                 calib,
                                                 &m_cameraDataSource,
@@ -1034,16 +1027,16 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
 
 void K4ADeviceDockControl::ApplyDefaultConfiguration()
 {
-    m_pendingDeviceConfiguration = K4AViewerSettingsManager::Instance().GetSavedDeviceConfiguration();
+    m_config = K4AViewerSettingsManager::Instance().GetSavedDeviceConfiguration();
 }
 
 void K4ADeviceDockControl::SaveDefaultConfiguration()
 {
-    K4AViewerSettingsManager::Instance().SetSavedDeviceConfiguration(m_pendingDeviceConfiguration);
+    K4AViewerSettingsManager::Instance().SetSavedDeviceConfiguration(m_config);
 }
 
 void K4ADeviceDockControl::ResetDefaultConfiguration()
 {
-    m_pendingDeviceConfiguration = K4ADeviceConfiguration();
+    m_config = K4ADeviceConfiguration();
     SaveDefaultConfiguration();
 }

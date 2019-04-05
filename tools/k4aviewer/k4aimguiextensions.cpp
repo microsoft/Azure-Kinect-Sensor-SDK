@@ -115,9 +115,9 @@ void K4AVText(const char *s)
     ImGui::Text("%s", vLabel.c_str());
 }
 
-void K4AShowTooltip(const char *msg)
+void K4AShowTooltip(const char *msg, bool show)
 {
-    if (ImGui::IsItemHovered())
+    if (show && ImGui::IsItemHovered())
     {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
