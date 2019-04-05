@@ -1067,7 +1067,7 @@ typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
  *
  * \remarks
  * The callback is called asynchronously when the Azure Kinext SDK generates a message at a \p level that is equal to
- * or more critical than the level specified when calling \r k4a_set_debug_message_handler to register the callback.
+ * or more critical than the level specified when calling \ref k4a_set_debug_message_handler() to register the callback.
  *
  * \remarks
  * The user must ensure synchronization between parallel calls to the k4a_logging_message_cb_t function.
