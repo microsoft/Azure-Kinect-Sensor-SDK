@@ -51,7 +51,7 @@ namespace Microsoft.AzureKinect
                             // If cache was disposed before we called the native accessor (by the caller or another thread), 
                             // the handle could have been reused and the values would incorrectly match. However, cache.DangerousGetHandle()
                             // will throw an exception, and we will correctly construct a new image wrapper.
-                            if (cache.DangerousGetHandle() != imageHandle)
+                            if (cache.DangerousGetHandle().DangerousGetHandle() != imageHandle)
                             {
                                 // The image has changed, invalidate the current image and construct a new wrapper
                                 cache.Dispose();
@@ -66,12 +66,12 @@ namespace Microsoft.AzureKinect
                         }
                     }
 
-                    if (cache != null && !image.IsInvalid)
+                    if (cache == null && !image.IsInvalid)
                     {
                         // Construct a new wrapper and return it
                         // The native function may have returned 
-                        cache = new UnsafeImage(image);
-
+                        cache = new Image(image);
+                        
                         // Since we have wrapped image, it is now owned by the UnsafeImage object and we should no longer close it
                         image = null;
                     }

@@ -15,6 +15,7 @@ namespace Microsoft.AzureKinect.WPF
         {
             PixelFormat pixelFormat;
 
+            // TODO: reference comment
             // Take a new reference on the image to ensure that the object
             // cannot be disposed by another thread while we have a copy of its UnsafeBufferPointer
             using (Image reference = image.Reference())
@@ -43,7 +44,7 @@ namespace Microsoft.AzureKinect.WPF
                             dpiY, // DPI
                             pixelFormat,
                             null, // Pallete
-                            ((UnsafeImage)reference).UnsafeBufferPointer,
+                            ((IUnsafeImage)reference).UnsafeBufferPointer,
                             checked((int)reference.Size),
                             reference.StrideBytes);
             }

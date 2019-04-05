@@ -57,7 +57,7 @@ namespace WrapperTests
                 Calibration cal = Calibration.GetFromRaw(raw, DepthMode.WFOV_2x2Binned, ColorResolution.r1080p);
 
                 Float2 source = new Float2(0, 0);
-                Float2 result = cal.Transform_2d_to_2d(source, 1.0f, Calibration.DeviceType.Color, Calibration.DeviceType.Depth);
+                Float2 result = cal.TransformTo2D(source, 1.0f, Calibration.DeviceType.Color, Calibration.DeviceType.Depth);
 
             }
         }

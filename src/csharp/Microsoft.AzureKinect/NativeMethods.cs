@@ -6,6 +6,8 @@ using Microsoft.AzureKinect.Native;
 
 namespace Microsoft.AzureKinect
 {
+#pragma warning disable IDE1006 // Naming Styles
+
     internal class NativeMethods
     {
         // These types are used internally by the interop dll for marshalling purposes and are not exposed
@@ -13,6 +15,7 @@ namespace Microsoft.AzureKinect
 
 
         #region Handle Types
+
         public class k4a_device_t : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
         {
             private k4a_device_t() : base(true)
@@ -40,7 +43,7 @@ namespace Microsoft.AzureKinect
 
                 duplicate.handle = this.handle;
                 return duplicate;
-                
+
             }
 
             protected override bool ReleaseHandle()
@@ -70,6 +73,20 @@ namespace Microsoft.AzureKinect
                 return true;
             }
         }
+
+        public class k4a_transformation_t : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
+        {
+            private k4a_transformation_t() : base (true)
+            {
+            }
+
+            protected override bool ReleaseHandle()
+            {
+                NativeMethods.k4a_transformation_destroy(handle);
+                return true;
+            }
+        }
+
         #endregion
 
         #region Enumerations
@@ -190,6 +207,25 @@ namespace Microsoft.AzureKinect
             out Float3 target_point3d,
             out bool valid);
 
+        [DllImport("k4a")]
+        [NativeReference]
+        public static extern k4a_result_t k4a_calibration_3d_to_2d(
+            Calibration calibration,
+            Float3 source_point3d,
+            Calibration.DeviceType source_camera,
+            Calibration.DeviceType target_camera,
+            out Float2 target_point2d,
+            out bool valid);
+
+        [DllImport("k4a")]
+        [NativeReference]
+        public static extern k4a_result_t k4a_calibration_3d_to_3d(
+            Calibration calibration,
+            Float3 source_point3d,
+            Calibration.DeviceType source_camera,
+            Calibration.DeviceType target_camera,
+            out Float3 target_point3d,
+            out bool valid);
 
         [DllImport("k4a")]
         [NativeReference]
@@ -200,6 +236,37 @@ namespace Microsoft.AzureKinect
             ColorResolution color_resolution,
             out Calibration calibration);
 
+        [DllImport("k4a")]
+        [NativeReference]
+        public static extern k4a_transformation_t k4a_transformation_create(Calibration calibration);
+
+
+        [DllImport("k4a")]
+        [NativeReference]
+        public static extern k4a_result_t k4a_transformation_destroy(IntPtr transformation_handle);
+
+        [DllImport("k4a")]
+        [NativeReference]
+        public static extern k4a_result_t k4a_transformation_depth_image_to_color_camera(
+            k4a_transformation_t transformation_handle,
+            k4a_image_t depth_image,
+            k4a_image_t transformed_depth_image);
+
+        [DllImport("k4a")]
+        [NativeReference]
+        public static extern k4a_result_t k4a_transformation_color_image_to_depth_camera(
+            k4a_transformation_t transformation_handle,
+            k4a_image_t depth_image,
+            k4a_image_t color_image,
+            k4a_image_t transformed_color_image);
+
+        [DllImport("k4a")]
+        [NativeReference]
+        public static extern k4a_result_t k4a_transformation_depth_image_to_point_cloud(
+                k4a_transformation_t transformation_handle,
+                k4a_image_t depth_image,
+                Calibration.DeviceType camera,
+                k4a_image_t xyz_image);
 
         [DllImport("k4a")]
         [NativeReference]
@@ -251,6 +318,30 @@ namespace Microsoft.AzureKinect
         [DllImport("k4a")]
         [NativeReference]
         public static extern void k4a_capture_release(IntPtr capture_handle);
+
+        [DllImport("k4a")]
+        [NativeReference]
+        public static extern k4a_result_t k4a_image_create(ImageFormat format,
+            int width_pixels,
+            int height_pixels,
+            int stride_bytes,
+            out k4a_image_t image_handle);
+
+        public delegate void k4a_memory_destroy_cb_t(IntPtr buffer, IntPtr context);
+
+        [DllImport("k4a")]
+        [NativeReference]
+        public static extern k4a_result_t k4a_image_create_from_buffer(
+            ImageFormat format,
+            int width_pixels,
+            int height_pixels,
+            int stride_bytes,
+            IntPtr buffer,
+            UIntPtr buffer_size,
+            k4a_memory_destroy_cb_t buffer_release_cb,
+            IntPtr buffer_release_cb_context,
+            out k4a_image_t image_handle
+        );
 
         [DllImport("k4a")]
         [NativeReference]
@@ -401,4 +492,5 @@ namespace Microsoft.AzureKinect
         #endregion
 
     }
+#pragma warning restore IDE1006 // Naming Styles
 }

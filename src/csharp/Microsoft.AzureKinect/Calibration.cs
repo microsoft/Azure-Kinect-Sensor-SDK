@@ -90,7 +90,7 @@ namespace Microsoft.AzureKinect
             Num
         }
         
-        public Float2 Transform_2d_to_2d(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
+        public Float2 TransformTo2D(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_2d(
                 this,
@@ -104,12 +104,38 @@ namespace Microsoft.AzureKinect
             return valid ? target_point2d : null;
         }
 
-        public Float3 Transform_2d_to_3d(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
+        public Float3 TransformTo3D(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_3d(
                 this,
                 source_point2d,
                 source_depth,
+                source_camera,
+                target_camera,
+                out Float3 target_point3d,
+                out bool valid));
+
+            return valid ? target_point3d : null;
+        }
+
+        public Float2 TransformTo2D(Float3 source_point3d, DeviceType source_camera, DeviceType target_camera)
+        {
+            Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_2d(
+                this,
+                source_point3d,
+                source_camera,
+                target_camera,
+                out Float2 target_point2d,
+                out bool valid));
+
+            return valid ? target_point2d : null;
+        }
+
+        public Float3 TransformTo3D(Float3 source_point3d, DeviceType source_camera, DeviceType target_camera)
+        {
+            Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_3d(
+                this,
+                source_point3d,
                 source_camera,
                 target_camera,
                 out Float3 target_point3d,
@@ -128,6 +154,11 @@ namespace Microsoft.AzureKinect
                 out Calibration calibration));
 
             return calibration;
+        }
+
+        public Transformation CreateTransformation()
+        {
+            return new Transformation(this);
         }
     }
 }

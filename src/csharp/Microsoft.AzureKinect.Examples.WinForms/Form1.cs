@@ -39,7 +39,7 @@ namespace Microsoft.AzureKinect.Examples.WinForms
                             capture.Color.HeightPixels,
                             capture.Color.StrideBytes,
                             System.Drawing.Imaging.PixelFormat.Format32bppArgb,
-                            ((UnsafeImage)capture.Color).UnsafeBufferPointer);
+                            ((IUnsafeImage)capture.Color).UnsafeBufferPointer);
 
 
                         pictureBoxDepth.Image = await Task.Run(() =>

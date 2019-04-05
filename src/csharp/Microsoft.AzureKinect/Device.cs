@@ -64,8 +64,32 @@ namespace Microsoft.AzureKinect
 
         public Calibration GetCalibration(DepthMode depthMode, ColorResolution colorResolution)
         {
-            Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_get_calibration(handle, depthMode, colorResolution, out Calibration calibration));
-            return calibration;
+            lock (this)
+            {
+                if (disposedValue)
+                    throw new ObjectDisposedException(nameof(Device));
+
+                Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_get_calibration(handle, depthMode, colorResolution, out Calibration calibration));
+                return calibration;
+            }
+
+        }
+
+        public DepthMode CurrentDepthMode { get; private set; } = DepthMode.Off;
+        public ColorResolution CurrentColorResolution { get; private set; } = ColorResolution.Off;
+
+        public Calibration GetCalibration()
+        {
+            if (CurrentColorResolution == ColorResolution.Off)
+            {
+                throw new Exception("Color camera not started");
+            }
+            if (CurrentDepthMode == DepthMode.Off)
+            {
+                throw new Exception("Depth camera not started");
+            }
+
+            return GetCalibration(CurrentDepthMode, CurrentColorResolution);
         }
 
         public byte[] GetRawCalibration()
@@ -242,6 +266,9 @@ namespace Microsoft.AzureKinect
                     throw new ObjectDisposedException(nameof(Device));
 
                 Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_start_cameras(handle, configuration.GetNativeConfiguration()));
+
+                this.CurrentDepthMode = configuration.DepthMode;
+                this.CurrentColorResolution = configuration.ColorResolution;
             }
         }
 
@@ -253,6 +280,9 @@ namespace Microsoft.AzureKinect
                     throw new ObjectDisposedException(nameof(Device));
 
                 NativeMethods.k4a_device_stop_cameras(handle);
+
+                this.CurrentDepthMode = DepthMode.Off;
+                this.CurrentColorResolution = ColorResolution.Off;
             }
         }
 
