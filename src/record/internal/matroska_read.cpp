@@ -1890,6 +1890,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
             {
                 imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
                 imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
+                imu_sample->temperature = std::numeric_limits<float>::quiet_NaN();
                 for (size_t i = 0; i < 3; i++)
                 {
                     imu_sample->acc_sample.v[i] = sample->acc_data[i];
