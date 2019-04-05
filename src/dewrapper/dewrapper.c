@@ -116,6 +116,7 @@ static void free_shared_depth_image(void *buffer, void *context)
     if (count == 0)
     {
         shared_context->memory_free_cb(shared_context->buffer, shared_context->memory_free_cb_context);
+        free(context);
     }
 }
 

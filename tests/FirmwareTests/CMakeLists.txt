@@ -13,6 +13,8 @@ target_link_libraries(firmware_fw PRIVATE
 
     k4ainternal::conn_ex_utility
     k4ainternal::depth_mcu
+    k4ainternal::color_mcu
+    k4ainternal::calibration
     k4ainternal::firmware
     k4ainternal::logging
     k4ainternal::usb_cmd)

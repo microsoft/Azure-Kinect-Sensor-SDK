@@ -12,9 +12,7 @@
 #include <list>
 #include <fstream>
 #include <memory>
-#include <azure_c_shared_utility/threadapi.h>
-#include <azure_c_shared_utility/condition.h>
-#include <azure_c_shared_utility/lock.h>
+#include <thread>
 
 #if defined(__clang__)
 
@@ -83,6 +81,14 @@ constexpr uint64_t operator"" _s(unsigned long long x)
 #define CLUSTER_WRITE_DELAY_NS 2_s
 #endif
 
+#ifndef CUE_ENTRY_GAP_NS
+#define CUE_ENTRY_GAP_NS 1_s
+#endif
+
+#ifndef CLUSTER_READ_AHEAD_COUNT
+#define CLUSTER_READ_AHEAD_COUNT 2
+#endif
+
 static_assert(MAX_CLUSTER_LENGTH_NS < INT16_MAX * MATROSKA_TIMESCALE_NS, "Cluster length must fit in a 16 bit int");
 static_assert(CLUSTER_WRITE_DELAY_NS >= MAX_CLUSTER_LENGTH_NS * 2, "Cluster write delay is shorter than 2 clusters");
 
@@ -136,9 +142,11 @@ public:
     size_t write(const void *buffer, size_t size) override;
     uint64 getFilePointer() override;
     void close() override;
+    void setOwnerThread();
 
 private:
     std::fstream m_stream;
+    std::thread::id m_owner;
 };
 
 // Struct matches https://docs.microsoft.com/en-us/windows/desktop/wmdm/-bitmapinfoheader
@@ -161,9 +169,9 @@ struct BITMAPINFOHEADER
 // Used to serialize imu samples to disk. The struct padding and size must be exact.
 struct matroska_imu_sample_t
 {
-    uint64_t acc_timestamp;
+    uint64_t acc_timestamp_ns;
     float acc_data[3];
-    uint64_t gyro_timestamp;
+    uint64_t gyro_timestamp_ns;
     float gyro_data[3];
 };
 #pragma pack(pop)

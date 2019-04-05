@@ -5,6 +5,7 @@
 add_library(k4arecord SHARED
             playback.cpp
             record.cpp
+            dll_main.c
             ${CMAKE_CURRENT_BINARY_DIR}/version.rc
             )
 

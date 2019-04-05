@@ -4,6 +4,9 @@
 #include "firmware_helper.h"
 #include <utcommon.h>
 
+#include <k4ainternal/logging.h>
+#include <k4ainternal/usbcommand.h>
+
 #include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/threadapi.h>
 
@@ -818,5 +821,6 @@ int main(int argc, char **argv)
     int result = RUN_ALL_TESTS();
 
     tear_down_common_test();
+    k4a_unittest_deinit();
     return result;
 }

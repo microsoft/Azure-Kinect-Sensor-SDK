@@ -26,17 +26,27 @@ using namespace k4aviewer;
 namespace
 {
 static constexpr std::chrono::microseconds InvalidSeekTime = std::chrono::microseconds(-1);
-}
 
-K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &&recording)
+std::string SafeGetTag(const k4a::playback &recording, const char *tagName)
+{
+    std::string result;
+    if (!recording.get_tag(tagName, &result))
+    {
+        result = "Failed to read tag!";
+    }
+
+    return result;
+}
+} // namespace
+
+K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playback &&recording) :
+    m_filenameLabel(std::move(path))
 {
     m_playbackThreadState.SeekTimestamp = InvalidSeekTime;
 
-    m_filenameLabel = recording->GetPath().filename().c_str();
-
     // Recording config
     //
-    m_recordConfiguration = recording->GetRecordConfiguation();
+    m_recordConfiguration = recording.get_record_configuration();
     std::stringstream fpsSS;
     fpsSS << m_recordConfiguration.camera_fps;
     m_fpsLabel = fpsSS.str();
@@ -101,22 +111,13 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &
     m_subordinateDelayOffMasterUsec = m_recordConfiguration.subordinate_delay_off_master_usec;
     m_startTimestampOffsetUsec = m_recordConfiguration.start_timestamp_offset_usec;
     m_playbackThreadState.TimestampOffset = std::chrono::microseconds(m_startTimestampOffsetUsec);
-    m_recordingLengthUsec = recording->GetRecordingLength();
+    m_recordingLengthUsec = static_cast<uint64_t>(recording.get_last_timestamp().count());
 
     // Device info
     //
-    if (K4A_BUFFER_RESULT_SUCCEEDED != recording->GetTag("K4A_DEVICE_SERIAL_NUMBER", &m_deviceSerialNumber))
-    {
-        m_deviceSerialNumber = noneStr;
-    }
-    if (K4A_BUFFER_RESULT_SUCCEEDED != recording->GetTag("K4A_COLOR_FIRMWARE_VERSION", &m_colorFirmwareVersion))
-    {
-        m_colorFirmwareVersion = noneStr;
-    }
-    if (K4A_BUFFER_RESULT_SUCCEEDED != recording->GetTag("K4A_DEPTH_FIRMWARE_VERSION", &m_depthFirmwareVersion))
-    {
-        m_depthFirmwareVersion = noneStr;
-    }
+    m_deviceSerialNumber = SafeGetTag(recording, "K4A_DEVICE_SERIAL_NUMBER");
+    m_colorFirmwareVersion = SafeGetTag(recording, "K4A_COLOR_FIRMWARE_VERSION");
+    m_depthFirmwareVersion = SafeGetTag(recording, "K4A_DEPTH_FIRMWARE_VERSION");
 
     m_playbackThreadState.Recording = std::move(recording);
     PlaybackThreadState *pThreadState = &m_playbackThreadState;
@@ -126,16 +127,15 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::unique_ptr<K4ARecording> &
     SetViewType(K4AWindowSet::ViewType::Normal);
 }
 
-void K4ARecordingDockControl::Show()
+K4ADockControlStatus K4ARecordingDockControl::Show()
 {
     ImGui::Text("%s", m_filenameLabel.c_str());
-
+    ImGui::SameLine();
     ImGuiExtensions::ButtonColorChanger cc(ImGuiExtensions::ButtonColor::Red);
     if (ImGui::SmallButton("Close"))
     {
         K4AWindowManager::Instance().ClearWindows();
-        K4AWindowManager::Instance().PopDockControl();
-        return;
+        return K4ADockControlStatus::ShouldClose;
     }
     cc.Clear();
     ImGui::Separator();
@@ -220,115 +220,116 @@ void K4ARecordingDockControl::Show()
     K4AWindowSet::ShowModeSelector(&m_viewType, true, m_recordingHasDepth, [this](K4AWindowSet::ViewType t) {
         return this->SetViewType(t);
     });
+
+    return K4ADockControlStatus::Ok;
 }
 
 bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
 {
-    std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
-
-    std::unique_lock<std::mutex> lock(state->Mutex);
-
-    k4a::capture backseekCapture;
-    if (state->SeekTimestamp != InvalidSeekTime)
+    try
     {
-        state->Recording->SeekTimestamp(state->SeekTimestamp.count());
+        std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 
-        // The seek timestamp may end up in the middle of a capture, read backwards and forwards
-        // again to get a full capture.
-        //
-        // If the read-forward fails after this, it means we seeked to the end of the file, and
-        // this capture is the last capture in the file, so we actually do want to use this
-        // capture, so we need to keep it until we determine if that happened.
-        //
-        backseekCapture = state->Recording->GetPreviousCapture();
+        std::unique_lock<std::mutex> lock(state->Mutex);
 
-        state->SeekTimestamp = InvalidSeekTime;
-
-        // Force-read the next frame
-        //
-        state->Step = StepDirection::Forward;
-    }
-
-    bool backward = false;
-    if (state->Step != StepDirection::None)
-    {
-        backward = state->Step == StepDirection::Backward;
-        state->Step = StepDirection::None;
-
-        // We don't want to restart from the beginning after stepping
-        // under most circumstances.  If the user stepped to the last
-        // capture, we'll pick up on that when we try to read it and
-        // re-set this flag.
-        //
-        state->RecordingAtEnd = false;
-    }
-    else if (state->Paused)
-    {
-        return true;
-    }
-    else if (!state->Paused && state->RecordingAtEnd)
-    {
-        // Someone hit 'play' after the recording ended, so we need
-        // to restart from the beginning
-        //
-        state->Recording->SeekTimestamp(0);
-        state->RecordingAtEnd = false;
-    }
-
-    k4a::capture nextCapture = backward ? state->Recording->GetPreviousCapture() : state->Recording->GetNextCapture();
-    if (nextCapture == nullptr)
-    {
-        // We're at the end of the file.
-        //
-        state->RecordingAtEnd = true;
-        state->Paused = true;
-
-        if (backseekCapture != nullptr)
+        if (state->SeekTimestamp != InvalidSeekTime)
         {
-            // We reached EOF as a result of an explicit seek operation, and
-            // the backseek capture is the last capture in the file.
+            state->Recording.seek_timestamp(state->SeekTimestamp, K4A_PLAYBACK_SEEK_BEGIN);
+            state->SeekTimestamp = InvalidSeekTime;
+
+            // Force-read the next frame
             //
-            nextCapture = std::move(backseekCapture);
+            state->Step = StepDirection::Forward;
         }
-        else
+
+        bool backward = false;
+        if (state->Step != StepDirection::None)
         {
-            // Recording ended
+            backward = state->Step == StepDirection::Backward;
+            state->Step = StepDirection::None;
+
+            // We don't want to restart from the beginning after stepping
+            // under most circumstances.  If the user stepped to the last
+            // capture, we'll pick up on that when we try to read it and
+            // re-set this flag.
             //
+            state->RecordingAtEnd = false;
+        }
+        else if (state->Paused)
+        {
             return true;
         }
-    }
-
-    state->CurrentCaptureTimestamp = GetCaptureTimestamp(nextCapture);
-
-    // Update the images' timestamps using the timing data embedded in the recording
-    // so we show comparable timestamps whenplaying back synchronized recordings
-    //
-
-    k4a::image images[] = { nextCapture.get_color_image(), nextCapture.get_depth_image(), nextCapture.get_ir_image() };
-
-    for (k4a::image &image : images)
-    {
-        if (image)
+        else if (!state->Paused && state->RecordingAtEnd)
         {
-            image.set_timestamp(image.get_timestamp() + state->TimestampOffset);
+            // Someone hit 'play' after the recording ended, so we need
+            // to restart from the beginning
+            //
+            state->Recording.seek_timestamp(std::chrono::microseconds(0), K4A_PLAYBACK_SEEK_BEGIN);
+            state->RecordingAtEnd = false;
         }
+
+        k4a::capture nextCapture;
+        const bool seekSuccessful = backward ? state->Recording.get_previous_capture(&nextCapture) :
+                                               state->Recording.get_next_capture(&nextCapture);
+        if (!seekSuccessful)
+        {
+            // We're at the end of the file.
+            //
+            state->RecordingAtEnd = true;
+            state->Paused = true;
+
+            // Attempt to show the last capture in the file.
+            // We need to do this rather than just leaving the last-posted capture to handle
+            // cases where we did a seek to EOF.
+            //
+            const bool backseekSuccessful = state->Recording.get_previous_capture(&nextCapture);
+            if (!backseekSuccessful)
+            {
+                // Couldn't read back the last capture, so continue showing the last one
+                //
+                return true;
+            }
+        }
+
+        state->CurrentCaptureTimestamp = GetCaptureTimestamp(nextCapture);
+
+        // Update the images' timestamps using the timing data embedded in the recording
+        // so we show comparable timestamps whenplaying back synchronized recordings
+        //
+
+        k4a::image images[] = { nextCapture.get_color_image(),
+                                nextCapture.get_depth_image(),
+                                nextCapture.get_ir_image() };
+
+        for (k4a::image &image : images)
+        {
+            if (image)
+            {
+                image.set_timestamp(image.get_timestamp() + state->TimestampOffset);
+            }
+        }
+
+        state->DataSource.NotifyObservers(nextCapture);
+        lock.unlock();
+
+        // Account for the time we spent getting captures and such when figuring out how long to wait
+        // before starting the next frame
+        //
+        std::chrono::high_resolution_clock::time_point endTime = std::chrono::high_resolution_clock::now();
+        std::chrono::high_resolution_clock::duration processingTime = endTime - startTime;
+        auto processingTimeUs = std::chrono::duration_cast<std::chrono::microseconds>(processingTime);
+        std::chrono::microseconds sleepTime = state->TimePerFrame - processingTimeUs;
+        if (sleepTime > std::chrono::microseconds(0))
+        {
+            std::this_thread::sleep_for(sleepTime);
+        }
+        return true;
     }
-
-    state->DataSource.NotifyObservers(nextCapture);
-    lock.unlock();
-
-    // Account for the time we spent getting captures and such when figuring out how long to wait
-    // before starting the next frame
-    //
-    std::chrono::high_resolution_clock::time_point endTime = std::chrono::high_resolution_clock::now();
-    std::chrono::high_resolution_clock::duration processingTime = endTime - startTime;
-    auto processingTimeUs = std::chrono::duration_cast<std::chrono::microseconds>(processingTime);
-    std::chrono::microseconds sleepTime = state->TimePerFrame - processingTimeUs;
-    if (sleepTime > std::chrono::microseconds(0))
+    catch (const k4a::error &e)
     {
-        std::this_thread::sleep_for(sleepTime);
+        K4AViewerErrorManager::Instance().SetErrorStatus(e.what());
+        return false;
     }
-    return true;
 }
 
 std::chrono::microseconds K4ARecordingDockControl::GetCaptureTimestamp(const k4a::capture &capture)
@@ -383,19 +384,21 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         break;
 
     case K4AWindowSet::ViewType::PointCloudViewer:
-        k4a::calibration calibration;
-        const k4a_result_t result = m_playbackThreadState.Recording->GetCalibration(&calibration);
-        if (result != K4A_RESULT_SUCCEEDED)
+        try
         {
-            return;
+            k4a::calibration calibration = m_playbackThreadState.Recording.get_calibration();
+            bool colorPointCloudAvailable = m_recordConfiguration.color_track_enabled &&
+                                            m_recordConfiguration.color_format == K4A_IMAGE_FORMAT_COLOR_BGRA32;
+            K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
+                                                std::move(calibration),
+                                                &m_playbackThreadState.DataSource,
+                                                colorPointCloudAvailable);
+        }
+        catch (const k4a::error &e)
+        {
+            K4AViewerErrorManager::Instance().SetErrorStatus(e.what());
         }
 
-        bool colorPointCloudAvailable = m_recordConfiguration.color_track_enabled &&
-                                        m_recordConfiguration.color_format == K4A_IMAGE_FORMAT_COLOR_BGRA32;
-        K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
-                                            std::move(calibration),
-                                            &m_playbackThreadState.DataSource,
-                                            colorPointCloudAvailable);
         break;
     }
 

@@ -67,6 +67,10 @@ set(K4A_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 # Source for the common version resource file
 set(K4A_VERSION_RC ${CMAKE_CURRENT_LIST_DIR}/version.rc.in)
 
+if ("${K4A_ENABLE_LEAK_DETECTION_CMAKE}" STREQUAL "1")
+    add_definitions(-DK4A_ENABLE_LEAK_DETECTION)
+endif()
+
 add_subdirectory(examples)
 add_subdirectory(src)
 add_subdirectory(tests)
