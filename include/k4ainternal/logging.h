@@ -103,10 +103,7 @@ bool logger_is_file_based(void);
  * The least critical error the user wants to be notified about.
  *
  * \remarks
-
- *
- * \remarks
- * See \ref k4a_set_debug_message_handler for more detailed documentation
+ * See \ref k4a_set_debug_message_handler for more detailed documentation.
  */
 k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_cb,
                                               void *message_cb_context,

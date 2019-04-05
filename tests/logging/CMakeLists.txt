@@ -9,10 +9,7 @@ target_link_libraries(logging_ut PRIVATE
     # Link k4ainternal::logging without transitive dependencies
     $<TARGET_FILE:k4ainternal::logging>
     # Link the dependencies of k4ainternal::logging that we do not mock
-    k4ainternal::calibration
-    k4ainternal::image
-    k4ainternal::logging
-    k4ainternal::queue)
+    )
 
 # Include the PUBLIC and INTERFACE directories specified by k4ainternal::logging
 target_include_directories(logging_ut PRIVATE $<TARGET_PROPERTY:k4ainternal::logging,INTERFACE_INCLUDE_DIRECTORIES>)

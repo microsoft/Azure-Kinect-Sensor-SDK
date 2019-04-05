@@ -97,7 +97,6 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
             {
                 // Disallow the caller from registering a 2nd callback. A new callback can be established by clearing
                 // the existing callback function.
-                assert(g_user_logger_cb_info != NULL);
                 result = K4A_RESULT_FROM_BOOL(count_of_registered_callbacks == 1);
                 DEC_REF_VAR(g_user_logger_cb_info_ref);
                 result = K4A_RESULT_FAILED;
@@ -275,9 +274,11 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
 
 void logger_destroy(logger_t logger_handle)
 {
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, logger_t, logger_handle);
+
     logger_context_t *context = logger_t_get_context(logger_handle);
 
-    // destroy the logger
+    // Destroy the logger
     if (DEC_REF_VAR(g_env_logger_count) == 0)
     {
         bool drop_logger = g_env_logger != NULL;
@@ -311,7 +312,14 @@ void logger_log(k4a_log_level_t level, const char * file, const int line, const 
         char buffer[1024];
         va_list args;
         va_start(args, format);
+#ifndef _WIN32
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
         vsnprintf(buffer, sizeof(buffer), format, args);
+#ifndef _WIN32
+#pragma GCC diagnostic pop
+#endif
         va_end(args);
 
         if ((level <= g_user_log_level) && (g_user_log_level != K4A_LOG_LEVEL_OFF))

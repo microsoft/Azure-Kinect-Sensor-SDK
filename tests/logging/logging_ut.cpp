@@ -47,11 +47,11 @@ TEST_F(logging_ut, create)
     // Verify the instances are unique
     ASSERT_NE(logger_handle1, logger_handle2);
 
-    LOG_TRACE("Test Trace Message");
-    LOG_INFO("Test Info Message");
-    LOG_WARNING("Test Warning Message");
-    LOG_ERROR("Test Error Message");
-    LOG_CRITICAL("Test Critical Message");
+    LOG_TRACE("Test Trace Message", 0);
+    LOG_INFO("Test Info Message", 0);
+    LOG_WARNING("Test Warning Message", 0);
+    LOG_ERROR("Test Error Message", 0);
+    LOG_CRITICAL("Test Critical Message", 0);
 
     logger_destroy(logger_handle1);
     logger_destroy(logger_handle2);
@@ -66,9 +66,8 @@ typedef struct _logger_test_callback_info_t
     int message_count_critical;
 } logger_test_callback_info_t;
 
-typedef void(
-    k4a_logging_message_cb_t)(void *context, k4a_log_level_t level, const char *file, int line, const char *message);
 k4a_logging_message_cb_t logging_callback_function;
+k4a_logging_message_cb_t logging_callback_function_not_used;
 
 void logging_callback_function(void *context, k4a_log_level_t level, const char *file, int line, const char *message)
 {
@@ -141,11 +140,11 @@ TEST_F(logging_ut, callback)
 
     {
         memset(&info, 0, sizeof(info));
-        LOG_TRACE("Test Trace Message");
-        LOG_INFO("Test Info Message");
-        LOG_WARNING("Test Warning Message");
-        LOG_ERROR("Test Error Message");
-        LOG_CRITICAL("Test Critical Message");
+        LOG_TRACE("Test Trace Message", 0);
+        LOG_INFO("Test Info Message", 0);
+        LOG_WARNING("Test Warning Message", 0);
+        LOG_ERROR("Test Error Message", 0);
+        LOG_CRITICAL("Test Critical Message", 0);
 
         ASSERT_EQ(info.message_count_critical, 1);
         ASSERT_EQ(info.message_count_error, 1);
@@ -160,11 +159,11 @@ TEST_F(logging_ut, callback)
 
     {
         memset(&info, 0, sizeof(info));
-        LOG_TRACE("Test Trace Message");
-        LOG_INFO("Test Info Message");
-        LOG_WARNING("Test Warning Message");
-        LOG_ERROR("Test Error Message");
-        LOG_CRITICAL("Test Critical Message");
+        LOG_TRACE("Test Trace Message", 0);
+        LOG_INFO("Test Info Message", 0);
+        LOG_WARNING("Test Warning Message", 0);
+        LOG_ERROR("Test Error Message", 0);
+        LOG_CRITICAL("Test Critical Message", 0);
 
         ASSERT_EQ(info.message_count_critical, 1);
         ASSERT_EQ(info.message_count_error, 1);
@@ -179,11 +178,11 @@ TEST_F(logging_ut, callback)
 
     {
         memset(&info, 0, sizeof(info));
-        LOG_TRACE("Test Trace Message");
-        LOG_INFO("Test Info Message");
-        LOG_WARNING("Test Warning Message");
-        LOG_ERROR("Test Error Message");
-        LOG_CRITICAL("Test Critical Message");
+        LOG_TRACE("Test Trace Message", 0);
+        LOG_INFO("Test Info Message", 0);
+        LOG_WARNING("Test Warning Message", 0);
+        LOG_ERROR("Test Error Message", 0);
+        LOG_CRITICAL("Test Critical Message", 0);
 
         ASSERT_EQ(info.message_count_critical, 0);
         ASSERT_EQ(info.message_count_error, 0);
@@ -202,11 +201,11 @@ TEST_F(logging_ut, callback)
 
     {
         memset(&info, 0, sizeof(info));
-        LOG_TRACE("Test Trace Message");
-        LOG_INFO("Test Info Message");
-        LOG_WARNING("Test Warning Message");
-        LOG_ERROR("Test Error Message");
-        LOG_CRITICAL("Test Critical Message");
+        LOG_TRACE("Test Trace Message", 0);
+        LOG_INFO("Test Info Message", 0);
+        LOG_WARNING("Test Warning Message", 0);
+        LOG_ERROR("Test Error Message", 0);
+        LOG_CRITICAL("Test Critical Message", 0);
 
         ASSERT_EQ(info.message_count_critical, 1);
         ASSERT_EQ(info.message_count_error, 1);
@@ -234,11 +233,11 @@ static int logger_callback_thread(void *param)
     Lock(data->lock);
     do
     {
-        LOG_TRACE("Test Trace Message");
-        LOG_INFO("Test Info Message");
-        LOG_WARNING("Test Warning Message");
-        LOG_ERROR("Test Error Message");
-        LOG_CRITICAL("Test Critical Message");
+        LOG_TRACE("Test Trace Message", 0);
+        LOG_INFO("Test Info Message", 0);
+        LOG_WARNING("Test Warning Message", 0);
+        LOG_ERROR("Test Error Message", 0);
+        LOG_CRITICAL("Test Critical Message", 0);
     } while (data->done == 0);
     return TEST_RETURN_VALUE;
 }
