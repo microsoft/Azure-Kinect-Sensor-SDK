@@ -255,9 +255,9 @@ bool K4AVSliderFloat(const char *name, ImVec2 size, float *value, float minValue
 //
 void K4AVText(const char *str);
 
-// Shows a tooltip if the most recently-drawn control was hovered
+// Shows a tooltip if the most recently-drawn control was hovered and show == true
 //
-void K4AShowTooltip(const char *msg);
+void K4AShowTooltip(const char *msg, bool show = true);
 
 } // namespace ImGuiExtensions
 } // namespace k4aviewer
