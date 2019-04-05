@@ -6,7 +6,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 {
     public class CallCount
     {
-        private StubbedModule module;
+        private readonly StubbedModule module;
         internal CallCount(StubbedModule module)
         {
             this.module = module;
@@ -16,7 +16,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
         }
 
-        Dictionary<string, int> initialCount = new Dictionary<string, int>();
+        readonly Dictionary<string, int> initialCount = new Dictionary<string, int>();
 
         public int Calls(string function)
         {

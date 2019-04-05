@@ -33,10 +33,10 @@ namespace K4aWpfTestApplication
             using (Device device = Device.Open(0))
             {
                 device.StartCameras(new DeviceConfiguration {
-                    color_format = ImageFormat.ColorBGRA32,
-                    color_resolution = ColorResolution.r1080p,
-                    depth_mode = DepthMode.NFOV_2x2Binned,
-                    synchronized_images_only = true
+                    ColorFormat = ImageFormat.ColorBGRA32,
+                    ColorResolution = ColorResolution.r1080p,
+                    DepthMode = DepthMode.NFOV_2x2Binned,
+                    SynchronizedImagesOnly = true
                 });
 
                 while (true)

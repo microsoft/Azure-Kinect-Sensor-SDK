@@ -52,7 +52,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             return h.ToString();
         }
 
-        private byte[] hash;
+        private readonly byte[] hash;
 
         public override string ToString()
         {

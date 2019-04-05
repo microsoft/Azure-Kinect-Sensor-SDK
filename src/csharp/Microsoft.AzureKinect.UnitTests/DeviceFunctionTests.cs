@@ -16,7 +16,7 @@ namespace Microsoft.AzureKinect.UnitTests
     /// </summary>
     public class DeviceFunctionTests
     {
-        StubbedModule NativeK4a;
+        readonly StubbedModule NativeK4a;
 
         public DeviceFunctionTests()
         {
@@ -737,8 +737,7 @@ k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle, k4a_color_
                 using (Device device = Device.Open(0))
                 {
                     Assert.AreEqual(0, count.Calls("k4a_device_get_color_control"));
-                    ColorControlMode mode;
-                    Assert.AreEqual(2345, device.GetColorControl(ColorControlCommand.PowerlineFrequency, out mode));
+                    Assert.AreEqual(2345, device.GetColorControl(ColorControlCommand.PowerlineFrequency, out ColorControlMode mode));
                     Assert.AreEqual(ColorControlMode.Manual, mode);
                     Assert.AreEqual(1, count.Calls("k4a_device_get_color_control"));
 
@@ -774,8 +773,7 @@ k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle, k4a_color_
                 {
                     Assert.AreEqual(0, count.Calls("k4a_device_get_color_control"));
                     Assert.Throws(typeof(Microsoft.AzureKinect.Exception), () => {
-                        ColorControlMode mode;
-                        device.GetColorControl(ColorControlCommand.PowerlineFrequency, out mode);
+                        device.GetColorControl(ColorControlCommand.PowerlineFrequency, out ColorControlMode mode);
                     });
                     Assert.AreEqual(1, count.Calls("k4a_device_get_color_control"));
                 }
@@ -1160,16 +1158,18 @@ k4a_result_t k4a_device_start_cameras(
     return K4A_RESULT_SUCCEEDED;
 }
 ");
-                    DeviceConfiguration config = new DeviceConfiguration();
-                    config.color_format = ImageFormat.ColorBGRA32;
-                    config.color_resolution = ColorResolution.r1080p;
-                    config.depth_mode = DepthMode.PassiveIR;
-                    config.camera_fps = FPS.fps15;
-                    config.synchronized_images_only = true;
-                    config.depth_delay_off_color = System.TimeSpan.FromSeconds(-1);
-                    config.wired_sync_mode = WiredSyncMode.Master;
-                    config.subordinate_delay_off_master = System.TimeSpan.FromMilliseconds(500);
-                    config.disable_streaming_indicator = true;
+                    DeviceConfiguration config = new DeviceConfiguration
+                    {
+                        ColorFormat = ImageFormat.ColorBGRA32,
+                        ColorResolution = ColorResolution.r1080p,
+                        DepthMode = DepthMode.PassiveIR,
+                        CameraFPS = FPS.fps15,
+                        SynchronizedImagesOnly = true,
+                        DepthDelayOffColor = System.TimeSpan.FromSeconds(-1),
+                        WiredSyncMode = WiredSyncMode.Master,
+                        SuboridinateDelayOffMaster = System.TimeSpan.FromMilliseconds(500),
+                        DisableStreamingIndicator = true
+                    };
 
                     device.StartCameras(config);
 

@@ -9,8 +9,4 @@
     <DocumentationFile>D:\git\Azure-Kinect-Sensor-SDK\src\csharp\Microsoft.AzureKinect\Microsoft.AzureKinect.xml</DocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Calibration\" />
-  </ItemGroup>
-
 </Project>

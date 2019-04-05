@@ -351,6 +351,9 @@ namespace Microsoft.AzureKinect
         {
             lock (this)
             {
+                if (disposedValue)
+                    throw new ObjectDisposedException(nameof(Image));
+
                 return handle.DangerousGetHandle();
             }
         }

@@ -62,9 +62,11 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                         continue;
                     }
 
-                    FunctionInfo info = new FunctionInfo();
-                    info.Declaration = functionMatch.Groups["prototype"].Value;
-                    info.ReturnType = functionMatch.Groups["return"].Value;
+                    FunctionInfo info = new FunctionInfo
+                    {
+                        Declaration = functionMatch.Groups["prototype"].Value,
+                        ReturnType = functionMatch.Groups["return"].Value
+                    };
                     if (functionMatch.Groups["pointers"].Success)
                     {
                         info.ReturnType += functionMatch.Groups["pointers"].Value;

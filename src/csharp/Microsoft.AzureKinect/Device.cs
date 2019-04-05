@@ -20,8 +20,7 @@ namespace Microsoft.AzureKinect
 
         public static Device Open(int index)
         {
-            NativeMethods.k4a_device_t handle;
-            Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_open((uint)index, out handle));
+            Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_open((uint)index, out NativeMethods.k4a_device_t handle));
             return new Device(handle);
         }
 
@@ -65,8 +64,7 @@ namespace Microsoft.AzureKinect
 
         public Calibration GetCalibration(DepthMode depthMode, ColorResolution colorResolution)
         {
-            Calibration calibration;
-            Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_get_calibration(handle, depthMode, colorResolution, out calibration));
+            Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_get_calibration(handle, depthMode, colorResolution, out Calibration calibration));
             return calibration;
         }
 
@@ -183,10 +181,9 @@ namespace Microsoft.AzureKinect
                     if (disposedValue)
                         throw new ObjectDisposedException(nameof(Device));
 
-                    bool sync_in, sync_out;
                     Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_get_sync_jack(handle,
-                        out sync_in,
-                        out sync_out));
+                        out bool sync_in,
+                        out bool sync_out));
                     return sync_in;
                 }
             }
@@ -201,10 +198,9 @@ namespace Microsoft.AzureKinect
                     if (disposedValue)
                         throw new ObjectDisposedException(nameof(Device));
 
-                    bool sync_in, sync_out;
                     Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_get_sync_jack(handle,
-                        out sync_in,
-                        out sync_out));
+                        out bool sync_in,
+                        out bool sync_out));
                     return sync_out;
                 }
             }
@@ -226,10 +222,8 @@ namespace Microsoft.AzureKinect
                     if (version != null)
                         return version.Value;
 
-                    NativeMethods.k4a_hardware_version_t nativeVersion;
-
                     Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_get_version(handle,
-                        out nativeVersion));
+                        out NativeMethods.k4a_hardware_version_t nativeVersion));
 
                     version = nativeVersion.ToHardwareVersion();
                     return version.Value;

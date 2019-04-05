@@ -14,18 +14,20 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 
         public static ModuleInfo Analyze(string path, CompilerOptions options = null)
         {
-            options = options != null ? options : CompilerOptions.GetDefault();
+            options = options ?? CompilerOptions.GetDefault();
 
             List<string> exports = new List<string>();
 
             var regex = new System.Text.RegularExpressions.Regex(@"^\s+\d+\s+[\dA-Fa-f]+\s+[0-9A-Fa-f]{8}\s+([^\s]*).*?$", System.Text.RegularExpressions.RegexOptions.Multiline);
             // Start the compiler process
-            ProcessStartInfo startInfo = new ProcessStartInfo(options.LinkerPath);
-            startInfo.Arguments = $"/dump \"{path}\" /exports";
-            startInfo.WorkingDirectory = options.TempPath;
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardError = true;
-            startInfo.RedirectStandardInput = true;
+            ProcessStartInfo startInfo = new ProcessStartInfo(options.LinkerPath)
+            {
+                Arguments = $"/dump \"{path}\" /exports",
+                WorkingDirectory = options.TempPath,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = true
+            };
 
             using (Process link = Process.Start(startInfo))
             {

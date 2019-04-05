@@ -8,6 +8,8 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
     {
         private ModuleImplementation(string path, IntPtr hModule, IReadOnlyDictionary<string, FunctionImplementation> functions)
         {
+            this.Path = path;
+            this.ModuleHandle = hModule;
             this.Functions = functions;
         }
 

@@ -23,7 +23,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             string[] additionalLibraries = null,
             string[] additionalSources = null)
         {
-            options = options != null ? options : CompilerOptions.GetDefault();
+            options = options ?? CompilerOptions.GetDefault();
             string moduleName = outputBinary;
 
 
@@ -78,11 +78,12 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
 
             // Start the compiler process
-            ProcessStartInfo startInfo = new ProcessStartInfo(options.CompilerPath);
-            startInfo.Arguments = compilerArguments.ToString();
-            startInfo.WorkingDirectory = options.TempPath;
-
-            startInfo.RedirectStandardOutput = true;
+            ProcessStartInfo startInfo = new ProcessStartInfo(options.CompilerPath)
+            {
+                Arguments = compilerArguments.ToString(),
+                WorkingDirectory = options.TempPath,
+                RedirectStandardOutput = true
+            };
 
             Debug.WriteLine(startInfo.Arguments);
             try

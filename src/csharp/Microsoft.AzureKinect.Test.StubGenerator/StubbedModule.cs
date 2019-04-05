@@ -16,8 +16,8 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 
         public string ModuleName { get;  }
 
-        Dictionary<string, FunctionImplementation> currentFunctionImplementations = new Dictionary<string, FunctionImplementation>();
-        Dictionary<Hash, ModuleImplementation> implementedModules = new Dictionary<Hash, ModuleImplementation>();
+        readonly Dictionary<string, FunctionImplementation> currentFunctionImplementations = new Dictionary<string, FunctionImplementation>();
+        readonly Dictionary<Hash, ModuleImplementation> implementedModules = new Dictionary<Hash, ModuleImplementation>();
 
         private void GenerateStub(string modulePath, NativeInterface @interface, CompilerOptions options)
         {
@@ -68,12 +68,12 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 
             // Load the generated stub in to the current process. This should be done before any P/Invokes in to the
             // target module to ensure that the stub implementation is the one accessed
-            IntPtr loadLibrary = NativeMethods.LoadLibrary(modulePath);
+            _ = NativeMethods.LoadLibrary(modulePath);
         }
 
         public NativeInterface NativeInterface { get;  }
 
-        private static Dictionary<string, StubbedModule> stubbedModules = new Dictionary<string, StubbedModule>();
+        private static readonly Dictionary<string, StubbedModule> stubbedModules = new Dictionary<string, StubbedModule>();
         public static StubbedModule Get(string moduleName)
         {
             if (!stubbedModules.ContainsKey(moduleName))
@@ -97,7 +97,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 
         private StubbedModule(string moduleName, NativeInterface @interface, CompilerOptions options = null)
         {
-            options = options != null ? options : CompilerOptions.GetDefault();
+            options = options ?? CompilerOptions.GetDefault();
             if (moduleName.EndsWith(".dll"))
             {
                 throw new Exception("Module name should not include file extension");

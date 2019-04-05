@@ -20,7 +20,7 @@ namespace Microsoft.AzureKinect
         }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-        private float[] v = new float[2];
+        private readonly float[] v = new float[2];
 
 
         public float X

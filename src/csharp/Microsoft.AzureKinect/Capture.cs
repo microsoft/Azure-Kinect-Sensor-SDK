@@ -13,55 +13,89 @@ namespace Microsoft.AzureKinect
 
         public static Capture Create()
         {
-            NativeMethods.k4a_capture_t handle;
-
             Exception.ThrowIfNotSuccess(
-                NativeMethods.k4a_capture_create(out handle));
+                NativeMethods.k4a_capture_create(out NativeMethods.k4a_capture_t handle));
 
             return new Capture(handle);
         }
 
 
-        private Image _Color;
-        private Image _Depth;
-        private Image _IR;
+        
 
+        // This function retrieves a native image handle from the native API.
+        //
+        // If this is the first time calling the property, we construct a new wrapper
+        // If the handle is for an Image we have already constructed a wrapper for, we return the existing wrapper
+        // If the handle is for a different Image, or if the wrapper has already been disposed, we construct a new wrapper and dispose the old one
+        private Image GetImage(Func<NativeMethods.k4a_capture_t, NativeMethods.k4a_image_t> nativeMethod, 
+            ref Image cache)
+        {
+            // Lock must be held to ensure the Image in cache is not replaced while we are inspecting it
+            // It is still possible for that Image to be accessed or Disposed while this lock is held
+            lock (this)
+            {
+                if (disposedValue)
+                    throw new ObjectDisposedException(nameof(Capture));
+
+                NativeMethods.k4a_image_t image = nativeMethod(handle);
+                // This try block ensures that we close image
+                try
+                {
+                    if (cache != null)
+                    {
+                        IntPtr imageHandle = image.DangerousGetHandle();
+
+                        // Only attempt to access cache in this try block
+                        try
+                        {
+                            // If cache was disposed before we called the native accessor (by the caller or another thread), 
+                            // the handle could have been reused and the values would incorrectly match. However, cache.DangerousGetHandle()
+                            // will throw an exception, and we will correctly construct a new image wrapper.
+                            if (cache.DangerousGetHandle() != imageHandle)
+                            {
+                                // The image has changed, invalidate the current image and construct a new wrapper
+                                cache.Dispose();
+                                cache = null;
+                            }
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // If cache has been disposed by the caller or another thread we will discard
+                            // it and construct a new wrapper
+                            cache = null;
+                        }
+                    }
+
+                    if (cache != null && !image.IsInvalid)
+                    {
+                        // Construct a new wrapper and return it
+                        // The native function may have returned 
+                        cache = new UnsafeImage(image);
+
+                        // Since we have wrapped image, it is now owned by the UnsafeImage object and we should no longer close it
+                        image = null;
+                    }
+                }
+                finally
+                {
+                    // Ensure the native handle is closed if we have a failure creating the Image object
+                    if (image != null)
+                    {
+                        image.Close();
+                    }
+                }
+
+                return cache;
+            }
+        }
+
+        private Image _Color;
+        
         public Image Color
         {
             get
             {
-                NativeMethods.k4a_image_t image = NativeMethods.k4a_capture_get_color_image(handle);
-                lock (this)
-                {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Capture));
-
-                    if (_Color != null)
-                    {
-                        if (_Color.DangerousGetHandle() == image.DangerousGetHandle())
-                        {
-                            // The image is the same as the current managed wrapper
-
-                            // Close the native handle to release the newly created reference
-                            image.Close();
-                            image = null;
-
-                            // Return the previously created wrapper
-                            return _Color;
-                        }
-                        else
-                        {
-                            // The color image has changed, invalidate the current color image and construct
-                            // a new wrapper
-                            _Color.Dispose();
-                            _Color = null;
-                        }
-                    }
-
-                    // Construct a new wrapper and return it
-                    _Color = new UnsafeImage(image);
-                    return _Color;
-                }
+                return GetImage(NativeMethods.k4a_capture_get_color_image, ref _Color);
             }
             set
             {
@@ -71,7 +105,8 @@ namespace Microsoft.AzureKinect
                         throw new ObjectDisposedException(nameof(Capture));
 
                     // If the assignment is a new managed wrapper we need
-                    // to release the reference to the old wrapper
+                    // to release the reference to the old wrapper.
+                    // If it is the same object though, we should not dispose it.
                     if (_Color != null && !object.ReferenceEquals(
                         _Color, value))
                     {
@@ -82,42 +117,12 @@ namespace Microsoft.AzureKinect
             }
         }
 
-
+        private Image _Depth;
+        
         public Image Depth {
             get
             {
-                NativeMethods.k4a_image_t image = NativeMethods.k4a_capture_get_depth_image(handle);
-                lock (this)
-                {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Capture));
-
-                    if (_Depth != null)
-                    {
-                        if (_Depth.DangerousGetHandle() == image.DangerousGetHandle())
-                        {
-                            // The image is the same as the current managed wrapper
-
-                            // Close the native handle to release the newly created reference
-                            image.Close();
-                            image = null;
-
-                            // Return the previously created wrapper
-                            return _Depth;
-                        }
-                        else
-                        {
-                            // The color image has changed, invalidate the current color image and construct
-                            // a new wrapper
-                            _Depth.Dispose();
-                            _Depth = null;
-                        }
-                    }
-
-                    // Construct a new wrapper and return it
-                    _Depth = new UnsafeImage(image);
-                    return _Depth;
-                }
+                return GetImage(NativeMethods.k4a_capture_get_depth_image, ref _Depth);
             }
             set
             {
@@ -128,6 +133,7 @@ namespace Microsoft.AzureKinect
 
                     // If the assignment is a new managed wrapper we need
                     // to release the reference to the old wrapper
+                    // If it is the same object though, we should not dispose it.
                     if (_Depth != null && !object.ReferenceEquals(
                         _Depth, value))
                     {
@@ -138,41 +144,11 @@ namespace Microsoft.AzureKinect
             }
         }
 
+        private Image _IR;
         public Image IR {
             get
             {
-                NativeMethods.k4a_image_t image = NativeMethods.k4a_capture_get_ir_image(handle);
-                lock (this)
-                {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Capture));
-
-                    if (_IR != null)
-                    {
-                        if (_IR.DangerousGetHandle() == image.DangerousGetHandle())
-                        {
-                            // The image is the same as the current managed wrapper
-
-                            // Close the native handle to release the newly created reference
-                            image.Close();
-                            image = null;
-
-                            // Return the previously created wrapper
-                            return _IR;
-                        }
-                        else
-                        {
-                            // The color image has changed, invalidate the current color image and construct
-                            // a new wrapper
-                            _IR.Dispose();
-                            _IR = null;
-                        }
-                    }
-
-                    // Construct a new wrapper and return it
-                    _IR = new UnsafeImage(image);
-                    return _IR;
-                }
+                return GetImage(NativeMethods.k4a_capture_get_ir_image, ref _IR);
             }
             set
             {
@@ -183,6 +159,7 @@ namespace Microsoft.AzureKinect
 
                     // If the assignment is a new managed wrapper we need
                     // to release the reference to the old wrapper
+                    // If it is the same object though, we should not dispose it.
                     if (_IR != null && !object.ReferenceEquals(
                         _IR, value))
                     {

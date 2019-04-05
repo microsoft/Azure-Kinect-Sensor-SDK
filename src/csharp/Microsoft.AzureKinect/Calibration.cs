@@ -10,14 +10,14 @@ namespace Microsoft.AzureKinect
     public struct Calibration
     {
         [MarshalAs(UnmanagedType.Struct)]
-        public Calibration.Camera depth_camera_calibration;
+        public Camera depth_camera_calibration;
 
         [MarshalAs(UnmanagedType.Struct)]
-        public Calibration.Camera color_camera_calibration;
+        public Camera color_camera_calibration;
 
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.Struct,
             SizeConst = ((int)(Calibration.DeviceType.Num) * ((int)(Calibration.DeviceType.Num))))]
-        public Calibration.Extrinsics[] extrinsics;
+        public Extrinsics[] device_extrinsics;
 
         public DepthMode depth_mode;
 
@@ -92,49 +92,41 @@ namespace Microsoft.AzureKinect
         
         public Float2 Transform_2d_to_2d(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
         {
-            Float2 target_point2d = null;
-            bool valid = false;
-
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_2d(
                 this,
                 source_point2d,
                 source_depth,
                 source_camera,
                 target_camera,
-                out target_point2d,
-                out valid));
+                out Float2 target_point2d,
+                out bool valid));
 
             return valid ? target_point2d : null;
         }
 
         public Float3 Transform_2d_to_3d(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
         {
-            Float3 target_point3d = null;
-            bool valid = false;
-
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_3d(
                 this,
                 source_point2d,
                 source_depth,
                 source_camera,
                 target_camera,
-                out target_point3d,
-                out valid));
+                out Float3 target_point3d,
+                out bool valid));
 
             return valid ? target_point3d : null;
         }
 
         public static Calibration GetFromRaw(byte[] raw, DepthMode depth_mode, ColorResolution color_resolution)
         {
-            Calibration calibration;
-
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_get_from_raw(
                 raw,
                 (UIntPtr)raw.Length,
                 depth_mode,
                 color_resolution,
-                out calibration));
-            
+                out Calibration calibration));
+
             return calibration;
         }
     }

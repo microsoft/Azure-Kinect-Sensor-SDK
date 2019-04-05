@@ -6,7 +6,7 @@ namespace Microsoft.AzureKinect.UnitTests
 {
     public class CaptureFunctionTests
     {
-        StubbedModule NativeK4a;
+        readonly StubbedModule NativeK4a;
 
         public CaptureFunctionTests()
         {

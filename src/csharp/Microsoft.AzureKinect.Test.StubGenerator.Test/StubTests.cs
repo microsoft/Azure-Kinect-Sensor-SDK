@@ -7,6 +7,7 @@ using Microsoft.AzureKinect.Test.StubGenerator;
 
 namespace Tests
 {
+#pragma warning disable IDE1006 // Naming Styles
     class TestNativeMethods
     {
         public enum k4a_result_t
@@ -29,7 +30,9 @@ namespace Tests
         }
 
         [DllImport("k4a")]
+
         public static extern k4a_result_t k4a_device_open(UInt32 index, out k4a_device_t device_handle);
+
 
         [DllImport("k4a")]
         public static extern void k4a_device_close(IntPtr device_handle);
@@ -38,15 +41,15 @@ namespace Tests
         public static extern UInt32 k4a_device_get_installed_count();
 
     }
+#pragma warning restore IDE1006 // Naming Styles
 
     public class Tests
     {
-        NativeInterface k4ainterface;
-        StubbedModule k4a;
+        readonly StubbedModule k4a;
 
         public Tests()
         {
-            k4ainterface = NativeInterface.Create(
+            NativeInterface k4ainterface = NativeInterface.Create(
                @"d:\git\Azure-Kinect-Sensor-SDK\build\bin\k4a.dll",
                @"D:\git\Azure-Kinect-Sensor-SDK\include\k4a\k4a.h");
 
