@@ -127,6 +127,8 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_calibration(k4a_playback_t playba
 K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle,
                                                                     k4a_record_configuration_t *config);
 
+K4ARECORD_EXPORT bool k4a_playback_check_track_exists(k4a_playback_t playback_handle, const char *track_name);
+
 K4ARECORD_EXPORT k4a_result_t k4a_playback_get_track_video_info(k4a_playback_t playback_handle,
                                                                 const char *track_name,
                                                                 k4a_record_video_info_t *video_info);
@@ -355,11 +357,11 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
                                                                           k4a_imu_sample_t *imu_sample);
 
 K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_handle,
-                                                                      const char *custom_track_name,
+                                                                      const char *track_name,
                                                                       k4a_playback_data_block_t *data_block_handle);
 
 K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback_handle,
-                                                                          const char *custom_track_name,
+                                                                          const char *track_name,
                                                                           k4a_playback_data_block_t *data_block_handle);
 
 K4ARECORD_EXPORT uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playback_data_block_t data_block_handle);
