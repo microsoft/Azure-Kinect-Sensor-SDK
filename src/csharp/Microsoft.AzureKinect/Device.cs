@@ -80,13 +80,9 @@ namespace Microsoft.AzureKinect
 
         public Calibration GetCalibration()
         {
-            if (CurrentColorResolution == ColorResolution.Off)
+            if (CurrentColorResolution == ColorResolution.Off && CurrentDepthMode == DepthMode.Off)
             {
-                throw new Exception("Color camera not started");
-            }
-            if (CurrentDepthMode == DepthMode.Off)
-            {
-                throw new Exception("Depth camera not started");
+                throw new Exception("Cameras not started");
             }
 
             return GetCalibration(CurrentDepthMode, CurrentColorResolution);
@@ -134,7 +130,7 @@ namespace Microsoft.AzureKinect
 
                 if (capture.IsInvalid)
                 {
-                    throw new System.Exception("k4a_device_get_capture did not return a valid capture handle");
+                    throw new Microsoft.AzureKinect.Exception("k4a_device_get_capture did not return a valid capture handle");
                 }
 
                 return new Capture(capture);

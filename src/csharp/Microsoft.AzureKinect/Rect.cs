@@ -19,12 +19,6 @@ namespace Microsoft.AzureKinect
         public int Width { get; set; }
         public int Height { get; set; }
 
-        public static Rect Empty { get; } = new Rect(0,0,0,0);
-        public bool IsEmpty { get
-            {
-                return Width == 0 || Height == 0;
-            }
-        }
 
     }
 }

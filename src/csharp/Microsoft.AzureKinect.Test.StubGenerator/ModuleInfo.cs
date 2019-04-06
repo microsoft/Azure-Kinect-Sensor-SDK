@@ -28,27 +28,34 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                 RedirectStandardError = true,
                 RedirectStandardInput = true
             };
-
-            using (Process link = Process.Start(startInfo))
+            try
             {
-                string output = link.StandardOutput.ReadToEnd().Replace("\r\n", "\n");
-
-                link.WaitForExit();
-
-                if (link.ExitCode != 0)
+                using (Process link = Process.Start(startInfo))
                 {
-                    throw new Exception("Link /dump failed");
+                    string output = link.StandardOutput.ReadToEnd().Replace("\r\n", "\n");
+
+                    link.WaitForExit();
+
+                    if (link.ExitCode != 0)
+                    {
+                        throw new Exception("Link /dump failed");
+                    }
+
+                    foreach (System.Text.RegularExpressions.Match m in regex.Matches(output))
+                    {
+                        string functionName = m.Groups[1].Value;
+
+                        exports.Add(functionName);
+
+
+                    }
+
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("exception info");
                 
-                foreach (System.Text.RegularExpressions.Match m in regex.Matches(output))
-                {
-                    string functionName = m.Groups[1].Value;
-
-                    exports.Add(functionName);
-
-                    
-                }
-
             }
 
             return new ModuleInfo(exports.ToArray());

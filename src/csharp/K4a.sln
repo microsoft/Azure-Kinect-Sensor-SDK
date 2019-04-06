@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AzureKinect.UnitT
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StubGenerator", "StubGenerator", "{5C3A9F92-56B4-4A7B-86EC-BACBE07C5AAE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureKinect.Test.StubGenerator.Test", "Microsoft.AzureKinect.Test.StubGenerator.Test\Microsoft.AzureKinect.Test.StubGenerator.Test.csproj", "{E1B3CC41-BC1C-47B7-A6A6-AA50E6994C05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AzureKinect.Test.StubGenerator.Test", "Microsoft.AzureKinect.Test.StubGenerator.Test\Microsoft.AzureKinect.Test.StubGenerator.Test.csproj", "{E1B3CC41-BC1C-47B7-A6A6-AA50E6994C05}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureKinect.WPF", "Microsoft.AzureKinect.WPF\Microsoft.AzureKinect.WPF.csproj", "{4762DD42-3CF3-4742-9AEA-5D39781FD2A6}"
 EndProject

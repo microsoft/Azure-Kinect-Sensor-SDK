@@ -215,9 +215,23 @@ k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle,
     }
 }
 ");
+            CallCount count = NativeK4a.CountCalls();
             using (Device device = Device.Open(0))
             {
                 Assert.AreEqual("1234", device.SerialNum);
+                Assert.AreEqual(2, count.Calls("k4a_device_get_serialnum"));
+
+                // Verify the serial number is cached
+                Assert.AreEqual("1234", device.SerialNum);
+                Assert.AreEqual(2, count.Calls("k4a_device_get_serialnum"));
+
+
+                device.Dispose();
+                Assert.Throws(typeof(System.ObjectDisposedException), () => {
+                    _ = device.SerialNum;
+
+                });
+
             }
         }
 
@@ -331,6 +345,13 @@ k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle,
                 {
                     Assert.AreEqual((byte)i, rawCalibration[i]);
                 }
+
+                device.Dispose();
+
+                Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                {
+                    device.GetRawCalibration();
+                });
             }
         }
 
@@ -485,8 +506,58 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
                 Assert.AreEqual(102, calibration.color_camera_calibration.resolution_height);
                 Assert.AreEqual(4.56f, calibration.color_camera_calibration.metric_radius);
 
+
+                // GetCalibration with no arguments will throw if the device is not yet started
+                Assert.Throws(typeof(Exception), () =>
+                {
+                    device.GetCalibration();
+                });
+
+                NativeK4a.SetImplementation(@"
+k4a_result_t k4a_device_start_cameras(
+    k4a_device_t device_handle,
+    k4a_device_configuration_t * config
+)
+{
+    STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
+    STUB_ASSERT(config != NULL);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+void k4a_device_stop_cameras(k4a_device_t device_handle)
+{
+    STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
+}
+");
+                               
+                device.StartCameras(new DeviceConfiguration
+                {
+                    ColorResolution = ColorResolution.r1440p,
+                    DepthMode = DepthMode.NFOV_Unbinned
+                });
+
+                // Calibration should return correctly now
+                Assert.IsNotNull(device.GetCalibration());
+
+                device.StopCameras();
+
+                // GetCalibration will fail again after the cameras are stopped
+                Assert.Throws(typeof(Exception), () =>
+                {
+                    device.GetCalibration();
+                });
+
+                device.Dispose();
+                
+                Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.r1440p);
+                    });
                 
             }
+
+            
         }
 
         [Test]
@@ -568,12 +639,21 @@ void k4a_capture_release(k4a_capture_t capture_handle)
                     
                     Assert.AreEqual(1, count.Calls("k4a_device_get_capture"));
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
+
+                    device.Dispose();
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        device.GetCapture();
+                    });
                 }
 
                 capture.Dispose();
                 Assert.AreEqual(1, count.Calls("k4a_device_get_capture"));
                 Assert.AreEqual(1, count.Calls("k4a_capture_release"));
+
             }
+
+            
 
         }
 
@@ -612,6 +692,20 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
                 }
             }
+
+            NativeK4a.SetImplementation(@"
+
+k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture_t* capture_handle, int32_t timeout_in_ms)
+{
+    STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
+    STUB_ASSERT(capture_handle != NULL);
+    STUB_ASSERT(timeout_in_ms == 2345);
+
+    *capture_handle = (k4a_capture_t)0x0C001234;
+    return K4A_WAIT_RESULT_SUCCEEDED;
+}
+");
+
         }
 
         [Test]
@@ -639,6 +733,40 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
 
                     Assert.Throws(typeof(Microsoft.AzureKinect.Exception), () => {
+                        using (Capture capture = device.GetCapture(2345))
+                        {
+
+                        }
+                    });
+
+                    Assert.AreEqual(1, count.Calls("k4a_device_get_capture"));
+                    Assert.AreEqual(0, count.Calls("k4a_capture_release"));
+                }
+            }
+
+
+            // Verify that if the native code returns success, but no handle, we properly throw an exception
+            NativeK4a.SetImplementation(@"
+
+k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture_t* capture_handle, int32_t timeout_in_ms)
+{
+    STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
+    STUB_ASSERT(capture_handle != NULL);
+    STUB_ASSERT(timeout_in_ms == 2345);
+
+    *capture_handle = (k4a_capture_t)0;
+    return K4A_WAIT_RESULT_SUCCEEDED;
+}
+");
+            {
+                CallCount count = NativeK4a.CountCalls();
+                using (Device device = Device.Open(0))
+                {
+                    Assert.AreEqual(0, count.Calls("k4a_device_get_capture"));
+                    Assert.AreEqual(0, count.Calls("k4a_capture_release"));
+
+                    Assert.Throws(typeof(Microsoft.AzureKinect.Exception), () =>
+                    {
                         using (Capture capture = device.GetCapture(2345))
                         {
 
@@ -677,6 +805,12 @@ k4a_result_t k4a_device_set_color_control(k4a_device_t device_handle, k4a_color_
                     Assert.AreEqual(0, count.Calls("k4a_device_set_color_control"));
                     device.SetColorControl(ColorControlCommand.PowerlineFrequency, ColorControlMode.Manual, 2345);
                     Assert.AreEqual(1, count.Calls("k4a_device_set_color_control"));
+
+                    device.Dispose();
+
+                    Assert.Throws(typeof(System.ObjectDisposedException), () => {
+                        device.SetColorControl(ColorControlCommand.PowerlineFrequency, ColorControlMode.Manual, 2345);
+                    });
                 }
             }
         }
@@ -743,6 +877,18 @@ k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle, k4a_color_
 
                     Assert.AreEqual(2345, device.GetColorControl(ColorControlCommand.PowerlineFrequency));
                     Assert.AreEqual(2, count.Calls("k4a_device_get_color_control"));
+
+                    device.Dispose();
+
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        device.GetColorControl(ColorControlCommand.PowerlineFrequency, out ColorControlMode mode2);
+                    });
+
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        device.GetColorControl(ColorControlCommand.PowerlineFrequency);
+                    });
                 }
             }
         }
@@ -831,6 +977,11 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_imu_sample"));
 
+                    device.Dispose();
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        device.GetImuSample(2345);
+                    });
                 }
             }
 
@@ -958,6 +1109,18 @@ k4a_result_t k4a_device_get_sync_jack(
 
                     Assert.AreEqual(true, device.SyncOutJackConnected);
                     Assert.AreEqual(4, count.Calls("k4a_device_get_sync_jack"));
+
+                    device.Dispose();
+
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        _ = device.SyncInJackConnected;
+                    });
+
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        _ = device.SyncOutJackConnected;
+                    });
                 }
             }
         }
@@ -1061,6 +1224,14 @@ k4a_result_t k4a_device_get_version(
 
                     // A second device instance should not have the same cache
                     Assert.AreEqual(2, count.Calls("k4a_device_get_version"));
+
+                    device.Dispose();
+
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        _ = device.Version;
+                    });
+
                 }
             }
         }
@@ -1175,6 +1346,12 @@ k4a_result_t k4a_device_start_cameras(
 
                     Assert.AreEqual(2, count.Calls("k4a_device_start_cameras"));
 
+                    device.Dispose();
+
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        device.StartCameras(config);
+                    });
                 }
             }
         }
@@ -1198,6 +1375,13 @@ void k4a_device_stop_cameras(
                 {
                     device.StopCameras();
                     Assert.AreEqual(1, count.Calls("k4a_device_stop_cameras"));
+
+                    device.Dispose();
+
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        device.StopCameras();
+                    });
                 }
             }
         }
@@ -1223,6 +1407,13 @@ k4a_result_t k4a_device_start_imu(
                 {
                     device.StartImu();
                     Assert.AreEqual(1, count.Calls("k4a_device_start_imu"));
+
+                    device.Dispose();
+                    
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        device.StartImu();
+                    });
                 }
             }
         }
@@ -1274,6 +1465,13 @@ void k4a_device_stop_imu(
                 {
                     device.StopImu();
                     Assert.AreEqual(1, count.Calls("k4a_device_stop_imu"));
+
+                    device.Dispose();
+
+                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    {
+                        device.StopImu();
+                    });
                 }
             }
         }
