@@ -189,7 +189,7 @@ namespace Microsoft.AzureKinect
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_2d_to_2d(
             Calibration calibration,
-            Float2 source_point2d,
+            ref Float2 source_point2d,
             float source_depth,
             Calibration.DeviceType source_camera,
             Calibration.DeviceType target_camera,
@@ -200,7 +200,7 @@ namespace Microsoft.AzureKinect
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_2d_to_3d(
             Calibration calibration,
-            Float2 source_point2d,
+            ref Float2 source_point2d,
             float source_depth,
             Calibration.DeviceType source_camera,
             Calibration.DeviceType target_camera,
@@ -211,7 +211,7 @@ namespace Microsoft.AzureKinect
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_3d_to_2d(
             Calibration calibration,
-            Float3 source_point3d,
+            ref Float3 source_point3d,
             Calibration.DeviceType source_camera,
             Calibration.DeviceType target_camera,
             out Float2 target_point2d,
@@ -221,7 +221,7 @@ namespace Microsoft.AzureKinect
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_3d_to_3d(
             Calibration calibration,
-            Float3 source_point3d,
+            ref Float3 source_point3d,
             Calibration.DeviceType source_camera,
             Calibration.DeviceType target_camera,
             out Float3 target_point3d,

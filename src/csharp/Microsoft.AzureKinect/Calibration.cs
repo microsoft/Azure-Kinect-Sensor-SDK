@@ -94,7 +94,7 @@ namespace Microsoft.AzureKinect
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_2d(
                 this,
-                source_point2d,
+                ref source_point2d,
                 source_depth,
                 source_camera,
                 target_camera,
@@ -109,7 +109,7 @@ namespace Microsoft.AzureKinect
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_3d(
                 this,
-                source_point2d,
+                ref source_point2d,
                 source_depth,
                 source_camera,
                 target_camera,
@@ -125,7 +125,7 @@ namespace Microsoft.AzureKinect
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_2d(
                 this,
-                source_point3d,
+                ref source_point3d,
                 source_camera,
                 target_camera,
                 out Float2 target_point2d,
@@ -140,7 +140,7 @@ namespace Microsoft.AzureKinect
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_3d(
                 this,
-                source_point3d,
+                ref source_point3d,
                 source_camera,
                 target_camera,
                 out Float3 target_point3d,

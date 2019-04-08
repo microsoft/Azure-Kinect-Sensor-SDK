@@ -24,7 +24,7 @@ namespace Microsoft.AzureKinect.UnitTests
         }
 
         [Test]
-        void CalibrationGetFromRaw()
+        public void CalibrationGetFromRaw()
         {
             
         }
