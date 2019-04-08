@@ -63,6 +63,8 @@ void K4AWindowSet::ShowModeSelector(ViewType *viewType,
                                                    reinterpret_cast<int *>(viewType),
                                                    static_cast<int>(ViewType::PointCloudViewer),
                                                    pointCloudViewerEnabled && enabled);
+    ImGuiExtensions::K4AShowTooltip("Requires depth camera!", !pointCloudViewerEnabled);
+
     if (modeClicked && oldViewType != *viewType)
     {
         changeViewFn(*viewType);

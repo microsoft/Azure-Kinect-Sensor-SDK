@@ -76,7 +76,9 @@ PointCloudVisualizationResult K4APointCloudVisualizer::UpdateTexture(std::shared
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_viewControl.GetPerspectiveMatrix(m_projection, m_dimensions.Width, m_dimensions.Height);
+    const linmath::vec2 displayDimensions{ static_cast<float>(m_dimensions.Width),
+                                           static_cast<float>(m_dimensions.Height) };
+    m_viewControl.GetPerspectiveMatrix(m_projection, displayDimensions);
     m_viewControl.GetViewMatrix(m_view);
 
     m_pointCloudRenderer.UpdateViewProjection(m_view, m_projection);
@@ -92,14 +94,12 @@ PointCloudVisualizationResult K4APointCloudVisualizer::UpdateTexture(std::shared
     return PointCloudVisualizationResult::Success;
 }
 
-void K4APointCloudVisualizer::ProcessPositionalMovement(const ViewMovement direction, const float deltaTime)
+void K4APointCloudVisualizer::ProcessMouseMovement(const linmath::vec2 displayDimensions,
+                                                   const linmath::vec2 mousePos,
+                                                   const linmath::vec2 mouseDelta,
+                                                   MouseMovementType movementType)
 {
-    m_viewControl.ProcessPositionalMovement(direction, deltaTime);
-}
-
-void K4APointCloudVisualizer::ProcessMouseMovement(const float xoffset, const float yoffset)
-{
-    m_viewControl.ProcessMouseMovement(xoffset, yoffset);
+    m_viewControl.ProcessMouseMovement(displayDimensions, mousePos, mouseDelta, movementType);
 }
 
 void K4APointCloudVisualizer::ProcessMouseScroll(const float yoffset)
