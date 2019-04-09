@@ -12,7 +12,7 @@
 #define COLOR_CAMERA_IDENTIFIER L"vid_045e&pid_097d"
 #define MetadataId_FrameAlignInfo 0x80000001
 
-#pragma pack(push)
+#pragma pack(push, 1)
 typedef struct tag_CUSTOM_METADATA_FrameAlignInfo
 {
     KSCAMERA_METADATA_ITEMHEADER Header;
@@ -22,6 +22,7 @@ typedef struct tag_CUSTOM_METADATA_FrameAlignInfo
     ULONG PTSReference;
     ULONGLONG USBSoFSeqNum; // 8 bytes
     ULONGLONG USBSoFPTS;    // 8 bytes
+    ULONG Synced;
 } CUSTOM_METADATA_FrameAlignInfo, *PKSCAMERA_CUSTOM_METADATA_FrameAlignInfo;
 #pragma pack(pop)
 
