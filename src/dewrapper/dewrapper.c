@@ -32,6 +32,7 @@ typedef struct _dewrapper_context_t
     THREAD_HANDLE thread;
     LOCK_HANDLE lock;
     COND_HANDLE condition;
+    volatile bool thread_started;
     volatile bool thread_stop;
     k4a_result_t thread_start_result;
 
@@ -191,6 +192,7 @@ static int depth_engine_thread(void *param)
     // The Start routine is blocked waiting for this thread to complete startup, so we signal it here and share our
     // startup status.
     Lock(dewrapper->lock);
+    dewrapper->thread_started = true;
     dewrapper->thread_start_result = result;
     Condition_Post(dewrapper->condition);
     Unlock(dewrapper->lock);
@@ -519,6 +521,7 @@ k4a_result_t dewrapper_start(dewrapper_t dewrapper_handle,
         dewrapper->fps = config->camera_fps;
         dewrapper->depth_mode = config->depth_mode;
         dewrapper->thread_stop = false;
+        dewrapper->thread_started = false;
 
         THREADAPI_RESULT tresult = ThreadAPI_Create(&dewrapper->thread, depth_engine_thread, dewrapper);
         result = K4A_RESULT_FROM_BOOL(tresult == THREADAPI_OK);
@@ -527,9 +530,12 @@ k4a_result_t dewrapper_start(dewrapper_t dewrapper_handle,
         {
             Lock(dewrapper->lock);
             locked = true;
-            int infinite_timeout = 0;
-            COND_RESULT cond_result = Condition_Wait(dewrapper->condition, dewrapper->lock, infinite_timeout);
-            result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
+            if (!dewrapper->thread_started)
+            {
+                int infinite_timeout = 0;
+                COND_RESULT cond_result = Condition_Wait(dewrapper->condition, dewrapper->lock, infinite_timeout);
+                result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
+            }
         }
 
         if (K4A_SUCCEEDED(result) && K4A_FAILED(dewrapper->thread_start_result))
