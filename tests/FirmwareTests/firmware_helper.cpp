@@ -479,8 +479,12 @@ k4a_result_t open_firmware_device(firmware_t *firmware_handle)
 
     while (device_count == 0 && retry++ < 20)
     {
-        ThreadAPI_Sleep(500);
         K4A_TEST_VERIFY_SUCCEEDED(usb_cmd_get_device_count(&device_count));
+
+        if (device_count == 0)
+        {
+            ThreadAPI_Sleep(500);
+        }
     }
 
     K4A_TEST_VERIFY_LE(retry, 20);
@@ -500,6 +504,8 @@ k4a_result_t reset_device(firmware_t *firmware_handle)
     firmware_destroy(*firmware_handle);
     *firmware_handle = nullptr;
 
+    ThreadAPI_Sleep(1000);
+
     // Re-open the device to ensure it is ready for use.
     return TRACE_CALL(open_firmware_device(firmware_handle));
 }
@@ -510,12 +516,14 @@ k4a_result_t disconnect_device(firmware_t *firmware_handle)
 
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
 
-    ThreadAPI_Sleep(500);
+    ThreadAPI_Sleep(1000);
 
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(g_k4a_port_number));
 
     firmware_destroy(*firmware_handle);
     *firmware_handle = nullptr;
+
+    ThreadAPI_Sleep(1000);
 
     // Re-open the device to ensure it is ready for use.
     return TRACE_CALL(open_firmware_device(firmware_handle));

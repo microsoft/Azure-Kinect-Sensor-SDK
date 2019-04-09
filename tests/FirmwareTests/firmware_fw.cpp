@@ -18,7 +18,8 @@ protected:
     {
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, TRACE_CALL(setup_common_test()));
         const ::testing::TestInfo *const test_info = ::testing::UnitTest::GetInstance()->current_test_info();
-        printf("\nTest %s requires a connection exerciser.\n", test_info->name());
+        printf("\nStarting test %s. This requires a connection exerciser to be connected.\n", test_info->name());
+        LOG_INFO("Starting test %s.", test_info->name());
         LOG_INFO("Disconnecting the device");
         g_connection_exerciser->set_usb_port(0);
         ThreadAPI_Sleep(500);
@@ -78,7 +79,8 @@ protected:
 
     k4a_result_t connect_device()
     {
-        k4a_result_t result = g_connection_exerciser->set_usb_port(g_k4a_port_number);
+        k4a_result_t result = TRACE_CALL(g_connection_exerciser->set_usb_port(g_k4a_port_number));
+        ThreadAPI_Sleep(1000);
 
         if (K4A_SUCCEEDED(result))
         {
@@ -108,7 +110,7 @@ protected:
             firmware_handle = nullptr;
         }
 
-        k4a_result_t result = g_connection_exerciser->set_usb_port(0);
+        k4a_result_t result = TRACE_CALL(g_connection_exerciser->set_usb_port(0));
         if (K4A_SUCCEEDED(result))
         {
             ThreadAPI_Sleep(1000);
@@ -220,7 +222,7 @@ TEST_F(firmware_fw, DISABLED_update_timing)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
 
-    LOG_INFO("Updating the device to the Candidate firmware.");
+    printf("\n == Updating the device to the Candidate firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_candidate_firmware_buffer,
@@ -230,7 +232,7 @@ TEST_F(firmware_fw, DISABLED_update_timing)
 
     ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
-    LOG_INFO("Updating the device to the Test firmware.");
+    printf("\n == Updating the device to the Test firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_test_firmware_buffer,
