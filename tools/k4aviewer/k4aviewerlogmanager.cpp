@@ -26,15 +26,9 @@ K4AViewerLogManager &K4AViewerLogManager::Instance()
 
 K4AViewerLogManager::K4AViewerLogManager()
 {
-    try
+    if (k4a_set_debug_message_handler(&LoggerCallback, this, K4A_LOG_LEVEL_TRACE) != K4A_RESULT_SUCCEEDED)
     {
-        k4a_set_debug_message_handler(&LoggerCallback, this, K4A_LOG_LEVEL_TRACE);
-    }
-    catch (const k4a::error &e)
-    {
-        std::stringstream ss;
-        ss << "Failed to initialize K4A logging callback: " << e.what();
-        Log(K4A_LOG_LEVEL_ERROR, __FILE__, __LINE__, ss.str().c_str());
+        Log(K4A_LOG_LEVEL_ERROR, __FILE__, __LINE__, "Failed to initialize K4A logging!");
     }
 }
 
