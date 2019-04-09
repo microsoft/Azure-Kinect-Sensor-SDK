@@ -472,13 +472,14 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
 
     if (transformation_context->enable_gpu_optimization)
     {
-        if (K4A_FAILED(TRACE_CALL(transformation_depth_image_to_color_camera_validate_parameters(
+        if (K4A_BUFFER_RESULT_SUCCEEDED !=
+            TRACE_BUFFER_CALL(transformation_depth_image_to_color_camera_validate_parameters(
                 &transformation_context->calibration,
                 &transformation_context->depth_camera_xy_tables,
                 depth_image_data,
                 depth_image_descriptor,
                 transformed_depth_image_data,
-                transformed_depth_image_descriptor))))
+                transformed_depth_image_descriptor)))
         {
             return K4A_RESULT_FAILED;
         }
@@ -551,7 +552,8 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
 
     if (transformation_context->enable_gpu_optimization)
     {
-        if (K4A_FAILED(TRACE_CALL(transformation_color_image_to_depth_camera_validate_parameters(
+        if (K4A_BUFFER_RESULT_SUCCEEDED !=
+            TRACE_BUFFER_CALL(transformation_color_image_to_depth_camera_validate_parameters(
                 &transformation_context->calibration,
                 &transformation_context->depth_camera_xy_tables,
                 depth_image_data,
@@ -559,7 +561,7 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
                 color_image_data,
                 color_image_descriptor,
                 transformed_color_image_data,
-                transformed_color_image_descriptor))))
+                transformed_color_image_descriptor)))
         {
             return K4A_RESULT_FAILED;
         }

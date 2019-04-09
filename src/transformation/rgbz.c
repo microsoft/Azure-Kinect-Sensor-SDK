@@ -511,13 +511,14 @@ k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
     uint8_t *transformed_depth_image_data,
     k4a_transformation_image_descriptor_t *transformed_depth_image_descriptor)
 {
-    if (K4A_FAILED(TRACE_CALL(
+    if (K4A_BUFFER_RESULT_SUCCEEDED !=
+        TRACE_BUFFER_CALL(
             transformation_depth_image_to_color_camera_validate_parameters(calibration,
                                                                            xy_tables_depth_camera,
                                                                            depth_image_data,
                                                                            depth_image_descriptor,
                                                                            transformed_depth_image_data,
-                                                                           transformed_depth_image_descriptor))))
+                                                                           transformed_depth_image_descriptor)))
     {
         return K4A_BUFFER_RESULT_FAILED;
     }
@@ -735,7 +736,8 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
     uint8_t *transformed_color_image_data,
     k4a_transformation_image_descriptor_t *transformed_color_image_descriptor)
 {
-    if (K4A_FAILED(TRACE_CALL(
+    if (K4A_BUFFER_RESULT_SUCCEEDED !=
+        TRACE_BUFFER_CALL(
             transformation_color_image_to_depth_camera_validate_parameters(calibration,
                                                                            xy_tables_depth_camera,
                                                                            depth_image_data,
@@ -743,7 +745,7 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
                                                                            color_image_data,
                                                                            color_image_descriptor,
                                                                            transformed_color_image_data,
-                                                                           transformed_color_image_descriptor))))
+                                                                           transformed_color_image_descriptor)))
     {
         return K4A_BUFFER_RESULT_FAILED;
     }
