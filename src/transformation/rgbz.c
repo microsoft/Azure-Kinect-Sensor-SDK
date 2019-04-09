@@ -60,7 +60,7 @@ static bool transformation_compare_image_descriptors(const k4a_transformation_im
         descriptor1->height_pixels != descriptor2->height_pixels ||
         descriptor1->stride_bytes != descriptor2->stride_bytes)
     {
-        LOG_ERROR("Unexpected image descriptor. Expect width_pixels: %d, height_pixels: %d, stride_bytes: %d. "
+        LOG_ERROR("Unexpected image descriptor. Expected width_pixels: %d, height_pixels: %d, stride_bytes: %d. "
                   "Actual width_pixels: %d, height_pixels: %d, stride_bytes: %d.",
                   descriptor1->width_pixels,
                   descriptor1->height_pixels,
@@ -428,7 +428,7 @@ static k4a_result_t transformation_depth_to_color(k4a_transformation_rgbz_contex
     return K4A_RESULT_SUCCEEDED;
 }
 
-k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
+k4a_buffer_result_t transformation_depth_image_to_color_camera_validate_parameters(
     const k4a_calibration_t *calibration,
     const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
     const uint8_t *depth_image_data,
@@ -497,6 +497,28 @@ k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
     if (transformation_compare_image_descriptors(depth_image_descriptor, &expected_depth_image_descriptor) == false)
     {
         LOG_ERROR("Unexpected depth image descriptor, see details above.", 0);
+        return K4A_BUFFER_RESULT_FAILED;
+    }
+
+    return K4A_BUFFER_RESULT_SUCCEEDED;
+}
+
+k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
+    const k4a_calibration_t *calibration,
+    const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
+    const uint8_t *depth_image_data,
+    const k4a_transformation_image_descriptor_t *depth_image_descriptor,
+    uint8_t *transformed_depth_image_data,
+    k4a_transformation_image_descriptor_t *transformed_depth_image_descriptor)
+{
+    if (K4A_FAILED(TRACE_CALL(
+            transformation_depth_image_to_color_camera_validate_parameters(calibration,
+                                                                           xy_tables_depth_camera,
+                                                                           depth_image_data,
+                                                                           depth_image_descriptor,
+                                                                           transformed_depth_image_data,
+                                                                           transformed_depth_image_descriptor))))
+    {
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -610,7 +632,7 @@ static k4a_result_t transformation_color_to_depth(k4a_transformation_rgbz_contex
     return K4A_RESULT_SUCCEEDED;
 }
 
-k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
+k4a_buffer_result_t transformation_color_image_to_depth_camera_validate_parameters(
     const k4a_calibration_t *calibration,
     const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
     const uint8_t *depth_image_data,
@@ -697,6 +719,32 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
     if (transformation_compare_image_descriptors(color_image_descriptor, &expected_color_image_descriptor) == false)
     {
         LOG_ERROR("Unexpected color image descriptor, see details above.", 0);
+        return K4A_BUFFER_RESULT_FAILED;
+    }
+
+    return K4A_BUFFER_RESULT_SUCCEEDED;
+}
+
+k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
+    const k4a_calibration_t *calibration,
+    const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
+    const uint8_t *depth_image_data,
+    const k4a_transformation_image_descriptor_t *depth_image_descriptor,
+    const uint8_t *color_image_data,
+    const k4a_transformation_image_descriptor_t *color_image_descriptor,
+    uint8_t *transformed_color_image_data,
+    k4a_transformation_image_descriptor_t *transformed_color_image_descriptor)
+{
+    if (K4A_FAILED(TRACE_CALL(
+            transformation_color_image_to_depth_camera_validate_parameters(calibration,
+                                                                           xy_tables_depth_camera,
+                                                                           depth_image_data,
+                                                                           depth_image_descriptor,
+                                                                           color_image_data,
+                                                                           color_image_descriptor,
+                                                                           transformed_color_image_data,
+                                                                           transformed_color_image_descriptor))))
+    {
         return K4A_BUFFER_RESULT_FAILED;
     }
 
