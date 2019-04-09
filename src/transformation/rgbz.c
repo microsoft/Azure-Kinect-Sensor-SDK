@@ -486,10 +486,6 @@ k4a_buffer_result_t transformation_depth_image_to_color_camera_validate_paramete
         transformation_compare_image_descriptors(transformed_depth_image_descriptor,
                                                  &expected_transformed_depth_image_descriptor) == false)
     {
-        memcpy(transformed_depth_image_descriptor,
-               &expected_transformed_depth_image_descriptor,
-               sizeof(k4a_transformation_image_descriptor_t));
-
         if (transformed_depth_image_data == 0)
         {
             LOG_ERROR("Transformed depth image data is null.", 0);
@@ -693,10 +689,6 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_validate_paramete
         transformation_compare_image_descriptors(transformed_color_image_descriptor,
                                                  &expected_transformed_color_image_descriptor) == false)
     {
-        memcpy(transformed_color_image_descriptor,
-               &expected_transformed_color_image_descriptor,
-               sizeof(k4a_transformation_image_descriptor_t));
-
         if (transformed_color_image_data == 0)
         {
             LOG_ERROR("Transformed color image data is null.", 0);
@@ -895,8 +887,6 @@ transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_
     if (xyz_image_data == 0 ||
         transformation_compare_image_descriptors(xyz_image_descriptor, &expected_xyz_image_descriptor) == false)
     {
-        memcpy(xyz_image_descriptor, &expected_xyz_image_descriptor, sizeof(k4a_transformation_image_descriptor_t));
-
         if (xyz_image_data == 0)
         {
             LOG_ERROR("XYZ image data is null.", 0);
