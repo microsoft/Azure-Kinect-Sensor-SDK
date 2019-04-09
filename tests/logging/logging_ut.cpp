@@ -72,6 +72,7 @@ k4a_logging_message_cb_t logging_callback_function_not_used;
 void logging_callback_function(void *context, k4a_log_level_t level, const char *file, int line, const char *message)
 {
     ASSERT_TRUE(level >= K4A_LOG_LEVEL_CRITICAL && level <= K4A_LOG_LEVEL_TRACE);
+    ASSERT_TRUE(context != nullptr);
 
     (void)file;
     (void)line;

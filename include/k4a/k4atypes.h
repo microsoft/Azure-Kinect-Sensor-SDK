@@ -1070,7 +1070,9 @@ typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
  * or more critical than the level specified when calling \ref k4a_set_debug_message_handler() to register the callback.
  *
  * \remarks
- * The user must ensure synchronization between parallel calls to the k4a_logging_message_cb_t function.
+ * This callback can occur from any thread and blocks the calling thread. The k4a_logging_message_cb_t function user
+ * must protect it's logging resources from concurrent calls. All care should be made to minimize the amount of time
+ * locks are held.
  *
  * \xmlonly
  * <requirements>
