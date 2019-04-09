@@ -312,7 +312,7 @@ TEST_F(transformation_ut, transformation_2d_to_2d)
 
 TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
 {
-    k4a_transformation_t transformation_handle = transformation_create(&m_calibration, true);
+    k4a_transformation_t transformation_handle = transformation_create(&m_calibration, false);
     ASSERT_NE(transformation_handle, (k4a_transformation_t)NULL);
 
     int width = m_calibration.depth_camera_calibration.resolution_width;
@@ -467,7 +467,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
             k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_resolution, &calibration);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        k4a_transformation_t transformation_handle = transformation_create(&calibration, true);
+        k4a_transformation_t transformation_handle = transformation_create(&calibration, false);
         ASSERT_NE(transformation_handle, (k4a_transformation_t)NULL);
 
         k4a_result_t result_color_to_depth =
