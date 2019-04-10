@@ -114,24 +114,22 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_handle);
 
-/** TODO
- *
- * TODO
+/** Adds an attachment to the recording. Add attachments need to be added before the recording header is written.
  *
  * \param recording_handle
- * TODO
+ * The handle of a new recording, obtained by k4a_record_create().
  *
  * \param file_name
- * TODO
+ * The file name of the attachment to write.
  *
  * \param tag_name
- * TODO
+ * The tag name that linked to the attachment.
  *
  * \param buffer
- * TODO
+ * The attachment data buffer.
  *
  * \param buffer_size
- * TODO
+ * The size of the attachment data buffer.
  *
  * \headerfile record.h <k4arecord/record.h>
  *
@@ -153,27 +151,31 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
                                                         const uint8_t *buffer,
                                                         size_t buffer_size);
 
-/** TODO
+/** Adds custom video tracks to the recording.
  *
- * TODO
+ * The default tracks like depth track, ir track and color camera track will be created after the k4a_record_create
+ * API is called. Use this API to add additional custom video tracks to save your own custom data. The track needs
+ * to be added before the recording header is written.
  *
  * \param recording_handle
- * TODO
+ * The handle of a new recording, obtained by k4a_record_create().
  *
  * \param track_name
- * TODO
+ * The name of the custom video track to be added
  *
- * \param codec
- * TODO
+ * \param codec_id
+ * This will be a UTF8 null terminated string. The codec ID is a string that corresponds to the codec. Some of the
+ * existing formats are listed here: https://www.matroska.org/technical/specs/codecid/index.html. It can also be custom
+ * defined by the user.
  *
  * \param codec_private
- * TODO
+ * The codec private is codec-specific buffer that contains any required codec metadata that only known to the codec.
  *
  * \param codec_private_size
- * TODO
+ * The size of the codec private buffer.
  *
  * \param video_info
- * TODO
+ * The general information of the video track data.
  *
  * \headerfile record.h <k4arecord/record.h>
  *
@@ -191,29 +193,33 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
                                                          const char *track_name,
-                                                         const char *codec,
+                                                         const char *codec_id,
                                                          const uint8_t *codec_private,
                                                          size_t codec_private_size,
                                                          const k4a_record_video_info_t *video_info);
 
-/** TODO
+/** Adds custom subtitle tracks to the recording.
  *
- * TODO
+ * The default subtitle track like imu track will be created after API k4a_record_add_imu_track is called. Use this API
+ * to add additional custom subtitle tracks to save your own custom data. The track needs to be added before the
+ * recording header is written.
  *
  * \param recording_handle
- * TODO
+ * The handle of a new recording, obtained by k4a_record_create().
  *
  * \param track_name
- * TODO
+ * The name of the custom subtitle track to be added
  *
- * \param codec
- * TODO
+ * \param codec_id
+ * This will be a UTF8 null terminated string. The codec ID is a string that corresponds to the codec. Some of the
+ * existing formats are listed here: https://www.matroska.org/technical/specs/codecid/index.html. It can also be custom
+ * defined by the user.
  *
  * \param codec_private
- * TODO
+ * The codec private is codec-specific buffer that contains any required codec metadata that only known to the codec.
  *
  * \param codec_private_size
- * TODO
+ * The size of the codec private buffer.
  *
  * \headerfile record.h <k4arecord/record.h>
  *
@@ -231,25 +237,23 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t reco
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
                                                             const char *track_name,
-                                                            const char *codec,
+                                                            const char *codec_id,
                                                             const uint8_t *codec_private,
                                                             size_t codec_private_size);
 
-/** TODO
- *
- * TODO
+/** Adds tag that related to the track with given track name.
  *
  * \param recording_handle
- * TODO
+ * The handle of a new recording, obtained by k4a_record_create().
  *
  * \param track_name
- * TODO
+ * The track name that the tag is related to
  *
  * \param tag_name
- * TODO
+ * The name of the tag to write.
  *
  * \param tag_value
- * TODO
+ * The string value to store in the tag.
  *
  * \headerfile record.h <k4arecord/record.h>
  *
@@ -351,27 +355,24 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_ha
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording_handle, k4a_imu_sample_t imu_sample);
 
-/** TODO
+/** Writes a custom track data to file.
  *
- * TODO
+ * Custom track data must be written in increasing order of timestamp, and the file's header must already be written.
  *
  * \param recording_handle
- * TODO
+ * The handle of a new recording, obtained by k4a_record_create().
  *
  * \param track_name
- * TODO
+ * The name of the custom track that the data is going to write upon.
  *
- * \param timestamp_ns
- * TODO
+ * \param timestamp_usec
+ * The timestamp in microsecond of the custom track data.
  *
  * \param buffer
- * TODO
+ * The buffer of the custom track data.
  *
  * \param buffer_size
- * TODO
- *
- * \param copy_buffer
- * TODO
+ * The size of the custom track data.
  *
  * \headerfile record.h <k4arecord/record.h>
  *
@@ -389,10 +390,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
                                                                  const char *track_name,
-                                                                 uint64_t timestamp_ns,
+                                                                 uint64_t timestamp_usec,
                                                                  uint8_t *buffer,
-                                                                 uint32_t buffer_size,
-                                                                 bool copy_buffer);
+                                                                 size_t buffer_size);
 
 /** Flushes all pending recording data to disk.
  *

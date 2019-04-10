@@ -14,23 +14,31 @@ namespace k4arecord
 {
 typedef struct _read_block_t
 {
-    struct _track_reader_t *reader;
+    struct _track_reader_t *reader = nullptr;
     std::shared_ptr<libmatroska::KaxCluster> cluster;
-    libmatroska::KaxInternalBlock *block;
+    libmatroska::KaxInternalBlock *block = nullptr;
 
-    uint64_t timestamp_ns;
-    uint64_t sync_timestamp_ns;
-    int index;
+    uint64_t timestamp_ns = 0;
+    uint64_t sync_timestamp_ns = 0;
+    int index = 0;
 } read_block_t;
 
 typedef struct _track_reader_t
 {
-    libmatroska::KaxTrackEntry *track;
-    uint32_t width, height, stride;
-    k4a_image_format_t format;
-    uint64_t sync_delay_ns;
-    BITMAPINFOHEADER *bitmap_header;
+    libmatroska::KaxTrackEntry *track = nullptr;
+    uint64_t sync_delay_ns = 0;
+    std::string codec_id;
+    std::vector<uint8_t> codec_private;
     std::shared_ptr<read_block_t> current_block;
+    uint64_t frame_period_ns = 0;
+    track_type type = track_video;
+    std::vector<uint64_t> block_index_timestamp_usec_map;
+
+    // Fields specific to video track
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t stride = 0;
+    k4a_image_format_t format = K4A_IMAGE_FORMAT_CUSTOM;
 } track_reader_t;
 
 typedef struct _k4a_playback_context_t
@@ -63,6 +71,10 @@ typedef struct _k4a_playback_context_t
     track_reader_t ir_track;
 
     track_reader_t imu_track;
+
+    std::unordered_map<std::string, track_reader_t> custom_track_map;
+    std::unordered_map<uint64_t, std::string> track_number_name_map;
+
     int imu_sample_index;
 
     uint64_t segment_info_offset;
@@ -77,7 +89,17 @@ typedef struct _k4a_playback_context_t
 
 K4A_DECLARE_CONTEXT(k4a_playback_t, k4a_playback_context_t);
 
-std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlElement *parent);
+typedef struct _k4a_playback_data_block_context_t
+{
+    uint64_t timestamp_usec;
+    std::vector<uint8_t> data_block;
+} k4a_playback_data_block_context_t;
+
+K4A_DECLARE_CONTEXT(k4a_playback_data_block_t, k4a_playback_data_block_context_t);
+
+std::unique_ptr<EbmlElement> next_element(k4a_playback_context_t *context,
+                                          EbmlElement *parent,
+                                          int *upper_level = nullptr);
 k4a_result_t skip_element(k4a_playback_context_t *context, EbmlElement *element);
 
 void match_ebml_id(k4a_playback_context_t *context, EbmlId &id, uint64_t offset);
@@ -88,11 +110,15 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track);
 void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestamp_ns);
 
 libmatroska::KaxTrackEntry *get_track_by_name(k4a_playback_context_t *context, const char *name);
+track_reader_t *get_track_reader_by_name(k4a_playback_context_t *context, std::string track_name);
+k4a_result_t parse_custom_tracks(k4a_playback_context_t *context);
 libmatroska::KaxTrackEntry *get_track_by_tag(k4a_playback_context_t *context, const char *tag_name);
 libmatroska::KaxTag *get_tag(k4a_playback_context_t *context, const char *name);
 std::string get_tag_string(libmatroska::KaxTag *tag);
 libmatroska::KaxAttached *get_attachment_by_name(k4a_playback_context_t *context, const char *file_name);
 libmatroska::KaxAttached *get_attachment_by_tag(k4a_playback_context_t *context, const char *tag_name);
+
+k4a_result_t parse_all_timestamps(k4a_playback_context_t *context);
 
 k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset);
 std::shared_ptr<libmatroska::KaxCluster> seek_timestamp(k4a_playback_context_t *context, uint64_t timestamp_ns);
@@ -111,7 +137,8 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
 k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next);
 
 // Template helper functions
-template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElement *element)
+template<typename T>
+T *read_element(k4a_playback_context_t *context, EbmlElement *element, ScopeMode readFully = SCOPE_ALL_DATA)
 {
     try
     {
@@ -119,7 +146,7 @@ template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElemen
         EbmlElement *dummy = nullptr;
 
         T *read_element = static_cast<T *>(element);
-        read_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true);
+        read_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true, readFully);
         return read_element;
     }
     catch (std::ios_base::failure e)

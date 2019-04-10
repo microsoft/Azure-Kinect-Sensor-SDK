@@ -287,3 +287,53 @@ bool validate_imu_sample(k4a_imu_sample_t imu_sample, uint64_t timestamp_us)
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
+
+template<typename T> void write_value(const T &value, std::vector<uint8_t> *stream)
+{
+    const uint8_t *valueBegin = reinterpret_cast<const uint8_t *>(&value);
+    const uint8_t *valueEnd = valueBegin + sizeof(value);
+    stream->insert(stream->end(), valueBegin, valueEnd);
+}
+
+std::vector<uint8_t> create_test_custom_track_block(uint64_t timestamp_us)
+{
+    std::srand(static_cast<uint32_t>(timestamp_us));
+
+    uint32_t item_number = static_cast<uint32_t>(std::rand()) % 100;
+    std::vector<uint8_t> track_data;
+    write_value(item_number, &track_data);
+    for (uint32_t i = 0; i < item_number; i++)
+    {
+        write_value(static_cast<uint32_t>(std::rand()), &track_data);
+    }
+
+    return track_data;
+}
+
+bool validate_custom_track_block(const uint8_t *block, size_t block_size, uint64_t timestamp_us)
+{
+    std::srand(static_cast<uint32_t>(timestamp_us));
+    uint32_t expected_item_number = static_cast<uint32_t>(std::rand()) % 100;
+
+    if (block_size != (expected_item_number + 1) * sizeof(uint32_t))
+    {
+        return false;
+    }
+
+    const uint32_t *block_data = reinterpret_cast<const uint32_t *>(block);
+    if (*block_data++ != expected_item_number)
+    {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < expected_item_number; i++)
+    {
+        uint32_t expected_value = static_cast<uint32_t>(std::rand());
+        if (block_data[i] != expected_value)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}

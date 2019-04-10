@@ -12,6 +12,7 @@
 #include <list>
 #include <fstream>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/condition.h>
@@ -123,6 +124,12 @@ constexpr uint16_t swap_bytes_16(uint16_t input)
 
 namespace k4arecord
 {
+// Define all the default track names here
+const std::string depth_track_name = "DEPTH";
+const std::string ir_track_name = "IR";
+const std::string color_track_name = "COLOR";
+const std::string imu_track_name = "IMU";
+
 /**
  * EBML IO handler compatible with file sizes larger than 32-bit
  */
