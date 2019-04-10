@@ -13,6 +13,7 @@
 #include <k4ainternal/logging.h>
 
 #include <turbojpeg.h>
+#include <libyuv.h>
 
 using namespace LIBMATROSKA_NAMESPACE;
 
@@ -1549,7 +1550,9 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
     int out_width = (int)in_block->reader->width;
     int out_height = (int)in_block->reader->height;
     int out_stride = (int)in_block->reader->stride;
+    assert(out_height >= 0 && out_width >= 0);
 
+    auto start = std::chrono::high_resolution_clock::now();
     switch (target_format)
     {
     case K4A_IMAGE_FORMAT_DEPTH16:
@@ -1585,44 +1588,125 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
         {
             // No format conversion is required, just copy the buffer.
             buffer = new std::vector<uint8_t>(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
-            break;
-        }
-        else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_MJPG)
-        {
-            out_stride = out_width * 4 * (int)sizeof(uint8_t);
-            assert(out_height >= 0 && out_stride >= 0);
-            buffer = new std::vector<uint8_t>((size_t)(out_height * out_stride));
-
-            auto start = std::chrono::high_resolution_clock::now();
-            tjhandle turbojpeg_handle = tjInitDecompress();
-            if (tjDecompress2(turbojpeg_handle,
-                              data_buffer.Buffer(),
-                              data_buffer.Size(),
-                              buffer->data(),
-                              out_width,
-                              0, // pitch
-                              out_height,
-                              TJPF_BGRA,
-                              TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE) != 0)
-            {
-                LOG_ERROR("Failed to decompress jpeg image for conversion.", 0);
-                result = K4A_RESULT_FAILED;
-            }
-            (void)tjDestroy(turbojpeg_handle);
-            auto delta = std::chrono::high_resolution_clock::now() - start;
-            std::cout << "Decompress time: " << (delta.count() / 1000) << " usec" << std::endl;
         }
         else
         {
-            __debugbreak();
-            LOG_ERROR("Unsupported image format conversion: %d to %d", in_block->reader->format, target_format);
-            result = K4A_RESULT_FAILED;
+            // Convert the buffer to BGRA format first
+            out_stride = out_width * 4 * (int)sizeof(uint8_t);
+            buffer = new std::vector<uint8_t>((size_t)(out_height * out_stride));
+
+            if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_MJPG)
+            {
+                tjhandle turbojpeg_handle = tjInitDecompress();
+                if (tjDecompress2(turbojpeg_handle,
+                                  data_buffer.Buffer(),
+                                  data_buffer.Size(),
+                                  buffer->data(),
+                                  out_width,
+                                  0, // pitch
+                                  out_height,
+                                  TJPF_BGRA,
+                                  TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE) != 0)
+                {
+                    LOG_ERROR("Failed to decompress jpeg image to BGRA format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
+                (void)tjDestroy(turbojpeg_handle);
+            }
+            else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_NV12)
+            {
+                // The endianness of libyuv's ARGB is opposite our BGRA format. They are the same byte order.
+                if (libyuv::NV12ToARGB(data_buffer.Buffer(),
+                                       (int)in_block->reader->stride,
+                                       data_buffer.Buffer() + (out_height * (int)in_block->reader->stride),
+                                       (int)in_block->reader->stride,
+                                       buffer->data(),
+                                       out_stride,
+                                       out_width,
+                                       out_height) != 0)
+                {
+                    LOG_ERROR("Failed to convert NV12 image to BGRA format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
+            }
+            else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_YUY2)
+            {
+                // The endianness of libyuv's ARGB is opposite our BGRA format. They are the same byte order.
+                if (libyuv::YUY2ToARGB(data_buffer.Buffer(),
+                                       (int)in_block->reader->stride,
+                                       buffer->data(),
+                                       out_stride,
+                                       out_width,
+                                       out_height) != 0)
+                {
+                    LOG_ERROR("Failed to convert YUY2 image to BGRA format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
+            }
+            else
+            {
+                LOG_ERROR("Unsupported image format conversion: %d to %d", in_block->reader->format, target_format);
+                result = K4A_RESULT_FAILED;
+            }
+
+            if (K4A_SUCCEEDED(result) && target_format != K4A_IMAGE_FORMAT_COLOR_BGRA32)
+            {
+                auto bgra_buffer = buffer;
+                buffer = NULL;
+                int bgra_stride = out_stride;
+
+                if (target_format == K4A_IMAGE_FORMAT_COLOR_NV12)
+                {
+                    out_stride = out_width;
+                    size_t y_plane_size = (size_t)(out_height * out_stride);
+                    // Round up the size of the UV plane in case the resolution is odd.
+                    size_t uv_plane_size = (size_t)(out_height * out_stride + 1) / 2;
+                    buffer = new std::vector<uint8_t>(y_plane_size + uv_plane_size);
+
+                    if (libyuv::ARGBToNV12(bgra_buffer->data(),
+                                           bgra_stride,
+                                           buffer->data(),
+                                           out_stride,
+                                           buffer->data() + y_plane_size,
+                                           out_stride,
+                                           out_width,
+                                           out_height) != 0)
+                    {
+                        LOG_ERROR("Failed to convert BGRA image to NV12 format.", 0);
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+                else if (target_format == K4A_IMAGE_FORMAT_COLOR_YUY2)
+                {
+                    out_stride = out_width * 2;
+                    buffer = new std::vector<uint8_t>((size_t)(out_height * out_stride));
+
+                    if (libyuv::ARGBToYUY2(
+                            bgra_buffer->data(), bgra_stride, buffer->data(), out_stride, out_width, out_height) != 0)
+                    {
+                        LOG_ERROR("Failed to convert BGRA image to YUY2 format.", 0);
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+                else
+                {
+                    LOG_ERROR("Unsupported image format conversion: %d to %d", in_block->reader->format, target_format);
+                    result = K4A_RESULT_FAILED;
+                }
+
+                if (bgra_buffer != NULL)
+                {
+                    delete bgra_buffer;
+                }
+            }
         }
         break;
     default:
         LOG_ERROR("Unknown target image format: %d", target_format);
         result = K4A_RESULT_FAILED;
     }
+    auto delta = std::chrono::high_resolution_clock::now() - start;
+    std::cout << "Format conversion time: " << (delta.count() / 1000) << " usec" << std::endl;
 
     if (K4A_SUCCEEDED(result) && buffer != NULL)
     {

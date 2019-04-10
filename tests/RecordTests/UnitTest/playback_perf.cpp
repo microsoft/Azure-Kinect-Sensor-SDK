@@ -70,7 +70,7 @@ TEST_F(playback_perf, test_1000_reads_forward)
     }
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    k4a_playback_set_color_conversion(handle, K4A_IMAGE_FORMAT_COLOR_BGRA32);
+    k4a_playback_set_color_conversion(handle, K4A_IMAGE_FORMAT_COLOR_YUY2);
 
     {
         k4a_capture_t capture = NULL;
