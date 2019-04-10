@@ -49,6 +49,12 @@ public:
         }
     }
 
+    void ClearData() override
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_lastCapture.reset();
+    }
+
     void NotifyTermination() override
     {
         m_failed = true;

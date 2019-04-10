@@ -3,7 +3,7 @@
 
 // Associated header
 //
-#include "k4aimudatagraph.h"
+#include "k4aimugraph.h"
 
 // System headers
 //
@@ -41,15 +41,14 @@ constexpr float MinHeight = 50.f;
 
 } // namespace
 
-K4AImuDataGraph::K4AImuDataGraph(std::string &&title,
-                                 std::string &&xLabel,
-                                 std::string &&yLabel,
-                                 std::string &&zLabel,
-                                 std::string &&units,
-                                 const float minRange,
-                                 const float maxRange,
-                                 const float defaultRange,
-                                 const float scaleFactor) :
+K4AImuGraph::K4AImuGraph(std::string &&title,
+                         std::string &&xLabel,
+                         std::string &&yLabel,
+                         std::string &&zLabel,
+                         std::string &&units,
+                         const float minRange,
+                         const float maxRange,
+                         const float defaultRange) :
     m_title(std::move(title)),
     m_xLabel(std::move(xLabel)),
     m_yLabel(std::move(yLabel)),
@@ -58,38 +57,14 @@ K4AImuDataGraph::K4AImuDataGraph(std::string &&title,
     m_minRange(minRange),
     m_maxRange(maxRange),
     m_currentRange(-defaultRange),
-    m_scaleFactor(scaleFactor),
     m_scaleTitle(GetScaleTitle(m_title))
 {
 }
 
-void K4AImuDataGraph::AddSample(const k4a_float3_t &sample, const uint64_t timestampUs)
-{
-    // We want to average a few samples together to slow down the graph enough that it's readable
-    //
-    m_nextSampleAccumulator.xyz.x += sample.xyz.x;
-    m_nextSampleAccumulator.xyz.y += sample.xyz.y;
-    m_nextSampleAccumulator.xyz.z += sample.xyz.z;
-    ++m_nextSampleAccumulatorCount;
-
-    if (m_nextSampleAccumulatorCount >= DataSamplesPerGraphSample)
-    {
-        m_offset = (m_offset + 1) % m_x.size();
-
-        m_x[m_offset] = m_nextSampleAccumulator.xyz.x / m_nextSampleAccumulatorCount * m_scaleFactor;
-        m_y[m_offset] = m_nextSampleAccumulator.xyz.y / m_nextSampleAccumulatorCount * m_scaleFactor;
-        m_z[m_offset] = m_nextSampleAccumulator.xyz.z / m_nextSampleAccumulatorCount * m_scaleFactor;
-
-        m_lastTimestamp = timestampUs;
-
-        m_nextSampleAccumulator.xyz.x = 0.f;
-        m_nextSampleAccumulator.xyz.y = 0.f;
-        m_nextSampleAccumulator.xyz.z = 0.f;
-        m_nextSampleAccumulatorCount = 0;
-    }
-}
-
-void K4AImuDataGraph::Show(ImVec2 maxSize)
+void K4AImuGraph::Show(ImVec2 maxSize,
+                       const K4AImuGraphData::AccumulatorArray &graphData,
+                       int graphFrontIdx,
+                       uint64_t timestamp)
 {
     // One line for the graph type (accelerometer/gyro), one for the timestamp
     //
@@ -116,7 +91,7 @@ void K4AImuDataGraph::Show(ImVec2 maxSize)
 
     ImGui::BeginGroup();
     ImGui::Text("%s", m_title.c_str());
-    ImGui::Text("Time (us): %llu", static_cast<long long unsigned int>(m_lastTimestamp));
+    ImGui::Text("Time (us): %llu", static_cast<long long unsigned int>(timestamp));
 
     // We use negative min/max ranges to reverse the direction of the slider, which makes it
     // grow when you drag up, which is a bit more intuitive.
@@ -130,19 +105,23 @@ void K4AImuDataGraph::Show(ImVec2 maxSize)
     ImGui::SameLine();
 
     ImGui::BeginGroup();
-    PlotGraph(m_xLabel.c_str(), m_x, graphSize);
-    PlotGraph(m_yLabel.c_str(), m_y, graphSize);
-    PlotGraph(m_zLabel.c_str(), m_z, graphSize);
+    PlotGraph(m_xLabel.c_str(), graphSize, graphData, graphFrontIdx, 0);
+    PlotGraph(m_yLabel.c_str(), graphSize, graphData, graphFrontIdx, 1);
+    PlotGraph(m_zLabel.c_str(), graphSize, graphData, graphFrontIdx, 2);
     ImGui::EndGroup();
     ImGui::EndGroup();
 }
 
-void K4AImuDataGraph::PlotGraph(const char *name, const std::array<float, GraphSampleCount> &data, ImVec2 graphSize)
+void K4AImuGraph::PlotGraph(const char *name,
+                            ImVec2 graphSize,
+                            const K4AImuGraphData::AccumulatorArray &graphData,
+                            int graphFrontIdx,
+                            int offset)
 {
     std::stringstream nameBuilder;
     nameBuilder << "##" << name;
 
-    const float currentData = data[m_offset];
+    const float currentData = graphData[static_cast<size_t>(graphFrontIdx)].v[offset];
 
     std::string label;
     if (K4AViewerSettingsManager::Instance().GetShowInfoPane())
@@ -175,10 +154,23 @@ void K4AImuDataGraph::PlotGraph(const char *name, const std::array<float, GraphS
         label = labelBuilder.str();
     }
 
+    struct SelectorData
+    {
+        const k4a_float3_t *data;
+        int offset;
+    } selectorData;
+
+    selectorData.data = &graphData[0];
+    selectorData.offset = offset;
+
     ImGui::PlotLines(nameBuilder.str().c_str(),
-                     &data[0],
-                     static_cast<int>(data.size()),
-                     static_cast<int>(m_offset),
+                     [](void *data, int idx) {
+                         auto *sd = reinterpret_cast<SelectorData *>(data);
+                         return sd->data[idx].v[sd->offset];
+                     },
+                     &selectorData,
+                     static_cast<int>(graphData.size()),
+                     graphFrontIdx,
                      label.c_str(),
                      m_currentRange,
                      -m_currentRange,

@@ -43,6 +43,13 @@ public:
         return m_count == 0;
     }
 
+    void Clear()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_count = 0;
+        m_buffer.fill(T());
+    }
+
     bool Full()
     {
         return m_buffer.size() == m_count;

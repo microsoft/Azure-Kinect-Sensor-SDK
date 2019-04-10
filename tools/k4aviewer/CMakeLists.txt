@@ -11,8 +11,8 @@ set(SOURCE_FILES
     k4adevicedockcontrol.cpp
     k4afilepicker.cpp
     k4aimguiextensions.cpp
-    k4aimudatagraph.cpp
-    k4aimusamplesource.cpp
+    k4aimugraph.cpp
+    k4aimugraphdatagenerator.cpp
     k4aimuwindow.cpp
     k4alogdockcontrol.cpp
     k4amicrophone.cpp
