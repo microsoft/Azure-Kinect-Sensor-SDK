@@ -109,7 +109,7 @@ void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestam
 
 libmatroska::KaxTrackEntry *get_track_by_name(k4a_playback_context_t *context, const char *name);
 track_reader_t *get_track_reader_by_name(k4a_playback_context_t *context, std::string track_name);
-k4a_result_t get_all_custom_tracks(k4a_playback_context_t *context);
+k4a_result_t parse_custom_tracks(k4a_playback_context_t *context);
 libmatroska::KaxTrackEntry *get_track_by_tag(k4a_playback_context_t *context, const char *tag_name);
 libmatroska::KaxTag *get_tag(k4a_playback_context_t *context, const char *name);
 std::string get_tag_string(libmatroska::KaxTag *tag);

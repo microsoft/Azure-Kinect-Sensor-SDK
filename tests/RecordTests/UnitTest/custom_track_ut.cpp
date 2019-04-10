@@ -205,42 +205,42 @@ TEST_F(custom_track_ut, read_track_information)
 
     // Read video track information
     k4a_record_video_info_t video_info;
-    result = k4a_playback_get_track_video_info(handle, "DEPTH", &video_info);
+    result = k4a_playback_track_get_video_info(handle, "DEPTH", &video_info);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(video_info.width, test_depth_width);
     ASSERT_EQ(video_info.height, test_depth_height);
     ASSERT_EQ(video_info.frame_rate, test_camera_fps);
 
-    result = k4a_playback_get_track_video_info(handle, "IR", &video_info);
+    result = k4a_playback_track_get_video_info(handle, "IR", &video_info);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(video_info.width, test_depth_width);
     ASSERT_EQ(video_info.height, test_depth_height);
     ASSERT_EQ(video_info.frame_rate, test_camera_fps);
 
-    result = k4a_playback_get_track_video_info(handle, "CUSTOM_TRACK_1", &video_info);
+    result = k4a_playback_track_get_video_info(handle, "CUSTOM_TRACK_1", &video_info);
     ASSERT_EQ(result, K4A_RESULT_FAILED);
 
     // Read codec id
     size_t data_size = 0;
     std::vector<char> codec_id;
-    ASSERT_EQ(k4a_playback_get_track_codec_id(handle, "DEPTH", nullptr, &data_size), K4A_BUFFER_RESULT_TOO_SMALL);
+    ASSERT_EQ(k4a_playback_track_get_codec_id(handle, "DEPTH", nullptr, &data_size), K4A_BUFFER_RESULT_TOO_SMALL);
     codec_id.resize(data_size);
-    ASSERT_EQ(k4a_playback_get_track_codec_id(handle, "DEPTH", codec_id.data(), &data_size),
+    ASSERT_EQ(k4a_playback_track_get_codec_id(handle, "DEPTH", codec_id.data(), &data_size),
               K4A_BUFFER_RESULT_SUCCEEDED);
     ASSERT_STREQ(reinterpret_cast<char *>(codec_id.data()), "V_MS/VFW/FOURCC");
 
-    ASSERT_EQ(k4a_playback_get_track_codec_id(handle, "CUSTOM_TRACK_1", nullptr, &data_size),
+    ASSERT_EQ(k4a_playback_track_get_codec_id(handle, "CUSTOM_TRACK_1", nullptr, &data_size),
               K4A_BUFFER_RESULT_TOO_SMALL);
     codec_id.resize(data_size);
-    ASSERT_EQ(k4a_playback_get_track_codec_id(handle, "CUSTOM_TRACK_1", codec_id.data(), &data_size),
+    ASSERT_EQ(k4a_playback_track_get_codec_id(handle, "CUSTOM_TRACK_1", codec_id.data(), &data_size),
               K4A_BUFFER_RESULT_SUCCEEDED);
     ASSERT_STREQ(reinterpret_cast<char *>(codec_id.data()), "S_K4A/CUSTOM_TRACK_1");
 
     // Read private codec
     std::vector<uint8_t> private_codec;
-    ASSERT_EQ(k4a_playback_get_track_private_codec(handle, "DEPTH", nullptr, &data_size), K4A_BUFFER_RESULT_TOO_SMALL);
+    ASSERT_EQ(k4a_playback_track_get_codec_private(handle, "DEPTH", nullptr, &data_size), K4A_BUFFER_RESULT_TOO_SMALL);
     private_codec.resize(data_size);
-    ASSERT_EQ(k4a_playback_get_track_private_codec(handle, "DEPTH", private_codec.data(), &data_size),
+    ASSERT_EQ(k4a_playback_track_get_codec_private(handle, "DEPTH", private_codec.data(), &data_size),
               K4A_BUFFER_RESULT_SUCCEEDED);
 
     const BITMAPINFOHEADER *depth_codec_header = reinterpret_cast<const BITMAPINFOHEADER *>(private_codec.data());
@@ -250,7 +250,7 @@ TEST_F(custom_track_ut, read_track_information)
     ASSERT_EQ(depth_codec_header->biCompression, static_cast<uint32_t>(0x32595559)); // YUY2 little endian
     ASSERT_EQ(depth_codec_header->biSizeImage, sizeof(uint16_t) * test_depth_width * test_depth_height);
 
-    ASSERT_EQ(k4a_playback_get_track_private_codec(handle, "CUSTOM_TRACK_1", nullptr, &data_size),
+    ASSERT_EQ(k4a_playback_track_get_codec_private(handle, "CUSTOM_TRACK_1", nullptr, &data_size),
               K4A_BUFFER_RESULT_TOO_SMALL);
     ASSERT_EQ(data_size, 0);
 
@@ -290,6 +290,18 @@ TEST_F(custom_track_ut, read_custom_track_data)
     stream_result = k4a_playback_get_next_data_block(handle, "CUSTOM_TRACK_1", &data_block);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
 
+    // After getting K4A_STREAM_RESULT_EOF, calling k4a_playback_get_previous_data_block is expected to get the last
+    // frame
+    stream_result = k4a_playback_get_previous_data_block(handle, "CUSTOM_TRACK_1", &data_block);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    uint64_t last_frame_expected_timestamp_usec = test_timestamp_delta_usec * (max_frame_index - 1);
+    uint64_t timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
+    ASSERT_EQ(timestamp_usec, last_frame_expected_timestamp_usec);
+    size_t block_size = k4a_playback_data_block_get_buffer_size(data_block);
+    uint8_t *block_buffer = k4a_playback_data_block_get_buffer(data_block);
+    ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
+    k4a_playback_data_block_release(data_block);
+
     k4a_playback_close(handle);
 }
 
@@ -300,13 +312,13 @@ TEST_F(custom_track_ut, read_custom_track_frame_information)
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
     // Read track total frame numbers
-    size_t custom_track_frame_num = k4a_playback_get_track_frame_count(handle, "CUSTOM_TRACK_1");
+    size_t custom_track_frame_num = k4a_playback_track_get_frame_count(handle, "CUSTOM_TRACK_1");
     ASSERT_EQ(custom_track_frame_num, max_frame_index - custom_track_start_index);
 
-    size_t depth_frame_num = k4a_playback_get_track_frame_count(handle, "DEPTH");
+    size_t depth_frame_num = k4a_playback_track_get_frame_count(handle, "DEPTH");
     ASSERT_EQ(depth_frame_num, max_frame_index);
 
-    size_t frame_num = k4a_playback_get_track_frame_count(handle, "NON_EXISTED_TRACK");
+    size_t frame_num = k4a_playback_track_get_frame_count(handle, "NON_EXISTED_TRACK");
     ASSERT_EQ(frame_num, 0);
 
     uint64_t expected_timestamp_usec = 0;
@@ -315,22 +327,22 @@ TEST_F(custom_track_ut, read_custom_track_frame_information)
     {
         if (i >= custom_track_start_index)
         {
-            timestamp_usec = k4a_playback_get_track_frame_usec_by_index(handle,
+            timestamp_usec = k4a_playback_track_get_frame_usec_by_index(handle,
                                                                         "CUSTOM_TRACK_1",
                                                                         i - custom_track_start_index);
             ASSERT_EQ(timestamp_usec, static_cast<int64_t>(expected_timestamp_usec));
         }
 
-        timestamp_usec = k4a_playback_get_track_frame_usec_by_index(handle, "IR", i);
+        timestamp_usec = k4a_playback_track_get_frame_usec_by_index(handle, "IR", i);
         ASSERT_EQ(timestamp_usec, static_cast<int64_t>(expected_timestamp_usec));
 
         expected_timestamp_usec += test_timestamp_delta_usec;
     }
 
-    timestamp_usec = k4a_playback_get_track_frame_usec_by_index(handle, "IR", 100);
+    timestamp_usec = k4a_playback_track_get_frame_usec_by_index(handle, "IR", 100);
     ASSERT_EQ(timestamp_usec, -1);
 
-    timestamp_usec = k4a_playback_get_track_frame_usec_by_index(handle, "NON_EXISTED_TRACK", 0);
+    timestamp_usec = k4a_playback_track_get_frame_usec_by_index(handle, "NON_EXISTED_TRACK", 0);
     ASSERT_EQ(timestamp_usec, -1);
 
     k4a_playback_close(handle);

@@ -96,6 +96,11 @@ populate_bitmap_info_header(BITMAPINFOHEADER *header, uint64_t width, uint64_t h
         header->biCompression = 0x67363162; // b16g (16 bit grayscale, big endian)
         header->biSizeImage = sizeof(uint8_t) * header->biWidth * header->biHeight * 2;
         break;
+    case K4A_IMAGE_FORMAT_COLOR_BGRA32:
+        header->biBitCount = 32;
+        header->biCompression = 0x41524742; // BGRA
+        header->biSizeImage = sizeof(uint8_t) * header->biWidth * header->biHeight * 4;
+        break;
     default:
         logger_error(LOGGER_RECORD, "Unsupported color format specified in recording: %d", format);
         return K4A_RESULT_FAILED;
