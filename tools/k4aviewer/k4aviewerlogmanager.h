@@ -7,6 +7,7 @@
 // System headers
 //
 #include <list>
+#include <memory>
 #include <mutex>
 #include <sstream>
 

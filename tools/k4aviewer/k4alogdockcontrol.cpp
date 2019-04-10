@@ -29,7 +29,7 @@ constexpr static size_t MaxLines = 10000;
 // Get a string representation of a log level suitable for printing
 // in the log box (fields are fixed-width)
 //
-constexpr char *LogLevelToString(k4a_log_level_t logLevel)
+const char *LogLevelToString(k4a_log_level_t logLevel)
 {
     switch(logLevel)
     {
