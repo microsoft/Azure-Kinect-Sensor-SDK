@@ -65,7 +65,7 @@ private:
     };
 
     std::shared_ptr<LogListener> m_logListener;
-    std::array<char, 100> m_filterString = { '\0' };
+    std::array<char, 100> m_filterString = { { '\0' } };
     bool m_showLineInfo = false;
 };
 
