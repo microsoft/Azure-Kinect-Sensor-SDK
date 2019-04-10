@@ -1,5 +1,11 @@
 ## Change Log
 
+### v1.1.0
+
+* Add new API's k4a_image_get_device_timestamp_usec(), k4a_image_get_system_timestamp_usec(), 
+k4a_image_set_device_timestamp_usec(), k4a_image_set_system_timestamp_usec(), and k4a_image_set_exposure_usec().
+* Deprecated API's k4a_image_get_timestamp_usec(), k4a_image_set_timestamp_usec(), and k4a_image_set_exposure_time_usec().
+
 ### v1.0.0
 
 * Breaking Change to pre-production devices, update container ID & serial number

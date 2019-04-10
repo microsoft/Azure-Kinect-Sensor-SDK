@@ -1056,10 +1056,22 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
 
                 if (K4A_SUCCEEDED(result))
                 {
-                    image_set_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(pFrameContext->GetPTSTime()));
+                    // Read the QPC value MF attached to the sample when it was received.
+                    unsigned long long mf_device_time_100nsec = 0;
+                    if (FAILED(hr = pSample->GetUINT64(MFSampleExtension_DeviceTimestamp, &mf_device_time_100nsec)))
+                    {
+                        result = K4A_RESULT_FAILED;
+                        LOG_ERROR("IMFSample::GetUINT64(MFSampleExtension_DeviceTimestamp) failed; hr=0x%08X", hr);
+                    }
+                    image_set_system_timestamp_nsec(image, mf_device_time_100nsec * 100);
+                }
+
+                if (K4A_SUCCEEDED(result))
+                {
+                    image_set_device_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(pFrameContext->GetPTSTime()));
 
                     // Set metadata
-                    image_set_exposure_time_usec(image, pFrameContext->GetExposureTime());
+                    image_set_exposure_usec(image, pFrameContext->GetExposureTime());
                     image_set_white_balance(image, pFrameContext->GetWhiteBalance());
                     image_set_iso_speed(image, pFrameContext->GetISOSpeed());
 

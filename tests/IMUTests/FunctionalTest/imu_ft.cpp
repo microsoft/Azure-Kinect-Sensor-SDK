@@ -108,17 +108,17 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     tickcounter_get_current_ms(tick_count, &start_ms);
     timeout_ms = 2000;
 
-    uint64_t last_gyro_ts = 0;
-    uint64_t last_acc_ts = 0;
+    uint64_t last_gyro_dev_ts = 0;
+    uint64_t last_acc_dev_ts = 0;
     while (stream_count > 0)
     {
         // get frames as available
         ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_imu_sample(device, &imu_sample, timeout_ms));
 
-        ASSERT_GT(imu_sample.acc_timestamp_usec, last_acc_ts);
-        last_acc_ts = imu_sample.acc_timestamp_usec;
-        ASSERT_GT(imu_sample.gyro_timestamp_usec, last_gyro_ts);
-        last_gyro_ts = imu_sample.gyro_timestamp_usec;
+        ASSERT_GT(imu_sample.acc_timestamp_usec, last_acc_dev_ts);
+        last_acc_dev_ts = imu_sample.acc_timestamp_usec;
+        ASSERT_GT(imu_sample.gyro_timestamp_usec, last_gyro_dev_ts);
+        last_gyro_dev_ts = imu_sample.gyro_timestamp_usec;
 
         ASSERT_NE(imu_sample.temperature, 0);
         ASSERT_EQ(true, is_float_in_range(imu_sample.acc_sample.xyz.x, MIN_ACC_READING, MAX_ACC_READING, "ACC_X"));

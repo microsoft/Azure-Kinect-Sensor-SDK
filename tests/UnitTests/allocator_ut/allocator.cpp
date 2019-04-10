@@ -18,6 +18,7 @@ int main(int argc, char **argv)
 }
 
 #define GTEST_LOG_ERROR std::cout << "[    ERROR ] "
+#define GTEST_LOG_INFO std::cout << "[     INFO ] "
 
 typedef struct _allocator_thread_adjust_ref_data_t
 {
@@ -86,12 +87,12 @@ TEST(allocator_ut, allocator_api_validation)
         ASSERT_NE((image_c = capture_get_color_image(capture_c)), (k4a_image_t)NULL);
         ASSERT_NE((image_d = capture_get_depth_image(capture_d)), (k4a_image_t)NULL);
 
-        image_set_timestamp_usec(image_d, 0x1234);
-        image_set_timestamp_usec(image_c, 0x5678);
-        image_set_timestamp_usec(NULL, 0x2222);
-        image_set_timestamp_usec(NULL, 0x1111);
-        image_set_timestamp_usec(image_d, 0); // should be rejected for being 0
-        image_set_timestamp_usec(image_c, 0); // should be rejected for being 0
+        image_set_device_timestamp_usec(image_d, 0x1234);
+        image_set_device_timestamp_usec(image_c, 0x5678);
+        image_set_device_timestamp_usec(NULL, 0x2222);
+        image_set_device_timestamp_usec(NULL, 0x1111);
+        image_set_device_timestamp_usec(image_d, 0); // should be rejected for being 0
+        image_set_device_timestamp_usec(image_c, 0); // should be rejected for being 0
 
         image_dec_ref(image_c);
         image_dec_ref(image_d);
@@ -324,20 +325,20 @@ TEST(allocator_ut, image_api_validation)
 
         ASSERT_EQ(0, image_get_stride_bytes(NULL));
         ASSERT_EQ(1, image_get_stride_bytes(image));
-        ASSERT_EQ(0, image_get_timestamp_usec(NULL));
-        ASSERT_EQ(0, image_get_timestamp_usec(image));
-        image_set_timestamp_usec(NULL, 10);
-        ASSERT_EQ(0, image_get_timestamp_usec(image));
-        image_set_timestamp_usec(image, 10); // should succeed
-        ASSERT_EQ(10, image_get_timestamp_usec(image));
-        image_set_timestamp_usec(image, 0); // should succeed
-        ASSERT_EQ(0, image_get_timestamp_usec(image));
+        ASSERT_EQ(0, image_get_device_timestamp_usec(NULL));
+        ASSERT_EQ(0, image_get_device_timestamp_usec(image));
+        image_set_device_timestamp_usec(NULL, 10);
+        ASSERT_EQ(0, image_get_device_timestamp_usec(image));
+        image_set_device_timestamp_usec(image, 10); // should succeed
+        ASSERT_EQ(10, image_get_device_timestamp_usec(image));
+        image_set_device_timestamp_usec(image, 0); // should succeed
+        ASSERT_EQ(0, image_get_device_timestamp_usec(image));
 
         ASSERT_EQ(0, image_get_exposure_usec(NULL));
         ASSERT_EQ(0, image_get_exposure_usec(image));
-        image_set_exposure_time_usec(NULL, 10);
+        image_set_exposure_usec(NULL, 10);
         ASSERT_EQ(0, image_get_exposure_usec(image));
-        image_set_exposure_time_usec(image, 10); // should succeed
+        image_set_exposure_usec(image, 10); // should succeed
         ASSERT_EQ(10, image_get_exposure_usec(image));
 
         ASSERT_EQ((uint32_t)0, image_get_white_balance(NULL));
@@ -386,8 +387,63 @@ TEST(allocator_ut, image_api_validation)
         image_dec_ref(image);
         ASSERT_EQ(allocator_test_for_leaks(), 0);
     }
+
+    {
+        ASSERT_EQ(K4A_RESULT_FAILED, image_apply_system_timestamp(nullptr));
+        ASSERT_EQ(0, image_get_system_timestamp_nsec(nullptr));
+        image_set_system_timestamp_nsec(nullptr, 0);
+
+        ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create_from_buffer(
+                      K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+
+        ASSERT_EQ(0, image_get_system_timestamp_nsec(image));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_apply_system_timestamp(image));
+        ASSERT_NE(0, image_get_system_timestamp_nsec(image));
+        image_set_system_timestamp_nsec(image, 1);
+        ASSERT_EQ(1, image_get_system_timestamp_nsec(image));
+
+        image_dec_ref(image);
+        ASSERT_EQ(allocator_test_for_leaks(), 0);
+    }
+
     ASSERT_EQ(allocator_test_for_leaks(), 0);
 }
+
+//
+// This test is sensitive to workload and should be a manual test.
+//
+TEST(allocator_ut, manual_image_system_time)
+{
+    uint8_t *buffer = NULL;
+    k4a_image_t image;
+    const int IMAGE_SIZE = 128;
+    void *context;
+    uint64_t ts_last;
+
+    ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              image_create_from_buffer(
+                  K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_apply_system_timestamp(image));
+    ASSERT_NE((ts_last = image_get_system_timestamp_nsec(image)), 0);
+
+    for (int x = 0; x < 100; x++)
+    {
+        uint64_t ts;
+        ThreadAPI_Sleep(50);
+
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_apply_system_timestamp(image));
+        ASSERT_NE((ts = image_get_system_timestamp_nsec(image)), 0);
+        ASSERT_GT(ts, ts_last);
+        ts_last = ts;
+    }
+    image_dec_ref(image);
+    ASSERT_EQ(allocator_test_for_leaks(), 0);
+}
+
 static int allocator_thread_adjust_ref(void *param)
 {
     allocator_thread_adjust_ref_data_t *data = (allocator_thread_adjust_ref_data_t *)param;
