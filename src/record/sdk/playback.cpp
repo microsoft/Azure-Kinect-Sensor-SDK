@@ -443,6 +443,11 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
     }
 
     std::shared_ptr<read_block_t> read_block = find_next_block(context, track_reader, true);
+    if (read_block == nullptr)
+    {
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
     track_reader->current_block = read_block;
 
     // Reach EOF
@@ -462,9 +467,7 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
     DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(0);
 
     data_block_context->timestamp_usec = timestamp_ns / 1000;
-    data_block_context->data_block.resize(data_buffer.Size());
-
-    memcpy(data_block_context->data_block.data(), data_buffer.Buffer(), data_buffer.Size());
+    data_block_context->data_block.assign(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
 
     return K4A_STREAM_RESULT_SUCCEEDED;
 }
@@ -487,6 +490,11 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     }
 
     std::shared_ptr<read_block_t> read_block = find_next_block(context, track_reader, false);
+    if (read_block == nullptr)
+    {
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
     track_reader->current_block = read_block;
 
     // Reach EOF
@@ -506,9 +514,7 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(0);
 
     data_block_context->timestamp_usec = timestamp_ns / 1000;
-    data_block_context->data_block.resize(data_buffer.Size());
-
-    memcpy(data_block_context->data_block.data(), data_buffer.Buffer(), data_buffer.Size());
+    data_block_context->data_block.assign(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
 
     return K4A_STREAM_RESULT_SUCCEEDED;
 }

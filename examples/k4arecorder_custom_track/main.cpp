@@ -146,16 +146,14 @@ int main(int argc, char **argv)
                                                         "DEPTH",
                                                         k4a_image_get_timestamp_usec(depth_image) * 1000,
                                                         k4a_image_get_buffer(depth_image),
-                                                        static_cast<uint32_t>(k4a_image_get_size(depth_image)),
-                                                        true);
+                                                        static_cast<uint32_t>(k4a_image_get_size(depth_image)));
             VERIFY(result, "Write DEPTH custom track data failed!");
 
             result = k4a_record_write_custom_track_data(recording,
                                                         "IR",
                                                         k4a_image_get_timestamp_usec(ir_image) * 1000,
                                                         k4a_image_get_buffer(ir_image),
-                                                        static_cast<uint32_t>(k4a_image_get_size(ir_image)),
-                                                        true);
+                                                        static_cast<uint32_t>(k4a_image_get_size(ir_image)));
             VERIFY(result, "Write IR custom track data failed!");
 
             k4a_image_release(depth_image);

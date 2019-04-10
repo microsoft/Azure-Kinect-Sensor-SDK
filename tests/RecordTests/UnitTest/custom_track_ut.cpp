@@ -105,16 +105,14 @@ protected:
                                                         "DEPTH",
                                                         k4a_image_get_timestamp_usec(depth_image),
                                                         k4a_image_get_buffer(depth_image),
-                                                        static_cast<uint32_t>(k4a_image_get_size(depth_image)),
-                                                        true);
+                                                        static_cast<uint32_t>(k4a_image_get_size(depth_image)));
             ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
             result = k4a_record_write_custom_track_data(handle,
                                                         "IR",
                                                         k4a_image_get_timestamp_usec(ir_image),
                                                         k4a_image_get_buffer(ir_image),
-                                                        static_cast<uint32_t>(k4a_image_get_size(ir_image)),
-                                                        true);
+                                                        static_cast<uint32_t>(k4a_image_get_size(ir_image)));
             ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
             // Test custom track to start from different index
@@ -125,8 +123,7 @@ protected:
                                                             "CUSTOM_TRACK_1",
                                                             timestamp_usec,
                                                             custom_track_block.data(),
-                                                            custom_track_block.size(),
-                                                            true);
+                                                            custom_track_block.size());
                 ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
             }
 

@@ -22,9 +22,7 @@ namespace k4arecord
 //  0 : child
 //  1 : same level
 //  + : further parent
-std::unique_ptr<EbmlElement> next_element(k4a_playback_context_t *context,
-                                          EbmlElement *parent,
-                                          int *upper_level = nullptr)
+std::unique_ptr<EbmlElement> next_element(k4a_playback_context_t *context, EbmlElement *parent, int *upper_level)
 {
     try
     {

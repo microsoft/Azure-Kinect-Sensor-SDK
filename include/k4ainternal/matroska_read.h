@@ -97,7 +97,9 @@ typedef struct _k4a_playback_data_block_context_t
 
 K4A_DECLARE_CONTEXT(k4a_playback_data_block_t, k4a_playback_data_block_context_t);
 
-std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlElement *parent);
+std::unique_ptr<EbmlElement> next_element(k4a_playback_context_t *context,
+                                          EbmlElement *parent,
+                                          int *upper_level = nullptr);
 k4a_result_t skip_element(k4a_playback_context_t *context, EbmlElement *element);
 
 void match_ebml_id(k4a_playback_context_t *context, EbmlId &id, uint64_t offset);

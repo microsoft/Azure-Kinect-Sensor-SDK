@@ -139,7 +139,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback
  *
  * \xmlonly
  * <requirements>
- *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
  *   <requirement name="Library">k4arecord.lib</requirement>
  *   <requirement name="DLL">k4arecord.dll</requirement>
  * </requirements>
@@ -162,7 +162,7 @@ K4ARECORD_EXPORT bool k4a_playback_track_check_exists(k4a_playback_t playback_ha
  *
  * \xmlonly
  * <requirements>
- *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
  *   <requirement name="Library">k4arecord.lib</requirement>
  *   <requirement name="DLL">k4arecord.dll</requirement>
  * </requirements>
@@ -200,7 +200,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t p
  *
  * \xmlonly
  * <requirements>
- *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
  *   <requirement name="Library">k4arecord.lib</requirement>
  *   <requirement name="DLL">k4arecord.dll</requirement>
  * </requirements>
@@ -237,7 +237,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
  *
  * \xmlonly
  * <requirements>
- *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
  *   <requirement name="Library">k4arecord.lib</requirement>
  *   <requirement name="DLL">k4arecord.dll</requirement>
  * </requirements>
@@ -313,7 +313,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
  *
  * \xmlonly
  * <requirements>
- *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
  *   <requirement name="Library">k4arecord.lib</requirement>
  *   <requirement name="DLL">k4arecord.dll</requirement>
  * </requirements>
@@ -337,7 +337,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_attachment(k4a_playback_t 
  *
  * \xmlonly
  * <requirements>
- *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
  *   <requirement name="Library">k4arecord.lib</requirement>
  *   <requirement name="DLL">k4arecord.dll</requirement>
  * </requirements>
@@ -364,7 +364,7 @@ K4ARECORD_EXPORT size_t k4a_playback_track_get_frame_count(k4a_playback_t playba
  *
  * \xmlonly
  * <requirements>
- *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
  *   <requirement name="Library">k4arecord.lib</requirement>
  *   <requirement name="DLL">k4arecord.dll</requirement>
  * </requirements>

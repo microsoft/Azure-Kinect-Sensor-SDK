@@ -454,13 +454,15 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
 
 k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
                                         const char *track_name,
-                                        const char *codec,
+                                        const char *codec_id,
                                         const uint8_t *codec_private,
                                         size_t codec_private_size,
                                         const k4a_record_video_info_t *video_info)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL || codec == NULL || video_info == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, codec_id == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, video_info == NULL);
 
     k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
@@ -476,7 +478,7 @@ k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
         return K4A_RESULT_FAILED;
     }
 
-    KaxTrackEntry *track = add_track(context, track_name, track_video, codec, codec_private, codec_private_size);
+    KaxTrackEntry *track = add_track(context, track_name, track_video, codec_id, codec_private, codec_private_size);
     context->custom_tracks.insert(std::pair<std::string, KaxTrackEntry *>(std::string(track_name), track));
     set_track_info_video(track, video_info->width, video_info->height, video_info->frame_rate);
 
@@ -485,12 +487,13 @@ k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
 
 k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
                                            const char *track_name,
-                                           const char *codec,
+                                           const char *codec_id,
                                            const uint8_t *codec_private,
                                            size_t codec_private_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL || codec == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, codec_id == NULL);
 
     k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
@@ -506,7 +509,7 @@ k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
         return K4A_RESULT_FAILED;
     }
 
-    KaxTrackEntry *track = add_track(context, track_name, track_subtitle, codec, codec_private, codec_private_size);
+    KaxTrackEntry *track = add_track(context, track_name, track_subtitle, codec_id, codec_private, codec_private_size);
     context->custom_tracks.insert(std::pair<std::string, KaxTrackEntry *>(std::string(track_name), track));
 
     return K4A_RESULT_SUCCEEDED;
@@ -702,8 +705,7 @@ k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_han
                                                 const char *track_name,
                                                 uint64_t timestamp_usec,
                                                 uint8_t *buffer,
-                                                size_t buffer_size,
-                                                bool copy_buffer)
+                                                size_t buffer_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
 
@@ -727,7 +729,7 @@ k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_han
 
     // Create a copy of the image buffer for writing to file.
     assert(buffer_size <= UINT32_MAX);
-    DataBuffer *data_buffer = new DataBuffer(buffer, (uint32_t)buffer_size, NULL, copy_buffer);
+    DataBuffer *data_buffer = new DataBuffer(buffer, (uint32_t)buffer_size, NULL, true);
 
     k4a_result_t result = TRACE_CALL(write_track_data(context, track, timestamp_usec * 1000, data_buffer));
     if (K4A_FAILED(result))
