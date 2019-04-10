@@ -17,6 +17,7 @@
 // Project headers
 //
 #include "k4aaudiomanager.h"
+#include "k4alogdockcontrol.h"
 #include "k4asourceselectiondockcontrol.h"
 #include "k4aviewererrormanager.h"
 #include "k4aviewerutil.h"
@@ -145,6 +146,7 @@ K4AViewer::K4AViewer(const K4AViewerOptions &args)
     }
 
     K4AWindowManager::Instance().PushLeftDockControl(std14::make_unique<K4ASourceSelectionDockControl>());
+    K4AWindowManager::Instance().PushBottomDockControl(std14::make_unique<K4ALogDockControl>());
 }
 
 K4AViewer::~K4AViewer()

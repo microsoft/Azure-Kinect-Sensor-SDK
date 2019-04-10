@@ -14,6 +14,7 @@ set(SOURCE_FILES
     k4aimudatagraph.cpp
     k4aimusamplesource.cpp
     k4aimuwindow.cpp
+    k4alogdockcontrol.cpp
     k4amicrophone.cpp
     k4amicrophonelistener.cpp
     k4apointcloudrenderer.cpp
@@ -26,6 +27,7 @@ set(SOURCE_FILES
     k4avideowindow.cpp
     k4aviewer.cpp
     k4aviewerimage.cpp
+    k4aviewerlogmanager.cpp
     k4aviewererrormanager.cpp
     k4aviewersettingsmanager.cpp
     k4awindowmanager.cpp
