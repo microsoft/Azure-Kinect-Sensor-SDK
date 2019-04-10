@@ -13,6 +13,10 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#ifndef _WIN32
+#include <time.h>
+#endif
+
 typedef struct _image_context_t
 {
     volatile long ref_count;
@@ -25,7 +29,8 @@ typedef struct _image_context_t
     int width_pixels;            /** width in pixels */
     int height_pixels;           /** height in pixels */
     int stride_bytes;            /** stride in bytes */
-    uint64_t timestamp_usec;     /** timestamp in micro seconds */
+    uint64_t dev_timestamp_usec; /** device timestamp in microseconds */
+    uint64_t sys_timestamp_nsec; /** system timestamp in nanoseconds */
     uint64_t exposure_time_usec; /** image exposure duration */
     size_t size_allocated;       /** size of the raw memory allocation */
 
@@ -265,11 +270,18 @@ int image_get_stride_bytes(k4a_image_t image_handle)
     return image->stride_bytes;
 }
 
-uint64_t image_get_timestamp_usec(k4a_image_t image_handle)
+uint64_t image_get_device_timestamp_usec(k4a_image_t image_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
     image_context_t *image = k4a_image_t_get_context(image_handle);
-    return image->timestamp_usec;
+    return image->dev_timestamp_usec;
+}
+
+uint64_t image_get_system_timestamp_nsec(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    return image->sys_timestamp_nsec;
 }
 
 uint64_t image_get_exposure_usec(k4a_image_t image_handle)
@@ -293,11 +305,52 @@ uint32_t image_get_iso_speed(k4a_image_t image_handle)
     return image->metadata.color.iso_speed;
 }
 
-void image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec)
+void image_set_device_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
     image_context_t *image = k4a_image_t_get_context(image_handle);
-    image->timestamp_usec = timestamp_usec;
+    image->dev_timestamp_usec = timestamp_usec;
+}
+
+void image_set_system_timestamp_nsec(k4a_image_t image_handle, uint64_t timestamp_nsec)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    image->sys_timestamp_nsec = timestamp_nsec;
+}
+
+k4a_result_t image_apply_system_timestamp(k4a_image_t image_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_image_t, image_handle);
+    image_context_t *image = k4a_image_t_get_context(image_handle);
+    k4a_result_t result;
+
+#ifdef _WIN32
+    LARGE_INTEGER qpc = { 0 }, freq = { 0 };
+    result = K4A_RESULT_FROM_BOOL(QueryPerformanceCounter(&qpc) != 0);
+    if (K4A_SUCCEEDED(result))
+    {
+        result = K4A_RESULT_FROM_BOOL(QueryPerformanceFrequency(&freq) != 0);
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        // Calculate seconds in such a way we minimize overflow.
+        // Rollover happens, for a 1MHz Freq, when qpc.QuadPart > 0x003F FFFF FFFF FFFF; ~571 Years after boot.
+        image->sys_timestamp_nsec = qpc.QuadPart / freq.QuadPart * 1000000000;
+        image->sys_timestamp_nsec += qpc.QuadPart % freq.QuadPart * 1000000000 / freq.QuadPart;
+    }
+#else
+    struct timespec ts_time;
+    result = K4A_RESULT_FROM_BOOL(clock_gettime(CLOCK_MONOTONIC, &ts_time) == 0);
+    if (K4A_SUCCEEDED(result))
+    {
+        // Rollover happens about ~136 years after boot.
+        image->sys_timestamp_nsec = ts_time.tv_sec * 1000000000 + ts_time.tv_nsec;
+    }
+#endif
+
+    return result;
 }
 
 void image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_time_usec)

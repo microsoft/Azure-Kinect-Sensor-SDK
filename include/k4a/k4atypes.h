@@ -894,6 +894,9 @@ typedef struct _k4a_imu_sample_t
     uint64_t acc_timestamp_usec;  /**< Timestamp of the accelerometer in microseconds. */
     k4a_float3_t gyro_sample;     /**< Gyro sample in radians per second. */
     uint64_t gyro_timestamp_usec; /**< Timestamp of the gyroscope in microseconds */
+
+    uint64_t acc_system_timestamp_nsec;  /**< Timestamp of the accelerometer as record by the host in nanoseconds. */
+    uint64_t gyro_system_timestamp_nsec; /**< Timestamp of the gyroscope as record by the host in nanoseconds. */
 } k4a_imu_sample_t;
 
 /** Extrinsic calibration data.

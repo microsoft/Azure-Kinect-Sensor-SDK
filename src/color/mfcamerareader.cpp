@@ -848,7 +848,12 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
 
                 if (K4A_SUCCEEDED(result))
                 {
-                    image_set_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(pFrameContext->GetPTSTime()));
+                    result = image_apply_system_timestamp(image);
+                }
+
+                if (K4A_SUCCEEDED(result))
+                {
+                    image_set_device_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(pFrameContext->GetPTSTime()));
 
                     // Set metadata
                     image_set_exposure_time_usec(image, pFrameContext->GetExposureTime());

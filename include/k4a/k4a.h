@@ -795,8 +795,8 @@ K4A_EXPORT int k4a_image_get_stride_bytes(k4a_image_t image_handle);
  * Handle of the image for which the get operation is performed on.
  *
  * \remarks
- * Returns the timestamp of the image. Timestamps are recorded by the device and represent the mid-point of exposure.
- * They may be used for relative comparison, but their absolute value has no defined meaning.
+ * Returns the device timestamp of the image. Timestamps are recorded by the device and represent the mid-point of
+ * exposure. They may be used for relative comparison, but their absolute value has no defined meaning.
  *
  * \returns
  * If the \p image_handle is invalid or if no timestamp was set for the image,
@@ -814,6 +814,33 @@ K4A_EXPORT int k4a_image_get_stride_bytes(k4a_image_t image_handle);
  * \endxmlonly
  */
 K4A_EXPORT uint64_t k4a_image_get_timestamp_usec(k4a_image_t image_handle);
+
+/** Get the image timestamp in nanoseconds
+ *
+ * \param image_handle
+ * Handle of the image for which the get operation is performed on.
+ *
+ * \remarks
+ * Returns the system timestamp of the image. Timestamps are recorded by the host and represent the time after the last
+ * byte of the image was read by the host. They may be used for relative comparison, but their absolute value has no
+ * defined meaning.
+ *
+ * \returns
+ * If the \p image_handle is invalid or if no timestamp was set for the image,
+ * this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning
+ * of a recording or the start of streaming.
+ *
+ * \relates k4a_image_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT uint64_t k4a_image_get_system_timestamp_nsec(k4a_image_t image_handle);
 
 /** Get the image exposure in microseconds.
  *
@@ -886,7 +913,7 @@ K4A_EXPORT uint32_t k4a_image_get_white_balance(k4a_image_t image_handle);
  */
 K4A_EXPORT uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle);
 
-/** Set the time stamp, in microseconds, of the image.
+/** Set the device time stamp, in microseconds, of the image.
  *
  * \param image_handle
  * Handle of the image to set the timestamp on.
@@ -901,6 +928,9 @@ K4A_EXPORT uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle);
  * \remarks
  * Set a timestamp of 0 to indicate that the timestamp is not valid.
  *
+ * \remarks
+ * The device timestamp represents the mid-point of exposure of the image, as captured by the hardware.
+ *
  * \relates k4a_image_t
  *
  * \xmlonly
@@ -912,6 +942,37 @@ K4A_EXPORT uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle);
  * \endxmlonly
  */
 K4A_EXPORT void k4a_image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
+
+/** Set the system time stamp, in nanoseconds, of the image.
+ *
+ * \param image_handle
+ * Handle of the image to set the timestamp on.
+ *
+ * \param timestamp_nsec
+ * Timestamp of the image in nanoseconds.
+ *
+ * \remarks
+ * Use this function in conjunction with k4a_image_create() or k4a_image_create_from_buffer() to construct a
+ * \ref k4a_image_t.
+ *
+ * \remarks
+ * Set a timestamp of 0 to indicate that the timestamp is not valid.
+ *
+ * \remarks
+ * The system timestamp is a high performance and increasing clock (from boot). The timestamp represents the time
+ * immediately after the image buffer was ready by the host PC.
+ *
+ * \relates k4a_image_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT void k4a_image_set_system_timestamp_nsec(k4a_image_t image_handle, uint64_t timestamp_nsec);
 
 /** Set the exposure time, in microseconds, of the image.
  *

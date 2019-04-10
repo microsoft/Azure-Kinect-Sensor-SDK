@@ -115,7 +115,7 @@ drop_sample(capturesync_context_t *sync, k4a_wait_result_t *wresult, bool color_
         }
         if (*wresult == K4A_WAIT_RESULT_SUCCEEDED)
         {
-            frame_info->ts = image_get_timestamp_usec(frame_info->image);
+            frame_info->ts = image_get_device_timestamp_usec(frame_info->image);
         }
     }
 
@@ -153,7 +153,7 @@ static void replace_sample(capturesync_context_t *sync, k4a_capture_t capture_ne
     {
         frame_info->capture = capture_new;
         frame_info->image = frame_info->get_typed_image(capture_new);
-        frame_info->ts = image_get_timestamp_usec(frame_info->image);
+        frame_info->ts = image_get_device_timestamp_usec(frame_info->image);
     }
     else
     {
@@ -227,7 +227,7 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
         result = K4A_RESULT_FROM_BOOL(image != NULL);
         if (K4A_SUCCEEDED(result))
         {
-            ts_raw_capture = image_get_timestamp_usec(image);
+            ts_raw_capture = image_get_device_timestamp_usec(image);
             image_dec_ref(image);
             image = NULL;
         }
@@ -286,7 +286,7 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
         {
             assert(frame_info->image == 0); // Both capture and image should be NULL
             frame_info->image = frame_info->get_typed_image(capture_raw);
-            frame_info->ts = image_get_timestamp_usec(frame_info->image);
+            frame_info->ts = image_get_device_timestamp_usec(frame_info->image);
             frame_info->capture = capture_raw;
             capture_inc_ref(capture_raw);
             capture_raw = NULL;

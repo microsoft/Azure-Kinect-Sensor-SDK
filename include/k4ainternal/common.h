@@ -24,7 +24,8 @@ typedef struct _guid_t
 #define MAX_FPS_IN_MS (33) // 30 FPS
 
 #define COUNTOF(x) (sizeof(x) / sizeof(x[0]))
-
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define STRINGIFY(string) #string
 
 // Clock tick runs 90kHz and convert sec to micro sec

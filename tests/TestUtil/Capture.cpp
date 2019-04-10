@@ -34,7 +34,6 @@
 #define QUARTER_MEGA_PIXEL 7
 #define COLOR_SENSOR "color"
 #define DEPTH_SENSOR "depth"
-#define K4A_90K_HZ_TICK_TO_USEC(x) ((uint64_t)(x)*100 / 9)
 
 //************************ Typedefs *****************************
 #pragma pack(push, 1)
@@ -118,7 +117,7 @@ static void image_stream_callback(k4a_result_t result, k4a_image_t image_handle,
     }
     else
     {
-        printf("%16d                    ", (int)image_get_timestamp_usec(image_handle));
+        printf("%16d                    ", (int)image_get_device_timestamp_usec(image_handle));
     }
     printf("%10zu\n", capture_size);
     if (p_file != NULL)
@@ -136,7 +135,7 @@ static void image_stream_callback(k4a_result_t result, k4a_image_t image_handle,
         }
         else
         {
-            fprintf(p_file, "%d, ", (int)image_get_timestamp_usec(image_handle));
+            fprintf(p_file, "%d, ", (int)image_get_device_timestamp_usec(image_handle));
         }
         fprintf(p_file, "%zu", capture_size);
     }

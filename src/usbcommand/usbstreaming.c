@@ -84,8 +84,12 @@ void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer)
         // if callback provided, callback with associated information
         if ((p_bulk_transfer->status == LIBUSB_TRANSFER_COMPLETED) && (usbcmd->callback != NULL))
         {
-            image_set_size(usbcmd->image[image_index], (size_t)p_bulk_transfer->actual_length);
-            usbcmd->callback(K4A_RESULT_SUCCEEDED, usbcmd->image[image_index], usbcmd->stream_context);
+            result = image_apply_system_timestamp(usbcmd->image[image_index]);
+            if (K4A_SUCCEEDED(result))
+            {
+                image_set_size(usbcmd->image[image_index], (size_t)p_bulk_transfer->actual_length);
+                usbcmd->callback(K4A_RESULT_SUCCEEDED, usbcmd->image[image_index], usbcmd->stream_context);
+            }
         }
         else
         {

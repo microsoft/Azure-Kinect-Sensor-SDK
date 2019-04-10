@@ -445,7 +445,11 @@ int k4a_image_get_stride_bytes(k4a_image_t image_handle)
 }
 uint64_t k4a_image_get_timestamp_usec(k4a_image_t image_handle)
 {
-    return image_get_timestamp_usec(image_handle);
+    return image_get_device_timestamp_usec(image_handle);
+}
+uint64_t k4a_image_get_system_timestamp_nsec(k4a_image_t image_handle)
+{
+    return image_get_system_timestamp_nsec(image_handle);
 }
 
 uint64_t k4a_image_get_exposure_usec(k4a_image_t image_handle)
@@ -465,7 +469,11 @@ uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle)
 
 void k4a_image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec)
 {
-    image_set_timestamp_usec(image_handle, timestamp_usec);
+    image_set_device_timestamp_usec(image_handle, timestamp_usec);
+}
+void k4a_image_set_system_timestamp_nsec(k4a_image_t image_handle, uint64_t timestamp_nsec)
+{
+    image_set_system_timestamp_nsec(image_handle, timestamp_nsec);
 }
 void k4a_image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_usec)
 {
