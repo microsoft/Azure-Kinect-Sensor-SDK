@@ -29,6 +29,12 @@ protected:
 
     void TearDown() override
     {
+        for (cluster_t *cluster : *context->pending_clusters)
+        {
+            delete cluster;
+        }
+        context->pending_clusters->clear();
+
         k4a_record_t_destroy(recording_handle);
     }
 };
