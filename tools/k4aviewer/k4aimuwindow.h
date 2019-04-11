@@ -14,9 +14,9 @@
 
 // Project headers
 //
-#include "k4aimusamplesource.h"
 #include "ik4avisualizationwindow.h"
-#include "k4aimudatagraph.h"
+#include "k4aimugraphdatagenerator.h"
+#include "k4aimugraph.h"
 
 namespace k4aviewer
 {
@@ -27,7 +27,7 @@ public:
 
     const char *GetTitle() const override;
 
-    K4AImuWindow(std::string &&title, std::shared_ptr<K4AImuSampleSource> sampleSource);
+    K4AImuWindow(std::string &&title, std::shared_ptr<K4AImuGraphDataGenerator> graphDataGenerator);
     ~K4AImuWindow() override = default;
 
     K4AImuWindow(const K4AImuWindow &) = delete;
@@ -36,13 +36,13 @@ public:
     K4AImuWindow &operator=(const K4AImuWindow &&) = delete;
 
 private:
-    std::shared_ptr<K4AImuSampleSource> m_sampleSource;
+    std::shared_ptr<K4AImuGraphDataGenerator> m_graphDataGenerator;
+
     std::string m_title;
     bool m_failed = false;
 
-    K4AImuDataGraph m_accelerometerGraph;
-    K4AImuDataGraph m_gyroscopeGraph;
-    double m_sensorTemperature;
+    K4AImuGraph m_accGraph;
+    K4AImuGraph m_gyroGraph;
 };
 } // namespace k4aviewer
 
