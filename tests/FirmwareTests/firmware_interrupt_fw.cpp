@@ -31,7 +31,7 @@ protected:
     {
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, TRACE_CALL(setup_common_test()));
         const ::testing::TestInfo *const test_info = ::testing::UnitTest::GetInstance()->current_test_info();
-        LOG_INFO("Test %s requires a connection exerciser.", test_info->name());
+        printf("\nStarting test %s. This requires a connection exerciser to be connected.\n", test_info->name());
         LOG_INFO("Disconnecting the device", 0);
         g_connection_exerciser->set_usb_port(0);
         ThreadAPI_Sleep(500);
@@ -51,7 +51,7 @@ protected:
         ASSERT_FALSE(compare_version(g_test_firmware_package_info.depth, g_candidate_firmware_package_info.depth));
         ASSERT_FALSE(compare_version(g_test_firmware_package_info.rgb, g_candidate_firmware_package_info.rgb));
 
-        // There should be no other devices.
+        // There should be no other devices as the tests use the default device to connect to.
         uint32_t device_count = 0;
         usb_cmd_get_device_count(&device_count);
         ASSERT_EQ((uint32_t)0, device_count);
@@ -83,14 +83,14 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
 {
     firmware_interrupt_parameters parameters = GetParam();
     firmware_status_summary_t finalStatus;
-    LOG_INFO("Beginning the \'%s\' test. Stage: %d Interruption: %d",
-             parameters.test_name,
-             parameters.component,
-             parameters.interruption);
+
+    printf("Beginning the \'%s\' test. Stage: %d Interruption: %d",
+           parameters.test_name,
+           parameters.component,
+           parameters.interruption);
 
     LOG_INFO("Powering on the device...", 0);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, g_connection_exerciser->set_usb_port(g_k4a_port_number));
-
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
     ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
@@ -102,7 +102,7 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
               firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
 
     // Update to the Candidate firmware
-    LOG_INFO("Updating the device to the Candidate firmware.");
+    printf("\n == Updating the device to the Candidate firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_candidate_firmware_buffer,
@@ -111,7 +111,7 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
                                     false));
 
     // Update to the Test firmware, but interrupt...
-    LOG_INFO("Beginning of the firmware update to the Test Firmware with interruption...");
+    printf("\n == Beginning of the firmware update to the Test Firmware with interruption...\n");
 
     // Prepend the "Firmware Package Versions:\n" with "Test".
     printf("Test ");
@@ -190,7 +190,7 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
         // happened.
         if (!compare_version(current_version.depth, { 0 }))
         {
-            printf("  The Depth version was not expected\n");
+            printf("  ** The Depth version was not expected\n");
         }
         break;
 
@@ -205,15 +205,15 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
         // reset actually happened.
         if (!compare_version(current_version.audio, g_test_firmware_package_info.audio))
         {
-            printf("  The Audio version was not expected\n");
+            printf("  **  The Audio version was not expected\n");
         }
         if (!compare_version(current_version.depth, g_test_firmware_package_info.depth))
         {
-            printf("  The Depth version was not expected\n");
+            printf("  **  The Depth version was not expected\n");
         }
         if (!compare_version(current_version.rgb, { 0 }))
         {
-            printf("  The RGB version was not expected\n");
+            printf("  **  The RGB version was not expected\n");
         }
         break;
 
@@ -222,7 +222,7 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
     }
 
     // Update back to the LKG firmware to make sure that works.
-    LOG_INFO("Updating the device back to the LKG firmware.");
+    printf("\n == Updating the device back to the LKG firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
                                     g_lkg_firmware_buffer,
