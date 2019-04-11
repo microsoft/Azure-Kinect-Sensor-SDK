@@ -98,7 +98,7 @@ static k4a_result_t transformation_compute_correspondence(const int depth_index,
                                                           const k4a_transformation_rgbz_context_t *context,
                                                           k4a_correspondence_t *correspondence)
 {
-    if (depth == 0 || (context->xy_tables->x_table[depth_index] != context->xy_tables->x_table[depth_index]))
+    if (depth == 0 || context->xy_tables->x_table[depth_index] == NAN)
     {
         memset(correspondence, 0, sizeof(k4a_correspondence_t));
         return K4A_RESULT_SUCCEEDED;
@@ -761,6 +761,104 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
     }
     return K4A_BUFFER_RESULT_SUCCEEDED;
 }
+
+#ifndef _M_X64
+static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
+                                        const void *depth_image_data,
+                                        void *xyz_image_data)
+{
+    const uint16_t *depth_image_data_uint16 = (const uint16_t *)depth_image_data;
+    int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
+    int16_t x, y, z;
+
+    for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
+    {
+        float x_tab = xy_tables->x_table[i];
+
+        if (x_tab == x_tab) // check for NAN
+        {
+            z = (int16_t)depth_image_data_uint16[i];
+            x = (int16_t)(floorf(x_tab * (float)z + 0.5f));
+            y = (int16_t)(floorf(xy_tables->y_table[i] * (float)z + 0.5f));
+        }
+        else
+        {
+            x = 0;
+            y = 0;
+            z = 0;
+        }
+
+        xyz_data_int16[3 * i + 0] = x;
+        xyz_data_int16[3 * i + 1] = y;
+        xyz_data_int16[3 * i + 2] = z;
+    }
+}
+#else
+static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_tables,
+                                            const void *depth_image_data,
+                                            void *xyz_image_data)
+{
+    const __m128i *depth_image_data_m128i = (const __m128i *)depth_image_data;
+    __m128 *x_table_m128 = (__m128 *)xy_tables->x_table;
+    __m128 *y_table_m128 = (__m128 *)xy_tables->y_table;
+    __m128i *xyz_data_m128i = (__m128i *)xyz_image_data;
+
+    const int16_t pos0 = 0x0100;
+    const int16_t pos1 = 0x0302;
+    const int16_t pos2 = 0x0504;
+    const int16_t pos3 = 0x0706;
+    const int16_t pos4 = 0x0908;
+    const int16_t pos5 = 0x0B0A;
+    const int16_t pos6 = 0x0D0C;
+    const int16_t pos7 = 0x0F0E;
+
+    // x0, x3, x6, x1, x4, x7, x2, x5
+    __m128i x_shuffle = _mm_setr_epi16(pos0, pos3, pos6, pos1, pos4, pos7, pos2, pos5);
+    // y5, y0, y3, y6, y1, y4, y7, y2
+    __m128i y_shuffle = _mm_setr_epi16(pos5, pos0, pos3, pos6, pos1, pos4, pos7, pos2);
+    // z2, z5, z0, z3, z6, z1, z4, z7
+    __m128i z_shuffle = _mm_setr_epi16(pos2, pos5, pos0, pos3, pos6, pos1, pos4, pos7);
+
+    __m128i valid_shuffle = _mm_setr_epi16(pos0, pos2, pos4, pos6, pos0, pos2, pos4, pos6);
+
+    for (int i = 0; i < xy_tables->width * xy_tables->height / 8; i++)
+    {
+        __m128i z = *depth_image_data_m128i++;
+
+        __m128 x_tab_lo = *x_table_m128++;
+        __m128 x_tab_hi = *x_table_m128++;
+        __m128 valid_lo = _mm_cmpeq_ps(x_tab_lo, x_tab_lo);
+        __m128 valid_hi = _mm_cmpeq_ps(x_tab_hi, x_tab_hi);
+        __m128i valid_shuffle_lo = _mm_shuffle_epi8(*((__m128i *)&valid_lo), valid_shuffle);
+        __m128i valid_shuffle_hi = _mm_shuffle_epi8(*((__m128i *)&valid_hi), valid_shuffle);
+        __m128i valid = _mm_blend_epi16(valid_shuffle_lo, valid_shuffle_hi, 0xF0);
+        z = _mm_blendv_epi8(_mm_setzero_si128(), z, valid);
+
+        __m128 depth_lo = _mm_cvtepi32_ps(_mm_unpacklo_epi16(z, _mm_setzero_si128()));
+        __m128 depth_hi = _mm_cvtepi32_ps(_mm_unpackhi_epi16(z, _mm_setzero_si128()));
+
+        __m128i x_lo = _mm_cvtps_epi32(_mm_mul_ps(depth_lo, x_tab_lo));
+        __m128i x_hi = _mm_cvtps_epi32(_mm_mul_ps(depth_hi, x_tab_hi));
+        __m128i x = _mm_packs_epi32(x_lo, x_hi);
+        x = _mm_blendv_epi8(_mm_setzero_si128(), x, valid);
+        x = _mm_shuffle_epi8(x, x_shuffle);
+
+        __m128i y_lo = _mm_cvtps_epi32(_mm_mul_ps(depth_lo, *y_table_m128++));
+        __m128i y_hi = _mm_cvtps_epi32(_mm_mul_ps(depth_hi, *y_table_m128++));
+        __m128i y = _mm_packs_epi32(y_lo, y_hi);
+        y = _mm_shuffle_epi8(y, y_shuffle);
+
+        z = _mm_shuffle_epi8(z, z_shuffle);
+
+        // x0, y0, z0, x1, y1, z1, x2, y2
+        *xyz_data_m128i++ = _mm_blend_epi16(_mm_blend_epi16(x, y, 0x92), z, 0x24);
+        // z2, x3, y3, z3, x4, y4, z4, x5
+        *xyz_data_m128i++ = _mm_blend_epi16(_mm_blend_epi16(x, y, 0x24), z, 0x49);
+        // y5, z5, x6, y6, z6, x7, y7, z7
+        *xyz_data_m128i++ = _mm_blend_epi16(_mm_blend_epi16(x, y, 0x49), z, 0x92);
+    }
+}
+#endif
 
 k4a_buffer_result_t
 transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_t *xy_tables,
