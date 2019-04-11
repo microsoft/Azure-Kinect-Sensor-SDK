@@ -89,7 +89,7 @@ void APIENTRY glDebugOutput(GLenum source,
 }
 #endif
 
-K4AViewer::K4AViewer(const K4AViewerOptions &args)
+K4AViewer::K4AViewer(const K4AViewerArgs &args)
 {
     // Setup window
     glfwSetErrorCallback(LogGlfwError);
@@ -224,35 +224,43 @@ void K4AViewer::ShowMainMenuBar()
 {
     if (ImGui::BeginMainMenuBar())
     {
-        if (ImGui::BeginMenu("File"))
+        if (ImGui::BeginMenu("Settings"))
         {
-            auto &settings = K4AViewerSettingsManager::Instance();
-            if (ImGui::MenuItem("Show info overlay", nullptr, settings.GetShowInfoPane()))
-                settings.SetShowInfoPane(!settings.GetShowInfoPane());
-            if (settings.GetShowInfoPane())
+            ShowViewerOptionMenuItem("Show log dock", ViewerOption::ShowLogDock);
+            ShowViewerOptionMenuItem("Show info overlay", ViewerOption::ShowInfoPane);
+
+            if (K4AViewerSettingsManager::Instance().GetViewerOption(ViewerOption::ShowInfoPane))
             {
-                if (ImGui::MenuItem("Show framerate info", nullptr, settings.GetShowFrameRateInfo()))
-                    settings.SetShowFrameRateInfo(!settings.GetShowFrameRateInfo());
+                ShowViewerOptionMenuItem("Show framerate", ViewerOption::ShowFrameRateInfo);
             }
-            if (ImGui::MenuItem("Show developer options", nullptr, m_showDeveloperOptions))
-                m_showDeveloperOptions = !m_showDeveloperOptions;
+
+            ShowViewerOptionMenuItem("Show developer options", ViewerOption::ShowDeveloperOptions);
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Load default settings"))
+            {
+                K4AViewerSettingsManager::Instance().SetDefaults();
+            }
+
+            ImGui::Separator();
+
             if (ImGui::MenuItem("Quit"))
+            {
                 glfwSetWindowShouldClose(m_window, true);
+            }
             ImGui::EndMenu();
         }
 
-        if (m_showDeveloperOptions)
+        if (K4AViewerSettingsManager::Instance().GetViewerOption(ViewerOption::ShowDeveloperOptions))
         {
             if (ImGui::BeginMenu("Developer"))
             {
-                if (ImGui::MenuItem("Show demo window", nullptr, m_showDemoWindow))
-                    m_showDemoWindow = !m_showDemoWindow;
-                if (ImGui::MenuItem("Show style editor", nullptr, m_showStyleEditor))
-                    m_showStyleEditor = !m_showStyleEditor;
-                if (ImGui::MenuItem("Show metrics window", nullptr, m_showMetricsWindow))
-                    m_showMetricsWindow = !m_showMetricsWindow;
-                if (ImGui::MenuItem("Show perf counters", nullptr, m_showPerfCounters))
-                    m_showPerfCounters = !m_showPerfCounters;
+                ImGui::MenuItem("Show demo window", nullptr, &m_showDemoWindow);
+                ImGui::MenuItem("Show style editor", nullptr, &m_showStyleEditor);
+                ImGui::MenuItem("Show metrics window", nullptr, &m_showMetricsWindow);
+                ImGui::MenuItem("Show perf counters", nullptr, &m_showPerfCounters);
+
                 ImGui::EndMenu();
             }
         }
@@ -296,5 +304,16 @@ void K4AViewer::ShowErrorOverlay()
         }
 
         ImGui::EndPopup();
+    }
+}
+
+void K4AViewer::ShowViewerOptionMenuItem(const char *msg, ViewerOption option)
+{
+    auto &settings = K4AViewerSettingsManager::Instance();
+    bool isSet = settings.GetViewerOption(option);
+
+    if (ImGui::MenuItem(msg, nullptr, isSet))
+    {
+        settings.SetViewerOption(option, !isSet);
     }
 }

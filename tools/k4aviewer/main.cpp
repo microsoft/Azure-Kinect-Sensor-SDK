@@ -7,11 +7,11 @@
 #include <string>
 #include <cctype>
 
-K4AViewerOptions ProcessArgs(int argc, char **argv);
+K4AViewerArgs ProcessArgs(int argc, char **argv);
 
-K4AViewerOptions ProcessArgs(int argc, char **argv)
+K4AViewerArgs ProcessArgs(int argc, char **argv)
 {
-    K4AViewerOptions options;
+    K4AViewerArgs args;
 
     // Skip argv[0], which is the path to the executable
     //
@@ -26,15 +26,15 @@ K4AViewerOptions ProcessArgs(int argc, char **argv)
 
         if (arg == "-HIGHDPI")
         {
-            options.HighDpi = true;
+            args.HighDpi = true;
         }
         else if (arg == "-NORMALDPI")
         {
-            options.HighDpi = false;
+            args.HighDpi = false;
         }
     }
 
-    return options;
+    return args;
 }
 
 int main(int argc, char **argv)
