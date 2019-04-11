@@ -181,7 +181,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
  * ::K4A_RESULT_SUCCEEDED if the format conversion is supported. ::K4A_RESULT_FAILED otherwise.
  *
  * \remarks
- * After the color conversion format is set, all \r k4a_capture_t objects returned from the playback handle will have
+ * After the color conversion format is set, all \ref k4a_capture_t objects returned from the playback handle will have
  * their color images converted to the \p target_format.
  *
  * \remarks
