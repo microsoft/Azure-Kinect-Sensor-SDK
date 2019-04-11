@@ -17,7 +17,7 @@
 #include "k4acolorimageconverter.h"
 #include "k4adepthimageconverter.h"
 #include "k4aimguiextensions.h"
-#include "k4aimusamplesource.h"
+#include "k4aimugraphdatagenerator.h"
 #include "k4aimuwindow.h"
 #include "k4ainfraredimageconverter.h"
 #include "k4apointcloudwindow.h"
@@ -159,10 +159,10 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
     {
         std::string title = std::string(sourceIdentifier) + ": IMU Data";
 
-        auto imuSampleSource = std::make_shared<K4AImuSampleSource>();
-        imuDataSource->RegisterObserver(std::static_pointer_cast<IK4AImuObserver>(imuSampleSource));
+        auto imuGraphDataGenerator = std::make_shared<K4AImuGraphDataGenerator>();
+        imuDataSource->RegisterObserver(std::static_pointer_cast<IK4AImuObserver>(imuGraphDataGenerator));
 
-        graphWindows.emplace_back(std14::make_unique<K4AImuWindow>(std::move(title), std::move(imuSampleSource)));
+        graphWindows.emplace_back(std14::make_unique<K4AImuWindow>(std::move(title), std::move(imuGraphDataGenerator)));
     }
 
     if (microphoneDataSource != nullptr)
