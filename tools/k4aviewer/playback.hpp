@@ -137,8 +137,6 @@ public:
         k4a_record_configuration_t config;
         k4a_result_t result = k4a_playback_get_record_configuration(m_handle, &config);
 
-        config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-
         if (K4A_RESULT_SUCCEEDED != result)
         {
             throw error("Failed to read record configuration!");
@@ -306,8 +304,6 @@ public:
     {
         k4a_playback_t handle = nullptr;
         k4a_result_t result = k4a_playback_open(path, &handle);
-
-        k4a_playback_set_color_conversion(handle, K4A_IMAGE_FORMAT_COLOR_BGRA32);
 
         if (K4A_RESULT_SUCCEEDED != result)
         {

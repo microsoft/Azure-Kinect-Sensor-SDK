@@ -231,9 +231,25 @@ k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle, k
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
 
+    if (context->color_track.track == NULL)
+    {
+        LOG_ERROR("The color track is not enabled in this recording. The color conversion format cannot be set.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
     switch (target_format)
     {
     case K4A_IMAGE_FORMAT_COLOR_MJPG:
+        if (context->color_track.format == K4A_IMAGE_FORMAT_COLOR_MJPG)
+        {
+            context->color_format_conversion = target_format;
+        }
+        else
+        {
+            LOG_ERROR("Converting color images to K4A_IMAGE_FORMAT_COLOR_MJPG is not supported.", 0);
+            return K4A_RESULT_FAILED;
+        }
+        break;
     case K4A_IMAGE_FORMAT_COLOR_NV12:
     case K4A_IMAGE_FORMAT_COLOR_YUY2:
     case K4A_IMAGE_FORMAT_COLOR_BGRA32:

@@ -1552,7 +1552,6 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
     int out_stride = (int)in_block->reader->stride;
     assert(out_height >= 0 && out_width >= 0);
 
-    auto start = std::chrono::high_resolution_clock::now();
     switch (target_format)
     {
     case K4A_IMAGE_FORMAT_DEPTH16:
@@ -1705,8 +1704,6 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
         LOG_ERROR("Unknown target image format: %d", target_format);
         result = K4A_RESULT_FAILED;
     }
-    auto delta = std::chrono::high_resolution_clock::now() - start;
-    std::cout << "Format conversion time: " << (delta.count() / 1000) << " usec" << std::endl;
 
     if (K4A_SUCCEEDED(result) && buffer != NULL)
     {
