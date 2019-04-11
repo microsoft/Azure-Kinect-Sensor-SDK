@@ -353,7 +353,7 @@ TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
 
     // Comparison against reference hash value computed over the entire image. If result image is changed (e.g., due to
     // using a different calibration), the reference value needs to be updated.
-    const double reference_val = 633.99727884928382;
+    const double reference_val = 562.20976003011071;
     if (std::abs(check_sum - reference_val) > 0.001)
     {
         ASSERT_EQ(check_sum, reference_val);
