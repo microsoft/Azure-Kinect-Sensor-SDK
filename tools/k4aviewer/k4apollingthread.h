@@ -14,6 +14,7 @@
 
 // Project headers
 //
+#include "k4aviewerutil.h"
 
 namespace k4aviewer
 {
@@ -34,6 +35,11 @@ public:
         }
     }
 
+    bool IsRunning() const
+    {
+        return m_isRunning;
+    }
+
     ~K4APollingThread()
     {
         Stop();
@@ -42,6 +48,9 @@ public:
 private:
     static void Run(K4APollingThread *instance)
     {
+        instance->m_isRunning = true;
+        CleanupGuard runGuard([instance]() { instance->m_isRunning = false; });
+
         while (!instance->m_shouldExit)
         {
             if (!instance->m_pollFn())
@@ -53,6 +62,7 @@ private:
 
     std::thread m_thread;
     volatile bool m_shouldExit = false;
+    volatile bool m_isRunning = false;
 
     std::function<bool()> m_pollFn;
 };

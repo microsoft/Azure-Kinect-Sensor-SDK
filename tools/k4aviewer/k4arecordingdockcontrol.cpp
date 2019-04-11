@@ -21,6 +21,7 @@
 #include "k4atypeoperators.h"
 #include "k4aviewerutil.h"
 #include "k4awindowmanager.h"
+#include "k4aimugraphdatagenerator.h"
 
 using namespace k4aviewer;
 namespace
@@ -129,7 +130,7 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
 
 K4ADockControlStatus K4ARecordingDockControl::Show()
 {
-    ImGui::Text("%s", m_filenameLabel.c_str());
+    ImGui::TextUnformatted(m_filenameLabel.c_str());
     ImGui::SameLine();
     ImGuiExtensions::ButtonColorChanger cc(ImGuiExtensions::ButtonColor::Red);
     if (ImGui::SmallButton("Close"))
@@ -140,14 +141,15 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
     cc.Clear();
     ImGui::Separator();
 
-    ImGui::Text("%s", "Image formats");
+    ImGui::TextUnformatted("Recording Settings");
     ImGui::Text("FPS:              %s", m_fpsLabel.c_str());
     ImGui::Text("Depth mode:       %s", m_depthModeLabel.c_str());
     ImGui::Text("Color format:     %s", m_colorFormatLabel.c_str());
     ImGui::Text("Color resolution: %s", m_colorResolutionLabel.c_str());
+    ImGui::Text("IMU enabled:      %s", m_recordConfiguration.imu_track_enabled ? "Yes" : "No");
     ImGui::Separator();
 
-    ImGui::Text("%s", "Sync settings");
+    ImGui::TextUnformatted("Sync settings");
     ImGui::Text("Depth/color delay (us): %d", m_depthDelayOffColorUsec);
     ImGui::Text("Sync mode:              %s", m_wiredSyncModeLabel.c_str());
     ImGui::Text("Subordinate delay (us): %d", m_subordinateDelayOffMasterUsec);
@@ -155,11 +157,17 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
     ImGui::Text("Recording Length (us):  %lu", m_recordingLengthUsec);
     ImGui::Separator();
 
-    ImGui::Text("%s", "Device info");
+    ImGui::TextUnformatted("Device info");
     ImGui::Text("Device S/N:      %s", m_deviceSerialNumber.c_str());
     ImGui::Text("RGB camera FW:   %s", m_colorFirmwareVersion.c_str());
     ImGui::Text("Depth camera FW: %s", m_depthFirmwareVersion.c_str());
     ImGui::Separator();
+
+    if (!m_playbackThread->IsRunning())
+    {
+        ImGui::Text("Playback failed!");
+        return K4ADockControlStatus::Ok;
+    }
 
     if (ImGui::Button("<|"))
     {
@@ -232,8 +240,13 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
 
         std::unique_lock<std::mutex> lock(state->Mutex);
 
+        bool forceRefreshImuData = false;
         if (state->SeekTimestamp != InvalidSeekTime)
         {
+            // We need to read back a few seconds from before the time we seeked to.
+            //
+            forceRefreshImuData = true;
+
             state->Recording.seek_timestamp(state->SeekTimestamp, K4A_PLAYBACK_SEEK_BEGIN);
             state->SeekTimestamp = InvalidSeekTime;
 
@@ -247,6 +260,11 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
         {
             backward = state->Step == StepDirection::Backward;
             state->Step = StepDirection::None;
+
+            // Stepping backwards is closer to a seek - we can't just add
+            // new samples on the end, we need to regenerate the graph
+            //
+            forceRefreshImuData |= backward;
 
             // We don't want to restart from the beginning after stepping
             // under most circumstances.  If the user stepped to the last
@@ -266,6 +284,7 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
             //
             state->Recording.seek_timestamp(std::chrono::microseconds(0), K4A_PLAYBACK_SEEK_BEGIN);
             state->RecordingAtEnd = false;
+            forceRefreshImuData = true;
         }
 
         k4a::capture nextCapture;
@@ -293,10 +312,77 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
 
         state->CurrentCaptureTimestamp = GetCaptureTimestamp(nextCapture);
 
-        // Update the images' timestamps using the timing data embedded in the recording
-        // so we show comparable timestamps whenplaying back synchronized recordings
+        // Read IMU data up to the next timestamp, if applicable
         //
+        if (state->ImuPlaybackEnabled)
+        {
+            try
+            {
+                // On seek operations, we need to load historic data or the graph will be wrong.
+                // Move the IMU read pointer back enough samples to populate the entire graph (if available).
+                //
+                if (forceRefreshImuData)
+                {
+                    state->ImuDataSource.ClearData();
 
+                    k4a_imu_sample_t sample;
+
+                    // Seek to the first IMU sample that was before the camera frame we're trying to show
+                    //
+                    while (state->Recording.get_previous_imu_sample(&sample))
+                    {
+                        if (sample.acc_timestamp_usec < static_cast<uint64_t>(state->CurrentCaptureTimestamp.count()))
+                        {
+                            break;
+                        }
+                    }
+
+                    // Then seek back the length of the graph
+                    //
+                    for (int i = 0; i < K4AImuGraphDataGenerator::SamplesPerGraph; ++i)
+                    {
+                        if (!state->Recording.get_previous_imu_sample(&sample))
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                // Read enough samples to catch up to the images that we're about to show
+                //
+                k4a_imu_sample_t nextImuSample;
+                nextImuSample.acc_timestamp_usec = 0;
+
+                while (nextImuSample.acc_timestamp_usec < static_cast<uint64_t>(state->CurrentCaptureTimestamp.count()))
+                {
+                    if (!state->Recording.get_next_imu_sample(&nextImuSample))
+                    {
+                        break;
+                    }
+
+                    // Update the timestamps on the IMU samples using the timing data embedded in the recording
+                    // so we show comparable timestamps when playing back synchronized recordings
+                    //
+                    nextImuSample.acc_timestamp_usec += static_cast<uint64_t>(state->TimestampOffset.count());
+                    nextImuSample.gyro_timestamp_usec += static_cast<uint64_t>(state->TimestampOffset.count());
+
+                    state->ImuDataSource.NotifyObservers(nextImuSample);
+                }
+            }
+            catch (const k4a::error &e)
+            {
+                // If something went wrong while reading the IMU data, mark the IMU failed, but allow
+                // the camera playback to continue.
+                //
+                K4AViewerErrorManager::Instance().SetErrorStatus(e.what());
+                state->ImuDataSource.NotifyTermination();
+                state->ImuPlaybackEnabled = false;
+            }
+        }
+
+        // Update the timestamps on the images using the timing data embedded in the recording
+        // so we show comparable timestamps when playing back synchronized recordings
+        //
         k4a::image images[] = { nextCapture.get_color_image(),
                                 nextCapture.get_depth_image(),
                                 nextCapture.get_ir_image() };
@@ -309,7 +395,7 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
             }
         }
 
-        state->DataSource.NotifyObservers(nextCapture);
+        state->CaptureDataSource.NotifyObservers(nextCapture);
         lock.unlock();
 
         // Account for the time we spent getting captures and such when figuring out how long to wait
@@ -369,12 +455,19 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     K4AWindowManager::Instance().ClearWindows();
 
     std::lock_guard<std::mutex> lock(m_playbackThreadState.Mutex);
+
+    K4ADataSource<k4a_imu_sample_t> *imuDataSource = nullptr;
     switch (viewType)
     {
     case K4AWindowSet::ViewType::Normal:
+        if (m_recordConfiguration.imu_track_enabled)
+        {
+            m_playbackThreadState.ImuPlaybackEnabled = true;
+            imuDataSource = &m_playbackThreadState.ImuDataSource;
+        }
         K4AWindowSet::StartNormalWindows(m_filenameLabel.c_str(),
-                                         &m_playbackThreadState.DataSource,
-                                         nullptr, // IMU playback not supported yet
+                                         &m_playbackThreadState.CaptureDataSource,
+                                         imuDataSource,
                                          nullptr, // Audio source - sound is not supported in recordings
                                          m_recordingHasDepth,
                                          m_recordConfiguration.depth_mode,
@@ -391,7 +484,7 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
                                             m_recordConfiguration.color_format == K4A_IMAGE_FORMAT_COLOR_BGRA32;
             K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
                                                 std::move(calibration),
-                                                &m_playbackThreadState.DataSource,
+                                                &m_playbackThreadState.CaptureDataSource,
                                                 colorPointCloudAvailable);
         }
         catch (const k4a::error &e)
