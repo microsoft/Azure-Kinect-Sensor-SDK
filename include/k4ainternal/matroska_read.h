@@ -12,6 +12,12 @@
 
 namespace k4arecord
 {
+
+// The depth mode string for legacy recordings
+static const std::pair<k4a_depth_mode_t, std::string> legacy_depth_modes[] =
+    { { K4A_DEPTH_MODE_NFOV_2X2BINNED, "NFOV_2x2BINNED" },
+      { K4A_DEPTH_MODE_WFOV_2X2BINNED, "WFOV_2x2BINNED" } };
+
 typedef struct _read_block_t
 {
     struct _track_reader_t *reader = nullptr;

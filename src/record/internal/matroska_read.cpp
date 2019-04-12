@@ -374,6 +374,22 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 }
             }
         }
+
+        if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
+        {
+            // Try to find the mode matching strings in the legacy modes
+            for (size_t i = 0; i < arraysize(legacy_depth_modes); i++)
+            {
+                if (k4a_convert_depth_mode_to_width_height(legacy_depth_modes[i].first, &depth_width, &depth_height))
+                {
+                    if (depth_mode_str == legacy_depth_modes[i].second)
+                    {
+                        context->record_config.depth_mode = legacy_depth_modes[i].first;
+                        break;
+                    }
+                }
+            }
+        }
         if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
         {
             logger_error(LOGGER_RECORD, "Unsupported depth mode: %s", depth_mode_str.c_str());
