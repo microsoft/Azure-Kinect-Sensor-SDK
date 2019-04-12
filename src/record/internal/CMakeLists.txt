@@ -31,6 +31,8 @@ target_link_libraries(k4a_playback PUBLIC
     k4ainternal::logging
     ebml::ebml
     matroska::matroska
+    libyuv::libyuv
+    libjpeg-turbo::libjpeg-turbo
 )
 
 # Define alias for other targets to link against
