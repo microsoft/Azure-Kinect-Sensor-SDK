@@ -365,12 +365,28 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         depth_mode_str = get_tag_string(depth_mode_tag);
         for (size_t i = 0; i < arraysize(depth_modes); i++)
         {
-            if (k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
+            if (depth_mode_str == depth_modes[i].second)
             {
-                if (depth_mode_str == depth_modes[i].second)
+                if (k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
                 {
                     context->record_config.depth_mode = depth_modes[i].first;
                     break;
+                }
+            }
+        }
+
+        if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
+        {
+            // Try to find the mode matching strings in the legacy modes
+            for (size_t i = 0; i < arraysize(legacy_depth_modes); i++)
+            {
+                if (depth_mode_str == legacy_depth_modes[i].second)
+                {
+                    if (k4a_convert_depth_mode_to_width_height(legacy_depth_modes[i].first, &depth_width, &depth_height))
+                    {
+                        context->record_config.depth_mode = legacy_depth_modes[i].first;
+                        break;
+                    }
                 }
             }
         }
