@@ -27,8 +27,7 @@ TraceLibUsbError(int err, const char *szCall, const char *szFile, int line, cons
         // Example print:
         //  depth.cpp (86): allocator_create(&depth->allocator) returned ERROR_NOT_FOUND in depth_create
 
-        logger_error(
-            LOGGER_K4A, "%s (%d): %s returned %s in %s ", szFile, line, szCall, libusb_error_name(err), szFunction);
+        LOG_ERROR("%s (%d): %s returned %s in %s ", szFile, line, szCall, libusb_error_name(err), szFunction);
         result = K4A_RESULT_FAILED;
     }
 
@@ -539,17 +538,16 @@ static k4a_result_t usb_cmd_io(usbcmd_t usbcmd_handle,
         result = K4A_RESULT_FAILED;
         if ((cmd_data_size > 0) && (p_data != NULL))
         {
-            logger_trace(LOGGER_USB_CMD,
-                         "XFR: Cmd=%08x, CmdLength=%u, PayloadSize=%zu, CmdData=%08x %08x...",
-                         cmd,
-                         cmd_data_size,
-                         payload_size,
-                         p_data[0],
-                         p_data[1]);
+            LOG_TRACE("XFR: Cmd=%08x, CmdLength=%u, PayloadSize=%zu, CmdData=%08x %08x...",
+                      cmd,
+                      cmd_data_size,
+                      payload_size,
+                      p_data[0],
+                      p_data[1]);
         }
         else
         {
-            logger_trace(LOGGER_USB_CMD, "XFR: Cmd=%08x, PayloadSize=%zu", cmd, payload_size);
+            LOG_TRACE("XFR: Cmd=%08x, PayloadSize=%zu", cmd, payload_size);
         }
 
         Lock(usbcmd->lock);
@@ -585,9 +583,7 @@ static k4a_result_t usb_cmd_io(usbcmd_t usbcmd_handle,
                                                                     USB_CMD_MAX_WAIT_TIME))) != LIBUSB_SUCCESS)
             {
                 usb_transfer_count = 0;
-                logger_error(LOGGER_USB_CMD,
-                             "Error calling libusb_bulk_transfer for tx, result:%s",
-                             libusb_error_name(err));
+                LOG_ERROR("Error calling libusb_bulk_transfer for tx, result:%s", libusb_error_name(err));
                 goto exit;
             }
 
@@ -600,9 +596,7 @@ static k4a_result_t usb_cmd_io(usbcmd_t usbcmd_handle,
                                                                     USB_CMD_MAX_WAIT_TIME)) != LIBUSB_SUCCESS))
             {
                 usb_transfer_count = 0;
-                logger_error(LOGGER_USB_CMD,
-                             "Error calling libusb_bulk_transfer for rx, result:%s",
-                             libusb_error_name(err));
+                LOG_ERROR("Error calling libusb_bulk_transfer for rx, result:%s", libusb_error_name(err));
                 goto exit;
             }
 
@@ -620,21 +614,20 @@ static k4a_result_t usb_cmd_io(usbcmd_t usbcmd_handle,
                     (response_packet.packet_transaction_id != usb_cmd_pkt.header.packet_transaction_id) ||
                     (response_packet.packet_type != USB_CMD_PACKET_TYPE_RESPONSE))
                 {
-                    logger_error(LOGGER_USB_CMD,
-                                 "Command(%08X) sequence ended in failure, "
-                                 "transationId %08X == %08X "
-                                 "Response size 0x%08X == 0x%08X "
-                                 "Packet status 0x%08x == 0x%08x "
-                                 "Packet type 0x%08x == 0x%08x",
-                                 cmd,
-                                 response_packet.packet_transaction_id,
-                                 usb_cmd_pkt.header.packet_transaction_id,
-                                 rx_size,
-                                 sizeof(response_packet),
-                                 response_packet.status,
-                                 0,
-                                 response_packet.packet_type,
-                                 USB_CMD_PACKET_TYPE_RESPONSE);
+                    LOG_ERROR("Command(%08X) sequence ended in failure, "
+                              "transationId %08X == %08X "
+                              "Response size 0x%08X == 0x%08X "
+                              "Packet status 0x%08x == 0x%08x "
+                              "Packet type 0x%08x == 0x%08x",
+                              cmd,
+                              response_packet.packet_transaction_id,
+                              usb_cmd_pkt.header.packet_transaction_id,
+                              rx_size,
+                              sizeof(response_packet),
+                              response_packet.status,
+                              0,
+                              response_packet.packet_type,
+                              USB_CMD_PACKET_TYPE_RESPONSE);
                 }
                 else
                 {
@@ -644,16 +637,12 @@ static k4a_result_t usb_cmd_io(usbcmd_t usbcmd_handle,
             }
             else
             {
-                logger_error(LOGGER_USB_CMD,
-                             "Error calling libusb_bulk_transfer for status, result:%s",
-                             libusb_error_name(err));
+                LOG_ERROR("Error calling libusb_bulk_transfer for status, result:%s", libusb_error_name(err));
             }
         }
         else
         {
-            logger_error(LOGGER_USB_CMD,
-                         "Error calling libusb_bulk_transfer for initial tx, result:%s",
-                         libusb_error_name(err));
+            LOG_ERROR("Error calling libusb_bulk_transfer for initial tx, result:%s", libusb_error_name(err));
         }
 
     exit:
@@ -714,7 +703,7 @@ k4a_result_t usb_cmd_read(usbcmd_t usbcmd_handle,
 
     if (K4A_SUCCEEDED(result) && cmd_status != 0)
     {
-        logger_error(LOGGER_USB_CMD, "Read command(%08X) ended in failure, Command status 0x%08x", cmd, cmd_status);
+        LOG_ERROR("Read command(%08X) ended in failure, Command status 0x%08x", cmd, cmd_status);
         result = K4A_RESULT_FAILED;
     }
 
@@ -809,7 +798,7 @@ k4a_result_t usb_cmd_write(usbcmd_t usbcmd_handle,
 
     if (K4A_SUCCEEDED(result) && cmd_status != 0)
     {
-        logger_error(LOGGER_USB_CMD, "Write command(%08X) ended in failure, Command status 0x%08x", cmd, cmd_status);
+        LOG_ERROR("Write command(%08X) ended in failure, Command status 0x%08x", cmd, cmd_status);
         result = K4A_RESULT_FAILED;
     }
 
@@ -915,7 +904,7 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
 
     if (p_device_count == NULL)
     {
-        logger_error(LOGGER_USB_CMD, "Error p_device_count is NULL");
+        LOG_ERROR("Error p_device_count is NULL", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -923,7 +912,7 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
     // initialize library
     if ((err = libusb_init(NULL)) < 0)
     {
-        logger_error(LOGGER_USB_CMD, "Error calling libusb_init, result:%s", libusb_error_name(err));
+        LOG_ERROR("Error calling libusb_init, result:%s", libusb_error_name(err));
         return K4A_RESULT_FAILED;
     }
 
@@ -936,12 +925,12 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
     count = libusb_get_device_list(NULL, &dev_list); // get the list of devices
     if (count > INT32_MAX)
     {
-        logger_error(LOGGER_USB_CMD, "List too large");
+        LOG_ERROR("List too large", 0);
         return K4A_RESULT_FAILED;
     }
     if (count == 0)
     {
-        logger_error(LOGGER_USB_CMD, "No devices found");
+        LOG_ERROR("No devices found", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -1009,7 +998,7 @@ k4a_result_t usb_cmd_path_get(usbcmd_t usbcmd_handle, uint8_t *p_bus, uint8_t *p
     }
     else
     {
-        logger_error(LOGGER_USB_CMD, "Error usbcmd is NULL");
+        LOG_ERROR( "Error usbcmd is NULL",0);
         result = K4A_RESULT_FAILED;
     }
     return result;

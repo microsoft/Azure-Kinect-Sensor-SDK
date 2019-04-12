@@ -19,6 +19,7 @@ extern "C" {
 
 // Initialize default k4a specific unittest behavior
 void k4a_unittest_init();
+void k4a_unittest_deinit();
 
 #ifdef _WIN32
 void k4a_unittest_init_logging_with_processid();

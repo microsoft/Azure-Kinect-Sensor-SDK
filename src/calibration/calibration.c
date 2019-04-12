@@ -388,7 +388,7 @@ static k4a_result_t get_camera_calibration(char *json, k4a_calibration_camera_t 
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL)
         {
-            logger_error(LOGGER_CALIBRATION, "cJSON_Parse error %s", error_ptr);
+            LOG_ERROR("cJSON_Parse error %s", error_ptr);
         }
         return K4A_RESULT_FAILED;
     }
@@ -467,7 +467,7 @@ static k4a_result_t get_imu_calibration(char *json, k4a_calibration_imu_t *cal, 
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL)
         {
-            logger_error(LOGGER_CALIBRATION, "cJSON_Parse error %s", error_ptr);
+            LOG_ERROR("cJSON_Parse error %s", error_ptr);
         }
         return K4A_RESULT_FAILED;
     }

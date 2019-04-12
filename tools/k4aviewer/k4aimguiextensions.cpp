@@ -115,5 +115,17 @@ void K4AVText(const char *s)
     ImGui::Text("%s", vLabel.c_str());
 }
 
+void K4AShowTooltip(const char *msg, bool show)
+{
+    if (show && ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(msg);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+
 } // namespace ImGuiExtensions
 } // namespace k4aviewer

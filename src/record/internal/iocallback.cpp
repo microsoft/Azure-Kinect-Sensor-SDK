@@ -8,7 +8,7 @@ using namespace k4arecord;
 static_assert(sizeof(std::streamoff) == sizeof(int64), "64-bit seeking is not supported on this architecture");
 static_assert(sizeof(std::streamsize) == sizeof(int64), "64-bit seeking is not supported on this architecture");
 
-LargeFileIOCallback::LargeFileIOCallback(const char *path, const open_mode mode)
+LargeFileIOCallback::LargeFileIOCallback(const char *path, const open_mode mode) : m_owner(std::this_thread::get_id())
 {
     assert(path);
     std::ios::openmode om = std::ios::binary;
@@ -44,6 +44,7 @@ LargeFileIOCallback::~LargeFileIOCallback()
 uint32 LargeFileIOCallback::read(void *buffer, size_t size)
 {
     assert(size <= UINT32_MAX); // can't properly return > uint32
+    assert(m_owner == std::this_thread::get_id());
 
     m_stream.read((char *)buffer, (std::streamsize)size);
     return (uint32)m_stream.gcount();
@@ -52,6 +53,7 @@ uint32 LargeFileIOCallback::read(void *buffer, size_t size)
 void LargeFileIOCallback::setFilePointer(int64 offset, libebml::seek_mode mode)
 {
     assert(mode == SEEK_SET || mode == SEEK_CUR || mode == SEEK_END);
+    assert(m_owner == std::this_thread::get_id());
 
     switch (mode)
     {
@@ -72,6 +74,7 @@ void LargeFileIOCallback::setFilePointer(int64 offset, libebml::seek_mode mode)
 size_t LargeFileIOCallback::write(const void *buffer, size_t size)
 {
     assert(size <= INT64_MAX); // m_stream.write() takes a signed long input
+    assert(m_owner == std::this_thread::get_id());
 
     m_stream.write((const char *)buffer, (std::streamsize)size);
     return size;
@@ -79,6 +82,7 @@ size_t LargeFileIOCallback::write(const void *buffer, size_t size)
 
 uint64 LargeFileIOCallback::getFilePointer()
 {
+    assert(m_owner == std::this_thread::get_id());
     std::streampos pos = m_stream.tellg();
     assert(pos >= 0); // tellg() should have thrown an exception if this happens
     return (uint64)pos;
@@ -95,4 +99,9 @@ void LargeFileIOCallback::close()
         m_stream.exceptions(std::ios::failbit | std::ios::badbit);
         m_stream.close();
     }
+}
+
+void LargeFileIOCallback::setOwnerThread()
+{
+    m_owner = std::this_thread::get_id();
 }

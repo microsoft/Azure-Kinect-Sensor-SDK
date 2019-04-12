@@ -12,11 +12,10 @@
 
 // Library headers
 //
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
 
 // Project headers
 //
-#include "assertionexception.h"
 #include "ik4aobserver.h"
 #include "k4aimageextractor.h"
 
@@ -48,6 +47,12 @@ public:
         {
             m_lastCapture = capture;
         }
+    }
+
+    void ClearData() override
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_lastCapture.reset();
     }
 
     void NotifyTermination() override

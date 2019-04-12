@@ -289,6 +289,41 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
                                                           char *value,
                                                           size_t *value_size);
 
+/** Set the image format that color captures will be converted to. By default the conversion format will be the same as
+ * the image format stored in the recording file, and no conversion will occur.
+ *
+ * \param playback_handle
+ * Handle obtained by k4a_playback_open().
+ *
+ * \param target_format
+ * The target image format to be returned in captures.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if the format conversion is supported. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \remarks
+ * After the color conversion format is set, all \ref k4a_capture_t objects returned from the playback handle will have
+ * their color images converted to the \p target_format.
+ *
+ * \remarks
+ * Color format conversion occurs in the user-thread, so setting \p target_format to anything other than the format
+ * stored in the file may significantly increase the latency of \p k4a_playback_get_next_capture() and \p
+ * k4a_playback_get_previous_capture().
+ *
+ * \relates k4a_playback_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle,
+                                                                k4a_image_format_t target_format);
+
+                                                          
 /** Reads the attachment from a recording.
  *
  * \param playback_handle
@@ -394,7 +429,7 @@ K4ARECORD_EXPORT int64_t k4a_playback_track_get_frame_usec_by_index(k4a_playback
  *
  * \remarks
  * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return the capture
- * in the recording closest to the seek time with all image timestamps greater than or equal to the seek time.
+ * in the recording closest to the seek time with an image timestamp greater than or equal to the seek time.
  *
  * \remarks
  * If a call was made to k4a_playback_get_previous_capture() that returned ::K4A_STREAM_RESULT_EOF, the playback
@@ -629,14 +664,14 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_pl
  * Specifies if the seek operation should be done relative to the beginning or end of the recording.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if the seek operation was successful. If the timestamp is out of range ::K4A_RESULT_FAILED is
- * returned. The current seek position is left unchanged if a failure is returned.
+ * ::K4A_RESULT_SUCCEEDED if the seek operation was successful, or ::K4A_RESULT_FAILED if an error occured. The current
+ * seek position is left unchanged if a failure is returned.
  *
  * \relates k4a_playback_t
  *
  * \remarks
  * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return the first capture
- * with all image timestamps greater than or equal to the seek time.
+ * containing an image timestamp greater than or equal to the seek time.
  *
  * \remarks
  * The first call to k4a_playback_get_previous_capture() after k4a_playback_seek_timestamp() will return the first

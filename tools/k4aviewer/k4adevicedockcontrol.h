@@ -26,7 +26,7 @@ namespace k4aviewer
 class K4ADeviceDockControl : public IK4ADockControl
 {
 public:
-    explicit K4ADeviceDockControl(k4a::device device);
+    explicit K4ADeviceDockControl(k4a::device &&device);
     K4ADeviceDockControl(K4ADeviceDockControl &other) = delete;
     K4ADeviceDockControl(K4ADeviceDockControl &&other) = delete;
     K4ADeviceDockControl operator=(K4ADeviceDockControl &other) = delete;
@@ -34,7 +34,7 @@ public:
 
     ~K4ADeviceDockControl() override;
 
-    void Show() override;
+    K4ADockControlStatus Show() override;
 
 private:
     struct ColorSetting
@@ -67,15 +67,15 @@ private:
     };
 
     void ShowColorControl(k4a_color_control_command_t command,
-                          ColorSetting &cacheEntry,
-                          const std::function<ColorControlAction(ColorSetting &)> &showControl);
+                          ColorSetting *cacheEntry,
+                          const std::function<ColorControlAction(ColorSetting *)> &showControl);
     static void ShowColorControlAutoButton(k4a_color_control_mode_t currentMode,
-                                           ColorControlAction &actionToUpdate,
+                                           ColorControlAction *actionToUpdate,
                                            const char *id);
-    void ApplyColorSetting(k4a_color_control_command_t command, ColorSetting &cacheEntry);
+    void ApplyColorSetting(k4a_color_control_command_t command, ColorSetting *cacheEntry);
     void ApplyDefaultColorSettings();
 
-    void ReadColorSetting(k4a_color_control_command_t command, ColorSetting &cacheEntry);
+    void ReadColorSetting(k4a_color_control_command_t command, ColorSetting *cacheEntry);
     void LoadColorSettingsCache();
 
     void Start();
@@ -101,7 +101,7 @@ private:
 
     void SetViewType(K4AWindowSet::ViewType viewType);
 
-    K4ADeviceConfiguration m_pendingDeviceConfiguration;
+    K4ADeviceConfiguration m_config;
 
     k4a::device m_device;
     bool m_camerasStarted = false;
@@ -122,8 +122,8 @@ private:
 
     std::string m_windowTitle;
 
-    std::unique_ptr<K4APollingThread<k4a::capture>> m_cameraPollingThread;
-    std::unique_ptr<K4APollingThread<k4a_imu_sample_t>> m_imuPollingThread;
+    std::unique_ptr<K4APollingThread> m_cameraPollingThread;
+    std::unique_ptr<K4APollingThread> m_imuPollingThread;
 };
 } // namespace k4aviewer
 

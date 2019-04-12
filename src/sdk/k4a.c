@@ -62,6 +62,13 @@ uint32_t k4a_device_get_installed_count(void)
     return device_count;
 }
 
+k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *message_cb,
+                                           void *message_cb_context,
+                                           k4a_log_level_t min_level)
+{
+    return logger_register_message_callback(message_cb, message_cb_context, min_level);
+}
+
 depth_cb_streaming_capture_t depth_capture_ready;
 color_cb_streaming_capture_t color_capture_ready;
 
@@ -285,14 +292,13 @@ k4a_result_t k4a_device_start_imu(k4a_device_t device_handle)
     if (device->depth_started == false && device->color_started == false)
     {
         // Color camera resets the IMU timestamp so we avoid letting the IMU run without the camera already running.
-        logger_error(LOGGER_API,
-                     "k4a_device_start_imu called while the color/depth camera is not running is not supported");
+        LOG_ERROR("k4a_device_start_imu called while the color/depth camera is not running is not supported", 0);
         result = K4A_RESULT_FAILED;
     }
 
     if (K4A_SUCCEEDED(result))
     {
-        logger_trace(LOGGER_API, "k4a_device_start_imu starting");
+        LOG_TRACE("k4a_device_start_imu starting", 0);
         result = TRACE_CALL(imu_start(device->imu, color_get_sensor_start_time_tick(device->color)));
     }
 
@@ -305,7 +311,7 @@ k4a_result_t k4a_device_start_imu(k4a_device_t device_handle)
     {
         k4a_device_stop_imu(device_handle);
     }
-    logger_info(LOGGER_API, "k4a_device_start_imu started");
+    LOG_INFO("k4a_device_start_imu started", 0);
 
     return result;
 }
@@ -315,13 +321,13 @@ void k4a_device_stop_imu(k4a_device_t device_handle)
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_device_t, device_handle);
     k4a_context_t *device = k4a_device_t_get_context(device_handle);
 
-    logger_info(LOGGER_API, "k4a_device_stop_imu stopping");
+    LOG_INFO("k4a_device_stop_imu stopping", 0);
     if (device->imu)
     {
         imu_stop(device->imu);
         device->imu_started = false;
     }
-    logger_trace(LOGGER_API, "k4a_device_stop_imu stopped");
+    LOG_TRACE("k4a_device_stop_imu stopped", 0);
 }
 
 k4a_result_t k4a_capture_create(k4a_capture_t *capture_handle)
@@ -657,21 +663,19 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_con
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     k4a_context_t *device = k4a_device_t_get_context(device_handle);
 
-    logger_trace(LOGGER_API, "k4a_device_start_cameras starting");
+    LOG_TRACE("k4a_device_start_cameras starting", 0);
     if (device->depth_started == true || device->color_started == true)
     {
-        logger_error(LOGGER_API,
-                     "k4a_device_start_cameras called while one of the sensors are running, depth:%d color:%d",
-                     device->depth_started,
-                     device->color_started);
+        LOG_ERROR("k4a_device_start_cameras called while one of the sensors are running, depth:%d color:%d",
+                  device->depth_started,
+                  device->color_started);
         result = K4A_RESULT_FAILED;
     }
 
     if (device->imu_started == true)
     {
         // Color camera resets the IMU timestamp so we avoid that condition.
-        logger_error(LOGGER_API,
-                     "k4a_device_start_cameras called while the IMU is running is not supported, stop the IMU");
+        LOG_ERROR("k4a_device_start_cameras called while the IMU is running is not supported, stop the IMU", 0);
         result = K4A_RESULT_FAILED;
     }
 
@@ -725,7 +729,7 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_con
             device->color_started = true;
         }
     }
-    logger_info(LOGGER_API, "k4a_device_start_cameras started");
+    LOG_INFO("k4a_device_start_cameras started", 0);
 
     if (K4A_FAILED(result))
     {
@@ -740,7 +744,7 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_device_t, device_handle);
     k4a_context_t *device = k4a_device_t_get_context(device_handle);
 
-    logger_info(LOGGER_API, "k4a_device_stop_cameras stopping");
+    LOG_INFO("k4a_device_stop_cameras stopping", 0);
 
     // Capturesync needs to stop before color so that all queues will purged
     if (device->capturesync)
@@ -761,7 +765,7 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
         device->color_started = false;
     }
 
-    logger_info(LOGGER_API, "k4a_device_stop_cameras stopped");
+    LOG_INFO("k4a_device_stop_cameras stopped", 0);
 }
 
 k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle,

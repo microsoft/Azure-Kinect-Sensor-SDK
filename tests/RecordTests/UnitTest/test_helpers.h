@@ -6,6 +6,8 @@
 
 #include <utcommon.h>
 #include <k4a/k4a.h>
+#include <chrono>
+#include <iostream>
 
 static const char *const format_names[] = { "K4A_IMAGE_FORMAT_COLOR_MJPG", "K4A_IMAGE_FORMAT_COLOR_NV12",
                                             "K4A_IMAGE_FORMAT_COLOR_YUY2", "K4A_IMAGE_FORMAT_COLOR_BGRA32",
@@ -40,7 +42,8 @@ bool validate_test_image(k4a_image_t image,
                          uint32_t height,
                          uint32_t stride);
 k4a_imu_sample_t create_test_imu_sample(uint64_t timestamp_us);
-bool validate_imu_sample(k4a_imu_sample_t imu_sample, uint64_t timestamp_us);
+bool validate_imu_sample(k4a_imu_sample_t &imu_sample, uint64_t timestamp_us);
+bool validate_null_imu_sample(k4a_imu_sample_t &imu_sample);
 
 std::vector<uint8_t> create_test_custom_track_block(uint64_t timestamp_us);
 bool validate_custom_track_block(const uint8_t *block, size_t block_size, uint64_t timestamp_us);
@@ -53,6 +56,26 @@ public:
 protected:
     void SetUp() override;
     void TearDown() override;
+};
+
+class Timer
+{
+public:
+    Timer(std::string _name) : name(_name)
+    {
+        std::cout << "Start Timer(" << name << ")" << std::endl;
+        start = std::chrono::high_resolution_clock::now();
+    }
+
+    ~Timer()
+    {
+        auto delta = std::chrono::high_resolution_clock::now() - start;
+        std::cout << "End Timer(" << name << "): " << ((float)delta.count() / 1000000.0f) << " ms" << std::endl;
+    }
+
+private:
+    std::string name;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
 };
 
 #endif /* RECORD_TEST_HELPERS_H */

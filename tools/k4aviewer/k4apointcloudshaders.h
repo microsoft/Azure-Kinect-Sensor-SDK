@@ -16,6 +16,11 @@ uniform bool enableShading;
 
 void main()
 {
+    if (fragmentColor.a == 0.0f)
+    {
+        discard;
+    }
+
     gl_FragColor = fragmentColor;
 }
 )";
@@ -58,6 +63,13 @@ void main()
     gl_Position = projection * view * vec4(vertexPosition, 1);
 
     fragmentColor = vertexColor;
+
+    // Pass along the 'invalid pixel' flag as the alpha channel
+    //
+    if (vertexPosition.z == 0.0f)
+    {
+        fragmentColor.a = 0.0f;
+    }
 
     if (enableShading)
     {

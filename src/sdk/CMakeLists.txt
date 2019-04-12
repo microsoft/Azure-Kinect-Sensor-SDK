@@ -4,7 +4,10 @@
 # Create K4A library
 add_library(k4a SHARED
             k4a.c
+            dll_main.c
             ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+
+
 
 # Generate k4a_export.h
 # This is a platform specific header defining the macros for the export functions

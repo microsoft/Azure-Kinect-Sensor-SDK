@@ -10,7 +10,7 @@
 
 // Library headers
 //
-#include <k4a/k4a.h>
+#include <k4a/k4a.hpp>
 #include "k4aimgui_all.h"
 
 // Project headers
@@ -22,6 +22,10 @@ namespace k4aviewer
 {
 struct ImageDimensions
 {
+    ImageDimensions() = default;
+    constexpr ImageDimensions(int w, int h) : Width(w), Height(h) {}
+    constexpr ImageDimensions(const std::pair<int, int> &pair) : Width(pair.first), Height(pair.second) {}
+
     int Width;
     int Height;
 };
@@ -35,7 +39,7 @@ public:
     static GLenum Create(std::shared_ptr<K4AViewerImage> *out,
                          const uint8_t *data,
                          ImageDimensions dimensions,
-                         GLenum format,
+                         GLenum format = GL_BGRA,
                          GLenum internalFormat = GL_RGBA8);
 
     explicit operator ImTextureID() const;

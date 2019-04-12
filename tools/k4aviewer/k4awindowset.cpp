@@ -14,12 +14,12 @@
 // Project headers
 //
 #include "k4aaudiowindow.h"
-#include "k4acolorframevisualizer.h"
-#include "k4adepthframevisualizer.h"
+#include "k4acolorimageconverter.h"
+#include "k4adepthimageconverter.h"
 #include "k4aimguiextensions.h"
-#include "k4aimusamplesource.h"
+#include "k4aimugraphdatagenerator.h"
 #include "k4aimuwindow.h"
-#include "k4ainfraredframevisualizer.h"
+#include "k4ainfraredimageconverter.h"
 #include "k4apointcloudwindow.h"
 #include "k4awindowmanager.h"
 
@@ -32,14 +32,14 @@ template<k4a_image_format_t ImageFormat>
 void CreateVideoWindow(const char *sourceIdentifier,
                        const char *windowTitle,
                        K4ADataSource<k4a::capture> &cameraDataSource,
-                       std::shared_ptr<K4AConvertingFrameSource<ImageFormat>> &&frameSource)
+                       std::shared_ptr<K4AConvertingImageSource<ImageFormat>> &&imageSource)
 {
     std::string title = std::string(sourceIdentifier) + ": " + windowTitle;
 
-    cameraDataSource.RegisterObserver(frameSource);
+    cameraDataSource.RegisterObserver(imageSource);
 
     std::unique_ptr<IK4AVisualizationWindow> window(
-        std14::make_unique<K4AVideoWindow<ImageFormat>>(std::move(title), frameSource));
+        std14::make_unique<K4AVideoWindow<ImageFormat>>(std::move(title), imageSource));
 
     K4AWindowManager::Instance().AddWindow(std::move(window));
 }
@@ -63,6 +63,8 @@ void K4AWindowSet::ShowModeSelector(ViewType *viewType,
                                                    reinterpret_cast<int *>(viewType),
                                                    static_cast<int>(ViewType::PointCloudViewer),
                                                    pointCloudViewerEnabled && enabled);
+    ImGuiExtensions::K4AShowTooltip("Requires depth camera!", !pointCloudViewerEnabled);
+
     if (modeClicked && oldViewType != *viewType)
     {
         changeViewFn(*viewType);
@@ -86,8 +88,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
             CreateVideoWindow(sourceIdentifier,
                               "Infrared Camera",
                               *cameraDataSource,
-                              std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_IR16>>(
-                                  std14::make_unique<K4AInfraredFrameVisualizer>(depthMode)));
+                              std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_IR16>>(
+                                  std14::make_unique<K4AInfraredImageConverter>(depthMode)));
 
             // K4A_DEPTH_MODE_PASSIVE_IR doesn't support actual depth
             //
@@ -96,8 +98,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                 CreateVideoWindow(sourceIdentifier,
                                   "Depth Camera",
                                   *cameraDataSource,
-                                  std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_DEPTH16>>(
-                                      std14::make_unique<K4ADepthFrameVisualizer>(depthMode)));
+                                  std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_DEPTH16>>(
+                                      std14::make_unique<K4ADepthImageConverter>(depthMode)));
             }
         }
 
@@ -112,8 +114,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
-                    std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_COLOR_YUY2>>(
-                        K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_YUY2>(colorResolution)));
+                    std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_COLOR_YUY2>>(
+                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_YUY2>(colorResolution)));
                 break;
 
             case K4A_IMAGE_FORMAT_COLOR_MJPG:
@@ -121,8 +123,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
-                    std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_COLOR_MJPG>>(
-                        K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_MJPG>(colorResolution)));
+                    std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_COLOR_MJPG>>(
+                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_MJPG>(colorResolution)));
                 break;
 
             case K4A_IMAGE_FORMAT_COLOR_BGRA32:
@@ -130,8 +132,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
-                    std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_COLOR_BGRA32>>(
-                        K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_BGRA32>(colorResolution)));
+                    std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_COLOR_BGRA32>>(
+                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_BGRA32>(colorResolution)));
                 break;
 
             case K4A_IMAGE_FORMAT_COLOR_NV12:
@@ -139,8 +141,8 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
-                    std::make_shared<K4AConvertingFrameSource<K4A_IMAGE_FORMAT_COLOR_NV12>>(
-                        K4AColorFrameVisualizerFactory::Create<K4A_IMAGE_FORMAT_COLOR_NV12>(colorResolution)));
+                    std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_COLOR_NV12>>(
+                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_NV12>(colorResolution)));
                 break;
 
             default:
@@ -157,10 +159,10 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
     {
         std::string title = std::string(sourceIdentifier) + ": IMU Data";
 
-        auto imuSampleSource = std::make_shared<K4AImuSampleSource>();
-        imuDataSource->RegisterObserver(std::static_pointer_cast<IK4AImuObserver>(imuSampleSource));
+        auto imuGraphDataGenerator = std::make_shared<K4AImuGraphDataGenerator>();
+        imuDataSource->RegisterObserver(std::static_pointer_cast<IK4AImuObserver>(imuGraphDataGenerator));
 
-        graphWindows.emplace_back(std14::make_unique<K4AImuWindow>(std::move(title), std::move(imuSampleSource)));
+        graphWindows.emplace_back(std14::make_unique<K4AImuWindow>(std::move(title), std::move(imuGraphDataGenerator)));
     }
 
     if (microphoneDataSource != nullptr)
@@ -179,12 +181,12 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
 
 void K4AWindowSet::StartPointCloudWindow(const char *sourceIdentifier,
                                          const k4a::calibration &calibrationData,
-                                         K4ADataSource<k4a::capture> &cameraDataSource,
+                                         K4ADataSource<k4a::capture> *cameraDataSource,
                                          bool enableColorPointCloud)
 {
     std::string pointCloudTitle = std::string(sourceIdentifier) + ": Point Cloud Viewer";
     auto captureSource = std::make_shared<K4ANonBufferingCaptureSource>();
-    cameraDataSource.RegisterObserver(captureSource);
+    cameraDataSource->RegisterObserver(captureSource);
 
     auto &wm = K4AWindowManager::Instance();
     wm.AddWindow(std14::make_unique<K4APointCloudWindow>(std::move(pointCloudTitle),

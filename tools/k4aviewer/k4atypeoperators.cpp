@@ -11,7 +11,6 @@
 
 // Project headers
 //
-#include "assertionexception.h"
 
 namespace k4aviewer
 {
@@ -118,7 +117,7 @@ std::ostream &operator<<(std::ostream &s, const k4a_wired_sync_mode_t &val)
         s << WiredSyncModeSubordinate;
         break;
     default:
-        throw AssertionException("Unrecognized sync mode");
+        throw std::logic_error("Unrecognized sync mode");
     }
     return s;
 }
@@ -167,7 +166,7 @@ std::ostream &operator<<(std::ostream &s, const k4a_fps_t &val)
         s << FramesPerSecond30;
         break;
     default:
-        throw AssertionException("Unrecognized fps");
+        throw std::logic_error("Unrecognized fps");
     }
     return s;
 }
@@ -228,7 +227,7 @@ std::ostream &operator<<(std::ostream &s, const k4a_depth_mode_t &val)
         s << DepthModePassiveIr;
         break;
     default:
-        throw AssertionException("Unrecognized depth mode");
+        throw std::logic_error("Unrecognized depth mode");
     }
     return s;
 }
@@ -305,7 +304,7 @@ std::ostream &operator<<(std::ostream &s, const k4a_color_resolution_t &val)
         s << ColorResolution3072p;
         break;
     default:
-        throw AssertionException("Unrecognized color resolution");
+        throw std::logic_error("Unrecognized color resolution");
     }
     return s;
 }
@@ -386,7 +385,7 @@ std::ostream &operator<<(std::ostream &s, const k4a_image_format_t &val)
         s << ImageFormatCustom;
         break;
     default:
-        throw AssertionException("Unrecognized image format");
+        throw std::logic_error("Unrecognized image format");
     }
     return s;
 }

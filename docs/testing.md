@@ -50,7 +50,8 @@ can be run using "ctest -L perf" in the build directory.
 Firmware tests are used to validate new firmware drops. They are run manually
 when a new firmware candidate is given and will require hardware. Firmware
 tests are built using the GoogleTest framework. After compiling, firmware tests
-can be run using "ctest -L firmware" in the build directory.
+can be run using "bin\firmware_fw.exe -ff \<factory firmware\> -lf \<lkg firmware\>
+-tf \<test firmware\> -cf \<candidate firmware\>" in the build directory.
 
 ## Running tests
 

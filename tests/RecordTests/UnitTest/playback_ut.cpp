@@ -4,9 +4,12 @@
 #include <utcommon.h>
 #include <k4a/k4a.h>
 #include <k4ainternal/common.h>
+#include <k4ainternal/matroska_common.h>
 
 #include "test_helpers.h"
 #include <fstream>
+#include <thread>
+#include <chrono>
 
 // Module being tested
 #include <k4arecord/playback.h>
@@ -270,24 +273,17 @@ TEST_F(playback_ut, playback_seek_test)
     uint64_t timestamps[3] = { 0, 1000, 1000 };
     uint64_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(config.camera_fps);
 
+    k4a_imu_sample_t imu_sample = { 0 };
+    uint64_t imu_timestamp = 1150;
+
     // Test initial state
     stream_result = k4a_playback_get_previous_capture(handle, &capture);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
     ASSERT_EQ(capture, (k4a_capture_t)NULL);
 
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
-    k4a_capture_release(capture);
-
-    // Test seek to beginning
-    result = k4a_playback_seek_timestamp(handle, 0, K4A_PLAYBACK_SEEK_BEGIN);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-
-    stream_result = k4a_playback_get_previous_capture(handle, &capture);
+    stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
-    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+    ASSERT_TRUE(validate_null_imu_sample(imu_sample));
 
     stream_result = k4a_playback_get_next_capture(handle, &capture);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
@@ -295,75 +291,225 @@ TEST_F(playback_ut, playback_seek_test)
         validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
     k4a_capture_release(capture);
 
-    // Test seek past beginning
-    result = k4a_playback_seek_timestamp(handle,
-                                         -(int64_t)k4a_playback_get_last_timestamp_usec(handle) - 10,
-                                         K4A_PLAYBACK_SEEK_END);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
+    stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
-    k4a_capture_release(capture);
+    ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
 
-    // Test seek to end
-    result = k4a_playback_seek_timestamp(handle, 0, K4A_PLAYBACK_SEEK_END);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    int64_t recording_length = (int64_t)k4a_playback_get_last_timestamp_usec(handle) + 1;
+    std::pair<int64_t, k4a_playback_seek_origin_t> start_seek_combinations[] = { // Beginning
+                                                                                 { 0, K4A_PLAYBACK_SEEK_BEGIN },
+                                                                                 { -recording_length,
+                                                                                   K4A_PLAYBACK_SEEK_END },
+                                                                                 // Past beginning
+                                                                                 { -10, K4A_PLAYBACK_SEEK_BEGIN },
+                                                                                 { -recording_length - 10,
+                                                                                   K4A_PLAYBACK_SEEK_END }
+    };
+
+    std::pair<int64_t, k4a_playback_seek_origin_t> end_seek_combinations[] = { // End
+                                                                               { 0, K4A_PLAYBACK_SEEK_END },
+                                                                               { recording_length,
+                                                                                 K4A_PLAYBACK_SEEK_BEGIN },
+                                                                               // Past end
+                                                                               { 10, K4A_PLAYBACK_SEEK_END },
+                                                                               { recording_length + 10,
+                                                                                 K4A_PLAYBACK_SEEK_BEGIN }
+    };
+
+    std::pair<int64_t, k4a_playback_seek_origin_t> middle_seek_combinations[] = {
+        // Between captures, and between IMU samples
+        { timestamp_delta * 50 - 250, K4A_PLAYBACK_SEEK_BEGIN },
+        { -recording_length + (int64_t)(timestamp_delta * 50 - 250), K4A_PLAYBACK_SEEK_END },
+        // Middle of capture, and exact IMU timestamp
+        { timestamp_delta * 50 + 500, K4A_PLAYBACK_SEEK_BEGIN },
+        { -recording_length + (int64_t)(timestamp_delta * 50 + 500), K4A_PLAYBACK_SEEK_END },
+    };
+
+    std::cerr << "[          ] Testing seek to start:" << std::endl;
+    // Test seek combinations around beginning of recording
+    for (auto seek : start_seek_combinations)
+    {
+        std::cerr << "[          ]     Seeking to " << seek.first << " from "
+                  << (seek.second == K4A_PLAYBACK_SEEK_BEGIN ? "beginning" : "end") << std::endl;
+
+        // Seek then read backward
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+        ASSERT_EQ(capture, (k4a_capture_t)NULL);
+
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+
+        stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+        ASSERT_TRUE(validate_null_imu_sample(imu_sample));
+
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        // Seek then read forward
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+    }
+
+    std::cerr << "[          ] Testing seek to end:" << std::endl;
+    // Test seek combinations around end of recording
     timestamps[0] += timestamp_delta * 99;
     timestamps[1] += timestamp_delta * 99;
     timestamps[2] += timestamp_delta * 99;
+    imu_timestamp = 3333150;
+    for (auto seek : end_seek_combinations)
+    {
+        std::cerr << "[          ]     Seeking to " << seek.first << " from "
+                  << (seek.second == K4A_PLAYBACK_SEEK_BEGIN ? "beginning" : "end") << std::endl;
 
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
-    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+        // Seek then read forward
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    stream_result = k4a_playback_get_previous_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
-    k4a_capture_release(capture);
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+        ASSERT_EQ(capture, (k4a_capture_t)NULL);
 
-    // Test seek to end, relative to start
-    result = k4a_playback_seek_timestamp(handle,
-                                         (int64_t)k4a_playback_get_last_timestamp_usec(handle) + 1,
-                                         K4A_PLAYBACK_SEEK_BEGIN);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
 
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
-    ASSERT_EQ(capture, (k4a_capture_t)NULL);
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+        ASSERT_TRUE(validate_null_imu_sample(imu_sample));
 
-    stream_result = k4a_playback_get_previous_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
-    k4a_capture_release(capture);
+        stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
 
-    // Test seeking to the middle of a capture, then read forward
-    timestamps[0] -= timestamp_delta * 50;
-    timestamps[1] -= timestamp_delta * 50;
-    timestamps[2] -= timestamp_delta * 50;
-    result = k4a_playback_seek_timestamp(handle, (int64_t)timestamps[0] + 500, K4A_PLAYBACK_SEEK_BEGIN);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        // Seek then read backward
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    stream_result = k4a_playback_get_next_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    // Color image is before the timestamp and will be missing.
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode));
-    k4a_capture_release(capture);
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
 
-    // Test seeking to the middle of a capture, then read backward
-    result = k4a_playback_seek_timestamp(handle, (int64_t)timestamps[0] + 500, K4A_PLAYBACK_SEEK_BEGIN);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+    }
 
-    stream_result = k4a_playback_get_previous_capture(handle, &capture);
-    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-    // Depth and IR images are before the timestamp and will be missing.
-    ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, K4A_DEPTH_MODE_OFF));
-    k4a_capture_release(capture);
+    std::cerr << "[          ] Testing seek to middle:" << std::endl;
+    // Test seek combinations around middle of recording
+    timestamps[0] -= timestamp_delta * 49;
+    timestamps[1] -= timestamp_delta * 49;
+    timestamps[2] -= timestamp_delta * 49;
+    imu_timestamp = 1667150;
+    for (auto seek : middle_seek_combinations)
+    {
+        std::cerr << "[          ]     Seeking to " << seek.first << " from "
+                  << (seek.second == K4A_PLAYBACK_SEEK_BEGIN ? "beginning" : "end") << std::endl;
+
+        // Test next then previous capture
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        timestamps[0] -= timestamp_delta;
+        timestamps[1] -= timestamp_delta;
+        timestamps[2] -= timestamp_delta;
+        imu_timestamp -= 1000;
+
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+
+        stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        // Test previous then next capture
+        result = k4a_playback_seek_timestamp(handle, seek.first, seek.second);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_previous_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+
+        stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        timestamps[0] += timestamp_delta;
+        timestamps[1] += timestamp_delta;
+        timestamps[2] += timestamp_delta;
+        imu_timestamp += 1000;
+
+        stream_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_test_capture(capture,
+                                          timestamps,
+                                          config.color_format,
+                                          config.color_resolution,
+                                          config.depth_mode));
+        k4a_capture_release(capture);
+
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+    }
 
     k4a_playback_close(handle);
 }
@@ -549,72 +695,88 @@ TEST_F(playback_ut, open_skipped_frames_file)
     k4a_playback_close(handle);
 }
 
-TEST_F(playback_ut, DISABLED_open_test_file)
+TEST_F(playback_ut, open_imu_playback_file)
 {
-    k4a_playback_t handle;
-    k4a_result_t result = k4a_playback_open("test.mkv", &handle);
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_full.mkv", &handle);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    uint8_t buffer[8096];
-    size_t buffer_size = 8096;
-    k4a_buffer_result_t buffer_result = k4a_playback_get_raw_calibration(handle, &buffer[0], &buffer_size);
-    ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_SUCCEEDED);
-
-    k4a_calibration_t calibration;
-    result = k4a_playback_get_calibration(handle, &calibration);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-    result = k4a_playback_get_calibration(handle, &calibration);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-
-    std::cout << "Previous capture" << std::endl;
-    k4a_capture_t capture = NULL;
-    k4a_stream_result_t playback_result = k4a_playback_get_previous_capture(handle, &capture);
-    ASSERT_EQ(playback_result, K4A_STREAM_RESULT_EOF);
-    ASSERT_EQ(capture, nullptr);
-
-    std::cout << "Next capture x10" << std::endl;
-    for (int i = 0; i < 10; i++)
-    {
-        playback_result = k4a_playback_get_next_capture(handle, &capture);
-        ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
-        ASSERT_NE(capture, nullptr);
-        k4a_capture_release(capture);
-    }
-    std::cout << "Previous capture x10" << std::endl;
-    for (int i = 0; i < 9; i++)
-    {
-        playback_result = k4a_playback_get_previous_capture(handle, &capture);
-        ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
-        ASSERT_NE(capture, nullptr);
-        k4a_capture_release(capture);
-    }
-    playback_result = k4a_playback_get_previous_capture(handle, &capture);
-    ASSERT_EQ(playback_result, K4A_STREAM_RESULT_EOF);
-    ASSERT_EQ(capture, nullptr);
-
+    // Read recording configuration
     k4a_record_configuration_t config;
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-    std::cout << "Config:" << std::endl;
-    std::cout << "    Tracks enabled:";
-    static const std::pair<bool *, std::string> tracks[] = { { &config.color_track_enabled, "Color" },
-                                                             { &config.depth_track_enabled, "Depth" },
-                                                             { &config.ir_track_enabled, "IR" },
-                                                             { &config.imu_track_enabled, "IMU" } };
-    for (int i = 0; i < 4; i++)
+    ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
+    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_TRUE(config.color_track_enabled);
+    ASSERT_TRUE(config.depth_track_enabled);
+    ASSERT_TRUE(config.ir_track_enabled);
+    ASSERT_TRUE(config.imu_track_enabled);
+    ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+    ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_STANDALONE);
+    ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)0);
+    ASSERT_EQ(config.start_timestamp_offset_usec, (uint32_t)0);
+
+    k4a_imu_sample_t imu_sample = { 0 };
+    k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
+    uint64_t imu_timestamp = 1150;
+    uint64_t last_timestamp = k4a_playback_get_last_timestamp_usec(handle);
+    ASSERT_EQ(last_timestamp, 3333150);
+
+    // Read forward
+    while (imu_timestamp <= last_timestamp)
     {
-        if (*tracks[i].first)
-        {
-            std::cout << " " << tracks[i].second;
-        }
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+        imu_timestamp += 1000;
     }
-    std::cout << std::endl;
-    std::cout << "    Color format: " << format_names[config.color_format] << std::endl;
-    std::cout << "    Color resolution: " << resolution_names[config.color_resolution] << std::endl;
-    std::cout << "    Depth mode: " << depth_names[config.depth_mode] << std::endl;
-    std::cout << "    Frame rate: " << fps_names[config.camera_fps] << std::endl;
-    std::cout << "    Depth delay: " << config.depth_delay_off_color_usec << " usec" << std::endl;
-    std::cout << "    Start offset: " << config.start_timestamp_offset_usec << " usec" << std::endl;
+    stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_TRUE(validate_null_imu_sample(imu_sample));
+
+    // Read backward
+    while (imu_timestamp > 1150)
+    {
+        imu_timestamp -= 1000;
+        stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+    }
+    stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+    ASSERT_TRUE(validate_null_imu_sample(imu_sample));
+
+    // Test seeking to first 100 samples (covers edge cases around block boundaries)
+    for (int i = 0; i < 100; i++)
+    {
+        // Seek to before sample
+        result = k4a_playback_seek_timestamp(handle, (int64_t)imu_timestamp - 100, K4A_PLAYBACK_SEEK_BEGIN);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        // Seek exactly to sample
+        result = k4a_playback_seek_timestamp(handle, (int64_t)imu_timestamp, K4A_PLAYBACK_SEEK_BEGIN);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        // Seek to after sample
+        result = k4a_playback_seek_timestamp(handle, (int64_t)imu_timestamp + 100, K4A_PLAYBACK_SEEK_BEGIN);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
+        ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+        ASSERT_TRUE(validate_imu_sample(imu_sample, imu_timestamp));
+
+        imu_timestamp += 1000;
+    }
 
     k4a_playback_close(handle);
 }
@@ -625,5 +787,7 @@ int main(int argc, char **argv)
 
     ::testing::AddGlobalTestEnvironment(new SampleRecordings());
     ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    int results = RUN_ALL_TESTS();
+    k4a_unittest_deinit();
+    return results;
 }
