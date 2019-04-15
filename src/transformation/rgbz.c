@@ -104,7 +104,7 @@ static k4a_result_t transformation_compute_correspondence(const int depth_index,
                                                           const k4a_transformation_rgbz_context_t *context,
                                                           k4a_correspondence_t *correspondence)
 {
-    if (depth == 0 || context->xy_tables->x_table[depth_index] == NAN)
+    if (depth == 0 || isnan(context->xy_tables->x_table[depth_index]))
     {
         memset(correspondence, 0, sizeof(k4a_correspondence_t));
         return K4A_RESULT_SUCCEEDED;
@@ -806,7 +806,7 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
     {
         float x_tab = xy_tables->x_table[i];
 
-        if (x_tab == x_tab) // check for NAN
+        if (!isnan(x_tab))
         {
             z = (int16_t)depth_image_data_uint16[i];
             x = (int16_t)(floorf(x_tab * (float)z + 0.5f));
