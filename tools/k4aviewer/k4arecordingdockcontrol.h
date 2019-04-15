@@ -18,6 +18,7 @@
 
 #include "ik4adockcontrol.h"
 #include "k4adatasource.h"
+#include "k4aimugraphdatagenerator.h"
 #include "k4apollingthread.h"
 #include "k4awindowset.h"
 
@@ -59,7 +60,10 @@ private:
         // Recording state
         //
         k4a::playback Recording;
-        K4ADataSource<k4a::capture> DataSource;
+        K4ADataSource<k4a::capture> CaptureDataSource;
+        K4ADataSource<k4a_imu_sample_t> ImuDataSource;
+
+        bool ImuPlaybackEnabled;
     } m_playbackThreadState;
 
     static bool PlaybackThreadFn(PlaybackThreadState *state);

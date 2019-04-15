@@ -7,6 +7,7 @@
 
 // System headers
 //
+#include <cmath>
 #include <utility>
 
 // Library headers
@@ -15,7 +16,6 @@
 
 // Project headers
 //
-#include "k4aimudatagraph.h"
 #include "k4aviewererrormanager.h"
 #include "k4awindowsizehelpers.h"
 
@@ -26,59 +26,35 @@ namespace
 constexpr float AccelMinRange = 5.0f;
 constexpr float AccelMaxRange = 100.0f;
 constexpr float AccelDefaultRange = 20.0f;
-constexpr float AccelScaleFactor = 1.0f;
 
 constexpr float GyroMinRange = 5.0f;
 constexpr float GyroMaxRange = 50.0f;
 constexpr float GyroDefaultRange = 20.0f;
-constexpr float GyroScaleFactor = 1.0f;
 } // namespace
 
-K4AImuWindow::K4AImuWindow(std::string &&title, std::shared_ptr<K4AImuSampleSource> sampleSource) :
-    m_sampleSource(std::move(sampleSource)),
+K4AImuWindow::K4AImuWindow(std::string &&title, std::shared_ptr<K4AImuGraphDataGenerator> graphDataGenerator) :
+    m_graphDataGenerator(std::move(graphDataGenerator)),
     m_title(std::move(title)),
-    m_accelerometerGraph("Accelerometer",
-                         "X",
-                         "Y",
-                         "Z",
-                         "m/s/s",
-                         AccelMinRange,
-                         AccelMaxRange,
-                         AccelDefaultRange,
-                         AccelScaleFactor),
-    m_gyroscopeGraph("Gyroscope",
-                     " Roll",
-                     "Pitch",
-                     "  Yaw",
-                     "Rad/s",
-                     GyroMinRange,
-                     GyroMaxRange,
-                     GyroDefaultRange,
-                     GyroScaleFactor)
+    m_accGraph("Accelerometer", "X", "Y", "Z", "m/s/s", AccelMinRange, AccelMaxRange, AccelDefaultRange),
+    m_gyroGraph("Gyroscope", " Roll", "Pitch", "  Yaw", "Rad/s", GyroMinRange, GyroMaxRange, GyroDefaultRange)
 {
 }
 
 void K4AImuWindow::Show(K4AWindowPlacementInfo placementInfo)
 {
-    if (!m_failed && m_sampleSource->IsFailed())
+    if (!m_failed && m_graphDataGenerator->IsFailed())
     {
-        K4AViewerErrorManager::Instance().SetErrorStatus(m_title + ": sample source failed!");
+        K4AViewerErrorManager::Instance().SetErrorStatus(m_title + ": data source failed!");
         m_failed = true;
     }
 
     if (m_failed)
     {
-        ImGui::Text("Sample source failed!");
+        ImGui::Text("Data source failed!");
         return;
     }
 
-    k4a_imu_sample_t sample;
-    while (m_sampleSource->PopSample(&sample))
-    {
-        m_accelerometerGraph.AddSample(sample.acc_sample, sample.acc_timestamp_usec);
-        m_gyroscopeGraph.AddSample(sample.gyro_sample, sample.gyro_timestamp_usec);
-        m_sensorTemperature = static_cast<double>(sample.temperature);
-    }
+    K4AImuGraphDataGenerator::GraphReader reader = m_graphDataGenerator->GetGraphData();
 
     // Sizing math
     //
@@ -100,14 +76,18 @@ void K4AImuWindow::Show(K4AWindowPlacementInfo placementInfo)
 
     // Actually draw the widgets
     //
-    m_accelerometerGraph.Show(graphSize);
+    m_accGraph.Show(graphSize, reader.Data->AccData, reader.Data->StartOffset, reader.Data->AccTimestamp);
 
     ImGui::Separator();
 
-    m_gyroscopeGraph.Show(graphSize);
+    m_gyroGraph.Show(graphSize, reader.Data->GyroData, reader.Data->StartOffset, reader.Data->GyroTimestamp);
 
     ImGui::Separator();
-    ImGui::Text("Sensor temperature: %.2f C", m_sensorTemperature);
+
+    if (!std::isnan(reader.Data->LastTemperature))
+    {
+        ImGui::Text("Sensor temperature: %.2f C", static_cast<double>(reader.Data->LastTemperature));
+    }
 }
 
 const char *K4AImuWindow::GetTitle() const

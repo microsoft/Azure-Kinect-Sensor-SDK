@@ -77,7 +77,12 @@ TEST_F(playback_perf, test_1000_reads_forward)
         for (int i = 0; i < 1000; i++)
         {
             playback_result = k4a_playback_get_next_capture(handle, &capture);
-            ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
+            ASSERT_NE(playback_result, K4A_STREAM_RESULT_FAILED);
+            if (playback_result == K4A_STREAM_RESULT_EOF)
+            {
+                std::cout << "    Warning: Input file is too short, only read " << i << " captures." << std::endl;
+                break;
+            }
             ASSERT_NE(capture, nullptr);
             k4a_capture_release(capture);
         }
@@ -109,7 +114,12 @@ TEST_F(playback_perf, test_1000_reads_backward)
         for (int i = 0; i < 1000; i++)
         {
             playback_result = k4a_playback_get_previous_capture(handle, &capture);
-            ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
+            ASSERT_NE(playback_result, K4A_STREAM_RESULT_FAILED);
+            if (playback_result == K4A_STREAM_RESULT_EOF)
+            {
+                std::cout << "    Warning: Input file is too short, only read " << i << " captures." << std::endl;
+                break;
+            }
             ASSERT_NE(capture, nullptr);
             k4a_capture_release(capture);
         }
@@ -141,7 +151,12 @@ TEST_F(playback_perf, test_read_latency_30fps)
             playback_result = k4a_playback_get_next_capture(handle, &capture);
             auto delta = std::chrono::high_resolution_clock::now() - start;
 
-            ASSERT_EQ(playback_result, K4A_STREAM_RESULT_SUCCEEDED);
+            ASSERT_NE(playback_result, K4A_STREAM_RESULT_FAILED);
+            if (playback_result == K4A_STREAM_RESULT_EOF)
+            {
+                std::cout << "    Warning: Input file is too short, only read " << i << " captures." << std::endl;
+                break;
+            }
             ASSERT_NE(capture, nullptr);
             k4a_capture_release(capture);
 
@@ -156,9 +171,65 @@ TEST_F(playback_perf, test_read_latency_30fps)
     {
         total_ns += d;
     }
-    std::cout << "Avg latency: " << (total_ns / (int64_t)deltas.size() / 1000) << " usec" << std::endl;
-    std::cout << "P95 latency: " << (deltas[(size_t)((double)deltas.size() * 0.95) - 1] / 1000) << " usec" << std::endl;
-    std::cout << "P99 latency: " << (deltas[(size_t)((double)deltas.size() * 0.99) - 1] / 1000) << " usec" << std::endl;
+    std::cout << "    Avg latency: " << (total_ns / (int64_t)deltas.size() / 1000) << " usec" << std::endl;
+    std::cout << "    P95 latency: " << (deltas[(size_t)((double)deltas.size() * 0.95) - 1] / 1000) << " usec"
+              << std::endl;
+    std::cout << "    P99 latency: " << (deltas[(size_t)((double)deltas.size() * 0.99) - 1] / 1000) << " usec"
+              << std::endl;
+
+    k4a_playback_close(handle);
+}
+
+TEST_F(playback_perf, test_read_latency_30fps_bgra_conversion)
+{
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = K4A_RESULT_FAILED;
+    {
+        Timer t("File open: " + g_test_file_name);
+        result = k4a_playback_open(g_test_file_name.c_str(), &handle);
+    }
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    result = k4a_playback_set_color_conversion(handle, K4A_IMAGE_FORMAT_COLOR_BGRA32);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    std::vector<int64_t> deltas;
+
+    {
+        k4a_capture_t capture = NULL;
+        k4a_stream_result_t playback_result = K4A_STREAM_RESULT_FAILED;
+        Timer t("Next capture x1000");
+        for (int i = 0; i < 1000; i++)
+        {
+
+            auto start = std::chrono::high_resolution_clock::now();
+            playback_result = k4a_playback_get_next_capture(handle, &capture);
+            auto delta = std::chrono::high_resolution_clock::now() - start;
+
+            if (playback_result == K4A_STREAM_RESULT_EOF)
+            {
+                std::cout << "    Warning: Input file is too short, only read " << i << " captures." << std::endl;
+                break;
+            }
+            ASSERT_NE(capture, nullptr);
+            k4a_capture_release(capture);
+
+            deltas.push_back(delta.count());
+            std::this_thread::sleep_until(start + std::chrono::milliseconds(33));
+        }
+    }
+
+    std::sort(deltas.begin(), deltas.end(), std::less<int64_t>());
+    int64_t total_ns = 0;
+    for (auto d : deltas)
+    {
+        total_ns += d;
+    }
+    std::cout << "    Avg latency: " << (total_ns / (int64_t)deltas.size() / 1000) << " usec" << std::endl;
+    std::cout << "    P95 latency: " << (deltas[(size_t)((double)deltas.size() * 0.95) - 1] / 1000) << " usec"
+              << std::endl;
+    std::cout << "    P99 latency: " << (deltas[(size_t)((double)deltas.size() * 0.99) - 1] / 1000) << " usec"
+              << std::endl;
 
     k4a_playback_close(handle);
 }

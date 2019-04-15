@@ -263,11 +263,11 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !context->header_written);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster == NULL);
 
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
     if (cluster->data.size() == 0)
     {
         LOG_WARNING("Tried to write empty cluster to disk", 0);
-        return result;
+        delete cluster;
+        return K4A_RESULT_FAILED;
     }
 
     // Sort the data in the cluster by timestamp so it can be written in order
@@ -307,6 +307,8 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     KaxTrackEntry *current_track = NULL;
     uint64_t block_blob_start = 0;
 
+    std::vector<std::unique_ptr<KaxBlockBlob>> blob_list;
+
     bool first = true;
     for (std::pair<uint64_t, track_data_t> data : cluster->data)
     {
@@ -317,7 +319,10 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
             // We need to decide the block type ahead of time to force IMU into a BlockGroup
             block_blob = new KaxBlockBlob(data.second.track == context->imu_track ? BLOCK_BLOB_NO_SIMPLE :
                                                                                     BLOCK_BLOB_ALWAYS_SIMPLE);
-            new_cluster->AddBlockBlob(block_blob); // Blob will be freed by libmatroska when the file is closed.
+            // BlockBlob needs to be valid until the cluster is rendered.
+            // The blob will be freed at the end of write_cluster().
+            blob_list.emplace_back(block_blob);
+            new_cluster->AddBlockBlob(block_blob);
             block_blob->SetParent(*new_cluster);
             block_blob_start = data.first;
 
@@ -358,6 +363,8 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
         }
     }
 
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
     auto &cues = GetChild<KaxCues>(*context->file_segment);
     try
     {
@@ -381,8 +388,23 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
         data.second.buffer->FreeBuffer(*data.second.buffer);
     }
 
-    delete cluster;
+    // Both KaxCluster and KaxBlockBlob will try to free the same element due to a bug in libmatroska.
+    // In order to prevent this, we need to go through and remove the Block elements from the cluster.
+    auto &elements = new_cluster->GetElementList();
+    for (size_t i = 0; i < elements.size(); i++)
+    {
+        if (EbmlId(*elements[i]) == KaxBlockGroup::ClassInfos.GlobalId ||
+            EbmlId(*elements[i]) == KaxSimpleBlock::ClassInfos.GlobalId)
+        {
+            // Remove this element from the list.
+            // We don't care about preserving order because the Cluster has already been rendered.
+            elements[i] = elements.back();
+            elements.pop_back();
+            i--;
+        }
+    }
 
+    delete cluster;
     return result;
 }
 

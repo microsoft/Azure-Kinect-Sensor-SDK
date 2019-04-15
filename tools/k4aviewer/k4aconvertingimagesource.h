@@ -79,6 +79,14 @@ public:
         m_failed = true;
     }
 
+    void ClearData() override
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        m_textureBuffers.Clear();
+        m_inputImageBuffer.Clear();
+    }
+
     ~K4AConvertingImageSourceImpl() override
     {
         m_workerThreadShouldExit = true;

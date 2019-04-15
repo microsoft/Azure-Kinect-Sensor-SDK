@@ -12,6 +12,9 @@
 #include <k4ainternal/common.h>
 #include <k4ainternal/logging.h>
 
+#include <turbojpeg.h>
+#include <libyuv.h>
+
 using namespace LIBMATROSKA_NAMESPACE;
 
 namespace k4arecord
@@ -438,12 +441,14 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
         context->record_config.color_track_enabled = true;
         context->record_config.color_format = context->color_track.format;
+        context->color_format_conversion = context->color_track.format;
     }
     else
     {
         context->record_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
         // Set to a default color format if color track is disabled.
         context->record_config.color_format = K4A_IMAGE_FORMAT_CUSTOM;
+        context->color_format_conversion = K4A_IMAGE_FORMAT_CUSTOM;
     }
 
     KaxTag *depth_mode_tag = get_tag(context, "K4A_DEPTH_MODE");
@@ -547,6 +552,10 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
 
         RETURN_IF_ERROR(read_bitmap_info_header(&context->ir_track));
+        if (context->ir_track.format == K4A_IMAGE_FORMAT_DEPTH16)
+        {
+            context->ir_track.format = K4A_IMAGE_FORMAT_IR16;
+        }
 
         context->record_config.ir_track_enabled = true;
     }
@@ -1518,6 +1527,206 @@ static void free_vector_buffer(void *buffer, void *context)
     delete vector;
 }
 
+// Allocates a new image in the specified format from in_block
+k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
+                                    block_info_t *in_block,
+                                    k4a_image_t *image_out,
+                                    k4a_image_format_t target_format)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, in_block == nullptr);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, image_out == nullptr);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, in_block->reader == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, in_block->block == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, in_block->block->NumberFrames() != 1);
+
+    DataBuffer &data_buffer = in_block->block->GetBuffer(0);
+
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    std::vector<uint8_t> *buffer = NULL;
+    assert(in_block->reader->width <= INT_MAX);
+    assert(in_block->reader->height <= INT_MAX);
+    assert(in_block->reader->stride <= INT_MAX);
+    int out_width = (int)in_block->reader->width;
+    int out_height = (int)in_block->reader->height;
+    int out_stride = (int)in_block->reader->stride;
+    assert(out_height >= 0 && out_width >= 0);
+
+    switch (target_format)
+    {
+    case K4A_IMAGE_FORMAT_DEPTH16:
+    case K4A_IMAGE_FORMAT_IR16:
+        buffer = new std::vector<uint8_t>(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
+        if (in_block->reader->format == K4A_IMAGE_FORMAT_DEPTH16 || in_block->reader->format == K4A_IMAGE_FORMAT_IR16)
+        {
+            // 16 bit grayscale needs to be converted from big-endian back to little-endian.
+            assert(buffer->size() % sizeof(uint16_t) == 0);
+            uint16_t *buffer_raw = reinterpret_cast<uint16_t *>(buffer->data());
+            size_t buffer_size = buffer->size() / sizeof(uint16_t);
+            for (size_t i = 0; i < buffer_size; i++)
+            {
+                buffer_raw[i] = swap_bytes_16(buffer_raw[i]);
+            }
+        }
+        else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_YUY2)
+        {
+            // For backwards compatibility with early recordings, the YUY2 format was used. The actual data buffer is
+            // 16-bit little-endian, so we can just use the buffer as-is.
+        }
+        else
+        {
+            LOG_ERROR("Unsupported image format conversion: %d to %d", in_block->reader->format, target_format);
+            result = K4A_RESULT_FAILED;
+        }
+        break;
+    case K4A_IMAGE_FORMAT_COLOR_MJPG:
+    case K4A_IMAGE_FORMAT_COLOR_NV12:
+    case K4A_IMAGE_FORMAT_COLOR_YUY2:
+    case K4A_IMAGE_FORMAT_COLOR_BGRA32:
+        if (in_block->reader->format == target_format)
+        {
+            // No format conversion is required, just copy the buffer.
+            buffer = new std::vector<uint8_t>(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
+        }
+        else
+        {
+            // Convert the buffer to BGRA format first
+            out_stride = out_width * 4 * (int)sizeof(uint8_t);
+            buffer = new std::vector<uint8_t>((size_t)(out_height * out_stride));
+
+            if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_MJPG)
+            {
+                tjhandle turbojpeg_handle = tjInitDecompress();
+                if (tjDecompress2(turbojpeg_handle,
+                                  data_buffer.Buffer(),
+                                  data_buffer.Size(),
+                                  buffer->data(),
+                                  out_width,
+                                  0, // pitch
+                                  out_height,
+                                  TJPF_BGRA,
+                                  TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE) != 0)
+                {
+                    LOG_ERROR("Failed to decompress jpeg image to BGRA format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
+                (void)tjDestroy(turbojpeg_handle);
+            }
+            else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_NV12)
+            {
+                // The endianness of libyuv's ARGB is opposite our BGRA format. They are the same byte order.
+                if (libyuv::NV12ToARGB(data_buffer.Buffer(),
+                                       (int)in_block->reader->stride,
+                                       data_buffer.Buffer() + (out_height * (int)in_block->reader->stride),
+                                       (int)in_block->reader->stride,
+                                       buffer->data(),
+                                       out_stride,
+                                       out_width,
+                                       out_height) != 0)
+                {
+                    LOG_ERROR("Failed to convert NV12 image to BGRA format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
+            }
+            else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_YUY2)
+            {
+                // The endianness of libyuv's ARGB is opposite our BGRA format. They are the same byte order.
+                if (libyuv::YUY2ToARGB(data_buffer.Buffer(),
+                                       (int)in_block->reader->stride,
+                                       buffer->data(),
+                                       out_stride,
+                                       out_width,
+                                       out_height) != 0)
+                {
+                    LOG_ERROR("Failed to convert YUY2 image to BGRA format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
+            }
+            else
+            {
+                LOG_ERROR("Unsupported image format conversion: %d to %d", in_block->reader->format, target_format);
+                result = K4A_RESULT_FAILED;
+            }
+
+            if (K4A_SUCCEEDED(result) && target_format != K4A_IMAGE_FORMAT_COLOR_BGRA32)
+            {
+                auto bgra_buffer = buffer;
+                buffer = NULL;
+                int bgra_stride = out_stride;
+
+                if (target_format == K4A_IMAGE_FORMAT_COLOR_NV12)
+                {
+                    out_stride = out_width;
+                    size_t y_plane_size = (size_t)(out_height * out_stride);
+                    // Round up the size of the UV plane in case the resolution is odd.
+                    size_t uv_plane_size = (size_t)(out_height * out_stride + 1) / 2;
+                    buffer = new std::vector<uint8_t>(y_plane_size + uv_plane_size);
+
+                    if (libyuv::ARGBToNV12(bgra_buffer->data(),
+                                           bgra_stride,
+                                           buffer->data(),
+                                           out_stride,
+                                           buffer->data() + y_plane_size,
+                                           out_stride,
+                                           out_width,
+                                           out_height) != 0)
+                    {
+                        LOG_ERROR("Failed to convert BGRA image to NV12 format.", 0);
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+                else if (target_format == K4A_IMAGE_FORMAT_COLOR_YUY2)
+                {
+                    out_stride = out_width * 2;
+                    buffer = new std::vector<uint8_t>((size_t)(out_height * out_stride));
+
+                    if (libyuv::ARGBToYUY2(
+                            bgra_buffer->data(), bgra_stride, buffer->data(), out_stride, out_width, out_height) != 0)
+                    {
+                        LOG_ERROR("Failed to convert BGRA image to YUY2 format.", 0);
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+                else
+                {
+                    LOG_ERROR("Unsupported image format conversion: %d to %d", in_block->reader->format, target_format);
+                    result = K4A_RESULT_FAILED;
+                }
+
+                if (bgra_buffer != NULL)
+                {
+                    delete bgra_buffer;
+                }
+            }
+        }
+        break;
+    default:
+        LOG_ERROR("Unknown target image format: %d", target_format);
+        result = K4A_RESULT_FAILED;
+    }
+
+    if (K4A_SUCCEEDED(result) && buffer != NULL)
+    {
+        result = TRACE_CALL(k4a_image_create_from_buffer(target_format,
+                                                         out_width,
+                                                         out_height,
+                                                         out_stride,
+                                                         buffer->data(),
+                                                         buffer->size(),
+                                                         &free_vector_buffer,
+                                                         buffer,
+                                                         image_out));
+        k4a_image_set_timestamp_usec(*image_out, in_block->timestamp_ns / 1000);
+    }
+
+    if (K4A_FAILED(result) && buffer != NULL)
+    {
+        delete buffer;
+    }
+
+    return result;
+}
+
 k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k4a_capture_t *capture_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
@@ -1525,74 +1734,27 @@ k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block == nullptr);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block->reader == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block->block == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block->block->NumberFrames() != 1);
 
     if (*capture_handle == 0)
     {
         RETURN_IF_ERROR(k4a_capture_create(capture_handle));
     }
 
-    DataBuffer &data_buffer = block->block->GetBuffer(0);
-    std::vector<uint8_t> *buffer = new std::vector<uint8_t>(data_buffer.Buffer(),
-                                                            data_buffer.Buffer() + data_buffer.Size());
-
-    if (block->reader->format == K4A_IMAGE_FORMAT_DEPTH16 || block->reader->format == K4A_IMAGE_FORMAT_IR16)
-    {
-        // 16 bit grayscale needs to be converted from big-endian back to little-endian.
-        assert(buffer->size() % sizeof(uint16_t) == 0);
-        uint16_t *buffer_raw = reinterpret_cast<uint16_t *>(buffer->data());
-        size_t buffer_size = buffer->size() / sizeof(uint16_t);
-        for (size_t i = 0; i < buffer_size; i++)
-        {
-            buffer_raw[i] = swap_bytes_16(buffer_raw[i]);
-        }
-    }
-
-    assert(block->reader->width <= INT_MAX);
-    assert(block->reader->height <= INT_MAX);
-    assert(block->reader->stride <= INT_MAX);
     k4a_image_t image_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     if (block->reader == &context->color_track)
     {
-        result = TRACE_CALL(k4a_image_create_from_buffer(context->record_config.color_format,
-                                                         (int)block->reader->width,
-                                                         (int)block->reader->height,
-                                                         (int)block->reader->stride,
-                                                         buffer->data(),
-                                                         buffer->size(),
-                                                         &free_vector_buffer,
-                                                         buffer,
-                                                         &image_handle));
-        k4a_image_set_timestamp_usec(image_handle, block->timestamp_ns / 1000);
+        result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, context->color_format_conversion));
         k4a_capture_set_color_image(*capture_handle, image_handle);
     }
     else if (block->reader == &context->depth_track)
     {
-        result = TRACE_CALL(k4a_image_create_from_buffer(K4A_IMAGE_FORMAT_DEPTH16,
-                                                         (int)block->reader->width,
-                                                         (int)block->reader->height,
-                                                         (int)block->reader->stride,
-                                                         buffer->data(),
-                                                         buffer->size(),
-                                                         &free_vector_buffer,
-                                                         buffer,
-                                                         &image_handle));
-        k4a_image_set_timestamp_usec(image_handle, block->timestamp_ns / 1000);
+        result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, K4A_IMAGE_FORMAT_DEPTH16));
         k4a_capture_set_depth_image(*capture_handle, image_handle);
     }
     else if (block->reader == &context->ir_track)
     {
-        result = TRACE_CALL(k4a_image_create_from_buffer(K4A_IMAGE_FORMAT_IR16,
-                                                         (int)block->reader->width,
-                                                         (int)block->reader->height,
-                                                         (int)block->reader->stride,
-                                                         buffer->data(),
-                                                         buffer->size(),
-                                                         &free_vector_buffer,
-                                                         buffer,
-                                                         &image_handle));
-        k4a_image_set_timestamp_usec(image_handle, block->timestamp_ns / 1000);
+        result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, K4A_IMAGE_FORMAT_IR16));
         k4a_capture_set_ir_image(*capture_handle, image_handle);
     }
     else
@@ -1604,10 +1766,6 @@ k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k
     if (image_handle != NULL)
     {
         k4a_image_release(image_handle);
-    }
-    if (K4A_FAILED(result))
-    {
-        delete buffer;
     }
     return result;
 }
@@ -1634,7 +1792,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
         {
             enabled_tracks++;
 
-            // Only read from disk if we haven't aready found the next block for this track
+            // If the current block is NULL, find the next block before/after the seek timestamp.
             if (next_blocks[i] == nullptr)
             {
                 next_blocks[i] = find_block(context, blocks[i], context->seek_timestamp_ns);
@@ -1890,6 +2048,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
             {
                 imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
                 imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
+                imu_sample->temperature = std::numeric_limits<float>::quiet_NaN();
                 for (size_t i = 0; i < 3; i++)
                 {
                     imu_sample->acc_sample.v[i] = sample->acc_data[i];
