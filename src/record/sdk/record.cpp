@@ -643,6 +643,11 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
 
         { // Update seek info
             auto &seek_head = GetChild<KaxSeekHead>(*context->file_segment);
+            // RemoveAll() has a bug and does not free the elements before emptying the list.
+            for (auto element : seek_head.GetElementList())
+            {
+                delete element;
+            }
             seek_head.RemoveAll(); // Remove any seek entries from previous flushes
 
             seek_head.IndexThis(segment_info, *context->file_segment);
