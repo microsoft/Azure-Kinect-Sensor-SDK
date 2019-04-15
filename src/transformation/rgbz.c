@@ -98,7 +98,7 @@ static k4a_result_t transformation_compute_correspondence(const int depth_index,
                                                           const k4a_transformation_rgbz_context_t *context,
                                                           k4a_correspondence_t *correspondence)
 {
-    if (depth == 0)
+    if (depth == 0 || isnan(context->xy_tables->x_table[depth_index]))
     {
         memset(correspondence, 0, sizeof(k4a_correspondence_t));
         return K4A_RESULT_SUCCEEDED;
