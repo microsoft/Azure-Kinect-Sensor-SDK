@@ -302,49 +302,6 @@ TEST_F(custom_track_ut, read_custom_track_data)
     k4a_playback_close(handle);
 }
 
-TEST_F(custom_track_ut, read_custom_track_frame_information)
-{
-    k4a_playback_t handle = NULL;
-    k4a_result_t result = k4a_playback_open("record_test_custom_track.mkv", &handle);
-    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-
-    // Read track total frame numbers
-    size_t custom_track_frame_num = k4a_playback_track_get_frame_count(handle, "CUSTOM_TRACK_1");
-    ASSERT_EQ(custom_track_frame_num, max_frame_index - custom_track_start_index);
-
-    size_t depth_frame_num = k4a_playback_track_get_frame_count(handle, "DEPTH");
-    ASSERT_EQ(depth_frame_num, max_frame_index);
-
-    size_t frame_num = k4a_playback_track_get_frame_count(handle, "NON_EXISTED_TRACK");
-    ASSERT_EQ(frame_num, 0);
-
-    uint64_t expected_timestamp_usec = 0;
-    int64_t timestamp_usec = 0;
-    for (size_t i = 0; i < max_frame_index; i++)
-    {
-        if (i >= custom_track_start_index)
-        {
-            timestamp_usec = k4a_playback_track_get_frame_usec_by_index(handle,
-                                                                        "CUSTOM_TRACK_1",
-                                                                        i - custom_track_start_index);
-            ASSERT_EQ(timestamp_usec, static_cast<int64_t>(expected_timestamp_usec));
-        }
-
-        timestamp_usec = k4a_playback_track_get_frame_usec_by_index(handle, "IR", i);
-        ASSERT_EQ(timestamp_usec, static_cast<int64_t>(expected_timestamp_usec));
-
-        expected_timestamp_usec += test_timestamp_delta_usec;
-    }
-
-    timestamp_usec = k4a_playback_track_get_frame_usec_by_index(handle, "IR", 100);
-    ASSERT_EQ(timestamp_usec, -1);
-
-    timestamp_usec = k4a_playback_track_get_frame_usec_by_index(handle, "NON_EXISTED_TRACK", 0);
-    ASSERT_EQ(timestamp_usec, -1);
-
-    k4a_playback_close(handle);
-}
-
 TEST_F(custom_track_ut, seek_custom_track_frame)
 {
     k4a_playback_t handle = NULL;

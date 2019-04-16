@@ -399,40 +399,6 @@ k4a_playback_get_attachment(k4a_playback_t playback_handle, const char *file_nam
     }
 }
 
-size_t k4a_playback_track_get_frame_count(k4a_playback_t playback_handle, const char *track_name)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_t, playback_handle);
-    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
-    RETURN_VALUE_IF_ARG(0, context == NULL);
-    RETURN_VALUE_IF_ARG(0, track_name == NULL);
-
-    track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
-    if (track_reader != nullptr)
-    {
-        return track_reader->block_index_timestamp_usec_map.size();
-    }
-
-    return 0;
-}
-
-int64_t k4a_playback_track_get_frame_usec_by_index(k4a_playback_t playback_handle,
-                                                   const char *track_name,
-                                                   size_t frame_index)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(-1, k4a_playback_t, playback_handle);
-    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
-    RETURN_VALUE_IF_ARG(-1, context == NULL);
-    RETURN_VALUE_IF_ARG(-1, track_name == NULL);
-
-    track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
-    if (track_reader != nullptr && frame_index < track_reader->block_index_timestamp_usec_map.size())
-    {
-        return track_reader->block_index_timestamp_usec_map[frame_index];
-    }
-
-    return -1;
-}
-
 k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_t playback_handle, k4a_capture_t *capture_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_STREAM_RESULT_FAILED, k4a_playback_t, playback_handle);

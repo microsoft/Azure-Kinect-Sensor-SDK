@@ -358,56 +358,6 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_attachment(k4a_playback_t 
                                                                  uint8_t *data,
                                                                  size_t *data_size);
 
-/** Gets the total frame count given a track name
- *
- * \param playback_handle
- * Handle obtained by k4a_playback_open().
- *
- * \param track_name
- * The track name to be queried the frame count
- *
- * \returns
- * The number of frame count. 0 if the function call failed.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
- *   <requirement name="Library">k4arecord.lib</requirement>
- *   <requirement name="DLL">k4arecord.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4ARECORD_EXPORT size_t k4a_playback_track_get_frame_count(k4a_playback_t playback_handle, const char *track_name);
-
-/** Queries the frame timestamp based on the frame index from a given track name
- *
- * The timestamp can be used in the k4a_playback_seek_timestamp function. You can jump to a given frame index by using
- * these two APIs together.
- *
- * \param playback_handle
- * Handle obtained by k4a_playback_open().
- *
- * \param track_name
- * The track name to be queried the frame index timestamp
- *
- * \param frame_index
- * The frame_index to be queried the timestamp
- *
- * \returns
- * The frame timestamp of the given frame_index in micro-second. -1 if the function call failed.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
- *   <requirement name="Library">k4arecord.lib</requirement>
- *   <requirement name="DLL">k4arecord.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4ARECORD_EXPORT int64_t k4a_playback_track_get_frame_usec_by_index(k4a_playback_t playback_handle,
-                                                                    const char *track_name,
-                                                                    size_t frame_index);
-
 /** Read the next capture in the recording sequence.
  *
  * \param playback_handle

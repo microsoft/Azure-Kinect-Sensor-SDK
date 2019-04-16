@@ -779,12 +779,6 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         context->record_config.start_timestamp_offset_usec = 0;
     }
 
-    if (K4A_FAILED(parse_all_timestamps(context)))
-    {
-        // The rest of the recording can still be read if parse track timestamps failed
-        LOG_WARNING("Pre-parsing all track timestamp information failed.");
-    }
-
     return K4A_RESULT_SUCCEEDED;
 }
 
@@ -1089,96 +1083,6 @@ KaxAttached *get_attachment_by_tag(k4a_playback_context_t *context, const char *
     }
 
     return NULL;
-}
-
-k4a_result_t parse_all_timestamps(k4a_playback_context_t *context)
-{
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL || context->segment == NULL);
-
-    if (K4A_FAILED(seek_offset(context, context->first_cluster_offset)))
-    {
-        return K4A_RESULT_FAILED;
-    }
-    std::shared_ptr<KaxCluster> cluster = find_next<KaxCluster>(context, false);
-
-    while (cluster != nullptr)
-    {
-        std::shared_ptr<EbmlElement> element = next_element(context, cluster.get());
-        bool cluster_start_found = false;
-        int upper_level = 0;
-
-        while (element != nullptr)
-        {
-            uint64_t block_timestamp_ns = 0;
-            uint16_t track_number = 0;
-            bool is_data_block = false;
-
-            EbmlId element_id(*element);
-            if (element_id == KaxClusterTimecode::ClassInfos.GlobalId)
-            {
-                KaxClusterTimecode *cluster_timecode = read_element<KaxClusterTimecode>(context, element.get());
-                cluster->InitTimecode(cluster_timecode->GetValue(), (int64_t)context->timecode_scale);
-                cluster_start_found = true;
-            }
-            else if (element_id == KaxSimpleBlock::ClassInfos.GlobalId)
-            {
-                assert(cluster_start_found);
-                KaxSimpleBlock *simple_block = read_element<KaxSimpleBlock>(context, element.get(), SCOPE_PARTIAL_DATA);
-
-                simple_block->SetParent(*cluster);
-                block_timestamp_ns = simple_block->GlobalTimecode();
-                track_number = simple_block->TrackNum();
-                is_data_block = true;
-            }
-            else if (element_id == KaxBlockGroup::ClassInfos.GlobalId)
-            {
-                assert(cluster_start_found);
-                KaxBlockGroup *block_group = read_element<KaxBlockGroup>(context, element.get(), SCOPE_PARTIAL_DATA);
-
-                block_group->SetParent(*cluster);
-                block_timestamp_ns = block_group->GlobalTimecode();
-                track_number = block_group->TrackNumber();
-                is_data_block = true;
-            }
-
-            if (is_data_block)
-            {
-                auto itr = context->track_number_name_map.find(track_number);
-                if (itr != context->track_number_name_map.end())
-                {
-                    track_reader_t *track_reader = get_track_reader_by_name(context, itr->second);
-                    track_reader->block_index_timestamp_usec_map.push_back(block_timestamp_ns / 1000);
-                }
-            }
-
-            skip_element(context, element.get());
-            element = next_element(context, cluster.get(), &upper_level);
-
-            // The next element is no longer the child, but is same level as cluster
-            if (upper_level > 0)
-            {
-                break;
-            }
-        }
-
-        // There is no more element left
-        if (element == nullptr)
-        {
-            break;
-        }
-        else if (static_cast<EbmlId>(*element) == KaxCluster::ClassInfos.GlobalId)
-        {
-            // The next element happen to be another cluster. Use this as the next cluster pointer
-            cluster = std::static_pointer_cast<KaxCluster, EbmlElement>(element);
-        }
-        else
-        {
-            // The next element is other types. Try to find the next cluster type
-            cluster = find_next<KaxCluster>(context, true);
-        }
-    }
-
-    return K4A_RESULT_SUCCEEDED;
 }
 
 k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset)

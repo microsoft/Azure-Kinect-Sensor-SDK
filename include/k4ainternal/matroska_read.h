@@ -76,7 +76,6 @@ typedef struct _track_reader_t
     std::shared_ptr<block_info_t> current_block;
     uint64_t frame_period_ns = 0;
     track_type type = track_video;
-    std::vector<uint64_t> block_index_timestamp_usec_map;
 
     // Fields specific to video track
     uint32_t width = 0;
