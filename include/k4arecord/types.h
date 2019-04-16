@@ -133,7 +133,7 @@ typedef struct _k4a_record_configuration_t
     uint32_t start_timestamp_offset_usec;
 } k4a_record_configuration_t;
 
-/** TODO
+/** Structure containing the video information used to add or parse a video custom track
  *
  * \xmlonly
  * <requirements>

@@ -171,8 +171,6 @@ std::string get_tag_string(libmatroska::KaxTag *tag);
 libmatroska::KaxAttached *get_attachment_by_name(k4a_playback_context_t *context, const char *file_name);
 libmatroska::KaxAttached *get_attachment_by_tag(k4a_playback_context_t *context, const char *tag_name);
 
-k4a_result_t parse_all_timestamps(k4a_playback_context_t *context);
-
 k4a_result_t seek_offset(k4a_playback_context_t *context, uint64_t offset);
 void populate_cluster_info(k4a_playback_context_t *context,
                            std::shared_ptr<libmatroska::KaxCluster> &cluster,
