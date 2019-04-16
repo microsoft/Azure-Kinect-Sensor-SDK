@@ -519,7 +519,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             {
                 if (depth_mode_str == legacy_depth_modes[i].second)
                 {
-                    if (k4a_convert_depth_mode_to_width_height(legacy_depth_modes[i].first, &depth_width, &depth_height))
+                    if (k4a_convert_depth_mode_to_width_height(legacy_depth_modes[i].first,
+                                                               &depth_width,
+                                                               &depth_height))
                     {
                         context->record_config.depth_mode = legacy_depth_modes[i].first;
                         break;
