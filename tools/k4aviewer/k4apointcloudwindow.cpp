@@ -172,18 +172,36 @@ K4APointCloudWindow::K4APointCloudWindow(std::string &&windowTitle,
 
 void K4APointCloudWindow::ProcessInput(ImVec2 imageStartPos, ImVec2 displayDimensions)
 {
+    ImGuiIO &io = ImGui::GetIO();
+
+    const bool leftMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_1];
+    const bool rightMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_2];
+
+    const bool anyMouseDown = leftMouseDown || rightMouseDown;
+    if (!anyMouseDown)
+    {
+        m_dragging = false;
+    }
+
+    const linmath::vec2 mousePos{ io.MousePos.x - imageStartPos.x, io.MousePos.y - imageStartPos.y };
+
+    const linmath::vec2 mouseDelta{ io.MouseDelta.x, io.MouseDelta.y };
+    const linmath::vec2 dimensions{ displayDimensions.x, displayDimensions.y };
+
     if (ImGui::IsWindowFocused())
     {
-        ImGuiIO &io = ImGui::GetIO();
+        m_pointCloudVisualizer.ProcessMouseScroll(io.MouseWheel);
 
-        const bool leftMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_1];
-        const bool rightMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_2];
+        if (!m_dragging && anyMouseDown)
+        {
+            m_dragging = true;
+            m_dragStartedOnPointCloud = mousePos[0] >= 0.f && mousePos[0] <= displayDimensions.x &&
+                                        mousePos[1] >= 0.f && mousePos[1] <= displayDimensions.y;
+        }
+    }
 
-        const linmath::vec2 mousePos{ io.MousePos.x - imageStartPos.x, io.MousePos.y - imageStartPos.y };
-
-        const linmath::vec2 mouseDelta{ io.MouseDelta.x, io.MouseDelta.y };
-        const linmath::vec2 dimensions{ displayDimensions.x, displayDimensions.y };
-
+    if (m_dragging && m_dragStartedOnPointCloud)
+    {
         MouseMovementType movementType = MouseMovementType::None;
         if (leftMouseDown)
         {
@@ -195,7 +213,6 @@ void K4APointCloudWindow::ProcessInput(ImVec2 imageStartPos, ImVec2 displayDimen
         }
 
         m_pointCloudVisualizer.ProcessMouseMovement(dimensions, mousePos, mouseDelta, movementType);
-        m_pointCloudVisualizer.ProcessMouseScroll(io.MouseWheel);
     }
 }
 

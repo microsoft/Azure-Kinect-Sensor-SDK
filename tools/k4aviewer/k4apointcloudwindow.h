@@ -54,6 +54,8 @@ private:
     bool m_enableColorPointCloud = false;
 
     bool m_failed = false;
+    bool m_dragging = false;
+    bool m_dragStartedOnPointCloud = false;
 
     static constexpr int MaxConsecutiveMissingImages = 10;
     int m_consecutiveMissingImages = 0;
