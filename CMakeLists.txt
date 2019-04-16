@@ -48,7 +48,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     include(MSVCStaticCrt)
     include(MSVCLinkerFlags)
-    add_compile_options("/ZH:SHA_256") # Embed hash of source files
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /ZH:SHA_256")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZH:SHA_256")
 endif()
 
 # Find all dependencies
@@ -65,6 +66,10 @@ set(K4A_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
 # Source for the common version resource file
 set(K4A_VERSION_RC ${CMAKE_CURRENT_LIST_DIR}/version.rc.in)
+
+if ("${K4A_ENABLE_LEAK_DETECTION_CMAKE}" STREQUAL "1")
+    add_definitions(-DK4A_ENABLE_LEAK_DETECTION)
+endif()
 
 add_subdirectory(examples)
 add_subdirectory(src)

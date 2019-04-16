@@ -62,7 +62,7 @@ int K4AAudioManager::RefreshDevices()
 
     std::map<std::string, std::string> soundIoToSerialNumberMapping;
 
-    if (!K4ADeviceCorrelator::GetSoundIoBackendIdToSerialNumberMapping(m_io.get(), soundIoToSerialNumberMapping))
+    if (!K4ADeviceCorrelator::GetSoundIoBackendIdToSerialNumberMapping(m_io.get(), &soundIoToSerialNumberMapping))
     {
         return SoundIoErrorIncompatibleDevice;
     }

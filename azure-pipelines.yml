@@ -6,6 +6,10 @@ name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
+- name: 'linux_firmware_version'
+  value: '1.5.946614'
+- name: 'windows_firmware_version'
+  value: '1.5.926614'
 
 trigger:
   batch: false
@@ -19,45 +23,93 @@ trigger:
 jobs:
 - job: WindowsK4ABuildTest
   displayName: Windows K4A Build + Test
-  pool:
-    vmImage: 'vs2017-win2016'
-    demands:
-      - Cmd
   strategy:
     maxParallel: 100
     matrix:
-      x86_64-pc-windows-msvc_debug_ninja:
+      VS2017_x86_64-pc-windows-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
-      x86_64-pc-windows-msvc_relwithdebinfo_ninja:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86_64-pc-windows-msvc_relwithdebinfo_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
-      x86_64-pc-windows-msvc_debug_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86_64-pc-windows-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'debug'
-      x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'relwithdebinfo'
-      x86-pc-windows-msvc_debug_ninja:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
-      x86-pc-windows-msvc_relwithdebinfo_ninja:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_relwithdebinfo_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
-      x86-pc-windows-msvc_debug_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'debug'
-      x86-pc-windows-msvc_relwithdebinfo_msbuild:
+        vmImage: 'vs2017-win2016'
+      VS2017_x86-pc-windows-msvc_relwithdebinfo_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'vs2017-win2016'
+      VS2019_x86_64-pc-windows-msvc_debug_ninja:
+        CMakeArch: 'amd64'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'debug'
+        vmImage: 'windows-2019'
+      VS2019_x86_64-pc-windows-msvc_relwithdebinfo_ninja:
+        CMakeArch: 'amd64'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'windows-2019'
+      # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
+      # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
+      #   CMakeArch: 'amd64'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'debug'
+      #   vmImage: 'windows-2019'
+      # VS2019_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
+      #   CMakeArch: 'amd64'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'relwithdebinfo'
+      #   vmImage: 'windows-2019'
+      VS2019_x86-pc-windows-msvc_debug_ninja:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'debug'
+        vmImage: 'windows-2019'
+      VS2019_x86-pc-windows-msvc_relwithdebinfo_ninja:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'relwithdebinfo'
+        vmImage: 'windows-2019'
+      # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
+      # VS2019_x86-pc-windows-msvc_debug_msbuild:
+      #   CMakeArch: 'x86'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'debug'
+      #   vmImage: 'windows-2019'
+      # VS2019_x86-pc-windows-msvc_relwithdebinfo_msbuild:
+      #   CMakeArch: 'x86'
+      #   BuildGenerator: 'Visual Studio 16 2019'
+      #   CMakeConfiguration: 'relwithdebinfo'
+      #   vmImage: 'windows-2019'
+  pool:
+    vmImage: $(vmImage)
 
   steps:
   - checkout: self
@@ -65,7 +117,7 @@ jobs:
     fetchDepth: 20
     lfs: false
     persistCredentials: true
-    submodules: 'recursive'
+    submodules: true
 
   # Use Python Version
   # Retrieves the specified version of Python from the tool cache. Optionally add it to PATH.
@@ -89,14 +141,67 @@ jobs:
     displayName: 'Check Line Endings'
 
   - task: BatchScript@1
-    displayName: 'Setup VS2017 Env'
+    displayName: 'Setup VS Env'
     inputs:
       filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
       arguments: '-arch=$(CMakeArch)'
       modifyEnvironment: true
+    condition: and(succeeded(), eq(variables['vmImage'], 'vs2017-win2016'))
+
+  - task: BatchScript@1
+    displayName: 'Setup VS Env'
+    inputs:
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat'
+      arguments: '-arch=$(CMakeArch)'
+      modifyEnvironment: true
+    condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
+
+  - powershell: |
+      $ErrorActionPreference = "Stop"
+
+      function Download-ToTemp
+      {
+          param
+          (
+              [Parameter(Mandatory)]
+              [string] $url,
+              [string] $filename
+          )
+
+          if (-not ($filename))
+          {
+              $filename = Split-Path -Path $url -Leaf
+          }
+
+          if (-not ($filename))
+          {
+              Write-Error "Unable to parse filename from $url"
+              return $null
+          }
+
+          $tempDir = [System.IO.Path]::GetTempPath()
+          $path = Join-Path -Path $tempDir -ChildPath $filename
+
+          Write-Host -NoNewline "Downloading $url to $path..."
+          Invoke-WebRequest -Uri $url -OutFile $path -UserAgent "NativeClient"
+          Write-Host "Done"
+
+          return $path
+      }
+
+      # Download NASM
+      $url = "https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/win64/nasm-2.14.02-win64.zip"
+      $nasmzip = Download-ToTemp -url $url
+
+      Expand-Archive $nasmzip .\nasmexe
+      Write-Host "NASM Downloaded"
+
+    workingDirectory: '$(Build.BinariesDirectory)'
+    displayName: 'Download NASM'
 
   - script: |
-       cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
+      set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
+      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:
@@ -146,7 +251,7 @@ jobs:
       ArtifactName: '$(CMakeArch)-windows-msvc-$(CMakeConfiguration)'
       parallel: true
       parallelCount: 8
-    condition: and(succeeded(), eq(variables['BuildGenerator'], 'Ninja'))
+    condition: and(succeeded(), and(eq(variables['vmImage'], 'vs2017-win2016'), eq(variables['BuildGenerator'], 'Ninja')))
 
   # This will publish symbols created from this build to the Azure DevOps symbol
   # server. This symbol server will be private to Microsoft internal.
@@ -158,7 +263,7 @@ jobs:
       indexSources: true
       publishSymbols: true
       symbolServerType: 'teamServices'
-    condition: and(succeeded(), eq(variables['BuildGenerator'], 'Ninja'))
+    condition: and(succeeded(), and(eq(variables['vmImage'], 'vs2017-win2016'), eq(variables['BuildGenerator'], 'Ninja')))
 
 - job: LinuxK4ABuildTest
   displayName: Linux K4A Build + Test
@@ -200,7 +305,7 @@ jobs:
     fetchDepth: 20
     lfs: false
     persistCredentials: true
-    submodules: 'recursive'
+    submodules: true
 
   - task: ShellScript@2
     inputs:
@@ -278,7 +383,7 @@ jobs:
     fetchDepth: 20
     lfs: false
     persistCredentials: true
-    submodules: 'recursive'
+    submodules: true
 
   - task: BatchScript@1
     displayName: 'Setup VS2017 Env'
@@ -358,6 +463,8 @@ jobs:
   - job: WindowsFunctionalTests
     displayName: Windows Functional Test
     dependsOn: WindowsK4ABuildTest
+    variables:
+      firmware_version: "$(windows_firmware_version)"
     pool:
       name: Analog-FwConnected
       demands:
@@ -369,7 +476,7 @@ jobs:
       clean: true
       lfs: false
       persistCredentials: true
-      submodules: 'recursive'
+      submodules: true
 
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
@@ -394,11 +501,24 @@ jobs:
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
         flattenFolders: true
 
+    - task: UniversalPackages@0
+      displayName: 'Download Azure Kinect Firmware'
+      inputs:
+        command: download
+        vstsFeed: 'analog.ai.depthcamera'
+        vstsFeedPackage: 'azure-kinect-firmware'
+        vstsPackageVersion: "$(firmware_version)"
+        downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
+
     - task: PowerShell@2
       inputs:
         targetType: 'filePath'
         filePath: './scripts/Reset-Device.ps1'
       displayName: 'Reset K4A Device'
+
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinect_Fw_$(firmware_version).bin'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Update Device'
 
     - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\enumerate_devices.exe'
       workingDirectory: '$(System.ArtifactsDirectory)'
@@ -426,6 +546,8 @@ jobs:
   - job: LinuxFunctionalTests
     displayName: Linux Functional Test
     dependsOn: LinuxK4ABuildTest
+    variables:
+      firmware_version: "$(linux_firmware_version)"
     pool:
       name: Analog-FwConnected
       demands:
@@ -437,13 +559,22 @@ jobs:
       clean: true
       lfs: false
       persistCredentials: true
-      submodules: 'recursive'
+      submodules: true
 
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
       inputs:
         artifactName: 'x86_64-linux-clang-RelWithDebInfo'
         parallelizationLimit: 8
+
+    - task: UniversalPackages@0
+      displayName: 'Download Azure Kinect Firmware'
+      inputs:
+        command: download
+        vstsFeed: 'analog.ai.depthcamera'
+        vstsFeedPackage: 'azure-kinect-firmware'
+        vstsPackageVersion: "$(firmware_version)"
+        downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
 
     - task: UniversalPackages@0
       displayName: 'Download DepthEngine Plugin'
@@ -453,6 +584,19 @@ jobs:
         vstsFeedPackage: 'depthengine'
         vstsPackageVersion: "1.0.1"
         downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
+
+    - task: UniversalPackages@0
+      displayName: 'Download findconnectedport'
+      inputs:
+        command: download
+        vstsFeed: 'analog.ai.depthcamera'
+        vstsFeedPackage: 'findconnectedport'
+        vstsPackageVersion: "0.1.1"
+        downloadDirectory: "$(System.ArtifactsDirectory)/findconnectedport"
+
+    - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Add execution property to findconnectedport'
 
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
@@ -486,9 +630,13 @@ jobs:
 
       # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
       # Wait a little bit so the device can enumerate, 3 seconds has seemed good.
-    - script: '/home/eden/findconnectedport-linux/findconnectedport && sleep 3'
-      workingDirectory: '/home/eden/findconnectedport-linux/'
+    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport && sleep 3'
+      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
       displayName: 'Reset K4A Device'
+
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinect_Fw_$(firmware_version).bin'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'Update Device'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
       workingDirectory: '$(System.ArtifactsDirectory)'
@@ -506,6 +654,6 @@ jobs:
       continueOnError: true
 
     # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-    - script: '/home/eden/findconnectedport-linux/findconnectedport'
-      workingDirectory: '/home/eden/findconnectedport-linux/'
+    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport'
+      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
       displayName: 'Reset K4A Device'

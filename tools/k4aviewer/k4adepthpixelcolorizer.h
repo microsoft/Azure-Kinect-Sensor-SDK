@@ -10,114 +10,92 @@
 
 // Library headers
 //
+#include "k4aimgui_all.h"
 
 // Project headers
 //
 #include "k4apixel.h"
-#include "k4aviewerutil.h"
 
 namespace k4aviewer
 {
 
-using DepthPixelVisualizationFunction = RgbPixel(const ExpectedValueRange &validValueRange, const DepthPixel &value);
+using DepthPixelVisualizationFunction = BgraPixel(const DepthPixel &value,
+                                                  const DepthPixel &min,
+                                                  const DepthPixel &max);
 
+// Functions that provide ways to take depth images and turn them into color representations
+// suitable for showing to humans.
+//
 class K4ADepthPixelColorizer
 {
 public:
-    // Colorizing strategy that uses a rainbow gradient where blue is near and red is far
+    // Computes a color representation of a depth pixel on the blue-red spectrum, using min
+    // as the value for blue and max as the value for red.
     //
-    static inline RgbPixel ColorizeRedToBlue(const ExpectedValueRange &validValueRange, const DepthPixel &value)
+    static inline BgraPixel ColorizeBlueToRed(const DepthPixel &depthPixel,
+                                              const DepthPixel &min,
+                                              const DepthPixel &max)
     {
-        float c[3] = { 1.0, 1.0, 1.0 }; // white
+        constexpr uint8_t PixelMax = std::numeric_limits<uint8_t>::max();
+
+        // Default to opaque black.
+        //
+        BgraPixel result = { 0, 0, 0, PixelMax };
 
         // If the pixel is actual zero and not just below the min value, make it black
         //
-        if (value == 0)
+        if (depthPixel == 0)
         {
-            return RgbPixel{ 0, 0, 0 };
+            return result;
         }
 
-        DepthPixel clampedValue = value;
-        clampedValue = std::min(clampedValue, validValueRange.Max);
-        clampedValue = std::max(clampedValue, validValueRange.Min);
+        uint16_t clampedValue = depthPixel;
+        clampedValue = std::min(clampedValue, max);
+        clampedValue = std::max(clampedValue, min);
 
-        const auto dv = static_cast<float>(validValueRange.Max - validValueRange.Min);
-        const float index = (clampedValue - validValueRange.Min) / dv; // [0, 1]
-        // If we're less than min, in the middle, or greater than max, then do B, G, R, respectively
-        if (index <= 0.0f)
-        {
-            c[0] = 0.0f;
-            c[1] = 0.0f;
-            c[2] = 1.0f; // Blue
-        }
-        else if (index == 0.5f)
-        {
-            c[0] = 0.0f;
-            c[1] = 1.0f; // Green
-            c[2] = 0.0f;
-        }
-        else if (index >= 1.0f)
-        {
-            c[0] = 1.0f; // Red
-            c[1] = 0.0f;
-            c[2] = 0.0f;
-        }
-        // The in between colors
-        else if (index < 0.5f)
-        {
-            // Adjust only Blue and Green
-            const float colorToSubtract = index - 0.25f; // [-.25, .25]
-            c[0] = 0.0f;                                 // Red
-            if (colorToSubtract < 0.0f)
-            {
-                // If < 0, then subtract from Green
-                c[1] = 1.0f + (4.0f * colorToSubtract);
-                c[2] = 1.0f;
-            }
-            else
-            {
-                // If > 0, then subtract from Blue
-                c[1] = 1.0f;
-                c[2] = 1.0f - (4.0f * colorToSubtract);
-            }
-        }
-        else
-        {
-            // Adjust only Green and Red
-            const float colorToSubtract = index - 0.75f; // [-.25, .25]
-            c[2] = 0.0f;                                 // Blue
-            if (colorToSubtract < 0.0f)
-            {
-                // If < 0, then subtract from Red
-                c[0] = 1.0f + (4.0f * colorToSubtract);
-                c[1] = 1.0f;
-            }
-            else
-            {
-                // If > 0, then subtract from Green
-                c[0] = 1.0f;
-                c[1] = 1.0f - (4.0f * colorToSubtract);
-            }
-        }
+        // Normalize to [0, 1]
+        //
+        float hue = (clampedValue - min) / static_cast<float>(max - min);
 
-        return RgbPixel{ static_cast<uint8_t>(c[0] * std::numeric_limits<uint8_t>::max()),
-                         static_cast<uint8_t>(c[1] * std::numeric_limits<uint8_t>::max()),
-                         static_cast<uint8_t>(c[2] * std::numeric_limits<uint8_t>::max()) };
+        // The 'hue' coordinate in HSV is a polar coordinate, so it 'wraps'.
+        // Purple starts after blue and is close enough to red to be a bit unclear,
+        // so we want to go from blue to red.  Purple starts around .6666667,
+        // so we want to normalize to [0, .6666667].
+        //
+        constexpr float range = 2.f / 3.f;
+        hue *= range;
+
+        // We want blue to be close and red to be far, so we need to reflect the
+        // hue across the middle of the range.
+        //
+        hue = range - hue;
+
+        float fRed = 0.f;
+        float fGreen = 0.f;
+        float fBlue = 0.f;
+        ImGui::ColorConvertHSVtoRGB(hue, 1.f, 1.f, fRed, fGreen, fBlue);
+
+        result.Red = static_cast<uint8_t>(fRed * PixelMax);
+        result.Green = static_cast<uint8_t>(fGreen * PixelMax);
+        result.Blue = static_cast<uint8_t>(fBlue * PixelMax);
+
+        return result;
     }
 
-    static inline RgbPixel ColorizeGreyscale(const ExpectedValueRange &expectedValueRange, const DepthPixel &value)
+    // Computes a greyscale representation of a depth pixel.
+    //
+    static inline BgraPixel ColorizeGreyscale(const DepthPixel &value, const DepthPixel &min, const DepthPixel &max)
     {
         // Clamp to max
         //
-        DepthPixel pixelValue = std::min(value, expectedValueRange.Max);
+        DepthPixel pixelValue = std::min(value, max);
 
-        const auto normalizedValue = static_cast<uint8_t>(
-            (pixelValue - expectedValueRange.Min) *
-            (double(std::numeric_limits<uint8_t>::max()) / (expectedValueRange.Max - expectedValueRange.Min)));
+        constexpr uint8_t PixelMax = std::numeric_limits<uint8_t>::max();
+        const auto normalizedValue = static_cast<uint8_t>((pixelValue - min) * (double(PixelMax) / (max - min)));
 
-        // All color channels (RGB) are set the same (image is greyscale)
+        // All color channels are set the same (image is greyscale)
         //
-        return RgbPixel{ normalizedValue, normalizedValue, normalizedValue };
+        return BgraPixel{ normalizedValue, normalizedValue, normalizedValue, PixelMax };
     }
 };
 } // namespace k4aviewer

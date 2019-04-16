@@ -8,7 +8,6 @@
 #define ALLOCATOR_H
 
 #include <k4a/k4atypes.h>
-#include <k4ainternal/logging.h>
 
 #include <stddef.h>
 

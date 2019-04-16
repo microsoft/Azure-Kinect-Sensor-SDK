@@ -102,7 +102,7 @@ populate_bitmap_info_header(BITMAPINFOHEADER *header, uint64_t width, uint64_t h
         header->biSizeImage = sizeof(uint8_t) * header->biWidth * header->biHeight * 4;
         break;
     default:
-        logger_error(LOGGER_RECORD, "Unsupported color format specified in recording: %d", format);
+        LOG_ERROR("Unsupported color format specified in recording: %d", format);
         return K4A_RESULT_FAILED;
     }
 
@@ -146,7 +146,7 @@ k4a_result_t check_custom_track_name_valid(k4a_record_context_t *context, const 
     auto itr = context->custom_tracks.find(track_name);
     if (itr != context->custom_tracks.end())
     {
-        logger_error(LOGGER_RECORD, "The custom track has already been added to this recording.");
+        LOG_ERROR("The custom track has already been added to this recording.");
         return K4A_RESULT_FAILED;
     }
 
@@ -159,7 +159,7 @@ k4a_result_t check_custom_track_name_valid(k4a_record_context_t *context, const 
                           (track_name_string == imu_track_name && context->imu_track != nullptr);
     if (track_name_conflict)
     {
-        logger_error(LOGGER_RECORD, "The custom track is conflicted with the existed default track.");
+        LOG_ERROR("The custom track is conflicted with the existed default track.");
         return K4A_RESULT_FAILED;
     }
 
@@ -187,33 +187,34 @@ write_track_data(k4a_record_context_t *context, KaxTrackEntry *track, uint64_t t
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, buffer == NULL);
 
-    if (Lock(context->pending_cluster_lock) != LOCK_OK)
+    try
     {
-        logger_error(LOGGER_RECORD, "Failed to lock pending clusters");
+        std::lock_guard<std::mutex> lock(context->pending_cluster_lock);
+
+        if (context->most_recent_timestamp < timestamp_ns)
+        {
+            context->most_recent_timestamp = timestamp_ns;
+        }
+
+        cluster_t *cluster = get_cluster_for_timestamp(context, timestamp_ns);
+        if (cluster == NULL)
+        {
+            // The timestamp is too old, the block of data has already been written.
+            return K4A_RESULT_FAILED;
+        }
+
+        track_data_t data = { track, buffer };
+        cluster->data.push_back(std::make_pair(timestamp_ns, data));
+    }
+    catch (std::system_error &e)
+    {
+        LOG_ERROR("Failed to write track data to queue: %s", e.what());
         return K4A_RESULT_FAILED;
     }
 
-    if (context->most_recent_timestamp < timestamp_ns)
+    if (context->writer_notify)
     {
-        context->most_recent_timestamp = timestamp_ns;
-    }
-
-    cluster_t *cluster = get_cluster_for_timestamp(context, timestamp_ns);
-    if (cluster == NULL)
-    {
-        // The timestamp is too old, the block of data has already been written.
-        Unlock(context->pending_cluster_lock);
-        return K4A_RESULT_FAILED;
-    }
-
-    track_data_t data = { track, buffer };
-    cluster->data.push_back(std::make_pair(timestamp_ns, data));
-
-    Unlock(context->pending_cluster_lock);
-    if (!context->writer_stopping && Condition_Post(context->writer_notify) != COND_OK)
-    {
-        logger_error(LOGGER_RECORD, "Failed to notify writer thread");
-        // Data was still written in this case, so don't return failure
+        context->writer_notify->notify_one();
     }
 
     return K4A_RESULT_SUCCEEDED;
@@ -227,9 +228,7 @@ cluster_t *get_cluster_for_timestamp(k4a_record_context_t *context, uint64_t tim
 
     if (context->last_written_timestamp > timestamp_ns)
     {
-        logger_error(LOGGER_RECORD,
-                     "The cluster containing the timestamp %d has already been written to disk.",
-                     timestamp_ns);
+        LOG_ERROR("The cluster containing the timestamp %d has already been written to disk.", timestamp_ns);
         return NULL;
     }
 
@@ -294,11 +293,11 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !context->header_written);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, cluster == NULL);
 
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
     if (cluster->data.size() == 0)
     {
-        logger_warn(LOGGER_RECORD, "Tried to write empty cluster to disk");
-        return result;
+        LOG_WARNING("Tried to write empty cluster to disk", 0);
+        delete cluster;
+        return K4A_RESULT_FAILED;
     }
 
     // Sort the data in the cluster by timestamp so it can be written in order
@@ -338,6 +337,8 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     KaxTrackEntry *current_track = NULL;
     uint64_t block_blob_start = 0;
 
+    std::vector<std::unique_ptr<KaxBlockBlob>> blob_list;
+
     bool first = true;
     for (std::pair<uint64_t, track_data_t> data : cluster->data)
     {
@@ -348,7 +349,10 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
             // We need to decide the block type ahead of time to force IMU into a BlockGroup
             block_blob = new KaxBlockBlob(data.second.track == context->imu_track ? BLOCK_BLOB_NO_SIMPLE :
                                                                                     BLOCK_BLOB_ALWAYS_SIMPLE);
-            new_cluster->AddBlockBlob(block_blob); // Blob will be freed by libmatroska when the file is closed.
+            // BlockBlob needs to be valid until the cluster is rendered.
+            // The blob will be freed at the end of write_cluster().
+            blob_list.emplace_back(block_blob);
+            new_cluster->AddBlockBlob(block_blob);
             block_blob->SetParent(*new_cluster);
             block_blob_start = data.first;
 
@@ -373,24 +377,32 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
 
         block_blob->AddFrameAuto(*data.second.track, data.first - context->start_timestamp_offset, *data.second.buffer);
 
-        // Only add a Cue entry once per write (i.e. roughly once per second)
+        // Only add one Cue entry once per cluster
         // We only need to write Cue entries for the first track.
         if (first && GetChild<KaxTrackNumber>(*data.second.track).GetValue() == 1)
         {
-            auto &cues = GetChild<KaxCues>(*context->file_segment);
-            cues.AddBlockBlob(*block_blob);
+            // Add cue entries at a maximum rate specified by CUE_ENTRY_GAP_NS so that the index doesn't get too large.
+            if (context->last_cues_entry_ns == 0 ||
+                data.first - context->start_timestamp_offset >= context->last_cues_entry_ns + CUE_ENTRY_GAP_NS)
+            {
+                context->last_cues_entry_ns = data.first - context->start_timestamp_offset;
+                auto &cues = GetChild<KaxCues>(*context->file_segment);
+                cues.AddBlockBlob(*block_blob);
+            }
             first = false;
         }
     }
+
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     auto &cues = GetChild<KaxCues>(*context->file_segment);
     try
     {
         new_cluster->Render(*context->ebml_file, cues);
     }
-    catch (std::ios_base::failure e)
+    catch (std::ios_base::failure &e)
     {
-        logger_error(LOGGER_RECORD, "Failed to write recording data '%s': %s", context->file_path, e.what());
+        LOG_ERROR("Failed to write recording data '%s': %s", context->file_path, e.what());
         result = K4A_RESULT_FAILED;
     }
 
@@ -406,29 +418,44 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
         data.second.buffer->FreeBuffer(*data.second.buffer);
     }
 
-    delete cluster;
+    // Both KaxCluster and KaxBlockBlob will try to free the same element due to a bug in libmatroska.
+    // In order to prevent this, we need to go through and remove the Block elements from the cluster.
+    auto &elements = new_cluster->GetElementList();
+    for (size_t i = 0; i < elements.size(); i++)
+    {
+        if (EbmlId(*elements[i]) == KaxBlockGroup::ClassInfos.GlobalId ||
+            EbmlId(*elements[i]) == KaxSimpleBlock::ClassInfos.GlobalId)
+        {
+            // Remove this element from the list.
+            // We don't care about preserving order because the Cluster has already been rendered.
+            elements[i] = elements.back();
+            elements.pop_back();
+            i--;
+        }
+    }
 
+    delete cluster;
     return result;
 }
 
-static int matroska_writer_thread(void *context_ptr)
+static void matroska_writer_thread(k4a_record_context_t *context)
 {
-    k4a_record_context_t *context = (k4a_record_context_t *)context_ptr;
     assert(context->writer_notify);
-    assert(context->writer_lock);
 
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
-
-    if (Lock(context->writer_lock) != LOCK_OK)
+    try
     {
-        logger_error(LOGGER_RECORD, "Writer thread failed Lock");
-        result = K4A_RESULT_FAILED;
-    }
+        std::unique_lock<std::mutex> lock(context->writer_lock);
 
-    while (!context->writer_stopping && result == K4A_RESULT_SUCCEEDED)
-    {
-        if (Lock(context->pending_cluster_lock) == LOCK_OK)
+        LargeFileIOCallback *file_io = dynamic_cast<LargeFileIOCallback *>(context->ebml_file.get());
+        if (file_io != NULL)
         {
+            file_io->setOwnerThread();
+        }
+
+        while (!context->writer_stopping)
+        {
+            context->pending_cluster_lock.lock();
+
             // Check the oldest pending cluster to see if we should write to disk.
             cluster_t *oldest_cluster = NULL;
             if (!context->pending_clusters->empty())
@@ -445,88 +472,72 @@ static int matroska_writer_thread(void *context_ptr)
                     oldest_cluster = NULL;
                 }
             }
-            Unlock(context->pending_cluster_lock);
+
+            context->pending_cluster_lock.unlock();
 
             if (oldest_cluster)
             {
-                result = TRACE_CALL(write_cluster(context, oldest_cluster));
+                k4a_result_t result = TRACE_CALL(write_cluster(context, oldest_cluster));
                 if (K4A_FAILED(result))
                 {
                     // write_cluster failures are not recoverable (file IO errors only, the file is likely corrupt)
-                    logger_error(LOGGER_RECORD, "Cluster write failed, dropping cluster.");
+                    LOG_ERROR("Cluster write failed, writer thread exiting.", 0);
                     break;
                 }
             }
 
             // Wait until more clusters arrive up to 100ms, or 1ms if the queue is not empty.
-            COND_RESULT cond = Condition_Wait(context->writer_notify, context->writer_lock, oldest_cluster ? 1 : 100);
-            if (cond != COND_OK && cond != COND_TIMEOUT)
+            context->writer_notify->wait_for(lock, std::chrono::milliseconds(oldest_cluster ? 1 : 100));
+
+            if (file_io != NULL)
             {
-                logger_error(LOGGER_RECORD, "Writer thread failed Condition_Wait: %d", cond);
-                result = K4A_RESULT_FAILED;
-                break;
+                file_io->setOwnerThread();
             }
         }
     }
-
-    if (Unlock(context->writer_lock) != LOCK_OK)
+    catch (std::system_error &e)
     {
-        logger_error(LOGGER_RECORD, "Writer thread failed Unlock");
-        result = K4A_RESULT_FAILED;
+        LOG_ERROR("Writer thread threw exception: %s", e.what());
     }
-
-    ThreadAPI_Exit((int)result);
-    return 0;
 }
 
 k4a_result_t start_matroska_writer_thread(k4a_record_context_t *context)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->writer_thread);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->writer_thread.joinable());
 
-    context->writer_notify = Condition_Init();
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !context->writer_notify);
-    context->writer_lock = Lock_Init();
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !context->writer_lock);
-
-    context->writer_stopping = false;
-
-    if (ThreadAPI_Create(&context->writer_thread, matroska_writer_thread, context) != THREADAPI_OK)
+    try
     {
-        context->writer_thread = 0;
-        logger_error(LOGGER_RECORD, "Failed to start recording writer thread.");
+        context->writer_notify.reset(new std::condition_variable());
+
+        context->writer_stopping = false;
+        context->writer_thread = std::thread(matroska_writer_thread, context);
+    }
+    catch (std::system_error &e)
+    {
+        LOG_ERROR("Failed to start recording writer thread: %s", e.what());
         return K4A_RESULT_FAILED;
     }
 
     return K4A_RESULT_SUCCEEDED;
 }
 
-// May return failure if thread encountered an error while running
-k4a_result_t stop_matroska_writer_thread(k4a_record_context_t *context)
+void stop_matroska_writer_thread(k4a_record_context_t *context)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !context->writer_thread);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, context == NULL);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, context->writer_notify == nullptr);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, !context->writer_thread.joinable());
 
-    context->writer_stopping = true;
-    if (Condition_Post(context->writer_notify) != COND_OK)
+    try
     {
-        // If this fails, the thread will still eventually stop via the writer_stopping flag.
-        logger_warn(LOGGER_RECORD, "Failed to notify writer thread to stop.");
+        context->writer_stopping = true;
+        context->writer_notify->notify_one();
+        context->writer_thread.join();
     }
-
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
-    if (ThreadAPI_Join(context->writer_thread, (int *)&result) != THREADAPI_OK)
+    catch (std::system_error &e)
     {
-        logger_error(LOGGER_RECORD, "Failed to stop recording writer thread.");
-        result = K4A_RESULT_FAILED;
+        LOG_ERROR("Failed to stop recording writer thread: %s", e.what());
     }
-
-    Condition_Deinit(context->writer_notify);
-    Lock_Deinit(context->writer_lock);
-
-    context->writer_thread = 0;
-
-    return result;
 }
 
 KaxTag *
@@ -602,4 +613,5 @@ k4a_result_t get_matroska_segment(k4a_record_context_t *context,
     *iocallback = context->ebml_file.get();
     return K4A_RESULT_SUCCEEDED;
 }
+
 } // namespace k4arecord

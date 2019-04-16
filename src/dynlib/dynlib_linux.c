@@ -92,6 +92,11 @@ k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_
         free(versioned_name);
     }
 
+    if (K4A_FAILED(result))
+    {
+        dynlib_t_destroy(*dynlib_handle);
+        *dynlib_handle = NULL;
+    }
     return result;
 }
 

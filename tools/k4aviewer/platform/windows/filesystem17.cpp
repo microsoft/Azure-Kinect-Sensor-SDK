@@ -13,6 +13,9 @@
 #define NOMINMAX
 #include "Windows.h"
 
+#include <locale>
+#include <codecvt>
+
 #include "PathCch.h"
 #include "Shlwapi.h"
 
@@ -129,10 +132,11 @@ path path::extension() const
 
 path path::parent_path() const
 {
-    std::wstring wsParentPath(m_path.begin(), m_path.end());
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring wsParentPath = converter.from_bytes(m_path);
     PathCchRemoveFileSpec(&wsParentPath[0], wsParentPath.size());
 
-    std::string resultPath(wsParentPath.begin(), wsParentPath.end());
+    std::string resultPath = converter.to_bytes(wsParentPath);
 
     return path(resultPath.c_str());
 }

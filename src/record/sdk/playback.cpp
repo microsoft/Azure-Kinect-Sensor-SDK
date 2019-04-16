@@ -37,15 +37,16 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
     {
         context->logger_handle = logger_handle;
         context->file_path = path;
+        context->file_closing = false;
 
         try
         {
             context->ebml_file = make_unique<LargeFileIOCallback>(path, MODE_READ);
             context->stream = make_unique<libebml::EbmlStream>(*context->ebml_file);
         }
-        catch (std::ios_base::failure e)
+        catch (std::ios_base::failure &e)
         {
-            logger_error(LOGGER_RECORD, "Unable to open file '%s': %s", path, e.what());
+            LOG_ERROR("Unable to open file '%s': %s", path, e.what());
             result = K4A_RESULT_FAILED;
         }
     }
@@ -58,11 +59,20 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
     if (K4A_SUCCEEDED(result))
     {
         // Seek to the first cluster
-        context->seek_cluster = find_cluster(context, context->first_cluster_offset, 0);
-        if (context->seek_cluster == nullptr)
+        cluster_info_t *seek_cluster_info = find_cluster(context, 0);
+        if (seek_cluster_info == NULL)
         {
-            logger_error(LOGGER_RECORD, "Failed to parse recording, recording is empty.");
+            LOG_ERROR("Failed to parse recording, recording is empty.", 0);
             result = K4A_RESULT_FAILED;
+        }
+        else
+        {
+            context->seek_cluster = load_cluster(context, seek_cluster_info);
+            if (context->seek_cluster == nullptr)
+            {
+                LOG_ERROR("Failed to load first data cluster of recording.", 0);
+                result = K4A_RESULT_FAILED;
+            }
         }
     }
 
@@ -78,7 +88,7 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
             {
                 context->ebml_file->close();
             }
-            catch (std::ios_base::failure e)
+            catch (std::ios_base::failure &)
             {
                 // The file was opened as read-only, ignore any close failures.
             }
@@ -104,7 +114,7 @@ k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t playback_han
 
     if (context->calibration_attachment == NULL)
     {
-        logger_error(LOGGER_RECORD, "The device calibration is missing from the recording.");
+        LOG_ERROR("The device calibration is missing from the recording.", 0);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -113,7 +123,7 @@ k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t playback_han
     // Check if the binary data is null terminated, and if not append a zero.
     size_t append_zero = 0;
     assert(file_data.GetSize() > 0 && file_data.GetSize() <= SIZE_MAX);
-    if (file_data.GetBuffer()[file_data.GetSize() - 1] != 0)
+    if (file_data.GetBuffer()[file_data.GetSize() - 1] != '\0')
     {
         append_zero = 1;
     }
@@ -122,7 +132,7 @@ k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t playback_han
         memcpy(data, static_cast<uint8_t *>(file_data.GetBuffer()), (size_t)file_data.GetSize());
         if (append_zero)
         {
-            data[file_data.GetSize()] = 0;
+            data[file_data.GetSize()] = '\0';
         }
         *data_size = (size_t)file_data.GetSize() + append_zero;
         return K4A_BUFFER_RESULT_SUCCEEDED;
@@ -143,7 +153,7 @@ k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, k4a_ca
 
     if (context->calibration_attachment == NULL)
     {
-        logger_error(LOGGER_RECORD, "The device calibration is missing from the recording.");
+        LOG_ERROR("The device calibration is missing from the recording.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -155,7 +165,7 @@ k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, k4a_ca
         assert(file_data.GetSize() <= SIZE_MAX);
         std::vector<char> buffer = std::vector<char>((size_t)file_data.GetSize() + 1);
         memcpy(&buffer[0], file_data.GetBuffer(), (size_t)file_data.GetSize());
-        buffer[buffer.size() - 1] = 0;
+        buffer[buffer.size() - 1] = '\0';
         k4a_result_t result = k4a_calibration_get_from_raw(buffer.data(),
                                                            buffer.size(),
                                                            context->record_config.depth_mode,
@@ -206,7 +216,7 @@ k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t playback_handle,
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_RESULT_FAILED;
     }
 
@@ -238,7 +248,7 @@ k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_hand
 
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -272,7 +282,7 @@ k4a_buffer_result_t k4a_playback_track_get_codec_private(k4a_playback_t playback
 
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -319,6 +329,44 @@ k4a_playback_get_tag(k4a_playback_t playback_handle, const char *name, char *val
     {
         return K4A_BUFFER_RESULT_FAILED;
     }
+}
+
+k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle, k4a_image_format_t target_format)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    if (context->color_track.track == NULL)
+    {
+        LOG_ERROR("The color track is not enabled in this recording. The color conversion format cannot be set.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    switch (target_format)
+    {
+    case K4A_IMAGE_FORMAT_COLOR_MJPG:
+        if (context->color_track.format == K4A_IMAGE_FORMAT_COLOR_MJPG)
+        {
+            context->color_format_conversion = target_format;
+        }
+        else
+        {
+            LOG_ERROR("Converting color images to K4A_IMAGE_FORMAT_COLOR_MJPG is not supported.", 0);
+            return K4A_RESULT_FAILED;
+        }
+        break;
+    case K4A_IMAGE_FORMAT_COLOR_NV12:
+    case K4A_IMAGE_FORMAT_COLOR_YUY2:
+    case K4A_IMAGE_FORMAT_COLOR_BGRA32:
+        context->color_format_conversion = target_format;
+        break;
+    default:
+        LOG_ERROR("Unsupported target_format specified for format conversion: %d", target_format);
+        return K4A_RESULT_FAILED;
+    }
+
+    return K4A_RESULT_SUCCEEDED;
 }
 
 k4a_buffer_result_t
@@ -438,11 +486,22 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    std::shared_ptr<read_block_t> read_block = find_next_block(context, track_reader, true);
+    std::shared_ptr<block_info_t> read_block = track_reader->current_block;
+    if (read_block == nullptr)
+    {
+        // If the track current block is nullptr, it means it just performed a seek frame operation. find_block always
+        // finds the block with timestamp >= seek_timestamp.
+        read_block = find_block(context, track_reader, context->seek_timestamp_ns);
+    }
+    else
+    {
+        read_block = next_block(context, read_block.get(), true);
+    }
+
     if (read_block == nullptr)
     {
         return K4A_STREAM_RESULT_FAILED;
@@ -459,7 +518,7 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
     if (data_block_context == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Creating data block failed.");
+        LOG_ERROR("Creating data block failed.");
         return K4A_STREAM_RESULT_FAILED;
     }
 
@@ -485,11 +544,24 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    std::shared_ptr<read_block_t> read_block = find_next_block(context, track_reader, false);
+    std::shared_ptr<block_info_t> read_block = track_reader->current_block;
+    if (read_block == nullptr)
+    {
+        // If the track current block is nullptr, it means it just performed a seek frame operation. find_block always
+        // finds the block with timestamp >= seek_timestamp. In order to find the first timestamp < seek_timestamp, we
+        // need to query its previous block.
+        read_block = find_block(context, track_reader, context->seek_timestamp_ns);
+        read_block = next_block(context, read_block.get(), false);
+    }
+    else
+    {
+        read_block = next_block(context, read_block.get(), false);
+    }
+
     if (read_block == nullptr)
     {
         return K4A_STREAM_RESULT_FAILED;
@@ -506,7 +578,7 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
     if (data_block_context == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Creating data block failed.");
+        LOG_ERROR("Creating data block failed.");
         return K4A_STREAM_RESULT_FAILED;
     }
 
@@ -556,15 +628,22 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->segment == nullptr);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin != K4A_PLAYBACK_SEEK_BEGIN && origin != K4A_PLAYBACK_SEEK_END);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin == K4A_PLAYBACK_SEEK_BEGIN && offset_usec < 0);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin == K4A_PLAYBACK_SEEK_END && offset_usec > 0);
+
+    // Clamp the offset timestamp so the seek direction is correct reletive to the specified origin.
+    if (origin == K4A_PLAYBACK_SEEK_BEGIN && offset_usec < 0)
+    {
+        offset_usec = 0;
+    }
+    else if (origin == K4A_PLAYBACK_SEEK_END && offset_usec > 0)
+    {
+        offset_usec = 0;
+    }
 
     uint64_t target_time_ns = 0;
-
     if (origin == K4A_PLAYBACK_SEEK_END)
     {
         uint64_t offset_ns = (uint64_t)(-offset_usec * 1000);
-        if (offset_ns >= context->last_timestamp_ns)
+        if (offset_ns > context->last_timestamp_ns)
         {
             // If the target timestamp is negative, clamp to 0 so we don't underflow.
             target_time_ns = 0;
@@ -579,18 +658,24 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
         target_time_ns = (uint64_t)offset_usec * 1000;
     }
 
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
-
-    std::shared_ptr<KaxCluster> seek_cluster = seek_timestamp(context, target_time_ns);
-    result = K4A_RESULT_FROM_BOOL(seek_cluster != nullptr);
-
-    if (K4A_SUCCEEDED(result))
+    cluster_info_t *seek_cluster_info = find_cluster(context, target_time_ns);
+    if (seek_cluster_info == NULL)
     {
-        context->seek_cluster = seek_cluster;
-        reset_seek_pointers(context, target_time_ns);
+        LOG_ERROR("Failed to find cluster for timestamp: %llu ns", target_time_ns);
+        return K4A_RESULT_FAILED;
     }
 
-    return result;
+    std::shared_ptr<loaded_cluster_t> seek_cluster = load_cluster(context, seek_cluster_info);
+    if (seek_cluster == nullptr || seek_cluster->cluster == nullptr)
+    {
+        LOG_ERROR("Failed to load data cluster at timestamp: %llu ns", target_time_ns);
+        return K4A_RESULT_FAILED;
+    }
+
+    context->seek_cluster = seek_cluster;
+    reset_seek_pointers(context, target_time_ns);
+
+    return K4A_RESULT_SUCCEEDED;
 }
 
 uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle)
@@ -609,14 +694,31 @@ void k4a_playback_close(const k4a_playback_t playback_handle)
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     if (context != NULL)
     {
+        LOG_TRACE("File reading stats:", 0);
+        LOG_TRACE("  Seek count: %llu", context->seek_count);
+        LOG_TRACE("  Cluster load count: %llu", context->load_count);
+        LOG_TRACE("  Cluster cache hits: %llu", context->cache_hits);
+
+        context->file_closing = true;
+
         try
         {
+            try
+            {
+                context->io_lock.lock();
+            }
+            catch (std::system_error &)
+            {
+                // Lock is in a bad state, close the file anyway.
+            }
             context->ebml_file->close();
         }
-        catch (std::ios_base::failure e)
+        catch (std::ios_base::failure &)
         {
             // The file was opened as read-only, ignore any close failures.
         }
+
+        context->io_lock.unlock();
 
         // After this destroy, logging will no longer happen.
         if (context->logger_handle)

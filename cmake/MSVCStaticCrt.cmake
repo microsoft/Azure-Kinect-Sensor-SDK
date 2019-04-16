@@ -15,7 +15,11 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     string(REGEX REPLACE "/MDd" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
 
     # Link against the static crt
-    add_compile_options(
-        "$<$<CONFIG:Debug>:/MTd>"
-        "$<$<NOT:$<CONFIG:Debug>>:/MT>")
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MTd")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MTd")
+    else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
+    endif()
 endif()

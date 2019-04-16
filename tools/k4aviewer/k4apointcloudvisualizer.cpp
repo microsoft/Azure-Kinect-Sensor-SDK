@@ -14,9 +14,9 @@
 
 // Project headers
 //
-#include "assertionexception.h"
-#include "k4acolorframevisualizer.h"
+#include "k4acolorimageconverter.h"
 #include "k4adepthpixelcolorizer.h"
+#include "k4astaticimageproperties.h"
 #include "k4aviewerutil.h"
 #include "perfcounter.h"
 
@@ -76,7 +76,9 @@ PointCloudVisualizationResult K4APointCloudVisualizer::UpdateTexture(std::shared
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_viewControl.GetPerspectiveMatrix(m_projection, m_dimensions.Width, m_dimensions.Height);
+    const linmath::vec2 displayDimensions{ static_cast<float>(m_dimensions.Width),
+                                           static_cast<float>(m_dimensions.Height) };
+    m_viewControl.GetPerspectiveMatrix(m_projection, displayDimensions);
     m_viewControl.GetViewMatrix(m_view);
 
     m_pointCloudRenderer.UpdateViewProjection(m_view, m_projection);
@@ -92,14 +94,12 @@ PointCloudVisualizationResult K4APointCloudVisualizer::UpdateTexture(std::shared
     return PointCloudVisualizationResult::Success;
 }
 
-void K4APointCloudVisualizer::ProcessPositionalMovement(const ViewMovement direction, const float deltaTime)
+void K4APointCloudVisualizer::ProcessMouseMovement(const linmath::vec2 displayDimensions,
+                                                   const linmath::vec2 mousePos,
+                                                   const linmath::vec2 mouseDelta,
+                                                   MouseMovementType movementType)
 {
-    m_viewControl.ProcessPositionalMovement(direction, deltaTime);
-}
-
-void K4APointCloudVisualizer::ProcessMouseMovement(const float xoffset, const float yoffset)
-{
-    m_viewControl.ProcessMouseMovement(xoffset, yoffset);
+    m_viewControl.ProcessMouseMovement(displayDimensions, mousePos, mouseDelta, movementType);
 }
 
 void K4APointCloudVisualizer::ProcessMouseScroll(const float yoffset)
@@ -116,7 +116,7 @@ PointCloudVisualizationResult K4APointCloudVisualizer::SetColorizationStrategy(C
 {
     if (strategy == ColorizationStrategy::Color && !m_enableColorPointCloud)
     {
-        throw AssertionException("Attempted to set unsupported point cloud mode!");
+        throw std::logic_error("Attempted to set unsupported point cloud mode!");
     }
 
     m_colorizationStrategy = strategy;
@@ -177,7 +177,7 @@ K4APointCloudVisualizer::K4APointCloudVisualizer(const bool enableColorPointClou
     m_enableColorPointCloud(enableColorPointCloud),
     m_calibrationData(calibrationData)
 {
-    m_expectedValueRange = GetRangeForDepthMode(m_calibrationData.depth_mode);
+    m_expectedValueRange = GetDepthModeRange(m_calibrationData.depth_mode);
     m_transformation = k4a::transformation(m_calibrationData);
 
     glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer.Id());
@@ -249,11 +249,9 @@ PointCloudVisualizationResult K4APointCloudVisualizer::UpdatePointClouds(const k
 
         while (dstPixel != endPixel)
         {
-            const RgbPixel colorization = K4ADepthPixelColorizer::ColorizeRedToBlue(m_expectedValueRange, *srcPixel);
-            dstPixel->Red = colorization.Red;
-            dstPixel->Green = colorization.Green;
-            dstPixel->Blue = colorization.Blue;
-            dstPixel->Alpha = 0xFF;
+            *dstPixel = K4ADepthPixelColorizer::ColorizeBlueToRed(*srcPixel,
+                                                                  m_expectedValueRange.first,
+                                                                  m_expectedValueRange.second);
 
             ++dstPixel;
             ++srcPixel;

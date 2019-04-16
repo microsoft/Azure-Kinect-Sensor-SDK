@@ -8,7 +8,6 @@
 #define QUEUE_H
 
 #include <k4a/k4atypes.h>
-#include <k4ainternal/logging.h>
 #include <k4ainternal/capture.h>
 #include <k4ainternal/common.h>
 

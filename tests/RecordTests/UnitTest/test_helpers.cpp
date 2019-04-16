@@ -11,7 +11,7 @@
     {                                                                                                                  \
         if (!(x))                                                                                                      \
         {                                                                                                              \
-            logger_error("PlaybackTest", "%s == false", #x);                                                           \
+            LOG_ERROR("PlaybackTest, %s == false", #x);                                                                \
             exit(1);                                                                                                   \
         }                                                                                                              \
     }
@@ -21,7 +21,7 @@
         auto _actual = (actual);                                                                                       \
         if (_actual != (expected))                                                                                     \
         {                                                                                                              \
-            logger_error("PlaybackTest", "%s is incorrect. Actual: %d, Expected: %d", #actual, _actual, (expected));   \
+            LOG_ERROR("PlaybackTest, %s is incorrect. Actual: %d, Expected: %d", #actual, _actual, (expected));        \
             return false;                                                                                              \
         }                                                                                                              \
     }
@@ -100,7 +100,7 @@ bool validate_test_capture(k4a_capture_t capture,
             k4a_image_t color_image = k4a_capture_get_color_image(capture);
             if (color_image == NULL)
             {
-                logger_error("PlaybackTest", "Color image is missing");
+                LOG_ERROR("PlaybackTest, Color image is missing", 0);
                 return false;
             }
             bool image_valid =
@@ -108,13 +108,13 @@ bool validate_test_capture(k4a_capture_t capture,
             k4a_image_release(color_image);
             if (!image_valid)
             {
-                logger_error("PlaybackTest", "Color image is invalid");
+                LOG_ERROR("PlaybackTest, Color image is invalid", 0);
                 return false;
             }
         }
         else if (k4a_capture_get_color_image(capture) != NULL)
         {
-            logger_error("PlaybackTest", "Color image is set when it should be NULL");
+            LOG_ERROR("PlaybackTest, Color image is set when it should be NULL", 0);
             return false;
         }
 
@@ -129,7 +129,7 @@ bool validate_test_capture(k4a_capture_t capture,
                 k4a_image_t depth_image = k4a_capture_get_depth_image(capture);
                 if (depth_image == NULL)
                 {
-                    logger_error("PlaybackTest", "Depth image is missing");
+                    LOG_ERROR("PlaybackTest, Depth image is missing", 0);
                     return false;
                 }
                 bool image_valid = validate_test_image(depth_image,
@@ -141,20 +141,20 @@ bool validate_test_capture(k4a_capture_t capture,
                 k4a_image_release(depth_image);
                 if (!image_valid)
                 {
-                    logger_error("PlaybackTest", "Depth image is invalid");
+                    LOG_ERROR("PlaybackTest, Depth image is invalid", 0);
                     return false;
                 }
             }
             else if (k4a_capture_get_depth_image(capture) != NULL)
             {
-                logger_error("PlaybackTest", "Depth image is set when it should be NULL (Passive IR Mode)");
+                LOG_ERROR("PlaybackTest, Depth image is set when it should be NULL (Passive IR Mode)", 0);
                 return false;
             }
 
             k4a_image_t ir_image = k4a_capture_get_ir_image(capture);
             if (ir_image == NULL)
             {
-                logger_error("PlaybackTest", "IR image is missing");
+                LOG_ERROR("PlaybackTest, IR image is missing", 0);
                 return false;
             }
             bool image_valid =
@@ -162,23 +162,23 @@ bool validate_test_capture(k4a_capture_t capture,
             k4a_image_release(ir_image);
             if (!image_valid)
             {
-                logger_error("PlaybackTest", "IR image is invalid");
+                LOG_ERROR("PlaybackTest, IR image is invalid", 0);
                 return false;
             }
         }
         else if (k4a_capture_get_depth_image(capture) != NULL)
         {
-            logger_error("PlaybackTest", "Depth image is set when it should be NULL");
+            LOG_ERROR("PlaybackTest, Depth image is set when it should be NULL", 0);
             return false;
         }
         else if (k4a_capture_get_ir_image(capture) != NULL)
         {
-            logger_error("PlaybackTest", "IR image is set when it should be NULL");
+            LOG_ERROR("PlaybackTest, IR image is set when it should be NULL", 0);
             return false;
         }
         return true;
     }
-    logger_error("PlaybackTest", "Capture is NULL");
+    LOG_ERROR("PlaybackTest, Capture is NULL", 0);
     return false;
 }
 
@@ -238,17 +238,13 @@ bool validate_test_image(k4a_image_t image,
         {
             if (buffer[i] != 0xAABBCCDD)
             {
-                logger_error("PlaybackTest",
-                             "Image data is incorrect (index %d): 0x%X != 0x%X",
-                             i,
-                             buffer[i],
-                             0xAABBCCDD);
+                LOG_ERROR("PlaybackTest, Image data is incorrect (index %d): 0x%X != 0x%X", i, buffer[i], 0xAABBCCDD);
                 return false;
             }
         }
         return true;
     }
-    logger_error("PlaybackTest", "Image is NULL");
+    LOG_ERROR("PlaybackTest, Image is NULL", 0);
     return false;
 }
 
@@ -267,21 +263,31 @@ k4a_imu_sample_t create_test_imu_sample(uint64_t timestamp_us)
 // 1.0, 2.0, and 3.0 are all exact float values, and no math is done. Equals is fine in this case.
 #pragma clang diagnostic ignored "-Wfloat-equal"
 #endif
-bool validate_imu_sample(k4a_imu_sample_t imu_sample, uint64_t timestamp_us)
+bool validate_imu_sample(k4a_imu_sample_t &imu_sample, uint64_t timestamp_us)
 {
-    if (imu_sample.acc_timestamp_usec != timestamp_us || imu_sample.gyro_timestamp_usec != timestamp_us)
-    {
-        return false;
-    }
-    if (imu_sample.acc_sample.v[0] != 1.0f || imu_sample.acc_sample.v[1] != 2.0f || imu_sample.acc_sample.v[2] != 3.0f)
-    {
-        return false;
-    }
-    if (imu_sample.gyro_sample.v[0] != -1.0f || imu_sample.gyro_sample.v[1] != -2.0f ||
-        imu_sample.gyro_sample.v[2] != -3.0f)
-    {
-        return false;
-    }
+    VALIDATE_PARAMETER(imu_sample.acc_timestamp_usec, timestamp_us);
+    VALIDATE_PARAMETER(imu_sample.gyro_timestamp_usec, timestamp_us);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[0] == 1.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[1] == 2.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[2] == 3.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[0] == -1.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[1] == -2.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[2] == -3.0f);
+
+    return true;
+}
+
+bool validate_null_imu_sample(k4a_imu_sample_t &imu_sample)
+{
+    VALIDATE_PARAMETER(imu_sample.acc_timestamp_usec, 0);
+    VALIDATE_PARAMETER(imu_sample.gyro_timestamp_usec, 0);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[0] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[1] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.acc_sample.v[2] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[0] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[1] == 0.0f);
+    EXIT_IF_FALSE(imu_sample.gyro_sample.v[2] == 0.0f);
+
     return true;
 }
 #if defined(__clang__)

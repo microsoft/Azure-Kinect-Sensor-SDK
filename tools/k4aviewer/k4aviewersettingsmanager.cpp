@@ -213,7 +213,7 @@ void K4AViewerSettingsManager::LoadSettings()
         {
             fileReader >> newSettingsPayload.ShowFrameRateInfo;
         }
-        if (variableTag == ShowInfoPaneTag)
+        else if (variableTag == ShowInfoPaneTag)
         {
             fileReader >> newSettingsPayload.ShowInfoPane;
         }

@@ -237,7 +237,7 @@ k4a_result_t colormcu_set_multi_device_mode(colormcu_t colormcu_handle, k4a_devi
         break;
     default:
         result = K4A_RESULT_FAILED;
-        logger_error("colormcu", "Unexpected value in  config->wired_sync_mode:%d", config->wired_sync_mode);
+        LOG_ERROR("Unexpected value in  config->wired_sync_mode:%d", config->wired_sync_mode);
         break;
     }
 
@@ -252,4 +252,12 @@ k4a_result_t colormcu_set_multi_device_mode(colormcu_t colormcu_handle, k4a_devi
             colormcu->usb_cmd, DEV_CMD_SET_SYS_CFG, (uint8_t *)&sync_config, sizeof(sync_config), NULL, 0));
     }
     return result;
+}
+
+k4a_result_t colormcu_reset_device(colormcu_t colormcu_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, colormcu_t, colormcu_handle);
+    colormcu_context_t *colormcu = colormcu_t_get_context(colormcu_handle);
+
+    return TRACE_CALL(usb_cmd_write(colormcu->usb_cmd, DEV_CMD_RESET, NULL, 0, NULL, 0));
 }

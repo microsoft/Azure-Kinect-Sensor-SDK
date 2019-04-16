@@ -37,6 +37,54 @@ extern "C" {
  */
 K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
 
+/** Sets and clears the callback function to recieve debug messages from the Azure Kinect device.
+ *
+ * \param message_cb
+ * The callback function to recieve messages from. Set to NULL to unregister the callback function.
+ *
+ * \param message_cb_context
+ * The callback functions context.
+ *
+ * \param min_level
+ * The least critical error the user wants to be notified about.
+ *
+ * \return ::K4A_RESULT_SUCCEEDED if the callback function was set or cleared successfully. ::K4A_RESULT_FAILED if an
+ * error is encountered or the callback function has already been set.
+ *
+ * \remarks
+ * Call this function to set or clear the callback function that is used to deliver debug messages to the caller. This
+ * callback may be called concurrently, it is up to the implementation of the callback function to ensure the
+ * parallelization is handled.
+ *
+ * \remarks
+ * Clearing the callback function will block until all pending calls to the callback function have completed.
+ *
+ * \remarks
+ * To update \p min_level, \p k4a_set_debug_message_handler can be called with the same value \p message_cb and by
+ * specifying a new \p min_level.
+ *
+ * \remarks
+ * Logging provided via this API is independent of the logging controlled by the environmental variable controls \p
+ * K4A_ENABLE_LOG_TO_STDOUT, \p K4A_ENABLE_LOG_TO_A_FILE, and \p K4A_LOG_LEVEL. However there is a slight change in
+ * default behavior when using this function. By default, when \p k4a_set_debug_message_handler() has not been used to
+ * register a message callback, the default for environmental variable controls is to send debug messages as if
+ * K4A_ENABLE_LOG_TO_STDOUT=1 were set. If \p k4a_set_debug_message_handler registers a callback function before
+ * k4a_device_open() is called, then the default for environmental controls is as if K4A_ENABLE_LOG_TO_STDOUT=0 was
+ * specified. Physically specifying the environmental control will override the default.
+ *
+ * \p min_level
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *message_cb,
+                                                      void *message_cb_context,
+                                                      k4a_log_level_t min_level);
+
 /** Open an Azure Kinect device.
  *
  * \param index

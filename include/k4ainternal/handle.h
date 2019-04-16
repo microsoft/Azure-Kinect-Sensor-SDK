@@ -56,11 +56,11 @@ used with CPP and destroy being used with C, or vise-vesa, the types get c or cp
         pContextWrapper = ALLOCATE(PUB_HANDLE_TYPE(_public_handle_name_));                                             \
         if (pContextWrapper == NULL)                                                                                   \
         {                                                                                                              \
-            IF_LOGGER(logger_error(LOGGER_K4A, "Failed to allocate " #_public_handle_name_);) return NULL;             \
+            IF_LOGGER(LOG_ERROR("Failed to allocate " #_public_handle_name_, 0);) return NULL;                         \
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
-            IF_LOGGER(logger_trace(LOGGER_K4A, "Created   " #_public_handle_name_ " %p", pContextWrapper);)            \
+            IF_LOGGER(LOG_TRACE("Created   " #_public_handle_name_ " %p", pContextWrapper);)                           \
         }                                                                                                              \
         pContextWrapper->handleType = PRIV_HANDLE_TYPE(_public_handle_name_);                                          \
         *handle = (_public_handle_name_)pContextWrapper;                                                               \
@@ -73,7 +73,7 @@ used with CPP and destroy being used with C, or vise-vesa, the types get c or cp
         if ((handle == NULL) ||                                                                                        \
             ((PUB_HANDLE_TYPE(_public_handle_name_) *)handle)->handleType != PRIV_HANDLE_TYPE(_public_handle_name_))   \
         {                                                                                                              \
-            IF_LOGGER(logger_error(LOGGER_K4A, "Invalid " #_public_handle_name_ " %p", handle);)                       \
+            IF_LOGGER(LOG_ERROR("Invalid " #_public_handle_name_ " %p", handle);)                                      \
             return NULL;                                                                                               \
         }                                                                                                              \
         return &(((PUB_HANDLE_TYPE(_public_handle_name_) *)handle)->context);                                          \
@@ -83,7 +83,7 @@ used with CPP and destroy being used with C, or vise-vesa, the types get c or cp
     static inline void _public_handle_name_##_destroy(_public_handle_name_ handle)                                     \
     {                                                                                                                  \
         (void)_public_handle_name_##_get_context(handle);                                                              \
-        IF_LOGGER(logger_trace(LOGGER_K4A, "Destroyed " #_public_handle_name_ " %p", handle);)                         \
+        IF_LOGGER(LOG_TRACE("Destroyed " #_public_handle_name_ " %p", handle);)                                        \
         ((PUB_HANDLE_TYPE(_public_handle_name_) *)handle)->handleType = NULL;                                          \
         DESTROY((PUB_HANDLE_TYPE(_public_handle_name_) *)handle);                                                      \
     }
