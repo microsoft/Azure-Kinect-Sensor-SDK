@@ -7,6 +7,7 @@
 
 // System dependencies
 #include <stdlib.h>
+#include <math.h>
 
 k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_camera_t *depth_camera_calibration,
                                                           const k4a_calibration_camera_t *color_camera_calibration,
@@ -316,7 +317,9 @@ static k4a_buffer_result_t transformation_init_xy_tables(const k4a_calibration_t
 
                 if (valid == 0)
                 {
-                    xy_tables->x_table[idx] = 0.f;
+                    // x table value of NAN marks invalid
+                    xy_tables->x_table[idx] = NAN;
+                    // set y table value to 0 to speed up SSE implementation
                     xy_tables->y_table[idx] = 0.f;
                 }
                 else
