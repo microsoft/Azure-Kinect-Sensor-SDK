@@ -85,7 +85,8 @@ public:
 
         const bool imageIsHovered = ImGui::IsItemHovered();
 
-        if (m_currentImage != nullptr && K4AViewerSettingsManager::Instance().GetShowInfoPane())
+        if (m_currentImage != nullptr &&
+            K4AViewerSettingsManager::Instance().GetViewerOption(ViewerOption::ShowInfoPane))
         {
             ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, 0.f), displayDimensions);
             ImGui::SetNextWindowPos(imageStartPos, ImGuiCond_Always);
@@ -149,7 +150,7 @@ private:
 
     void RenderBasicInfoPane(const k4a::image &image)
     {
-        if (K4AViewerSettingsManager::Instance().GetShowFrameRateInfo())
+        if (K4AViewerSettingsManager::Instance().GetViewerOption(ViewerOption::ShowFrameRateInfo))
         {
             ImGui::Text("Average frame rate: %.2f fps", m_imageSource->GetFrameRate());
         }

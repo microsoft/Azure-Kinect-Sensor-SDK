@@ -15,6 +15,7 @@
 // Project headers
 //
 #include "k4atypeoperators.h"
+#include "k4aviewersettingsmanager.h"
 
 using namespace k4aviewer;
 
@@ -37,6 +38,7 @@ void K4AViewerErrorManager::SetErrorStatus(const std::string &msg)
 
 void K4AViewerErrorManager::SetErrorStatus(std::string &&msg)
 {
+    K4AViewerSettingsManager::Instance().SetViewerOption(ViewerOption::ShowLogDock, true);
     std::lock_guard<std::mutex> lock(m_mutex);
     m_errors.emplace(std::move(msg));
 }
@@ -50,6 +52,7 @@ void K4AViewerErrorManager::SetErrorStatus(const char *msg, const k4a_buffer_res
 
 void K4AViewerErrorManager::SetErrorStatus(const std::string &msg, k4a_buffer_result_t result)
 {
+    K4AViewerSettingsManager::Instance().SetViewerOption(ViewerOption::ShowLogDock, true);
     SetErrorStatus(msg.c_str(), result);
 }
 
