@@ -146,7 +146,7 @@ k4a_result_t check_custom_track_name_valid(k4a_record_context_t *context, const 
     auto itr = context->custom_tracks.find(track_name);
     if (itr != context->custom_tracks.end())
     {
-        logger_error(LOGGER_RECORD, "The custom track has already been added to this recording.");
+        LOG_ERROR("The custom track has already been added to this recording.");
         return K4A_RESULT_FAILED;
     }
 
@@ -159,7 +159,7 @@ k4a_result_t check_custom_track_name_valid(k4a_record_context_t *context, const 
                           (track_name_string == imu_track_name && context->imu_track != nullptr);
     if (track_name_conflict)
     {
-        logger_error(LOGGER_RECORD, "The custom track is conflicted with the existed default track.");
+        LOG_ERROR("The custom track is conflicted with the existed default track.");
         return K4A_RESULT_FAILED;
     }
 

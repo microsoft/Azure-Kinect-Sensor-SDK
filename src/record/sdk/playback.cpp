@@ -216,7 +216,7 @@ k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t playback_handle,
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_RESULT_FAILED;
     }
 
@@ -248,7 +248,7 @@ k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_hand
 
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -282,7 +282,7 @@ k4a_buffer_result_t k4a_playback_track_get_codec_private(k4a_playback_t playback
 
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -486,11 +486,22 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    std::shared_ptr<read_block_t> read_block = find_next_block(context, track_reader, true);
+    std::shared_ptr<block_info_t> read_block = track_reader->current_block;
+    if (read_block == nullptr)
+    {
+        // If the track current block is nullptr, it means it just performed a seek frame operation. find_block always
+        // finds the block with timestamp >= seek_timestamp.
+        read_block = find_block(context, track_reader, context->seek_timestamp_ns);
+    }
+    else
+    {
+        read_block = next_block(context, read_block.get(), true);
+    }
+
     if (read_block == nullptr)
     {
         return K4A_STREAM_RESULT_FAILED;
@@ -507,7 +518,7 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
     if (data_block_context == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Creating data block failed.");
+        LOG_ERROR("Creating data block failed.");
         return K4A_STREAM_RESULT_FAILED;
     }
 
@@ -533,11 +544,24 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.");
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    std::shared_ptr<read_block_t> read_block = find_next_block(context, track_reader, false);
+    std::shared_ptr<block_info_t> read_block = track_reader->current_block;
+    if (read_block == nullptr)
+    {
+        // If the track current block is nullptr, it means it just performed a seek frame operation. find_block always
+        // finds the block with timestamp >= seek_timestamp. In order to find the first timestamp < seek_timestamp, we
+        // need to query its previous block.
+        read_block = find_block(context, track_reader, context->seek_timestamp_ns);
+        read_block = next_block(context, read_block.get(), false);
+    }
+    else
+    {
+        read_block = next_block(context, read_block.get(), false);
+    }
+
     if (read_block == nullptr)
     {
         return K4A_STREAM_RESULT_FAILED;
@@ -554,7 +578,7 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
     if (data_block_context == nullptr)
     {
-        logger_error(LOGGER_RECORD, "Creating data block failed.");
+        LOG_ERROR("Creating data block failed.");
         return K4A_STREAM_RESULT_FAILED;
     }
 

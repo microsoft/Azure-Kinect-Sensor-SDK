@@ -69,7 +69,7 @@ typedef struct _track_reader_t
     std::string codec_id;
     std::vector<uint8_t> codec_private;
 
-    std::shared_ptr<read_block_t> current_block;
+    std::shared_ptr<block_info_t> current_block;
     uint64_t frame_period_ns = 0;
     track_type type = track_video;
     std::vector<uint64_t> block_index_timestamp_usec_map;
@@ -119,10 +119,9 @@ typedef struct _k4a_playback_context_t
 
     track_reader_t imu_track;
     int imu_sample_index = -1;
-    
+
     std::unordered_map<std::string, track_reader_t> custom_track_map;
     std::unordered_map<uint64_t, std::string> track_number_name_map;
-
 
     uint64_t segment_info_offset;
     uint64_t first_cluster_offset;

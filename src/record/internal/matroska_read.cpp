@@ -413,7 +413,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     if (K4A_FAILED(parse_custom_tracks(context)))
     {
         // The rest of the recording can still be read if read custom track failed
-        logger_warn(LOGGER_RECORD, "Read custom track data failed.");
+        LOG_WARNING("Read custom track data failed.");
     }
 
     // Read device calibration attachment
@@ -439,7 +439,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
         if (context->color_track.type != track_video)
         {
-            logger_error(LOGGER_RECORD, "Color track is not a video track.");
+            LOG_ERROR("Color track is not a video track.");
             return K4A_RESULT_FAILED;
         }
 
@@ -467,10 +467,10 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
         if (context->record_config.color_resolution == K4A_COLOR_RESOLUTION_OFF)
         {
-            LOG_WARNNING("The color resolution is not officially supported: %dx%d. You cannot get the calibration "
-                         "information for this color resolution",
-                         context->color_track.width,
-                         context->color_track.height);
+            LOG_WARNING("The color resolution is not officially supported: %dx%d. You cannot get the calibration "
+                        "information for this color resolution",
+                        context->color_track.width,
+                        context->color_track.height);
         }
 
         context->record_config.color_track_enabled = true;
@@ -764,7 +764,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     if (K4A_FAILED(parse_all_timestamps(context)))
     {
         // The rest of the recording can still be read if parse track timestamps failed
-        logger_warn(LOGGER_RECORD, "Pre-parsing all track timestamp information failed.");
+        LOG_WARNING("Pre-parsing all track timestamp information failed.");
     }
 
     return K4A_RESULT_SUCCEEDED;
@@ -812,7 +812,7 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track)
         default:
             LOG_ERROR("Unsupported FOURCC format for track '%s': %x",
                       GetChild<KaxTrackName>(*track->track).GetValueUTF8().c_str(),
-                      track->bitmap_header->biCompression);
+                      bitmap_header->biCompression);
             return K4A_RESULT_FAILED;
         }
 
@@ -1081,7 +1081,7 @@ k4a_result_t parse_all_timestamps(k4a_playback_context_t *context)
     {
         return K4A_RESULT_FAILED;
     }
-    std::shared_ptr<KaxCluster> cluster = find_next<KaxCluster>(context, false, false);
+    std::shared_ptr<KaxCluster> cluster = find_next<KaxCluster>(context, false);
 
     while (cluster != nullptr)
     {
@@ -1156,7 +1156,7 @@ k4a_result_t parse_all_timestamps(k4a_playback_context_t *context)
         else
         {
             // The next element is other types. Try to find the next cluster type
-            cluster = find_next<KaxCluster>(context, true, false);
+            cluster = find_next<KaxCluster>(context, true);
         }
     }
 
@@ -1224,7 +1224,7 @@ void populate_cluster_info(k4a_playback_context_t *context,
     }
 
     // Update the timestamp to the real cluster start read from the file.
-    auto element = next_child(context, cluster.get());
+    auto element = next_element(context, cluster.get());
     while (element != nullptr)
     {
         EbmlId element_id(*element);
@@ -1239,7 +1239,7 @@ void populate_cluster_info(k4a_playback_context_t *context,
             skip_element(context, element.get());
         }
 
-        element = next_child(context, cluster.get());
+        element = next_element(context, cluster.get());
     }
 }
 
