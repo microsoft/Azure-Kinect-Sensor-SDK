@@ -153,49 +153,46 @@ void K4APointCloudWindow::ProcessInput(ImVec2 imageStartPos, ImVec2 displayDimen
 {
     ImGuiIO &io = ImGui::GetIO();
 
-    const bool leftMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_1];
-    const bool rightMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_2];
-
-    const bool anyMouseDown = leftMouseDown || rightMouseDown;
-    if (!anyMouseDown)
-    {
-        m_dragging = false;
-    }
-
-    const linmath::vec2 mousePos{ io.MousePos.x - imageStartPos.x, io.MousePos.y - imageStartPos.y };
-
-    const linmath::vec2 mouseDelta{ io.MouseDelta.x, io.MouseDelta.y };
-    const linmath::vec2 dimensions{ displayDimensions.x, displayDimensions.y };
-
     if (ImGui::IsWindowHovered())
     {
         m_pointCloudVisualizer.ProcessMouseScroll(io.MouseWheel);
     }
 
-    if (ImGui::IsWindowFocused())
-    {
+    MouseMovementType movementType = MouseMovementType::None;
 
-        if (!m_dragging && anyMouseDown)
-        {
-            m_dragging = true;
-            m_dragStartedOnPointCloud = mousePos[0] >= 0.f && mousePos[0] <= displayDimensions.x &&
-                                        mousePos[1] >= 0.f && mousePos[1] <= displayDimensions.y;
-        }
+    bool mouseDown = false;
+    ImVec2 mouseDownPos(-1.f, -1.f);
+    if (io.MouseDown[GLFW_MOUSE_BUTTON_1])
+    {
+        mouseDownPos = io.MouseClickedPos[GLFW_MOUSE_BUTTON_1];
+        movementType = MouseMovementType::Rotation;
+        mouseDown = true;
+    }
+    else if (io.MouseDown[GLFW_MOUSE_BUTTON_2])
+    {
+        mouseDownPos = io.MouseClickedPos[GLFW_MOUSE_BUTTON_2];
+        movementType = MouseMovementType::Translation;
+        mouseDown = true;
     }
 
-    if (m_dragging && m_dragStartedOnPointCloud)
+    if (mouseDown)
     {
-        MouseMovementType movementType = MouseMovementType::None;
-        if (leftMouseDown)
-        {
-            movementType = MouseMovementType::Rotation;
-        }
-        else if (rightMouseDown)
-        {
-            movementType = MouseMovementType::Translation;
-        }
+        // Normalize to the image start coordinates
+        //
+        mouseDownPos.x -= imageStartPos.x;
+        mouseDownPos.y -= imageStartPos.y;
 
-        m_pointCloudVisualizer.ProcessMouseMovement(dimensions, mousePos, mouseDelta, movementType);
+        const linmath::vec2 mousePos{ io.MousePos.x - imageStartPos.x, io.MousePos.y - imageStartPos.y };
+
+        // Only count drags if they originated on the image
+        //
+        if (mouseDownPos.x >= 0.f && mouseDownPos.x <= displayDimensions.x && mouseDownPos.y >= 0.f &&
+            mouseDownPos.y <= displayDimensions.y)
+        {
+            const linmath::vec2 dimensions{ displayDimensions.x, displayDimensions.y };
+            const linmath::vec2 mouseDelta{ io.MouseDelta.x, io.MouseDelta.y };
+            m_pointCloudVisualizer.ProcessMouseMovement(dimensions, mousePos, mouseDelta, movementType);
+        }
     }
 }
 
