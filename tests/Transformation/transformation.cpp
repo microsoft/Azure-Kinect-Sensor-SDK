@@ -537,6 +537,5 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
     image_dec_ref(xyz_depth_image);
 }
 
-int main(int argc, char **argv)
-    return k4a_test_commmon_main(argc, argv);
+int main(int argc, char **argv) return k4a_test_commmon_main(argc, argv);
 }
