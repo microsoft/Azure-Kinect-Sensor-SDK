@@ -490,7 +490,7 @@ jobs:
         command: download
         vstsFeed: 'DepthEnginePlugin'
         vstsFeedPackage: 'depthengine'
-        vstsPackageVersion: "1.0.1"
+        vstsPackageVersion: "1.0.4"
         downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
     - task: CopyFiles@2
@@ -582,7 +582,7 @@ jobs:
         command: download
         vstsFeed: 'DepthEnginePlugin'
         vstsFeedPackage: 'depthengine'
-        vstsPackageVersion: "1.0.1"
+        vstsPackageVersion: "1.0.4"
         downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
     - task: UniversalPackages@0
