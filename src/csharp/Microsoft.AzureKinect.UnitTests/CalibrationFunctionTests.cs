@@ -15,9 +15,8 @@ namespace Microsoft.AzureKinect.UnitTests
             if (NativeK4a == null)
             {
                 NativeInterface k4ainterface = NativeInterface.Create(
-                    @"d:\git\Azure-Kinect-Sensor-SDK\build\bin\k4a.dll",
-                    @"D:\git\Azure-Kinect-Sensor-SDK\include\k4a\k4a.h");
-
+                    @"%K4A_BINARY_DIR%\bin\k4a.dll",
+                    @"%K4A_SOURCE_DIR%\include\k4a\k4a.h");
 
                 NativeK4a = StubbedModule.Create("k4a", k4ainterface);
             }

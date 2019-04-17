@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
@@ -23,8 +22,12 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
         /// </summary>
         /// <param name="modulePath"></param>
         /// <returns></returns>
-        public static NativeInterface Create(string modulePath,  string headerPath)
+        public static NativeInterface Create(string modulePath, string headerPath)
         {
+            EnvironmentInfo.LoadEnvironment();
+            modulePath = System.Environment.ExpandEnvironmentVariables(modulePath);
+            headerPath = System.Environment.ExpandEnvironmentVariables(headerPath);
+
             List<FunctionInfo> functions = new List<FunctionInfo>();
 
             // Get the exports from the module
@@ -49,8 +52,6 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 
             Regex parameterRegex = new Regex(@"^\s*(?<type>.*?)(?<name>[a-zA-Z0-9_]+)\s*$");
 
-
-            
             using (var header = System.IO.File.OpenText(headerPath))
             {
                 string headerData = header.ReadToEnd().Replace("\r\n", "\n");
@@ -92,7 +93,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                     }
                     else
                     {
-                        throw new Exception("Header declares a function not found in module exports");
+                        throw new Exception($"Header declares a function not found in module exports. Function \"{info.Declaration}\" was not found in exports.");
                     }
                 }
             }

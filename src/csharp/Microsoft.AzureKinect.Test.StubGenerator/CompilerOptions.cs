@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.IO;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
 {
     public class CompilerOptions
     {
-        public static CompilerOptions defaultOptions = new CompilerOptions();
+        public static CompilerOptions defaultOptions = CompilerOptions.GenerateDefaults();
         public static CompilerOptions GetDefault()
         {
             return defaultOptions;
@@ -16,11 +14,9 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             defaultOptions = options;
         }
 
-        //public string CompilerPath { get; set; } = @"C:/Program Files (x86)/Microsoft Visual Studio/Preview/Enterprise/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe";
-        public string CompilerPath { get; set; } = @"cl.exe";
-        //public string LinkerPath { get; set; } = @"C:/Program Files (x86)/Microsoft Visual Studio/Preview/Enterprise/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/link.exe";
-        public string LinkerPath { get; set; } = @"link.exe";
+        public string CompilerPath { get; set; } = @"%CMAKE_CXX_COMPILER%";
 
+        public string LinkerPath { get; set; } = @"%CMAKE_LINKER%";
 
         public string CompilerFlags { get; set; } = "/DWIN32 /D_WINDOWS /W3 /GR /EHa /Od /Zi";
 
@@ -54,9 +50,9 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
         */
 
         public string[] IncludePaths { get; set; } = new string[] {
-            @"D:\git\Azure-Kinect-Sensor-SDK\include",
-            @"D:\git\Azure-Kinect-Sensor-SDK\build\src\sdk\include",
-            @"D:\git\Azure-Kinect-Sensor-SDK\src\csharp\K4aStub"
+            @"%K4A_SOURCE_DIR%\include",
+            @"%K4A_BINARY_DIR%\src\sdk\include",
+            @"%K4A_SOURCE_DIR%\src\csharp\K4aStub"
         };
 
         /*
@@ -74,8 +70,8 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 
         public string[] LibraryPaths { get; set; } = new string[] { };
 
-        public string BinaryPath { get; set; } = @"C:\temp\binaries";
-        public string TempPath { get; set; } = @"C:\temp\compilation";
+        public string BinaryPath { get; set; } = @"binaries";
+        public string TempPath { get; set; } = @"compilation";
 
         public string StubFile { get; set; } = "Stub.cpp";
         public CodeString CodeHeader { get; set; } = @"
@@ -114,8 +110,28 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                 StubFile = this.StubFile,
                 TempPath = this.TempPath,
                 CodeHeader = this.CodeHeader
-
             };
+        }
+
+        private static CompilerOptions GenerateDefaults()
+        {
+            CompilerOptions options = new CompilerOptions();
+
+            EnvironmentInfo.LoadEnvironment();
+
+            for (int i = 0; i < options.IncludePaths.Length; ++i)
+            {
+                options.IncludePaths[i] = System.Environment.ExpandEnvironmentVariables(options.IncludePaths[i]);
+            }
+
+            options.CompilerPath = System.Environment.ExpandEnvironmentVariables(options.CompilerPath);
+            options.LinkerPath = System.Environment.ExpandEnvironmentVariables(options.LinkerPath);
+
+            string baseTempPath = Path.Combine(Path.GetTempPath(), "AzureKinect");
+            options.BinaryPath = Path.Combine(baseTempPath, options.BinaryPath);
+            options.TempPath = Path.Combine(baseTempPath, options.TempPath);
+
+            return options;
         }
     }
 }

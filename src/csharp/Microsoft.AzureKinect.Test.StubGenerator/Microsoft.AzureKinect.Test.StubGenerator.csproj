@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\k4a.props" />
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+	
+    <OutputPath>$(BaseOutputPath)$(AssemblyName)\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

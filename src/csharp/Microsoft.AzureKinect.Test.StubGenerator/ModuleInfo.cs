@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
 {
-    class ModuleInfo
+    internal class ModuleInfo
     {
         private ModuleInfo(string[] exports)
         {
@@ -17,6 +16,16 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             options = options ?? CompilerOptions.GetDefault();
 
             List<string> exports = new List<string>();
+
+            if (!System.IO.File.Exists(path))
+            {
+                throw new System.IO.FileNotFoundException("Failed to analyze module, file not found.", path);
+            }
+
+            if (!System.IO.Directory.Exists(options.TempPath))
+            {
+                System.IO.Directory.CreateDirectory(options.TempPath);
+            }
 
             var regex = new System.Text.RegularExpressions.Regex(@"^\s+\d+\s+[\dA-Fa-f]+\s+[0-9A-Fa-f]{8}\s+([^\s]*).*?$", System.Text.RegularExpressions.RegexOptions.Multiline);
             // Start the compiler process
@@ -54,13 +63,13 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("exception info");
-                
+                System.Diagnostics.Debug.WriteLine(ex, "exception info");
+                throw new InvalidOperationException("Failed to analyze module", ex);
             }
 
             return new ModuleInfo(exports.ToArray());
         }
-        
-        public string[] Exports { get;  }
+
+        public string[] Exports { get; }
     }
 }
