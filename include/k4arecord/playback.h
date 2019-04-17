@@ -542,11 +542,15 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * \remarks
  * If a call was made to k4a_playback_get_previous_data_block() which returned ::K4A_STREAM_RESULT_EOF, then the
  * playback position is at the beginning of the recording and k4a_playback_get_next_data_block() will return the first
- * IMU sample in the recording.
+ * data block in the recording.
  *
  * \remarks
  * The first call to k4a_playback_get_next_data_block() after k4a_playback_seek_timestamp() will return the data
  * block in the recording closest to the seek time with a timestamp greater than or equal to the seek time.
+ *
+ * \remarks
+ * If the call is successful and a data block is returned, callers must call k4a_playback_data_block_release() to return
+ * the allocated memory.
  *
  * \xmlonly
  * <requirements>
@@ -588,6 +592,10 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playba
  * \remarks
  * The first call to k4a_playback_get_previous_data_block() after k4a_playback_seek_timestamp() will return the
  * data block closest to the seek time with a timestamp less than the seek time.
+ *
+ * \remarks
+ * If the call is successful and a data block is returned, callers must call k4a_playback_data_block_release() to return
+ * the allocated memory.
  *
  * \xmlonly
  * <requirements>

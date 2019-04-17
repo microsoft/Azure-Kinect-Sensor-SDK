@@ -431,9 +431,6 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     uint64_t frame_period_ns = 0;
     if (context->color_track.track)
     {
-        context->track_number_name_map.insert(
-            std::pair<uint64_t, std::string>(GetChild<KaxTrackNumber>(*context->color_track.track).GetValue(),
-                                             color_track_name));
         context->color_track.type = static_cast<track_type>(
             GetChild<KaxTrackType>(*context->color_track.track).GetValue());
 
@@ -538,9 +535,6 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     if (context->depth_track.track)
     {
-        context->track_number_name_map.insert(
-            std::pair<uint64_t, std::string>(GetChild<KaxTrackNumber>(*context->depth_track.track).GetValue(),
-                                             depth_track_name));
         context->depth_track.type = static_cast<track_type>(
             GetChild<KaxTrackType>(*context->depth_track.track).GetValue());
 
@@ -578,9 +572,6 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     if (context->ir_track.track)
     {
-        context->track_number_name_map.insert(
-            std::pair<uint64_t, std::string>(GetChild<KaxTrackNumber>(*context->ir_track.track).GetValue(),
-                                             ir_track_name));
         context->ir_track.type = static_cast<track_type>(GetChild<KaxTrackType>(*context->ir_track.track).GetValue());
         KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*context->ir_track.track);
         context->ir_track.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
@@ -694,10 +685,6 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     {
         context->record_config.imu_track_enabled = true;
         context->imu_track.type = static_cast<track_type>(GetChild<KaxTrackType>(*context->imu_track.track).GetValue());
-
-        context->track_number_name_map.insert(
-            std::pair<uint64_t, std::string>(GetChild<KaxTrackNumber>(*context->imu_track.track).GetValue(),
-                                             imu_track_name));
     }
 
     // Read wired_sync_mode and subordinate_delay_off_master_usec.
@@ -946,9 +933,6 @@ k4a_result_t parse_custom_tracks(k4a_playback_context_t *context)
                     track_reader.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
                     track_reader.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
                 }
-
-                context->track_number_name_map.insert(
-                    std::pair<uint64_t, std::string>(GetChild<KaxTrackNumber>(*track).GetValue(), track_name));
 
                 context->custom_track_map.insert(std::pair<std::string, track_reader_t>(track_name, track_reader));
             }

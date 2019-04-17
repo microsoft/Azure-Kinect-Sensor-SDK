@@ -124,7 +124,6 @@ typedef struct _k4a_playback_context_t
     int imu_sample_index = -1;
 
     std::unordered_map<std::string, track_reader_t> custom_track_map;
-    std::unordered_map<uint64_t, std::string> track_number_name_map;
 
     uint64_t segment_info_offset;
     uint64_t first_cluster_offset;

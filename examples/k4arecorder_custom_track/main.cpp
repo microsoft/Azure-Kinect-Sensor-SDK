@@ -137,7 +137,7 @@ int main(int argc, char **argv)
         {
             frame_count++;
 
-            printf("Start processing frame %d\n", frame_count);
+            std::cout << "Start processing frame " << frame_count << std::endl;
 
             k4a_image_t depth_image = k4a_capture_get_depth_image(capture);
             k4a_image_t ir_image = k4a_capture_get_ir_image(capture);
@@ -163,18 +163,18 @@ int main(int argc, char **argv)
         else if (get_capture_result == K4A_WAIT_RESULT_TIMEOUT)
         {
             // It should never hit time out when K4A_WAIT_INFINITE is set.
-            printf("Error! Get depth frame time out!\n");
+            std::cout << "Error! Get depth frame time out!" << std::endl;
             break;
         }
         else
         {
-            printf("Get depth capture returned error: %d\n", get_capture_result);
+            std::cout << "Get depth capture returned error: " << get_capture_result << std::endl;
             break;
         }
 
     } while (frame_count < 100);
 
-    printf("Finished body tracking processing!\n");
+    std::cout << "Finished body tracking processing!" << std::endl;
 
     k4a_device_stop_cameras(device);
 

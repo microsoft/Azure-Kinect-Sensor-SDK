@@ -114,16 +114,16 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_handle);
 
-/** Adds an attachment to the recording. Add attachments need to be added before the recording header is written.
+/** Adds an attachment to the recording.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
  * \param file_name
- * The file name of the attachment to write.
+ * The file name that you want this attachment to be called in the recording file.
  *
  * \param tag_name
- * The tag name that linked to the attachment.
+ * The tag name that is linked to the attachment.
  *
  * \param buffer
  * The attachment data buffer.
@@ -136,6 +136,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_ha
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * The attachment needs to be added before the recording header is written.
  *
  * \xmlonly
  * <requirements>
@@ -154,8 +157,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
 /** Adds custom video tracks to the recording.
  *
  * The default tracks like depth track, ir track and color camera track will be created after the k4a_record_create
- * API is called. Use this API to add additional custom video tracks to save your own custom data. The track needs
- * to be added before the recording header is written.
+ * API is called. Use this API to add additional custom video tracks to save your own custom data.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
@@ -183,6 +185,12 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
  *
+ * \remarks
+ * The track needs to be added before the recording header is written.
+ *
+ * \remarks
+ * Call k4a_record_write_custom_track_data() with the same track_name to write data to this track.
+ *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
@@ -201,8 +209,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t reco
 /** Adds custom subtitle tracks to the recording.
  *
  * The default subtitle track like imu track will be created after API k4a_record_add_imu_track is called. Use this API
- * to add additional custom subtitle tracks to save your own custom data. The track needs to be added before the
- * recording header is written.
+ * to add additional custom subtitle tracks to save your own custom data.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
@@ -226,6 +233,12 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t reco
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * The track needs to be added before the recording header is written.
+ *
+ * \remarks
+ * Call k4a_record_write_custom_track_data() with the same track_name to write data to this track.
  *
  * \xmlonly
  * <requirements>
@@ -260,6 +273,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t r
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * The tag needs to be added before the recording header is written.
  *
  * \xmlonly
  * <requirements>
@@ -357,8 +373,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
 
 /** Writes a custom track data to file.
  *
- * Custom track data must be written in increasing order of timestamp, and the file's header must already be written.
- *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
@@ -379,6 +393,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * Custom track data must be written in increasing order of timestamp, and the file's header must already be written.
  *
  * \xmlonly
  * <requirements>
