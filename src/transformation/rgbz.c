@@ -8,6 +8,12 @@
 #include <limits.h>
 #include <math.h>
 
+#ifdef _M_X64
+#include <emmintrin.h> // SSE2
+#include <tmmintrin.h> // SSE3
+#include <smmintrin.h> // SSE4.1
+#endif
+
 typedef struct _k4a_transformation_input_image_t
 {
     const k4a_transformation_image_descriptor_t *descriptor;
@@ -239,7 +245,32 @@ static bool transformation_check_valid_correspondences(const k4a_correspondence_
     }
 
     // If two or more vertices are invalid then we can't create a valid triangle
-    return num_invalid < 2;
+    bool valid = num_invalid < 2;
+
+    // Ignore interpolation at large depth discontinuity without disrupting slanted surface
+    // Skip interpolation threshold is estimated based on the following logic:
+    // - angle between two pixels is: theta = 0.234375 degree (120 degree / 512) in binning resolution mode
+    // - distance between two pixels at same depth approximately is: A ~= sin(theta) * depth
+    // - distance between two pixels at highly slanted surface (e.g. alpha = 85 degree) is: B = A / cos(alpha)
+    // - skip_interpolation_ratio ~= sin(theta) / cos(alpha)
+    // We use B as the threshold that to skip interpolation if the depth difference in the triangle is larger
+    // than B. This is a conservative threshold to estimate largest distance on a highly slanted surface at given depth,
+    // in reality, given distortion, distance, resolution difference, B can be smaller
+    const float skip_interpolation_ratio = 0.04693441759f;
+    float d1 = valid_top_left->depth;
+    float d2 = valid_top_right->depth;
+    float d3 = valid_bottom_right->depth;
+    float d4 = valid_bottom_left->depth;
+    float depth_min = transformation_min2f(transformation_min2f(d1, d2), transformation_min2f(d3, d4));
+    float depth_max = transformation_max2f(transformation_max2f(d1, d2), transformation_max2f(d3, d4));
+    float depth_delta = depth_max - depth_min;
+    float skip_interpolation_threshold = skip_interpolation_ratio * depth_min;
+    if (depth_delta > skip_interpolation_threshold)
+    {
+        valid = false;
+    }
+
+    return valid;
 }
 
 static inline float transformation_area_function(const k4a_float2_t *a, const k4a_float2_t *b, const k4a_float2_t *c)
@@ -911,19 +942,11 @@ transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_
         return K4A_BUFFER_RESULT_FAILED;
     }
 
-    const uint16_t *depth_image_data_uint16 = (const uint16_t *)(const void *)depth_image_data;
-    int16_t *xyz_data_int16 = (int16_t *)(void *)xyz_image_data;
-
-    for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
-    {
-        int16_t z = (int16_t)depth_image_data_uint16[i];
-        int16_t x = (int16_t)(floorf(xy_tables->x_table[i] * (float)z + 0.5f));
-        int16_t y = (int16_t)(floorf(xy_tables->y_table[i] * (float)z + 0.5f));
-
-        xyz_data_int16[3 * i + 0] = x;
-        xyz_data_int16[3 * i + 1] = y;
-        xyz_data_int16[3 * i + 2] = z;
-    }
+#ifdef _M_X64
+    transformation_depth_to_xyz_sse(xy_tables, (const void *)depth_image_data, (void *)xyz_image_data);
+#else
+    transformation_depth_to_xyz(xy_tables, (const void *)depth_image_data, (void *)xyz_image_data);
+#endif
 
     return K4A_BUFFER_RESULT_SUCCEEDED;
 }
