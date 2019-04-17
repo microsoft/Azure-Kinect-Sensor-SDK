@@ -167,9 +167,13 @@ void K4APointCloudWindow::ProcessInput(ImVec2 imageStartPos, ImVec2 displayDimen
     const linmath::vec2 mouseDelta{ io.MouseDelta.x, io.MouseDelta.y };
     const linmath::vec2 dimensions{ displayDimensions.x, displayDimensions.y };
 
-    if (ImGui::IsWindowFocused())
+    if (ImGui::IsWindowHovered())
     {
         m_pointCloudVisualizer.ProcessMouseScroll(io.MouseWheel);
+    }
+
+    if (ImGui::IsWindowFocused())
+    {
 
         if (!m_dragging && anyMouseDown)
         {
