@@ -59,10 +59,6 @@ private:
 
     static constexpr int MaxConsecutiveMissingImages = 10;
     int m_consecutiveMissingImages = 0;
-
-    bool m_haveShownMissingImagesWarning = false;
-    int m_missingColorImages = 0;
-    int m_missingDepthImages = 0;
 };
 } // namespace k4aviewer
 

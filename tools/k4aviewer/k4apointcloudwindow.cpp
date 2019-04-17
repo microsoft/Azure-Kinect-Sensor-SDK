@@ -18,6 +18,7 @@
 //
 #include "k4aimguiextensions.h"
 #include "k4aviewererrormanager.h"
+#include "k4aviewerlogmanager.h"
 #include "k4awindowsizehelpers.h"
 
 using namespace k4aviewer;
@@ -66,28 +67,6 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
 
     const ImVec2 imageStartPos = ImGui::GetCursorScreenPos();
     ImGui::Image(static_cast<ImTextureID>(*m_texture), textureSize);
-
-    if (m_missingColorImages != 0 || m_missingDepthImages != 0)
-    {
-        ImGui::BeginGroup();
-        {
-            ImGuiExtensions::TextColorChanger warningColorChanger(ImGuiExtensions::TextColor::Warning);
-            ImGui::Text("%s", "Warning: some captures were dropped due to missing images!");
-            ImGui::Text("Missing depth images: %d", m_missingDepthImages);
-            ImGui::Text("Missing color images: %d", m_missingColorImages);
-        }
-        ImGui::EndGroup();
-
-        if (!m_haveShownMissingImagesWarning)
-        {
-            std::stringstream warningBuilder;
-            warningBuilder
-                << "Warning: Some captures didn't have both color and depth data and had to be dropped." << std::endl
-                << "         To avoid this, you can set the \"Synchronized images only\" option under Internal Sync.";
-            K4AViewerErrorManager::Instance().SetErrorStatus(warningBuilder.str());
-            m_haveShownMissingImagesWarning = true;
-        }
-    }
 
     int *ipColorizationStrategy = reinterpret_cast<int *>(&m_colorizationStrategy);
 
@@ -224,11 +203,19 @@ bool K4APointCloudWindow::CheckVisualizationResult(PointCloudVisualizationResult
         return true;
     case PointCloudVisualizationResult::MissingDepthImage:
         ++m_consecutiveMissingImages;
-        ++m_missingDepthImages;
+        K4AViewerLogManager::Instance()
+            .Log(K4A_LOG_LEVEL_WARNING,
+                 __FILE__,
+                 __LINE__,
+                 "Dropped a capture due to a missing depth image - set \"Synchronized Images Only\" to avoid this");
         break;
     case PointCloudVisualizationResult::MissingColorImage:
+        K4AViewerLogManager::Instance()
+            .Log(K4A_LOG_LEVEL_WARNING,
+                 __FILE__,
+                 __LINE__,
+                 "Dropped a capture due to a missing color image - set \"Synchronized Images Only\" to avoid this");
         ++m_consecutiveMissingImages;
-        ++m_missingColorImages;
         break;
     case PointCloudVisualizationResult::OpenGlError:
         SetFailed("OpenGL error!");
