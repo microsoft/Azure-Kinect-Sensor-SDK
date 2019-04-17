@@ -463,6 +463,9 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
         }
 
         k4a_calibration_t calibration;
+        k4a_result_t result =
+            k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_resolution, &calibration);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         k4a_transformation_t transformation_handle = transformation_create(&calibration, false);
         ASSERT_NE(transformation_handle, (k4a_transformation_t)NULL);
@@ -537,5 +540,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
     image_dec_ref(xyz_depth_image);
 }
 
-int main(int argc, char **argv) return k4a_test_commmon_main(argc, argv);
+int main(int argc, char **argv)
+{
+    return k4a_test_commmon_main(argc, argv);
 }
