@@ -168,6 +168,9 @@ k4a_result_t k4a_record_create(const char *path,
         set_track_info_video(context->color_track, color_width, color_height, context->camera_fps);
 
         uint64_t track_uid = GetChild<KaxTrackUID>(*context->color_track).GetValue();
+        std::ostringstream track_uid_str;
+        track_uid_str << track_uid;
+        add_tag(context, "K4A_COLOR_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
         add_tag(context, "K4A_COLOR_MODE", color_mode_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
     }
 
@@ -193,6 +196,9 @@ k4a_result_t k4a_record_create(const char *path,
             set_track_info_video(context->depth_track, depth_width, depth_height, context->camera_fps);
 
             uint64_t track_uid = GetChild<KaxTrackUID>(*context->depth_track).GetValue();
+            std::ostringstream track_uid_str;
+            track_uid_str << track_uid;
+            add_tag(context, "K4A_DEPTH_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
             add_tag(context, "K4A_DEPTH_MODE", depth_mode_str, TAG_TARGET_TYPE_TRACK, track_uid);
         }
     }
@@ -212,6 +218,9 @@ k4a_result_t k4a_record_create(const char *path,
         set_track_info_video(context->ir_track, depth_width, depth_height, context->camera_fps);
 
         uint64_t track_uid = GetChild<KaxTrackUID>(*context->ir_track).GetValue();
+        std::ostringstream track_uid_str;
+        track_uid_str << track_uid;
+        add_tag(context, "K4A_IR_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
         add_tag(context,
                 "K4A_IR_MODE",
                 device_config.depth_mode == K4A_DEPTH_MODE_PASSIVE_IR ? "PASSIVE" : "ACTIVE",
@@ -443,6 +452,9 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
     context->imu_track = add_track(context, imu_track_name.c_str(), track_subtitle, "S_K4A/IMU");
 
     uint64_t track_uid = GetChild<KaxTrackUID>(*context->imu_track).GetValue();
+    std::ostringstream track_uid_str;
+    track_uid_str << track_uid;
+    add_tag(context, "K4A_IMU_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
     add_tag(context, "K4A_IMU_MODE", "ON", TAG_TARGET_TYPE_TRACK, track_uid);
 
     return K4A_RESULT_SUCCEEDED;
