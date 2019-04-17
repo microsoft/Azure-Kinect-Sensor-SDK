@@ -99,6 +99,15 @@ transformation_init_output_image(k4a_transformation_image_descriptor_t *descript
     return image;
 }
 
+// On Ubuntu 16.04 this works without warnings, but on Ubuntu 18.04 isnan actually
+// takes a long double, we get a double-promotion warning here.  Unfortunately,
+// isnan has an implementation-defined argument type, so there's not a specific
+// type we can cast it to in order to avoid clang's precision warnings, so we
+// just need to suppress the warning.
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdouble-promotion"
+#endif
 static k4a_result_t transformation_compute_correspondence(const int depth_index,
                                                           const uint16_t depth,
                                                           const k4a_transformation_rgbz_context_t *context,
@@ -137,6 +146,9 @@ static k4a_result_t transformation_compute_correspondence(const int depth_index,
     }
     return K4A_RESULT_SUCCEEDED;
 }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 static inline int transformation_min2(const int v1, const int v2)
 {
@@ -794,6 +806,15 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
 }
 
 #ifndef _M_X64
+// On Ubuntu 16.04 this works without warnings, but on Ubuntu 18.04 isnan actually
+// takes a long double, we get a double-promotion warning here.  Unfortunately,
+// isnan has an implementation-defined argument type, so there's not a specific
+// type we can cast it to in order to avoid clang's precision warnings, so we
+// just need to suppress the warning.
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdouble-promotion"
+#endif
 static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
                                         const void *depth_image_data,
                                         void *xyz_image_data)
@@ -824,6 +845,9 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
         xyz_data_int16[3 * i + 2] = z;
     }
 }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 #else
 static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_tables,
                                             const void *depth_image_data,

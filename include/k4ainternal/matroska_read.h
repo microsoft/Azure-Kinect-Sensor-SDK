@@ -148,9 +148,7 @@ typedef struct _k4a_playback_data_block_context_t
 
 K4A_DECLARE_CONTEXT(k4a_playback_data_block_t, k4a_playback_data_block_context_t);
 
-std::unique_ptr<EbmlElement> next_element(k4a_playback_context_t *context,
-                                          EbmlElement *parent,
-                                          int *upper_level = nullptr);
+std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlElement *parent);
 k4a_result_t skip_element(k4a_playback_context_t *context, EbmlElement *element);
 
 void match_ebml_id(k4a_playback_context_t *context, EbmlId &id, uint64_t offset);
@@ -161,10 +159,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context);
 k4a_result_t read_bitmap_info_header(track_reader_t *track);
 void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestamp_ns);
 
-libmatroska::KaxTrackEntry *get_track_by_name(k4a_playback_context_t *context, const char *name);
+libmatroska::KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name);
 track_reader_t *get_track_reader_by_name(k4a_playback_context_t *context, std::string track_name);
 k4a_result_t parse_custom_tracks(k4a_playback_context_t *context);
-libmatroska::KaxTrackEntry *get_track_by_tag(k4a_playback_context_t *context, const char *tag_name);
 libmatroska::KaxTag *get_tag(k4a_playback_context_t *context, const char *name);
 std::string get_tag_string(libmatroska::KaxTag *tag);
 libmatroska::KaxAttached *get_attachment_by_name(k4a_playback_context_t *context, const char *file_name);
@@ -176,6 +173,8 @@ void populate_cluster_info(k4a_playback_context_t *context,
                            cluster_info_t *cluster_info);
 cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp_ns);
 cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *current, bool next);
+std::shared_ptr<libmatroska::KaxCluster> load_cluster_internal(k4a_playback_context_t *context,
+                                                               cluster_info_t *cluster_info);
 std::shared_ptr<loaded_cluster_t> load_cluster(k4a_playback_context_t *context, cluster_info_t *cluster_info);
 std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *context,
                                                     loaded_cluster_t *current_cluster,

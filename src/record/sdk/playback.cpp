@@ -216,7 +216,7 @@ k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t playback_handle,
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        LOG_ERROR("Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -248,7 +248,7 @@ k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_hand
 
     if (track_reader == nullptr)
     {
-        LOG_ERROR("Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.", 0);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -282,7 +282,7 @@ k4a_buffer_result_t k4a_playback_track_get_codec_private(k4a_playback_t playback
 
     if (track_reader == nullptr)
     {
-        LOG_ERROR("Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.", 0);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -452,7 +452,7 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        LOG_ERROR("Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.", 0);
         return K4A_STREAM_RESULT_FAILED;
     }
 
@@ -484,7 +484,7 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
     if (data_block_context == nullptr)
     {
-        LOG_ERROR("Creating data block failed.");
+        LOG_ERROR("Creating data block failed.", 0);
         return K4A_STREAM_RESULT_FAILED;
     }
 
@@ -510,7 +510,7 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        LOG_ERROR("Track name cannot be found.");
+        LOG_ERROR("Track name cannot be found.", 0);
         return K4A_STREAM_RESULT_FAILED;
     }
 
@@ -544,7 +544,7 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
     if (data_block_context == nullptr)
     {
-        LOG_ERROR("Creating data block failed.");
+        LOG_ERROR("Creating data block failed.", 0);
         return K4A_STREAM_RESULT_FAILED;
     }
 

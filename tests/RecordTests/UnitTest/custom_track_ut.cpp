@@ -243,13 +243,13 @@ TEST_F(custom_track_ut, read_track_information)
     const BITMAPINFOHEADER *depth_codec_header = reinterpret_cast<const BITMAPINFOHEADER *>(private_codec.data());
     ASSERT_EQ(depth_codec_header->biWidth, test_depth_width);
     ASSERT_EQ(depth_codec_header->biHeight, test_depth_height);
-    ASSERT_EQ(depth_codec_header->biBitCount, 16);
+    ASSERT_EQ(depth_codec_header->biBitCount, (uint64_t)16);
     ASSERT_EQ(depth_codec_header->biCompression, static_cast<uint32_t>(0x32595559)); // YUY2 little endian
     ASSERT_EQ(depth_codec_header->biSizeImage, sizeof(uint16_t) * test_depth_width * test_depth_height);
 
     ASSERT_EQ(k4a_playback_track_get_codec_private(handle, "CUSTOM_TRACK_1", nullptr, &data_size),
               K4A_BUFFER_RESULT_TOO_SMALL);
-    ASSERT_EQ(data_size, 0);
+    ASSERT_EQ(data_size, (size_t)0);
 
     k4a_playback_close(handle);
 }
@@ -319,7 +319,7 @@ TEST_F(custom_track_ut, seek_custom_track_frame)
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     for (size_t i = 0; i < seek_timestamps_usec.size(); i++)
     {
-        result = k4a_playback_seek_timestamp(handle, seek_timestamps_usec[i], K4A_PLAYBACK_SEEK_BEGIN);
+        result = k4a_playback_seek_timestamp(handle, (int64_t)seek_timestamps_usec[i], K4A_PLAYBACK_SEEK_BEGIN);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         k4a_playback_data_block_t data_block = NULL;

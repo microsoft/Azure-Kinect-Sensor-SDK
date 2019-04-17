@@ -43,6 +43,19 @@ K4A_DECLARE_HANDLE(k4a_record_t);
  */
 K4A_DECLARE_HANDLE(k4a_playback_t);
 
+/** \class k4a_playback_data_block_t types.h <k4arecord/types.h>
+ * Handle to a block of data read from a k4a_playback_t custom track.
+ *
+ * \remarks
+ * Handles are obtained from k4a_playback_get_next_data_block() or k4a_playback_get_previous_data_block(), and released
+ * with k4a_playback_data_block_release(). Invalid handles are set to 0.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">types.h (include k4arecord/types.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4A_DECLARE_HANDLE(k4a_playback_data_block_t)
 
 /** Return codes returned by Azure Kinect playback API.
