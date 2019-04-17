@@ -319,7 +319,7 @@ TEST_F(custom_track_ut, seek_custom_track_frame)
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     for (size_t i = 0; i < seek_timestamps_usec.size(); i++)
     {
-        result = k4a_playback_seek_timestamp(handle, seek_timestamps_usec[i], K4A_PLAYBACK_SEEK_BEGIN);
+        result = k4a_playback_seek_timestamp(handle, (int64_t)seek_timestamps_usec[i], K4A_PLAYBACK_SEEK_BEGIN);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         k4a_playback_data_block_t data_block = NULL;

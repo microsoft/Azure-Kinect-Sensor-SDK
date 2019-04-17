@@ -384,7 +384,7 @@ k4a_result_t k4a_record_add_attachment(const k4a_record_t recording_handle,
 
     if (context->header_written)
     {
-        LOG_ERROR("Attachment must be added before the recording header is written.");
+        LOG_ERROR("Attachments must be added before the recording header is written.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -411,14 +411,14 @@ k4a_result_t k4a_record_add_custom_track_tag(const k4a_record_t recording_handle
 
     if (context->header_written)
     {
-        LOG_ERROR("Tags must be added before the recording header is written.");
+        LOG_ERROR("Tags must be added before the recording header is written.", 0);
         return K4A_RESULT_FAILED;
     }
 
     auto itr = context->custom_tracks.find(track_name);
     if (itr == context->custom_tracks.end())
     {
-        LOG_ERROR("The custom track is not created.");
+        LOG_ERROR("The custom track is not created.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -477,7 +477,7 @@ k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
 
     if (context->header_written)
     {
-        LOG_ERROR("The custom track must be added before the recording header is written.");
+        LOG_ERROR("Custom tracks must be added before the recording header is written.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -508,7 +508,7 @@ k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
 
     if (context->header_written)
     {
-        LOG_ERROR("The custom track must be added before the recording header is written.");
+        LOG_ERROR("Custom tracks must be added before the recording header is written.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -722,14 +722,14 @@ k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_han
 
     if (!context->header_written)
     {
-        LOG_ERROR("The recording header needs to be written before any captures.");
+        LOG_ERROR("The recording header needs to be written before any track data.", 0);
         return K4A_RESULT_FAILED;
     }
 
     auto itr = context->custom_tracks.find(track_name);
     if (itr == context->custom_tracks.end())
     {
-        LOG_ERROR("The custom track is not created.");
+        LOG_ERROR("The custom track is not created.", 0);
         return K4A_RESULT_FAILED;
     }
 

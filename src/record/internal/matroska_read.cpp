@@ -37,7 +37,9 @@ std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlEle
         {
             // This element is not a child of the parent, set the file pointer back to the start of the element and
             // return nullptr.
-            context->ebml_file->setFilePointer(element->GetElementPosition());
+            uint64_t file_offset = element->GetElementPosition();
+            assert(file_offset <= INT64_MAX);
+            context->ebml_file->setFilePointer((int64_t)file_offset);
             delete element;
             return nullptr;
         }
@@ -400,7 +402,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     if (K4A_FAILED(parse_custom_tracks(context)))
     {
         // The rest of the recording can still be read if read custom track failed
-        LOG_WARNING("Read custom track data failed.");
+        LOG_WARNING("Read custom track data failed.", 0);
     }
 
     // Read device calibration attachment
@@ -423,7 +425,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
         if (context->color_track.type != track_video)
         {
-            LOG_ERROR("Color track is not a video track.");
+            LOG_ERROR("Color track is not a video track.", 0);
             return K4A_RESULT_FAILED;
         }
 
@@ -863,8 +865,7 @@ KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, con
         }
     }
 
-    KaxTrackEntry *track_by_name = NULL;
-    KaxTrackEntry *track_by_tag = NULL;
+    KaxTrackEntry *track_found = NULL;
     for (EbmlElement *e : context->tracks->GetElementList())
     {
         KaxTrackEntry *track = NULL;
@@ -874,31 +875,28 @@ KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, con
             uint64_t track_uid = GetChild<KaxTrackUID>(*track).GetValue();
             std::string track_codec_id = GetChild<KaxCodecID>(*track).GetValue();
 
-            if (track_name == search_name)
-            {
-                track_by_name = track;
-            }
             if (search_uid != 0 && track_uid == search_uid)
             {
-                track_by_tag = track;
+                track_found = track;
+                break;
+            }
+            else if (track_name == search_name)
+            {
+                track_found = track;
+                // Search by UID has priority over search by name, keep searching for a matching UID.
             }
         }
     }
 
-    if (track_by_tag != NULL)
+    if (track_found != NULL)
     {
-        track_by_tag->SetGlobalTimecodeScale(context->timecode_scale);
-        return track_by_tag;
-    }
-    else if (track_by_name != NULL)
-    {
-        track_by_name->SetGlobalTimecodeScale(context->timecode_scale);
-        return track_by_name;
+        track_found->SetGlobalTimecodeScale(context->timecode_scale);
+        return track_found;
     }
     return NULL;
 }
 
-bool check_track_name_default_track(std::string track_name)
+static bool check_track_name_default_track(std::string track_name)
 {
     return track_name == depth_track_name || track_name == ir_track_name || track_name == color_track_name ||
            track_name == imu_track_name;
@@ -2019,7 +2017,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             bool filled = false;
             for (size_t i = 0; i < arraysize(blocks); i++)
             {
-                if (next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
+                if (blocks[i]->track != NULL && next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
                 {
                     std::shared_ptr<block_info_t> test_block = find_block(context,
                                                                           blocks[i],
