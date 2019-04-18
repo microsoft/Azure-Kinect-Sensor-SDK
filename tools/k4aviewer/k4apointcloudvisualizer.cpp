@@ -188,7 +188,11 @@ K4APointCloudVisualizer::K4APointCloudVisualizer(const bool enableColorPointClou
 
     m_viewControl.ResetPosition();
 
-    m_colorXyTable = m_pointCloudConverter.GenerateXyTable(m_calibrationData, K4A_CALIBRATION_TYPE_COLOR);
+    if (enableColorPointCloud)
+    {
+        m_colorXyTable = m_pointCloudConverter.GenerateXyTable(m_calibrationData, K4A_CALIBRATION_TYPE_COLOR);
+    }
+
     m_depthXyTable = m_pointCloudConverter.GenerateXyTable(m_calibrationData, K4A_CALIBRATION_TYPE_DEPTH);
 
     SetColorizationStrategy(m_colorizationStrategy);
