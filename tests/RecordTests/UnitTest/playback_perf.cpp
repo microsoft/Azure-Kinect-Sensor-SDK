@@ -88,6 +88,27 @@ TEST_F(playback_perf, test_1000_reads_forward)
         }
     }
 
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    if (config.imu_track_enabled)
+    {
+        k4a_imu_sample_t sample = { 0 };
+        k4a_stream_result_t playback_result = K4A_STREAM_RESULT_FAILED;
+        Timer t("Next imu smaple x10000");
+        for (int i = 0; i < 10000; i++)
+        {
+            playback_result = k4a_playback_get_next_imu_sample(handle, &sample);
+            ASSERT_NE(playback_result, K4A_STREAM_RESULT_FAILED);
+            if (playback_result == K4A_STREAM_RESULT_EOF)
+            {
+                std::cout << "    Warning: Input file is too short, only read " << i << " imu_samples." << std::endl;
+                break;
+            }
+        }
+    }
+
     k4a_playback_close(handle);
 }
 
@@ -122,6 +143,27 @@ TEST_F(playback_perf, test_1000_reads_backward)
             }
             ASSERT_NE(capture, nullptr);
             k4a_capture_release(capture);
+        }
+    }
+
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    if (config.imu_track_enabled)
+    {
+        k4a_imu_sample_t sample = { 0 };
+        k4a_stream_result_t playback_result = K4A_STREAM_RESULT_FAILED;
+        Timer t("Previous imu smaple x10000");
+        for (int i = 0; i < 10000; i++)
+        {
+            playback_result = k4a_playback_get_previous_imu_sample(handle, &sample);
+            ASSERT_NE(playback_result, K4A_STREAM_RESULT_FAILED);
+            if (playback_result == K4A_STREAM_RESULT_EOF)
+            {
+                std::cout << "    Warning: Input file is too short, only read " << i << " imu_samples." << std::endl;
+                break;
+            }
         }
     }
 
