@@ -9,6 +9,13 @@
     <Platforms>x64;x86</Platforms>
     <OutputPath>$(BaseOutputPath)$(AssemblyName)\</OutputPath>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Content Include="..\StubGenerator.$(Platform).json">
+      <Link>appsettings.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="nunit" Version="3.10.1" />

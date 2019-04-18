@@ -1,0 +1,10 @@
+{
+  "Paths": {
+    "K4A_BINARY_DIR": "@PROJECT_BINARY_DIR@",
+    "K4A_SOURCE_DIR": "@PROJ_DIR@",
+    "CMAKE_CXX_COMPILER": "@CMAKE_CXX_COMPILER@",
+    "CMAKE_LINKER": "@CMAKE_LINKER@",
+    "INCLUDE": "$ENV{INCLUDE}",
+    "LIB": "$ENV{LIB}"
+  }
+}

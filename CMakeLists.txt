@@ -192,6 +192,15 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     endif()
 endif()
 
+
+if ("${TARGET_ARCH}" STREQUAL "amd64")
+    configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x64.props)
+    configure_file(StubGenerator.json.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x64.json)
+elseif ("${TARGET_ARCH}" STREQUAL "x86")
+    configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x86.props)
+    configure_file(StubGenerator.json.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x86.json)
+endif()
+
 # Packaging support
 set(CPACK_PACKAGE_VENDOR "Microsoft")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C/C++ SDK for Kinect for Azure")
