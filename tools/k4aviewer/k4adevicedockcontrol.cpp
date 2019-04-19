@@ -919,13 +919,13 @@ bool K4ADeviceDockControl::StartCameras()
 
     m_cameraPollingThread = std14::make_unique<K4APollingThread>(
         [pDevice, pCameraDataSource, pPaused, pCamerasStarted, pAbortInProgress, isSubordinate](bool firstRun) {
-            std::chrono::milliseconds timeout = CameraPollingTimeout;
+            std::chrono::milliseconds pollingTimeout = CameraPollingTimeout;
             if (firstRun && isSubordinate)
             {
                 // If we're starting in subordinate mode, we need to give the user time to start the
                 // master device, so we wait for longer.
                 //
-                timeout = SubordinateModeStartupTimeout;
+                pollingTimeout = SubordinateModeStartupTimeout;
             }
             return PollSensor<k4a::capture>("Cameras",
                                             pDevice,
@@ -939,7 +939,7 @@ bool K4ADeviceDockControl::StartCameras()
                                                 return device->get_capture(capture, timeout);
                                             },
                                             [](k4a::device *device) { device->stop_cameras(); },
-                                            timeout);
+                                            pollingTimeout);
         });
 
     return true;
@@ -1018,13 +1018,13 @@ bool K4ADeviceDockControl::StartImu()
 
     m_imuPollingThread = std14::make_unique<K4APollingThread>(
         [pDevice, pImuDataSource, pPaused, pImuStarted, pAbortInProgress, isSubordinate](bool firstRun) {
-            std::chrono::milliseconds timeout = ImuPollingTimeout;
+            std::chrono::milliseconds pollingTimeout = ImuPollingTimeout;
             if (firstRun && isSubordinate)
             {
                 // If we're starting in subordinate mode, we need to give the user time to start the
                 // master device, so we wait for longer.
                 //
-                timeout = SubordinateModeStartupTimeout;
+                pollingTimeout = SubordinateModeStartupTimeout;
             }
             return PollSensor<k4a_imu_sample_t>("IMU",
                                                 pDevice,
@@ -1038,7 +1038,7 @@ bool K4ADeviceDockControl::StartImu()
                                                     return device->get_imu_sample(sample, timeout);
                                                 },
                                                 [](k4a::device *device) { device->stop_imu(); },
-                                                timeout);
+                                                pollingTimeout);
         });
 
     return true;
