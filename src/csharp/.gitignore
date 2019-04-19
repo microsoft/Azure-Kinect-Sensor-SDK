@@ -1,0 +1,6 @@
+## Ignore CMake generated files that enable the CSharp solution to find and interact with the CMake built files.
+
+/k4a.*.props
+
+/StubGenerator.*.json
+/StubGenerator.*.xml
