@@ -71,7 +71,14 @@ GLenum K4AViewerImage::UpdateTexture(const uint8_t *data)
         return glGetError();
     }
 
-    std::copy(data, data + m_textureBufferSize, buffer);
+    if (data)
+    {
+        std::copy(data, data + m_textureBufferSize, buffer);
+    }
+    else
+    {
+        std::fill(buffer, buffer + m_textureBufferSize, static_cast<uint8_t>(0));
+    }
 
     if (!glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
     {
@@ -111,15 +118,7 @@ GLenum K4AViewerImage::Create(std::shared_ptr<K4AViewerImage> *out,
                    static_cast<GLsizei>(dimensions.Width),
                    static_cast<GLsizei>(dimensions.Height));
 
-    GLenum status;
-    if (data)
-    {
-        status = newTexture->UpdateTexture(data);
-    }
-    else
-    {
-        status = glGetError();
-    }
+    GLenum status = newTexture->UpdateTexture(data);
 
     if (status == GL_NO_ERROR)
     {
