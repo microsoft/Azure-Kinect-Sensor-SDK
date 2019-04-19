@@ -1,14 +1,12 @@
-# K4A Fast Capture:trigger
+# Azure Kinect Fast Capture:trigger
 
 ## Introduction
 
-K4A Fast Capture trigger will send command to K4A Fast Capture streaming process to take capture. K4A Fast Capture trigger cannot work alone.
+Azure Kinect Fast Capture trigger will send command to Azure Kinect Fast Capture streaming process to take capture.
+Azure Kinect Fast Capture trigger cannot work alone.
 
 ## Usage Info
 
-       	To take capture:
-		fastcapture_trigger.exe
+Run ```fastcapture_trigger.exe``` to take a capture.
 
-	To exit the streaming process:
-		fastcapture_trigger.exe exit
-
+Run ```fastcapture_trigger.exe``` to exit the streaming process.

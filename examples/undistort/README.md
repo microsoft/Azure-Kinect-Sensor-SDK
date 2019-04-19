@@ -1,4 +1,4 @@
-# K4A Undistort Example
+# Azure Kinect Undistort Example
 
 ## Introduction
 

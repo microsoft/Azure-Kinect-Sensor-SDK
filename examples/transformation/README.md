@@ -1,11 +1,11 @@
-# K4A Transformation Example
+# Azure Kinect Transformation Example
 
 ## Introduction
 
-The K4A Transformation Example shows the transformations between a color image, a depth image, and a point cloud.
+The Azure Kinect Transformation Example shows the transformations between a color image, a depth image, and a point cloud.
 It has two modes: the **capture** mode and the **playback** mode.
 
-The K4A Transformation Example demonstrates the use of the K4A transformation functions
+The Azure Kinect Transformation Example demonstrates the use of the Azure Kinect transformation functions
 `k4a_transformation_color_image_to_depth_camera()`, `k4a_transformation_depth_image_to_color_camera()` and 
 `k4a_transformation_depth_image_to_point_cloud()`.
 
