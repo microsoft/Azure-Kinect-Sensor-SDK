@@ -3,8 +3,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	
-    <OutputPath>$(BaseOutputPath)$(AssemblyName)\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

@@ -192,13 +192,17 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     endif()
 endif()
 
+string(REGEX REPLACE "\\\\" "/" MSBUID_ENV_INCLUDE "$ENV{INCLUDE}")
+string(REGEX REPLACE "\\\\" "/" MSBUID_ENV_LIB "$ENV{LIB}")
 
 if ("${TARGET_ARCH}" STREQUAL "amd64")
     configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x64.props)
     configure_file(StubGenerator.json.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x64.json)
+    configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x64.xml)
 elseif ("${TARGET_ARCH}" STREQUAL "x86")
     configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x86.props)
     configure_file(StubGenerator.json.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x86.json)
+    configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x86.xml)
 endif()
 
 # Packaging support

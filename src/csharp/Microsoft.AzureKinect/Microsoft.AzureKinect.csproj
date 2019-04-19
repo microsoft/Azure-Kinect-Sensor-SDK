@@ -4,12 +4,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
 	<LangVersion>latest</LangVersion>
-	
-    <OutputPath>$(BaseOutputPath)$(AssemblyName)\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>$(OutputPath)\Microsoft.AzureKinect.xml</DocumentationFile>
+    <DocumentationFile>Microsoft.AzureKinect.xml</DocumentationFile>
   </PropertyGroup>
 </Project>

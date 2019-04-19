@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.Xml;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
 {
@@ -24,24 +24,34 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                         return;
                     }
 
-                    System.Console.WriteLine("LoadEnvironment...");
+                    Console.WriteLine("LoadEnvironment...");
 
-                    string appSettingsJson = File.ReadAllText(@"appsettings.json");
+                    //string appSettingsJson = File.ReadAllText(@"appsettings.json");
                     //JObject appSettings = JObject.Parse(appSettingsJson);
 
-                    System.Environment.SetEnvironmentVariable("K4A_BINARY_DIR", @"D:/Projects/Azure-Kinect-Sensor-SDK/build64");
-                    System.Environment.SetEnvironmentVariable("K4A_SOURCE_DIR", @"D:/Projects/Azure-Kinect-Sensor-SDK/");
-                    System.Environment.SetEnvironmentVariable("CMAKE_CXX_COMPILER", @"C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe");
-                    System.Environment.SetEnvironmentVariable("CMAKE_LINKER", @"C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/link.exe");
-                    System.Environment.SetEnvironmentVariable("INCLUDE", @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\ATLMFC\include;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\include;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\shared;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\winrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\cppwinrt");
-                    System.Environment.SetEnvironmentVariable("LIB", @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\ATLMFC\lib\x64;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\lib\x64;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\lib\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.17763.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.17763.0\um\x64;");
+                    //Environment.SetEnvironmentVariable("K4A_BINARY_DIR", appSettings["Paths"]["K4A_BINARY_DIR"].Value<string>());
+                    //Environment.SetEnvironmentVariable("K4A_SOURCE_DIR", appSettings["Paths"]["K4A_SOURCE_DIR"].Value<string>());
+                    //Environment.SetEnvironmentVariable("CMAKE_CXX_COMPILER", appSettings["Paths"]["CMAKE_CXX_COMPILER"].Value<string>());
+                    //Environment.SetEnvironmentVariable("CMAKE_LINKER", appSettings["Paths"]["CMAKE_LINKER"].Value<string>());
+                    //Environment.SetEnvironmentVariable("INCLUDE", appSettings["Paths"]["INCLUDE"].Value<string>());
+                    //Environment.SetEnvironmentVariable("LIB", appSettings["Paths"]["LIB"].Value<string>());
+
+                    XmlDocument appSettings = new XmlDocument();
+                    appSettings.Load("appsettings.xml");
+
+                    Environment.SetEnvironmentVariable("K4A_BINARY_DIR", appSettings.DocumentElement["K4A_BINARY_DIR"].InnerXml);
+                    Environment.SetEnvironmentVariable("K4A_SOURCE_DIR", appSettings.DocumentElement["K4A_SOURCE_DIR"].InnerXml);
+                    Environment.SetEnvironmentVariable("CMAKE_CXX_COMPILER", appSettings.DocumentElement["CMAKE_CXX_COMPILER"].InnerXml);
+                    Environment.SetEnvironmentVariable("CMAKE_LINKER", appSettings.DocumentElement["CMAKE_LINKER"].InnerXml);
+                    Environment.SetEnvironmentVariable("INCLUDE", appSettings.DocumentElement["INCLUDE"].InnerXml);
+                    Environment.SetEnvironmentVariable("LIB", appSettings.DocumentElement["LIB"].InnerXml);
 
                     EnvironmentInfo.IsInitialized = true;
                 }
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine("Failed to load settings: {0}", ex);
+                Console.WriteLine("Failed to load settings: {0}", ex);
             }
         }
     }

@@ -2,6 +2,6 @@
   <PropertyGroup>
     <K4aBinaryDirectory>@PROJECT_BINARY_DIR@</K4aBinaryDirectory>
     <K4aSourceDirectory>@PROJ_DIR@</K4aSourceDirectory>
-	<K4aSdkDirectory>C:\Program Files\Azure Kinect SDK\sdk\windows-desktop</K4aSdkDirectory>
+    <K4aSdkDirectory>C:\Program Files\Azure Kinect SDK\sdk\windows-desktop</K4aSdkDirectory>
   </PropertyGroup>  
 </Project>
