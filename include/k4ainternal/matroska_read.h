@@ -136,6 +136,8 @@ typedef struct _k4a_playback_context_t
 
     // Stats
     uint64_t seek_count, load_count, cache_hits;
+
+    bool capture_tracks_sync_is_broken = false;
 } k4a_playback_context_t;
 
 K4A_DECLARE_CONTEXT(k4a_playback_t, k4a_playback_context_t);
@@ -160,6 +162,7 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track);
 void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestamp_ns);
 
 libmatroska::KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name);
+bool check_track_name_capture_track(std::string track_name);
 track_reader_t *get_track_reader_by_name(k4a_playback_context_t *context, std::string track_name);
 k4a_result_t parse_custom_tracks(k4a_playback_context_t *context);
 libmatroska::KaxTag *get_tag(k4a_playback_context_t *context, const char *name);

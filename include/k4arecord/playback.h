@@ -211,9 +211,10 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
                                                                      char *codec_id,
                                                                      size_t *codec_id_size);
 
-/** Gets the codec private with the given track name
+/** Gets the codec context with the given track name
  *
- * The codec private is codec-specific buffer that contains any required codec metadata that only known to the codec.
+ * The codec context is codec-specific buffer that contains any required codec metadata that only known to the codec. It
+ * is mapped to the matroska Codec Private field.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
@@ -222,7 +223,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
  * The track name to be queried the codec id
  *
  * \param data
- * Location to write the codec private data. If a NULL buffer is specified, \p data_size will be set to the size of
+ * Location to write the codec context data. If a NULL buffer is specified, \p data_size will be set to the size of
  * buffer needed to store the data.
  *
  * \param data_size
@@ -243,7 +244,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_private(k4a_playback_t playback_handle,
+K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_playback_t playback_handle,
                                                                           const char *track_name,
                                                                           uint8_t *data,
                                                                           size_t *data_size);
@@ -549,8 +550,8 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * block in the recording closest to the seek time with a timestamp greater than or equal to the seek time.
  *
  * \remarks
- * If the call is successful and a data block is returned, callers must call k4a_playback_data_block_release() to return
- * the allocated memory.
+ * If the call is successful, callers must call k4a_playback_data_block_release() to return the allocated memory for
+ * data_block_handle.
  *
  * \xmlonly
  * <requirements>
@@ -594,8 +595,8 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playba
  * data block closest to the seek time with a timestamp less than the seek time.
  *
  * \remarks
- * If the call is successful and a data block is returned, callers must call k4a_playback_data_block_release() to return
- * the allocated memory.
+ * If the call is successful, callers must call k4a_playback_data_block_release() to return the allocated memory for
+ * data_block_handle.
  *
  * \xmlonly
  * <requirements>

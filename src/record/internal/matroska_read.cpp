@@ -902,6 +902,11 @@ static bool check_track_name_default_track(std::string track_name)
            track_name == imu_track_name;
 }
 
+bool check_track_name_capture_track(std::string track_name)
+{
+    return track_name == depth_track_name || track_name == ir_track_name || track_name == color_track_name;
+}
+
 track_reader_t *get_track_reader_by_name(k4a_playback_context_t *context, std::string track_name)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
@@ -1918,6 +1923,14 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
 {
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, capture_handle == NULL);
+
+    if (context->capture_tracks_sync_is_broken)
+    {
+        LOG_ERROR("Capture tracks sync is broken by k4a_playback_get_next_data_block or "
+                  "k4a_playback_get_previous_data_block function call. Try to call k4a_playback_seek_timestamp to "
+                  "bring the capture tracks back to sync!");
+        return K4A_STREAM_RESULT_FAILED;
+    }
 
     track_reader_t *blocks[] = { &context->color_track, &context->depth_track, &context->ir_track };
     std::shared_ptr<block_info_t> next_blocks[] = { context->color_track.current_block,

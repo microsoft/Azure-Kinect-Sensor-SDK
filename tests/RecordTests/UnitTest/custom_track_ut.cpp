@@ -234,20 +234,20 @@ TEST_F(custom_track_ut, read_track_information)
     ASSERT_STREQ(reinterpret_cast<char *>(codec_id.data()), "S_K4A/CUSTOM_TRACK_1");
 
     // Read private codec
-    std::vector<uint8_t> private_codec;
-    ASSERT_EQ(k4a_playback_track_get_codec_private(handle, "DEPTH", nullptr, &data_size), K4A_BUFFER_RESULT_TOO_SMALL);
-    private_codec.resize(data_size);
-    ASSERT_EQ(k4a_playback_track_get_codec_private(handle, "DEPTH", private_codec.data(), &data_size),
+    std::vector<uint8_t> codec_context;
+    ASSERT_EQ(k4a_playback_track_get_codec_context(handle, "DEPTH", nullptr, &data_size), K4A_BUFFER_RESULT_TOO_SMALL);
+    codec_context.resize(data_size);
+    ASSERT_EQ(k4a_playback_track_get_codec_context(handle, "DEPTH", codec_context.data(), &data_size),
               K4A_BUFFER_RESULT_SUCCEEDED);
 
-    const BITMAPINFOHEADER *depth_codec_header = reinterpret_cast<const BITMAPINFOHEADER *>(private_codec.data());
+    const BITMAPINFOHEADER *depth_codec_header = reinterpret_cast<const BITMAPINFOHEADER *>(codec_context.data());
     ASSERT_EQ(depth_codec_header->biWidth, test_depth_width);
     ASSERT_EQ(depth_codec_header->biHeight, test_depth_height);
     ASSERT_EQ(depth_codec_header->biBitCount, (uint64_t)16);
     ASSERT_EQ(depth_codec_header->biCompression, static_cast<uint32_t>(0x32595559)); // YUY2 little endian
     ASSERT_EQ(depth_codec_header->biSizeImage, sizeof(uint16_t) * test_depth_width * test_depth_height);
 
-    ASSERT_EQ(k4a_playback_track_get_codec_private(handle, "CUSTOM_TRACK_1", nullptr, &data_size),
+    ASSERT_EQ(k4a_playback_track_get_codec_context(handle, "CUSTOM_TRACK_1", nullptr, &data_size),
               K4A_BUFFER_RESULT_TOO_SMALL);
     ASSERT_EQ(data_size, (size_t)0);
 

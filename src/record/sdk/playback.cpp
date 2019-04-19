@@ -267,7 +267,7 @@ k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_hand
     }
 }
 
-k4a_buffer_result_t k4a_playback_track_get_codec_private(k4a_playback_t playback_handle,
+k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_playback_t playback_handle,
                                                          const char *track_name,
                                                          uint8_t *data,
                                                          size_t *data_size)
@@ -456,6 +456,11 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
         return K4A_STREAM_RESULT_FAILED;
     }
 
+    if (check_track_name_capture_track(track_name))
+    {
+        context->capture_tracks_sync_is_broken = true;
+    }
+
     std::shared_ptr<block_info_t> read_block = track_reader->current_block;
     if (read_block == nullptr)
     {
@@ -512,6 +517,11 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     {
         LOG_ERROR("Track name cannot be found.", 0);
         return K4A_STREAM_RESULT_FAILED;
+    }
+
+    if (check_track_name_capture_track(track_name))
+    {
+        context->capture_tracks_sync_is_broken = true;
     }
 
     std::shared_ptr<block_info_t> read_block = track_reader->current_block;
@@ -640,6 +650,8 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
 
     context->seek_cluster = seek_cluster;
     reset_seek_pointers(context, target_time_ns);
+
+    context->capture_tracks_sync_is_broken = false;
 
     return K4A_RESULT_SUCCEEDED;
 }

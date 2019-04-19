@@ -126,7 +126,7 @@ int main(int argc, char **argv)
     result = k4a_record_add_custom_track_tag(recording, "DEPTH", "K4A_DEPTH_MODE", "NFOV_UNBINNED");
     VERIFY(result, "Add custom track tag failed!");
 
-    VERIFY(k4a_record_write_header(recording), "K4A Write Header Failed");
+    VERIFY(k4a_record_write_header(recording), "K4A write header failed");
 
     int frame_count = 0;
     do
@@ -173,8 +173,6 @@ int main(int argc, char **argv)
         }
 
     } while (frame_count < 100);
-
-    std::cout << "Finished body tracking processing!" << std::endl;
 
     k4a_device_stop_cameras(device);
 

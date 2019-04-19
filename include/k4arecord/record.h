@@ -170,11 +170,12 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
  * existing formats are listed here: https://www.matroska.org/technical/specs/codecid/index.html. It can also be custom
  * defined by the user.
  *
- * \param codec_private
- * The codec private is codec-specific buffer that contains any required codec metadata that only known to the codec.
+ * \param codec_context
+ * The codec context is codec-specific buffer that contains any required codec metadata that only known to the codec. It
+ * is mapped to the matroska Codec Private field.
  *
- * \param codec_private_size
- * The size of the codec private buffer.
+ * \param codec_context_size
+ * The size of the codec context buffer.
  *
  * \param video_info
  * The general information of the video track data.
@@ -202,8 +203,8 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
                                                          const char *track_name,
                                                          const char *codec_id,
-                                                         const uint8_t *codec_private,
-                                                         size_t codec_private_size,
+                                                         const uint8_t *codec_context,
+                                                         size_t codec_context_size,
                                                          const k4a_record_video_info_t *video_info);
 
 /** Adds custom subtitle tracks to the recording.
@@ -222,11 +223,12 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t reco
  * existing formats are listed here: https://www.matroska.org/technical/specs/codecid/index.html. It can also be custom
  * defined by the user.
  *
- * \param codec_private
- * The codec private is codec-specific buffer that contains any required codec metadata that only known to the codec.
+ * \param codec_context
+ * The codec context is codec-specific buffer that contains any required codec metadata that only known to the codec. It
+ * is mapped to the matroska Codec Private field.
  *
- * \param codec_private_size
- * The size of the codec private buffer.
+ * \param codec_context_size
+ * The size of the codec context buffer.
  *
  * \headerfile record.h <k4arecord/record.h>
  *
@@ -251,8 +253,8 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t reco
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
                                                             const char *track_name,
                                                             const char *codec_id,
-                                                            const uint8_t *codec_private,
-                                                            size_t codec_private_size);
+                                                            const uint8_t *codec_context,
+                                                            size_t codec_context_size);
 
 /** Adds tag that related to the track with given track name.
  *
@@ -382,10 +384,10 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
  * \param timestamp_usec
  * The timestamp in microsecond of the custom track data.
  *
- * \param buffer
+ * \param custom_data
  * The buffer of the custom track data.
  *
- * \param buffer_size
+ * \param custom_data_size
  * The size of the custom track data.
  *
  * \headerfile record.h <k4arecord/record.h>
@@ -408,8 +410,8 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
                                                                  const char *track_name,
                                                                  uint64_t timestamp_usec,
-                                                                 uint8_t *buffer,
-                                                                 size_t buffer_size);
+                                                                 uint8_t *custom_data,
+                                                                 size_t custom_data_size);
 
 /** Flushes all pending recording data to disk.
  *
