@@ -31,20 +31,41 @@ namespace
 constexpr std::chrono::milliseconds CameraPollingTimeout(2000);
 constexpr std::chrono::milliseconds ImuPollingTimeout(2000);
 
+constexpr std::chrono::minutes SubordinateModeStartupTimeout(5);
+
+constexpr std::chrono::milliseconds PollingThreadCleanShutdownTimeout = std::chrono::milliseconds(1000 / 5);
+
+template<typename T>
+void StopSensor(k4a::device *device,
+                std::function<void(k4a::device *)> stopFn,
+                K4ADataSource<T> *dataSource,
+                bool *started)
+{
+    if (*started)
+    {
+        stopFn(device);
+    }
+    dataSource->NotifyTermination();
+    *started = false;
+}
+
 template<typename T>
 bool PollSensor(const char *sensorFriendlyName,
                 k4a::device *device,
                 K4ADataSource<T> *dataSource,
                 bool *paused,
-                std::function<bool(k4a::device *, T *)> pollFn,
-                std::function<void(k4a::device *)> stopFn)
+                bool *started,
+                bool *abortInProgress,
+                std::function<bool(k4a::device *, T *, std::chrono::milliseconds)> pollFn,
+                std::function<void(k4a::device *)> stopFn,
+                std::chrono::milliseconds timeout)
 {
-    bool failureWasTimeout = false;
+    std::string errorMessage;
 
     try
     {
         T data;
-        const bool succeeded = pollFn(device, &data);
+        const bool succeeded = pollFn(device, &data, timeout);
         if (succeeded)
         {
             if (!*paused)
@@ -54,31 +75,59 @@ bool PollSensor(const char *sensorFriendlyName,
             return true;
         }
 
-        // We've timed out.
-        //
-        failureWasTimeout = true;
+        errorMessage = "timed out!";
     }
-    catch (const k4a::error &)
+    catch (const k4a::error &e)
     {
-        failureWasTimeout = false;
+        errorMessage = e.what();
     }
 
-    std::stringstream errorBuilder;
-    errorBuilder << sensorFriendlyName;
-    if (failureWasTimeout)
+    StopSensor(device, stopFn, dataSource, started);
+
+    if (!*abortInProgress)
     {
-        errorBuilder << " timed out!";
-    }
-    else
-    {
-        errorBuilder << " failed!";
+        std::stringstream errorBuilder;
+        errorBuilder << sensorFriendlyName << " failed: " << errorMessage;
+        K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
     }
 
-    K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
-    dataSource->NotifyTermination();
-    stopFn(device);
     return false;
 }
+
+template<typename T>
+void StopPollingThread(std::unique_ptr<K4APollingThread> *pollingThread,
+                       k4a::device *device,
+                       std::function<void(k4a::device *)> stopFn,
+                       K4ADataSource<T> *dataSource,
+                       bool *started,
+                       bool *abortInProgress)
+{
+    *abortInProgress = true;
+    if (*pollingThread)
+    {
+        (*pollingThread)->StopAsync();
+
+        // Attempt graceful shutdown of the polling thread to reduce noise.
+        // If this doesn't work out, we'll stop the device manually, which will
+        // make the polling thread's blocking call to get the next data sample abort.
+        //
+        auto startTime = std::chrono::high_resolution_clock::now();
+        while (*started)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            auto now = std::chrono::high_resolution_clock::now();
+            if (now - startTime > PollingThreadCleanShutdownTimeout)
+            {
+                break;
+            }
+        }
+    }
+
+    StopSensor(device, stopFn, dataSource, started);
+    pollingThread->reset();
+    *abortInProgress = false;
+}
+
 } // namespace
 
 void K4ADeviceDockControl::ShowColorControl(k4a_color_control_command_t command,
@@ -755,6 +804,16 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     {
         ImGuiExtensions::ButtonColorChanger colorChanger(ImGuiExtensions::ButtonColor::Green);
         const bool validStartMode = enableCameras || m_config.EnableMicrophone || m_config.EnableImu;
+
+        if (m_config.WiredSyncMode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
+        {
+            ImGuiExtensions::TextColorChanger cc(ImGuiExtensions::TextColor::Warning);
+            ImGui::TextUnformatted("You are starting in subordinate mode.");
+            ImGui::TextUnformatted("The camera will not start until it");
+            ImGui::TextUnformatted("receives a start signal from the");
+            ImGui::TextUnformatted("master device");
+        }
+
         if (ImGuiExtensions::K4AButton("Start", buttonSize, validStartMode))
         {
             Start();
@@ -805,11 +864,11 @@ void K4ADeviceDockControl::Start()
     const bool enableCameras = m_config.EnableColorCamera || m_config.EnableDepthCamera;
     if (enableCameras)
     {
-        StartCameras();
-    }
-    if (m_config.EnableImu)
-    {
-        StartImu();
+        bool camerasStarted = StartCameras();
+        if (camerasStarted && m_config.EnableImu)
+        {
+            StartImu();
+        }
     }
     if (m_config.EnableMicrophone)
     {
@@ -855,20 +914,32 @@ bool K4ADeviceDockControl::StartCameras()
     K4ADataSource<k4a::capture> *pCameraDataSource = &m_cameraDataSource;
     bool *pPaused = &m_paused;
     bool *pCamerasStarted = &m_camerasStarted;
+    bool *pAbortInProgress = &m_camerasAbortInProgress;
+    bool isSubordinate = m_config.WiredSyncMode == K4A_WIRED_SYNC_MODE_SUBORDINATE;
 
     m_cameraPollingThread = std14::make_unique<K4APollingThread>(
-        [pDevice, pCameraDataSource, pPaused, pCamerasStarted]() {
+        [pDevice, pCameraDataSource, pPaused, pCamerasStarted, pAbortInProgress, isSubordinate](bool firstRun) {
+            std::chrono::milliseconds pollingTimeout = CameraPollingTimeout;
+            if (firstRun && isSubordinate)
+            {
+                // If we're starting in subordinate mode, we need to give the user time to start the
+                // master device, so we wait for longer.
+                //
+                pollingTimeout = SubordinateModeStartupTimeout;
+            }
             return PollSensor<k4a::capture>("Cameras",
                                             pDevice,
                                             pCameraDataSource,
                                             pPaused,
-                                            [](k4a::device *device, k4a::capture *capture) {
-                                                return device->get_capture(capture, CameraPollingTimeout);
+                                            pCamerasStarted,
+                                            pAbortInProgress,
+                                            [](k4a::device *device,
+                                               k4a::capture *capture,
+                                               std::chrono::milliseconds timeout) {
+                                                return device->get_capture(capture, timeout);
                                             },
-                                            [pCamerasStarted](k4a::device *device) {
-                                                device->stop_cameras();
-                                                *pCamerasStarted = false;
-                                            });
+                                            [](k4a::device *device) { device->stop_cameras(); },
+                                            pollingTimeout);
         });
 
     return true;
@@ -876,13 +947,12 @@ bool K4ADeviceDockControl::StartCameras()
 
 void K4ADeviceDockControl::StopCameras()
 {
-    if (m_cameraPollingThread)
-    {
-        m_cameraPollingThread.reset();
-    }
-    m_cameraDataSource.NotifyTermination();
-    m_device.stop_cameras();
-    m_camerasStarted = false;
+    StopPollingThread(&m_cameraPollingThread,
+                      &m_device,
+                      [](k4a::device *device) { device->stop_cameras(); },
+                      &m_cameraDataSource,
+                      &m_camerasStarted,
+                      &m_camerasAbortInProgress);
 }
 
 bool K4ADeviceDockControl::StartMicrophone()
@@ -943,34 +1013,45 @@ bool K4ADeviceDockControl::StartImu()
     K4ADataSource<k4a_imu_sample_t> *pImuDataSource = &m_imuDataSource;
     bool *pPaused = &m_paused;
     bool *pImuStarted = &m_imuStarted;
+    bool *pAbortInProgress = &m_imuAbortInProgress;
+    bool isSubordinate = m_config.WiredSyncMode == K4A_WIRED_SYNC_MODE_SUBORDINATE;
 
-    m_imuPollingThread = std14::make_unique<K4APollingThread>([pDevice, pImuDataSource, pPaused, pImuStarted]() {
-        return PollSensor<k4a_imu_sample_t>("IMU",
-                                            pDevice,
-                                            pImuDataSource,
-                                            pPaused,
-                                            [](k4a::device *device, k4a_imu_sample_t *sample) {
-                                                return device->get_imu_sample(sample, ImuPollingTimeout);
-                                            },
-                                            [pImuStarted](k4a::device *device) {
-                                                device->stop_imu();
-                                                *pImuStarted = false;
-                                            });
-    });
+    m_imuPollingThread = std14::make_unique<K4APollingThread>(
+        [pDevice, pImuDataSource, pPaused, pImuStarted, pAbortInProgress, isSubordinate](bool firstRun) {
+            std::chrono::milliseconds pollingTimeout = ImuPollingTimeout;
+            if (firstRun && isSubordinate)
+            {
+                // If we're starting in subordinate mode, we need to give the user time to start the
+                // master device, so we wait for longer.
+                //
+                pollingTimeout = SubordinateModeStartupTimeout;
+            }
+            return PollSensor<k4a_imu_sample_t>("IMU",
+                                                pDevice,
+                                                pImuDataSource,
+                                                pPaused,
+                                                pImuStarted,
+                                                pAbortInProgress,
+                                                [](k4a::device *device,
+                                                   k4a_imu_sample_t *sample,
+                                                   std::chrono::milliseconds timeout) {
+                                                    return device->get_imu_sample(sample, timeout);
+                                                },
+                                                [](k4a::device *device) { device->stop_imu(); },
+                                                pollingTimeout);
+        });
 
     return true;
 }
 
 void K4ADeviceDockControl::StopImu()
 {
-    if (m_imuPollingThread)
-    {
-        m_imuPollingThread.reset();
-    }
-    m_imuDataSource.NotifyTermination();
-    m_imuStarted = false;
-
-    m_device.stop_imu();
+    StopPollingThread(&m_imuPollingThread,
+                      &m_device,
+                      [](k4a::device *device) { device->stop_imu(); },
+                      &m_imuDataSource,
+                      &m_imuStarted,
+                      &m_imuAbortInProgress);
 }
 
 void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
