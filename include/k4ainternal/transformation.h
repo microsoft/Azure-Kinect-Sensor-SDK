@@ -85,6 +85,14 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration,
 
 void transformation_destroy(k4a_transformation_t transformation_handle);
 
+k4a_buffer_result_t transformation_depth_image_to_color_camera_validate_parameters(
+    const k4a_calibration_t *calibration,
+    const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
+    const uint8_t *depth_image_data,
+    const k4a_transformation_image_descriptor_t *depth_image_descriptor,
+    uint8_t *transformed_depth_image_data,
+    k4a_transformation_image_descriptor_t *transformed_depth_image_descriptor);
+
 k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
     const k4a_calibration_t *calibration,
     const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
@@ -99,6 +107,16 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
                                            const k4a_transformation_image_descriptor_t *depth_image_descriptor,
                                            uint8_t *transformed_depth_image_data,
                                            k4a_transformation_image_descriptor_t *transformed_depth_image_descriptor);
+
+k4a_buffer_result_t transformation_color_image_to_depth_camera_validate_parameters(
+    const k4a_calibration_t *calibration,
+    const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
+    const uint8_t *depth_image_data,
+    const k4a_transformation_image_descriptor_t *depth_image_descriptor,
+    const uint8_t *color_image_data,
+    const k4a_transformation_image_descriptor_t *color_image_descriptor,
+    uint8_t *transformed_color_image_data,
+    k4a_transformation_image_descriptor_t *transformed_color_image_descriptor);
 
 k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
     const k4a_calibration_t *calibration,
