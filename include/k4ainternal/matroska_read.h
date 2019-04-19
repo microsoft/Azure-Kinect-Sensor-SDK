@@ -15,6 +15,10 @@
 
 namespace k4arecord
 {
+// The depth mode string for legacy recordings
+static const std::pair<k4a_depth_mode_t, std::string> legacy_depth_modes[] =
+    { { K4A_DEPTH_MODE_NFOV_2X2BINNED, "NFOV_2x2BINNED" }, { K4A_DEPTH_MODE_WFOV_2X2BINNED, "WFOV_2x2BINNED" } };
+
 typedef struct _cluster_info_t
 {
     // The cluster size will be 0 until the actual cluster has been read from disk.
@@ -138,8 +142,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context);
 k4a_result_t read_bitmap_info_header(track_reader_t *track);
 void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestamp_ns);
 
-libmatroska::KaxTrackEntry *get_track_by_name(k4a_playback_context_t *context, const char *name);
-libmatroska::KaxTrackEntry *get_track_by_tag(k4a_playback_context_t *context, const char *tag_name);
+libmatroska::KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name);
 libmatroska::KaxTag *get_tag(k4a_playback_context_t *context, const char *name);
 std::string get_tag_string(libmatroska::KaxTag *tag);
 libmatroska::KaxAttached *get_attachment_by_name(k4a_playback_context_t *context, const char *file_name);
@@ -151,6 +154,8 @@ void populate_cluster_info(k4a_playback_context_t *context,
                            cluster_info_t *cluster_info);
 cluster_info_t *find_cluster(k4a_playback_context_t *context, uint64_t timestamp_ns);
 cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *current, bool next);
+std::shared_ptr<libmatroska::KaxCluster> load_cluster_internal(k4a_playback_context_t *context,
+                                                               cluster_info_t *cluster_info);
 std::shared_ptr<loaded_cluster_t> load_cluster(k4a_playback_context_t *context, cluster_info_t *cluster_info);
 std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *context,
                                                     loaded_cluster_t *current_cluster,

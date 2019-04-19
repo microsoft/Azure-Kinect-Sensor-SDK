@@ -27,6 +27,22 @@ std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlEle
         EbmlElement *element =
             context->stream->FindNextElement(parent->Generic().Context, upper_level, parent->GetSize(), false, 0);
 
+        // upper_level shows the relationship of the element to the parent element
+        // -1 : global element
+        //  0 : child
+        //  1 : same level
+        //  + : further parent
+        if (upper_level > 0)
+        {
+            // This element is not a child of the parent, set the file pointer back to the start of the element and
+            // return nullptr.
+            uint64_t file_offset = element->GetElementPosition();
+            assert(file_offset <= INT64_MAX);
+            context->ebml_file->setFilePointer((int64_t)file_offset);
+            delete element;
+            return nullptr;
+        }
+
         return std::unique_ptr<EbmlElement>(element);
     }
     catch (std::ios_base::failure &e)
@@ -223,17 +239,17 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
 
     KaxSimpleBlock *simple_block = NULL;
     KaxBlockGroup *block_group = NULL;
-    std::shared_ptr<loaded_cluster_t> last_cluster = load_cluster(context, cluster_info);
-    if (last_cluster == nullptr || last_cluster->cluster == nullptr)
+    std::shared_ptr<KaxCluster> last_cluster = load_cluster_internal(context, cluster_info);
+    if (last_cluster == nullptr)
     {
         LOG_ERROR("Failed to load end of recording.", 0);
         return K4A_RESULT_FAILED;
     }
-    for (EbmlElement *e : last_cluster->cluster->GetElementList())
+    for (EbmlElement *e : last_cluster->GetElementList())
     {
         if (check_element_type(e, &simple_block))
         {
-            simple_block->SetParent(*last_cluster->cluster);
+            simple_block->SetParent(*last_cluster);
             uint64_t block_timestamp_ns = simple_block->GlobalTimecode();
             if (block_timestamp_ns > context->last_timestamp_ns)
             {
@@ -242,7 +258,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         }
         else if (check_element_type(e, &block_group))
         {
-            block_group->SetParent(*last_cluster->cluster);
+            block_group->SetParent(*last_cluster);
 
             KaxTrackEntry *parent_track = NULL;
             for (EbmlElement *e2 : context->tracks->GetElementList())
@@ -377,26 +393,15 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     context->timecode_scale = GetChild<KaxTimecodeScale>(*context->segment_info).GetValue();
 
-    context->color_track.track = get_track_by_tag(context, "K4A_COLOR_MODE");
-    context->depth_track.track = get_track_by_tag(context, "K4A_DEPTH_MODE");
-    context->ir_track.track = get_track_by_tag(context, "K4A_IR_MODE");
-    context->imu_track.track = get_track_by_tag(context, "K4A_IMU_MODE");
-    if (context->color_track.track == NULL)
-    {
-        context->color_track.track = get_track_by_name(context, "COLOR");
-    }
-    if (context->depth_track.track == NULL)
-    {
-        context->depth_track.track = get_track_by_name(context, "DEPTH");
-    }
+    context->color_track.track = find_track(context, "COLOR", "K4A_COLOR_TRACK");
+    context->depth_track.track = find_track(context, "DEPTH", "K4A_DEPTH_TRACK");
+    context->ir_track.track = find_track(context, "IR", "K4A_IR_TRACK");
     if (context->ir_track.track == NULL)
     {
-        context->ir_track.track = get_track_by_name(context, "IR");
+        // Support legacy IR track naming.
+        context->ir_track.track = find_track(context, "DEPTH_IR", NULL);
     }
-    if (context->imu_track.track == NULL)
-    {
-        context->imu_track.track = get_track_by_name(context, "IMU");
-    }
+    context->imu_track.track = find_track(context, "IMU", "K4A_IMU_TRACK");
 
     // Read device calibration attachment
     context->calibration_attachment = get_attachment_by_tag(context, "K4A_CALIBRATION_FILE");
@@ -457,26 +462,48 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         LOG_ERROR("K4A_DEPTH_MODE tag is missing.", 0);
         return K4A_RESULT_FAILED;
     }
-    std::string depth_mode_str = get_tag_string(depth_mode_tag);
 
+    std::string depth_mode_str;
     uint32_t depth_width = 0;
     uint32_t depth_height = 0;
     context->record_config.depth_mode = K4A_DEPTH_MODE_OFF;
-    for (size_t i = 0; i < arraysize(depth_modes); i++)
+
+    if (depth_mode_tag != NULL)
     {
-        if (k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
+        depth_mode_str = get_tag_string(depth_mode_tag);
+        for (size_t i = 0; i < arraysize(depth_modes); i++)
         {
             if (depth_mode_str == depth_modes[i].second)
             {
-                context->record_config.depth_mode = depth_modes[i].first;
-                break;
+                if (k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
+                {
+                    context->record_config.depth_mode = depth_modes[i].first;
+                    break;
+                }
             }
         }
-    }
-    if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
-    {
-        LOG_ERROR("Unsupported depth mode: %s", depth_mode_str.c_str());
-        return K4A_RESULT_FAILED;
+        if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
+        {
+            // Try to find the mode matching strings in the legacy modes
+            for (size_t i = 0; i < arraysize(legacy_depth_modes); i++)
+            {
+                if (depth_mode_str == legacy_depth_modes[i].second)
+                {
+                    if (k4a_convert_depth_mode_to_width_height(legacy_depth_modes[i].first,
+                                                               &depth_width,
+                                                               &depth_height))
+                    {
+                        context->record_config.depth_mode = legacy_depth_modes[i].first;
+                        break;
+                    }
+                }
+            }
+        }
+        if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
+        {
+            LOG_ERROR("Unsupported depth mode: %s", depth_mode_str.c_str());
+            return K4A_RESULT_FAILED;
+        }
     }
 
     if (context->depth_track.track)
@@ -771,59 +798,66 @@ void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestam
     context->imu_sample_index = -1;
 }
 
-KaxTrackEntry *get_track_by_name(k4a_playback_context_t *context, const char *name)
+KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
     RETURN_VALUE_IF_ARG(NULL, context->tracks == nullptr);
     RETURN_VALUE_IF_ARG(NULL, name == NULL);
 
-    std::string search(name);
-    KaxTrackEntry *track = NULL;
-    for (EbmlElement *e : context->tracks->GetElementList())
+    std::string search_name(name);
+    uint64_t search_uid = 0;
+
+    if (tag_name != NULL)
     {
-        if (check_element_type(e, &track))
+        KaxTag *track_tag = get_tag(context, tag_name);
+        if (track_tag)
         {
-            if (GetChild<KaxTrackName>(*track).GetValueUTF8() == search)
+            KaxTagTargets &tagTargets = GetChild<KaxTagTargets>(*track_tag);
+            if (GetChild<KaxTagTargetType>(tagTargets).GetValue() == "TRACK")
             {
-                track->SetGlobalTimecodeScale(context->timecode_scale);
-                return track;
+                search_uid = GetChild<KaxTagTrackUID>(tagTargets).GetValue();
             }
-        }
-    }
-
-    return NULL;
-}
-
-KaxTrackEntry *get_track_by_tag(k4a_playback_context_t *context, const char *tag_name)
-{
-    RETURN_VALUE_IF_ARG(NULL, context == NULL);
-    RETURN_VALUE_IF_ARG(NULL, context->tracks == NULL);
-    RETURN_VALUE_IF_ARG(NULL, tag_name == NULL);
-
-    KaxTag *track_tag = get_tag(context, tag_name);
-    if (track_tag)
-    {
-        KaxTagTargets &tagTargets = GetChild<KaxTagTargets>(*track_tag);
-        if (GetChild<KaxTagTargetType>(tagTargets).GetValue() != "TRACK")
-        {
-            return NULL;
-        }
-        uint64_t search_uid = GetChild<KaxTagTrackUID>(tagTargets).GetValue();
-
-        KaxTrackEntry *track = NULL;
-        for (EbmlElement *e : context->tracks->GetElementList())
-        {
-            if (check_element_type(e, &track))
+            if (search_uid == 0)
             {
-                if (GetChild<KaxTrackUID>(*track).GetValue() == search_uid)
+                std::istringstream search_uid_str(get_tag_string(track_tag));
+                search_uid_str >> search_uid;
+                if (search_uid_str.fail())
                 {
-                    track->SetGlobalTimecodeScale(context->timecode_scale);
-                    return track;
+                    LOG_ERROR("Track tag '%s' for track %s is not valid.", tag_name, name);
+                    search_uid = 0;
                 }
             }
         }
     }
 
+    KaxTrackEntry *track_found = NULL;
+    for (EbmlElement *e : context->tracks->GetElementList())
+    {
+        KaxTrackEntry *track = NULL;
+        if (check_element_type(e, &track))
+        {
+            std::string track_name = GetChild<KaxTrackName>(*track).GetValueUTF8();
+            uint64_t track_uid = GetChild<KaxTrackUID>(*track).GetValue();
+            std::string track_codec_id = GetChild<KaxCodecID>(*track).GetValue();
+
+            if (search_uid != 0 && track_uid == search_uid)
+            {
+                track_found = track;
+                break;
+            }
+            else if (track_name == search_name)
+            {
+                track_found = track;
+                // Search by UID has priority over search by name, keep searching for a matching UID.
+            }
+        }
+    }
+
+    if (track_found != NULL)
+    {
+        track_found->SetGlobalTimecodeScale(context->timecode_scale);
+        return track_found;
+    }
     return NULL;
 }
 
@@ -1175,7 +1209,7 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
 
 // Load a cluster from the cluster cache / disk without any neighbor preloading.
 // This should never fail unless there is a file IO error.
-static std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t *context, cluster_info_t *cluster_info)
+std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t *context, cluster_info_t *cluster_info)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
     RETURN_VALUE_IF_ARG(nullptr, context->ebml_file == nullptr);
@@ -1873,7 +1907,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             bool filled = false;
             for (size_t i = 0; i < arraysize(blocks); i++)
             {
-                if (next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
+                if (blocks[i]->track != NULL && next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
                 {
                     std::shared_ptr<block_info_t> test_block = find_block(context,
                                                                           blocks[i],
