@@ -463,8 +463,8 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
 k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
                                         const char *track_name,
                                         const char *codec_id,
-                                        const uint8_t *codec_private,
-                                        size_t codec_private_size,
+                                        const uint8_t *codec_context,
+                                        size_t codec_context_size,
                                         const k4a_record_video_info_t *video_info)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
@@ -486,7 +486,7 @@ k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
         return K4A_RESULT_FAILED;
     }
 
-    KaxTrackEntry *track = add_track(context, track_name, track_video, codec_id, codec_private, codec_private_size);
+    KaxTrackEntry *track = add_track(context, track_name, track_video, codec_id, codec_context, codec_context_size);
     context->custom_tracks.insert(std::pair<std::string, KaxTrackEntry *>(std::string(track_name), track));
     set_track_info_video(track, video_info->width, video_info->height, video_info->frame_rate);
 
@@ -496,8 +496,8 @@ k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
 k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
                                            const char *track_name,
                                            const char *codec_id,
-                                           const uint8_t *codec_private,
-                                           size_t codec_private_size)
+                                           const uint8_t *codec_context,
+                                           size_t codec_context_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
@@ -517,7 +517,7 @@ k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
         return K4A_RESULT_FAILED;
     }
 
-    KaxTrackEntry *track = add_track(context, track_name, track_subtitle, codec_id, codec_private, codec_private_size);
+    KaxTrackEntry *track = add_track(context, track_name, track_subtitle, codec_id, codec_context, codec_context_size);
     context->custom_tracks.insert(std::pair<std::string, KaxTrackEntry *>(std::string(track_name), track));
 
     return K4A_RESULT_SUCCEEDED;

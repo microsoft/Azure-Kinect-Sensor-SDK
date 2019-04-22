@@ -269,14 +269,14 @@ k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_hand
 
 k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_playback_t playback_handle,
                                                          const char *track_name,
-                                                         uint8_t *data,
-                                                         size_t *data_size)
+                                                         uint8_t *codec_context,
+                                                         size_t *codec_context_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, track_name == NULL);
-    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, data_size == NULL);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, codec_context_size == NULL);
 
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
 
@@ -286,15 +286,15 @@ k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_playback_t playback
         return K4A_BUFFER_RESULT_FAILED;
     }
 
-    if (data != NULL && *data_size >= track_reader->codec_private.size())
+    if (codec_context != NULL && *codec_context_size >= track_reader->codec_private.size())
     {
-        memcpy(data, track_reader->codec_private.data(), track_reader->codec_private.size());
-        *data_size = track_reader->codec_private.size();
+        memcpy(codec_context, track_reader->codec_private.data(), track_reader->codec_private.size());
+        *codec_context_size = track_reader->codec_private.size();
         return K4A_BUFFER_RESULT_SUCCEEDED;
     }
     else
     {
-        *data_size = track_reader->codec_private.size();
+        *codec_context_size = track_reader->codec_private.size();
         return K4A_BUFFER_RESULT_TOO_SMALL;
     }
 }
@@ -650,8 +650,6 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
 
     context->seek_cluster = seek_cluster;
     reset_seek_pointers(context, target_time_ns);
-
-    context->capture_tracks_sync_is_broken = false;
 
     return K4A_RESULT_SUCCEEDED;
 }

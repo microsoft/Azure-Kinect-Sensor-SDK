@@ -831,6 +831,8 @@ void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestam
         auto &track_reader = itr.second;
         track_reader.current_block.reset();
     }
+
+    context->capture_tracks_sync_is_broken = false;
 }
 
 KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name)

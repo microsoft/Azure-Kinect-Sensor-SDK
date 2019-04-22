@@ -246,8 +246,8 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
  */
 K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_playback_t playback_handle,
                                                                           const char *track_name,
-                                                                          uint8_t *data,
-                                                                          size_t *data_size);
+                                                                          uint8_t *codec_context,
+                                                                          size_t *codec_context_size);
 
 /** Read the value of a tag from a recording.
  *
@@ -550,6 +550,13 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * block in the recording closest to the seek time with a timestamp greater than or equal to the seek time.
  *
  * \remarks
+ * The k4a_playback_get_next_data_block is allowed to move the default track as well when passing in the default track
+ * names: "DEPTH", "IR", "COLOR", "IMU". However, but it will break the timestamp synchronization among DEPTH/IR/COLOR
+ * tracks. Once k4a_playback_get_next_data_block is called, the k4a_playback_get_next_capture and
+ * k4a_playback_get_previous_capture API will return failure until k4a_playback_seek_timestamp API is called afterwards
+ * to realign the timestamps.
+ *
+ * \remarks
  * If the call is successful, callers must call k4a_playback_data_block_release() to return the allocated memory for
  * data_block_handle.
  *
@@ -597,6 +604,13 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playba
  * \remarks
  * If the call is successful, callers must call k4a_playback_data_block_release() to return the allocated memory for
  * data_block_handle.
+ *
+ * \remarks
+ * The k4a_playback_get_next_data_block is allowed to move the default track as well when passing in the default track
+ * names: "DEPTH", "IR", "COLOR", "IMU". However, but it will break the timestamp synchronization among DEPTH/IR/COLOR
+ * tracks. Once k4a_playback_get_previous_data_block is called, the k4a_playback_get_next_capture and
+ * k4a_playback_get_previous_capture API will return failure until k4a_playback_seek_timestamp API is called afterwards
+ * to realign the timestamps.
  *
  * \xmlonly
  * <requirements>
