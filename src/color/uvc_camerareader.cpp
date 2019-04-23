@@ -771,7 +771,7 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
         {
             // Set metadata
             image_set_device_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(framePTS));
-            image_set_exposure_time_usec(image, exposure_time);
+            image_set_exposure_usec(image, exposure_time);
             image_set_iso_speed(image, iso_speed);
             image_set_white_balance(image, white_balance);
 

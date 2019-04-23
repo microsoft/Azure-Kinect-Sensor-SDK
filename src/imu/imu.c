@@ -117,7 +117,6 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
         // Take apart the capture packet data and create captures for each sample
         p_packet = image_get_buffer(image);
         capture_size = image_get_size(image);
-        uint64_t sys_timestamp_nsec = image_get_system_timestamp_nsec(image);
 
         if (capture_size < sizeof(imu_payload_metadata_t))
         {
@@ -217,9 +216,6 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
                 sample.acc_sample.xyz.z = (float)p_accel_data[i].rz * p_metadata->accel.sensitivity *
                                           IMU_GRAVITATIONAL_CONSTANT / IMU_SCALE_NORMALIZATION;
                 sample.acc_timestamp_usec = K4A_90K_HZ_TICK_TO_USEC(p_accel_data[i].pts);
-
-                sample.acc_system_timestamp_nsec = sys_timestamp_nsec;
-                sample.gyro_system_timestamp_nsec = sys_timestamp_nsec;
 
                 memcpy(image_get_buffer(imu_image), &sample, sizeof(k4a_imu_sample_t));
             }

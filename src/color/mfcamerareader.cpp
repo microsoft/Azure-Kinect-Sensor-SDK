@@ -856,7 +856,7 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
                     image_set_device_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(pFrameContext->GetPTSTime()));
 
                     // Set metadata
-                    image_set_exposure_time_usec(image, pFrameContext->GetExposureTime());
+                    image_set_exposure_usec(image, pFrameContext->GetExposureTime());
                     image_set_white_balance(image, pFrameContext->GetWhiteBalance());
                     image_set_iso_speed(image, pFrameContext->GetISOSpeed());
 

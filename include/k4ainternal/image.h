@@ -119,7 +119,7 @@ uint32_t image_get_iso_speed(k4a_image_t image_handle);
 void image_set_device_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
 void image_set_system_timestamp_nsec(k4a_image_t image_handle, uint64_t timestamp_nsec);
 k4a_result_t image_apply_system_timestamp(k4a_image_t image_handle);
-void image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_time_usec);
+void image_set_exposure_usec(k4a_image_t image_handle, uint64_t exposure_usec);
 void image_set_white_balance(k4a_image_t image_handle, uint32_t white_balance);
 void image_set_iso_speed(k4a_image_t image_handle, uint32_t iso_speed);
 

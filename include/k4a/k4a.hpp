@@ -301,13 +301,22 @@ public:
         return k4a_image_get_stride_bytes(m_handle);
     }
 
-    /** Get the image timestamp in microseconds
+    /** Get the image's device timestamp in microseconds
      *
-     * \sa k4a_image_get_timestamp_usec
+     * \sa k4a_image_get_device_timestamp_usec
      */
-    std::chrono::microseconds get_timestamp() const noexcept
+    std::chrono::microseconds get_device_timestamp() const noexcept
     {
-        return std::chrono::microseconds(k4a_image_get_timestamp_usec(m_handle));
+        return std::chrono::microseconds(k4a_image_get_device_timestamp_usec(m_handle));
+    }
+
+    /** Get the image's system timestamp in nanoseconds
+     *
+     * \sa k4a_image_get_system_timestamp_nsec
+     */
+    std::chrono::nanoseconds get_system_timestamp() const noexcept
+    {
+        return std::chrono::nanoseconds(k4a_image_get_system_timestamp_nsec(m_handle));
     }
 
     /** Get the image exposure time in microseconds
@@ -339,11 +348,11 @@ public:
 
     /** Set the image's timestamp in microseconds
      *
-     * \sa k4a_image_set_timestamp_usec
+     * \sa k4a_image_set_device_timestamp_usec
      */
     void set_timestamp(std::chrono::microseconds timestamp) noexcept
     {
-        k4a_image_set_timestamp_usec(m_handle, internal::clamp_cast<uint64_t>(timestamp.count()));
+        k4a_image_set_device_timestamp_usec(m_handle, internal::clamp_cast<uint64_t>(timestamp.count()));
     }
 
     /** Set the image's exposure time in microseconds (color images only)
@@ -352,7 +361,7 @@ public:
      */
     void set_exposure_time(std::chrono::microseconds exposure) noexcept
     {
-        k4a_image_set_exposure_time_usec(m_handle, internal::clamp_cast<uint64_t>(exposure.count()));
+        k4a_image_set_exposure_usec(m_handle, internal::clamp_cast<uint64_t>(exposure.count()));
     }
 
     /** Set the white balance of the image (color images only)

@@ -18,6 +18,7 @@ int main(int argc, char **argv)
 }
 
 #define GTEST_LOG_ERROR std::cout << "[    ERROR ] "
+#define GTEST_LOG_INFO std::cout << "[     INFO ] "
 
 typedef struct _allocator_thread_adjust_ref_data_t
 {
@@ -335,9 +336,9 @@ TEST(allocator_ut, image_api_validation)
 
         ASSERT_EQ(0, image_get_exposure_usec(NULL));
         ASSERT_EQ(0, image_get_exposure_usec(image));
-        image_set_exposure_time_usec(NULL, 10);
+        image_set_exposure_usec(NULL, 10);
         ASSERT_EQ(0, image_get_exposure_usec(image));
-        image_set_exposure_time_usec(image, 10); // should succeed
+        image_set_exposure_usec(image, 10); // should succeed
         ASSERT_EQ(10, image_get_exposure_usec(image));
 
         ASSERT_EQ((uint32_t)0, image_get_white_balance(NULL));
@@ -423,7 +424,7 @@ TEST(allocator_ut, DISABLED_manual_image_system_time)
         ASSERT_GT(stop_time_nsec, start_time_nsec);
         ASSERT_GT(stop_time_nsec - start_time_nsec, 100 * 1000000);
         ASSERT_LT(stop_time_nsec - start_time_nsec, 110 * 1000000);
-        GTEST_LOG_ERROR << stop_time_nsec - start_time_nsec << " time slept was " << x << "\n\n";
+        GTEST_LOG_INFO << stop_time_nsec - start_time_nsec << " time slept was " << x << "\n\n";
         image_dec_ref(image);
     }
     ASSERT_EQ(allocator_test_for_leaks(), 0);

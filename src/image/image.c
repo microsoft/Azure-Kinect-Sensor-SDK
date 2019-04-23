@@ -353,11 +353,11 @@ k4a_result_t image_apply_system_timestamp(k4a_image_t image_handle)
     return result;
 }
 
-void image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_time_usec)
+void image_set_exposure_usec(k4a_image_t image_handle, uint64_t exposure_usec)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
     image_context_t *image = k4a_image_t_get_context(image_handle);
-    image->exposure_time_usec = exposure_time_usec;
+    image->exposure_time_usec = exposure_usec;
 }
 
 void image_set_white_balance(k4a_image_t image_handle, uint32_t white_balance)
