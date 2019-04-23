@@ -1,7 +1,5 @@
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     if (NOT TARGET project_libuvc)
-        find_package(LibUSB REQUIRED)
-
         set(CMAKE_BUILD_TARGET Static)
 
         include(ExternalProject)

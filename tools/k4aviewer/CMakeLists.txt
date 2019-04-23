@@ -49,7 +49,6 @@ configure_file(
     )
 
 find_package(OpenGL REQUIRED)
-find_package(LibUSB REQUIRED)
 include_directories(
     ${OPENGL_INCLUDE_DIRS}
     ${CMAKE_CURRENT_LIST_DIR}
