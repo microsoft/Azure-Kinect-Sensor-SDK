@@ -12,6 +12,11 @@ target_include_directories(LibUSB PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/libusb
 
 add_library(LibUSB::LibUSB ALIAS LibUSB)
 
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    target_compile_options(LibUSB PUBLIC "-Wno-zero-length-array")
+endif()
+
+
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     target_sources(LibUSB PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/libusb/os/poll_windows.c"
