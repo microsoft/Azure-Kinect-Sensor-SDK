@@ -418,8 +418,7 @@ TEST(allocator_ut, DISABLED_manual_image_system_time)
         ThreadAPI_Sleep(100);
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_apply_system_timestamp(image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_apply_system_timestamp(nullptr)); //????? generate error message with time in
-                                                                             // it.
+        ASSERT_EQ(K4A_RESULT_FAILED, image_apply_system_timestamp(nullptr));
         ASSERT_NE((stop_time_nsec = image_get_system_timestamp_nsec(image)), 0);
         ASSERT_GT(stop_time_nsec, start_time_nsec);
         ASSERT_GT(stop_time_nsec - start_time_nsec, 100 * 1000000);

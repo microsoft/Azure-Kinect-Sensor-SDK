@@ -346,7 +346,7 @@ k4a_result_t image_apply_system_timestamp(k4a_image_t image_handle)
     if (K4A_SUCCEEDED(result))
     {
         // Rollover happens about ~136 years after boot.
-        image->sys_timestamp_nsec = ts_time.tv_sec * 1000000000 + ts_time.tv_nsec;
+        image->sys_timestamp_nsec = (uint64_t)ts_time.tv_sec * 1000000000 + (uint64_t)ts_time.tv_nsec;
     }
 #endif
 
