@@ -7,13 +7,11 @@ add_library(k4a_usb_cmd STATIC
             )
 
 # Consumers should #include <k4ainternal/usbcommand.h>
-target_include_directories(k4a_usb_cmd PUBLIC 
+target_include_directories(k4a_usb_cmd PUBLIC
     ${K4A_PRIV_INCLUDE_DIR})
 
-find_package(LibUSB REQUIRED)
-
 # Dependencies of this library
-target_link_libraries(k4a_usb_cmd PUBLIC 
+target_link_libraries(k4a_usb_cmd PUBLIC
     azure::aziotsharedutil
     LibUSB::LibUSB
     k4ainternal::allocator
