@@ -111,7 +111,7 @@
       <Link>libusb-1.0.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="C:\Program Files\Azure Kinect SDK\sdk\windows-desktop\amd64\release\bin\depthengine_1_0.dll">
+    <Content Include="$(K4aBinaryDirectory)\bin\depthengine_1_0.dll">
       <Link>depthengine_1_0.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
