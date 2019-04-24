@@ -32,14 +32,18 @@ format. Note that the color channel needs to be in MJPEG format.
 
 ## Usage Info
 
-       transformation_example capture <output_directory> [device_id]
-       transformation_example playback <filename.mkv> [timestamp (ms)] [output_file]
+```shell
+transformation_example capture <output_directory> [device_id]
+transformation_example playback <filename.mkv> [timestamp (ms)] [output_file]
+```
 
 ### Examples:
 
-       transformation_example capture c:\temp\
-       transformation_example capture output 1
+```shell
+transformation_example capture c:\temp\
+transformation_example capture output 1
 
-       transformation_example playback output.mkv
-       transformation_example playback output.mkv 2000
-       transformation_example playback output.mkv 2000 c:\data\out.ply
+transformation_example playback output.mkv
+transformation_example playback output.mkv 2000
+transformation_example playback output.mkv 2000 c:\data\out.ply
+```

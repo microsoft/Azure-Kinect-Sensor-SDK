@@ -1,7 +1,8 @@
 # Contributing to the Azure Kinect SDK
 
 The Azure Kinect SDK team welcomes community feedback and contributions. This repo
-is relatively new and team members are actively defining and refining the process. Feel free to point out any discrepancies between documented process and the actual process.
+is relatively new and team members are actively defining and refining the process. Feel free to point out any 
+discrepancies between documented process and the actual process.
 
 ## Reporting issues and suggesting new features
 
@@ -9,7 +10,8 @@ If the Azure Kinect SDK is not working the way you expect it to, then please rep
 
 ### Filing a bug
 
-Please review the list of open Issues to see if one is already open. Please review all categories, Bugs and Enhancements. Also check for closed Issues before opening a new one.
+Please review the list of open Issues to see if one is already open. Please review all categories, Bugs and Enhancements. 
+Also check for closed Issues before opening a new one.
 
 When opening a new issue be sure to document:
 
@@ -22,32 +24,39 @@ When opening a new issue be sure to document:
 
 ### Requesting new features
 
-Please review the list of open Issues to see if one is already open. Please review all categories, Bugs and Enhancements. Also check for Closed Issues before opening a new one.
+Please review the list of open Issues to see if one is already open. Please review all categories, Bugs and Enhancements. 
+Also check for Closed Issues before opening a new one.
 
 ## Finding issues you can help with
 
-Looking for something to work on? Issues marked [``good first issue``](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/labels/good%20first%20issue) are a good place to start.
+Looking for something to work on? Issues marked [``good first issue``](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/labels/good%20first%20issue) 
+are a good place to start.
 
-You can also check the [``help wanted``](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/labels/help%20wanted) tag to find other issues to help with. If you're interested in working on a fix, leave a comment to let everyone know and to help avoid duplicated effort from others.
+You can also check the [``help wanted``](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/labels/help%20wanted) tag to 
+find other issues to help with. If you're interested in working on a fix, leave a comment to let everyone know and to help 
+avoid duplicated effort from others.
 
 Once you are committed to fixing an issue, assign it to yourself so others know the issue has an owner.
 
 ## Contributing code changes
 
-We welcome your contributions, especially to fix bugs and to make improvements which address the top Issues. Some general guidelines:
+We welcome your contributions, especially to fix bugs and to make improvements which address the top Issues. Some general 
+guidelines:
 
 * **DO** create one pull request per Issue, and ensure that the Issue is linked in the pull request.
 * **DO** follow our [Coding and Style](#Style-Guidelines) guidelines, and keep code changes as small as possible.
 * **DO** include corresponding tests whenever possible.
 * **DO** check for additional occurrences of the same problem in other parts of the codebase before submitting your PR.
 * **DO** [link the Issue](https://github.com/blog/957-introducing-issue-mentions) you are addressing in the pull request.
-* **DO** write a good description for your pull request. More detail is better. Describe why the change is being made and why you have chosen a particular solution. Describe any manual testing you performed to validate your change.
-* **DO NOT** submit a PR unless it is linked to an Issue marked triage approved. This enables us to have a discussion on the idea before anyone invests time in an implementation.
+* **DO** write a good description for your pull request. More detail is better. Describe why the change is being made and 
+why you have chosen a particular solution. Describe any manual testing you performed to validate your change.
+* **DO NOT** submit a PR unless it is linked to an Issue marked triage approved. This enables us to have a discussion on 
+the idea before anyone invests time in an implementation.
 * **DO NOT** merge multiple changes into one PR unless they have the same root cause.
 * **DO NOT** submit pure formatting/typo changes to code that has not been modified otherwise.
 
-> Submitting a pull request for an approved Issue is not a guarantee it will be approved.
-> The change must meet our high bar for code quality, architecture, and performance.
+**NOTE:** *Submitting a pull request for an approved Issue is not a guarantee it will be approved. The change must meet 
+our high bar for code quality, architecture, and performance.*
 
 # Making changes to the code
 
@@ -55,7 +64,8 @@ We welcome your contributions, especially to fix bugs and to make improvements w
 Check out how to set up your environment and do a build [here](docs/building.md).
 
 ## Style Guidelines
-The public API surface is written in C. Internally most of the code is C, CPP is used only when necessary, such as when leveraging other open source projects that are written for CPP.
+The public API surface is written in C. Internally most of the code is C, CPP is used only when necessary, such as when 
+leveraging other open source projects that are written for CPP.
 
 Style formatting is enforced as part of check in criteria using [.clang-format](.clang-format).
 
@@ -64,7 +74,7 @@ To complete a PR all tests must pass. Please see [testing.md](docs/testing.md) f
 
 ## Git Workflow
 
->This is in work.
+**NOTE:** *This is in work.*
 
 Azure Kinect uses the [GitHub flow](https://guides.github.com/introduction/flow/) where most
 development happens on the `develop` branch. The `develop` branch should always be in a
@@ -82,7 +92,8 @@ participate in the review, but at least one member of the team will ultimately a
 the request.
 
 Often, multiple iterations will be needed to respond to feedback from reviewers. Try looking at
-[past pull requests](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/pulls?q=is%3Apr+is%3Aclosed) to see what the experience might be like.
+[past pull requests](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/pulls?q=is%3Apr+is%3Aclosed) to see what the 
+experience might be like.
 
 # Contributor License Agreement
 Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have

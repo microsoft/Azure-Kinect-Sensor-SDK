@@ -67,8 +67,8 @@ binaries that are tested. (The command prompt should be called something like
 x64 Native Tools Command Prompt for VS 2017). Note: call the command line tool
 with the option ```-arch=amd64``` for x64 builds i.e ```VsDevCmd.bat -arch=amd64```
 
-> You can run [scripts/verify-windows.ps1](scripts/verify-windows.ps1) to
-verify that your Windows PC is setup properly.
+**NOTE:** *You can run [scripts/verify-windows.ps1](scripts/verify-windows.ps1) to verify that your Windows PC is setup 
+properly.*
 
 ### Linux Dependencies
 

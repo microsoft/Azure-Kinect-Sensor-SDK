@@ -27,7 +27,7 @@ please see
 After compiling, unit tests can be run using "ctest -L unit" in the build
 directory. Unit tests are run as part of the CI system.
 
->These tests run for every pull request iteration submitted.
+**NOTE:** *These tests run for every pull request iteration submitted.*
 
 ### Functional Tests
 
@@ -40,7 +40,7 @@ functional test please see
 After compiling, functional tests can be run using "ctest -L functional" in the build
 directory. Functional tests are run as part of the CI system.
 
->These tests run for every pull request iteration submitted.
+**NOTE:** *These tests run for every pull request iteration submitted.*
 
 ### Stress Tests
 
@@ -52,7 +52,8 @@ framework.
 After compiling, stress tests can be run using "ctest -L stress"
 in the build directory.
 
-> At the moment the Azure Kinect SDK does not have any stress tests. There are however some 'stress' like tests running as unit tests that run for several seconds to impact threading and timing related issues.
+**NOTE:** *At the moment the Azure Kinect SDK does not have any stress tests. There are however some 'stress' like tests 
+running as unit tests that run for several seconds to impact threading and timing related issues.*
 
 ### Perf Tests
 
@@ -62,7 +63,7 @@ tests are built using the GoogleTest framework.
 
 After compiling, perf tests can be run using "ctest -L perf" in the build directory.
 
->These tests are run on demand
+**NOTE:** *These tests are run on demand*
 
 ### Firmware Tests
 
@@ -71,7 +72,9 @@ tests are built using the GoogleTest framework. After compiling, firmware tests
 can be run using "bin\firmware_fw.exe -ff \<factory firmware\> -lf \<lkg firmware\>
 -tf \<test firmware\> -cf \<candidate firmware\>" in the build directory.
 
->These tests are run manually when a new firmware candidate is being evaluated. These tests rely on a specific hardware configuration that includes a USB connection exerciser [Type C](https://store.mcci.com/collections/frontpage/products/model-3101-type-c-connection-exerciser) or [Type A](https://store.mcci.com/collections/frontpage/products/hmd-exerciser).
+**NOTE:** *These tests are run manually when a new firmware candidate is being evaluated. These tests rely on a specific hardware 
+configuration that includes a USB connection exerciser [Type C](https://store.mcci.com/collections/frontpage/products/model-3101-type-c-connection-exerciser) 
+or [Type A](https://store.mcci.com/collections/frontpage/products/hmd-exerciser).*
 
 ## Running tests
 

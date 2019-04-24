@@ -11,8 +11,12 @@ remap() function.
 
 ## Usage Info
 
-       undistort.exe <output file>
+```shell
+undistort.exe <output file>
+```
 
 Example:
 
-       undistort.exe undistorted.csv
+```shell
+undistort.exe undistorted.csv
+```
