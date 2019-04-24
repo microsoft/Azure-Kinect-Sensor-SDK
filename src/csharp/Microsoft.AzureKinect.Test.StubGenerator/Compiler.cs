@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
+using System.Text;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
 {
-    class Compiler
+    internal class Compiler
     {
         /// <summary>
         /// Compiles a DLL
@@ -15,9 +14,9 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
         /// <param name="outputBinary">Path of output DLL</param>
         /// <param name="impLib">Path of output import .lib</param>
         /// <param name="options">Compiler Options</param>
-        public static void CompileModule(string[] sourceFiles, 
-            string outputBinary, 
-            string impLib, 
+        public static void CompileModule(string[] sourceFiles,
+            string outputBinary,
+            string impLib,
             CompilerOptions options = null,
             string additionalFlags = null,
             string[] additionalLibraries = null,
@@ -25,7 +24,6 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
         {
             options = options ?? CompilerOptions.GetDefault();
             string moduleName = outputBinary;
-
 
             // Set up compiler arguments
             StringBuilder compilerArguments = new StringBuilder();
@@ -49,17 +47,18 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                     compilerArguments.Append($" \"{sourceFilePath}\"");
                 }
             }
-            foreach (string includePath in options.IncludePaths)
+            foreach (DirectoryInfo includePath in options.IncludePaths)
             {
-                compilerArguments.Append($" \"/I{includePath}\"");
+                compilerArguments.Append($" \"/I{includePath.FullName}\"");
             }
 
             // Linker options
             compilerArguments.Append(" /link");
-            foreach (string libraryPath in options.LibraryPaths)
+            foreach (DirectoryInfo libraryPath in options.LibraryPaths)
             {
-                compilerArguments.Append($" \"/LIBPATH:{libraryPath}\"");
+                compilerArguments.Append($" \"/LIBPATH:{libraryPath.FullName}\"");
             }
+
             compilerArguments.Append($" \"/OUT:{moduleName}\"");
             if (impLib != null)
             {
@@ -78,10 +77,10 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
 
             // Start the compiler process
-            ProcessStartInfo startInfo = new ProcessStartInfo(options.CompilerPath)
+            ProcessStartInfo startInfo = new ProcessStartInfo(options.CompilerPath.FullName)
             {
                 Arguments = compilerArguments.ToString(),
-                WorkingDirectory = options.TempPath,
+                WorkingDirectory = options.TempPath.FullName,
                 RedirectStandardOutput = true
             };
 
@@ -99,7 +98,8 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                         throw new Exception("Compilation failed: " + output);
                     }
                 }
-            } catch (System.ComponentModel.Win32Exception ex)
+            }
+            catch (System.ComponentModel.Win32Exception ex)
             {
                 if ((uint)ex.ErrorCode == 0x80004005)
                 {

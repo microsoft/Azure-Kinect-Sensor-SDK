@@ -22,17 +22,17 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                 throw new System.IO.FileNotFoundException("Failed to analyze module, file not found.", path);
             }
 
-            if (!System.IO.Directory.Exists(options.TempPath))
+            if (!options.TempPath.Exists)
             {
-                System.IO.Directory.CreateDirectory(options.TempPath);
+                options.TempPath.Create();
             }
 
             var regex = new System.Text.RegularExpressions.Regex(@"^\s+\d+\s+[\dA-Fa-f]+\s+[0-9A-Fa-f]{8}\s+([^\s]*).*?$", System.Text.RegularExpressions.RegexOptions.Multiline);
             // Start the compiler process
-            ProcessStartInfo startInfo = new ProcessStartInfo(options.LinkerPath)
+            ProcessStartInfo startInfo = new ProcessStartInfo(options.LinkerPath.FullName)
             {
                 Arguments = $"/dump \"{path}\" /exports",
-                WorkingDirectory = options.TempPath,
+                WorkingDirectory = options.TempPath.FullName,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 RedirectStandardInput = true

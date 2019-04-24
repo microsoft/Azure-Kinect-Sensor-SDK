@@ -1,27 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Linq;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
+using System.Text;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
 {
-    
-       
-
     public class StubbedModule
     {
         public CompilerOptions CompilerOptions { get; }
 
-        public string ModuleName { get;  }
+        public string ModuleName { get; }
 
-        readonly Dictionary<string, FunctionImplementation> currentFunctionImplementations = new Dictionary<string, FunctionImplementation>();
-        readonly Dictionary<Hash, ModuleImplementation> implementedModules = new Dictionary<Hash, ModuleImplementation>();
+        private readonly Dictionary<string, FunctionImplementation> currentFunctionImplementations = new Dictionary<string, FunctionImplementation>();
+        private readonly Dictionary<Hash, ModuleImplementation> implementedModules = new Dictionary<Hash, ModuleImplementation>();
 
         private void GenerateStub(string modulePath, NativeInterface @interface, CompilerOptions options)
         {
-            
             // Generate the stub function definitions
             CodeString stubCode = new CodeString(options.CodeHeader);
             foreach (FunctionInfo def in @interface.Functions)
@@ -42,9 +37,9 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
 
 
-            string sourceFilePath = System.IO.Path.Combine(options.TempPath, "stubfunctions.cpp");
-            
-            using (var filestream = System.IO.File.CreateText(sourceFilePath))
+            string sourceFilePath = Path.Combine(options.TempPath.FullName, "stubfunctions.cpp");
+
+            using (var filestream = File.CreateText(sourceFilePath))
             {
                 filestream.WriteLine("#include \"stub.h\"");
                 filestream.WriteLine($"// Defined at {options.CodeHeader.SourceFileName} line {options.CodeHeader.SourceLineNumber}");
@@ -54,15 +49,15 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
 
 
-            System.IO.File.Copy("Stub.cpp", System.IO.Path.Combine(options.TempPath, "Stub.cpp"), true);
-            System.IO.File.Copy("Stub.h", System.IO.Path.Combine(options.TempPath, "Stub.h"), true);
-            System.IO.File.Copy("StubImplementation.h", System.IO.Path.Combine(options.TempPath, "StubImplementation.h"), true);
+            System.IO.File.Copy("Stub.cpp", Path.Combine(options.TempPath.FullName, "Stub.cpp"), true);
+            System.IO.File.Copy("Stub.h", Path.Combine(options.TempPath.FullName, "Stub.h"), true);
+            System.IO.File.Copy("StubImplementation.h", Path.Combine(options.TempPath.FullName, "StubImplementation.h"), true);
 
-            string stubImportLib = System.IO.Path.Combine(options.TempPath, "stubimport.lib");
+            string stubImportLib = Path.Combine(options.TempPath.FullName, "stubimport.lib");
 
             CompilerOptions modifiedOptions = options.Copy();
             modifiedOptions.CompilerFlags += " /DStubExport";
-            
+
             Compiler.CompileModule(new string[] { sourceFilePath, "Stub.cpp" }, modulePath, stubImportLib, modifiedOptions);
 
 
@@ -71,7 +66,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             _ = NativeMethods.LoadLibrary(modulePath);
         }
 
-        public NativeInterface NativeInterface { get;  }
+        public NativeInterface NativeInterface { get; }
 
         private static readonly Dictionary<string, StubbedModule> stubbedModules = new Dictionary<string, StubbedModule>();
         public static StubbedModule Get(string moduleName)
@@ -102,34 +97,46 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             {
                 throw new Exception("Module name should not include file extension");
             }
-            
+
             this.ModuleName = moduleName;
             this.CompilerOptions = options;
             this.NativeInterface = @interface;
 
-            try
+            if (options.TempPath.Exists)
             {
-                System.IO.Directory.Delete(options.TempPath);
-                
-            } catch
-            {
+                try
+                {
+                    options.TempPath.Delete(true);
+                    options.TempPath.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception: {0}", ex);
+                }
             }
-            System.IO.Directory.CreateDirectory(options.TempPath);
 
-            try
+            if (options.BinaryPath.Exists)
             {
-                System.IO.Directory.Delete(options.BinaryPath);   
+                try
+                {
+                    options.BinaryPath.Delete(true);
+                    options.BinaryPath.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception: {0}", ex);
+                }
             }
-            catch
-            {
-            }
-            System.IO.Directory.CreateDirectory(options.BinaryPath);
 
-            string executingDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-            string modulePath = System.IO.Path.Combine(executingDirectory, moduleName + ".dll");
-            
+            options.TempPath.Create();
+            options.TempPath.Refresh();
+            options.BinaryPath.Create();
+            options.BinaryPath.Refresh();
+
+            string executingDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+            string modulePath = Path.Combine(executingDirectory, moduleName + ".dll");
+
             GenerateStub(modulePath, @interface, options);
-
         }
 
         internal int GetTotalCallCount(string function)

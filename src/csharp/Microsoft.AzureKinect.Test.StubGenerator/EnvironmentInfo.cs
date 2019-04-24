@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
@@ -34,6 +35,18 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 
                 EnvironmentInfo.IsInitialized = true;
             }
+        }
+
+        public static FileInfo CalculateFileLocation(string filename)
+        {
+            EnvironmentInfo.LoadEnvironment();
+            return new FileInfo(Environment.ExpandEnvironmentVariables(filename));
+        }
+
+        public static DirectoryInfo CalculateDirectoryLocation(string filename)
+        {
+            EnvironmentInfo.LoadEnvironment();
+            return new DirectoryInfo(Environment.ExpandEnvironmentVariables(filename));
         }
     }
 }
