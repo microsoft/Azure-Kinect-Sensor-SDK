@@ -24,7 +24,8 @@ namespace Microsoft.AzureKinect
 
         public bool Equals(HardwareVersion other)
         {
-            return this.RGB.Equals(other.RGB) &&
+            return other != null && 
+                this.RGB.Equals(other.RGB) &&
                 this.Depth.Equals(other.Depth) &&
                 this.Audio.Equals(other.Audio) &&
                 this.DepthSensor.Equals(other.DepthSensor) &&
@@ -46,11 +47,17 @@ namespace Microsoft.AzureKinect
         
         public static bool operator==(HardwareVersion a, HardwareVersion b)
         {
+            if (object.ReferenceEquals(a, null))
+                return object.ReferenceEquals(b,null);
+
             return a.Equals(b);
         }
 
         public static bool operator!=(HardwareVersion a, HardwareVersion b)
         {
+            if (object.ReferenceEquals(a, null))
+                return !object.ReferenceEquals(b, null);
+
             return !a.Equals(b);
         }
 

@@ -9,9 +9,6 @@
             Some docs!
             </summary>
         </member>
-        <member name="M:Microsoft.AzureKinect.HardwareVersion.GetHashCode">
-            <!-- Badly formed XML file "C:\Program Files\dotnet\sdk\NuGetFallbackFolder\netstandard.library\2.0.3\build\netstandard2.0\ref\netstandard.xml" cannot be included -->
-        </member>
         <member name="T:Microsoft.AzureKinect.Native.NativeReferenceAttribute">
             <summary>
             Attribute indicating the native equivilant.

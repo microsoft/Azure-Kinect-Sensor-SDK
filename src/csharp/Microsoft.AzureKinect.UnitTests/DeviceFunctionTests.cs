@@ -294,7 +294,7 @@ k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle,
             //Validate that we get exceptions from the first call to k4a_device_get_serialnum
             using (Device device = Device.Open(0))
             {
-                Assert.Throws<Microsoft.AzureKinect.Exception>(() =>
+                Assert.Throws<System.InvalidOperationException>(() =>
                 {
                     string sn = device.SerialNum;
                 });
