@@ -101,7 +101,7 @@ K4A_DECLARE_CONTEXT(usbcmd_t, usbcmd_context_t);
 //************ Declarations (Statics and globals) ***************
 
 //******************* Function Prototypes ***********************
-void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer);
+void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *bulk_transfer);
 
 #ifdef __cplusplus
 }

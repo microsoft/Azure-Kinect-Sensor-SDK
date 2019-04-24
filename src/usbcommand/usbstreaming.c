@@ -26,7 +26,7 @@
 /**
  *  Utility function for releasing the transfer resources
  *
- *  @param p_bulk_transfer
+ *  @param bulk_transfer
  *   Pointer to the resources allocated for doing the usb transfer
  *
  */
@@ -56,7 +56,7 @@ static void usb_cmd_release_xfr(struct libusb_transfer *bulk_transfer)
 /**
  *  Function for handling the callback from the libusb library as a result of a transfer request
  *
- *  @param p_bulk_transfer
+ *  @param bulk_transfer
  *   Pointer to the resources allocated for doing the usb transfer
  *
  */
