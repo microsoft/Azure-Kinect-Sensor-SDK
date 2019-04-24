@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <K4aBinaryDirectory>@PROJECT_BINARY_DIR@</K4aBinaryDirectory>
+  </PropertyGroup>  
+</Project>

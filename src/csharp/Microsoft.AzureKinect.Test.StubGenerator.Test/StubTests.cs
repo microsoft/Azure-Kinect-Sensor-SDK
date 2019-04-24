@@ -1,14 +1,14 @@
 using System;
-using NUnit.Framework;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Microsoft.AzureKinect.Test.StubGenerator;
+using NUnit.Framework;
 
 
 namespace Tests
 {
 #pragma warning disable IDE1006 // Naming Styles
-    class TestNativeMethods
+    internal class TestNativeMethods
     {
         public enum k4a_result_t
         {
@@ -45,13 +45,13 @@ namespace Tests
 
     public class Tests
     {
-        readonly StubbedModule k4a;
+        private readonly StubbedModule k4a;
 
         public Tests()
         {
             NativeInterface k4ainterface = NativeInterface.Create(
-               @"d:\git\Azure-Kinect-Sensor-SDK\build\bin\k4a.dll",
-               @"D:\git\Azure-Kinect-Sensor-SDK\include\k4a\k4a.h");
+                    EnvironmentInfo.CalculateFileLocation(@"%K4A_BINARY_DIR%\bin\k4a.dll"),
+                    EnvironmentInfo.CalculateFileLocation(@"%K4A_SOURCE_DIR%\include\k4a\k4a.h"));
 
             k4a = StubbedModule.Create("k4a", k4ainterface);
         }
@@ -94,7 +94,7 @@ uint32_t k4a_device_get_installed_count()
         [Test]
         public void BasicMarshalling()
         {
-            
+
             foreach (UInt32 index in new uint[] { 0, 100, 0xffffffff })
             {
                 k4a.SetImplementation($@"

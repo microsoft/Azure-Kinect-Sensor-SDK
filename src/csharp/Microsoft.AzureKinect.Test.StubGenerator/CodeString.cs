@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
 {
@@ -22,20 +20,29 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
         /// <summary>
         /// Create a CodeString with some C code
         /// </summary>
-        /// <param name="code"></param>
+        /// <param name="code">The C code string to represent.</param>
         public CodeString(string code)
         {
-            AssignCode(code, 2);
+            AssignCode(code);
         }
 
         private string code = "";
 
-        // Performs the asignment and looks back frameDepth stack frames
-        // for the origin information
-        private void AssignCode(string code, int frameDepth)
+        /// <summary>
+        /// Performs the assignment of the code block and looks through the stack to find the origin information, filename and line number.
+        /// </summary>
+        /// <param name="code">The C code string to represent.</param>
+        private void AssignCode(string code)
         {
+            int frameDepth = 0;
             var trace = new System.Diagnostics.StackTrace(true);
             var frame = trace.GetFrame(frameDepth);
+
+            while (frame.GetMethod().DeclaringType == typeof(CodeString))
+            {
+                frame = trace.GetFrame(++frameDepth);
+            }
+
             SourceLineNumber = frame.GetFileLineNumber();
             SourceFileName = frame.GetFileName();
 
@@ -50,7 +57,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
             set
             {
-                AssignCode(code, 2);
+                AssignCode(code);
             }
         }
 
@@ -65,7 +72,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
         public static implicit operator CodeString(string s)
         {
             CodeString c = new CodeString();
-            c.AssignCode(s, 2);
+            c.AssignCode(s);
             return c;
         }
 

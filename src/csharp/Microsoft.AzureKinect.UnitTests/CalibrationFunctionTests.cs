@@ -1,13 +1,12 @@
-﻿using NUnit.Framework;
-using Microsoft.AzureKinect.Test.StubGenerator;
-using Microsoft.AzureKinect;
+﻿using Microsoft.AzureKinect.Test.StubGenerator;
+using NUnit.Framework;
 
 namespace Microsoft.AzureKinect.UnitTests
 {
 
     public class CalibrationFunctionTests
     {
-        readonly StubbedModule NativeK4a;
+        private readonly StubbedModule NativeK4a;
 
         public CalibrationFunctionTests()
         {
@@ -15,9 +14,8 @@ namespace Microsoft.AzureKinect.UnitTests
             if (NativeK4a == null)
             {
                 NativeInterface k4ainterface = NativeInterface.Create(
-                    @"d:\git\Azure-Kinect-Sensor-SDK\build\bin\k4a.dll",
-                    @"D:\git\Azure-Kinect-Sensor-SDK\include\k4a\k4a.h");
-
+                    EnvironmentInfo.CalculateFileLocation(@"%K4A_BINARY_DIR%\bin\k4a.dll"),
+                    EnvironmentInfo.CalculateFileLocation(@"%K4A_SOURCE_DIR%\include\k4a\k4a.h"));
 
                 NativeK4a = StubbedModule.Create("k4a", k4ainterface);
             }
@@ -26,7 +24,7 @@ namespace Microsoft.AzureKinect.UnitTests
         [Test]
         public void CalibrationGetFromRaw()
         {
-            
+
         }
     }
 }

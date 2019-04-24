@@ -1,121 +1,129 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using System.Text;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
 {
     public class CompilerOptions
     {
-        public static CompilerOptions defaultOptions = new CompilerOptions();
-        public static CompilerOptions GetDefault()
+        private static CompilerOptions defaultOptions = new CompilerOptions();
+
+        public CompilerOptions()
         {
-            return defaultOptions;
+            this.CompilerPath = EnvironmentInfo.CalculateFileLocation(@"%CMAKE_CXX_COMPILER%");
+            this.LinkerPath = EnvironmentInfo.CalculateFileLocation(@"%CMAKE_LINKER%");
+            this.CompilerFlags = "/DWIN32 /D_WINDOWS /W3 /GR /EHa /Od /Zi";
+
+            this.Libraries = new string[]
+                {
+                    "kernel32.lib",
+                    "user32.lib",
+                    "gdi32.lib",
+                    "winspool.lib",
+                    "shell32.lib",
+                    "ole32.lib",
+                    "oleaut32.lib",
+                    "uuid.lib",
+                    "comdlg32.lib",
+                    "advapi32.lib"
+                };
+
+            this.IncludePaths = new DirectoryInfo[]
+                {
+                    EnvironmentInfo.CalculateDirectoryLocation(@"%K4A_SOURCE_DIR%\include"),
+                    EnvironmentInfo.CalculateDirectoryLocation(@"%K4A_BINARY_DIR%\src\sdk\include"),
+                    EnvironmentInfo.CalculateDirectoryLocation(@"%K4A_SOURCE_DIR%\src\csharp\K4aStub")
+                };
+
+            this.LibraryPaths = new DirectoryInfo[] { };
+
+            string baseTempPath = Path.Combine(Path.GetTempPath(), "AzureKinect");
+            this.BinaryPath = new DirectoryInfo(Path.Combine(baseTempPath, @"binaries"));
+            this.TempPath = new DirectoryInfo(Path.Combine(baseTempPath, @"compilation"));
+
+            this.StubFile = new FileInfo("Stub.cpp");
         }
-        public static void SetDefault(CompilerOptions options)
+
+        private CompilerOptions(CompilerOptions other)
         {
-            defaultOptions = options;
+            this.BinaryPath = other.BinaryPath;
+            this.CompilerFlags = other.CompilerFlags;
+            this.CompilerPath = other.CompilerPath;
+            this.IncludePaths = other.IncludePaths;
+            this.Libraries = other.Libraries;
+            this.LibraryPaths = other.LibraryPaths;
+            this.LinkerPath = other.LinkerPath;
+            this.StubFile = other.StubFile;
+            this.TempPath = other.TempPath;
+            this.CodeHeader = other.CodeHeader;
         }
 
-        //public string CompilerPath { get; set; } = @"C:/Program Files (x86)/Microsoft Visual Studio/Preview/Enterprise/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe";
-        public string CompilerPath { get; set; } = @"cl.exe";
-        //public string LinkerPath { get; set; } = @"C:/Program Files (x86)/Microsoft Visual Studio/Preview/Enterprise/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/link.exe";
-        public string LinkerPath { get; set; } = @"link.exe";
+        public FileInfo CompilerPath { get; set; }
 
+        public FileInfo LinkerPath { get; set; }
 
-        public string CompilerFlags { get; set; } = "/DWIN32 /D_WINDOWS /W3 /GR /EHa /Od /Zi";
+        public string CompilerFlags { get; set; }
 
-        public string[] Libraries { get; set; } = new string[] {
-            "kernel32.lib",
-            "user32.lib",
-            "gdi32.lib",
-            "winspool.lib",
-            "shell32.lib",
-            "ole32.lib",
-            "oleaut32.lib",
-            "uuid.lib",
-            "comdlg32.lib",
-            "advapi32.lib"
-        };
-        /*
-        public string[] IncludePaths { get; set; } = new string[] {
-            @"D:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Tools\MSVC\14.20.27027\include",
-            @"D:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Tools\MSVC\14.20.27027\atlmfc\include",
-            @"D:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Auxiliary\VS\include",
-            @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt",
-            @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\um",
-            @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared",
-            @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\winrt",
-            @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\cppwinrt",
-            @"C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um",
-            @"D:\git\Azure-Kinect-Sensor-SDK\include",
-            @"D:\git\Azure-Kinect-Sensor-SDK\build\src\sdk\include",
-            @"D:\git\Azure-Kinect-Sensor-SDK\src\csharp\K4aStub"
-        };
-        */
+        public string[] Libraries { get; set; }
 
-        public string[] IncludePaths { get; set; } = new string[] {
-            @"D:\git\Azure-Kinect-Sensor-SDK\include",
-            @"D:\git\Azure-Kinect-Sensor-SDK\build\src\sdk\include",
-            @"D:\git\Azure-Kinect-Sensor-SDK\src\csharp\K4aStub"
-        };
+        public DirectoryInfo[] IncludePaths { get; set; }
 
-        /*
-        public string[] LibraryPaths { get; set; } = new string[]
-        {
-            @"D:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Tools\MSVC\14.20.27027\lib\x64",
-            @"D:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Tools\MSVC\14.20.27027\atlmfc\lib\x64",
-            @"D:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Auxiliary\VS\lib\x64",
-            @"C:\Program Files (x86)\Windows Kits\10\lib\10.0.17763.0\ucrt\x64",
-            @"C:\Program Files (x86)\Windows Kits\10\lib\10.0.17763.0\um\x64",
-            @"C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\lib\um\x64",
-            @"C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Lib\um\x64",
-        };
-        */
+        public DirectoryInfo[] LibraryPaths { get; set; }
 
-        public string[] LibraryPaths { get; set; } = new string[] { };
+        public DirectoryInfo BinaryPath { get; set; }
 
-        public string BinaryPath { get; set; } = @"C:\temp\binaries";
-        public string TempPath { get; set; } = @"C:\temp\compilation";
+        public DirectoryInfo TempPath { get; set; }
 
-        public string StubFile { get; set; } = "Stub.cpp";
+        public FileInfo StubFile { get; set; }
+
         public CodeString CodeHeader { get; set; } = @"
 #define k4a_EXPORTS
 #include ""k4a\k4a.h""
 
 ";
 
+        public static CompilerOptions GetDefault()
+        {
+            return defaultOptions;
+        }
+
+        public static void SetDefault(CompilerOptions options)
+        {
+            defaultOptions = options;
+        }
+
         // Gets the hash of options that may impact the output of the compiled modules
         public byte[] GetOptionsHash()
         {
+            StringBuilder summaryString = new StringBuilder();
+
             var md5 = System.Security.Cryptography.MD5.Create();
 
-            byte[] hash = md5.ComputeHash(System.Text.Encoding.Unicode.GetBytes(
-                CompilerPath + ";" +
-                CompilerFlags + ";" +
-                Libraries + ";" +
-                IncludePaths + ";" +
-                LibraryPaths
-                ));
+            summaryString.AppendFormat("{0};", this.CompilerPath.FullName);
+            summaryString.AppendFormat("{0};", this.LinkerPath.FullName);
+            summaryString.AppendFormat("{0};", this.CompilerFlags);
 
+            foreach (string library in this.Libraries)
+            {
+                summaryString.AppendFormat("{0};", library);
+            }
+
+            foreach (DirectoryInfo directory in this.IncludePaths)
+            {
+                summaryString.AppendFormat("{0};", directory.FullName);
+            }
+
+            foreach (DirectoryInfo directory in this.LibraryPaths)
+            {
+                summaryString.AppendFormat("{0};", directory.FullName);
+            }
+
+            byte[] hash = md5.ComputeHash(Encoding.Unicode.GetBytes(summaryString.ToString()));
             return hash;
         }
 
         public CompilerOptions Copy()
         {
-            return new CompilerOptions()
-            {
-                BinaryPath = this.BinaryPath,
-                CompilerFlags = this.CompilerFlags,
-                CompilerPath = this.CompilerPath,
-                IncludePaths = this.IncludePaths,
-                Libraries = this.Libraries,
-                LibraryPaths = this.LibraryPaths,
-                LinkerPath = this.LinkerPath,
-                StubFile = this.StubFile,
-                TempPath = this.TempPath,
-                CodeHeader = this.CodeHeader
-
-            };
+            return new CompilerOptions(this);
         }
     }
 }

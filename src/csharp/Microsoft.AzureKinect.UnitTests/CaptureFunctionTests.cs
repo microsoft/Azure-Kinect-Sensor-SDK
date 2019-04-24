@@ -1,12 +1,11 @@
-﻿using NUnit.Framework;
-using Microsoft.AzureKinect.Test.StubGenerator;
-using Microsoft.AzureKinect;
+﻿using Microsoft.AzureKinect.Test.StubGenerator;
+using NUnit.Framework;
 
 namespace Microsoft.AzureKinect.UnitTests
 {
     public class CaptureFunctionTests
     {
-        readonly StubbedModule NativeK4a;
+        private readonly StubbedModule NativeK4a;
 
         public CaptureFunctionTests()
         {
@@ -14,9 +13,8 @@ namespace Microsoft.AzureKinect.UnitTests
             if (NativeK4a == null)
             {
                 NativeInterface k4ainterface = NativeInterface.Create(
-                    @"d:\git\Azure-Kinect-Sensor-SDK\build\bin\k4a.dll",
-                    @"D:\git\Azure-Kinect-Sensor-SDK\include\k4a\k4a.h");
-
+                    EnvironmentInfo.CalculateFileLocation(@"%K4A_BINARY_DIR%\bin\k4a.dll"),
+                    EnvironmentInfo.CalculateFileLocation(@"%K4A_SOURCE_DIR%\include\k4a\k4a.h"));
 
                 NativeK4a = StubbedModule.Create("k4a", k4ainterface);
             }
@@ -29,7 +27,7 @@ namespace Microsoft.AzureKinect.UnitTests
         }
 
         // Helper function to implement basic open/close behavior
-        void SetOpenCloseImplementation()
+        private void SetOpenCloseImplementation()
         {
             NativeK4a.SetImplementation(@"
 
@@ -50,7 +48,7 @@ void k4a_device_close(k4a_device_t device_handle)
 }}");
         }
 
-        System.WeakReference CreateWithWeakReference<T>(System.Func<T> factory)
+        private System.WeakReference CreateWithWeakReference<T>(System.Func<T> factory)
         {
             return new System.WeakReference(factory());
         }

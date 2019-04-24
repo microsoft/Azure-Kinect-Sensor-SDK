@@ -31,7 +31,7 @@ STUB_EXPORT int Stub_GetCallCount(char *functionName)
     if (callCount.find(functionName) == callCount.end())
     {
         return 0;
-	}
+    }
     return callCount[functionName];
 }
 

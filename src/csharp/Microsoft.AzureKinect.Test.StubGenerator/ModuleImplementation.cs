@@ -16,13 +16,13 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
         public static ModuleImplementation Compile(CodeString code, CompilerOptions options)
         {
             Hash hashCode = Hash.GetHash(code) + Hash.GetHash(options) + Hash.GetHash("version1");
-            string moduleName = System.IO.Path.Combine(options.BinaryPath, $"imp{hashCode}.dll");
+            string moduleName = System.IO.Path.Combine(options.BinaryPath.FullName, $"imp{hashCode}.dll");
 
             if (!System.IO.File.Exists(moduleName))
             {
                 // Produce the source code file
                 StringBuilder sourceFile = new StringBuilder();
-                string sourceFilePath = System.IO.Path.Combine(options.TempPath, $"imp{hashCode}.cpp");
+                string sourceFilePath = System.IO.Path.Combine(options.TempPath.FullName, $"imp{hashCode}.cpp");
 
                 CodeString prefix = @"
 #include ""StubImplementation.h""
@@ -35,7 +35,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                     filestream.WriteLine(sourceFile.ToString());
                 }
 
-                string stubImportLib = System.IO.Path.Combine(options.TempPath, "stubimport.lib");
+                string stubImportLib = System.IO.Path.Combine(options.TempPath.FullName, "stubimport.lib");
 
                 Compiler.CompileModule(new string[] { sourceFilePath }, moduleName, null, options, additionalLibraries: new string[] { stubImportLib });
             }
@@ -67,7 +67,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             try
             {
                 ModuleImplementation module = new ModuleImplementation(path, hModule, functions);
-                
+
                 // Inspect the module for its exports and get the function addresses
                 ModuleInfo moduleInfo = ModuleInfo.Analyze(path, options);
                 foreach (string export in moduleInfo.Exports)
@@ -86,7 +86,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
         }
 
-        static void ModuleError(string file, int line, string expression)
+        private static void ModuleError(string file, int line, string expression)
         {
             throw new NativeFailureException(expression, file, line);
         }
@@ -127,9 +127,10 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
         }
 
-        ~ModuleImplementation() {
-          // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-          Dispose(false);
+        ~ModuleImplementation()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
         }
 
         // This code added to correctly implement the disposable pattern.

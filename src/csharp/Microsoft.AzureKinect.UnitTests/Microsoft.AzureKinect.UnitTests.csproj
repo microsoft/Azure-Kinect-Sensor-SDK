@@ -1,10 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\k4a.props" />
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <Platforms>x64;x86</Platforms>
+    <OutputPath>$(BaseOutputPath)$(AssemblyName)\</OutputPath>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Content Include="..\StubGenerator.$(Platform).xml">
+      <Link>appsettings.xml</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="nunit" Version="3.10.1" />

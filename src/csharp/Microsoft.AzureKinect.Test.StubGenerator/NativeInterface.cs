@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
 {
     public class NativeInterface
     {
-        public NativeInterface(string modulePath, string headerPath, IReadOnlyList<FunctionInfo> functions)
+        public NativeInterface(FileInfo modulePath, FileInfo headerPath, IReadOnlyList<FunctionInfo> functions)
         {
             this.HeaderPath = headerPath;
             this.ModulePath = modulePath;
             this.Functions = functions;
         }
 
-        public string HeaderPath { get; }
-        public string ModulePath { get; }
+        public FileInfo HeaderPath { get; }
+        public FileInfo ModulePath { get; }
         public IReadOnlyList<FunctionInfo> Functions { get; }
 
         /// <summary>
@@ -23,12 +23,12 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
         /// </summary>
         /// <param name="modulePath"></param>
         /// <returns></returns>
-        public static NativeInterface Create(string modulePath,  string headerPath)
+        public static NativeInterface Create(FileInfo modulePath, FileInfo headerPath)
         {
             List<FunctionInfo> functions = new List<FunctionInfo>();
 
             // Get the exports from the module
-            ModuleInfo module = ModuleInfo.Analyze(modulePath);
+            ModuleInfo module = ModuleInfo.Analyze(modulePath.FullName);
             List<string> exports = new List<string>(module.Exports);
 
             //Regex functionRegex = new Regex(@"^\s*K4A_EXPORT\s+(?<return>\S+)\s+(?<function>[a-zA-Z0-9_]+)\s*\((?<arguments>[^\)]*)\)", RegexOptions.Multiline);
@@ -49,9 +49,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 
             Regex parameterRegex = new Regex(@"^\s*(?<type>.*?)(?<name>[a-zA-Z0-9_]+)\s*$");
 
-
-            
-            using (var header = System.IO.File.OpenText(headerPath))
+            using (var header = File.OpenText(headerPath.FullName))
             {
                 string headerData = header.ReadToEnd().Replace("\r\n", "\n");
 
@@ -92,7 +90,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                     }
                     else
                     {
-                        throw new Exception("Header declares a function not found in module exports");
+                        throw new Exception($"Header declares a function not found in module exports. Function \"{info.Declaration}\" was not found in exports.");
                     }
                 }
             }

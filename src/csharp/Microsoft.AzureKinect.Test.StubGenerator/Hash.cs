@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
+﻿using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace Microsoft.AzureKinect.Test.StubGenerator
 {
     /// <summary>
-    /// Hashes an arbitrary object
+    /// Hashes an arbitrary object.
     /// </summary>
-    class Hash
+    internal class Hash
     {
         /// <summary>
-        /// Serialize an object to XML and compute its hash
+        /// Serialize an object to XML and compute its hash.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="object"></param>
         /// <returns></returns>
-        private static  byte[] HashSerializedObject<T>(T @object)
+        private static byte[] HashSerializedObject<T>(T @object)
         {
             DataContractSerializer xs = new DataContractSerializer(typeof(T));
             using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream())
@@ -32,6 +30,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             var md5 = System.Security.Cryptography.MD5.Create();
             return md5.ComputeHash(input);
         }
+
         private Hash(byte[] hash)
         {
             this.hash = hash;
@@ -42,11 +41,16 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             return new Hash(HashSerializedObject(@object));
         }
 
-        public static Hash operator+(Hash left, Hash right)
+        public static Hash GetHash(CompilerOptions options)
+        {
+            return new Hash(options.GetOptionsHash());
+        }
+
+        public static Hash operator +(Hash left, Hash right)
         {
             return new Hash(HashBytes(left.hash.Concat(right.hash).ToArray()));
         }
-        
+
         public static implicit operator string(Hash h)
         {
             return h.ToString();
