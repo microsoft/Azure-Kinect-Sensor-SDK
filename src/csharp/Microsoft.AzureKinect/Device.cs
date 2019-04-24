@@ -18,11 +18,12 @@ namespace Microsoft.AzureKinect
             return (int)NativeMethods.k4a_device_get_installed_count();
         }
 
-        public static Device Open(int index)
+        public static Device Open(int index = 0)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_open((uint)index, out NativeMethods.k4a_device_t handle));
             return new Device(handle);
         }
+
 
         private string serialNum = null;
 
