@@ -9,6 +9,8 @@ namespace Microsoft.AzureKinect
     {
         Msft,
         Test,
+#pragma warning disable CA1720 // Identifier contains type name
         Unsigned
+#pragma warning restore CA1720 // Identifier contains type name
     }
 }

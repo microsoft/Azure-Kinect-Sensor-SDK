@@ -8,7 +8,14 @@ namespace Microsoft.AzureKinect
     [Serializable]
     public class Exception : System.Exception
     {
+        public Exception() : base("An AzureKinect exception occurred") { }
         public Exception(string message) : base(message) { }
+        public Exception(string message, Exception innerException) : base(message, innerException) { }
+
+        protected Exception(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
+        {
+
+        }
 
         internal static void ThrowIfNotSuccess(NativeMethods.k4a_result_t result)
         {
@@ -32,6 +39,10 @@ namespace Microsoft.AzureKinect
             {
                 throw new Exception($"result = {result}");
             }
+        }
+
+        public Exception(string message, System.Exception innerException) : base(message, innerException)
+        {
         }
     }
 }

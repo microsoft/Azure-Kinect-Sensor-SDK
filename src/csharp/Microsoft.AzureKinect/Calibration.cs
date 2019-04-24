@@ -90,14 +90,17 @@ namespace Microsoft.AzureKinect
             Num
         }
         
-        public Float2? TransformTo2D(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
+        public Float2? TransformTo2D(Float2 sourcePoint2D,
+                                     float sourceDepth,
+                                     DeviceType sourceCamera,
+                                     DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_2d(
                 this,
-                ref source_point2d,
-                source_depth,
-                source_camera,
-                target_camera,
+                ref sourcePoint2D,
+                sourceDepth,
+                sourceCamera,
+                targetCamera,
                 out Float2 target_point2d,
                 out bool valid));
             if (valid)
@@ -105,14 +108,14 @@ namespace Microsoft.AzureKinect
             return null;
         }
 
-        public Float3? TransformTo3D(Float2 source_point2d, float source_depth, DeviceType source_camera, DeviceType target_camera)
+        public Float3? TransformTo3D(Float2 sourcePoint2D, float sourceDepth, DeviceType sourceCamera, DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_3d(
                 this,
-                ref source_point2d,
-                source_depth,
-                source_camera,
-                target_camera,
+                ref sourcePoint2D,
+                sourceDepth,
+                sourceCamera,
+                targetCamera,
                 out Float3 target_point3d,
                 out bool valid));
 
@@ -121,13 +124,13 @@ namespace Microsoft.AzureKinect
             return null;
         }
 
-        public Float2? TransformTo2D(Float3 source_point3d, DeviceType source_camera, DeviceType target_camera)
+        public Float2? TransformTo2D(Float3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_2d(
                 this,
-                ref source_point3d,
-                source_camera,
-                target_camera,
+                ref sourcePoint3D,
+                sourceCamera,
+                targetCamera,
                 out Float2 target_point2d,
                 out bool valid));
 
@@ -136,13 +139,13 @@ namespace Microsoft.AzureKinect
             return null;
         }
 
-        public Float3? TransformTo3D(Float3 source_point3d, DeviceType source_camera, DeviceType target_camera)
+        public Float3? TransformTo3D(Float3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_3d(
                 this,
-                ref source_point3d,
-                source_camera,
-                target_camera,
+                ref sourcePoint3D,
+                sourceCamera,
+                targetCamera,
                 out Float3 target_point3d,
                 out bool valid));
 
@@ -151,13 +154,13 @@ namespace Microsoft.AzureKinect
             return null;
         }
 
-        public static Calibration GetFromRaw(byte[] raw, DepthMode depth_mode, ColorResolution color_resolution)
+        public static Calibration GetFromRaw(byte[] raw, DepthMode depthMode, ColorResolution colorResolution)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_get_from_raw(
                 raw,
                 (UIntPtr)raw.Length,
-                depth_mode,
-                color_resolution,
+                depthMode,
+                colorResolution,
                 out Calibration calibration));
 
             return calibration;

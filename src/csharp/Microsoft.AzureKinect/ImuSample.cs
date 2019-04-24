@@ -7,13 +7,13 @@ namespace Microsoft.AzureKinect
 {
     [StructLayout(LayoutKind.Sequential)]
     [Native.NativeReference("k4a_imu_sample_t")]
-    public struct ImuSample
+    public class ImuSample
     {
-        public float temperature;
-        public Float3 acc_sample;
-        public UInt64 acc_timestamp_usec;
-        public Float3 gyro_sample;
-        public UInt64 gyro_timestamp_usec;
+        public float Temperature { get; set; }
+        public Float3 AccelerometerSample { get; set; }
+        public Int64 AccelerometerTimestampInUsec { get; set; }
+        public Float3 GyroSample { get; set; }
+        public Int64 GyroTimestampInUsec { get; set; }
 
     }
 }

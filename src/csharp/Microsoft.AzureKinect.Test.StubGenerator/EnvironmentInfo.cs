@@ -6,7 +6,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 {
     public static class EnvironmentInfo
     {
-        private static object SyncRoot = new object();
+        private static readonly object SyncRoot = new object();
         private static bool IsInitialized = false;
 
         public static void LoadEnvironment()

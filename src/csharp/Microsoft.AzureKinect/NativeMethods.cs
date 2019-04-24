@@ -153,12 +153,12 @@ namespace Microsoft.AzureKinect
             {
                 return new HardwareVersion
                 {
-                    rgb = this.rgb.ToVersion(),
-                    depth = this.depth.ToVersion(),
-                    audio = this.audio.ToVersion(),
-                    depth_sensor = this.depth_sensor.ToVersion(),
-                    firmware_build = this.firmware_build,
-                    firmware_signature = this.firmware_signature
+                    RGB = this.rgb.ToVersion(),
+                    Depth = this.depth.ToVersion(),
+                    Audio = this.audio.ToVersion(),
+                    DepthSensor = this.depth_sensor.ToVersion(),
+                    FirmwareBuild = this.firmware_build,
+                    FirmwareSignature = this.firmware_signature
                 };
             }
         }
@@ -374,7 +374,7 @@ namespace Microsoft.AzureKinect
         [NativeReference]
         public static extern k4a_wait_result_t k4a_device_get_imu_sample(
             k4a_device_t device_handle,
-            out ImuSample imu_sample,
+            ImuSample imu_sample,
             Int32 timeout_in_ms);
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
@@ -425,7 +425,7 @@ namespace Microsoft.AzureKinect
         public static extern k4a_result_t k4a_device_open(UInt32 index, out k4a_device_t device_handle);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
         [NativeReference]
         public static extern k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle, StringBuilder serial_number, ref UIntPtr data_size);
 

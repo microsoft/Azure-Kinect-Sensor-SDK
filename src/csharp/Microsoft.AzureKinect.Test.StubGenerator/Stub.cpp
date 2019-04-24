@@ -38,7 +38,7 @@ STUB_EXPORT int Stub_GetCallCount(char *functionName)
 STUB_EXPORT FARPROC Stub_GetFunctionPointer(std::string functionName)
 {
     std::map<std::string, FARPROC>::iterator it = functionLookup.find(functionName);
-    if (it == functionLookup.end())
+    if (it == functionLookup.end() || it->second == NULL)
     {
         STUB_FAIL("Stubbed function has no implementation");
     }

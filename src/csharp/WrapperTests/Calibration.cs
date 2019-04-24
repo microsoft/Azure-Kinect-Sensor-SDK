@@ -48,7 +48,7 @@ namespace WrapperTests
         }
 
         [Test]
-        public void Transform_2d_to_2d()
+        public void Transform2Dto2D()
         {
             using (Device device = Device.Open(0))
             {
