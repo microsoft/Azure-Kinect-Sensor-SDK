@@ -47,7 +47,6 @@ private:
     {
         ColorSetting ExposureTimeUs;
         ColorSetting WhiteBalance;
-        ColorSetting AutoExposurePriority;
         ColorSetting Brightness;
         ColorSetting Contrast;
         ColorSetting Saturation;
