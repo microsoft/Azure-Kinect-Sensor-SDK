@@ -275,18 +275,6 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         *pValue = (int32_t)(exposure_time * 100); // 0.0001 sec to uSec
     }
     break;
-    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
-    {
-        uint8_t priority;
-        res = uvc_get_ae_priority(m_pDeviceHandle, &priority, UVC_GET_CUR);
-        if (res < 0)
-        {
-            LOG_ERROR("Failed to get auto exposure priority: %s", uvc_strerror(res));
-            return K4A_RESULT_FAILED;
-        }
-        *pValue = (int32_t)priority;
-    }
-    break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
     {
         int16_t brightness;
@@ -454,22 +442,6 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             if (res < 0)
             {
                 LOG_ERROR("Failed to set auto exposure mode: %s", uvc_strerror(res));
-                return K4A_RESULT_FAILED;
-            }
-        }
-        else
-        {
-            LOG_ERROR("Invalid color control mode\n", 0);
-            return K4A_RESULT_FAILED;
-        }
-        break;
-    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
-        if (mode == K4A_COLOR_CONTROL_MODE_MANUAL)
-        {
-            res = uvc_set_ae_priority(m_pDeviceHandle, (uint8_t)newValue);
-            if (res < 0)
-            {
-                LOG_ERROR("Failed to set auto exposure priority: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }

@@ -510,19 +510,6 @@ typedef enum
      */
     K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE = 0,
 
-    /** Exposure or Framerate priority setting.
-     *
-     * \details
-     * May only be set to ::K4A_COLOR_CONTROL_MODE_MANUAL.
-     *
-     * \details
-     * Value of 0 means framerate priority. Value of 1 means exposure priority.
-     *
-     * \details
-     * Using exposure priority may impact the framerate of both the color and depth cameras.
-     */
-    K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY,
-
     /** Brightness setting.
      *
      * \details

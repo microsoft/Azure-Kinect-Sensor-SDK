@@ -562,12 +562,6 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
         propertyValue = (LONG)(exp2f((float)propertyValue) * 1000000.0f);
     }
     break;
-    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
-    {
-        hr =
-            GetCameraControlValue(KSPROPERTY_CAMERACONTROL_AUTO_EXPOSURE_PRIORITY, &propertyValue, &flags, &capability);
-    }
-    break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
     {
         hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_BRIGHTNESS, &propertyValue, &flags, &capability);
@@ -655,19 +649,6 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
     {
         // Convert micro-second unit to KSProperty exposure time value
         hr = SetCameraControlValue(KSPROPERTY_CAMERACONTROL_EXPOSURE, (LONG)log2f((float)newValue * 0.000001f), flags);
-    }
-    break;
-    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
-    {
-        if (newValue == 0 || newValue == 1)
-        {
-            hr = SetCameraControlValue(KSPROPERTY_CAMERACONTROL_AUTO_EXPOSURE_PRIORITY, (LONG)newValue, flags);
-        }
-        else
-        {
-            LOG_ERROR("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY only accept 0 or 1. Actual = %d", newValue);
-            return K4A_RESULT_FAILED;
-        }
     }
     break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
