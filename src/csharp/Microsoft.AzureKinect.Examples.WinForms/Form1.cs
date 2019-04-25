@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.AzureKinect;
+using Microsoft.AzureKinect.WinForms;
 
 namespace Microsoft.AzureKinect.Examples.WinForms
 {
@@ -35,12 +36,7 @@ namespace Microsoft.AzureKinect.Examples.WinForms
                 {
                     using (Capture capture = await Task.Run(() => { return device.GetCapture(); }))
                     {
-                        pictureBoxColor.Image = new Bitmap(capture.Color.WidthPixels,
-                            capture.Color.HeightPixels,
-                            capture.Color.StrideBytes,
-                            System.Drawing.Imaging.PixelFormat.Format32bppArgb,
-                            ((IUnsafeImage)capture.Color).UnsafeBufferPointer);
-
+                        pictureBoxColor.Image = capture.Color.CreateBitmap();
 
                         pictureBoxDepth.Image = await Task.Run(() =>
                         {
@@ -70,7 +66,6 @@ namespace Microsoft.AzureKinect.Examples.WinForms
                                         }
                                         else
                                         {
-
                                             float brightness = (float)depthValue / (float)2000;
 
                                             if (brightness > 1.0f)

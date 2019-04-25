@@ -91,7 +91,7 @@ namespace Microsoft.AzureKinect
         }
     }
 
-    public class Image : IDisposable, IUnsafeImage
+    public class Image : IDisposable
     {
         public Image(ImageFormat format, int width_pixels, int height_pixels, int stride_bytes)
         {
@@ -110,7 +110,7 @@ namespace Microsoft.AzureKinect
 
         
 
-        public byte[] GetBufferCopy()
+        public unsafe byte[] GetBufferCopy()
         {
             lock (this)
             {
@@ -118,7 +118,7 @@ namespace Microsoft.AzureKinect
                     throw new ObjectDisposedException(nameof(Image));
 
                 byte[] copy = new byte[this.Size];
-                System.Runtime.InteropServices.Marshal.Copy(((IUnsafeImage)this).UnsafeBufferPointer, copy, 0, checked((int)this.Size));
+                System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, copy, 0, checked((int)this.Size));
                 return copy;
             }
         }
@@ -143,7 +143,10 @@ namespace Microsoft.AzureKinect
                 if (this.Size < checked((long)(sourceOffset + count)))
                     throw new ArgumentException("Source buffer not long enough");
 
-                System.Runtime.InteropServices.Marshal.Copy(((IUnsafeImage)this).UnsafeBufferPointer, destination, destinationOffset, count);
+                unsafe
+                {
+                    System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, destination, destinationOffset, count);
+                }
             }
         }
 
@@ -173,7 +176,7 @@ namespace Microsoft.AzureKinect
 
                     fixed(T* destinationPointer = &destination[destinationOffset])
                     {
-                        this.CopyBytesTo((IntPtr)destinationPointer, 
+                        this.CopyBytesTo(destinationPointer, 
                             (destination.Length - destinationOffset) * elementSize, 
                             0, sourceOffsetElements * elementSize, 
                             countElements * elementSize);
@@ -193,16 +196,19 @@ namespace Microsoft.AzureKinect
 
                 // Take a new reference on the destinaion image to ensure that if the destinaion object
                 // is disposed by another thread, the underlying native memory cannot be freed
-                using (IUnsafeImage unsafeDestination = destination.Reference())
+                using (Image referenceDestination= destination.Reference())
                 {
-                    IntPtr destinationPointer = unsafeDestination.UnsafeBufferPointer;
+                    unsafe
+                    {
+                        void* destinationPointer = referenceDestination.Buffer;
 
-                    this.CopyBytesTo(
-                        destinationPointer,
-                        checked((int)unsafeDestination.Size),
-                        destinationOffset,
-                        sourceOffset,
-                        count);
+                        this.CopyBytesTo(
+                            destinationPointer,
+                            checked((int)referenceDestination.Size),
+                            destinationOffset,
+                            sourceOffset,
+                            count);
+                    }
                 }
             }
         }
@@ -227,7 +233,10 @@ namespace Microsoft.AzureKinect
                 if (this.Size < checked((long)(destinationOffset + count)))
                     throw new ArgumentException("Destination buffer not long enough");
 
-                System.Runtime.InteropServices.Marshal.Copy(source, sourceOffset, ((IUnsafeImage)this).UnsafeBufferPointer, count);
+                unsafe
+                {
+                    System.Runtime.InteropServices.Marshal.Copy(source, sourceOffset, (IntPtr)this.Buffer, count);
+                }
             }
         }
 
@@ -240,24 +249,27 @@ namespace Microsoft.AzureKinect
 
                 // Take a new reference on the source Image to ensure that if the source object
                 // is disposed by another thread, the underlying native memory cannot be freed
-                using (IUnsafeImage unsafeSource = source.Reference())
+                using (Image sourceReference = source.Reference())
                 {
-                    
-                    IntPtr sourcePointer = unsafeSource.UnsafeBufferPointer;
+                    unsafe
+                    {
+                        void* sourcePointer = sourceReference.Buffer;
 
-                    this.CopyBytesFrom(
-                        sourcePointer,
-                        checked((int)unsafeSource.Size),
-                        sourceOffset,
-                        destinationOffset,
-                        count);
+                        this.CopyBytesFrom(
+                            sourcePointer,
+                            checked((int)sourceReference.Size),
+                            sourceOffset,
+                            destinationOffset,
+                            count);
+                    }
                 }
             }
         }
 
         private IntPtr _Buffer = IntPtr.Zero;
 
-        IntPtr IUnsafeImage.UnsafeBufferPointer
+        
+        public unsafe void* Buffer
         {
             get
             {
@@ -266,7 +278,7 @@ namespace Microsoft.AzureKinect
                     if (disposedValue)
                         throw new ObjectDisposedException(nameof(Image));
 
-                    return _Buffer;
+                    return (void*)_Buffer;
                 }
 
                 lock (this)
@@ -280,12 +292,12 @@ namespace Microsoft.AzureKinect
                         throw new Exception("Image has NULL buffer");
                     }
 
-                    return _Buffer;
+                    return (void*)_Buffer;
                 }
             }
         }
 
-        protected void CopyBytesTo(IntPtr destination, int destinationLength, int destinationOffset, int sourceOffset, int count)
+        protected unsafe void CopyBytesTo(void* destination, int destinationLength, int destinationOffset, int sourceOffset, int count)
         {
             lock (this)
             {
@@ -305,18 +317,15 @@ namespace Microsoft.AzureKinect
                 if (this.Size < checked((long)(sourceOffset + count)))
                     throw new ArgumentException("Source buffer not long enough");
 
-                unsafe
-                {
-                    Buffer.MemoryCopy((void*)((IUnsafeImage)this).UnsafeBufferPointer, (void*)destination, destinationLength, count);
-                }
+                System.Buffer.MemoryCopy(this.Buffer, destination, destinationLength, count);
             }
         }
 
-        protected void CopyBytesFrom(IntPtr source, int sourceLength, int sourceOffset, int destinationOffset, int count)
+        protected unsafe void CopyBytesFrom(void* source, int sourceLength, int sourceOffset, int destinationOffset, int count)
         {
             lock (this)
             {
-                // We don't need to check to see if we are disposed since the call to ((IUnsafeImage)this).UnsafeBufferPointer will 
+                // We don't need to check to see if we are disposed since the call to this.UnsafeBufferPointer will 
                 // perform that check
 
                 if (source == null)
@@ -334,7 +343,7 @@ namespace Microsoft.AzureKinect
 
                 unsafe
                 {
-                    Buffer.MemoryCopy((void*)source, (void*)((IUnsafeImage)this).UnsafeBufferPointer, this.Size, (long)count);
+                    System.Buffer.MemoryCopy((void*)source, (void*)this.Buffer, this.Size, (long)count);
                 }
             }
         }
