@@ -74,7 +74,9 @@ int main(int argc, char **argv)
 
     size_t file_count = argc - 1;
     bool master_found = false;
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
+    // Allocate memory to store the state of N recordings.
     recording_t *files = malloc(sizeof(recording_t) * file_count);
     if (files == NULL)
     {
@@ -83,7 +85,7 @@ int main(int argc, char **argv)
     }
     memset(files, 0, sizeof(recording_t) * file_count);
 
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    // Open each recording file and validate they were recorded in master/subordinate mode.
     for (size_t i = 0; i < file_count; i++)
     {
         result = k4a_playback_open(argv[i + 1], &files[i].handle);
@@ -125,6 +127,7 @@ int main(int argc, char **argv)
             break;
         }
 
+        // Read the first capture of each recording into memory.
         k4a_stream_result_t stream_result = k4a_playback_get_next_capture(files[i].handle, &files[i].capture);
         if (stream_result == K4A_STREAM_RESULT_EOF)
         {
@@ -145,15 +148,20 @@ int main(int argc, char **argv)
         printf("%-32s  %12s  %12s  %12s\n", "Source file", "COLOR", "DEPTH", "IR");
         printf("==========================================================================\n");
 
+        // Print the first 25 captures in order of timestamp across all the recordings.
         for (int frame = 0; frame < 25; frame++)
         {
             uint64_t min_timestamp = (uint64_t)-1;
             size_t min_camera_id = 0;
 
+            // Find the lowest timestamp out of each of the current captures.
             for (size_t i = 0; i < file_count; i++)
             {
                 if (files[i].capture != NULL)
                 {
+                    // All recording files start at timestamp 0, however the first timestamp off the camera is usually
+                    // non-zero. We need to add the recording "start offset" back to the recording timestamp to recover
+                    // the original timestamp from the device, and synchronize the files.
                     uint64_t timestamp = first_capture_timestamp(files[i].capture) +
                                          files[i].record_config.start_timestamp_offset_usec;
                     if (timestamp < min_timestamp)
@@ -171,6 +179,7 @@ int main(int argc, char **argv)
             k4a_capture_release(files[min_camera_id].capture);
             files[min_camera_id].capture = NULL;
 
+            // Advance the recording with the lowest current timestamp forward.
             k4a_stream_result_t stream_result = k4a_playback_get_next_capture(files[min_camera_id].handle,
                                                                               &files[min_camera_id].capture);
             if (stream_result == K4A_BUFFER_RESULT_FAILED)
