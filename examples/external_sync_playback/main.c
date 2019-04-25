@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <malloc.h>
-// #include <string.h>
 #include <k4a/k4a.h>
 #include <k4arecord/playback.h>
 
