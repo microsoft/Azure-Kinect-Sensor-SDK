@@ -204,9 +204,6 @@ void K4ADeviceDockControl::ApplyDefaultColorSettings()
     m_colorSettingsCache.WhiteBalance = { K4A_COLOR_CONTROL_MODE_AUTO, 4500 };
     ApplyColorSetting(K4A_COLOR_CONTROL_WHITEBALANCE, &m_colorSettingsCache.WhiteBalance);
 
-    m_colorSettingsCache.AutoExposurePriority = { K4A_COLOR_CONTROL_MODE_MANUAL, 1 };
-    ApplyColorSetting(K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, &m_colorSettingsCache.AutoExposurePriority);
-
     m_colorSettingsCache.Brightness = { K4A_COLOR_CONTROL_MODE_MANUAL, 128 };
     ApplyColorSetting(K4A_COLOR_CONTROL_BRIGHTNESS, &m_colorSettingsCache.Brightness);
 
@@ -245,12 +242,11 @@ void K4ADeviceDockControl::LoadColorSettingsCache()
 {
     // If more color controls are added, they need to be initialized here
     //
-    static_assert(sizeof(m_colorSettingsCache) == sizeof(ColorSetting) * 10,
+    static_assert(sizeof(m_colorSettingsCache) == sizeof(ColorSetting) * 9,
                   "Missing color setting in LoadColorSettingsCache()");
 
     ReadColorSetting(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, &m_colorSettingsCache.ExposureTimeUs);
     ReadColorSetting(K4A_COLOR_CONTROL_WHITEBALANCE, &m_colorSettingsCache.WhiteBalance);
-    ReadColorSetting(K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, &m_colorSettingsCache.AutoExposurePriority);
     ReadColorSetting(K4A_COLOR_CONTROL_BRIGHTNESS, &m_colorSettingsCache.Brightness);
     ReadColorSetting(K4A_COLOR_CONTROL_CONTRAST, &m_colorSettingsCache.Contrast);
     ReadColorSetting(K4A_COLOR_CONTROL_SATURATION, &m_colorSettingsCache.Saturation);
@@ -571,13 +567,6 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         });
 
         ImGui::PopItemWidth();
-
-        ShowColorControl(K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, &m_colorSettingsCache.AutoExposurePriority,
-            [](ColorSetting *cacheEntry) {
-                return ImGui::Checkbox("Auto Exposure Priority", reinterpret_cast<bool *>(&cacheEntry->Value)) ?
-                    ColorControlAction::SetManual :
-                    ColorControlAction::None;
-         });
 
         ShowColorControl(K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, &m_colorSettingsCache.BacklightCompensation,
             [](ColorSetting *cacheEntry) {
