@@ -181,7 +181,7 @@ int main(int argc, char **argv)
             // Advance the recording with the lowest current timestamp forward.
             k4a_stream_result_t stream_result = k4a_playback_get_next_capture(files[min_camera_id].handle,
                                                                               &files[min_camera_id].capture);
-            if (stream_result == K4A_BUFFER_RESULT_FAILED)
+            if (stream_result == K4A_STREAM_RESULT_FAILED)
             {
                 printf("ERROR: Failed to read next capture from file: %s\n", argv[min_camera_id + 1]);
                 result = K4A_RESULT_FAILED;
