@@ -637,7 +637,8 @@ jobs:
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinect_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
-      env: K4A_LOG_LEVEL: 'I'
+      env:
+        K4A_LOG_LEVEL: 'I'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
       workingDirectory: '$(System.ArtifactsDirectory)'
