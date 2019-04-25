@@ -50,8 +50,8 @@ static void print_capture_info(char *filename, k4a_capture_t capture, uint32_t t
     {
         if (images[i] != NULL)
         {
-            uint64_t timestamp = k4a_image_get_timestamp_usec(images[i]) + timestamp_offset;
-            printf("  %7llu usec", timestamp);
+            uint64_t timestamp = k4a_image_get_timestamp_usec(images[i]) + (uint64_t)timestamp_offset;
+            printf("  %7ju usec", timestamp);
             k4a_image_release(images[i]);
             images[i] = NULL;
         }
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    size_t file_count = argc - 1;
+    size_t file_count = (size_t)(argc - 1);
     bool master_found = false;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
