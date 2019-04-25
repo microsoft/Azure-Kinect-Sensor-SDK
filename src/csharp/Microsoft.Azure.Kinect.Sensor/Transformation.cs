@@ -12,7 +12,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Transformation(Calibration calibration)
         {
             this.calibration = calibration;
-            this.handle = NativeMethods.k4a_transformation_create(calibration);
+            this.handle = NativeMethods.k4a_transformation_create(ref calibration);
             if (this.handle == null)
             {
                 throw new Exception("Failed to create transformation object");

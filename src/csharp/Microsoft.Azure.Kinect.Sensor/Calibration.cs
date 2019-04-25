@@ -97,7 +97,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                                      DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_2d(
-                this,
+                ref this,
                 ref sourcePoint2D,
                 sourceDepth,
                 sourceCamera,
@@ -112,7 +112,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Vector3? TransformTo3D(Vector2 sourcePoint2D, float sourceDepth, DeviceType sourceCamera, DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_3d(
-                this,
+                ref this,
                 ref sourcePoint2D,
                 sourceDepth,
                 sourceCamera,
@@ -128,7 +128,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Vector2? TransformTo2D(Vector3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_2d(
-                this,
+                ref this,
                 ref sourcePoint3D,
                 sourceCamera,
                 targetCamera,
@@ -143,16 +143,13 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Vector3? TransformTo3D(Vector3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_3d(
-                this,
+                ref this,
                 ref sourcePoint3D,
                 sourceCamera,
                 targetCamera,
-                out Vector3 target_point3d,
-                out bool valid));
+                out Vector3 target_point3d));
 
-            if (valid)
-                return target_point3d;
-            return null;
+            return target_point3d;
         }
 
         public static Calibration GetFromRaw(byte[] raw, DepthMode depthMode, ColorResolution colorResolution)

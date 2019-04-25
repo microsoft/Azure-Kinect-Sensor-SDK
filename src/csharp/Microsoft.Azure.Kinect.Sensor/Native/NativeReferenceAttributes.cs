@@ -6,7 +6,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Native
 {
 
     /// <summary>
-    /// Attribute indicating the native equivilant.
+    /// Attribute indicating the native equivalent.
     /// </summary>
     [System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = false)]
     public sealed class NativeReferenceAttribute : Attribute

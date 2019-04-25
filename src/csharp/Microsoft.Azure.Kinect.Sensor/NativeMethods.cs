@@ -189,7 +189,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_2d_to_2d(
-            Calibration calibration,
+            [In] ref Calibration calibration,
             ref Vector2 source_point2d,
             float source_depth,
             Calibration.DeviceType source_camera,
@@ -200,7 +200,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_2d_to_3d(
-            Calibration calibration,
+            [In] ref Calibration calibration,
             ref Vector2 source_point2d,
             float source_depth,
             Calibration.DeviceType source_camera,
@@ -211,7 +211,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_3d_to_2d(
-            Calibration calibration,
+            [In] ref Calibration calibration,
             ref Vector3 source_point3d,
             Calibration.DeviceType source_camera,
             Calibration.DeviceType target_camera,
@@ -221,12 +221,11 @@ namespace Microsoft.Azure.Kinect.Sensor
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_3d_to_3d(
-            Calibration calibration,
+            [In] ref Calibration calibration,
             ref Vector3 source_point3d,
             Calibration.DeviceType source_camera,
             Calibration.DeviceType target_camera,
-            out Vector3 target_point3d,
-            out bool valid);
+            out Float3 target_point3d);
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
@@ -239,7 +238,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
-        public static extern k4a_transformation_t k4a_transformation_create(Calibration calibration);
+        public static extern k4a_transformation_t k4a_transformation_create([In] ref Calibration calibration);
 
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
@@ -407,7 +406,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_configuration_t config);
+        public static extern k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, [In] ref k4a_device_configuration_t config);
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
