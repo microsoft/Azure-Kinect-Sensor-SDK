@@ -12,9 +12,6 @@ namespace Microsoft.AzureKinect
         public Version Audio { get; set; }
         public Version DepthSensor { get; set; }
         public FirmwareBuild FirmwareBuild { get; set; }
-        /// <summary>
-        /// Some docs!
-        /// </summary>
         public FirmwareSignature FirmwareSignature { get; set; }
 
         public override bool Equals(object obj)
@@ -47,14 +44,15 @@ namespace Microsoft.AzureKinect
         
         public static bool operator==(HardwareVersion a, HardwareVersion b)
         {
-            if (object.ReferenceEquals(a, null))
-                return object.ReferenceEquals(b,null);
+            if (a is null) return b is null;
 
             return a.Equals(b);
         }
 
         public static bool operator!=(HardwareVersion a, HardwareVersion b)
         {
+            if (a is null) return !(b is null);
+
             if (object.ReferenceEquals(a, null))
                 return !object.ReferenceEquals(b, null);
 

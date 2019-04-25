@@ -171,7 +171,7 @@ void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float value)
                 c.Temperature = 3.5f;
                 Assert.AreEqual(1, count.Calls("k4a_capture_set_temperature_c"));
 
-                // Verify the write is being marshalled cofrectly
+                // Verify the write is being marshalled correctly
                 Assert.Throws(typeof(NativeFailureException), () =>
                 {
                     c.Temperature = 4.0f;

@@ -146,7 +146,7 @@ uint8_t* k4a_image_get_buffer(k4a_image_t image_handle)
                 byte[] buffer = image.GetBufferCopy();
                 Assert.AreEqual(640 * 480 * 2, image.Size);
 
-                // k4a_device_close should have been called automatically 
+                // k4a_image_create should have been called once 
                 Assert.AreEqual(1, count.Calls("k4a_image_create"));
 
                 for (int i = 0; i < buffer.Length / 2; i++)

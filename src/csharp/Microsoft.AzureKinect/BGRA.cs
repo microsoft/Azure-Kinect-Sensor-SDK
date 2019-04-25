@@ -38,6 +38,12 @@ namespace Microsoft.AzureKinect
             return (obj is BGRA) ? this.Equals((BGRA)obj) : false;
         }
 
+        public bool Equals(BGRA other)
+        {
+            return other.Value == Value;
+        }
+
+
         public static bool operator==(BGRA a, BGRA b)
         {
             return a.Value == b.Value;
@@ -53,9 +59,6 @@ namespace Microsoft.AzureKinect
             return Value;
         }
 
-        public bool Equals(BGRA other)
-        {
-            return other.Value == Value;
-        }
+
     }
 }

@@ -1219,7 +1219,7 @@ k4a_result_t k4a_device_get_version(
                     Assert.AreEqual(new System.Version("7.8.9"), device.Version.Audio);
                     Assert.AreEqual(new System.Version("10.11.12"), device.Version.DepthSensor);
                     Assert.AreEqual(FirmwareBuild.Debug, device.Version.FirmwareBuild);
-                    Assert.AreEqual(FirmwareSignature.Unsigned, device.Version.FirmwareSignature);
+                    Assert.AreEqual(FirmwareSignature.NotSigned, device.Version.FirmwareSignature);
 
                     // Since the version numbers shouldn't change in the lifetime of a device,
                     // and callers may use the Version sub-properties many times, we should

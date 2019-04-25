@@ -4,11 +4,6 @@
         <name>Microsoft.AzureKinect</name>
     </assembly>
     <members>
-        <member name="P:Microsoft.AzureKinect.HardwareVersion.FirmwareSignature">
-            <summary>
-            Some docs!
-            </summary>
-        </member>
         <member name="T:Microsoft.AzureKinect.Native.NativeReferenceAttribute">
             <summary>
             Attribute indicating the native equivilant.

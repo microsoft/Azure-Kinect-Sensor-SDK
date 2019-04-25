@@ -99,21 +99,5 @@ namespace Microsoft.AzureKinect.UnitTests
             Assert.AreEqual(true, b1.Equals(b2));
 
         }
-
-        [Test]
-        public void BGRAPerf()
-        {
-            BGRA[] array = new BGRA[100000000];
-
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            for (int i = 0; i < array.Length; i++)
-            {
-                array[i].A = 10;
-            }
-            sw.Stop();
-
-            TestContext.WriteLine($"Ran in {sw.ElapsedTicks} ticks ({sw.ElapsedMilliseconds} ms)");
-        }
-
     }
 }
