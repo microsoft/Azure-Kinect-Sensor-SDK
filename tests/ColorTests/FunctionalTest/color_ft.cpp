@@ -570,6 +570,8 @@ struct color_control_parameter
         {
         case K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE:
             return os << "command : Exposure Time absolute";
+        case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
+            return os << "command : Auto exposure priority";
         case K4A_COLOR_CONTROL_BRIGHTNESS:
             return os << "command : Brightness";
         case K4A_COLOR_CONTROL_CONTRAST:
