@@ -711,7 +711,7 @@ static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info)
                 result = firmware_create(command_info->device_index, &command_info->firmware_handle);
                 if (!K4A_SUCCEEDED(result))
                 {
-                    LOG_INFO("Failed to connect to the Azure Kinect device");
+                    LOG_INFO("Failed to connect to the Azure Kinect device", 0);
                     result = K4A_RESULT_FAILED;
                     ThreadAPI_Sleep(500);
                     continue;
