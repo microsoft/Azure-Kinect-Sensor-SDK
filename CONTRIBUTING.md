@@ -69,6 +69,8 @@ leveraging other open source projects that are written for C++.
 
 Style formatting is enforced as part of check in criteria using [.clang-format](.clang-format).
 
+See [standards](docs/standards.md) for more information.
+
 ## Testing
 To complete a PR all tests must pass. Please see [testing.md](docs/testing.md) for more information.
 
@@ -78,7 +80,8 @@ Azure Kinect uses the [GitHub flow](https://guides.github.com/introduction/flow/
 development happens on the `develop` branch. The `develop` branch should always be in a
 healthy state.
 
-1) Start with an issue that has been tagged with Triage Approved. Otherwise create an Issue and start a conversation with the Azure Kinect Team to get the Issue Triage Approved.
+1) Start with an issue that has been tagged with Triage Approved. Otherwise, create an Issue and
+start a conversation with the Azure Kinect Team to get the Issue Triage Approved.
 1) If you have not already, fork the repo.
 1) Make changes.
 1) Test the change, all tests should pass:
@@ -88,13 +91,13 @@ healthy state.
 1) Create a pull request.
    * The PR description must reference the issue.
 1) An Azure Kinect SDK team member will review the change. See the [review process](#review-process) for more information.
-   * 1 team member must signoff on the change.
+   * 1 team member must sign off on the change.
    * Other reviewers are welcome.
 1) After the change has been reviewed by a team member, the PR will be submitted to the Azure Kinect CI system for official build and testing.
    * In the event of a test failure, the PR owner must address and provide a new PR commit and the review process starts over.
-1) Once the change is signedoff by a team member and the test pass show now regressions, an Azure Kinect team member will complete the PR.
+1) Once the change is signed off by a team member and the test pass shows no regressions, an Azure Kinect team member will complete the PR.
 
-**NOTE:** *Any update to the pull request after approval requires additiaonl review and test pass.*
+**NOTE:** *Any update to the pull request after approval requires additional review and test pass.*
 
 When completing a pull request, we will generally squash your changes into a single commit. Please
 let us know if your pull request needs to be merged as separate commits.

@@ -41,6 +41,6 @@ being root, you will need to setup udev rules. We have these rules checked
 into this repo under scripts/99-k4a.rules. To do so:
 
 * Copy scripts/99-k4a.rules into /etc/udev/rules.d/.
-* Dettach and reattch Azure Kinect devices if attached durring this process.
+* Detach and reattach Azure Kinect devices if attached during this process.
 
 Once complete, the Azure Kinect camera is available without being root.

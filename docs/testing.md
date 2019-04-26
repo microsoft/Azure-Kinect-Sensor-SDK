@@ -25,7 +25,7 @@ worst of conditions.
 
 Unit tests are tests which run on the build machine. They must be very quick
 (~ <1s), be reproducible, and not require hardware. Unit tests are built
-using the GoogleTest framework. For a basic example of writing a unit test
+using the Google Test framework. For a basic example of writing a unit test
 please see
 [tests/UnitTests/queue_ut/queue.cpp](../tests/UnitTests/queue_ut/queue.cpp).
 
@@ -38,7 +38,7 @@ directory. Unit tests are run as part of the CI system.
 
 Functional tests are tests which run on the test machine. They must be quick
 (~ <10s), be reproducible, and may require hardware. Functional tests are
-built using the GoogleTest framework. For a basic example of writing a
+built using the Google Test framework. For a basic example of writing a
 functional test please see
 [tests/example/test.cpp](../tests/example/test.cpp). 
 
@@ -51,7 +51,7 @@ directory. Functional tests are run as part of the CI system.
 
 Stress tests are tests which run the same logic repeatedly to check for
 crashes while the host is under heavy load. These tests will be run on a rolling
-build and may require hardware. Stress tests are built using the GoogleTest
+build and may require hardware. Stress tests are built using the Google Test
 framework.
 
 After compiling, stress tests can be run using "ctest -L stress"
@@ -65,7 +65,7 @@ seconds to detect threading and timing related issues.*
 
 Perf tests are tests who results are purely statistics and not Pass/Fail.
 These tests will be run on a rolling build and may require hardware. Perf
-tests are built using the GoogleTest framework.
+tests are built using the Google Test framework.
 
 After compiling, perf tests can be run using "ctest -L perf" in the build directory.
 
@@ -74,7 +74,7 @@ After compiling, perf tests can be run using "ctest -L perf" in the build direct
 ### Firmware Tests
 
 Firmware tests are used to validate new firmware drops. Firmware
-tests are built using the GoogleTest framework. After compiling, firmware tests
+tests are built using the Google Test framework. After compiling, firmware tests
 can be run using "bin\firmware_fw.exe -ff \<factory firmware\> -lf \<lkg firmware\>
 -tf \<test firmware\> -cf \<candidate firmware\>" in the build directory.
 

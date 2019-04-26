@@ -2,8 +2,8 @@
 
 ## Introduction
 
-Azure Kinect Fast Capture streaming process keeps streaming both the color and depth frames. It will store
-the most recent frames to the specified folder when notified by [Azure Kinect Fast Capture trigger](..\k4afastcapture_trigger\README.md).
+The Azure Kinect Fast Capture streaming process keeps streaming both the color and depth frames. It will store
+the most recent frames to the specified folder when notified by [Azure Kinect Fast Capture trigger](../k4afastcapture_trigger/README.md).
 
 ## Usage Info
 

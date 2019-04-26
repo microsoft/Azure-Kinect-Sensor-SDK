@@ -4,7 +4,7 @@ These standards apply all code in this repository.
 
 ## Modules
 
-A module is a small library that provides functionality that is a building block of the SDK. Modules must have a create and destroy function and use use a handle to maintain module state. Module naming should be simple, short, and without underscores. The module file name should match the actual module name.
+A module is a small library that provides functionality that is a building block of the SDK. Modules must have a create and destroy function and use a handle to maintain module state. Module naming should be simple, short, and without underscores. The module file name should match the actual module name.
 Modules should be coded in C whenever possible. It is acceptable to introduce C++ or other types of files to link in
 existing projects written in another language. The use of additional languages should be minimized where possible.
 
@@ -44,8 +44,8 @@ allow the reader to quickly and easily tell the difference between internal and 
  user could take (not including an application restart or PC reboot), then returning an error specific to the recovery
  action is acceptable.
 
- ## Clang-format
+## Clang-format
 
- * The default build enforces clang-format cleanliness. The K4A_VALIDATE_CLANG_FORMAT CMake option controls this
-   behavior.
- * To reformat source files automatically, run the "clangformat" target (e.g. "ninja clangformat").
+* The default build enforces clang-format cleanliness. The K4A_VALIDATE_CLANG_FORMAT CMake option controls this
+behavior.
+* To reformat source files automatically, run the "clangformat" target (e.g. "ninja clangformat").
