@@ -7,9 +7,9 @@ variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
 - name: 'linux_firmware_version'
-  value: '1.5.946614'
+  value: '1.6.987014'
 - name: 'windows_firmware_version'
-  value: '1.5.926614'
+  value: '1.6.987014'
 
 trigger:
   batch: false
@@ -512,7 +512,7 @@ jobs:
         filePath: './scripts/Reset-Device.ps1'
       displayName: 'Reset K4A Device'
 
-    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinect_Fw_$(firmware_version).bin'
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
 
@@ -623,7 +623,7 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
       displayName: 'Reset K4A Device'
 
-    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinect_Fw_$(firmware_version).bin'
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
 
