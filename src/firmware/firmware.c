@@ -203,15 +203,16 @@ k4a_result_t firmware_reset_device(firmware_t firmware_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, firmware_t, firmware_handle);
 
+    LOG_INFO("Issuing reset command to device.", 0);
     k4a_result_t result = K4A_RESULT_FAILED;
     firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
 
     Lock(firmware->lock);
     result = TRACE_CALL(colormcu_reset_device(firmware->colormcu));
-
     if (K4A_FAILED(result))
     {
         // Failed to issue the reset to the Color MCU, try issuing to the Depth MCU.
+        LOG_INFO("Issuing reset command to Depth MCU.", 0);
         result = TRACE_CALL(depthmcu_reset_device(firmware->depthmcu));
     }
     Unlock(firmware->lock);
