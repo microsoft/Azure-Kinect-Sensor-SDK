@@ -36,7 +36,7 @@ TEST_F(playback_perf, test_open)
     k4a_record_configuration_t config;
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-    std::cout << "Config:" << std::endl;
+    std::cout << "Record config:" << std::endl;
     std::cout << "    Tracks enabled:";
     static const std::pair<bool *, std::string> tracks[] = { { &config.color_track_enabled, "Color" },
                                                              { &config.depth_track_enabled, "Depth" },
@@ -56,6 +56,58 @@ TEST_F(playback_perf, test_open)
     std::cout << "    Frame rate: " << fps_names[config.camera_fps] << std::endl;
     std::cout << "    Depth delay: " << config.depth_delay_off_color_usec << " usec" << std::endl;
     std::cout << "    Start offset: " << config.start_timestamp_offset_usec << " usec" << std::endl;
+
+    std::pair<k4a_image_t, std::string> images[] = { { NULL, "Color" }, { NULL, "Depth" }, { NULL, "IR" } };
+    while (images[0].first == NULL || images[1].first == NULL || images[2].first == NULL)
+    {
+        k4a_capture_t capture = NULL;
+        k4a_stream_result_t playback_result = k4a_playback_get_next_capture(handle, &capture);
+        ASSERT_NE(playback_result, K4A_STREAM_RESULT_FAILED);
+        if (playback_result == K4A_STREAM_RESULT_EOF)
+        {
+            break;
+        }
+        else
+        {
+            ASSERT_NE(capture, nullptr);
+            if (images[0].first == NULL)
+            {
+                images[0].first = k4a_capture_get_color_image(capture);
+            }
+            if (images[1].first == NULL)
+            {
+                images[1].first = k4a_capture_get_depth_image(capture);
+            }
+            if (images[2].first == NULL)
+            {
+                images[2].first = k4a_capture_get_ir_image(capture);
+            }
+            k4a_capture_release(capture);
+        }
+    }
+    if (images[0].first == NULL && images[1].first == NULL && images[2].first == NULL)
+    {
+        std::cout << std::endl;
+        std::cout << "Input file has no captures." << std::endl;
+    }
+    else
+    {
+        for (size_t i = 0; i < arraysize(images); i++)
+        {
+            if (images[i].first)
+            {
+                std::cout << std::endl;
+                std::cout << "First " << images[i].second << " image:" << std::endl;
+                std::cout << "    Timestamp: " << k4a_image_get_timestamp_usec(images[i].first) << " usec" << std::endl;
+                std::cout << "    Image format: " << format_names[k4a_image_get_format(images[i].first)] << std::endl;
+                std::cout << "    Resolution: " << k4a_image_get_width_pixels(images[i].first) << "x"
+                          << k4a_image_get_height_pixels(images[i].first) << std::endl;
+                std::cout << "    Buffer size: " << k4a_image_get_size(images[i].first)
+                          << " (stride: " << k4a_image_get_stride_bytes(images[i].first) << " bytes)" << std::endl;
+                k4a_image_release(images[i].first);
+            }
+        }
+    }
 
     k4a_playback_close(handle);
 }

@@ -11,11 +11,6 @@
 
 // clang-format off
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdouble-promotion"
-#endif
-
 namespace linmath
 {
 #define LINMATH_H_DEFINE_VEC(n)                                                                                        \
@@ -620,9 +615,5 @@ static inline void quat_from_mat4x4(quat q, mat4x4 M)
 }
 } // namespace linmath
 // clang-format on
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
 #endif

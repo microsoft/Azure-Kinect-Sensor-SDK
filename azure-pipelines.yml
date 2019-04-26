@@ -580,6 +580,7 @@ jobs:
 
     - task: CmdLine@2
       displayName: 'Download Azure Kinect Firmware'
+
       inputs:
         script:  "curl $(ResourceBaseUrl)/linux/findconnectedport$(ResourceToken) --output $(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport"
 
@@ -626,6 +627,8 @@ jobs:
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
+      env:
+        K4A_LOG_LEVEL: 'I'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
       workingDirectory: '$(System.ArtifactsDirectory)'
