@@ -501,14 +501,19 @@ jobs:
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
         flattenFolders: true
 
-    - task: UniversalPackages@0
+    - task: CmdLine@2
       displayName: 'Download Azure Kinect Firmware'
       inputs:
-        command: download
-        vstsFeed: 'analog.ai.depthcamera'
-        vstsFeedPackage: 'azure-kinect-firmware'
-        vstsPackageVersion: "$(firmware_version)"
-        downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
+        script:  "curl $(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken) --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin"
+        
+    #- task: UniversalPackages@0
+      #displayName: 'Download Azure Kinect Firmware'
+      #inputs:
+        #command: download
+        #vstsFeed: 'analog.ai.depthcamera'
+        #vstsFeedPackage: 'azure-kinect-firmware'
+        #vstsPackageVersion: "$(firmware_version)"
+        #downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
 
     - task: PowerShell@2
       inputs:
@@ -567,15 +572,12 @@ jobs:
         artifactName: 'x86_64-linux-clang-RelWithDebInfo'
         parallelizationLimit: 8
 
-    - task: UniversalPackages@0
+
+    - task: CmdLine@2
       displayName: 'Download Azure Kinect Firmware'
       inputs:
-        command: download
-        vstsFeed: 'analog.ai.depthcamera'
-        vstsFeedPackage: 'azure-kinect-firmware'
-        vstsPackageVersion: "$(firmware_version)"
-        downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
-
+        script:  "curl $(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken) --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin"
+                
     - task: UniversalPackages@0
       displayName: 'Download DepthEngine Plugin'
       inputs:
@@ -585,14 +587,19 @@ jobs:
         vstsPackageVersion: "1.0.1"
         downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
-    - task: UniversalPackages@0
-      displayName: 'Download findconnectedport'
+    - task: CmdLine@2
+      displayName: 'Download Azure Kinect Firmware'
       inputs:
-        command: download
-        vstsFeed: 'analog.ai.depthcamera'
-        vstsFeedPackage: 'findconnectedport'
-        vstsPackageVersion: "0.1.1"
-        downloadDirectory: "$(System.ArtifactsDirectory)/findconnectedport"
+        script:  "curl $(ResourceBaseUrl)/linux/findconnectedport$(ResourceToken) --output $(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport"
+        
+    #- task: UniversalPackages@0
+      #displayName: 'Download findconnectedport'
+      #inputs:
+        #command: download
+        #vstsFeed: 'analog.ai.depthcamera'
+        #vstsFeedPackage: 'findconnectedport'
+        #vstsPackageVersion: "0.1.1"
+        #downloadDirectory: "$(System.ArtifactsDirectory)/findconnectedport"
 
     - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
       workingDirectory: '$(System.ArtifactsDirectory)'
