@@ -11,9 +11,10 @@ set(SOURCE_FILES
     k4adevicedockcontrol.cpp
     k4afilepicker.cpp
     k4aimguiextensions.cpp
-    k4aimudatagraph.cpp
-    k4aimusamplesource.cpp
+    k4aimugraph.cpp
+    k4aimugraphdatagenerator.cpp
     k4aimuwindow.cpp
+    k4alogdockcontrol.cpp
     k4amicrophone.cpp
     k4amicrophonelistener.cpp
     k4apointcloudrenderer.cpp
@@ -26,6 +27,7 @@ set(SOURCE_FILES
     k4avideowindow.cpp
     k4aviewer.cpp
     k4aviewerimage.cpp
+    k4aviewerlogmanager.cpp
     k4aviewererrormanager.cpp
     k4aviewersettingsmanager.cpp
     k4awindowmanager.cpp
@@ -46,7 +48,6 @@ configure_file(
     )
 
 find_package(OpenGL REQUIRED)
-find_package(LibUSB REQUIRED)
 include_directories(
     ${OPENGL_INCLUDE_DIRS}
     ${CMAKE_CURRENT_LIST_DIR}

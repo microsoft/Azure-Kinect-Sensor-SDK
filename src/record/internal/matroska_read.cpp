@@ -12,6 +12,9 @@
 #include <k4ainternal/common.h>
 #include <k4ainternal/logging.h>
 
+#include <turbojpeg.h>
+#include <libyuv.h>
+
 using namespace LIBMATROSKA_NAMESPACE;
 
 namespace k4arecord
@@ -23,6 +26,22 @@ std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlEle
         int upper_level = 0;
         EbmlElement *element =
             context->stream->FindNextElement(parent->Generic().Context, upper_level, parent->GetSize(), false, 0);
+
+        // upper_level shows the relationship of the element to the parent element
+        // -1 : global element
+        //  0 : child
+        //  1 : same level
+        //  + : further parent
+        if (upper_level > 0)
+        {
+            // This element is not a child of the parent, set the file pointer back to the start of the element and
+            // return nullptr.
+            uint64_t file_offset = element->GetElementPosition();
+            assert(file_offset <= INT64_MAX);
+            context->ebml_file->setFilePointer((int64_t)file_offset);
+            delete element;
+            return nullptr;
+        }
 
         return std::unique_ptr<EbmlElement>(element);
     }
@@ -220,17 +239,17 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
 
     KaxSimpleBlock *simple_block = NULL;
     KaxBlockGroup *block_group = NULL;
-    std::shared_ptr<loaded_cluster_t> last_cluster = load_cluster(context, cluster_info);
-    if (last_cluster == nullptr || last_cluster->cluster == nullptr)
+    std::shared_ptr<KaxCluster> last_cluster = load_cluster_internal(context, cluster_info);
+    if (last_cluster == nullptr)
     {
         LOG_ERROR("Failed to load end of recording.", 0);
         return K4A_RESULT_FAILED;
     }
-    for (EbmlElement *e : last_cluster->cluster->GetElementList())
+    for (EbmlElement *e : last_cluster->GetElementList())
     {
         if (check_element_type(e, &simple_block))
         {
-            simple_block->SetParent(*last_cluster->cluster);
+            simple_block->SetParent(*last_cluster);
             uint64_t block_timestamp_ns = simple_block->GlobalTimecode();
             if (block_timestamp_ns > context->last_timestamp_ns)
             {
@@ -239,7 +258,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         }
         else if (check_element_type(e, &block_group))
         {
-            block_group->SetParent(*last_cluster->cluster);
+            block_group->SetParent(*last_cluster);
 
             KaxTrackEntry *parent_track = NULL;
             for (EbmlElement *e2 : context->tracks->GetElementList())
@@ -374,26 +393,15 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     context->timecode_scale = GetChild<KaxTimecodeScale>(*context->segment_info).GetValue();
 
-    context->color_track.track = get_track_by_tag(context, "K4A_COLOR_MODE");
-    context->depth_track.track = get_track_by_tag(context, "K4A_DEPTH_MODE");
-    context->ir_track.track = get_track_by_tag(context, "K4A_IR_MODE");
-    context->imu_track.track = get_track_by_tag(context, "K4A_IMU_MODE");
-    if (context->color_track.track == NULL)
-    {
-        context->color_track.track = get_track_by_name(context, "COLOR");
-    }
-    if (context->depth_track.track == NULL)
-    {
-        context->depth_track.track = get_track_by_name(context, "DEPTH");
-    }
+    context->color_track.track = find_track(context, "COLOR", "K4A_COLOR_TRACK");
+    context->depth_track.track = find_track(context, "DEPTH", "K4A_DEPTH_TRACK");
+    context->ir_track.track = find_track(context, "IR", "K4A_IR_TRACK");
     if (context->ir_track.track == NULL)
     {
-        context->ir_track.track = get_track_by_name(context, "IR");
+        // Support legacy IR track naming.
+        context->ir_track.track = find_track(context, "DEPTH_IR", NULL);
     }
-    if (context->imu_track.track == NULL)
-    {
-        context->imu_track.track = get_track_by_name(context, "IMU");
-    }
+    context->imu_track.track = find_track(context, "IMU", "K4A_IMU_TRACK");
 
     // Read device calibration attachment
     context->calibration_attachment = get_attachment_by_tag(context, "K4A_CALIBRATION_FILE");
@@ -438,12 +446,14 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
         context->record_config.color_track_enabled = true;
         context->record_config.color_format = context->color_track.format;
+        context->color_format_conversion = context->color_track.format;
     }
     else
     {
         context->record_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
         // Set to a default color format if color track is disabled.
         context->record_config.color_format = K4A_IMAGE_FORMAT_CUSTOM;
+        context->color_format_conversion = K4A_IMAGE_FORMAT_CUSTOM;
     }
 
     KaxTag *depth_mode_tag = get_tag(context, "K4A_DEPTH_MODE");
@@ -452,26 +462,48 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         LOG_ERROR("K4A_DEPTH_MODE tag is missing.", 0);
         return K4A_RESULT_FAILED;
     }
-    std::string depth_mode_str = get_tag_string(depth_mode_tag);
 
+    std::string depth_mode_str;
     uint32_t depth_width = 0;
     uint32_t depth_height = 0;
     context->record_config.depth_mode = K4A_DEPTH_MODE_OFF;
-    for (size_t i = 0; i < arraysize(depth_modes); i++)
+
+    if (depth_mode_tag != NULL)
     {
-        if (k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
+        depth_mode_str = get_tag_string(depth_mode_tag);
+        for (size_t i = 0; i < arraysize(depth_modes); i++)
         {
             if (depth_mode_str == depth_modes[i].second)
             {
-                context->record_config.depth_mode = depth_modes[i].first;
-                break;
+                if (k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
+                {
+                    context->record_config.depth_mode = depth_modes[i].first;
+                    break;
+                }
             }
         }
-    }
-    if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
-    {
-        LOG_ERROR("Unsupported depth mode: %s", depth_mode_str.c_str());
-        return K4A_RESULT_FAILED;
+        if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
+        {
+            // Try to find the mode matching strings in the legacy modes
+            for (size_t i = 0; i < arraysize(legacy_depth_modes); i++)
+            {
+                if (depth_mode_str == legacy_depth_modes[i].second)
+                {
+                    if (k4a_convert_depth_mode_to_width_height(legacy_depth_modes[i].first,
+                                                               &depth_width,
+                                                               &depth_height))
+                    {
+                        context->record_config.depth_mode = legacy_depth_modes[i].first;
+                        break;
+                    }
+                }
+            }
+        }
+        if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
+        {
+            LOG_ERROR("Unsupported depth mode: %s", depth_mode_str.c_str());
+            return K4A_RESULT_FAILED;
+        }
     }
 
     if (context->depth_track.track)
@@ -547,6 +579,10 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
 
         RETURN_IF_ERROR(read_bitmap_info_header(&context->ir_track));
+        if (context->ir_track.format == K4A_IMAGE_FORMAT_DEPTH16)
+        {
+            context->ir_track.format = K4A_IMAGE_FORMAT_IR16;
+        }
 
         context->record_config.ir_track_enabled = true;
     }
@@ -762,59 +798,66 @@ void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestam
     context->imu_sample_index = -1;
 }
 
-KaxTrackEntry *get_track_by_name(k4a_playback_context_t *context, const char *name)
+KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
     RETURN_VALUE_IF_ARG(NULL, context->tracks == nullptr);
     RETURN_VALUE_IF_ARG(NULL, name == NULL);
 
-    std::string search(name);
-    KaxTrackEntry *track = NULL;
-    for (EbmlElement *e : context->tracks->GetElementList())
+    std::string search_name(name);
+    uint64_t search_uid = 0;
+
+    if (tag_name != NULL)
     {
-        if (check_element_type(e, &track))
+        KaxTag *track_tag = get_tag(context, tag_name);
+        if (track_tag)
         {
-            if (GetChild<KaxTrackName>(*track).GetValueUTF8() == search)
+            KaxTagTargets &tagTargets = GetChild<KaxTagTargets>(*track_tag);
+            if (GetChild<KaxTagTargetType>(tagTargets).GetValue() == "TRACK")
             {
-                track->SetGlobalTimecodeScale(context->timecode_scale);
-                return track;
+                search_uid = GetChild<KaxTagTrackUID>(tagTargets).GetValue();
             }
-        }
-    }
-
-    return NULL;
-}
-
-KaxTrackEntry *get_track_by_tag(k4a_playback_context_t *context, const char *tag_name)
-{
-    RETURN_VALUE_IF_ARG(NULL, context == NULL);
-    RETURN_VALUE_IF_ARG(NULL, context->tracks == NULL);
-    RETURN_VALUE_IF_ARG(NULL, tag_name == NULL);
-
-    KaxTag *track_tag = get_tag(context, tag_name);
-    if (track_tag)
-    {
-        KaxTagTargets &tagTargets = GetChild<KaxTagTargets>(*track_tag);
-        if (GetChild<KaxTagTargetType>(tagTargets).GetValue() != "TRACK")
-        {
-            return NULL;
-        }
-        uint64_t search_uid = GetChild<KaxTagTrackUID>(tagTargets).GetValue();
-
-        KaxTrackEntry *track = NULL;
-        for (EbmlElement *e : context->tracks->GetElementList())
-        {
-            if (check_element_type(e, &track))
+            if (search_uid == 0)
             {
-                if (GetChild<KaxTrackUID>(*track).GetValue() == search_uid)
+                std::istringstream search_uid_str(get_tag_string(track_tag));
+                search_uid_str >> search_uid;
+                if (search_uid_str.fail())
                 {
-                    track->SetGlobalTimecodeScale(context->timecode_scale);
-                    return track;
+                    LOG_ERROR("Track tag '%s' for track %s is not valid.", tag_name, name);
+                    search_uid = 0;
                 }
             }
         }
     }
 
+    KaxTrackEntry *track_found = NULL;
+    for (EbmlElement *e : context->tracks->GetElementList())
+    {
+        KaxTrackEntry *track = NULL;
+        if (check_element_type(e, &track))
+        {
+            std::string track_name = GetChild<KaxTrackName>(*track).GetValueUTF8();
+            uint64_t track_uid = GetChild<KaxTrackUID>(*track).GetValue();
+            std::string track_codec_id = GetChild<KaxCodecID>(*track).GetValue();
+
+            if (search_uid != 0 && track_uid == search_uid)
+            {
+                track_found = track;
+                break;
+            }
+            else if (track_name == search_name)
+            {
+                track_found = track;
+                // Search by UID has priority over search by name, keep searching for a matching UID.
+            }
+        }
+    }
+
+    if (track_found != NULL)
+    {
+        track_found->SetGlobalTimecodeScale(context->timecode_scale);
+        return track_found;
+    }
     return NULL;
 }
 
@@ -1166,7 +1209,7 @@ cluster_info_t *next_cluster(k4a_playback_context_t *context, cluster_info_t *cu
 
 // Load a cluster from the cluster cache / disk without any neighbor preloading.
 // This should never fail unless there is a file IO error.
-static std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t *context, cluster_info_t *cluster_info)
+std::shared_ptr<KaxCluster> load_cluster_internal(k4a_playback_context_t *context, cluster_info_t *cluster_info)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
     RETURN_VALUE_IF_ARG(nullptr, context->ebml_file == nullptr);
@@ -1518,6 +1561,206 @@ static void free_vector_buffer(void *buffer, void *context)
     delete vector;
 }
 
+// Allocates a new image in the specified format from in_block
+k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
+                                    block_info_t *in_block,
+                                    k4a_image_t *image_out,
+                                    k4a_image_format_t target_format)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, in_block == nullptr);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, image_out == nullptr);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, in_block->reader == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, in_block->block == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, in_block->block->NumberFrames() != 1);
+
+    DataBuffer &data_buffer = in_block->block->GetBuffer(0);
+
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    std::vector<uint8_t> *buffer = NULL;
+    assert(in_block->reader->width <= INT_MAX);
+    assert(in_block->reader->height <= INT_MAX);
+    assert(in_block->reader->stride <= INT_MAX);
+    int out_width = (int)in_block->reader->width;
+    int out_height = (int)in_block->reader->height;
+    int out_stride = (int)in_block->reader->stride;
+    assert(out_height >= 0 && out_width >= 0);
+
+    switch (target_format)
+    {
+    case K4A_IMAGE_FORMAT_DEPTH16:
+    case K4A_IMAGE_FORMAT_IR16:
+        buffer = new std::vector<uint8_t>(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
+        if (in_block->reader->format == K4A_IMAGE_FORMAT_DEPTH16 || in_block->reader->format == K4A_IMAGE_FORMAT_IR16)
+        {
+            // 16 bit grayscale needs to be converted from big-endian back to little-endian.
+            assert(buffer->size() % sizeof(uint16_t) == 0);
+            uint16_t *buffer_raw = reinterpret_cast<uint16_t *>(buffer->data());
+            size_t buffer_size = buffer->size() / sizeof(uint16_t);
+            for (size_t i = 0; i < buffer_size; i++)
+            {
+                buffer_raw[i] = swap_bytes_16(buffer_raw[i]);
+            }
+        }
+        else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_YUY2)
+        {
+            // For backwards compatibility with early recordings, the YUY2 format was used. The actual data buffer is
+            // 16-bit little-endian, so we can just use the buffer as-is.
+        }
+        else
+        {
+            LOG_ERROR("Unsupported image format conversion: %d to %d", in_block->reader->format, target_format);
+            result = K4A_RESULT_FAILED;
+        }
+        break;
+    case K4A_IMAGE_FORMAT_COLOR_MJPG:
+    case K4A_IMAGE_FORMAT_COLOR_NV12:
+    case K4A_IMAGE_FORMAT_COLOR_YUY2:
+    case K4A_IMAGE_FORMAT_COLOR_BGRA32:
+        if (in_block->reader->format == target_format)
+        {
+            // No format conversion is required, just copy the buffer.
+            buffer = new std::vector<uint8_t>(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
+        }
+        else
+        {
+            // Convert the buffer to BGRA format first
+            out_stride = out_width * 4 * (int)sizeof(uint8_t);
+            buffer = new std::vector<uint8_t>((size_t)(out_height * out_stride));
+
+            if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_MJPG)
+            {
+                tjhandle turbojpeg_handle = tjInitDecompress();
+                if (tjDecompress2(turbojpeg_handle,
+                                  data_buffer.Buffer(),
+                                  data_buffer.Size(),
+                                  buffer->data(),
+                                  out_width,
+                                  0, // pitch
+                                  out_height,
+                                  TJPF_BGRA,
+                                  TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE) != 0)
+                {
+                    LOG_ERROR("Failed to decompress jpeg image to BGRA format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
+                (void)tjDestroy(turbojpeg_handle);
+            }
+            else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_NV12)
+            {
+                // The endianness of libyuv's ARGB is opposite our BGRA format. They are the same byte order.
+                if (libyuv::NV12ToARGB(data_buffer.Buffer(),
+                                       (int)in_block->reader->stride,
+                                       data_buffer.Buffer() + (out_height * (int)in_block->reader->stride),
+                                       (int)in_block->reader->stride,
+                                       buffer->data(),
+                                       out_stride,
+                                       out_width,
+                                       out_height) != 0)
+                {
+                    LOG_ERROR("Failed to convert NV12 image to BGRA format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
+            }
+            else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_YUY2)
+            {
+                // The endianness of libyuv's ARGB is opposite our BGRA format. They are the same byte order.
+                if (libyuv::YUY2ToARGB(data_buffer.Buffer(),
+                                       (int)in_block->reader->stride,
+                                       buffer->data(),
+                                       out_stride,
+                                       out_width,
+                                       out_height) != 0)
+                {
+                    LOG_ERROR("Failed to convert YUY2 image to BGRA format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
+            }
+            else
+            {
+                LOG_ERROR("Unsupported image format conversion: %d to %d", in_block->reader->format, target_format);
+                result = K4A_RESULT_FAILED;
+            }
+
+            if (K4A_SUCCEEDED(result) && target_format != K4A_IMAGE_FORMAT_COLOR_BGRA32)
+            {
+                auto bgra_buffer = buffer;
+                buffer = NULL;
+                int bgra_stride = out_stride;
+
+                if (target_format == K4A_IMAGE_FORMAT_COLOR_NV12)
+                {
+                    out_stride = out_width;
+                    size_t y_plane_size = (size_t)(out_height * out_stride);
+                    // Round up the size of the UV plane in case the resolution is odd.
+                    size_t uv_plane_size = (size_t)(out_height * out_stride + 1) / 2;
+                    buffer = new std::vector<uint8_t>(y_plane_size + uv_plane_size);
+
+                    if (libyuv::ARGBToNV12(bgra_buffer->data(),
+                                           bgra_stride,
+                                           buffer->data(),
+                                           out_stride,
+                                           buffer->data() + y_plane_size,
+                                           out_stride,
+                                           out_width,
+                                           out_height) != 0)
+                    {
+                        LOG_ERROR("Failed to convert BGRA image to NV12 format.", 0);
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+                else if (target_format == K4A_IMAGE_FORMAT_COLOR_YUY2)
+                {
+                    out_stride = out_width * 2;
+                    buffer = new std::vector<uint8_t>((size_t)(out_height * out_stride));
+
+                    if (libyuv::ARGBToYUY2(
+                            bgra_buffer->data(), bgra_stride, buffer->data(), out_stride, out_width, out_height) != 0)
+                    {
+                        LOG_ERROR("Failed to convert BGRA image to YUY2 format.", 0);
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+                else
+                {
+                    LOG_ERROR("Unsupported image format conversion: %d to %d", in_block->reader->format, target_format);
+                    result = K4A_RESULT_FAILED;
+                }
+
+                if (bgra_buffer != NULL)
+                {
+                    delete bgra_buffer;
+                }
+            }
+        }
+        break;
+    default:
+        LOG_ERROR("Unknown target image format: %d", target_format);
+        result = K4A_RESULT_FAILED;
+    }
+
+    if (K4A_SUCCEEDED(result) && buffer != NULL)
+    {
+        result = TRACE_CALL(k4a_image_create_from_buffer(target_format,
+                                                         out_width,
+                                                         out_height,
+                                                         out_stride,
+                                                         buffer->data(),
+                                                         buffer->size(),
+                                                         &free_vector_buffer,
+                                                         buffer,
+                                                         image_out));
+        k4a_image_set_timestamp_usec(*image_out, in_block->timestamp_ns / 1000);
+    }
+
+    if (K4A_FAILED(result) && buffer != NULL)
+    {
+        delete buffer;
+    }
+
+    return result;
+}
+
 k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k4a_capture_t *capture_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
@@ -1525,74 +1768,27 @@ k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block == nullptr);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block->reader == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block->block == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, block->block->NumberFrames() != 1);
 
     if (*capture_handle == 0)
     {
         RETURN_IF_ERROR(k4a_capture_create(capture_handle));
     }
 
-    DataBuffer &data_buffer = block->block->GetBuffer(0);
-    std::vector<uint8_t> *buffer = new std::vector<uint8_t>(data_buffer.Buffer(),
-                                                            data_buffer.Buffer() + data_buffer.Size());
-
-    if (block->reader->format == K4A_IMAGE_FORMAT_DEPTH16 || block->reader->format == K4A_IMAGE_FORMAT_IR16)
-    {
-        // 16 bit grayscale needs to be converted from big-endian back to little-endian.
-        assert(buffer->size() % sizeof(uint16_t) == 0);
-        uint16_t *buffer_raw = reinterpret_cast<uint16_t *>(buffer->data());
-        size_t buffer_size = buffer->size() / sizeof(uint16_t);
-        for (size_t i = 0; i < buffer_size; i++)
-        {
-            buffer_raw[i] = swap_bytes_16(buffer_raw[i]);
-        }
-    }
-
-    assert(block->reader->width <= INT_MAX);
-    assert(block->reader->height <= INT_MAX);
-    assert(block->reader->stride <= INT_MAX);
     k4a_image_t image_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     if (block->reader == &context->color_track)
     {
-        result = TRACE_CALL(k4a_image_create_from_buffer(context->record_config.color_format,
-                                                         (int)block->reader->width,
-                                                         (int)block->reader->height,
-                                                         (int)block->reader->stride,
-                                                         buffer->data(),
-                                                         buffer->size(),
-                                                         &free_vector_buffer,
-                                                         buffer,
-                                                         &image_handle));
-        k4a_image_set_timestamp_usec(image_handle, block->timestamp_ns / 1000);
+        result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, context->color_format_conversion));
         k4a_capture_set_color_image(*capture_handle, image_handle);
     }
     else if (block->reader == &context->depth_track)
     {
-        result = TRACE_CALL(k4a_image_create_from_buffer(K4A_IMAGE_FORMAT_DEPTH16,
-                                                         (int)block->reader->width,
-                                                         (int)block->reader->height,
-                                                         (int)block->reader->stride,
-                                                         buffer->data(),
-                                                         buffer->size(),
-                                                         &free_vector_buffer,
-                                                         buffer,
-                                                         &image_handle));
-        k4a_image_set_timestamp_usec(image_handle, block->timestamp_ns / 1000);
+        result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, K4A_IMAGE_FORMAT_DEPTH16));
         k4a_capture_set_depth_image(*capture_handle, image_handle);
     }
     else if (block->reader == &context->ir_track)
     {
-        result = TRACE_CALL(k4a_image_create_from_buffer(K4A_IMAGE_FORMAT_IR16,
-                                                         (int)block->reader->width,
-                                                         (int)block->reader->height,
-                                                         (int)block->reader->stride,
-                                                         buffer->data(),
-                                                         buffer->size(),
-                                                         &free_vector_buffer,
-                                                         buffer,
-                                                         &image_handle));
-        k4a_image_set_timestamp_usec(image_handle, block->timestamp_ns / 1000);
+        result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, K4A_IMAGE_FORMAT_IR16));
         k4a_capture_set_ir_image(*capture_handle, image_handle);
     }
     else
@@ -1604,10 +1800,6 @@ k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k
     if (image_handle != NULL)
     {
         k4a_image_release(image_handle);
-    }
-    if (K4A_FAILED(result))
-    {
-        delete buffer;
     }
     return result;
 }
@@ -1634,7 +1826,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
         {
             enabled_tracks++;
 
-            // Only read from disk if we haven't aready found the next block for this track
+            // If the current block is NULL, find the next block before/after the seek timestamp.
             if (next_blocks[i] == nullptr)
             {
                 next_blocks[i] = find_block(context, blocks[i], context->seek_timestamp_ns);
@@ -1715,7 +1907,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             bool filled = false;
             for (size_t i = 0; i < arraysize(blocks); i++)
             {
-                if (next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
+                if (blocks[i]->track != NULL && next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
                 {
                     std::shared_ptr<block_info_t> test_block = find_block(context,
                                                                           blocks[i],
@@ -1890,6 +2082,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
             {
                 imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
                 imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
+                imu_sample->temperature = std::numeric_limits<float>::quiet_NaN();
                 for (size_t i = 0; i < 3; i++)
                 {
                     imu_sample->acc_sample.v[i] = sample->acc_data[i];

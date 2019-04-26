@@ -71,8 +71,8 @@ public:
     void NotifyTermination()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-
         m_primed = false;
+        m_mostRecentData = T();
         for (const auto &wpObserver : m_observers)
         {
             if (auto spObserver = wpObserver.lock())
@@ -82,6 +82,28 @@ public:
         }
 
         m_observers.clear();
+    }
+
+    void ClearData()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_primed = false;
+        m_mostRecentData = T();
+        for (auto wpObserver = m_observers.begin(); wpObserver != m_observers.end();)
+        {
+            auto spObserver = wpObserver->lock();
+            if (spObserver)
+            {
+                spObserver->ClearData();
+                ++wpObserver;
+            }
+            else
+            {
+                auto toDelete = wpObserver;
+                ++wpObserver;
+                m_observers.erase(toDelete);
+            }
+        }
     }
 
 private:

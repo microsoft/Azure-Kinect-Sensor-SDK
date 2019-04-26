@@ -27,8 +27,7 @@ TraceLibUsbError(int err, const char *szCall, const char *szFile, int line, cons
         // Example print:
         //  depth.cpp (86): allocator_create(&depth->allocator) returned ERROR_NOT_FOUND in depth_create
 
-        LOG_ERROR(
-            LOGGER_K4A, "%s (%d): %s returned %s in %s ", szFile, line, szCall, libusb_error_name(err), szFunction);
+        LOG_ERROR("%s (%d): %s returned %s in %s ", szFile, line, szCall, libusb_error_name(err), szFunction);
         result = K4A_RESULT_FAILED;
     }
 
