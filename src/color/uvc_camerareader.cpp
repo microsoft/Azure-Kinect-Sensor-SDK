@@ -396,6 +396,11 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
         *pValue = (int32_t)powerline_freq;
     }
     break;
+    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
+    {
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
+    }
+    break;
     default:
         LOG_ERROR("Unsupported control: %d\n", command);
         return K4A_RESULT_FAILED;
@@ -595,6 +600,11 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             return K4A_RESULT_FAILED;
         }
         break;
+    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
+    {
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
+    }
+    break;
     default:
         LOG_ERROR("Unsupported control: %d\n", command);
         return K4A_RESULT_FAILED;

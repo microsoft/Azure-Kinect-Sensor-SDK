@@ -602,6 +602,11 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
         hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY, &propertyValue, &flags, &capability);
     }
     break;
+    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
+    {
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
+    }
+    break;
     default:
         return K4A_RESULT_FAILED;
     }
@@ -689,6 +694,11 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
     case K4A_COLOR_CONTROL_POWERLINE_FREQUENCY:
     {
         hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY, (LONG)newValue, flags);
+    }
+    break;
+    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
+    {
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
     }
     break;
     default:
