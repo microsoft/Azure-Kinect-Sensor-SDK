@@ -8,6 +8,7 @@
 
 typedef struct
 {
+    char *filename;
     k4a_playback_t handle;
     k4a_record_configuration_t record_config;
     k4a_capture_t capture;
@@ -38,19 +39,20 @@ static uint64_t first_capture_timestamp(k4a_capture_t capture)
     return min_timestamp;
 }
 
-static void print_capture_info(char *filename, k4a_capture_t capture, uint32_t timestamp_offset)
+static void print_capture_info(recording_t *file)
 {
     k4a_image_t images[3];
-    images[0] = k4a_capture_get_color_image(capture);
-    images[1] = k4a_capture_get_depth_image(capture);
-    images[2] = k4a_capture_get_ir_image(capture);
+    images[0] = k4a_capture_get_color_image(file->capture);
+    images[1] = k4a_capture_get_depth_image(file->capture);
+    images[2] = k4a_capture_get_ir_image(file->capture);
 
-    printf("%-32s", filename);
+    printf("%-32s", file->filename);
     for (int i = 0; i < 3; i++)
     {
         if (images[i] != NULL)
         {
-            uint64_t timestamp = k4a_image_get_timestamp_usec(images[i]) + (uint64_t)timestamp_offset;
+            uint64_t timestamp = k4a_image_get_timestamp_usec(images[i]) +
+                                 (uint64_t)file->record_config.start_timestamp_offset_usec;
             printf("  %7ju usec", timestamp);
             k4a_image_release(images[i]);
             images[i] = NULL;
@@ -67,7 +69,7 @@ int main(int argc, char **argv)
 {
     if (argc < 3)
     {
-        printf("Usage: external_sync_playback.exe <master.mkv> <sub1.mkv>...\n");
+        printf("Usage: playback_external_sync.exe <master.mkv> <sub1.mkv>...\n");
         return 1;
     }
 
@@ -87,23 +89,25 @@ int main(int argc, char **argv)
     // Open each recording file and validate they were recorded in master/subordinate mode.
     for (size_t i = 0; i < file_count; i++)
     {
-        result = k4a_playback_open(argv[i + 1], &files[i].handle);
+        files[i].filename = argv[i + 1];
+
+        result = k4a_playback_open(files[i].filename, &files[i].handle);
         if (result != K4A_RESULT_SUCCEEDED)
         {
-            printf("Failed to open file: %s\n", argv[i + 1]);
+            printf("Failed to open file: %s\n", files[i].filename);
             break;
         }
 
         result = k4a_playback_get_record_configuration(files[i].handle, &files[i].record_config);
         if (result != K4A_RESULT_SUCCEEDED)
         {
-            printf("Failed to get record configuration for file: %s\n", argv[i + 1]);
+            printf("Failed to get record configuration for file: %s\n", files[i].filename);
             break;
         }
 
         if (files[i].record_config.wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER)
         {
-            printf("Opened master recording file: %s\n", argv[i + 1]);
+            printf("Opened master recording file: %s\n", files[i].filename);
             if (master_found)
             {
                 printf("ERROR: Multiple master recordings listed!\n");
@@ -117,11 +121,11 @@ int main(int argc, char **argv)
         }
         else if (files[i].record_config.wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
         {
-            printf("Opened subordinate recording file: %s\n", argv[i + 1]);
+            printf("Opened subordinate recording file: %s\n", files[i].filename);
         }
         else
         {
-            printf("ERROR: Recording file was not recorded in master/sub mode: %s\n", argv[i + 1]);
+            printf("ERROR: Recording file was not recorded in master/sub mode: %s\n", files[i].filename);
             result = K4A_RESULT_FAILED;
             break;
         }
@@ -130,13 +134,13 @@ int main(int argc, char **argv)
         k4a_stream_result_t stream_result = k4a_playback_get_next_capture(files[i].handle, &files[i].capture);
         if (stream_result == K4A_STREAM_RESULT_EOF)
         {
-            printf("ERROR: Recording file is empty: %s\n", argv[i + 1]);
+            printf("ERROR: Recording file is empty: %s\n", files[i].filename);
             result = K4A_RESULT_FAILED;
             break;
         }
         else if (stream_result == K4A_STREAM_RESULT_FAILED)
         {
-            printf("ERROR: Failed to read first capture from file: %s\n", argv[i + 1]);
+            printf("ERROR: Failed to read first capture from file: %s\n", files[i].filename);
             result = K4A_RESULT_FAILED;
             break;
         }
@@ -151,7 +155,7 @@ int main(int argc, char **argv)
         for (int frame = 0; frame < 25; frame++)
         {
             uint64_t min_timestamp = (uint64_t)-1;
-            size_t min_camera_id = 0;
+            recording_t *min_file = NULL;
 
             // Find the lowest timestamp out of each of the current captures.
             for (size_t i = 0; i < file_count; i++)
@@ -166,24 +170,21 @@ int main(int argc, char **argv)
                     if (timestamp < min_timestamp)
                     {
                         min_timestamp = timestamp;
-                        min_camera_id = i;
+                        min_file = &files[i];
                     }
                 }
             }
 
-            print_capture_info(argv[min_camera_id + 1],
-                               files[min_camera_id].capture,
-                               files[min_camera_id].record_config.start_timestamp_offset_usec);
+            print_capture_info(min_file);
 
-            k4a_capture_release(files[min_camera_id].capture);
-            files[min_camera_id].capture = NULL;
+            k4a_capture_release(min_file->capture);
+            min_file->capture = NULL;
 
             // Advance the recording with the lowest current timestamp forward.
-            k4a_stream_result_t stream_result = k4a_playback_get_next_capture(files[min_camera_id].handle,
-                                                                              &files[min_camera_id].capture);
+            k4a_stream_result_t stream_result = k4a_playback_get_next_capture(min_file->handle, &min_file->capture);
             if (stream_result == K4A_STREAM_RESULT_FAILED)
             {
-                printf("ERROR: Failed to read next capture from file: %s\n", argv[min_camera_id + 1]);
+                printf("ERROR: Failed to read next capture from file: %s\n", min_file->filename);
                 result = K4A_RESULT_FAILED;
                 break;
             }
