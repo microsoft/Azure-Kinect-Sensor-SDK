@@ -9,6 +9,6 @@ namespace Microsoft.AzureKinect
     {
         Msft,
         Test,
-        Unsigned
+        NotSigned
     }
 }

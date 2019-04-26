@@ -294,7 +294,7 @@ k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle,
             //Validate that we get exceptions from the first call to k4a_device_get_serialnum
             using (Device device = Device.Open(0))
             {
-                Assert.Throws<Microsoft.AzureKinect.Exception>(() =>
+                Assert.Throws<System.InvalidOperationException>(() =>
                 {
                     string sn = device.SerialNum;
                 });
@@ -942,6 +942,8 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
     STUB_ASSERT(imu_sample != NULL);
     STUB_ASSERT(timeout_in_ms == 2345);
 
+    STUB_ASSERT(imu_sample->temperature == 0.0f);
+
     imu_sample->temperature = 0.123f;
 
     imu_sample->acc_sample.v[0] = 0.0f;
@@ -966,17 +968,17 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
                     Assert.AreEqual(0, count.Calls("k4a_device_get_imu_sample"));
                     ImuSample sample = device.GetImuSample(2345);
 
-                    Assert.AreEqual(0.123f, sample.temperature);
+                    Assert.AreEqual(0.123f, sample.Temperature);
 
-                    Assert.AreEqual(0.0f, sample.acc_sample.X);
-                    Assert.AreEqual(0.1f, sample.acc_sample.Y);
-                    Assert.AreEqual(0.2f, sample.acc_sample.Z);
-                    Assert.AreEqual(0x1000200030004000, sample.acc_timestamp_usec);
+                    Assert.AreEqual(0.0f, sample.AccelerometerSample.X);
+                    Assert.AreEqual(0.1f, sample.AccelerometerSample.Y);
+                    Assert.AreEqual(0.2f, sample.AccelerometerSample.Z);
+                    Assert.AreEqual(0x1000200030004000, sample.AccelerometerTimestampInUsec);
 
-                    Assert.AreEqual(0.4f, sample.gyro_sample.X);
-                    Assert.AreEqual(0.5f, sample.gyro_sample.Y);
-                    Assert.AreEqual(0.6f, sample.gyro_sample.Z);
-                    Assert.AreEqual(0x2000200030004002, sample.gyro_timestamp_usec);
+                    Assert.AreEqual(0.4f, sample.GyroSample.X);
+                    Assert.AreEqual(0.5f, sample.GyroSample.Y);
+                    Assert.AreEqual(0.6f, sample.GyroSample.Z);
+                    Assert.AreEqual(0x2000200030004002, sample.GyroTimestampInUsec);
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_imu_sample"));
 
@@ -1212,12 +1214,12 @@ k4a_result_t k4a_device_get_version(
                 {
                     HardwareVersion version = device.Version;
 
-                    Assert.AreEqual(new System.Version("1.2.3"), device.Version.rgb);
-                    Assert.AreEqual(new System.Version("4.5.6"), device.Version.depth);
-                    Assert.AreEqual(new System.Version("7.8.9"), device.Version.audio);
-                    Assert.AreEqual(new System.Version("10.11.12"), device.Version.depth_sensor);
-                    Assert.AreEqual(FirmwareBuild.Debug, device.Version.firmware_build);
-                    Assert.AreEqual(FirmwareSignature.Unsigned, device.Version.firmware_signature);
+                    Assert.AreEqual(new System.Version("1.2.3"), device.Version.RGB);
+                    Assert.AreEqual(new System.Version("4.5.6"), device.Version.Depth);
+                    Assert.AreEqual(new System.Version("7.8.9"), device.Version.Audio);
+                    Assert.AreEqual(new System.Version("10.11.12"), device.Version.DepthSensor);
+                    Assert.AreEqual(FirmwareBuild.Debug, device.Version.FirmwareBuild);
+                    Assert.AreEqual(FirmwareSignature.NotSigned, device.Version.FirmwareSignature);
 
                     // Since the version numbers shouldn't change in the lifetime of a device,
                     // and callers may use the Version sub-properties many times, we should

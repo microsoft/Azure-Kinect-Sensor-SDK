@@ -1,29 +1,64 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.AzureKinect
 {
     [StructLayout(LayoutKind.Explicit)]
-    public struct BGRA
+    public struct BGRA : IEquatable<BGRA>
     {
         public BGRA(byte B, byte G, byte R, byte A = 0)
         {
-            this.Value = 0;
-            this.B = B;
-            this.G = G;
-            this.R = R;
-            this.A = A;
+            this.value = 0;
+            this.b = B;
+            this.g = G;
+            this.r = R;
+            this.a = A;
         }
 
         [FieldOffset(0)]
-        public byte B;
+        private byte b;
         [FieldOffset(1)]
-        public byte G;
+        private byte g;
         [FieldOffset(2)]
-        public byte R;
+        private byte r;
         [FieldOffset(3)]
-        public byte A;
+        private byte a;
 
         [FieldOffset(0)]
-        public int Value;
+        private int value;
+
+        public byte A { get => a; set => a = value; }
+        public byte R { get => r; set => r = value; }
+        public byte G { get => g; set => g = value; }
+        public byte B { get => b; set => b = value; }
+        public int Value { get => value; set => this.value = value; }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is BGRA) ? this.Equals((BGRA)obj) : false;
+        }
+
+        public bool Equals(BGRA other)
+        {
+            return other.Value == Value;
+        }
+
+
+        public static bool operator==(BGRA a, BGRA b)
+        {
+            return a.Value == b.Value;
+        }
+
+        public static bool operator !=(BGRA a, BGRA b)
+        {
+            return a.Value != b.Value;
+        }
+
+        public override int GetHashCode()
+        {
+            return Value;
+        }
+
+
     }
 }

@@ -96,27 +96,8 @@ namespace Microsoft.AzureKinect.UnitTests
             b2.A = 4;
             Assert.AreEqual(b1, b2);
 
-        }
+            Assert.AreEqual(true, b1.Equals(b2));
 
-        [Test]
-        public void Rect()
-        {
-            Rect r1 = new Rect(1, 2, 3, 4);
-
-            Assert.AreEqual(1, r1.X);
-            Assert.AreEqual(2, r1.Y);
-            Assert.AreEqual(3, r1.Width);
-            Assert.AreEqual(4, r1.Height);
-
-            r1.X = 10;
-            r1.Y = 11;
-            r1.Width = 12;
-            r1.Height = 13;
-
-            Assert.AreEqual(10, r1.X);
-            Assert.AreEqual(11, r1.Y);
-            Assert.AreEqual(12, r1.Width);
-            Assert.AreEqual(13, r1.Height);
         }
     }
 }

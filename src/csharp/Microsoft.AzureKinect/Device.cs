@@ -18,11 +18,12 @@ namespace Microsoft.AzureKinect
             return (int)NativeMethods.k4a_device_get_installed_count();
         }
 
-        public static Device Open(int index)
+        public static Device Open(int index = 0)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_open((uint)index, out NativeMethods.k4a_device_t handle));
             return new Device(handle);
         }
+
 
         private string serialNum = null;
 
@@ -45,7 +46,7 @@ namespace Microsoft.AzureKinect
                         UIntPtr size = new UIntPtr(0);
                         if (NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL != NativeMethods.k4a_device_get_serialnum(handle, null, ref size))
                         {
-                            throw new Exception($"Unexpected result calling { nameof(NativeMethods.k4a_device_get_serialnum) }");
+                            throw new System.InvalidOperationException($"Unexpected internal state calling { nameof(NativeMethods.k4a_device_get_serialnum) }");
                         }
 
                         // Allocate a string buffer
@@ -112,14 +113,14 @@ namespace Microsoft.AzureKinect
             }
         }
 
-        public Capture GetCapture(int timeout_in_ms = -1)
+        public Capture GetCapture(int timeoutInMS = -1)
         {
             lock (this)
             {
                 if (disposedValue)
                     throw new ObjectDisposedException(nameof(Device));
 
-                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_capture(handle, out NativeMethods.k4a_capture_t capture, timeout_in_ms);
+                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_capture(handle, out NativeMethods.k4a_capture_t capture, timeoutInMS);
 
                 if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
                 {
@@ -137,14 +138,15 @@ namespace Microsoft.AzureKinect
             }
         }
 
-        public ImuSample GetImuSample(int timeout_in_ms = -1)
+        public ImuSample GetImuSample(int timeoutInMS = -1)
         {
             lock (this)
             {
                 if (disposedValue)
                     throw new ObjectDisposedException(nameof(Device));
 
-                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_imu_sample(handle, out ImuSample sample, timeout_in_ms);
+                ImuSample sample = new ImuSample();
+                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_imu_sample(handle, sample, timeoutInMS);
 
                 if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
                 {
@@ -228,7 +230,7 @@ namespace Microsoft.AzureKinect
 
         // Cache the version information so we don't need to re-marshal it for each
         // access since it is not allowed to change
-        private HardwareVersion? version = null;
+        private HardwareVersion version = null;
 
         public HardwareVersion Version
         {
@@ -240,13 +242,13 @@ namespace Microsoft.AzureKinect
                         throw new ObjectDisposedException(nameof(Device));
 
                     if (version != null)
-                        return version.Value;
+                        return version;
 
                     Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_get_version(handle,
                         out NativeMethods.k4a_hardware_version_t nativeVersion));
 
                     version = nativeVersion.ToHardwareVersion();
-                    return version.Value;
+                    return version;
                 }
             }
         }

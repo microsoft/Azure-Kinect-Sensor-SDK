@@ -4,3 +4,5 @@
 
 /StubGenerator.*.json
 /StubGenerator.*.xml
+
+/Microsoft.AzureKinect/Microsoft.AxureKinect.xml

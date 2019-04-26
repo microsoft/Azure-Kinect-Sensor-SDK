@@ -255,16 +255,32 @@ namespace Microsoft.AzureKinect
             }
         }
 
+        private IntPtr _Buffer = IntPtr.Zero;
+
         IntPtr IUnsafeImage.UnsafeBufferPointer
         {
             get
             {
+                if (_Buffer != IntPtr.Zero)
+                {
+                    if (disposedValue)
+                        throw new ObjectDisposedException(nameof(Image));
+
+                    return _Buffer;
+                }
+
                 lock (this)
                 {
                     if (disposedValue)
                         throw new ObjectDisposedException(nameof(Image));
 
-                    return NativeMethods.k4a_image_get_buffer(handle);
+                    _Buffer = NativeMethods.k4a_image_get_buffer(handle);
+                    if (_Buffer == IntPtr.Zero)
+                    {
+                        throw new Exception("Image has NULL buffer");
+                    }
+
+                    return _Buffer;
                 }
             }
         }
@@ -348,72 +364,103 @@ namespace Microsoft.AzureKinect
             }
         }
 
+        private ImageFormat? _Format = null;
+
         public ImageFormat Format
         {
             get
             {
+                if (_Format.HasValue) return _Format.Value;
+
                 lock (this)
                 {
                     if (disposedValue)
                         throw new ObjectDisposedException(nameof(Image));
 
-                    return NativeMethods.k4a_image_get_format(handle);
+                    _Format = NativeMethods.k4a_image_get_format(handle);
+                    return _Format.Value;
                 }
             }
         }
+
+
+        private int _HeightPixels = -1;
 
         public int HeightPixels
         {
             get
             {
+                if (_HeightPixels >= 0) return _HeightPixels;
+
                 lock (this)
                 {
                     if (disposedValue)
                         throw new ObjectDisposedException(nameof(Image));
 
-                    return NativeMethods.k4a_image_get_height_pixels(handle);
+                    _HeightPixels = NativeMethods.k4a_image_get_height_pixels(handle);
+                    return _HeightPixels;
                 }
             }
         }
 
+        private int _WidthPixels = -1;
         public int WidthPixels
         {
             get
             {
+                if (_WidthPixels >= 0) return _WidthPixels;
+
                 lock (this)
                 {
+                    
+
                     if (disposedValue)
                         throw new ObjectDisposedException(nameof(Image));
 
-                    return NativeMethods.k4a_image_get_width_pixels(handle);
+                    _WidthPixels = NativeMethods.k4a_image_get_width_pixels(handle);
+                    return _WidthPixels;
                 }
             }
         }
+
+        private int _StrideBytes = -1;
 
         public int StrideBytes
         {
             get
             {
+
+                if (_StrideBytes >= 0) return _StrideBytes;
+
                 lock (this)
                 {
                     if (disposedValue)
                         throw new ObjectDisposedException(nameof(Image));
 
-                    return NativeMethods.k4a_image_get_stride_bytes(handle);
+                    _StrideBytes = NativeMethods.k4a_image_get_stride_bytes(handle);
+
+                    return _StrideBytes;
                 }
             }
         }
+
+        private long _Size = -1;
 
         public long Size
         {
             get
             {
+
+                if (_Size >= 0) return _Size;
+
                 lock (this)
                 {
                     if (disposedValue)
                         throw new ObjectDisposedException(nameof(Image));
 
-                    return checked((long)NativeMethods.k4a_image_get_size(handle).ToUInt64());
+                    _Size = checked((long)NativeMethods.k4a_image_get_size(handle).ToUInt64());
+
+                    return _Size;
                 }
             }
         }
@@ -523,15 +570,18 @@ namespace Microsoft.AzureKinect
         {
             if (!disposedValue)
             {
-                if (disposing)
+                lock (this)
                 {
-                    // TODO: dispose managed state (managed objects).
+                    if (disposing)
+                    {
+                        // TODO: dispose managed state (managed objects).
+                    }
+
+                    handle.Close();
+                    handle = null;
+
+                    disposedValue = true;
                 }
-
-                handle.Close();
-                handle = null;
-
-                disposedValue = true;
             }
         }
 
