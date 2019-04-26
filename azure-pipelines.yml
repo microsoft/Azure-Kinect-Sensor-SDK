@@ -112,6 +112,12 @@ jobs:
     vmImage: $(vmImage)
 
   steps:
+
+  - task: CmdLine@2
+      displayName: 'Echo test'
+      inputs:
+        script: "echo $(ResourceBaseUrl)"
+        
   - checkout: self
     clean: true
     fetchDepth: 20
