@@ -490,7 +490,7 @@ jobs:
         command: download
         vstsFeed: 'DepthEnginePlugin'
         vstsFeedPackage: 'depthengine'
-        vstsPackageVersion: "1.0.1"
+        vstsPackageVersion: "1.0.5"
         downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
     - task: CopyFiles@2
@@ -582,7 +582,7 @@ jobs:
         command: download
         vstsFeed: 'DepthEnginePlugin'
         vstsFeedPackage: 'depthengine'
-        vstsPackageVersion: "1.0.1"
+        vstsPackageVersion: "1.0.5"
         downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
 
     - task: UniversalPackages@0
@@ -637,6 +637,8 @@ jobs:
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
+      env:
+        K4A_LOG_LEVEL: 'I'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
       workingDirectory: '$(System.ArtifactsDirectory)'

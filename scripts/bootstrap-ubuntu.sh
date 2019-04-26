@@ -32,5 +32,6 @@ sudo apt install -y \
     libxrandr-dev \
     libusb-1.0-0-dev \
     libssl-dev \
+    libudev-dev \
     mesa-common-dev \
     uuid-dev
