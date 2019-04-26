@@ -398,6 +398,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
     break;
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
     {
+        *pValue = 0;
         LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.", 0);
     }
     break;
