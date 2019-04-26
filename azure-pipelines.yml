@@ -567,7 +567,7 @@ jobs:
     - task: CmdLine@2
       displayName: 'Download Azure Kinect Firmware'
       inputs:
-        script:  "curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin"
+        script: curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin
                 
     - task: CmdLine@2
       displayName: 'Download DepthEngine Plugin'
