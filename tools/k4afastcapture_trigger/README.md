@@ -2,8 +2,10 @@
 
 ## Introduction
 
-Azure Kinect Fast Capture trigger will send command to Azure Kinect Fast Capture streaming process to take capture.
-Azure Kinect Fast Capture trigger cannot work alone.
+The Azure Kinect Fast Capture trigger will send a command to the Azure Kinect Fast 
+Capture streaming process to take a capture.
+The Azure Kinect Fast Capture trigger requires that the Azure Kinect Fast Capture 
+Streaming tool is already running.
 
 ## Usage Info
 

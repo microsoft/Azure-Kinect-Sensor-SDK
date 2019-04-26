@@ -16,22 +16,21 @@ CI system but can be used to test specific flavors if needed.
 
 ## Dependencies
 
-Building on Windows and Linux need an active internet connection. Part of the
-build will require download dependencies from online.
+Building on Windows and Linux requires an active internet connection. Part of the
+build will require downloading dependencies.
 
 ### Windows Dependencies
 
-The following tools are required to build on Windows.
+The following tools are required to build on Windows:
 
 * [VS2017](https://visualstudio.microsoft.com/vs/). Contains the toolchains
-  for building. Please be sure to install the following workloads
+  for building. Please be sure to install the following workloads:
   * Desktop development with C++
-  * Linux development with C++
+  * Linux development with C++ (Visual C++ tools for CMake and Linux)
 
-  Also make sure the following components are selected
+  Also make sure the following components are selected:
   * Visual C++ Tools for CMake
   * Test adapter for Google Test
-  * Visual C++ tools for CMake and Linux
 
 * [cmake](https://cmake.org/download/). Add CMake to the PATH. Must be
   version 3.10 or higher. Only necessary if your version of VS2017 is less than
@@ -49,10 +48,7 @@ The following tools are required to build on Windows.
 * [python3](https://www.python.org/getit/). During the install make sure to add
   python to path.
 
-* [git lfs](https://git-lfs.github.com/). This is used to pull down binary
-  artifacts used for testing.
-
-The following tools are optional.
+The following tools are optional:
 
 * [Doxygen](http://www.doxygen.nl/download.html). Add doxygen to the PATH.
   Required for building documentation. To use, pass the CMake parameter ```-DK4A_BUILD_DOCS=1```
@@ -60,7 +56,7 @@ The following tools are optional.
 * [Clang-Format](http://releases.llvm.org/download.html). Please download clang
   v6.0.0 since that is what we are using to format our code. To invoke, call ```ninja clangformat```
 
-If you are building from a command prompt, it must be a x64 visual studio
+If you are building from a command prompt, it must be a x64 Visual Studio
 developer command prompt in order for CMake to find the installed compilers.
 We build both 32-bit and 64-bit binaries, but 64-bit binaries are the only
 binaries that are tested. (The command prompt should be called something like
@@ -76,7 +72,7 @@ Most of these dependencies should be available through the distribution's
 package manager.
 
 * [CMake](https://cmake.org/download/). Add CMake to the PATH. Must be
-  version 3.10 or higher. If your distribution has a version of CMake that is too old
+  version 3.10 or higher. If your distribution has a version of CMake that is too old,
   you can download and build CMake from source.
 
 * [ninja](https://github.com/ninja-build/ninja/releases). Add ninja to the
@@ -96,9 +92,7 @@ package manager.
 
 * uuid-dev
 
-* git-lfs
-
-If you are using Ubuntu you can use our CI script
+If you are using Ubuntu, you can use our CI script
 [scripts/bootstrap-ubuntu.sh](scripts/bootstrap-ubuntu.sh) to download and
 install all needed tools and libraries.
 
@@ -113,20 +107,20 @@ install all needed tools and libraries.
     mkdir build && cd build
     ```
 
-2. Run CMake from that directory. The preferred generator is ninja. All other
+2. Run CMake from that directory. The preferred build is ninja. All other
     generators are untested.
 
     ```shell
     cmake .. -GNinja
     ```
 
-3. Run the generator (ninja) to run the actual build
+3. Run the build (ninja).
 
     ```shell
     ninja
     ```
 
-### Building using Visual Studio IDE
+### Building using Visual Studio
 
 Visual Studio 2017 supports opening CMake based projects directly.
 Use File / Open / CMake ... to open the root CMakeLists.txt in the project.

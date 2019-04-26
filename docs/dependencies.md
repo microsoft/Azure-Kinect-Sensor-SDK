@@ -1,8 +1,7 @@
 # External Dependencies
 
-The Azure Kinect repo consumes external dependencies in two separate methods. Either
-through compiling from source or linking against the binaries / consuming the
-headers. It is preferred to build from source when possible due to no
+The Azure Kinect repo consumes external dependencies through compiling from source.
+It is preferred to build from source when possible due to the lack of
 standard package management on Windows.
 
 ## Building from Source
@@ -25,13 +24,13 @@ dependencies but there was a large performance hit on reconfiguration which
 forced the usage of git submodules.
 
 All the submodules are cloned into ./extern/project_name/src. A
-CMakeLists.txt exists in ./extern/project_name which will contain the logic
+CMakeLists.txt exists in ./extern/project_name which contains the logic
 to add the project as a target to the Azure Kinect build graph.
 
 ## Linking against pre-built binaries
 
 In order to link against pre-built binaries, those binaries must exist on
-disk. Usage of a package manager is expected for the typical case of getting
+disk. Use of a package manager is expected for the typical case of getting
 these binaries. On Windows, CMake's FetchContent can be used.
 
 Once the binaries are downloaded it is up to the programmer to properly

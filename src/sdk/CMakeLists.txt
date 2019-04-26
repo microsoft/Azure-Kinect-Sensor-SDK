@@ -12,7 +12,7 @@ add_library(k4a SHARED
 # Generate k4a_export.h
 # This is a platform specific header defining the macros for the export functions
 # of the shared library. This header is referenced by k4a.h and needs to be installed
-# with the sdk
+# with the SDK
 include(GenerateExportHeader)
 generate_export_header(k4a
     EXPORT_FILE_NAME "include/k4a/k4a_export.h")
