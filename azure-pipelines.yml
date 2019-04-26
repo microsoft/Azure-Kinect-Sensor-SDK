@@ -484,14 +484,14 @@ jobs:
         artifactName: 'amd64-windows-msvc-RelWithDebInfo'
         parallelizationLimit: 8
 
-    - task: UniversalPackages@0
+    - task: CmdLine@2
       displayName: 'Download DepthEngine Plugin'
       inputs:
-        command: download
-        vstsFeed: 'DepthEnginePlugin'
-        vstsFeedPackage: 'depthengine'
-        vstsPackageVersion: "1.0.1"
-        downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
+        script: >
+         curl $(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken) --output $(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/debug/depthengine_1_0.dll
+         curl $(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken) --output $(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/depthengine_1_0.dll
+         curl $(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken) --output $(System.ArtifactsDirectory)/depthengineplugin/windows/x86/debug/depthengine_1_0.dll
+         curl $(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken) --output $(System.ArtifactsDirectory)/depthengineplugin/windows/x86/release/depthengine_1_0.dll
 
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into bin folder"
@@ -569,14 +569,14 @@ jobs:
       inputs:
         script:  "curl $(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken) --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin"
                 
-    - task: UniversalPackages@0
+    - task: CmdLine@2
       displayName: 'Download DepthEngine Plugin'
       inputs:
-        command: download
-        vstsFeed: 'DepthEnginePlugin'
-        vstsFeedPackage: 'depthengine'
-        vstsPackageVersion: "1.0.1"
-        downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
+        script: >
+         curl $(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/debug/libdepthengine.so.1.0$(ResourceToken) --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug/libdepthengine.so.1.0
+         curl $(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/debug/libdepthengine.so$(ResourceToken) --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug/libdepthengine.so
+         curl $(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/release/libdepthengine.so.1.0$(ResourceToken) --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/libdepthengine.so.1.0
+         curl $(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/release/libdepthengine.so$(ResourceToken) --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/libdepthengine.so
 
     - task: CmdLine@2
       displayName: 'Download Azure Kinect Firmware'
