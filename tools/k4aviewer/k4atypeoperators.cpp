@@ -72,8 +72,6 @@ std::ostream &operator<<(std::ostream &s, const k4a_color_control_command_t &val
     {
     case K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE:
         return s << "EXPOSURE_TIME_ABSOLUTE";
-    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
-        return s << "AUTO_EXPOSURE_PRIORITY";
     case K4A_COLOR_CONTROL_BRIGHTNESS:
         return s << "BRIGHTNESS";
     case K4A_COLOR_CONTROL_CONTRAST:

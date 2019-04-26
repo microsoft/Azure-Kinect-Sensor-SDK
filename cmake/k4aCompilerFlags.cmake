@@ -24,6 +24,7 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     list(APPEND CLANG_ALL_WARNINGS "-Wno-documentation-unknown-command") # Allow undocumented documentation commands used by doxygen
     list(APPEND CLANG_ALL_WARNINGS "-Wno-covered-switch-default") # Allow default: in switch statements that cover all enum values
     list(APPEND CLANG_ALL_WARNINGS "-Wno-unreachable-code-break") # Allow break even if it is unreachable
+    list(APPEND CLANG_ALL_WARNINGS "-Wno-double-promotion") # Allow floats to be promoted to doubles. Needed for isnan() on some systems
     if (NOT (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS "5.0.0"))
         # Added in clang 5
         list(APPEND CLANG_ALL_WARNINGS "-Wno-zero-as-null-pointer-constant") # Allow zero as nullptr
