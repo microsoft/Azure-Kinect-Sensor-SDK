@@ -3,7 +3,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	  <LangVersion>latest</LangVersion>
+    <LangVersion>latest</LangVersion>
+
+    <OutputPath Condition="'$(BaseOutputPath)' != ''">$(BaseOutputPath)$(AssemblyName)\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup>
