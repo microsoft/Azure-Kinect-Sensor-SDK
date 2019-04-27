@@ -480,7 +480,6 @@ typedef enum
     K4A_FRAMES_PER_SECOND_30,    /**< 30 FPS */
 } k4a_fps_t;
 
-
 // Clang parses doxygen-style comments in your source and checks for doxygen syntax errors.
 // Unfortunately, some of our external dependencies have doxygen syntax errors in their
 // headers and clang looks at them when we include them here, so we need to shut off those
