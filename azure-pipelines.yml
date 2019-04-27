@@ -581,7 +581,7 @@ jobs:
     - task: CmdLine@2
       displayName: 'Download findconnectedport'
       inputs:
-        script:  curl "$(ResourceBaseUrl)/linux/findconnectedport$(ResourceToken)" --output $(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport" --create-dirs
+        script:  curl "$(ResourceBaseUrl)/linux/findconnectedport$(ResourceToken)" --output $(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport --create-dirs
 
     - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
       workingDirectory: '$(System.ArtifactsDirectory)'
