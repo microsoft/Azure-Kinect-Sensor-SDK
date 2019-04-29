@@ -480,16 +480,6 @@ typedef enum
     K4A_FRAMES_PER_SECOND_30,    /**< 30 FPS */
 } k4a_fps_t;
 
-// Clang parses doxygen-style comments in your source and checks for doxygen syntax errors.
-// Unfortunately, some of our external dependencies have doxygen syntax errors in their
-// headers and clang looks at them when we include them here, so we need to shut off those
-// warnings on these headers.
-//
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
-#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
-#endif
 /** Color sensor control commands
  *
  * \remarks
@@ -531,7 +521,7 @@ typedef enum
      * \details
      * Using exposure priority may impact the framerate of both the color and depth cameras.
      *
-     * \deprecated
+     * \details
      * Deprecated starting in 1.1.0. Please discontinue usage, firmware does not support this.
      */
     K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY,
@@ -604,9 +594,6 @@ typedef enum
      */
     K4A_COLOR_CONTROL_POWERLINE_FREQUENCY
 } k4a_color_control_command_t;
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
 /** Color sensor control mode
  *
