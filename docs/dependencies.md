@@ -12,7 +12,7 @@ The Azure Kinect repo uses git submodules to download the source. These submodul
 initialized on the first CMake configure by executing
 
 ```shell
-git submodule --init --recursive
+git submodule update --init --recursive
 ```
 
 CMake will also set the submodules.recurse configuration so that all git
