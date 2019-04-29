@@ -488,10 +488,10 @@ jobs:
       displayName: 'Download DepthEngine Plugin'
       inputs:
         script: |
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/debug/depthengine_1_0.dll --create-dirs
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/depthengine_1_0.dll --create-dirs
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/windows/x86/debug/depthengine_1_0.dll --create-dirs
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/windows/x86/release/depthengine_1_0.dll --create-dirs
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug\depthengine_1_0.dll" --create-dirs -s -S
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release\depthengine_1_0.dll" --create-dirs -s -S
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug\depthengine_1_0.dll" --create-dirs -s -S
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release\depthengine_1_0.dll" --create-dirs -s -S
 
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into bin folder"
@@ -504,7 +504,7 @@ jobs:
     - task: CmdLine@2
       displayName: 'Download Azure Kinect Firmware'
       inputs:
-        script:  curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin --create-dirs
+        script:  curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin" --create-dirs -s -S
 
     - task: PowerShell@2
       inputs:
