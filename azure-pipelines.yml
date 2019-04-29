@@ -484,14 +484,14 @@ jobs:
         artifactName: 'amd64-windows-msvc-RelWithDebInfo'
         parallelizationLimit: 8
 
-    - task: CmdLine@2
-      displayName: 'Download DepthEngine Plugin'
-      inputs:
-        script: |
+    - powershell: |
          curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug\depthengine_1_0.dll" --create-dirs -s -S --basic
          curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release\depthengine_1_0.dll" --create-dirs -s -S --basic
          curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug\depthengine_1_0.dll" --create-dirs -s -S --basic
          curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release\depthengine_1_0.dll" --create-dirs -s -S --basic
+         curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin" --create-dirs -s -S --basic
+      displayName: 'Download Resources'
+
 
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into bin folder"
@@ -500,11 +500,6 @@ jobs:
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
         flattenFolders: true
-
-    - task: CmdLine@2
-      displayName: 'Download Azure Kinect Firmware'
-      inputs:
-        script:  curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin" --create-dirs -s -S --basic
 
     - task: PowerShell@2
       inputs:
