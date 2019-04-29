@@ -233,6 +233,18 @@ jobs:
       testRunTitle: 'Unit Tests'
     condition: succeededOrFailed()
 
+  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2 # NuGetCommand@2
+    inputs:
+      command: 'restore'
+      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+
+  - task: VSBuild@1
+    inputs:
+      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+      msbuildArgs: '/p:BaseOutputPath="$(Build.BinariesDirectory)\Release\\"'
+      platform: 'x64'
+      configuration: 'Release'
+
   - task: CopyFiles@2
     displayName: 'Copy build folder to Staging'
     inputs:
