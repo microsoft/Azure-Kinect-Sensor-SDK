@@ -12,7 +12,7 @@ add_library(k4arecord SHARED
 # Generate k4arecord_export.h
 # This is a platform specific header defining the macros for the export functions
 # of the shared library. This header is referenced by k4arecord headers and needs to be installed
-# with the sdk
+# with the SDK
 include(GenerateExportHeader)
 generate_export_header(k4arecord
     EXPORT_FILE_NAME "include/k4arecord/k4arecord_export.h")
