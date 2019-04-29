@@ -4,11 +4,14 @@ These standards apply all code in this repository.
 
 ## Modules
 
-A module is a small library that provides functionality that is a building block of the SDK. Modules must have a create and destroy function and use a handle to maintain module state. Module naming should be simple, short, and without underscores. The module file name should match the actual module name.
-Modules should be coded in C whenever possible. It is acceptable to introduce C++ or other types of files to link in
+A module is a small library that provides functionality that is a building block of the SDK. Modules must 
+have a create and destroy function and use a handle to maintain module state. Module naming should be
+simple, short, and without underscores. The module file name should match the actual module name. Modules 
+should be coded in C whenever possible. It is acceptable to introduce C++ or other types of files to link in 
 existing projects written in another language. The use of additional languages should be minimized where possible.
 
-Each module should have tests written for it to verify its functionality. Depending on the scope of functionality, the test may be unit based or functional.
+Each module should have tests written for it to verify its functionality. Depending on the scope of 
+functionality, the test may be unit based or functional.
 
 ## CMakeLists.txt
 

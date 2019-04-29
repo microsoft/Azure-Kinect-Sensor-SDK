@@ -48,6 +48,11 @@ The following tools are required to build on Windows:
 * [python3](https://www.python.org/getit/). During the install make sure to add
   python to path.
 
+* Depth Engine. The depth engine (DE) is a closed source binary shipped with the
+  SDK installer. The DE binary needs to be copied to the host system and added 
+  to the path. **NOTE** *This step is not need for building, but is required 
+  running the SDK*
+
 The following tools are optional:
 
 * [Doxygen](http://www.doxygen.nl/download.html). Add doxygen to the PATH.
@@ -92,6 +97,11 @@ package manager.
 
 * uuid-dev
 
+* Depth Engine. The depth engine (DE) is a closed source binary shipped with the
+  SDK installer. The DE binary needs to be copied to the host system and added 
+  to the path. **NOTE** *This step is not need for building, but is required 
+  running the SDK*
+  
 If you are using Ubuntu, you can use our CI script
 [scripts/bootstrap-ubuntu.sh](scripts/bootstrap-ubuntu.sh) to download and
 install all needed tools and libraries.
