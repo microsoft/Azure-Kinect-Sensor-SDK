@@ -1,4 +1,4 @@
-# K4A Undistort Example
+# Azure Kinect Undistort Example
 
 ## Introduction
 
@@ -11,8 +11,12 @@ remap() function.
 
 ## Usage Info
 
-       undistort.exe <output file>
+```shell
+undistort.exe <output file>
+```
 
 Example:
 
-       undistort.exe undistorted.csv
+```shell
+undistort.exe undistorted.csv
+```
