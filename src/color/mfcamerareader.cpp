@@ -562,12 +562,6 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
         propertyValue = (LONG)(exp2f((float)propertyValue) * 1000000.0f);
     }
     break;
-    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
-    {
-        hr =
-            GetCameraControlValue(KSPROPERTY_CAMERACONTROL_AUTO_EXPOSURE_PRIORITY, &propertyValue, &flags, &capability);
-    }
-    break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
     {
         hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_BRIGHTNESS, &propertyValue, &flags, &capability);
@@ -606,6 +600,12 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
     case K4A_COLOR_CONTROL_POWERLINE_FREQUENCY:
     {
         hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY, &propertyValue, &flags, &capability);
+    }
+    break;
+    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
+    {
+        propertyValue = 0; // return 0 for current firmware behaviour - framerate priority.
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
     }
     break;
     default:
@@ -657,19 +657,6 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
         hr = SetCameraControlValue(KSPROPERTY_CAMERACONTROL_EXPOSURE, (LONG)log2f((float)newValue * 0.000001f), flags);
     }
     break;
-    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
-    {
-        if (newValue == 0 || newValue == 1)
-        {
-            hr = SetCameraControlValue(KSPROPERTY_CAMERACONTROL_AUTO_EXPOSURE_PRIORITY, (LONG)newValue, flags);
-        }
-        else
-        {
-            LOG_ERROR("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY only accept 0 or 1. Actual = %d", newValue);
-            return K4A_RESULT_FAILED;
-        }
-    }
-    break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
     {
         hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_BRIGHTNESS, (LONG)newValue, flags);
@@ -708,6 +695,11 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
     case K4A_COLOR_CONTROL_POWERLINE_FREQUENCY:
     {
         hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY, (LONG)newValue, flags);
+    }
+    break;
+    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
+    {
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
     }
     break;
     default:
