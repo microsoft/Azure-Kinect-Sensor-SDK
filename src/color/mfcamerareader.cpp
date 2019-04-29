@@ -604,7 +604,7 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
     break;
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
     {
-        propertyValue = 0;  // return 0 for current firmware behaviour - framerate priority.
+        propertyValue = 0; // return 0 for current firmware behaviour - framerate priority.
         LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
     }
     break;
