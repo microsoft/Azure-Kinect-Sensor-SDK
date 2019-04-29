@@ -485,11 +485,11 @@ jobs:
         parallelizationLimit: 8
 
     - powershell: |
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug\depthengine_1_0.dll" --create-dirs -s -S --basic
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release\depthengine_1_0.dll" --create-dirs -s -S --basic
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug\depthengine_1_0.dll" --create-dirs -s -S --basic
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken)" --output "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release\depthengine_1_0.dll" --create-dirs -s -S --basic
-         curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin" --create-dirs -s -S --basic
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken)" "--output" "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug\depthengine_1_0.dll" "--create-dirs"
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken)" "--output" "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release\depthengine_1_0.dll" "--create-dirs"
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken)" "--output" "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug\depthengine_1_0.dll" "--create-dirs"
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken)" "--output" "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release\depthengine_1_0.dll" "--create-dirs"
+         curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" "--output" "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin" "--create-dirs"
       displayName: 'Download Resources'
 
 
