@@ -11,13 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(K4aBinaryDirectory)\bin\k4a.dll" Link="k4a.dll">
+    <None Include="$(K4aBinaryDirectory)\k4a.dll" Link="k4a.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(K4aBinaryDirectory)\bin\k4a.pdb" Link="k4a.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="$(K4aBinaryDirectory)\bin\libusb-1.0.dll" Link="libusb-1.0.dll">
+    <None Include="$(K4aBinaryDirectory)\k4a.pdb" Link="k4a.pdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -30,83 +30,115 @@ jobs:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2017_x64-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x64-msvc_rel_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_rel_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
       VS2019_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'amd64'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'debug'
+      #   MSBuildPlatform: 'x64'
+      #   MSBuildConfiguration: 'Debug'
       #   vmImage: 'windows-2019'
       # VS2019_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
       #   CMakeArch: 'amd64'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'relwithdebinfo'
+      #   MSBuildPlatform: 'x64'
+      #   MSBuildConfiguration: 'Release'
       #   vmImage: 'windows-2019'
       VS2019_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
       VS2019_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'x86'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'debug'
+      #   MSBuildPlatform: 'x86'
+      #   MSBuildConfiguration: 'Debug'
       #   vmImage: 'windows-2019'
       # VS2019_x86-pc-windows-msvc_relwithdebinfo_msbuild:
       #   CMakeArch: 'x86'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'relwithdebinfo'
+      #   MSBuildPlatform: 'x86'
+      #   MSBuildConfiguration: 'Release'
       #   vmImage: 'windows-2019'
   pool:
     vmImage: $(vmImage)
@@ -233,17 +265,36 @@ jobs:
       testRunTitle: 'Unit Tests'
     condition: succeededOrFailed()
 
-  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2 # NuGetCommand@2
-    inputs:
-      command: 'restore'
-      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+  - powershell: |
+        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+    displayName: 'Download DepthEngine'
+    
+  - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
+    - task: NuGetToolInstaller@0
+      inputs:
+        versionSpec: '>=4.3.1' 
 
-  - task: VSBuild@1
-    inputs:
-      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
-      msbuildArgs: '/p:BaseOutputPath="$(Build.BinariesDirectory)\Release\\"'
-      platform: 'x64'
-      configuration: 'Release'
+    - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2 # NuGetCommand@2
+      inputs:
+        command: 'restore'
+        solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+
+    - task: VSBuild@1
+      inputs:
+        solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+        msbuildArgs: '/p:BaseOutputPath="$(Build.BinariesDirectory)\$(MSBuildConfiguration)\\"'
+        platform: '$(MSBuildPlatform)'
+        configuration: '$(MSBuildConfiguration)'
+
+    - task: VSTest@2
+      inputs:
+        testSelector: 'testAssemblies'
+        searchFolder: '$(Build.BinariesDirectory)'
+        platform: '$(MSBuildPlatform)'
+        configuration: '$(MSBuildConfiguration)'
+        testAssemblyVer2: |
+          **/*UnitTests.dll
+          !**/obj/**
 
   - task: CopyFiles@2
     displayName: 'Copy build folder to Staging'
@@ -484,6 +535,8 @@ jobs:
       - Agent.OS -equals Windows_NT
 
     steps:
+    - task: VisualStudioTestPlatformInstaller@1
+
     - checkout: self
       clean: true
       lfs: false
@@ -508,7 +561,6 @@ jobs:
          $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\firmware"
          Invoke-WebRequest -uri "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin"
       displayName: 'Download Resources'
-
 
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into bin folder"
@@ -543,12 +595,21 @@ jobs:
       timeoutInMinutes: 15
       continueOnError: true
 
+    - task: VSTest@2
+      inputs:
+        testSelector: 'testAssemblies'
+        searchFolder: '$(Build.BinariesDirectory)'
+        platform: '$(MSBuildPlatform)'
+        configuration: '$(MSBuildConfiguration)'
+        testAssemblyVer2: |
+          **/*FunctionalTests.dll
+          !**/obj/**
+
     - task: PowerShell@2
       inputs:
         targetType: 'filePath'
         filePath: './scripts/Reset-Device.ps1'
       displayName: 'Reset K4A Device'
-
 
 - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
   - job: LinuxFunctionalTests

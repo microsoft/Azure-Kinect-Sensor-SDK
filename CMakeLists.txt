@@ -181,6 +181,14 @@ set(TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR})
 
 # CMake doesn't set the target processor correctly for MSVC
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    if ("${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
+		set(K4A_BINARY_DIR_DEBUG ${PROJECT_BINARY_DIR}/bin)
+		set(K4A_BINARY_DIR_RELEASE ${PROJECT_BINARY_DIR}/bin)
+    else()
+		set(K4A_BINARY_DIR_DEBUG ${PROJECT_BINARY_DIR}/bin/Debug)
+		set(K4A_BINARY_DIR_RELEASE ${PROJECT_BINARY_DIR}/bin/RelWithDebInfo)
+    endif()
+
     if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(TARGET_ARCH "amd64")
 		configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x64.props)

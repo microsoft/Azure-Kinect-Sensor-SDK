@@ -122,18 +122,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(K4aBinaryDirectory)\bin\k4a.dll">
+    <None Include="$(K4aBinaryDirectory)\k4a.dll">
       <Link>k4a.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(K4aBinaryDirectory)\bin\libusb-1.0.dll">
-      <Link>libusb-1.0.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(K4aBinaryDirectory)\bin\depthengine_1_0.dll">
+    </None>
+    <None Include="$(K4aBinaryDirectory)\depthengine_1_0.dll">
       <Link>depthengine_1_0.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
