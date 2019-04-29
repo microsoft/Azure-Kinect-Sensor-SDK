@@ -520,6 +520,9 @@ typedef enum
      *
      * \details
      * Using exposure priority may impact the framerate of both the color and depth cameras.
+     *
+     * \details
+     * Deprecated starting in 1.1.0. Please discontinue usage, firmware does not support this.
      */
     K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY,
 
