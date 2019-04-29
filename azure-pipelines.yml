@@ -485,15 +485,15 @@ jobs:
         parallelizationLimit: 8
 
     - powershell: |
-         $null = New-Item -ItemType Direcotry -Force -Path -Ea 0 "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug"
+         $null = New-Item -ItemType Direcotry -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug"
          Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug\depthengine_1_0.dll"
-         $null = New-Item -ItemType Direcotry -Force -Path -Ea 0 "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release"
+         $null = New-Item -ItemType Direcotry -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release"
          Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release\depthengine_1_0.dll"
-         $null = New-Item -ItemType Direcotry -Force -Path -Ea 0 "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug"
+         $null = New-Item -ItemType Direcotry -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug"
          Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug\depthengine_1_0.dll"
-         $null = New-Item -ItemType Direcotry -Force -Path -Ea 0 "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release"
+         $null = New-Item -ItemType Direcotry -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release"
          Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release\depthengine_1_0.dll"
-         $null = New-Item -ItemType Direcotry -Force -Path -Ea 0 "$(System.ArtifactsDirectory)\firmware"
+         $null = New-Item -ItemType Direcotry -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\firmware"
          Invoke-WebRequest -uri "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin"
       displayName: 'Download Resources'
 
