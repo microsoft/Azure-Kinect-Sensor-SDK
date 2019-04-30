@@ -59,29 +59,29 @@ protected:
         depth_video_info.frame_rate = test_camera_fps;
 
         // Add custom tracks to the k4a_record_t
-        result = k4a_record_add_video_track(handle,
-                                            "DEPTH",
-                                            "V_MS/VFW/FOURCC",
-                                            reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                            sizeof(depth_codec_header),
-                                            &depth_video_info);
+        result = k4a_record_add_custom_video_track(handle,
+                                                   "DEPTH",
+                                                   "V_MS/VFW/FOURCC",
+                                                   reinterpret_cast<uint8_t *>(&depth_codec_header),
+                                                   sizeof(depth_codec_header),
+                                                   &depth_video_info);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        result = k4a_record_add_video_track(handle,
-                                            "IR",
-                                            "V_MS/VFW/FOURCC",
-                                            reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                            sizeof(depth_codec_header),
-                                            &depth_video_info);
+        result = k4a_record_add_custom_video_track(handle,
+                                                   "IR",
+                                                   "V_MS/VFW/FOURCC",
+                                                   reinterpret_cast<uint8_t *>(&depth_codec_header),
+                                                   sizeof(depth_codec_header),
+                                                   &depth_video_info);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        result = k4a_record_add_custom_track_tag(handle, "DEPTH", "K4A_DEPTH_MODE", "NFOV_UNBINNED");
+        result = k4a_record_add_tag(handle, "K4A_DEPTH_MODE", "NFOV_UNBINNED");
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        result = k4a_record_add_subtitle_track(handle, "CUSTOM_TRACK_1", "S_K4A/CUSTOM_TRACK_1", nullptr, 0);
+        result = k4a_record_add_custom_subtitle_track(handle, "CUSTOM_TRACK_1", "S_K4A/CUSTOM_TRACK_1", nullptr, 0);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        result = k4a_record_add_custom_track_tag(handle, "CUSTOM_TRACK_1", "CUSTOM_TRACK_1_VERSION", "1.0.0");
+        result = k4a_record_add_tag(handle, "CUSTOM_TRACK_1_VERSION", "1.0.0");
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         ASSERT_EQ(k4a_record_write_header(handle), K4A_RESULT_SUCCEEDED);

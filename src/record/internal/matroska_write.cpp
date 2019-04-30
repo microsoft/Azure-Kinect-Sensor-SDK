@@ -117,7 +117,31 @@ KaxTrackEntry *add_track(k4a_record_context_t *context,
                          size_t codec_private_size)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
+    RETURN_VALUE_IF_ARG(NULL, name == NULL);
+    RETURN_VALUE_IF_ARG(NULL, codec == NULL);
     RETURN_VALUE_IF_ARG(NULL, context->header_written);
+
+    const char *ch = name;
+    while (*ch != 0)
+    {
+        if (*ch == '-' || *ch == '_' || (*ch >= '0' && *ch <= '9') || (*ch >= 'A' && *ch <= 'Z'))
+        {
+            // Valid character
+            ch++;
+        }
+        else
+        {
+            LOG_ERROR("Track name '%s' must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.", name);
+            return NULL;
+        }
+    }
+
+    auto itr = context->tracks.find(name);
+    if (itr != context->tracks.end())
+    {
+        LOG_ERROR("A track already exists with the name: %s", name);
+        return NULL;
+    }
 
     auto &tracks = GetChild<KaxTracks>(*context->file_segment);
     auto track = new KaxTrackEntry();
@@ -138,32 +162,9 @@ KaxTrackEntry *add_track(k4a_record_context_t *context,
         GetChild<KaxCodecPrivate>(*track).CopyBuffer(codec_private, (uint32)codec_private_size);
     }
 
+    context->tracks.insert(std::pair<std::string, KaxTrackEntry *>(std::string(name), track));
+
     return track;
-}
-
-k4a_result_t check_custom_track_name_valid(k4a_record_context_t *context, const char *track_name)
-{
-    auto itr = context->custom_tracks.find(track_name);
-    if (itr != context->custom_tracks.end())
-    {
-        LOG_ERROR("The custom track has already been added to this recording.", 0);
-        return K4A_RESULT_FAILED;
-    }
-
-    // Check whether the track_name is conflicted with the existed default track names
-    bool track_name_conflict = false;
-    std::string track_name_string(track_name);
-    track_name_conflict = (track_name_string == depth_track_name && context->depth_track != nullptr) ||
-                          (track_name_string == ir_track_name && context->ir_track != nullptr) ||
-                          (track_name_string == color_track_name && context->color_track != nullptr) ||
-                          (track_name_string == imu_track_name && context->imu_track != nullptr);
-    if (track_name_conflict)
-    {
-        LOG_ERROR("The custom track is conflicted with the existed default track.", 0);
-        return K4A_RESULT_FAILED;
-    }
-
-    return K4A_RESULT_SUCCEEDED;
 }
 
 void set_track_info_video(KaxTrackEntry *track, uint64_t width, uint64_t height, uint64_t frame_rate)

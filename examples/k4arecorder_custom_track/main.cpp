@@ -70,7 +70,6 @@ int main(int argc, char **argv)
         {
             k4a_record_add_attachment(recording,
                                       "calibration.json",
-                                      "K4A_CALIBRATION_FILE",
                                       calibration_buffer.data(),
                                       calibration_buffer.size());
         }
@@ -107,23 +106,23 @@ int main(int argc, char **argv)
 
     // Add custom tracks to the k4a_record_t
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
-    result = k4a_record_add_video_track(recording,
-                                        "DEPTH",
-                                        "V_MS/VFW/FOURCC",
-                                        reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                        sizeof(depth_codec_header),
-                                        &depth_video_info);
+    result = k4a_record_add_custom_video_track(recording,
+                                               "DEPTH",
+                                               "V_MS/VFW/FOURCC",
+                                               reinterpret_cast<uint8_t *>(&depth_codec_header),
+                                               sizeof(depth_codec_header),
+                                               &depth_video_info);
     VERIFY(result, "Add Depth custom track failed!");
 
-    result = k4a_record_add_video_track(recording,
-                                        "IR",
-                                        "V_MS/VFW/FOURCC",
-                                        reinterpret_cast<uint8_t *>(&depth_codec_header),
-                                        sizeof(depth_codec_header),
-                                        &depth_video_info);
+    result = k4a_record_add_custom_video_track(recording,
+                                               "IR",
+                                               "V_MS/VFW/FOURCC",
+                                               reinterpret_cast<uint8_t *>(&depth_codec_header),
+                                               sizeof(depth_codec_header),
+                                               &depth_video_info);
     VERIFY(result, "Add IR custom track failed!");
 
-    result = k4a_record_add_custom_track_tag(recording, "DEPTH", "K4A_DEPTH_MODE", "NFOV_UNBINNED");
+    result = k4a_record_add_tag(recording, "K4A_DEPTH_MODE", "NFOV_UNBINNED");
     VERIFY(result, "Add custom track tag failed!");
 
     VERIFY(k4a_record_write_header(recording), "K4A write header failed");

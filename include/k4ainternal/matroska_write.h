@@ -73,7 +73,7 @@ typedef struct _k4a_record_context_t
     libmatroska::KaxTrackEntry *depth_track;
     libmatroska::KaxTrackEntry *ir_track;
     libmatroska::KaxTrackEntry *imu_track;
-    std::unordered_map<std::string, libmatroska::KaxTrackEntry *> custom_tracks;
+    std::unordered_map<std::string, libmatroska::KaxTrackEntry *> tracks;
 
     // std::list can't be memset to 0, so we need to use a pointer.
     std::unique_ptr<std::list<cluster_t *>> pending_clusters;
@@ -109,8 +109,6 @@ libmatroska::KaxTrackEntry *add_track(k4a_record_context_t *context,
                                       const char *codec,
                                       const uint8_t *codec_private = NULL,
                                       size_t codec_private_size = 0);
-
-k4a_result_t check_custom_track_name_valid(k4a_record_context_t *context, const char *track_name);
 
 void set_track_info_video(libmatroska::KaxTrackEntry *track, uint64_t width, uint64_t height, uint64_t frame_rate);
 
