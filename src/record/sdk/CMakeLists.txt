@@ -77,9 +77,9 @@ write_basic_package_version_file(
 
 install(
     EXPORT
-        k4aTargets
+        k4aRecordTargets
     FILE
-        k4aTargets.cmake
+        k4aRecordTargets.cmake
     NAMESPACE
         k4a::
     DESTINATION
