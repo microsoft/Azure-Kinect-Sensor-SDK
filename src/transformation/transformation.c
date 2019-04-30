@@ -7,6 +7,7 @@
 
 // System dependencies
 #include <stdlib.h>
+#include <math.h>
 
 k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_camera_t *depth_camera_calibration,
                                                           const k4a_calibration_camera_t *color_camera_calibration,
@@ -316,7 +317,9 @@ static k4a_buffer_result_t transformation_init_xy_tables(const k4a_calibration_t
 
                 if (valid == 0)
                 {
-                    xy_tables->x_table[idx] = 0.f;
+                    // x table value of NAN marks invalid
+                    xy_tables->x_table[idx] = NAN;
+                    // set y table value to 0 to speed up SSE implementation
                     xy_tables->y_table[idx] = 0.f;
                 }
                 else
@@ -467,6 +470,18 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
 
     if (transformation_context->enable_gpu_optimization)
     {
+        if (K4A_BUFFER_RESULT_SUCCEEDED !=
+            TRACE_BUFFER_CALL(transformation_depth_image_to_color_camera_validate_parameters(
+                &transformation_context->calibration,
+                &transformation_context->depth_camera_xy_tables,
+                depth_image_data,
+                depth_image_descriptor,
+                transformed_depth_image_data,
+                transformed_depth_image_descriptor)))
+        {
+            return K4A_RESULT_FAILED;
+        }
+
         size_t depth_image_size = (size_t)(depth_image_descriptor->stride_bytes *
                                            depth_image_descriptor->height_pixels);
         size_t transformed_depth_image_size = (size_t)(transformed_depth_image_descriptor->stride_bytes *
@@ -522,6 +537,20 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
 
     if (transformation_context->enable_gpu_optimization)
     {
+        if (K4A_BUFFER_RESULT_SUCCEEDED !=
+            TRACE_BUFFER_CALL(transformation_color_image_to_depth_camera_validate_parameters(
+                &transformation_context->calibration,
+                &transformation_context->depth_camera_xy_tables,
+                depth_image_data,
+                depth_image_descriptor,
+                color_image_data,
+                color_image_descriptor,
+                transformed_color_image_data,
+                transformed_color_image_descriptor)))
+        {
+            return K4A_RESULT_FAILED;
+        }
+
         size_t depth_image_size = (size_t)(depth_image_descriptor->stride_bytes *
                                            depth_image_descriptor->height_pixels);
         size_t color_image_size = (size_t)(color_image_descriptor->stride_bytes *

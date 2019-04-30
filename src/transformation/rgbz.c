@@ -66,7 +66,7 @@ static bool transformation_compare_image_descriptors(const k4a_transformation_im
         descriptor1->height_pixels != descriptor2->height_pixels ||
         descriptor1->stride_bytes != descriptor2->stride_bytes)
     {
-        LOG_ERROR("Unexpected image descriptor. Expect width_pixels: %d, height_pixels: %d, stride_bytes: %d. "
+        LOG_ERROR("Unexpected image descriptor. Expected width_pixels: %d, height_pixels: %d, stride_bytes: %d. "
                   "Actual width_pixels: %d, height_pixels: %d, stride_bytes: %d.",
                   descriptor1->width_pixels,
                   descriptor1->height_pixels,
@@ -104,7 +104,7 @@ static k4a_result_t transformation_compute_correspondence(const int depth_index,
                                                           const k4a_transformation_rgbz_context_t *context,
                                                           k4a_correspondence_t *correspondence)
 {
-    if (depth == 0)
+    if (depth == 0 || isnan(context->xy_tables->x_table[depth_index]))
     {
         memset(correspondence, 0, sizeof(k4a_correspondence_t));
         return K4A_RESULT_SUCCEEDED;
@@ -459,7 +459,7 @@ static k4a_result_t transformation_depth_to_color(k4a_transformation_rgbz_contex
     return K4A_RESULT_SUCCEEDED;
 }
 
-k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
+k4a_buffer_result_t transformation_depth_image_to_color_camera_validate_parameters(
     const k4a_calibration_t *calibration,
     const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
     const uint8_t *depth_image_data,
@@ -486,10 +486,6 @@ k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
         transformation_compare_image_descriptors(transformed_depth_image_descriptor,
                                                  &expected_transformed_depth_image_descriptor) == false)
     {
-        memcpy(transformed_depth_image_descriptor,
-               &expected_transformed_depth_image_descriptor,
-               sizeof(k4a_transformation_image_descriptor_t));
-
         if (transformed_depth_image_data == 0)
         {
             LOG_ERROR("Transformed depth image data is null.", 0);
@@ -528,6 +524,29 @@ k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
     if (transformation_compare_image_descriptors(depth_image_descriptor, &expected_depth_image_descriptor) == false)
     {
         LOG_ERROR("Unexpected depth image descriptor, see details above.", 0);
+        return K4A_BUFFER_RESULT_FAILED;
+    }
+
+    return K4A_BUFFER_RESULT_SUCCEEDED;
+}
+
+k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
+    const k4a_calibration_t *calibration,
+    const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
+    const uint8_t *depth_image_data,
+    const k4a_transformation_image_descriptor_t *depth_image_descriptor,
+    uint8_t *transformed_depth_image_data,
+    k4a_transformation_image_descriptor_t *transformed_depth_image_descriptor)
+{
+    if (K4A_BUFFER_RESULT_SUCCEEDED !=
+        TRACE_BUFFER_CALL(
+            transformation_depth_image_to_color_camera_validate_parameters(calibration,
+                                                                           xy_tables_depth_camera,
+                                                                           depth_image_data,
+                                                                           depth_image_descriptor,
+                                                                           transformed_depth_image_data,
+                                                                           transformed_depth_image_descriptor)))
+    {
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -641,7 +660,7 @@ static k4a_result_t transformation_color_to_depth(k4a_transformation_rgbz_contex
     return K4A_RESULT_SUCCEEDED;
 }
 
-k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
+k4a_buffer_result_t transformation_color_image_to_depth_camera_validate_parameters(
     const k4a_calibration_t *calibration,
     const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
     const uint8_t *depth_image_data,
@@ -670,10 +689,6 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
         transformation_compare_image_descriptors(transformed_color_image_descriptor,
                                                  &expected_transformed_color_image_descriptor) == false)
     {
-        memcpy(transformed_color_image_descriptor,
-               &expected_transformed_color_image_descriptor,
-               sizeof(k4a_transformation_image_descriptor_t));
-
         if (transformed_color_image_data == 0)
         {
             LOG_ERROR("Transformed color image data is null.", 0);
@@ -731,6 +746,33 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
         return K4A_BUFFER_RESULT_FAILED;
     }
 
+    return K4A_BUFFER_RESULT_SUCCEEDED;
+}
+
+k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
+    const k4a_calibration_t *calibration,
+    const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
+    const uint8_t *depth_image_data,
+    const k4a_transformation_image_descriptor_t *depth_image_descriptor,
+    const uint8_t *color_image_data,
+    const k4a_transformation_image_descriptor_t *color_image_descriptor,
+    uint8_t *transformed_color_image_data,
+    k4a_transformation_image_descriptor_t *transformed_color_image_descriptor)
+{
+    if (K4A_BUFFER_RESULT_SUCCEEDED !=
+        TRACE_BUFFER_CALL(
+            transformation_color_image_to_depth_camera_validate_parameters(calibration,
+                                                                           xy_tables_depth_camera,
+                                                                           depth_image_data,
+                                                                           depth_image_descriptor,
+                                                                           color_image_data,
+                                                                           color_image_descriptor,
+                                                                           transformed_color_image_data,
+                                                                           transformed_color_image_descriptor)))
+    {
+        return K4A_BUFFER_RESULT_FAILED;
+    }
+
     k4a_transformation_rgbz_context_t context;
     memset(&context, 0, sizeof(k4a_transformation_rgbz_context_t));
 
@@ -758,12 +800,24 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
 {
     const uint16_t *depth_image_data_uint16 = (const uint16_t *)depth_image_data;
     int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
+    int16_t x, y, z;
 
     for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
     {
-        int16_t z = (int16_t)depth_image_data_uint16[i];
-        int16_t x = (int16_t)(floorf(xy_tables->x_table[i] * (float)z + 0.5f));
-        int16_t y = (int16_t)(floorf(xy_tables->y_table[i] * (float)z + 0.5f));
+        float x_tab = xy_tables->x_table[i];
+
+        if (!isnan(x_tab))
+        {
+            z = (int16_t)depth_image_data_uint16[i];
+            x = (int16_t)(floorf(x_tab * (float)z + 0.5f));
+            y = (int16_t)(floorf(xy_tables->y_table[i] * (float)z + 0.5f));
+        }
+        else
+        {
+            x = 0;
+            y = 0;
+            z = 0;
+        }
 
         xyz_data_int16[3 * i + 0] = x;
         xyz_data_int16[3 * i + 1] = y;
@@ -796,16 +850,28 @@ static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_t
     // z2, z5, z0, z3, z6, z1, z4, z7
     __m128i z_shuffle = _mm_setr_epi16(pos2, pos5, pos0, pos3, pos6, pos1, pos4, pos7);
 
+    __m128i valid_shuffle = _mm_setr_epi16(pos0, pos2, pos4, pos6, pos0, pos2, pos4, pos6);
+
     for (int i = 0; i < xy_tables->width * xy_tables->height / 8; i++)
     {
         __m128i z = *depth_image_data_m128i++;
 
+        __m128 x_tab_lo = *x_table_m128++;
+        __m128 x_tab_hi = *x_table_m128++;
+        __m128 valid_lo = _mm_cmpeq_ps(x_tab_lo, x_tab_lo);
+        __m128 valid_hi = _mm_cmpeq_ps(x_tab_hi, x_tab_hi);
+        __m128i valid_shuffle_lo = _mm_shuffle_epi8(*((__m128i *)&valid_lo), valid_shuffle);
+        __m128i valid_shuffle_hi = _mm_shuffle_epi8(*((__m128i *)&valid_hi), valid_shuffle);
+        __m128i valid = _mm_blend_epi16(valid_shuffle_lo, valid_shuffle_hi, 0xF0);
+        z = _mm_blendv_epi8(_mm_setzero_si128(), z, valid);
+
         __m128 depth_lo = _mm_cvtepi32_ps(_mm_unpacklo_epi16(z, _mm_setzero_si128()));
         __m128 depth_hi = _mm_cvtepi32_ps(_mm_unpackhi_epi16(z, _mm_setzero_si128()));
 
-        __m128i x_lo = _mm_cvtps_epi32(_mm_mul_ps(depth_lo, *x_table_m128++));
-        __m128i x_hi = _mm_cvtps_epi32(_mm_mul_ps(depth_hi, *x_table_m128++));
+        __m128i x_lo = _mm_cvtps_epi32(_mm_mul_ps(depth_lo, x_tab_lo));
+        __m128i x_hi = _mm_cvtps_epi32(_mm_mul_ps(depth_hi, x_tab_hi));
         __m128i x = _mm_packs_epi32(x_lo, x_hi);
+        x = _mm_blendv_epi8(_mm_setzero_si128(), x, valid);
         x = _mm_shuffle_epi8(x, x_shuffle);
 
         __m128i y_lo = _mm_cvtps_epi32(_mm_mul_ps(depth_lo, *y_table_m128++));
@@ -845,8 +911,6 @@ transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_
     if (xyz_image_data == 0 ||
         transformation_compare_image_descriptors(xyz_image_descriptor, &expected_xyz_image_descriptor) == false)
     {
-        memcpy(xyz_image_descriptor, &expected_xyz_image_descriptor, sizeof(k4a_transformation_image_descriptor_t));
-
         if (xyz_image_data == 0)
         {
             LOG_ERROR("XYZ image data is null.", 0);

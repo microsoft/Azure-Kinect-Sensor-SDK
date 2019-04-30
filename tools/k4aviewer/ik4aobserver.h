@@ -22,6 +22,7 @@ template<typename NotificationType> class IK4AObserver
 public:
     virtual void NotifyData(const NotificationType &data) = 0;
     virtual void NotifyTermination() = 0;
+    virtual void ClearData() = 0;
 
     virtual ~IK4AObserver() = default;
 

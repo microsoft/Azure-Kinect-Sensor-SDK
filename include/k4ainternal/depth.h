@@ -9,7 +9,6 @@
 
 #include <k4a/k4atypes.h>
 #include <k4ainternal/handle.h>
-#include <k4ainternal/logging.h>
 #include <k4ainternal/depth_mcu.h>
 #include <k4ainternal/calibration.h>
 

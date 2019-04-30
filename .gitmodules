@@ -32,3 +32,6 @@
 [submodule "extern/libjpeg-turbo/src"]
 	path = extern/libjpeg-turbo/src
 	url = https://github.com/libjpeg-turbo/libjpeg-turbo.git
+[submodule "extern/libusb/src"]
+	path = extern/libusb/src
+	url = https://github.com/libusb/libusb

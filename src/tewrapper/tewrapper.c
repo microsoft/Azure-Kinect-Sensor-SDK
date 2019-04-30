@@ -25,6 +25,7 @@ typedef struct _tewrapper_context_t
     COND_HANDLE main_condition;
     LOCK_HANDLE worker_lock;
     COND_HANDLE worker_condition;
+    volatile bool thread_started;
     volatile bool thread_stop;
     k4a_result_t thread_start_result;
     k4a_result_t thread_processing_result;
@@ -78,6 +79,7 @@ static int transform_engine_thread(void *param)
     // The Start routine is blocked waiting for this thread to complete startup, so we signal it here and share our
     // startup status.
     Lock(tewrapper->main_lock);
+    tewrapper->thread_started = true;
     tewrapper->thread_start_result = result;
     Condition_Post(tewrapper->main_condition);
     Unlock(tewrapper->main_lock);
@@ -212,6 +214,7 @@ tewrapper_t tewrapper_create(k4a_transform_engine_calibration_t *transform_engin
     {
         bool locked = false;
         tewrapper->thread_stop = false;
+        tewrapper->thread_started = false;
 
         THREADAPI_RESULT tresult = ThreadAPI_Create(&tewrapper->thread, transform_engine_thread, tewrapper);
         result = K4A_RESULT_FROM_BOOL(tresult == THREADAPI_OK);
@@ -220,9 +223,14 @@ tewrapper_t tewrapper_create(k4a_transform_engine_calibration_t *transform_engin
         {
             Lock(tewrapper->main_lock);
             locked = true;
-            int infinite_timeout = 0;
-            COND_RESULT cond_result = Condition_Wait(tewrapper->main_condition, tewrapper->main_lock, infinite_timeout);
-            result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
+            if (!tewrapper->thread_started)
+            {
+                int infinite_timeout = 0;
+                COND_RESULT cond_result = Condition_Wait(tewrapper->main_condition,
+                                                         tewrapper->main_lock,
+                                                         infinite_timeout);
+                result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
+            }
         }
 
         if (K4A_SUCCEEDED(result) && K4A_FAILED(tewrapper->thread_start_result))

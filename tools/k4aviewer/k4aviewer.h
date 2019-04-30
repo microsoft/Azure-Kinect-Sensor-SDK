@@ -14,8 +14,9 @@
 
 // Project headers
 //
+#include "k4aviewersettingsmanager.h"
 
-struct K4AViewerOptions
+struct K4AViewerArgs
 {
     bool HighDpi = false;
 };
@@ -25,7 +26,7 @@ namespace k4aviewer
 class K4AViewer
 {
 public:
-    explicit K4AViewer(const K4AViewerOptions &args);
+    explicit K4AViewer(const K4AViewerArgs &args);
     ~K4AViewer();
 
     void Run();
@@ -42,8 +43,9 @@ private:
 
     void ShowErrorOverlay();
 
+    void ShowViewerOptionMenuItem(const char *msg, ViewerOption option);
+
     GLFWwindow *m_window;
-    bool m_showDeveloperOptions = false;
     bool m_showDemoWindow = false;
     bool m_showStyleEditor = false;
     bool m_showMetricsWindow = false;

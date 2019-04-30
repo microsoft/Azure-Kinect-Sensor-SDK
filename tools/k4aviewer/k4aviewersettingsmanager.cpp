@@ -16,18 +16,14 @@
 
 // Project headers
 //
+#include "filesystem17.h"
 #include "k4atypeoperators.h"
 
 using namespace k4aviewer;
 
 namespace
 {
-constexpr char SettingsFileName[] = "k4aviewersettings.txt";
 constexpr char Separator[] = "    ";
-
-constexpr char ShowFramerateTag[] = "ShowFramerate";
-constexpr char ShowInfoPaneTag[] = "ShowInfoPane";
-
 } // namespace
 
 namespace k4aviewer
@@ -153,6 +149,128 @@ std::istream &operator>>(std::istream &s, K4ADeviceConfiguration &val)
 
     return s;
 }
+
+constexpr char BeginViewerOptionsTag[] = "BeginViewerOptions";
+constexpr char EndViewerOptionsTag[] = "EndViewerOptions";
+
+std::istream &operator>>(std::istream &s, K4AViewerOptions &val)
+{
+    std::string variableTag;
+    s >> variableTag;
+    if (variableTag != BeginViewerOptionsTag)
+    {
+        s.setstate(std::ios::failbit);
+        return s;
+    }
+
+    while (variableTag != EndDeviceConfigurationTag && s)
+    {
+        s >> variableTag;
+        if (variableTag == EndViewerOptionsTag)
+        {
+            break;
+        }
+
+        ViewerOption option;
+        std::stringstream converter;
+        converter << variableTag;
+        converter >> option;
+        if (!converter)
+        {
+            s.setstate(std::ios::failbit);
+            break;
+        }
+
+        bool value;
+        s >> value;
+        if (!s)
+        {
+            break;
+        }
+        val.Options[static_cast<size_t>(option)] = value;
+    }
+
+    return s;
+}
+
+std::ostream &operator<<(std::ostream &s, const K4AViewerOptions &val)
+{
+    s << BeginViewerOptionsTag << std::endl;
+
+    for (size_t i = 0; i < val.Options.size(); ++i)
+    {
+        s << static_cast<ViewerOption>(i) << Separator << val.Options[i] << std::endl;
+    }
+
+    s << EndViewerOptionsTag << std::endl;
+
+    return s;
+}
+
+constexpr char ShowFrameRateInfoTag[] = "ShowFrameRateInfo";
+constexpr char ShowInfoPaneTag[] = "ShowInfoPane";
+constexpr char ShowLogDockTag[] = "ShowLogDock";
+constexpr char ShowDeveloperOptionsTag[] = "ShowDeveloperOptions";
+
+std::istream &operator>>(std::istream &s, ViewerOption &val)
+{
+    static_assert(static_cast<size_t>(ViewerOption::MAX) == 4, "Need to add a new viewer option conversion");
+    std::string tag;
+    s >> tag;
+
+    if (tag == ShowFrameRateInfoTag)
+    {
+        val = ViewerOption::ShowFrameRateInfo;
+    }
+    else if (tag == ShowInfoPaneTag)
+    {
+        val = ViewerOption::ShowInfoPane;
+    }
+    else if (tag == ShowLogDockTag)
+    {
+        val = ViewerOption::ShowLogDock;
+    }
+    else if (tag == ShowDeveloperOptionsTag)
+    {
+        val = ViewerOption::ShowDeveloperOptions;
+    }
+    else
+    {
+        s.setstate(std::ios::failbit);
+    }
+
+    return s;
+}
+
+std::ostream &operator<<(std::ostream &s, const ViewerOption &val)
+{
+    static_assert(static_cast<size_t>(ViewerOption::MAX) == 4, "Need to add a new viewer option conversion");
+
+    switch (val)
+    {
+    case ViewerOption::ShowFrameRateInfo:
+        s << ShowFrameRateInfoTag;
+        break;
+
+    case ViewerOption::ShowInfoPane:
+        s << ShowInfoPaneTag;
+        break;
+
+    case ViewerOption::ShowLogDock:
+        s << ShowLogDockTag;
+        break;
+
+    case ViewerOption::ShowDeveloperOptions:
+        s << ShowDeveloperOptionsTag;
+        break;
+
+    default:
+        s.setstate(std::ios::failbit);
+        break;
+    }
+
+    return s;
+}
 } // namespace k4aviewer
 
 // The UI doesn't quite line up with the struct we actually need to give to the K4A API, so
@@ -177,70 +295,95 @@ k4a_device_configuration_t K4ADeviceConfiguration::ToK4ADeviceConfiguration() co
     return deviceConfig;
 }
 
+K4AViewerOptions::K4AViewerOptions()
+{
+    static_assert(static_cast<size_t>(ViewerOption::MAX) == 4, "Need to add a new viewer option default");
+
+    Options[static_cast<size_t>(ViewerOption::ShowFrameRateInfo)] = false;
+    Options[static_cast<size_t>(ViewerOption::ShowInfoPane)] = true;
+    Options[static_cast<size_t>(ViewerOption::ShowLogDock)] = false;
+    Options[static_cast<size_t>(ViewerOption::ShowDeveloperOptions)] = false;
+}
+
 K4AViewerSettingsManager::K4AViewerSettingsManager()
 {
+    std17::filesystem::path settingsPath = "";
+
+#ifdef WIN32
+    constexpr size_t bufferSize = 250;
+    char buffer[bufferSize];
+    size_t len;
+
+    // While not technically part of the C++ spec, MSVC provides the
+    // C function getenv_s in the C++ standard library headers and
+    // complains if you use getenv, so we use getenv_s here.
+    //
+    errno_t err = getenv_s(&len, buffer, bufferSize, "LOCALAPPDATA");
+    if (err == 0)
+    {
+        settingsPath = buffer;
+    }
+
+#else
+    // The Linux compilers, on the other hand, don't provide the 'safe'
+    // C functions, but they do provide a nonstandard function to do it,
+    // so we do that instead.
+    //
+    const char *home = secure_getenv("HOME");
+    if (home)
+    {
+        settingsPath = home;
+    }
+
+#endif
+
+    settingsPath.append(".k4aviewer");
+    m_settingsFilePath = settingsPath.string();
+
     LoadSettings();
 }
 
 void K4AViewerSettingsManager::SaveSettings()
 {
-    std::ofstream fileWriter(SettingsFileName);
+    std::ofstream fileWriter(m_settingsFilePath.c_str());
 
     fileWriter << m_settingsPayload.SavedDeviceConfiguration << std::endl;
-    fileWriter << ShowFramerateTag << Separator << m_settingsPayload.ShowFrameRateInfo << std::endl;
-    fileWriter << ShowInfoPaneTag << Separator << m_settingsPayload.ShowInfoPane << std::endl;
+    fileWriter << m_settingsPayload.Options << std::endl;
 }
 
 void K4AViewerSettingsManager::LoadSettings()
 {
-    std::ifstream fileReader(SettingsFileName);
+    std::ifstream fileReader(m_settingsFilePath.c_str());
     if (!fileReader)
     {
+        SetDefaults();
         return;
     }
 
-    bool readSettingsFailed = false;
     SettingsPayload newSettingsPayload;
 
     fileReader >> newSettingsPayload.SavedDeviceConfiguration;
-    bool readFailed = fileReader.fail();
-    while (!readFailed && !fileReader.eof())
-    {
-        std::string variableTag;
-        fileReader >> variableTag;
+    fileReader >> newSettingsPayload.Options;
 
-        if (variableTag == ShowFramerateTag)
-        {
-            fileReader >> newSettingsPayload.ShowFrameRateInfo;
-        }
-        else if (variableTag == ShowInfoPaneTag)
-        {
-            fileReader >> newSettingsPayload.ShowInfoPane;
-        }
-        else if (variableTag.empty())
-        {
-            continue;
-        }
-        else
-        {
-            // Mark the file as corrupt
-            //
-            readFailed = true;
-            break;
-        }
-    }
-
-    if (readFailed)
+    if (fileReader.fail())
     {
         // File is corrupt, try to delete it
         //
-        readSettingsFailed = true;
         fileReader.close();
-        (void)std::remove(SettingsFileName);
+        SetDefaults();
     }
-
-    if (!readSettingsFailed)
+    else
     {
         m_settingsPayload = newSettingsPayload;
     }
+}
+
+void K4AViewerSettingsManager::SetDefaults()
+{
+    if (!m_settingsFilePath.empty())
+    {
+        (void)std::remove(m_settingsFilePath.c_str());
+    }
+
+    m_settingsPayload = SettingsPayload();
 }
