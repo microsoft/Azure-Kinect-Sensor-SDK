@@ -1,63 +1,86 @@
-# libk4a Release Process
+# Release Process
 
-## Release Steps
+The release process and building of private binaries is managed by Microsoft Azure Kinect team members.
 
-When creating a release milestone, you should send meeting invites to maintainers to book the release day and the previous day.
-This is to make sure they have enough time to work on the release.
+Released builds are numbered using semantic versioning. The GitHub project and CI builds are not uniquely versioned. 
+Versioning is applied by the private Azure Kinect Packing build system.
 
-The following release procedure should be started on the previous day of the target release day.
-This is to make sure we have enough buffer time to publish the release on the target day.
+The packaging build system may produce multiple builds with the same build number e.g. "1.0.1-beta.0", however only 
+one build of that number will ever be distributed internally or externally for validation or release.
 
-Before starting the following release procedure, open an issue and list all those steps as to-do tasks.
-Check the task when you finish one.
-This is to help track the release preparation work.
+Releases are scheduled on demand based on program needs.
 
-> Note: Step 2, 3 and 4 can be done in parallel.
+## Release Types
 
-1. Create a branch named `release-<Release Tag>` in our private repository.
-   All release related changes should happen in this branch.
-1. Prepare packages
-   - [Build release packages](#building-packages).
-   - Sign the MSI packages and DEB/RPM packages.
-   - Install and verify the packages.
-1. Update documentation, scripts and Dockerfiles
-   - Summarize the change log for the release. It should be reviewed by PM(s) to make it more user-friendly.
-   - Update [CHANGELOG.md](../../CHANGELOG.md) with the finalized change log draft.
-   - Update other documents and scripts to use the new package names and links.
-1. Verify the release Dockerfiles.
-1. [Create NuGet packages](#nuget-packages) and publish them to [libk4a-core feed][ps-core-feed].
-1. [Create the release tag](#release-tag) and push the tag to `libk4a/libk4a` repository.
-1. Create the draft and publish the release in Github.
-1. Merge the `release-<Release Tag>` branch to `master` in `libk4a/libk4a` and delete the `release-<Release Tag>` branch.
-1. Publish Linux packages to Microsoft YUM/APT repositories.
-1. Verify the generated docker container images.
+### Alpha Release
 
+Alpha builds are built using source from the develop branch and are numbered with the
+expected release number for current development, such as ```1.1.0-alpha.0```.
 
-## Building Packages
+Alpha builds expect heavy churn and are not guaranteed to be backward compatible with each other.
 
-TODO: How do we build release packages?
+### Beta Release
 
-## Release Tag
+Beta builds are built from the release branches, such as ```1.1.0-beta.0```.
 
-LibK4A releases use [Semantic Versioning][semver].
-For example until we hit 6.0, each sprint results in a bump to the build number,
-so `v6.0.0-alpha.7` goes to `v6.0.0-alpha.8`.
+Release branches are created when that release is being stabilized, at which point only bug fixes and changes 
+required for that release are merged or cherry-picked in to the release branch. Fixes may alternatively be made 
+to the release branch directly and then merged back to the develop branch.
 
-When a particular commit is chosen as a release,
-we create an [annotated tag][tag] that names the release.
-An annotated tag has a message (like a commit),
-and is *not* the same as a lightweight tag.
-Create one with `git tag -a v6.0.0-alpha.7 -m <message-here>`,
-and use the release change logs as the message.
-Our convention is to prepend the `v` to the semantic version.
-The summary (first line) of the annotated tag message should be the full release title,
-e.g. 'v6.0.0-alpha.7 release of libk4a'.
+### Official Release
 
-When the annotated tag is finalized, push it with `git push --tags`.
-GitHub will see the tag and present it as an option when creating a new [release][].
-Start the release, use the annotated tag's summary as the title,
-and save the release as a draft while you upload the binary packages.
+Once a beta build has been signed off for release, an official build is created with code from that release branch,
+such as ```1.1.0```
 
-[semver]: http://semver.org/
-[tag]: https://git-scm.com/book/en/v2/Git-Basics-Tagging
-[release]: https://help.github.com/articles/creating-releases/
+### Patch releases
+
+Critical changes to a released build may be made in the release branch to patch an existing release. These
+changes do not introduce functionality or break compatibility.
+
+Changes are made in the release branch for the existing release, such as ```release/1.0.x```, and are verified with beta
+builds for the patch, such as ```1.0.1-beta.0```, before the patch is signed off and released as ```1.0.1```
+
+## Moving changes between release branches
+
+When a release branch is created it should be created from the develop branch.
+
+Changes may be merged (not squashed) from develop in to a release branch so long as there are no new
+changes in develop not suitable for that release.
+
+Once develop starts taking changes for the next release, changes must be cherry-picked or made
+directly in a release branch.
+
+Release branches should always be merged back in to develop (not squashed) after changes have been made
+there to avoid future merge conflicts.
+
+Our Github repository policy enforces that all pull requests are squashed. Therefore merges between
+release branches should be done locally, and the results pushed by a repository administrator.
+
+## Building a Release Package
+
+The Azure Kinect team will update the packaging build repository to reference the commit of the GitHub
+Azure Kinect Sensor SDK repository to be released.
+The Azure Kinect team will schedule an official build of the packaging repository with the correct
+release version number.
+
+The build will produce an official copy of the SDK with the depth engine and installer. All binaries
+are signed and the symbols are indexed.
+
+Once a candidate build has been produced, it can be submitted to the Azure Kinect Release pipeline.
+
+The pipeline will:
+
+* Run all release tests.
+* Request manual sign off validation.
+* Update the documentation resources.
+* Tag commit in the Azure Kinect Sensor SDK repository.
+* Publish NuGet feeds.
+* Request publishing of the MSI installer to the web.
+
+## Installer
+
+The Azure Kinect SDK installer provides both open and closed source binaries. The open source binaries are built from 
+this [GitHub repo](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK).
+
+[Release tags](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases) are used by Microsoft to label commits 
+used to create a released build. Checkout the commit that matches the release label to build the desired release version.

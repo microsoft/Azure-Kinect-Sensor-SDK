@@ -709,7 +709,6 @@ INSTANTIATE_TEST_CASE_P(
                                                -11,
                                                EXPOSURE_TIME_ABSOLUTE_CONTROL_MAXIMUM_VALUE,
                                                1 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY, false, 0, 1, 1 },
                       color_control_parameter{ K4A_COLOR_CONTROL_BRIGHTNESS, false, 0, 255, 1 },
                       color_control_parameter{ K4A_COLOR_CONTROL_CONTRAST, false, 0, 10, 1 },
                       color_control_parameter{ K4A_COLOR_CONTROL_SATURATION, false, 0, 63, 1 },
