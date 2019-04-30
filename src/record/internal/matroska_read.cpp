@@ -1934,7 +1934,8 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     {
         LOG_ERROR("Capture tracks sync is broken by k4a_playback_get_next_data_block or "
                   "k4a_playback_get_previous_data_block function call. Try to call k4a_playback_seek_timestamp to "
-                  "bring the capture tracks back to sync!");
+                  "bring the capture tracks back to sync!",
+                  0);
         return K4A_STREAM_RESULT_FAILED;
     }
 

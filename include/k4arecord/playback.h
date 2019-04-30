@@ -222,18 +222,18 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
  * \param track_name
  * The track name to be queried the codec id
  *
- * \param data
- * Location to write the codec context data. If a NULL buffer is specified, \p data_size will be set to the size of
- * buffer needed to store the data.
+ * \param codec_context
+ * Location to write the codec context data. If a NULL buffer is specified, \p codec_context_size will be set to the
+ * size of buffer needed to store the data.
  *
- * \param data_size
- * On input, the size of the \p value buffer. On output, this is set to the length of the data value
+ * \param codec_context_size
+ * On input, the size of the \p value buffer. On output, this is set to the length of the codec_context data.
  *
  * \returns
  * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p value has been filled in. If the buffer is too small the
  * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p value buffer is returned in the \p
- * data_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track_name does not exist. All other failures
- * return
+ * codec_context_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track_name does not exist. All other
+ * failures return
  * ::K4A_BUFFER_RESULT_FAILED.
  *
  * \xmlonly
