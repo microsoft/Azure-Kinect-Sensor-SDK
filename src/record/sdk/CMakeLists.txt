@@ -30,8 +30,9 @@ configure_file(
 # ${K4ARECORD_INCLUDE_DIR} contains k4arecord/record.h and k4arecord/playback.h, which are the primary headers consumers should include
 # ${CMAKE_CURRENT_BINARY_DIR}/include contains the generated k4arecord/k4arecord_export.h
 target_include_directories(k4arecord PUBLIC
-    ${CMAKE_CURRENT_BINARY_DIR}/include
-    ${K4ARECORD_INCLUDE_DIR}
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+    $<BUILD_INTERFACE:${K4ARECORD_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
     )
 
 # Link in libraries
