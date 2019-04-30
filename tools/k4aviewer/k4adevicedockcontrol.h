@@ -47,7 +47,6 @@ private:
     {
         ColorSetting ExposureTimeUs;
         ColorSetting WhiteBalance;
-        ColorSetting AutoExposurePriority;
         ColorSetting Brightness;
         ColorSetting Contrast;
         ColorSetting Saturation;
@@ -106,6 +105,9 @@ private:
     k4a::device m_device;
     bool m_camerasStarted = false;
     bool m_imuStarted = false;
+
+    bool m_camerasAbortInProgress = false;
+    bool m_imuAbortInProgress = false;
 
     std::string m_deviceSerialNumber;
     std::shared_ptr<K4AMicrophone> m_microphone;

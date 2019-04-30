@@ -6,6 +6,7 @@
 
 // System headers
 //
+#include <array>
 #include <istream>
 #include <ostream>
 
@@ -49,6 +50,31 @@ struct K4ADeviceConfiguration
 std::istream &operator>>(std::istream &s, K4ADeviceConfiguration &val);
 std::ostream &operator<<(std::ostream &s, const K4ADeviceConfiguration &val);
 
+enum class ViewerOption
+{
+    ShowFrameRateInfo,
+    ShowInfoPane,
+    ShowLogDock,
+    ShowDeveloperOptions,
+
+    // Insert new settings here
+
+    MAX
+};
+
+std::istream &operator>>(std::istream &s, ViewerOption &val);
+std::ostream &operator<<(std::ostream &s, const ViewerOption &val);
+
+struct K4AViewerOptions
+{
+    K4AViewerOptions();
+
+    std::array<bool, static_cast<size_t>(ViewerOption::MAX)> Options;
+};
+
+std::istream &operator>>(std::istream &s, K4AViewerOptions &val);
+std::ostream &operator<<(std::ostream &s, const K4AViewerOptions &val);
+
 // Singleton that holds viewer settings
 //
 class K4AViewerSettingsManager
@@ -60,24 +86,26 @@ public:
         return instance;
     }
 
-    void SetShowFrameRateInfo(bool showFrameRateInfo)
-    {
-        m_settingsPayload.ShowFrameRateInfo = showFrameRateInfo;
-        SaveSettings();
-    }
-    bool GetShowFrameRateInfo() const
-    {
-        return m_settingsPayload.ShowFrameRateInfo;
-    }
+    void SetDefaults();
 
-    void SetShowInfoPane(bool showInfoPane)
+    void SetViewerOption(ViewerOption option, bool value)
     {
-        m_settingsPayload.ShowInfoPane = showInfoPane;
+        if (option == ViewerOption::MAX)
+        {
+            throw std::logic_error("Invalid viewer option!");
+        }
+
+        m_settingsPayload.Options.Options[static_cast<size_t>(option)] = value;
         SaveSettings();
     }
-    bool GetShowInfoPane() const
+    bool GetViewerOption(ViewerOption option) const
     {
-        return m_settingsPayload.ShowInfoPane;
+        if (option == ViewerOption::MAX)
+        {
+            throw std::logic_error("Invalid viewer option!");
+        }
+
+        return m_settingsPayload.Options.Options[static_cast<size_t>(option)];
     }
 
     const K4ADeviceConfiguration &GetSavedDeviceConfiguration() const
@@ -97,11 +125,11 @@ private:
 
     struct SettingsPayload
     {
-        bool ShowFrameRateInfo = false;
-        bool ShowInfoPane = true;
+        K4AViewerOptions Options;
         K4ADeviceConfiguration SavedDeviceConfiguration;
     };
 
+    std::string m_settingsFilePath;
     SettingsPayload m_settingsPayload;
 };
 

@@ -585,6 +585,7 @@ static bool compare_version_list(k4a_version_t device_version, uint8_t count, k4
 static k4a_result_t wait_update_operation_complete(firmware_t firmware_handle, firmware_status_summary_t *finalStatus)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, finalStatus == NULL);
+    LOG_INFO("Waiting for the update operation to complete...", 0);
 
     bool allComplete = false;
     k4a_result_t result = K4A_RESULT_FAILED;
@@ -617,7 +618,7 @@ static k4a_result_t wait_update_operation_complete(firmware_t firmware_handle, f
         else
         {
             printf("ERROR: Failed to get the firmware update status.\n");
-            break;
+            return K4A_RESULT_FAILED;
         }
 
         if (0 != tickcounter_get_current_ms(tick, &now))
@@ -629,7 +630,7 @@ static k4a_result_t wait_update_operation_complete(firmware_t firmware_handle, f
         if (!allComplete && (now - start_time_ms > UPDATE_TIMEOUT_MS))
         {
             printf("ERROR: Timeout waiting for the update to complete.\n");
-            break;
+            return K4A_RESULT_FAILED;
         }
 
         if (!allComplete)
@@ -637,6 +638,8 @@ static k4a_result_t wait_update_operation_complete(firmware_t firmware_handle, f
             ThreadAPI_Sleep(500);
         }
     } while (!allComplete);
+
+    LOG_INFO("Firmware update operation has completed.", 0);
 
     return K4A_RESULT_SUCCEEDED;
 }
@@ -651,6 +654,7 @@ static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info)
     if (command_info->device_serial_number == NULL && command_info->firmware_handle == NULL)
     {
         // Never connected to the device, connect and save the serial number for future connections
+        LOG_INFO("Connecting to device based on index to get Serial Number...", 0);
 
         usb_cmd_get_device_count(&device_count);
         if (device_count == 0)
@@ -696,6 +700,8 @@ static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info)
 
     if (command_info->firmware_handle == NULL)
     {
+        LOG_INFO("Connecting to device...", 0);
+
         // Wait until the device is available...
         do
         {
@@ -705,8 +711,10 @@ static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info)
                 result = firmware_create(command_info->device_index, &command_info->firmware_handle);
                 if (!K4A_SUCCEEDED(result))
                 {
-                    printf("ERROR: Failed to connect to the Azure Kinect device\n");
-                    return result;
+                    LOG_INFO("Failed to connect to the Azure Kinect device", 0);
+                    result = K4A_RESULT_FAILED;
+                    ThreadAPI_Sleep(500);
+                    continue;
                 }
 
                 char *serial_number = NULL;
@@ -769,6 +777,8 @@ static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info)
             return result;
         }
     }
+
+    LOG_INFO("Finished attempting to connect to device. Result: %d Retries: %d", result, retry);
 
     return result;
 }

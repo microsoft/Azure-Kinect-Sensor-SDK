@@ -122,8 +122,8 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
 
     m_playbackThreadState.Recording = std::move(recording);
     PlaybackThreadState *pThreadState = &m_playbackThreadState;
-    m_playbackThread = std::unique_ptr<K4APollingThread>(
-        new K4APollingThread([pThreadState]() { return PlaybackThreadFn(pThreadState); }));
+    m_playbackThread = std14::make_unique<K4APollingThread>(
+        [pThreadState](bool) { return PlaybackThreadFn(pThreadState); });
 
     SetViewType(K4AWindowSet::ViewType::Normal);
 }

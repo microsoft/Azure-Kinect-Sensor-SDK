@@ -71,8 +71,8 @@ public:
     void NotifyTermination()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-
         m_primed = false;
+        m_mostRecentData = T();
         for (const auto &wpObserver : m_observers)
         {
             if (auto spObserver = wpObserver.lock())

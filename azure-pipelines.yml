@@ -7,9 +7,9 @@ variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
 - name: 'linux_firmware_version'
-  value: '1.5.946614'
+  value: '1.6.987014'
 - name: 'windows_firmware_version'
-  value: '1.5.926614'
+  value: '1.6.987014'
 
 trigger:
   batch: false
@@ -22,56 +22,56 @@ trigger:
 
 jobs:
 - job: WindowsK4ABuildTest
-  displayName: Windows K4A Build + Test
+  displayName: Win
   strategy:
     maxParallel: 100
     matrix:
-      VS2017_x86_64-pc-windows-msvc_debug_ninja:
+      VS2017_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
         vmImage: 'vs2017-win2016'
-      VS2017_x86_64-pc-windows-msvc_relwithdebinfo_ninja:
+      VS2017_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
         vmImage: 'vs2017-win2016'
-      VS2017_x86_64-pc-windows-msvc_debug_msbuild:
+      VS2017_x64-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'debug'
         vmImage: 'vs2017-win2016'
-      VS2017_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
+      VS2017_x64-msvc_rel_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'relwithdebinfo'
         vmImage: 'vs2017-win2016'
-      VS2017_x86-pc-windows-msvc_debug_ninja:
+      VS2017_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
         vmImage: 'vs2017-win2016'
-      VS2017_x86-pc-windows-msvc_relwithdebinfo_ninja:
+      VS2017_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
         vmImage: 'vs2017-win2016'
-      VS2017_x86-pc-windows-msvc_debug_msbuild:
+      VS2017_x86-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'debug'
         vmImage: 'vs2017-win2016'
-      VS2017_x86-pc-windows-msvc_relwithdebinfo_msbuild:
+      VS2017_x86-msvc_rel_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'relwithdebinfo'
         vmImage: 'vs2017-win2016'
-      VS2019_x86_64-pc-windows-msvc_debug_ninja:
+      VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
         vmImage: 'windows-2019'
-      VS2019_x86_64-pc-windows-msvc_relwithdebinfo_ninja:
+      VS2019_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
@@ -87,12 +87,12 @@ jobs:
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'relwithdebinfo'
       #   vmImage: 'windows-2019'
-      VS2019_x86-pc-windows-msvc_debug_ninja:
+      VS2019_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
         vmImage: 'windows-2019'
-      VS2019_x86-pc-windows-msvc_relwithdebinfo_ninja:
+      VS2019_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
@@ -266,22 +266,22 @@ jobs:
     condition: and(succeeded(), and(eq(variables['vmImage'], 'vs2017-win2016'), eq(variables['BuildGenerator'], 'Ninja')))
 
 - job: LinuxK4ABuildTest
-  displayName: Linux K4A Build + Test
+  displayName: Linux
   pool:
     vmImage: 'ubuntu-16.04'
   strategy:
     maxParallel: 100
     matrix:
-      x86_64-unknown-linux-clang_debug_ninja:
+      x64-clang_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'debug'
-      x86_64-unknown-linux-gnu_debug_ninja:
+      x64-gnu_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'debug'
-      x86_64-unknown-linux-clang_relwithdebinfo_ninja:
+      x64-clang_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'relwithdebinfo'
-      x86_64-unknown-linux-gnu_relwithdebinfo_ninja:
+      x64-gnu_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'relwithdebinfo'
 
@@ -476,7 +476,7 @@ jobs:
       clean: true
       lfs: false
       persistCredentials: true
-      submodules: true
+      submodules: false
 
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
@@ -484,14 +484,19 @@ jobs:
         artifactName: 'amd64-windows-msvc-RelWithDebInfo'
         parallelizationLimit: 8
 
-    - task: UniversalPackages@0
-      displayName: 'Download DepthEngine Plugin'
-      inputs:
-        command: download
-        vstsFeed: 'DepthEnginePlugin'
-        vstsFeedPackage: 'depthengine'
-        vstsPackageVersion: "1.0.1"
-        downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
+    - powershell: |
+         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug"
+         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug\depthengine_1_0.dll"
+         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release"
+         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release\depthengine_1_0.dll"
+         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug"
+         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug\depthengine_1_0.dll"
+         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release"
+         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release\depthengine_1_0.dll"
+         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\firmware"
+         Invoke-WebRequest -uri "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin"
+      displayName: 'Download Resources'
+
 
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into bin folder"
@@ -501,22 +506,13 @@ jobs:
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
         flattenFolders: true
 
-    - task: UniversalPackages@0
-      displayName: 'Download Azure Kinect Firmware'
-      inputs:
-        command: download
-        vstsFeed: 'analog.ai.depthcamera'
-        vstsFeedPackage: 'azure-kinect-firmware'
-        vstsPackageVersion: "$(firmware_version)"
-        downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
-
     - task: PowerShell@2
       inputs:
         targetType: 'filePath'
         filePath: './scripts/Reset-Device.ps1'
       displayName: 'Reset K4A Device'
 
-    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinect_Fw_$(firmware_version).bin'
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
 
@@ -567,32 +563,25 @@ jobs:
         artifactName: 'x86_64-linux-clang-RelWithDebInfo'
         parallelizationLimit: 8
 
-    - task: UniversalPackages@0
+
+    - task: CmdLine@2
       displayName: 'Download Azure Kinect Firmware'
       inputs:
-        command: download
-        vstsFeed: 'analog.ai.depthcamera'
-        vstsFeedPackage: 'azure-kinect-firmware'
-        vstsPackageVersion: "$(firmware_version)"
-        downloadDirectory: "$(System.ArtifactsDirectory)/firmware"
-
-    - task: UniversalPackages@0
+        script: curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin --create-dirs
+                
+    - task: CmdLine@2
       displayName: 'Download DepthEngine Plugin'
       inputs:
-        command: download
-        vstsFeed: 'DepthEnginePlugin'
-        vstsFeedPackage: 'depthengine'
-        vstsPackageVersion: "1.0.1"
-        downloadDirectory: "$(System.ArtifactsDirectory)/depthengineplugin"
+        script: |
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/debug/libdepthengine.so.1.0$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug/libdepthengine.so.1.0 --create-dirs
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/debug/libdepthengine.so$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug/libdepthengine.so --create-dirs
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/release/libdepthengine.so.1.0$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/libdepthengine.so.1.0 --create-dirs
+         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/release/libdepthengine.so$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/libdepthengine.so --create-dirs
 
-    - task: UniversalPackages@0
+    - task: CmdLine@2
       displayName: 'Download findconnectedport'
       inputs:
-        command: download
-        vstsFeed: 'analog.ai.depthcamera'
-        vstsFeedPackage: 'findconnectedport'
-        vstsPackageVersion: "0.1.1"
-        downloadDirectory: "$(System.ArtifactsDirectory)/findconnectedport"
+        script:  curl "$(ResourceBaseUrl)/findconnectedport/linux/findconnectedport$(ResourceToken)" --output $(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport --create-dirs
 
     - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
       workingDirectory: '$(System.ArtifactsDirectory)'
@@ -634,9 +623,11 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
       displayName: 'Reset K4A Device'
 
-    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinect_Fw_$(firmware_version).bin'
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
+      env:
+        K4A_LOG_LEVEL: 'I'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
       workingDirectory: '$(System.ArtifactsDirectory)'

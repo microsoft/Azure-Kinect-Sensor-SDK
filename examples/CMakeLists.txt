@@ -3,11 +3,11 @@
 
 add_subdirectory(calibration)
 add_subdirectory(enumerate)
+add_subdirectory(playback_external_sync)
 add_subdirectory(fastpointcloud)
 add_subdirectory(k4arecorder)
 add_subdirectory(k4arecorder_custom_track)
 add_subdirectory(opencv_compatibility)
-add_subdirectory(snipits)
 add_subdirectory(streaming)
 add_subdirectory(transformation)
 add_subdirectory(undistort)

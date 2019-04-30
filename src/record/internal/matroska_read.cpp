@@ -397,6 +397,11 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     context->color_track.track = find_track(context, "COLOR", "K4A_COLOR_TRACK");
     context->depth_track.track = find_track(context, "DEPTH", "K4A_DEPTH_TRACK");
     context->ir_track.track = find_track(context, "IR", "K4A_IR_TRACK");
+    if (context->ir_track.track == NULL)
+    {
+        // Support legacy IR track naming.
+        context->ir_track.track = find_track(context, "DEPTH_IR", NULL);
+    }
     context->imu_track.track = find_track(context, "IMU", "K4A_IMU_TRACK");
 
     if (K4A_FAILED(parse_custom_tracks(context)))
@@ -893,9 +898,8 @@ KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, con
     if (track_found != NULL)
     {
         track_found->SetGlobalTimecodeScale(context->timecode_scale);
-        return track_found;
     }
-    return NULL;
+    return track_found;
 }
 
 static bool check_track_name_default_track(std::string track_name)
@@ -1721,7 +1725,7 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
         }
         else if (in_block->reader->format == K4A_IMAGE_FORMAT_COLOR_YUY2)
         {
-            // For backwards compatibility with early recordings, the YUY2 format was used. The actual data buffer is
+            // For backward compatibility with early recordings, the YUY2 format was used. The actual data buffer is
             // 16-bit little-endian, so we can just use the buffer as-is.
         }
         else

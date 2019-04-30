@@ -14,6 +14,7 @@
 // Library headers
 //
 #include "k4aimgui_all.h"
+#include "k4aviewersettingsmanager.h"
 #include "k4awindowsizehelpers.h"
 
 // Project headers
@@ -75,14 +76,18 @@ void K4AWindowManager::ShowAll()
     const ImVec2 leftDockRegionSize(m_glWindowSize.x, m_glWindowSize.y - leftDockRegionPos.y);
     m_leftDock.Show(leftDockRegionPos, leftDockRegionSize);
 
-    const ImVec2 bottomDockRegionPos(m_leftDock.GetSize().x, m_menuBarHeight);
-    const ImVec2 bottomDockRegionSize(m_glWindowSize.x - bottomDockRegionPos.x,
-                                      m_glWindowSize.y - bottomDockRegionPos.y);
-    m_bottomDock.Show(bottomDockRegionPos, bottomDockRegionSize);
-
     const ImVec2 windowAreaPosition(m_leftDock.GetSize().x, m_menuBarHeight);
-    const ImVec2 windowAreaSize(m_glWindowSize.x - windowAreaPosition.x,
-                                m_glWindowSize.y - windowAreaPosition.y - m_bottomDock.GetSize().y);
+    ImVec2 windowAreaSize(m_glWindowSize.x - windowAreaPosition.x, m_glWindowSize.y - windowAreaPosition.y);
+
+    if (K4AViewerSettingsManager::Instance().GetViewerOption(ViewerOption::ShowLogDock))
+    {
+        const ImVec2 bottomDockRegionPos(m_leftDock.GetSize().x, m_menuBarHeight);
+        const ImVec2 bottomDockRegionSize(m_glWindowSize.x - bottomDockRegionPos.x,
+                                          m_glWindowSize.y - bottomDockRegionPos.y);
+        m_bottomDock.Show(bottomDockRegionPos, bottomDockRegionSize);
+
+        windowAreaSize.y -= m_bottomDock.GetSize().y;
+    }
 
     if (m_maximizedWindow != nullptr)
     {

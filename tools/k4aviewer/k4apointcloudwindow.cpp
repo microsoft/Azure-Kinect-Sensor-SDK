@@ -18,6 +18,7 @@
 //
 #include "k4aimguiextensions.h"
 #include "k4aviewererrormanager.h"
+#include "k4aviewerlogmanager.h"
 #include "k4awindowsizehelpers.h"
 
 using namespace k4aviewer;
@@ -66,28 +67,6 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
 
     const ImVec2 imageStartPos = ImGui::GetCursorScreenPos();
     ImGui::Image(static_cast<ImTextureID>(*m_texture), textureSize);
-
-    if (m_missingColorImages != 0 || m_missingDepthImages != 0)
-    {
-        ImGui::BeginGroup();
-        {
-            ImGuiExtensions::TextColorChanger warningColorChanger(ImGuiExtensions::TextColor::Warning);
-            ImGui::Text("%s", "Warning: some captures were dropped due to missing images!");
-            ImGui::Text("Missing depth images: %d", m_missingDepthImages);
-            ImGui::Text("Missing color images: %d", m_missingColorImages);
-        }
-        ImGui::EndGroup();
-
-        if (!m_haveShownMissingImagesWarning)
-        {
-            std::stringstream warningBuilder;
-            warningBuilder
-                << "Warning: Some captures didn't have both color and depth data and had to be dropped." << std::endl
-                << "         To avoid this, you can set the \"Synchronized images only\" option under Internal Sync.";
-            K4AViewerErrorManager::Instance().SetErrorStatus(warningBuilder.str());
-            m_haveShownMissingImagesWarning = true;
-        }
-    }
 
     int *ipColorizationStrategy = reinterpret_cast<int *>(&m_colorizationStrategy);
 
@@ -172,30 +151,48 @@ K4APointCloudWindow::K4APointCloudWindow(std::string &&windowTitle,
 
 void K4APointCloudWindow::ProcessInput(ImVec2 imageStartPos, ImVec2 displayDimensions)
 {
-    if (ImGui::IsWindowFocused())
-    {
-        ImGuiIO &io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
 
-        const bool leftMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_1];
-        const bool rightMouseDown = io.MouseDown[GLFW_MOUSE_BUTTON_2];
+    if (ImGui::IsWindowHovered())
+    {
+        m_pointCloudVisualizer.ProcessMouseScroll(io.MouseWheel);
+    }
+
+    MouseMovementType movementType = MouseMovementType::None;
+
+    bool mouseDown = false;
+    ImVec2 mouseDownPos(-1.f, -1.f);
+    if (io.MouseDown[GLFW_MOUSE_BUTTON_1])
+    {
+        mouseDownPos = io.MouseClickedPos[GLFW_MOUSE_BUTTON_1];
+        movementType = MouseMovementType::Rotation;
+        mouseDown = true;
+    }
+    else if (io.MouseDown[GLFW_MOUSE_BUTTON_2])
+    {
+        mouseDownPos = io.MouseClickedPos[GLFW_MOUSE_BUTTON_2];
+        movementType = MouseMovementType::Translation;
+        mouseDown = true;
+    }
+
+    if (mouseDown)
+    {
+        // Normalize to the image start coordinates
+        //
+        mouseDownPos.x -= imageStartPos.x;
+        mouseDownPos.y -= imageStartPos.y;
 
         const linmath::vec2 mousePos{ io.MousePos.x - imageStartPos.x, io.MousePos.y - imageStartPos.y };
 
-        const linmath::vec2 mouseDelta{ io.MouseDelta.x, io.MouseDelta.y };
-        const linmath::vec2 dimensions{ displayDimensions.x, displayDimensions.y };
-
-        MouseMovementType movementType = MouseMovementType::None;
-        if (leftMouseDown)
+        // Only count drags if they originated on the image
+        //
+        if (mouseDownPos.x >= 0.f && mouseDownPos.x <= displayDimensions.x && mouseDownPos.y >= 0.f &&
+            mouseDownPos.y <= displayDimensions.y)
         {
-            movementType = MouseMovementType::Rotation;
+            const linmath::vec2 dimensions{ displayDimensions.x, displayDimensions.y };
+            const linmath::vec2 mouseDelta{ io.MouseDelta.x, io.MouseDelta.y };
+            m_pointCloudVisualizer.ProcessMouseMovement(dimensions, mousePos, mouseDelta, movementType);
         }
-        else if (rightMouseDown)
-        {
-            movementType = MouseMovementType::Translation;
-        }
-
-        m_pointCloudVisualizer.ProcessMouseMovement(dimensions, mousePos, mouseDelta, movementType);
-        m_pointCloudVisualizer.ProcessMouseScroll(io.MouseWheel);
     }
 }
 
@@ -207,11 +204,19 @@ bool K4APointCloudWindow::CheckVisualizationResult(PointCloudVisualizationResult
         return true;
     case PointCloudVisualizationResult::MissingDepthImage:
         ++m_consecutiveMissingImages;
-        ++m_missingDepthImages;
+        K4AViewerLogManager::Instance()
+            .Log(K4A_LOG_LEVEL_WARNING,
+                 __FILE__,
+                 __LINE__,
+                 "Dropped a capture due to a missing depth image - set \"Synchronized Images Only\" to avoid this");
         break;
     case PointCloudVisualizationResult::MissingColorImage:
+        K4AViewerLogManager::Instance()
+            .Log(K4A_LOG_LEVEL_WARNING,
+                 __FILE__,
+                 __LINE__,
+                 "Dropped a capture due to a missing color image - set \"Synchronized Images Only\" to avoid this");
         ++m_consecutiveMissingImages;
-        ++m_missingColorImages;
         break;
     case PointCloudVisualizationResult::OpenGlError:
         SetFailed("OpenGL error!");
