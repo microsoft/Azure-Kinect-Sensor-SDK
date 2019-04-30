@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# Define public library
+# Create K4ARecord library
 add_library(k4arecord SHARED
             playback.cpp
             record.cpp
@@ -34,6 +34,7 @@ target_include_directories(k4arecord PUBLIC
     ${K4ARECORD_INCLUDE_DIR}
     )
 
+# Link in libraries
 target_link_libraries(k4arecord PRIVATE
     k4ainternal::record
     k4ainternal::playback
@@ -57,12 +58,42 @@ include(GNUInstallDirs)
 install(
     TARGETS
         k4arecord
+    EXPORT
+        k4aRecordTargets
     LIBRARY DESTINATION
         ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION
         ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION
         ${CMAKE_INSTALL_BINDIR}
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    k4aRecordConfigVersion.cmake
+    VERSION ${K4A_VERSION}
+    COMPATIBILITY AnyNewerVersion
+    )
+
+install(
+    EXPORT
+        k4aTargets
+    FILE
+        k4aTargets.cmake
+    NAMESPACE
+        k4a::
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/cmake/k4a
+)
+
+configure_file("${PROJECT_SOURCE_DIR}/cmake/k4aRecordConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/k4aRecordConfig.cmake" COPYONLY)
+
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/k4aRecordConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/k4aRecordConfigVersion.cmake"
+    DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/cmake/k4a
 )
 
 install(
