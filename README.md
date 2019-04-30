@@ -1,6 +1,6 @@
 # Azure Kinect SDK (K4A)
 
-[![Build Status (develop)](https://microsoft.visualstudio.com/Analog/_apis/build/status/Analog/AI/depthcamera/Microsoft.Azure-Kinect-Sensor-SDK?branchName=develop)](https://microsoft.visualstudio.com/Analog/_build/latest?definitionId=35486&branchName=develop)
+[![Build Status (develop)](https://dev.azure.com/ms/Azure-Kinect-Sensor-SDK/_apis/build/status/Microsoft.Azure-Kinect-Sensor-SDK%20(Public)?branchName=develop)](https://dev.azure.com/ms/Azure-Kinect-Sensor-SDK/_build/latest?definitionId=133&branchName=develop)
 
 ## Introduction
 
