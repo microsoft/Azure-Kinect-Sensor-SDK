@@ -1,5 +1,10 @@
 # Azure Kinect SDK (K4A)
 
+Welcome to the Azure Kinect DK Sensor SDK! While devices and the Body Tracking SDK will be available this
+summer, we wanted to share the Sensor SDK now. We hope you can use this interim period to get familiar with
+our SDK, ask questions, and provide feedback. See [Azure.com/Kinect](https://Azure.com/kinect) for device
+info and available documentation. 
+
 [![Build Status (develop)](https://dev.azure.com/ms/Azure-Kinect-Sensor-SDK/_apis/build/status/Microsoft.Azure-Kinect-Sensor-SDK%20(Public)?branchName=develop)](https://dev.azure.com/ms/Azure-Kinect-Sensor-SDK/_build/latest?definitionId=133&branchName=develop)
 
 ## Introduction
