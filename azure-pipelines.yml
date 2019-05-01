@@ -270,23 +270,25 @@ jobs:
     displayName: 'Create temp DepthEngine'
 
   - task: NuGetToolInstaller@0
-      inputs:
+    inputs:
       versionSpec: '>=4.3.1' 
 
   - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2 # NuGetCommand@2
-      inputs:
+    inputs:
       command: 'restore'
       solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
 
   - task: VSBuild@1
-      inputs:
+    displayName: 'Build C# Wrappers'
+    inputs:
       solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
       msbuildArgs: '/p:BaseOutputPath="$(Build.BinariesDirectory)\$(MSBuildConfiguration)\\"'
       platform: '$(MSBuildPlatform)'
       configuration: '$(MSBuildConfiguration)'
 
   - task: VSTest@2
-      inputs:
+    displayName: 'Run C# Unit Tests'
+    inputs:
       testSelector: 'testAssemblies'
       searchFolder: '$(Build.BinariesDirectory)'
       platform: '$(MSBuildPlatform)'
@@ -595,6 +597,7 @@ jobs:
       continueOnError: true
 
     - task: VSTest@2
+      displayName: 'Run C# Functional Tests'
       inputs:
         testSelector: 'testAssemblies'
         searchFolder: '$(Build.BinariesDirectory)'
