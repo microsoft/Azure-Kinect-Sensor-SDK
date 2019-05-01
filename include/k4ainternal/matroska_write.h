@@ -73,8 +73,7 @@ typedef struct _k4a_record_context_t
     libmatroska::KaxTrackEntry *ir_track;
     libmatroska::KaxTrackEntry *imu_track;
 
-    // std::list can't be memset to 0, so we need to use a pointer.
-    std::unique_ptr<std::list<cluster_t *>> pending_clusters;
+    std::list<cluster_t *> pending_clusters;
     std::mutex pending_cluster_lock; // Locks last_written_timestamp, most_recent_timestamp, and pending_clusters
 
     bool writer_stopping;
