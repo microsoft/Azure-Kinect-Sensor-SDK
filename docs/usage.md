@@ -15,16 +15,15 @@ can find it.
 
 ### Windows Dependencies
 
-No dependencies needed. The Azure Kinect SDK is self contained on Windows and contains
-all needed dependencies.
+* [Depth Engine](depthengine.md)
 
 ### Linux Dependencies
 
 * OpenSSL
 
-* LibUSB
-
 * OpenGL
+
+* [Depth Engine](depthengine.md)
 
 ## Device Setup
 
