@@ -15,6 +15,4 @@ namespace Microsoft.AzureKinect
         IR16,
         Custom
     }
-
-
 }
