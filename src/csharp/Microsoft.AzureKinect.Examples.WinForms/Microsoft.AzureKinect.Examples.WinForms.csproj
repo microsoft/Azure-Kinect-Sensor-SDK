@@ -97,6 +97,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.AzureKinect.WinForms\Microsoft.AzureKinect.WinForms.csproj">
+      <Project>{618e28c5-0624-463f-9adb-040ba5daed68}</Project>
+      <Name>Microsoft.AzureKinect.WinForms</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.AzureKinect\Microsoft.AzureKinect.csproj">
       <Project>{847b31d5-c253-4766-bf81-032f4670589d}</Project>
       <Name>Microsoft.AzureKinect</Name>
