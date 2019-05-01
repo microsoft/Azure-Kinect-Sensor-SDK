@@ -4,4 +4,4 @@
 include(CMakeFindDependencyMacro)
 
 # Add the targets file
-include("${CMAKE_CURRENT_LIST_DIR}/k4aRecordTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/k4arecordTargets.cmake")
