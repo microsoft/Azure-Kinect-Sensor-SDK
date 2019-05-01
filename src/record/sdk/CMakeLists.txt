@@ -92,7 +92,7 @@ configure_file("${PROJECT_SOURCE_DIR}/cmake/k4arecordConfig.cmake.in" "${CMAKE_C
 install(
     FILES
         "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfigVersion.cmake"
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/k4arecord
 )
