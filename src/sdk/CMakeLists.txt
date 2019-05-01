@@ -62,8 +62,14 @@ add_library(k4a::k4a ALIAS k4a)
 set_target_properties(
     k4a
     PROPERTIES
-        VERSION ${K4A_VERSION}
-        SOVERSION ${K4A_VERSION})
+        VERSION
+	    ${K4A_VERSION}
+        SOVERSION
+	    ${K4A_VERSION}
+	INSTALL_RPATH
+	    "\$ORIGIN"
+	BUILD_WITH_INSTALL_RPATH
+	    YES)
 
 
 # Setup install
