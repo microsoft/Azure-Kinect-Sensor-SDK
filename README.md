@@ -29,6 +29,8 @@ To use the SDK please refer to the installation instructions here.
 
 ## Documentation and Official Builds
 
+**Coming soon:** Official binary releases will be available later this summer.
+
 Please see [usage](docs/usage.md) for info on how to use the SDK.
 
 ## Building
