@@ -35,7 +35,7 @@ Please see [usage](docs/usage.md) for info on how to use the SDK.
 
 ## Building
 
-Azure Kinect SDK uses cmake to build. For instructions on how to build this SDK please see
+Azure Kinect SDK uses CMake to build. For instructions on how to build this SDK please see
 [building](docs/building.md).
 
 ## Versioning
