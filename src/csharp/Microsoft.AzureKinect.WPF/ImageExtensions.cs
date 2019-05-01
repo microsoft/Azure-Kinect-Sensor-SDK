@@ -15,7 +15,6 @@ namespace Microsoft.AzureKinect.WPF
         {
             PixelFormat pixelFormat;
 
-            // TODO: reference comment
             // Take a new reference on the image to ensure that the object
             // cannot be disposed by another thread while we have a copy of its UnsafeBufferPointer
             using (Image reference = image.Reference())
@@ -37,16 +36,19 @@ namespace Microsoft.AzureKinect.WPF
                 // BitmapSource.Create copies the unmanaged memory, so there is no need to keep
                 // a reference after we have created the BitmapSource objects
 
-                return BitmapSource.Create(
-                            reference.WidthPixels,
-                            reference.HeightPixels,
-                            dpiX, // DPI
-                            dpiY, // DPI
-                            pixelFormat,
-                            null, // Pallete
-                            ((IUnsafeImage)reference).UnsafeBufferPointer,
-                            checked((int)reference.Size),
-                            reference.StrideBytes);
+                unsafe
+                {
+                    return BitmapSource.Create(
+                                reference.WidthPixels,
+                                reference.HeightPixels,
+                                dpiX,
+                                dpiY,
+                                pixelFormat,
+                                palette: null,
+                                (IntPtr)reference.Buffer,
+                                checked((int)reference.Size),
+                                reference.StrideBytes);
+                }
             }
         }
     }
