@@ -60,7 +60,7 @@ install(
     TARGETS
         k4arecord
     EXPORT
-        k4aRecordTargets
+        k4arecordTargets
     LIBRARY DESTINATION
         ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION
@@ -71,30 +71,30 @@ install(
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-    k4aRecordConfigVersion.cmake
+    k4arecordConfigVersion.cmake
     VERSION ${K4A_VERSION}
     COMPATIBILITY AnyNewerVersion
     )
 
 install(
     EXPORT
-        k4aRecordTargets
+        k4arecordTargets
     FILE
-        k4aRecordTargets.cmake
+        k4arecordTargets.cmake
     NAMESPACE
         k4a::
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/k4a
+        ${CMAKE_INSTALL_LIBDIR}/cmake/k4arecord
 )
 
-configure_file("${PROJECT_SOURCE_DIR}/cmake/k4aRecordConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/k4aRecordConfig.cmake" COPYONLY)
+configure_file("${PROJECT_SOURCE_DIR}/cmake/k4arecordConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfig.cmake" COPYONLY)
 
 install(
     FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/k4aRecordConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/k4aRecordConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfig.cmake"
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/k4a
+        ${CMAKE_INSTALL_LIBDIR}/cmake/k4arecord
 )
 
 install(
