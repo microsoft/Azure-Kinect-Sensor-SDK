@@ -267,34 +267,33 @@ jobs:
 
   - powershell: |
         IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
-    displayName: 'Download DepthEngine'
-    
-  - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
-    - task: NuGetToolInstaller@0
-      inputs:
-        versionSpec: '>=4.3.1' 
+    displayName: 'Create temp DepthEngine'
 
-    - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2 # NuGetCommand@2
+  - task: NuGetToolInstaller@0
       inputs:
-        command: 'restore'
-        solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+      versionSpec: '>=4.3.1' 
 
-    - task: VSBuild@1
+  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2 # NuGetCommand@2
       inputs:
-        solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
-        msbuildArgs: '/p:BaseOutputPath="$(Build.BinariesDirectory)\$(MSBuildConfiguration)\\"'
-        platform: '$(MSBuildPlatform)'
-        configuration: '$(MSBuildConfiguration)'
+      command: 'restore'
+      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
 
-    - task: VSTest@2
+  - task: VSBuild@1
       inputs:
-        testSelector: 'testAssemblies'
-        searchFolder: '$(Build.BinariesDirectory)'
-        platform: '$(MSBuildPlatform)'
-        configuration: '$(MSBuildConfiguration)'
-        testAssemblyVer2: |
-          **/*UnitTests.dll
-          !**/obj/**
+      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+      msbuildArgs: '/p:BaseOutputPath="$(Build.BinariesDirectory)\$(MSBuildConfiguration)\\"'
+      platform: '$(MSBuildPlatform)'
+      configuration: '$(MSBuildConfiguration)'
+
+  - task: VSTest@2
+      inputs:
+      testSelector: 'testAssemblies'
+      searchFolder: '$(Build.BinariesDirectory)'
+      platform: '$(MSBuildPlatform)'
+      configuration: '$(MSBuildConfiguration)'
+      testAssemblyVer2: |
+        **/*UnitTests.dll
+        !**/obj/**
 
   - task: CopyFiles@2
     displayName: 'Copy build folder to Staging'
