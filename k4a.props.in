@@ -1,8 +1,8 @@
 <Project>
-  <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <K4aBinaryDirectory>@K4A_BINARY_DIR_DEBUG@</K4aBinaryDirectory>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <K4aBinaryDirectory>@K4A_BINARY_DIR_RELEASE@</K4aBinaryDirectory>
   </PropertyGroup>
 </Project>
