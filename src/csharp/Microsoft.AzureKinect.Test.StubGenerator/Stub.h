@@ -13,7 +13,7 @@
 #endif
 
 // These functions are exported by the Stub module itself and are callable by either
-// The test application or the stub implementaitons.
+// The test application or the stub implementations.
 extern "C" {
 STUB_EXPORT extern FARPROC Stub_GetFunctionPointer(std::string functionName);
 STUB_EXPORT extern void Stub_RecordCall(char *szFunction);

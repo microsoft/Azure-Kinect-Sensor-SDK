@@ -11,8 +11,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Content Include="..\StubGenerator.$(Platform).xml">
-      <Link>appsettings.xml</Link>
+    <Content Include="..\StubGenerator.$(Platform).xml" Link="appsettings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\..\..\include\k4a\k4a.h" Link="k4a\k4a.h">
@@ -27,10 +26,21 @@
     <Content Include="$(K4aBinaryDirectory)\..\src\sdk\include\k4a\k4a_export.h" Link="k4a\k4a_export.h">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="$(K4aBinaryDirectory)\k4a.dll">
-      <Link>k4a.dll</Link>
+    <Content Include="$(K4aBinaryDirectory)\k4a.dll" Link="k4a\k4a.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="$(K4aBinaryDirectory)\k4a.pdb" Link="k4a\k4a.pdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Microsoft.AzureKinect.Test.StubGenerator\Stub.cpp" Link="stub\Stub.cpp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Microsoft.AzureKinect.Test.StubGenerator\Stub.h" Link="stub\Stub.h">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Microsoft.AzureKinect.Test.StubGenerator\StubImplementation.h" Link="stub\StubImplementation.h">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -48,8 +48,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                 filestream.WriteLine(stubCode.Code);
             }
 
-
-            System.IO.File.Copy("Stub.cpp", Path.Combine(options.TempPath.FullName, "Stub.cpp"), true);
+            options.StubFile.CopyTo(Path.Combine(options.TempPath.FullName, "Stub.cpp"), true);
             System.IO.File.Copy("Stub.h", Path.Combine(options.TempPath.FullName, "Stub.h"), true);
             System.IO.File.Copy("StubImplementation.h", Path.Combine(options.TempPath.FullName, "StubImplementation.h"), true);
 
