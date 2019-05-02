@@ -8,11 +8,9 @@
 #include <limits.h>
 #include <math.h>
 
-#ifdef _M_X64
 #include <emmintrin.h> // SSE2
 #include <tmmintrin.h> // SSE3
 #include <smmintrin.h> // SSE4.1
-#endif
 
 typedef struct _k4a_transformation_input_image_t
 {
