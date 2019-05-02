@@ -796,8 +796,15 @@ static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_t
                                             void *xyz_image_data)
 {
     const __m128i *depth_image_data_m128i = (const __m128i *)depth_image_data;
-    __m128 *x_table_m128 = (__m128 *)xy_tables->x_table;
-    __m128 *y_table_m128 = (__m128 *)xy_tables->y_table;
+#if defined(__clang__) || defined(__GNUC__)
+    void *x_table = __builtin_assume_aligned(xy_tables->x_table, 16);
+    void *y_table = __builtin_assume_aligned(xy_tables->y_table, 16);
+#else
+    void *x_table = (void*)xy_tables->x_table;
+    void *y_table = (void*)xy_tables->y_table;
+#endif
+    __m128 *x_table_m128 = (__m128 *)x_table;
+    __m128 *y_table_m128 = (__m128 *)y_table;
     __m128i *xyz_data_m128i = (__m128i *)xyz_image_data;
 
     const int16_t pos0 = 0x0100;
