@@ -30,7 +30,6 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             this.IncludePaths = new DirectoryInfo[]
                 {
                     EnvironmentInfo.CalculateDirectoryLocation(@"%K4A_SOURCE_DIR%\include"),
-                    EnvironmentInfo.CalculateDirectoryLocation(@"%K4A_BINARY_DIR%\src\sdk\include"),
                     EnvironmentInfo.CalculateDirectoryLocation(@"%K4A_SOURCE_DIR%\src\csharp\K4aStub")
                 };
 
