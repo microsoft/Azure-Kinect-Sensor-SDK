@@ -44,7 +44,7 @@ namespace Microsoft.AzureKinect.WPF
                                 dpiX,
                                 dpiY,
                                 pixelFormat,
-                                palette: null,
+                                /* palette: */ null,
                                 (IntPtr)reference.Buffer,
                                 checked((int)reference.Size),
                                 reference.StrideBytes);
