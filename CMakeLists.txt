@@ -71,6 +71,10 @@ if ("${K4A_ENABLE_LEAK_DETECTION_CMAKE}" STREQUAL "1")
     add_definitions(-DK4A_ENABLE_LEAK_DETECTION)
 endif()
 
+#
+set(CMAKE_BUILD_WITH_INSTALL_RPATH YES)
+set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+
 add_subdirectory(examples)
 add_subdirectory(src)
 add_subdirectory(tests)
