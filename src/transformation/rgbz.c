@@ -800,8 +800,8 @@ static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_t
     void *x_table = __builtin_assume_aligned(xy_tables->x_table, 16);
     void *y_table = __builtin_assume_aligned(xy_tables->y_table, 16);
 #else
-    void *x_table = (void*)xy_tables->x_table;
-    void *y_table = (void*)xy_tables->y_table;
+    void *x_table = (void *)xy_tables->x_table;
+    void *y_table = (void *)xy_tables->y_table;
 #endif
     __m128 *x_table_m128 = (__m128 *)x_table;
     __m128 *y_table_m128 = (__m128 *)y_table;
