@@ -266,8 +266,21 @@ jobs:
     condition: succeededOrFailed()
 
   - powershell: |
-        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
-    displayName: 'Create temp DepthEngine'
+      Get-Content $CMakeCacheFile | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
+      if($Matches -ne $null)
+      {
+        if ($Matches["generator"] -eq "ninja")
+        {
+          IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+        }
+        elseif ($Matches["generator"] -like "Visual Studio *")
+        {
+          IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\Debug\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\Debug\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+          IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\RelWithDebInfo\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\RelWithDebInfo\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+        }
+      }
+      Write-Error "Failed to find a match!"
+    displayName: 'Create temp DepthEngine DLL'
 
   - task: NuGetToolInstaller@0
     inputs:
@@ -296,6 +309,23 @@ jobs:
       testAssemblyVer2: |
         **/*UnitTests.dll
         !**/obj/**
+
+  - powershell: |
+      Get-Content $CMakeCacheFile | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
+      if($Matches -ne $null)
+      {
+        if ($Matches["generator"] -eq "ninja")
+        {
+          IF(Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" }
+        }
+        elseif ($Matches["generator"] -like "Visual Studio *")
+        {
+          IF(Test-Path "$(Build.BinariesDirectory)\bin\Debug\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\Debug\depthengine_1_0.dll" }        
+          IF(Test-Path "$(Build.BinariesDirectory)\bin\RelWithDebInfo\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\RelWithDebInfo\depthengine_1_0.dll" }        
+        }
+      }
+      Write-Error "Failed to find a match!"
+    displayName: 'Cleanup temp DepthEngine DLL'
 
   - task: CopyFiles@2
     displayName: 'Copy build folder to Staging'
