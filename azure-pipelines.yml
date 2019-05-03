@@ -277,8 +277,15 @@ jobs:
         {
           IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
         }
+        else
+        {
+          Write-Error ("Unknown Generator <<" + $Matches["generator"] + ">>")
+        }
       }
-      Write-Error "Failed to find a match!"
+      else
+      {
+        Write-Error "Failed to find a match!"
+      }      
     displayName: 'Create temp DepthEngine DLL'
 
   - task: NuGetToolInstaller@0
@@ -321,8 +328,15 @@ jobs:
         {
           IF(Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" }        
         }
+        else
+        {
+          Write-Error ("Unknown Generator <<" + $Matches["generator"] + ">>")
+        }
       }
-      Write-Error "Failed to find a match!"
+      else
+      {
+        Write-Error "Failed to find a match!"
+      }
     displayName: 'Cleanup temp DepthEngine DLL'
 
   - task: CopyFiles@2
