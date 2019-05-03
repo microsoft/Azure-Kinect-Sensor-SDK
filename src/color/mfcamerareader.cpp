@@ -1344,16 +1344,16 @@ HRESULT CMFCameraReader::GetCameraControlCap(const GUID PropertySet,
     ksProp.Property.Id = PropertyId;
     ksProp.Property.Flags = KSPROPERTY_TYPE_BASICSUPPORT;
 
-    if (FAILED(hr = m_spKsControl->KsProperty(
-                      (PKSPROPERTY)&ksProp, sizeof(ksProp), &ksMemList, sizeof(ksMemList), &cbReturned)))
+    if (FAILED(hr = m_spKsControl
+                        ->KsProperty((PKSPROPERTY)&ksProp, sizeof(ksProp), &ksMemList, sizeof(ksMemList), &cbReturned)))
     {
         LOG_ERROR("Failed to get control range: 0x%08x", hr);
         return hr;
     }
 
     ksProp.Property.Flags = KSPROPERTY_TYPE_DEFAULTVALUES;
-    if (FAILED(hr = m_spKsControl->KsProperty(
-                      (PKSPROPERTY)&ksProp, sizeof(ksProp), &ksDefault, sizeof(ksDefault), &cbReturned)))
+    if (FAILED(hr = m_spKsControl
+                        ->KsProperty((PKSPROPERTY)&ksProp, sizeof(ksProp), &ksDefault, sizeof(ksDefault), &cbReturned)))
     {
         LOG_ERROR("Failed to get control default values: 0x%08x", hr);
         return hr;

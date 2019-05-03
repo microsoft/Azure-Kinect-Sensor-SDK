@@ -675,7 +675,7 @@ TEST_P(color_control_test, control_test)
         }
 #else
         // Test valid range
-        step_value *= 3;    // skip test to do not too many test cases
+        step_value *= 3; // skip test to do not too many test cases
         for (int32_t testValue = min_value; testValue <= max_value; testValue += step_value)
         {
             // Set test value
