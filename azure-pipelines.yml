@@ -266,7 +266,7 @@ jobs:
     condition: succeededOrFailed()
 
   - powershell: |
-      Get-Content "$(Build.SourcesDirectory)\CMakeCache.txt" | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
+      Get-Content "$(Build.BinariesDirectory)\CMakeCache.txt" | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
       if($Matches -ne $null)
       {
         if ($Matches["generator"] -eq "ninja")
@@ -310,7 +310,7 @@ jobs:
         !**/obj/**
 
   - powershell: |
-      Get-Content "$(Build.SourcesDirectory)\CMakeCache.txt" | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
+      Get-Content "$(Build.BinariesDirectory)\CMakeCache.txt" | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
       if($Matches -ne $null)
       {
         if ($Matches["generator"] -eq "ninja")
