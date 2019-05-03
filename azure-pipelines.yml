@@ -265,28 +265,23 @@ jobs:
       testRunTitle: 'Unit Tests'
     condition: succeededOrFailed()
 
+  # Create a placeholder version of the depth engine to satisfy MSBuild copy rules.
+  # This version is not needed for actual execution.
+  # In the future we should fetch the real version from a valid source.
   - powershell: |
-      Get-Content "$(Build.BinariesDirectory)\CMakeCache.txt" | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
-      if($Matches -ne $null)
+      if ("$(BuildGenerator)" -eq "Ninja")
       {
-        if ($Matches["generator"] -eq "ninja")
-        {
-          IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
-        }
-        elseif ($Matches["generator"] -like "Visual Studio *")
-        {
-          IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
-        }
-        else
-        {
-          Write-Error ("Unknown Generator <<" + $Matches["generator"] + ">>")
-        }
+        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+      }
+      elseif ("$(BuildGenerator)" -like "Visual Studio *")
+      {
+        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
       }
       else
       {
-        Write-Error "Failed to find a match!"
-      }      
-    displayName: 'Create temp DepthEngine DLL'
+        Write-Error "Unknown Generator <<$(BuildGenerator)>>"
+      }
+    displayName: 'Create placeholder depth engine'
 
   - task: NuGetToolInstaller@0
     inputs:
@@ -315,29 +310,22 @@ jobs:
       testAssemblyVer2: |
         **/*UnitTests.dll
         !**/obj/**
-
+  
+  # Clean up any placeholder version of the depth engine that were created.
   - powershell: |
-      Get-Content "$(Build.BinariesDirectory)\CMakeCache.txt" | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
-      if($Matches -ne $null)
+      if ("$(BuildGenerator)" -eq "Ninja")
       {
-        if ($Matches["generator"] -eq "ninja")
-        {
-          IF(Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" }
-        }
-        elseif ($Matches["generator"] -like "Visual Studio *")
-        {
-          IF(Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" }        
-        }
-        else
-        {
-          Write-Error ("Unknown Generator <<" + $Matches["generator"] + ">>")
-        }
+        IF(Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" }
+      }
+      elseif ("$(BuildGenerator)" -like "Visual Studio *")
+      {
+        IF(Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" }        
       }
       else
       {
-        Write-Error "Failed to find a match!"
+        Write-Error "Unknown Generator <<$(BuildGenerator)>>"
       }
-    displayName: 'Cleanup temp DepthEngine DLL'
+    displayName: 'Clean up temp depth engine'
 
   - task: CopyFiles@2
     displayName: 'Copy build folder to Staging'
@@ -638,7 +626,7 @@ jobs:
       timeoutInMinutes: 15
       continueOnError: true
 
-    # TODO figure out the dependencies to be able to run.
+    # Issue #322, figure out the dependencies to be able to run the functional tests.
     # - task: VSTest@2
     #   displayName: 'Run C# Functional Tests'
     #   inputs:
