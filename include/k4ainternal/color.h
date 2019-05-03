@@ -126,7 +126,7 @@ tickcounter_ms_t color_get_sensor_start_time_tick(const color_t color_handle);
  * \param command
  * The targeted color control command to read the the value for.
  *
- * \param support_auto
+ * \param supports_auto
  * Location to store whether the color sensor's control support auto mode or not.
  * true if it supports auto mode, otherwise false.
  *
@@ -150,7 +150,7 @@ tickcounter_ms_t color_get_sensor_start_time_tick(const color_t color_handle);
  */
 k4a_result_t color_get_control_capabilities(const color_t color_handle,
                                             const k4a_color_control_command_t command,
-                                            bool *support_auto,
+                                            bool *supports_auto,
                                             int32_t *min_value,
                                             int32_t *max_value,
                                             int32_t *step_value,

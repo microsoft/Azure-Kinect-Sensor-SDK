@@ -1211,7 +1211,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_version(k4a_device_t device_handle, k4a_h
  * \param command
  * Color sensor control command.
  *
- * \param support_auto
+ * \param supports_auto
  * Location to store whether the color sensor's control support auto mode or not.
  * true if it supports auto mode, otherwise false.
  *
@@ -1245,7 +1245,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_version(k4a_device_t device_handle, k4a_h
  */
 K4A_EXPORT k4a_result_t k4a_device_get_color_control_capabilities(k4a_device_t device_handle,
                                                                   k4a_color_control_command_t command,
-                                                                  bool *support_auto,
+                                                                  bool *supports_auto,
                                                                   int32_t *min_value,
                                                                   int32_t *max_value,
                                                                   int32_t *step_value,

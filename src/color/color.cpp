@@ -228,7 +228,7 @@ tickcounter_ms_t color_get_sensor_start_time_tick(const color_t handle)
 
 k4a_result_t color_get_control_capabilities(const color_t handle,
                                             const k4a_color_control_command_t command,
-                                            bool *support_auto,
+                                            bool *supports_auto,
                                             int32_t *min_value,
                                             int32_t *max_value,
                                             int32_t *step_value,
@@ -239,7 +239,7 @@ k4a_result_t color_get_control_capabilities(const color_t handle,
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
                         command < K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE ||
                             command > K4A_COLOR_CONTROL_POWERLINE_FREQUENCY);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, support_auto == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, supports_auto == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, min_value == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, max_value == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, step_value == NULL);
@@ -255,7 +255,7 @@ k4a_result_t color_get_control_capabilities(const color_t handle,
 
     if (K4A_SUCCEEDED(result))
     {
-        *support_auto = color->control_cap[command].supportAuto;
+        *supports_auto = color->control_cap[command].supportAuto;
         *min_value = color->control_cap[command].minValue;
         *max_value = color->control_cap[command].maxValue;
         *step_value = color->control_cap[command].stepValue;

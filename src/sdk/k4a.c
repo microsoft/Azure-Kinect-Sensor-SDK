@@ -799,7 +799,7 @@ k4a_result_t k4a_device_get_sync_jack(k4a_device_t device_handle,
 
 k4a_result_t k4a_device_get_color_control_capabilities(k4a_device_t device_handle,
                                                        k4a_color_control_command_t command,
-                                                       bool *support_auto,
+                                                       bool *supports_auto,
                                                        int32_t *min_value,
                                                        int32_t *max_value,
                                                        int32_t *step_value,
@@ -810,7 +810,7 @@ k4a_result_t k4a_device_get_color_control_capabilities(k4a_device_t device_handl
     k4a_context_t *device = k4a_device_t_get_context(device_handle);
 
     return TRACE_CALL(color_get_control_capabilities(
-        device->color, command, support_auto, min_value, max_value, step_value, default_value, default_mode));
+        device->color, command, supports_auto, min_value, max_value, step_value, default_value, default_mode));
 }
 
 k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle,

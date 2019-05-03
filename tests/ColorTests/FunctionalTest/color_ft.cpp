@@ -619,7 +619,7 @@ TEST_P(color_control_test, control_test)
     int32_t step_value;
     int32_t default_value;
     k4a_color_control_mode_t default_mode = K4A_COLOR_CONTROL_MODE_AUTO;
-    bool support_auto;
+    bool supports_auto;
     int32_t value = 0;
 
     // Invalid device handle test
@@ -630,14 +630,14 @@ TEST_P(color_control_test, control_test)
     EXPECT_EQ(K4A_RESULT_SUCCEEDED,
               k4a_device_get_color_control_capabilities(m_device,
                                                         as.command,
-                                                        &support_auto,
+                                                        &supports_auto,
                                                         &min_value,
                                                         &max_value,
                                                         &step_value,
                                                         &default_value,
                                                         &default_mode));
 
-    if (support_auto)
+    if (supports_auto)
     {
         EXPECT_EQ(K4A_RESULT_SUCCEEDED,
                   k4a_device_set_color_control(m_device, as.command, K4A_COLOR_CONTROL_MODE_AUTO, 0));
