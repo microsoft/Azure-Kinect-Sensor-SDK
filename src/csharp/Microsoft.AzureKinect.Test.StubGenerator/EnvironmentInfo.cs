@@ -26,8 +26,6 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
                 XmlDocument appSettings = new XmlDocument();
                 appSettings.Load("appsettings.xml");
 
-                Environment.SetEnvironmentVariable("K4A_BINARY_DIR", appSettings.DocumentElement["K4A_BINARY_DIR"].InnerXml);
-                Environment.SetEnvironmentVariable("K4A_SOURCE_DIR", appSettings.DocumentElement["K4A_SOURCE_DIR"].InnerXml);
                 Environment.SetEnvironmentVariable("CMAKE_CXX_COMPILER", appSettings.DocumentElement["CMAKE_CXX_COMPILER"].InnerXml);
                 Environment.SetEnvironmentVariable("CMAKE_LINKER", appSettings.DocumentElement["CMAKE_LINKER"].InnerXml);
                 Environment.SetEnvironmentVariable("INCLUDE", appSettings.DocumentElement["INCLUDE"].InnerXml);

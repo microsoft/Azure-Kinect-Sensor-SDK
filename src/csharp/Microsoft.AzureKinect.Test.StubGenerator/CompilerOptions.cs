@@ -29,9 +29,8 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
 
             this.IncludePaths = new DirectoryInfo[]
                 {
-                    EnvironmentInfo.CalculateDirectoryLocation(@"%K4A_SOURCE_DIR%\include"),
-                    EnvironmentInfo.CalculateDirectoryLocation(@"%K4A_BINARY_DIR%\src\sdk\include"),
-                    EnvironmentInfo.CalculateDirectoryLocation(@"%K4A_SOURCE_DIR%\src\csharp\K4aStub")
+                    EnvironmentInfo.CalculateDirectoryLocation(@".\"),
+                    EnvironmentInfo.CalculateDirectoryLocation(@".\stub")
                 };
 
             this.LibraryPaths = new DirectoryInfo[] { };
@@ -40,7 +39,7 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             this.BinaryPath = new DirectoryInfo(Path.Combine(baseTempPath, @"binaries"));
             this.TempPath = new DirectoryInfo(Path.Combine(baseTempPath, @"compilation"));
 
-            this.StubFile = new FileInfo("Stub.cpp");
+            this.StubFile = new FileInfo(@".\stub\Stub.cpp");
         }
 
         private CompilerOptions(CompilerOptions other)

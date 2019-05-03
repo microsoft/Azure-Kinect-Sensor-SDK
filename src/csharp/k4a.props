@@ -6,7 +6,7 @@
   </Target>
 
   <PropertyGroup Condition="'$(Platform)' != 'AnyCPU'">
-    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(K4aBinaryDirectory)\bin\$(Configuration)\$(Platform)\</BaseOutputPath>
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(K4aBinaryDirectory)\$(Configuration)\$(Platform)\</BaseOutputPath>
     <!-- According to "EnableBaseIntermediateOutputPathMismatchWarning" there will be a warning if $(BaseIntermediateOutputPath) is not the same as $(MSBuildProjectExtensionsPath).
     Not changing the IntermediateOutputPath until we have a better understanding of where we want files.
     

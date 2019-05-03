@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\k4a.props" />
 
   <PropertyGroup>
@@ -51,6 +51,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.AzureKinect.Test.StubGenerator\Microsoft.AzureKinect.Test.StubGenerator.csproj" />
-    <ProjectReference Include="..\Microsoft.AzureKinect\Microsoft.AzureKinect.csproj" />
   </ItemGroup>
 </Project>

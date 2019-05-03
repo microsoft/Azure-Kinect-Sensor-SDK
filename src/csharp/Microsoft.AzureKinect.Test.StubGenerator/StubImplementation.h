@@ -4,7 +4,7 @@ typedef void(RaiseError)(char *szFile, int line, char *expression);
 RaiseError *g_ErrorHandler = NULL;
 
 // These functions are exported by the Stub module itself and are callable by either
-// The test application or the stub implementaitons.
+// The test application or the stub implementations.
 extern "C" {
 __declspec(dllexport) extern void Stub_SetErrorFunction(RaiseError *pfnErrorHandler);
 }

@@ -50,8 +50,8 @@ namespace Tests
         public Tests()
         {
             NativeInterface k4ainterface = NativeInterface.Create(
-                    EnvironmentInfo.CalculateFileLocation(@"%K4A_BINARY_DIR%\bin\k4a.dll"),
-                    EnvironmentInfo.CalculateFileLocation(@"%K4A_SOURCE_DIR%\include\k4a\k4a.h"));
+                    EnvironmentInfo.CalculateFileLocation(@"k4a\k4a.dll"),
+                    EnvironmentInfo.CalculateFileLocation(@"k4a\k4a.h"));
 
             k4a = StubbedModule.Create("k4a", k4ainterface);
         }

@@ -49,14 +49,14 @@ namespace Microsoft.AzureKinect.Test.StubGenerator
             }
             foreach (DirectoryInfo includePath in options.IncludePaths)
             {
-                compilerArguments.Append($" \"/I{includePath.FullName}\"");
+                compilerArguments.Append($" \"/I{includePath.FullName.TrimEnd('\\')}\"");
             }
 
             // Linker options
             compilerArguments.Append(" /link");
             foreach (DirectoryInfo libraryPath in options.LibraryPaths)
             {
-                compilerArguments.Append($" \"/LIBPATH:{libraryPath.FullName}\"");
+                compilerArguments.Append($" \"/LIBPATH:{libraryPath.FullName.TrimEnd('\\')}\"");
             }
 
             compilerArguments.Append($" \"/OUT:{moduleName}\"");
