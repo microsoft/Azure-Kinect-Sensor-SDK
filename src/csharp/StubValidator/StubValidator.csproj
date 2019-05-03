@@ -6,7 +6,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
 	
     <Platforms>x64;x86</Platforms>
-    <OutputPath>$(BaseOutputPath)$(AssemblyName)\</OutputPath>	
+    <OutputPath>$(BaseOutputPath)\$(AssemblyName)\</OutputPath>	
   </PropertyGroup>
   
   <ItemGroup>

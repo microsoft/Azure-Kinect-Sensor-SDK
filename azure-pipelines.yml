@@ -312,19 +312,7 @@ jobs:
         !**/obj/**
   
   # Clean up any placeholder version of the depth engine that were created.
-  - powershell: |
-      if ("$(BuildGenerator)" -eq "Ninja")
-      {
-        IF(Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" }
-      }
-      elseif ("$(BuildGenerator)" -like "Visual Studio *")
-      {
-        IF(Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" }        
-      }
-      else
-      {
-        Write-Error "Unknown Generator <<$(BuildGenerator)>>"
-      }
+  - powershell:  Get-ChildItem -Path "$(Build.BinariesDirectory)\$(MSBuildConfiguration)\\" -Filter "DepthEngine_*.dll" -Recurse | Remove-Item
     displayName: 'Clean up temp depth engine'
 
   - task: CopyFiles@2
@@ -333,7 +321,7 @@ jobs:
       SourceFolder: '$(Build.BinariesDirectory)'
       Contents: |
         *
-        bin/*
+        bin/**/*
         docs/**/*
         CMakeFiles/**/*
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
@@ -567,6 +555,7 @@ jobs:
 
     steps:
     - task: VisualStudioTestPlatformInstaller@1
+      versionSelector: 'latestStable'
 
     - checkout: self
       clean: true
@@ -626,17 +615,17 @@ jobs:
       timeoutInMinutes: 15
       continueOnError: true
 
-    # Issue #322, figure out the dependencies to be able to run the functional tests.
-    # - task: VSTest@2
-    #   displayName: 'Run C# Functional Tests'
-    #   inputs:
-    #     testSelector: 'testAssemblies'
-    #     searchFolder: '$(Build.BinariesDirectory)'
-    #     platform: '$(MSBuildPlatform)'
-    #     configuration: '$(MSBuildConfiguration)'
-    #     testAssemblyVer2: |
-    #       **/*FunctionalTests.dll
-    #       !**/obj/**
+    - task: VSTest@2
+      displayName: 'Run C# Functional Tests'
+      inputs:
+        testSelector: 'testAssemblies'
+        searchFolder: '$(Build.BinariesDirectory)'
+        platform: '$(MSBuildPlatform)'
+        configuration: '$(MSBuildConfiguration)'
+        vsTestVersion: 'toolsInstaller''
+        testAssemblyVer2: |
+          **/*FunctionalTests.dll
+          !**/obj/**
 
     - task: PowerShell@2
       inputs:
