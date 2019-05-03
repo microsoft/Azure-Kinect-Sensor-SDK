@@ -266,7 +266,7 @@ jobs:
     condition: succeededOrFailed()
 
   - powershell: |
-      Get-Content $CMakeCacheFile | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
+      Get-Content "$(Build.SourcesDirectory)\CMakeCache.txt" | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
       if($Matches -ne $null)
       {
         if ($Matches["generator"] -eq "ninja")
@@ -275,8 +275,7 @@ jobs:
         }
         elseif ($Matches["generator"] -like "Visual Studio *")
         {
-          IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\Debug\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\Debug\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
-          IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\RelWithDebInfo\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\RelWithDebInfo\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+          IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
         }
       }
       Write-Error "Failed to find a match!"
@@ -311,7 +310,7 @@ jobs:
         !**/obj/**
 
   - powershell: |
-      Get-Content $CMakeCacheFile | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
+      Get-Content "$(Build.SourcesDirectory)\CMakeCache.txt" | where { $_ -match "CMAKE_GENERATOR:INTERNAL=(?<generator>.*)" }
       if($Matches -ne $null)
       {
         if ($Matches["generator"] -eq "ninja")
@@ -320,8 +319,7 @@ jobs:
         }
         elseif ($Matches["generator"] -like "Visual Studio *")
         {
-          IF(Test-Path "$(Build.BinariesDirectory)\bin\Debug\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\Debug\depthengine_1_0.dll" }        
-          IF(Test-Path "$(Build.BinariesDirectory)\bin\RelWithDebInfo\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\RelWithDebInfo\depthengine_1_0.dll" }        
+          IF(Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll") { Remove-Item "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" }        
         }
       }
       Write-Error "Failed to find a match!"
