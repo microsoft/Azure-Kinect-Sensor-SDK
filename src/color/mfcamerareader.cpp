@@ -682,7 +682,7 @@ k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_contr
         capabilities.stepValue = stepValue;
         capabilities.defaultValue = defaultValue;
         capabilities.defaultMode = defaultMode;
-        // capabilities.valid = true;
+        capabilities.valid = true;
     }
 
     return k4aResultFromHRESULT(hr);
