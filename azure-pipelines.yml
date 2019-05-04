@@ -622,7 +622,7 @@ jobs:
         searchFolder: '$(Build.BinariesDirectory)'
         platform: '$(MSBuildPlatform)'
         configuration: '$(MSBuildConfiguration)'
-        vsTestVersion: 'toolsInstaller''
+        vsTestVersion: 'toolsInstaller'
         testAssemblyVer2: |
           **/*FunctionalTests.dll
           !**/obj/**
