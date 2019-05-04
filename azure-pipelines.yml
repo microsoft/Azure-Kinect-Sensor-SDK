@@ -555,7 +555,6 @@ jobs:
 
     steps:
     - task: VisualStudioTestPlatformInstaller@1
-      versionSelector: 'latestStable'
 
     - checkout: self
       clean: true
