@@ -619,6 +619,8 @@ TEST_P(color_control_test, control_test)
     int32_t step_value;
     int32_t default_value;
     k4a_color_control_mode_t default_mode = K4A_COLOR_CONTROL_MODE_AUTO;
+    int32_t current_value;
+    k4a_color_control_mode_t current_mode = K4A_COLOR_CONTROL_MODE_MANUAL;
     bool supports_auto;
     int32_t value = 0;
 
@@ -636,6 +638,14 @@ TEST_P(color_control_test, control_test)
                                                         &step_value,
                                                         &default_value,
                                                         &default_mode));
+
+    EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, as.command, &current_mode, &current_value));
+
+    // Verify default values
+    EXPECT_EQ(current_mode, default_mode) << "Current mode (" << current_mode << ") is not equal to default mode ("
+                                          << default_mode << "), please reset device before running test.\n";
+    EXPECT_EQ(current_value, default_value) << "Current value (" << current_value << ") is not equal to default value ("
+                                            << default_value << "), please reset device before running test.\n";
 
     if (supports_auto)
     {
@@ -688,7 +698,6 @@ TEST_P(color_control_test, control_test)
             EXPECT_EQ(control_mode, K4A_COLOR_CONTROL_MODE_MANUAL);
 
             // LibUVC exposure time camera control has 0.0001 sec precision
-            // EXPECT_EQ(value, (int32_t)(exp2f((float)testValue) * 10000.0f) * 100);
             EXPECT_EQ(value, testValue);
         }
 #endif
@@ -723,7 +732,15 @@ TEST_P(color_control_test, control_test)
     }
 
     // Recover to initial value
-    EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, as.command, default_mode, default_value));
+    EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+              k4a_device_set_color_control(m_device, as.command, K4A_COLOR_CONTROL_MODE_MANUAL, default_value));
+
+    // If default mode is not manual, recover color control mode as well
+    if (default_mode != K4A_COLOR_CONTROL_MODE_MANUAL)
+    {
+        EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device, as.command, default_mode, default_value));
+    }
 }
 
 INSTANTIATE_TEST_CASE_P(color_control,
