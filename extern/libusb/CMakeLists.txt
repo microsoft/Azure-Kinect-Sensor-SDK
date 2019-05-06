@@ -29,6 +29,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
 
     target_compile_definitions(LibUSB PRIVATE "_LIB" "_CRT_SECURE_NO_WARNINGS" "WINVER=0x0501" "_WIN32_WINNT=0x0501")
 
+    target_compile_options(LibUSB PRIVATE "/source-charset:utf-8")
+
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     target_sources(LibUSB PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/libusb/os/poll_posix.c"

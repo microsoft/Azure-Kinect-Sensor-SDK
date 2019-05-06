@@ -56,7 +56,6 @@ k4a_result_t k4a_record_create(const char *path,
     {
         context->device = device;
         context->device_config = device_config;
-        context->pending_clusters = make_unique<std::list<cluster_t *>>();
 
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
         context->camera_fps = k4a_convert_fps_to_uint(device_config.camera_fps);
@@ -608,9 +607,9 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
 
         std::lock_guard<std::mutex> cluster_lock(context->pending_cluster_lock);
 
-        if (!context->pending_clusters->empty())
+        if (!context->pending_clusters.empty())
         {
-            for (cluster_t *cluster : *context->pending_clusters)
+            for (cluster_t *cluster : context->pending_clusters)
             {
                 k4a_result_t write_result = TRACE_CALL(
                     write_cluster(context, cluster, &context->last_written_timestamp));
@@ -620,7 +619,7 @@ k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
                     result = write_result;
                 }
             }
-            context->pending_clusters->clear();
+            context->pending_clusters.clear();
         }
 
         auto &segment_info = GetChild<KaxInfo>(*context->file_segment);
