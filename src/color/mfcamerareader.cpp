@@ -540,7 +540,7 @@ void CMFCameraReader::Stop()
 }
 
 k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_control_command_t command,
-                                                           color_control_cap_t &capabilities)
+                                                           color_control_cap_t *capabilities)
 {
     HRESULT hr = S_OK;
     bool supportAuto = false;
@@ -549,6 +549,7 @@ k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_contr
     ULONG stepValue = 0;
     LONG defaultValue = 0;
     k4a_color_control_mode_t defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, capabilities == NULL);
 
     switch (command)
     {
@@ -667,7 +668,7 @@ k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_contr
         maxValue = 0;
         stepValue = 0;
         defaultValue = 0;
-        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and does nothing.");
     }
     break;
     default:
@@ -676,13 +677,13 @@ k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_contr
 
     if (SUCCEEDED(hr))
     {
-        capabilities.supportAuto = supportAuto;
-        capabilities.minValue = minValue;
-        capabilities.maxValue = maxValue;
-        capabilities.stepValue = stepValue;
-        capabilities.defaultValue = defaultValue;
-        capabilities.defaultMode = defaultMode;
-        capabilities.valid = true;
+        capabilities->supportAuto = supportAuto;
+        capabilities->minValue = minValue;
+        capabilities->maxValue = maxValue;
+        capabilities->stepValue = stepValue;
+        capabilities->defaultValue = defaultValue;
+        capabilities->defaultMode = defaultMode;
+        capabilities->valid = true;
     }
 
     return k4aResultFromHRESULT(hr);
@@ -792,7 +793,7 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
     {
         propertyValue = 0; // return 0 for current firmware behaviour - framerate priority.
-        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and does nothing.");
     }
     break;
     default:
@@ -910,7 +911,7 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
     break;
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
     {
-        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and does nothing.");
     }
     break;
     default:

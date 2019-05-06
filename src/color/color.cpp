@@ -250,7 +250,7 @@ k4a_result_t color_get_control_capabilities(const color_t handle,
 
     if (color->control_cap[command].valid == false)
     {
-        result = color->m_spCameraReader->GetCameraControlCapabilities(command, color->control_cap[command]);
+        result = color->m_spCameraReader->GetCameraControlCapabilities(command, &(color->control_cap[command]));
     }
 
     if (K4A_SUCCEEDED(result))

@@ -223,9 +223,10 @@ void UVCCameraReader::Shutdown()
 }
 
 k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_control_command_t command,
-                                                           color_control_cap_t &capabilities)
+                                                           color_control_cap_t *capabilities)
 {
     uvc_error_t res = UVC_SUCCESS;
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, capabilities == NULL);
 
     switch (command)
     {
@@ -247,12 +248,12 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
         if (default_ae_mode == UVC_AUTO_EXPOSURE_MODE_MANUAL ||
             default_ae_mode == UVC_AUTO_EXPOSURE_MODE_SHUTTER_PRIORITY)
         {
-            capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+            capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
         }
         else if (default_ae_mode == UVC_AUTO_EXPOSURE_MODE_AUTO ||
                  default_ae_mode == UVC_AUTO_EXPOSURE_MODE_APERTURE_PRIORITY)
         {
-            capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_AUTO;
+            capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_AUTO;
         }
         else
         {
@@ -290,12 +291,12 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
         }
 
         // 0.0001 sec to uSec
-        capabilities.supportAuto = true;
-        capabilities.minValue = (int32_t)(min_exposure_time * 100);
-        capabilities.maxValue = (int32_t)(max_exposure_time * 100);
-        capabilities.stepValue = (int32_t)(step_exposure_time * 100);
-        capabilities.defaultValue = (int32_t)(default_exposure_time * 100);
-        capabilities.valid = true;
+        capabilities->supportAuto = true;
+        capabilities->minValue = (int32_t)(min_exposure_time * 100);
+        capabilities->maxValue = (int32_t)(max_exposure_time * 100);
+        capabilities->stepValue = (int32_t)(step_exposure_time * 100);
+        capabilities->defaultValue = (int32_t)(default_exposure_time * 100);
+        capabilities->valid = true;
     }
     break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
@@ -332,13 +333,13 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
             return K4A_RESULT_FAILED;
         }
 
-        capabilities.supportAuto = false;
-        capabilities.minValue = (int32_t)min_brightness;
-        capabilities.maxValue = (int32_t)max_brightness;
-        capabilities.stepValue = (int32_t)step_brightness;
-        capabilities.defaultValue = (int32_t)default_brightness;
-        capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
-        capabilities.valid = true;
+        capabilities->supportAuto = false;
+        capabilities->minValue = (int32_t)min_brightness;
+        capabilities->maxValue = (int32_t)max_brightness;
+        capabilities->stepValue = (int32_t)step_brightness;
+        capabilities->defaultValue = (int32_t)default_brightness;
+        capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+        capabilities->valid = true;
     }
     break;
     case K4A_COLOR_CONTROL_CONTRAST:
@@ -376,13 +377,13 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
             return K4A_RESULT_FAILED;
         }
 
-        capabilities.supportAuto = false;
-        capabilities.minValue = (int32_t)min_contrast;
-        capabilities.maxValue = (int32_t)max_contrast;
-        capabilities.stepValue = (int32_t)step_contrast;
-        capabilities.defaultValue = (int32_t)default_contrast;
-        capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
-        capabilities.valid = true;
+        capabilities->supportAuto = false;
+        capabilities->minValue = (int32_t)min_contrast;
+        capabilities->maxValue = (int32_t)max_contrast;
+        capabilities->stepValue = (int32_t)step_contrast;
+        capabilities->defaultValue = (int32_t)default_contrast;
+        capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+        capabilities->valid = true;
     }
     break;
     case K4A_COLOR_CONTROL_SATURATION:
@@ -420,13 +421,13 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
             return K4A_RESULT_FAILED;
         }
 
-        capabilities.supportAuto = false;
-        capabilities.minValue = (int32_t)min_saturation;
-        capabilities.maxValue = (int32_t)max_saturation;
-        capabilities.stepValue = (int32_t)step_saturation;
-        capabilities.defaultValue = (int32_t)default_saturation;
-        capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
-        capabilities.valid = true;
+        capabilities->supportAuto = false;
+        capabilities->minValue = (int32_t)min_saturation;
+        capabilities->maxValue = (int32_t)max_saturation;
+        capabilities->stepValue = (int32_t)step_saturation;
+        capabilities->defaultValue = (int32_t)default_saturation;
+        capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+        capabilities->valid = true;
     }
     break;
     case K4A_COLOR_CONTROL_SHARPNESS:
@@ -464,13 +465,13 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
             return K4A_RESULT_FAILED;
         }
 
-        capabilities.supportAuto = false;
-        capabilities.minValue = (int32_t)min_sharpness;
-        capabilities.maxValue = (int32_t)max_sharpness;
-        capabilities.stepValue = (int32_t)step_sharpness;
-        capabilities.defaultValue = (int32_t)default_sharpness;
-        capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
-        capabilities.valid = true;
+        capabilities->supportAuto = false;
+        capabilities->minValue = (int32_t)min_sharpness;
+        capabilities->maxValue = (int32_t)max_sharpness;
+        capabilities->stepValue = (int32_t)step_sharpness;
+        capabilities->defaultValue = (int32_t)default_sharpness;
+        capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+        capabilities->valid = true;
     }
     break;
     case K4A_COLOR_CONTROL_WHITEBALANCE:
@@ -490,11 +491,11 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
 
         if (default_wb_mode == 0)
         {
-            capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+            capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
         }
         else if (default_wb_mode == 1)
         {
-            capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_AUTO;
+            capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_AUTO;
         }
         else
         {
@@ -531,12 +532,12 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
             return K4A_RESULT_FAILED;
         }
 
-        capabilities.supportAuto = true;
-        capabilities.minValue = min_white_balance;
-        capabilities.maxValue = max_white_balance;
-        capabilities.stepValue = step_white_balance;
-        capabilities.defaultValue = default_white_balance;
-        capabilities.valid = true;
+        capabilities->supportAuto = true;
+        capabilities->minValue = min_white_balance;
+        capabilities->maxValue = max_white_balance;
+        capabilities->stepValue = step_white_balance;
+        capabilities->defaultValue = default_white_balance;
+        capabilities->valid = true;
     }
     break;
     case K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION:
@@ -574,13 +575,13 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
             return K4A_RESULT_FAILED;
         }
 
-        capabilities.supportAuto = false;
-        capabilities.minValue = (int32_t)min_backlight_compensation;
-        capabilities.maxValue = (int32_t)max_backlight_compensation;
-        capabilities.stepValue = (int32_t)step_backlight_compensation;
-        capabilities.defaultValue = (int32_t)default_backlight_compensation;
-        capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
-        capabilities.valid = true;
+        capabilities->supportAuto = false;
+        capabilities->minValue = (int32_t)min_backlight_compensation;
+        capabilities->maxValue = (int32_t)max_backlight_compensation;
+        capabilities->stepValue = (int32_t)step_backlight_compensation;
+        capabilities->defaultValue = (int32_t)default_backlight_compensation;
+        capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+        capabilities->valid = true;
     }
     break;
     case K4A_COLOR_CONTROL_GAIN:
@@ -618,13 +619,13 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
             return K4A_RESULT_FAILED;
         }
 
-        capabilities.supportAuto = false;
-        capabilities.minValue = (int32_t)min_gain;
-        capabilities.maxValue = (int32_t)max_gain;
-        capabilities.stepValue = (int32_t)step_gain;
-        capabilities.defaultValue = (int32_t)default_gain;
-        capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
-        capabilities.valid = true;
+        capabilities->supportAuto = false;
+        capabilities->minValue = (int32_t)min_gain;
+        capabilities->maxValue = (int32_t)max_gain;
+        capabilities->stepValue = (int32_t)step_gain;
+        capabilities->defaultValue = (int32_t)default_gain;
+        capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+        capabilities->valid = true;
     }
     break;
     case K4A_COLOR_CONTROL_POWERLINE_FREQUENCY:
@@ -662,26 +663,26 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
             return K4A_RESULT_FAILED;
         }
 
-        capabilities.supportAuto = false;
-        capabilities.minValue = (int32_t)min_powerline_freq;
-        capabilities.maxValue = (int32_t)max_powerline_freq;
-        capabilities.stepValue = (int32_t)step_powerline_freq;
-        capabilities.defaultValue = (int32_t)default_powerline_freq;
-        capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
-        capabilities.valid = true;
+        capabilities->supportAuto = false;
+        capabilities->minValue = (int32_t)min_powerline_freq;
+        capabilities->maxValue = (int32_t)max_powerline_freq;
+        capabilities->stepValue = (int32_t)step_powerline_freq;
+        capabilities->defaultValue = (int32_t)default_powerline_freq;
+        capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+        capabilities->valid = true;
     }
     break;
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
     {
         // Deprecated control. Return 0 for all capabilities which is current behaviour.
-        capabilities.supportAuto = false;
-        capabilities.minValue = 0;
-        capabilities.maxValue = 0;
-        capabilities.stepValue = 0;
-        capabilities.defaultValue = 0;
-        capabilities.defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
-        capabilities.valid = true;
-        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.", 0);
+        capabilities->supportAuto = false;
+        capabilities->minValue = 0;
+        capabilities->maxValue = 0;
+        capabilities->stepValue = 0;
+        capabilities->defaultValue = 0;
+        capabilities->defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+        capabilities->valid = true;
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and does nothing.", 0);
     }
     break;
     default:
@@ -869,7 +870,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
     {
         *pValue = 0;
-        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.", 0);
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and does nothing.", 0);
     }
     break;
     default:
@@ -1082,7 +1083,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
         break;
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
     {
-        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.", 0);
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and does nothing.", 0);
     }
     break;
     default:
