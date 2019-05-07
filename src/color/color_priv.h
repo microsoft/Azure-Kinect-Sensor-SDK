@@ -10,6 +10,17 @@
 extern "C" {
 #endif
 
+typedef struct _color_control_cap_t
+{
+    int32_t minValue;
+    int32_t maxValue;
+    int32_t stepValue;
+    int32_t defaultValue;
+    k4a_color_control_mode_t defaultMode;
+    bool supportAuto;
+    bool valid;
+} color_control_cap_t;
+
 /** Delivers a sample to the registered callback function when a capture is ready for processing.
  *
  * \param result

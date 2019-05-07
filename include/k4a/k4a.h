@@ -1203,7 +1203,57 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_hand
  */
 K4A_EXPORT k4a_result_t k4a_device_get_version(k4a_device_t device_handle, k4a_hardware_version_t *version);
 
-/** Get the Azure Kinect color sensor control value.
+/** Get the Azure Kinect color sensor control capabilities.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param command
+ * Color sensor control command.
+ *
+ * \param supports_auto
+ * Location to store whether the color sensor's control support auto mode or not.
+ * true if it supports auto mode, otherwise false.
+ *
+ * \param min_value
+ * Location to store the color sensor's control minimum value of /p command.
+ *
+ * \param max_value
+ * Location to store the color sensor's control maximum value of /p command.
+ *
+ * \param step_value
+ * Location to store the color sensor's control step value of /p command.
+ *
+ * \param default_value
+ * Location to store the color sensor's control default value of /p command.
+ *
+ * \param default_mode
+ * Location to store the color sensor's control default mode of /p command.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if the value was successfully returned, ::K4A_RESULT_FAILED if an error occurred
+ *
+ * \relates k4a_device_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_color_control_capabilities(k4a_device_t device_handle,
+                                                                  k4a_color_control_command_t command,
+                                                                  bool *supports_auto,
+                                                                  int32_t *min_value,
+                                                                  int32_t *max_value,
+                                                                  int32_t *step_value,
+                                                                  int32_t *default_value,
+                                                                  k4a_color_control_mode_t *default_mode);
+
+/** Get the Azure Kinect color sensor control
+ * value.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
@@ -1212,27 +1262,27 @@ K4A_EXPORT k4a_result_t k4a_device_get_version(k4a_device_t device_handle, k4a_h
  * Color sensor control command.
  *
  * \param mode
- * Location to store the color sensor's control mode. This mode represents whether the command is in automatic or manual
- * mode.
+ * Location to store the color sensor's control mode. This mode represents whether the command is in automatic or
+ * manual mode.
  *
  * \param value
- * Location to store the color sensor's control value. This value is always written, but is only valid when the \p mode
- * returned is ::K4A_COLOR_CONTROL_MODE_MANUAL for the current \p command.
+ * Location to store the color sensor's control value. This value is always written, but is only valid when the \p
+ * mode returned is ::K4A_COLOR_CONTROL_MODE_MANUAL for the current \p command.
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if the value was successfully returned, ::K4A_RESULT_FAILED if an error occurred
  *
  * \remarks
- * Each control command may be set to manual or automatic. See the definition of \ref k4a_color_control_command_t on how
- * to interpret the \p value for each command.
+ * Each control command may be set to manual or automatic. See the definition of \ref k4a_color_control_command_t on
+ * how to interpret the \p value for each command.
  *
  * \remarks
- * Some control commands are only supported in manual mode. When a command is in automatic mode, the \p value for that
- * command is not valid.
+ * Some control commands are only supported in manual mode. When a command is in automatic mode, the \p value for
+ * that command is not valid.
  *
  * \remarks
- * Control values set on a device are reset only when the device is power cycled. The device will retain the settings
- * even if the \ref k4a_device_t is closed or the application is restarted.
+ * Control values set on a device are reset only when the device is power cycled. The device will retain the
+ * settings even if the \ref k4a_device_t is closed or the application is restarted.
  *
  * \relates k4a_device_t
  *

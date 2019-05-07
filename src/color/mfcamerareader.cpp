@@ -539,6 +539,163 @@ void CMFCameraReader::Stop()
     }
 }
 
+k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_control_command_t command,
+                                                           color_control_cap_t *capabilities)
+{
+    HRESULT hr = S_OK;
+    bool supportAuto = false;
+    LONG minValue = 0;
+    LONG maxValue = 0;
+    ULONG stepValue = 0;
+    LONG defaultValue = 0;
+    k4a_color_control_mode_t defaultMode = K4A_COLOR_CONTROL_MODE_MANUAL;
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, capabilities == NULL);
+
+    switch (command)
+    {
+    case K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE:
+    {
+        hr = GetCameraControlCap(PROPSETID_VIDCAP_CAMERACONTROL,
+                                 KSPROPERTY_CAMERACONTROL_EXPOSURE,
+                                 &supportAuto,
+                                 &minValue,
+                                 &maxValue,
+                                 &stepValue,
+                                 &defaultValue);
+
+        // Convert KSProperty exposure time value to micro-second unit
+        minValue = (LONG)(exp2f((float)minValue) * 1000000.0f);
+        maxValue = (LONG)(exp2f((float)maxValue) * 1000000.0f);
+        defaultValue = (LONG)(exp2f((float)defaultValue) * 1000000.0f);
+        defaultMode = K4A_COLOR_CONTROL_MODE_AUTO;
+
+        // Windows KsProperty uses exposure time value as log base 2 seconds, which is not linear.
+        // But K4A color control API allow to use micro sec unit exposure time.
+        // Set step value to 1.
+        stepValue = 1;
+    }
+    break;
+    case K4A_COLOR_CONTROL_BRIGHTNESS:
+    {
+        hr = GetCameraControlCap(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                 KSPROPERTY_VIDEOPROCAMP_BRIGHTNESS,
+                                 &supportAuto,
+                                 &minValue,
+                                 &maxValue,
+                                 &stepValue,
+                                 &defaultValue);
+    }
+    break;
+    case K4A_COLOR_CONTROL_CONTRAST:
+    {
+        hr = GetCameraControlCap(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                 KSPROPERTY_VIDEOPROCAMP_CONTRAST,
+                                 &supportAuto,
+                                 &minValue,
+                                 &maxValue,
+                                 &stepValue,
+                                 &defaultValue);
+    }
+    break;
+    case K4A_COLOR_CONTROL_SATURATION:
+    {
+        hr = GetCameraControlCap(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                 KSPROPERTY_VIDEOPROCAMP_SATURATION,
+                                 &supportAuto,
+                                 &minValue,
+                                 &maxValue,
+                                 &stepValue,
+                                 &defaultValue);
+    }
+    break;
+    case K4A_COLOR_CONTROL_SHARPNESS:
+    {
+        hr = GetCameraControlCap(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                 KSPROPERTY_VIDEOPROCAMP_SHARPNESS,
+                                 &supportAuto,
+                                 &minValue,
+                                 &maxValue,
+                                 &stepValue,
+                                 &defaultValue);
+    }
+    break;
+    case K4A_COLOR_CONTROL_WHITEBALANCE:
+    {
+        hr = GetCameraControlCap(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                 KSPROPERTY_VIDEOPROCAMP_WHITEBALANCE,
+                                 &supportAuto,
+                                 &minValue,
+                                 &maxValue,
+                                 &stepValue,
+                                 &defaultValue);
+
+        defaultMode = K4A_COLOR_CONTROL_MODE_AUTO;
+    }
+    break;
+    case K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION:
+    {
+        hr = GetCameraControlCap(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                 KSPROPERTY_VIDEOPROCAMP_BACKLIGHT_COMPENSATION,
+                                 &supportAuto,
+                                 &minValue,
+                                 &maxValue,
+                                 &stepValue,
+                                 &defaultValue);
+    }
+    break;
+    case K4A_COLOR_CONTROL_GAIN:
+    {
+        hr = GetCameraControlCap(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                 KSPROPERTY_VIDEOPROCAMP_GAIN,
+                                 &supportAuto,
+                                 &minValue,
+                                 &maxValue,
+                                 &stepValue,
+                                 &defaultValue);
+    }
+    break;
+    case K4A_COLOR_CONTROL_POWERLINE_FREQUENCY:
+    {
+        hr = GetCameraControlCap(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                 KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY,
+                                 &supportAuto,
+                                 &minValue,
+                                 &maxValue,
+                                 &stepValue,
+                                 &defaultValue);
+    }
+    break;
+    case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
+    {
+        supportAuto = false;
+        minValue = 0;
+        maxValue = 0;
+        stepValue = 0;
+        defaultValue = 0;
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and does nothing.");
+    }
+    break;
+    default:
+        return K4A_RESULT_FAILED;
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        capabilities->supportAuto = supportAuto;
+        capabilities->minValue = minValue;
+        capabilities->maxValue = maxValue;
+        capabilities->stepValue = stepValue;
+        capabilities->defaultValue = defaultValue;
+        capabilities->defaultMode = defaultMode;
+        capabilities->valid = true;
+    }
+
+    return k4aResultFromHRESULT(hr);
+}
+
+// PROPSETID_VIDCAP_CAMERACONTROL
+// PROPSETID_VIDCAP_VIDEOPROCAMP
+
 k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t command,
                                                k4a_color_control_mode_t *mode,
                                                int32_t *pValue)
@@ -546,7 +703,6 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
     HRESULT hr = S_OK;
     LONG propertyValue = 0;
     ULONG flags = 0;
-    ULONG capability = 0;
 
     // clear return
     *mode = K4A_COLOR_CONTROL_MODE_MANUAL;
@@ -556,7 +712,11 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
     {
     case K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE:
     {
-        hr = GetCameraControlValue(KSPROPERTY_CAMERACONTROL_EXPOSURE, &propertyValue, &flags, &capability);
+        hr = GetCameraControlValue(PROPSETID_VIDCAP_CAMERACONTROL,
+                                   KSPROPERTY_CAMERACONTROL_EXPOSURE,
+                                   &propertyValue,
+                                   &flags,
+                                   nullptr);
 
         // Convert KSProperty exposure time value to micro-second unit
         propertyValue = (LONG)(exp2f((float)propertyValue) * 1000000.0f);
@@ -564,48 +724,80 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
     break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
     {
-        hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_BRIGHTNESS, &propertyValue, &flags, &capability);
+        hr = GetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_BRIGHTNESS,
+                                   &propertyValue,
+                                   &flags,
+                                   nullptr);
     }
     break;
     case K4A_COLOR_CONTROL_CONTRAST:
     {
-        hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_CONTRAST, &propertyValue, &flags, &capability);
+        hr = GetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_CONTRAST,
+                                   &propertyValue,
+                                   &flags,
+                                   nullptr);
     }
     break;
     case K4A_COLOR_CONTROL_SATURATION:
     {
-        hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_SATURATION, &propertyValue, &flags, &capability);
+        hr = GetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_SATURATION,
+                                   &propertyValue,
+                                   &flags,
+                                   nullptr);
     }
     break;
     case K4A_COLOR_CONTROL_SHARPNESS:
     {
-        hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_SHARPNESS, &propertyValue, &flags, &capability);
+        hr = GetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_SHARPNESS,
+                                   &propertyValue,
+                                   &flags,
+                                   nullptr);
     }
     break;
     case K4A_COLOR_CONTROL_WHITEBALANCE:
     {
-        hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_WHITEBALANCE, &propertyValue, &flags, &capability);
+        hr = GetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_WHITEBALANCE,
+                                   &propertyValue,
+                                   &flags,
+                                   nullptr);
     }
     break;
     case K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION:
     {
-        hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_BACKLIGHT_COMPENSATION, &propertyValue, &flags, &capability);
+        hr = GetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_BACKLIGHT_COMPENSATION,
+                                   &propertyValue,
+                                   &flags,
+                                   nullptr);
     }
     break;
     case K4A_COLOR_CONTROL_GAIN:
     {
-        hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_GAIN, &propertyValue, &flags, &capability);
+        hr = GetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_GAIN,
+                                   &propertyValue,
+                                   &flags,
+                                   nullptr);
     }
     break;
     case K4A_COLOR_CONTROL_POWERLINE_FREQUENCY:
     {
-        hr = GetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY, &propertyValue, &flags, &capability);
+        hr = GetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY,
+                                   &propertyValue,
+                                   &flags,
+                                   nullptr);
     }
     break;
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
     {
         propertyValue = 0; // return 0 for current firmware behaviour - framerate priority.
-        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and does nothing.");
     }
     break;
     default:
@@ -654,52 +846,76 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
     case K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE:
     {
         // Convert micro-second unit to KSProperty exposure time value
-        hr = SetCameraControlValue(KSPROPERTY_CAMERACONTROL_EXPOSURE, (LONG)log2f((float)newValue * 0.000001f), flags);
+        hr = SetCameraControlValue(PROPSETID_VIDCAP_CAMERACONTROL,
+                                   KSPROPERTY_CAMERACONTROL_EXPOSURE,
+                                   (LONG)log2f((float)newValue * 0.000001f),
+                                   flags);
     }
     break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
     {
-        hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_BRIGHTNESS, (LONG)newValue, flags);
+        hr = SetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_BRIGHTNESS,
+                                   (LONG)newValue,
+                                   flags);
     }
     break;
     case K4A_COLOR_CONTROL_CONTRAST:
     {
-        hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_CONTRAST, (LONG)newValue, flags);
+        hr = SetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_CONTRAST,
+                                   (LONG)newValue,
+                                   flags);
     }
     break;
     case K4A_COLOR_CONTROL_SATURATION:
     {
-        hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_SATURATION, (LONG)newValue, flags);
+        hr = SetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_SATURATION,
+                                   (LONG)newValue,
+                                   flags);
     }
     break;
     case K4A_COLOR_CONTROL_SHARPNESS:
     {
-        hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_SHARPNESS, (LONG)newValue, flags);
+        hr = SetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_SHARPNESS,
+                                   (LONG)newValue,
+                                   flags);
     }
     break;
     case K4A_COLOR_CONTROL_WHITEBALANCE:
     {
-        hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_WHITEBALANCE, (LONG)newValue, flags);
+        hr = SetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_WHITEBALANCE,
+                                   (LONG)newValue,
+                                   flags);
     }
     break;
     case K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION:
     {
-        hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_BACKLIGHT_COMPENSATION, (LONG)newValue, flags);
+        hr = SetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_BACKLIGHT_COMPENSATION,
+                                   (LONG)newValue,
+                                   flags);
     }
     break;
     case K4A_COLOR_CONTROL_GAIN:
     {
-        hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_GAIN, (LONG)newValue, flags);
+        hr = SetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP, KSPROPERTY_VIDEOPROCAMP_GAIN, (LONG)newValue, flags);
     }
     break;
     case K4A_COLOR_CONTROL_POWERLINE_FREQUENCY:
     {
-        hr = SetVideoProcAmpValue(KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY, (LONG)newValue, flags);
+        hr = SetCameraControlValue(PROPSETID_VIDCAP_VIDEOPROCAMP,
+                                   KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY,
+                                   (LONG)newValue,
+                                   flags);
     }
     break;
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
     {
-        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and do nothing.");
+        LOG_WARNING("K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY is deprecated and does nothing.");
     }
     break;
     default:
@@ -1098,68 +1314,82 @@ done:
     return hr;
 }
 
-HRESULT CMFCameraReader::GetVideoProcAmpValue(const KSPROPERTY_VIDCAP_VIDEOPROCAMP PropertyId,
-                                              LONG *pValue,
-                                              ULONG *pFlags,
-                                              ULONG *pCapability)
+// KS property structures for querying the range and default values
+// of either the videoprocamp or cameracontrol properties.
+typedef struct _KsConrolMemberList
+{
+    KSPROPERTY_DESCRIPTION desc;
+    KSPROPERTY_MEMBERSHEADER hdr;
+    KSPROPERTY_STEPPING_LONG step;
+} KsConrolMemberList, *PKsConrolMemberList;
+
+typedef struct _KsControlDefaultValue
+{
+    KSPROPERTY_DESCRIPTION desc;
+    KSPROPERTY_MEMBERSHEADER hdr;
+    long lValue;
+} KsControlDefaultValue;
+
+HRESULT CMFCameraReader::GetCameraControlCap(const GUID PropertySet,
+                                             const ULONG PropertyId,
+                                             bool *supportAuto,
+                                             LONG *minValue,
+                                             LONG *maxValue,
+                                             ULONG *stepValue,
+                                             LONG *defaultValue)
 {
     HRESULT hr = S_OK;
-    KSPROPERTY_VIDEOPROCAMP_S videoCamp = {};
-    videoCamp.Property.Set = PROPSETID_VIDCAP_VIDEOPROCAMP;
-    videoCamp.Property.Id = PropertyId;
-    videoCamp.Property.Flags = KSPROPERTY_TYPE_GET;
-    videoCamp.Value = -1;
-    ULONG retSize = 0;
+    KsConrolMemberList ksMemList = {};
+    KsControlDefaultValue ksDefault = {};
+    KSPROPERTY_CAMERACONTROL_S ksProp = {};
+    ULONG capability = 0;
+    ULONG cbReturned = 0;
 
-    if (SUCCEEDED(hr = m_spKsControl->KsProperty(
-                      (PKSPROPERTY)&videoCamp, sizeof(videoCamp), &videoCamp, sizeof(videoCamp), &retSize)))
+    ksProp.Property.Set = PropertySet;
+    ksProp.Property.Id = PropertyId;
+    ksProp.Property.Flags = KSPROPERTY_TYPE_BASICSUPPORT;
+
+    if (FAILED(hr = m_spKsControl
+                        ->KsProperty((PKSPROPERTY)&ksProp, sizeof(ksProp), &ksMemList, sizeof(ksMemList), &cbReturned)))
     {
-        if (pValue)
-        {
-            *pValue = videoCamp.Value;
-        }
+        LOG_ERROR("Failed to get control range: 0x%08x", hr);
+        return hr;
+    }
 
-        if (pFlags)
-        {
-            *pFlags = videoCamp.Flags;
-        }
+    ksProp.Property.Flags = KSPROPERTY_TYPE_DEFAULTVALUES;
+    if (FAILED(hr = m_spKsControl
+                        ->KsProperty((PKSPROPERTY)&ksProp, sizeof(ksProp), &ksDefault, sizeof(ksDefault), &cbReturned)))
+    {
+        LOG_ERROR("Failed to get control default values: 0x%08x", hr);
+        return hr;
+    }
 
-        if (pCapability)
-        {
-            *pCapability = videoCamp.Capabilities;
-        }
+    if (FAILED(hr = GetCameraControlValue(PropertySet, PropertyId, nullptr, nullptr, &capability)))
+    {
+        LOG_ERROR("Failed to get control capability flag: 0x%08x", hr);
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        *minValue = ksMemList.step.Bounds.SignedMinimum;
+        *maxValue = ksMemList.step.Bounds.SignedMaximum;
+        *stepValue = ksMemList.step.SteppingDelta;
+        *defaultValue = ksDefault.lValue;
+        *supportAuto = !!(capability & KSPROPERTY_CAMERACONTROL_FLAGS_AUTO);
     }
 
     return hr;
 }
 
-HRESULT CMFCameraReader::SetVideoProcAmpValue(const KSPROPERTY_VIDCAP_VIDEOPROCAMP PropertyId,
-                                              LONG newValue,
-                                              ULONG newFlags)
-{
-    KSPROPERTY_VIDEOPROCAMP_S videoCamp = {};
-    videoCamp.Property.Set = PROPSETID_VIDCAP_VIDEOPROCAMP;
-    videoCamp.Property.Id = PropertyId;
-    videoCamp.Property.Flags = KSPROPERTY_TYPE_SET;
-    videoCamp.Value = newValue;
-    videoCamp.Flags = newFlags;
-    ULONG retSize = 0;
-
-    return m_spKsControl->KsProperty((PKSPROPERTY)&videoCamp,
-                                     sizeof(videoCamp),
-                                     &videoCamp,
-                                     sizeof(videoCamp),
-                                     &retSize);
-}
-
-HRESULT CMFCameraReader::GetCameraControlValue(const KSPROPERTY_VIDCAP_CAMERACONTROL PropertyId,
+HRESULT CMFCameraReader::GetCameraControlValue(const GUID PropertySet,
+                                               const ULONG PropertyId,
                                                LONG *pValue,
                                                ULONG *pFlags,
                                                ULONG *pCapability)
 {
     HRESULT hr = S_OK;
     KSPROPERTY_CAMERACONTROL_S videoControl = {};
-    videoControl.Property.Set = PROPSETID_VIDCAP_CAMERACONTROL;
+    videoControl.Property.Set = PropertySet;
     videoControl.Property.Id = PropertyId;
     videoControl.Property.Flags = KSPROPERTY_TYPE_GET;
     videoControl.Value = -1;
@@ -1187,12 +1417,11 @@ HRESULT CMFCameraReader::GetCameraControlValue(const KSPROPERTY_VIDCAP_CAMERACON
     return hr;
 }
 
-HRESULT CMFCameraReader::SetCameraControlValue(const KSPROPERTY_VIDCAP_CAMERACONTROL PropertyId,
-                                               LONG newValue,
-                                               ULONG newFlags)
+HRESULT
+CMFCameraReader::SetCameraControlValue(const GUID PropertySet, const ULONG PropertyId, LONG newValue, ULONG newFlags)
 {
     KSPROPERTY_CAMERACONTROL_S videoControl = {};
-    videoControl.Property.Set = PROPSETID_VIDCAP_CAMERACONTROL;
+    videoControl.Property.Set = PropertySet;
     videoControl.Property.Id = PropertyId;
     videoControl.Property.Flags = KSPROPERTY_TYPE_SET;
     videoControl.Value = newValue;
