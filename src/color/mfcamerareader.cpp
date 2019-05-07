@@ -566,9 +566,13 @@ k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_contr
         // Convert KSProperty exposure time value to micro-second unit
         minValue = (LONG)(exp2f((float)minValue) * 1000000.0f);
         maxValue = (LONG)(exp2f((float)maxValue) * 1000000.0f);
-        stepValue = 1;
         defaultValue = (LONG)(exp2f((float)defaultValue) * 1000000.0f);
         defaultMode = K4A_COLOR_CONTROL_MODE_AUTO;
+
+        // Windows KsProperty uses exposure time value as log base 2 seconds, which is not linear.
+        // But K4A color control API allow to use micro sec unit exposure time.
+        // Set step value to 1.
+        stepValue = 1;
     }
     break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
