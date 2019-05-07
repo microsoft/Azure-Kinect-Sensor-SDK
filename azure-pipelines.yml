@@ -254,7 +254,7 @@ jobs:
 
   - script: 'ctest -V -C "$(CMakeConfiguration)" -L unit'
     workingDirectory: '$(Build.BinariesDirectory)'
-    displayName: 'Unit Tests'
+    displayName: 'Run Native Unit Tests'
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
@@ -555,6 +555,7 @@ jobs:
 
     steps:
     - task: VisualStudioTestPlatformInstaller@1
+      displayName: 'Install Visual Studio Test Platform tools'
 
     - checkout: self
       clean: true
@@ -590,7 +591,7 @@ jobs:
         flattenFolders: true
 
     - task: CopyFiles@2
-      displayName: "Copy DepthEnginePlugin into C# fucntional tests folder"
+      displayName: "Copy DepthEnginePlugin into C# functional tests folder"
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
         contents: "depthengine*.dll"
