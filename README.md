@@ -1,5 +1,10 @@
 # Azure Kinect SDK (K4A)
 
+Welcome to the Azure Kinect DK Sensor SDK! While devices and the Body Tracking SDK will be available this
+summer, we wanted to share the Sensor SDK now. We hope you can use this interim period to get familiar with
+our SDK, ask questions, and provide feedback. See [Azure.com/Kinect](https://Azure.com/kinect) for device
+info and available documentation. 
+
 [![Build Status (develop)](https://dev.azure.com/ms/Azure-Kinect-Sensor-SDK/_apis/build/status/Microsoft.Azure-Kinect-Sensor-SDK%20(Public)?branchName=develop)](https://dev.azure.com/ms/Azure-Kinect-Sensor-SDK/_build/latest?definitionId=133&branchName=develop)
 
 ## Introduction
@@ -24,11 +29,17 @@ To use the SDK please refer to the installation instructions here.
 
 ## Documentation and Official Builds
 
+The latest stable binaries are available for download.
+   
+   Tag   | Download
+---------|----------------
+  [v1.0.2](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.0.2) | [Azure Kinect SDK 1.0.2.msi](http://download.microsoft.com/download/B/4/D/B4D26442-DDA5-40C2-9913-3B23AE84A806/Azure%20Kinect%20SDK%201.0.2.msi)
+
 Please see [usage](docs/usage.md) for info on how to use the SDK.
 
 ## Building
 
-Azure Kinect SDK uses cmake to build. For instructions on how to build this SDK please see
+Azure Kinect SDK uses CMake to build. For instructions on how to build this SDK please see
 [building](docs/building.md).
 
 ## Versioning
@@ -53,6 +64,15 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
 or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
+## Reporting Security Issues
+Security issues and bugs should be reported privately, via email, to the
+Microsoft Security Response Center (MSRC) at <[secure@microsoft.com](mailto:secure@microsoft.com)>.
+You should receive a response within 24 hours. If for some reason you do not, please follow up via
+email to ensure we received your original message. Further information, including the
+[MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the
+[Security TechCenter](https://technet.microsoft.com/en-us/security/default).
+
 ## License
 
 [MIT License](LICENSE)
+

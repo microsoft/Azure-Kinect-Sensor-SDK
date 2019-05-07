@@ -71,6 +71,20 @@ if ("${K4A_ENABLE_LEAK_DETECTION_CMAKE}" STREQUAL "1")
     add_definitions(-DK4A_ENABLE_LEAK_DETECTION)
 endif()
 
+# Sets the RUNPATH entry in the .dynamic section of an elf. RUNPATH is
+# interpreted by the linux loader as an additional path to search for shared
+# objects. $ORIGIN is a special setting telling the loader to search the path
+# relative to the exectuable.
+#
+# These specific settings tell the loader to search the directory of the
+# executable for shared objects. This is done on Linux to emulate the default
+# behavior of the Windows loader, which searches for DLLs in the path of the
+# executable.
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH YES)
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+endif()
+
 add_subdirectory(examples)
 add_subdirectory(src)
 add_subdirectory(tests)

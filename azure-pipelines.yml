@@ -691,7 +691,7 @@ jobs:
       displayName: 'Add execution property to findconnectedport'
 
     - task: CopyFiles@2
-      displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
+      displayName: "Copy DepthEnginePlugin into Build Artifacts"
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
         contents: "libdepthengine.so*"
@@ -701,11 +701,6 @@ jobs:
     - script: 'chmod +x ./x86_64-linux-clang-relwithdebinfo/bin/*'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Add execution property to binary files'
-
-      # Adding the bin folder to the LD_LIBRARY_PATH, so the executables can find the necessary .so files.
-    - script: 'echo "##vso[task.setvariable variable=LD_LIBRARY_PATH]$BUILD_ARTIFACTSTAGINGDIRECTORY/x86_64-linux-clang-relwithdebinfo/bin/"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
-      displayName: 'set LD_LIBRARY_PATH'
 
       # Set the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
     - script: 'echo "##vso[task.setvariable variable=DISPLAY]:0"'
