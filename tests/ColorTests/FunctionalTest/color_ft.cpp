@@ -511,6 +511,12 @@ TEST_F(color_functional_test, colorExposureTest)
     k4a_color_control_mode_t control_mode;
     int32_t value;
     uint64_t exposure_time;
+    int32_t min_value;
+    int32_t max_value;
+    int32_t step_value;
+    int32_t default_value;
+    bool supports_auto;
+    k4a_color_control_mode_t default_mode = K4A_COLOR_CONTROL_MODE_AUTO;
 
     // Create two valid configs that are expected to yield different-sized color payloads
     //
@@ -546,12 +552,31 @@ TEST_F(color_functional_test, colorExposureTest)
     k4a_image_release(image);
     k4a_capture_release(capture);
 
-    // Set exposure time to auto
+    // Reset exposure time to default
+    EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+              k4a_device_get_color_control_capabilities(m_device,
+                                                        K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                                        &supports_auto,
+                                                        &min_value,
+                                                        &max_value,
+                                                        &step_value,
+                                                        &default_value,
+                                                        &default_mode));
     EXPECT_EQ(K4A_RESULT_SUCCEEDED,
               k4a_device_set_color_control(m_device,
                                            K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-                                           K4A_COLOR_CONTROL_MODE_AUTO,
-                                           0));
+                                           K4A_COLOR_CONTROL_MODE_MANUAL,
+                                           default_value));
+
+    // If default mode is not manual, recover color control mode as well
+    if (default_mode != K4A_COLOR_CONTROL_MODE_MANUAL)
+    {
+        EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               default_mode,
+                                               default_value));
+    }
 
     k4a_device_stop_cameras(m_device);
 }
@@ -646,10 +671,17 @@ TEST_P(color_control_test, control_test)
     // Verify default values
     EXPECT_EQ(default_mode, as.default_mode);
     EXPECT_EQ(default_value, as.default_value);
-    EXPECT_EQ(current_mode, default_mode) << "Current mode (" << current_mode << ") is not equal to default mode ("
-                                          << default_mode << "), please reset device before running test.\n";
-    EXPECT_EQ(current_value, default_value) << "Current value (" << current_value << ") is not equal to default value ("
-                                            << default_value << "), please reset device before running test.\n";
+
+    if (current_mode != default_mode)
+    {
+        std::cout << "Current mode (" << current_mode << ") is not equal to default mode (" << default_mode
+                  << "), please reset device before running test.\n";
+    }
+    if (current_value != default_value)
+    {
+        std::cout << "Current value (" << current_value << ") is not equal to default value (" << default_value
+                  << "), please reset device before running test.\n";
+    }
 
     if (supports_auto)
     {
