@@ -111,6 +111,8 @@ install(
         k4aviewer
     RUNTIME DESTINATION
         ${CMAKE_INSTALL_BINDIR}
+    COMPONENT
+        tools
 )
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -119,6 +121,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
             $<TARGET_PDB_FILE:k4aviewer>
         DESTINATION
             ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            tools
         OPTIONAL
     )
 endif()

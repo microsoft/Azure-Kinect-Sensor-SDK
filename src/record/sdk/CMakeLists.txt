@@ -63,10 +63,16 @@ install(
         k4arecordTargets
     LIBRARY DESTINATION
         ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT
+        libraries
     ARCHIVE DESTINATION
         ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT
+        libraries
     RUNTIME DESTINATION
         ${CMAKE_INSTALL_BINDIR}
+    COMPONENT
+        libraries
 )
 
 include(CMakePackageConfigHelpers)
@@ -85,6 +91,8 @@ install(
         k4a::
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/k4arecord
+    COMPONENT
+        libraries
 )
 
 configure_file("${PROJECT_SOURCE_DIR}/cmake/k4arecordConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfig.cmake" COPYONLY)
@@ -95,6 +103,8 @@ install(
         "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfigVersion.cmake"
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/k4arecord
+    COMPONENT
+        libraries
 )
 
 install(
@@ -105,6 +115,8 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/include/k4arecord/k4arecord_export.h
     DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}/k4arecord
+    COMPONENT
+        libraries
 )
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -113,6 +125,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
             $<TARGET_PDB_FILE:k4arecord>
         DESTINATION
             ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            libraries
         OPTIONAL
     )
 endif()

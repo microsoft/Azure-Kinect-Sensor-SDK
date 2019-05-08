@@ -30,6 +30,8 @@ install(
         AzureKinectFirmwareTool
     RUNTIME DESTINATION
         ${CMAKE_INSTALL_BINDIR}
+    COMPONENT
+        tools
 )
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -38,6 +40,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
             $<TARGET_PDB_FILE:AzureKinectFirmwareTool>
         DESTINATION
             ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            tools
         OPTIONAL
     )
 endif()
