@@ -16,9 +16,21 @@
 namespace k4arecord
 {
 
-typedef struct _track_data_t
+typedef struct _track_header_t
 {
     libmatroska::KaxTrackEntry *track;
+
+    /**
+     * Some tracks such as IMU record small samples at a high rate. This changes the recording mode to use BlockGroup's
+     * and lacing to reduce overhead. Lacing will only record a single timestamp for a group of samples, so the data
+     * structure should contain its own timestamp information.
+     */
+    bool high_freq_data = false;
+} track_header_t;
+
+typedef struct _track_data_t
+{
+    track_header_t *track;
     libmatroska::DataBuffer *buffer;
 } track_data_t;
 
@@ -69,11 +81,11 @@ typedef struct _k4a_record_context_t
     std::unique_ptr<libebml::EbmlVoid> segment_info_void;
     std::unique_ptr<libebml::EbmlVoid> tags_void;
 
-    libmatroska::KaxTrackEntry *color_track;
-    libmatroska::KaxTrackEntry *depth_track;
-    libmatroska::KaxTrackEntry *ir_track;
-    libmatroska::KaxTrackEntry *imu_track;
-    std::unordered_map<std::string, libmatroska::KaxTrackEntry *> tracks;
+    track_header_t *color_track;
+    track_header_t *depth_track;
+    track_header_t *ir_track;
+    track_header_t *imu_track;
+    std::unordered_map<std::string, track_header_t> tracks;
 
     // std::list can't be memset to 0, so we need to use a pointer.
     std::unique_ptr<std::list<cluster_t *>> pending_clusters;
@@ -103,17 +115,17 @@ uint64_t new_unique_id();
 k4a_result_t
 populate_bitmap_info_header(BITMAPINFOHEADER *header, uint64_t width, uint64_t height, k4a_image_format_t format);
 
-libmatroska::KaxTrackEntry *add_track(k4a_record_context_t *context,
-                                      const char *name,
-                                      track_type type,
-                                      const char *codec,
-                                      const uint8_t *codec_private = NULL,
-                                      size_t codec_private_size = 0);
+track_header_t *add_track(k4a_record_context_t *context,
+                          const char *name,
+                          track_type type,
+                          const char *codec,
+                          const uint8_t *codec_private = NULL,
+                          size_t codec_private_size = 0);
 
-void set_track_info_video(libmatroska::KaxTrackEntry *track, uint64_t width, uint64_t height, uint64_t frame_rate);
+void set_track_info_video(track_header_t *track, uint64_t width, uint64_t height, uint64_t frame_rate);
 
 k4a_result_t write_track_data(k4a_record_context_t *context,
-                              libmatroska::KaxTrackEntry *track,
+                              track_header_t *track,
                               uint64_t timestamp_ns,
                               libmatroska::DataBuffer *buffer);
 

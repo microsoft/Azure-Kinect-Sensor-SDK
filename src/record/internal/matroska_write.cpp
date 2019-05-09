@@ -109,12 +109,12 @@ populate_bitmap_info_header(BITMAPINFOHEADER *header, uint64_t width, uint64_t h
     return K4A_RESULT_SUCCEEDED;
 }
 
-KaxTrackEntry *add_track(k4a_record_context_t *context,
-                         const char *name,
-                         track_type type,
-                         const char *codec,
-                         const uint8_t *codec_private,
-                         size_t codec_private_size)
+track_header_t *add_track(k4a_record_context_t *context,
+                          const char *name,
+                          track_type type,
+                          const char *codec,
+                          const uint8_t *codec_private,
+                          size_t codec_private_size)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
     RETURN_VALUE_IF_ARG(NULL, name == NULL);
@@ -162,18 +162,19 @@ KaxTrackEntry *add_track(k4a_record_context_t *context,
         GetChild<KaxCodecPrivate>(*track).CopyBuffer(codec_private, (uint32)codec_private_size);
     }
 
-    context->tracks.insert(std::pair<std::string, KaxTrackEntry *>(std::string(name), track));
+    auto entry = context->tracks.emplace(std::string(name), track_header_t{ track, false });
 
-    return track;
+    return &entry.first->second;
 }
 
-void set_track_info_video(KaxTrackEntry *track, uint64_t width, uint64_t height, uint64_t frame_rate)
+void set_track_info_video(track_header_t *track, uint64_t width, uint64_t height, uint64_t frame_rate)
 {
     RETURN_VALUE_IF_ARG(VOID_VALUE, track == NULL);
+    RETURN_VALUE_IF_ARG(VOID_VALUE, track->track == NULL);
 
-    GetChild<KaxTrackDefaultDuration>(*track).SetValue(1_s / frame_rate);
+    GetChild<KaxTrackDefaultDuration>(*track->track).SetValue(1_s / frame_rate);
 
-    auto &video_track = GetChild<KaxTrackVideo>(*track);
+    auto &video_track = GetChild<KaxTrackVideo>(*track->track);
     GetChild<KaxVideoPixelWidth>(video_track).SetValue(width);
     GetChild<KaxVideoPixelHeight>(video_track).SetValue(height);
 }
@@ -181,11 +182,12 @@ void set_track_info_video(KaxTrackEntry *track, uint64_t width, uint64_t height,
 // Buffer needs to be valid until it is flushed to disk. The DataBuffer free callback can be used to assist with this.
 // If a failure is returned, the caller will need to free the buffer.
 k4a_result_t
-write_track_data(k4a_record_context_t *context, KaxTrackEntry *track, uint64_t timestamp_ns, DataBuffer *buffer)
+write_track_data(k4a_record_context_t *context, track_header_t *track, uint64_t timestamp_ns, DataBuffer *buffer)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !context->header_written);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track->track == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, buffer == NULL);
 
     try
@@ -335,7 +337,7 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
 
     KaxBlockBlob *block_blob = NULL;
     KaxBlockGroup *block_group = NULL;
-    KaxTrackEntry *current_track = NULL;
+    track_header_t *current_track = NULL;
     uint64_t block_blob_start = 0;
 
     std::vector<std::unique_ptr<KaxBlockBlob>> blob_list;
@@ -343,13 +345,13 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     bool first = true;
     for (std::pair<uint64_t, track_data_t> data : cluster->data)
     {
-        // Only store IMU samples together in a block group, all other tracks store 1 frame per block.
-        if (block_blob == NULL || current_track != data.second.track || data.second.track != context->imu_track)
+        // Only store high frequency data together in a block group, all other tracks store 1 frame per block.
+        if (block_blob == NULL || current_track != data.second.track || !data.second.track->high_freq_data)
         {
             // Automatically switching between SimpleBlock and BlockGroup is not implemented in libmatroska,
-            // We need to decide the block type ahead of time to force IMU into a BlockGroup
-            block_blob = new KaxBlockBlob(data.second.track == context->imu_track ? BLOCK_BLOB_NO_SIMPLE :
-                                                                                    BLOCK_BLOB_ALWAYS_SIMPLE);
+            // We need to decide the block type ahead of time to force high frequency data into a BlockGroup
+            block_blob = new KaxBlockBlob(data.second.track->high_freq_data ? BLOCK_BLOB_NO_SIMPLE :
+                                                                              BLOCK_BLOB_ALWAYS_SIMPLE);
             // BlockBlob needs to be valid until the cluster is rendered.
             // The blob will be freed at the end of write_cluster().
             blob_list.emplace_back(block_blob);
@@ -361,7 +363,7 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
             {
                 block_group = new KaxBlockGroup();
                 block_blob->SetBlockGroup(*block_group); // Block group will be freed when BlockBlob is destroyed.
-                block_group->SetParentTrack(*data.second.track);
+                block_group->SetParentTrack(*data.second.track->track);
             }
             else
             {
@@ -376,11 +378,13 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
             block_group->SetBlockDuration(data.first - block_blob_start + context->timecode_scale);
         }
 
-        block_blob->AddFrameAuto(*data.second.track, data.first - context->start_timestamp_offset, *data.second.buffer);
+        block_blob->AddFrameAuto(*data.second.track->track,
+                                 data.first - context->start_timestamp_offset,
+                                 *data.second.buffer);
 
         // Only add one Cue entry once per cluster
         // We only need to write Cue entries for the first track.
-        if (first && GetChild<KaxTrackNumber>(*data.second.track).GetValue() == 1)
+        if (first && GetChild<KaxTrackNumber>(*data.second.track->track).GetValue() == 1)
         {
             // Add cue entries at a maximum rate specified by CUE_ENTRY_GAP_NS so that the index doesn't get too large.
             if (context->last_cues_entry_ns == 0 ||
