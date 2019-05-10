@@ -56,7 +56,7 @@ We welcome your contributions! Please see the [contribution guidelines](CONTRIBU
 
 ## Feedback
 
-For any feedback or to report a bug, please file a [GitHub Issue](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/issues).
+For SDK feedback or to report a bug, please file a [GitHub Issue](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/issues). For general suggestions or ideas, visit our [feedback forum](https://aka.ms/azurekinectfeedback).
 
 ## Code of Conduct
 
