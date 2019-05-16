@@ -25,7 +25,7 @@ elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
             VERSION
                 "${TEST_LIBRARY_MAJOR_VER}.${TEST_LIBRARY_MINOR_VER}"
             SOVERSION
-                "${TEST_LIBRARY_MAJOR_VER}.${TEST_LIBRARY_MINOR_VER}")
+                "${TEST_LIBRARY_MAJOR_VER}")
 endif()
 
 target_link_libraries(dynlib_ut PRIVATE
