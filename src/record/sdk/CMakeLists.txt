@@ -52,7 +52,7 @@ set_target_properties(
     k4arecord
     PROPERTIES
         VERSION ${K4A_VERSION}
-        SOVERSION ${K4A_VERSION})
+        SOVERSION ${K4A_VERSION_MAJOR})
 
 # Setup install
 include(GNUInstallDirs)
