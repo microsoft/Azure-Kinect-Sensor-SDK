@@ -112,6 +112,7 @@ install(
 install(
     FILES
         ${K4A_INCLUDE_DIR}/k4a/k4a.h
+        ${K4A_INCLUDE_DIR}/k4a/k4a.hpp
         ${K4A_INCLUDE_DIR}/k4a/k4atypes.h
         ${CMAKE_CURRENT_BINARY_DIR}/include/k4a/k4aversion.h
         ${CMAKE_CURRENT_BINARY_DIR}/include/k4a/k4a_export.h
