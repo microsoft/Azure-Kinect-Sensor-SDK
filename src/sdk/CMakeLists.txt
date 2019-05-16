@@ -63,7 +63,7 @@ set_target_properties(
     k4a
     PROPERTIES
         VERSION ${K4A_VERSION}
-        SOVERSION ${K4A_VERSION})
+        SOVERSION ${K4A_VERSION_MAJOR})
 
 
 # Setup install
