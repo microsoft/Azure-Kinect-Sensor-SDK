@@ -851,12 +851,13 @@ K4A_EXPORT uint64_t k4a_image_get_device_timestamp_usec(k4a_image_t image_handle
  *
  * \remarks
  * Returns the system timestamp of the image. Timestamps are recorded by the host. They may be used for relative
- * comparison, but their absolute value has no defined meaning.
+ * comparision, as they are relative to the corresponding system clock. The absolute value is a monotonic count from
+ * an arbitrary point in the past.
  *
  * \remarks
  * On Linux the system timestamp is read from clock_gettime(CLOCK_MONOTONIC), which measures realtime and is not
  * impacted by adjustments to the system clock. It starts from an arbitrary point in the past. On Windows the system
- * timestamp is read from QueryPerformanceCounter(), It also measures realtime and is not impacted by adjustments to the
+ * timestamp is read from QueryPerformanceCounter(), it also measures realtime and is not impacted by adjustments to the
  * system clock. It also starts from an arbitrary point in the past.
  *
  * \returns

@@ -66,6 +66,7 @@ typedef struct _usb_async_transfer_data_t
     struct _usbcmd_context_t *usbcmd;
     struct libusb_transfer *bulk_transfer;
     k4a_image_t image;
+    uint32_t list_index;
 } usb_async_transfer_data_t;
 
 typedef struct _usbcmd_context_t

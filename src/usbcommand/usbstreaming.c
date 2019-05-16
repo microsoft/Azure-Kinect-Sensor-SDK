@@ -35,12 +35,9 @@ static void usb_cmd_release_xfr(struct libusb_transfer *bulk_transfer)
     usb_async_transfer_data_t *transfer = (usb_async_transfer_data_t *)(bulk_transfer->user_data);
     usbcmd_context_t *usbcmd = transfer->usbcmd;
 
-    for (uint32_t i = 0; i < USB_CMD_MAX_XFR_COUNT; i++)
+    if (usbcmd->transfer_list[transfer->list_index] == transfer)
     {
-        if (usbcmd->transfer_list[i] == transfer)
-        {
-            usbcmd->transfer_list[i] = NULL;
-        }
+        usbcmd->transfer_list[transfer->list_index] = NULL;
     }
     if (transfer->image)
     {
@@ -194,6 +191,7 @@ static int usb_cmd_lib_usb_thread(void *var)
             {
                 xfer_pool += usbcmd->stream_size;
                 transfer->usbcmd = usbcmd;
+                transfer->list_index = i;
                 usbcmd->transfer_list[i] = transfer;
                 transfer->bulk_transfer = libusb_alloc_transfer(0);
                 result = K4A_RESULT_FROM_BOOL(transfer->bulk_transfer != NULL);

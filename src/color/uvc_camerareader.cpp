@@ -1227,14 +1227,10 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
 
         if (K4A_SUCCEEDED(result))
         {
+            // Set metadata
             uint64_t ts = (uint64_t)frame->capture_time_finished.tv_sec * 1000000000;
             ts += (uint64_t)frame->capture_time_finished.tv_nsec;
             image_set_system_timestamp_nsec(image, ts);
-        }
-
-        if (K4A_SUCCEEDED(result))
-        {
-            // Set metadata
             image_set_device_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(framePTS));
             image_set_exposure_usec(image, exposure_time);
             image_set_iso_speed(image, iso_speed);
