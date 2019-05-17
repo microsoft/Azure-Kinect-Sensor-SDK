@@ -391,7 +391,7 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
         {
             if (image)
             {
-                image.set_timestamp(image.get_timestamp() + state->TimestampOffset);
+                image.set_timestamp(image.get_device_timestamp() + state->TimestampOffset);
             }
         }
 
@@ -432,19 +432,19 @@ std::chrono::microseconds K4ARecordingDockControl::GetCaptureTimestamp(const k4a
     const auto irImage = capture.get_ir_image();
     if (irImage != nullptr)
     {
-        return irImage.get_timestamp();
+        return irImage.get_device_timestamp();
     }
 
     const auto depthImage = capture.get_depth_image();
     if (depthImage != nullptr)
     {
-        return depthImage.get_timestamp();
+        return depthImage.get_device_timestamp();
     }
 
     const auto colorImage = capture.get_color_image();
     if (colorImage != nullptr)
     {
-        return colorImage.get_timestamp();
+        return colorImage.get_device_timestamp();
     }
 
     return std::chrono::microseconds::zero();

@@ -1,5 +1,11 @@
 ## Change Log
 
+### v1.1.0
+
+* Clean up repo documentation for going public.
+* New API k4a_device_get_color_control_capabilities() to read color control capabilities was added.
+* C++ wrapper added.
+
 ### v1.0.0
 
 * Breaking Change to pre-production devices, update container ID & serial number

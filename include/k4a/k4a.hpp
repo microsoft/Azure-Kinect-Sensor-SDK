@@ -305,7 +305,7 @@ public:
      *
      * \sa k4a_image_get_timestamp_usec
      */
-    std::chrono::microseconds get_timestamp() const noexcept
+    std::chrono::microseconds get_device_timestamp() const noexcept
     {
         return std::chrono::microseconds(k4a_image_get_timestamp_usec(m_handle));
     }
