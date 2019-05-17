@@ -235,19 +235,28 @@ set(CPACK_PACKAGE_NAME "k4asdk")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${K4A_VERSION_STR}.${CMAKE_SYSTEM_NAME}.${TARGET_ARCH}.${CMAKE_BUILD_TYPE}")
 
 set(CPACK_COMPONENTS_GROUPING "ONE_PER_GROUP")
-set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 
 set(CPACK_GENERATOR "TGZ" "ZIP")
 
 include(CPack)
 
 cpack_add_component(
-    libraries
+    runtime
     DISPLAY_NAME
-        Libraries
+        Runtime
     DESCRIPTION
-        "Library and header files for Azure Kinect Development"
+        "Dynamic Libraries for Azure Kinect Runtime"
     REQUIRED)
+
+cpack_add_component(
+    development
+    DISPLAY_NAME
+        Development
+    DESCRIPTION
+        "Headers and cmake files needed for Azure Kinect Development"
+    REQUIRED
+    DEPENDS
+        runtime)
 
 cpack_add_component(
     tools
@@ -257,4 +266,4 @@ cpack_add_component(
         "Tools for Azure Kinect Development"
     REQUIRED
     DEPENDS
-        libraries)
+        runtime)

@@ -73,18 +73,21 @@ install(
         k4a
     EXPORT
         k4aTargets
-    LIBRARY DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT
-        libraries
-    ARCHIVE DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT
-        libraries
-    RUNTIME DESTINATION
-        ${CMAKE_INSTALL_BINDIR}
-    COMPONENT
-        libraries
+    LIBRARY
+        DESTINATION
+            ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT
+            runtime
+    ARCHIVE
+        DESTINATION
+            ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT
+            development
+    RUNTIME
+        DESTINATION
+            ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            runtime
 )
 
 include(CMakePackageConfigHelpers)
@@ -104,7 +107,7 @@ install(
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/k4a
     COMPONENT
-        libraries
+        development
 )
 
 configure_file("${PROJECT_SOURCE_DIR}/cmake/k4aConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/k4aConfig.cmake" COPYONLY)
@@ -116,7 +119,7 @@ install(
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/k4a
     COMPONENT
-        libraries
+        development
 )
 
 install(
@@ -129,7 +132,7 @@ install(
     DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}/k4a
     COMPONENT
-        libraries
+        development
 )
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -139,7 +142,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
         DESTINATION
             ${CMAKE_INSTALL_BINDIR}
         COMPONENT
-            libraries
+            runtime
         OPTIONAL
     )
 endif()
