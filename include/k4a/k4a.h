@@ -20,9 +20,20 @@
 extern "C" {
 #endif
 
+/**
+ * \defgroup Functions Functions
+ * \ingroup csdk
+ *
+ * Public functions of the API
+ *
+ * @{
+ */
+
 /** Gets the number of connected devices
  *
  * \returns Number of sensors connected to the PC.
+ *
+ * \relates k4a_device_t
  *
  * \remarks
  * This API counts the number of Azure Kinect devices connected to the host PC.
@@ -92,6 +103,8 @@ K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *
  *
  * \param device_handle
  * Output parameter which on success will return a handle to the device.
+ *
+ * \relates k4a_device_t
  *
  * \return ::K4A_RESULT_SUCCEEDED if the device was opened successfully.
  *
@@ -1923,6 +1936,10 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
                                                                       const k4a_image_t depth_image,
                                                                       const k4a_calibration_type_t camera,
                                                                       k4a_image_t xyz_image);
+
+/**
+ * @}
+ */
 
 #ifdef __cplusplus
 }
