@@ -3,8 +3,16 @@
 ### v1.1.0
 
 * Clean up repo documentation for going public.
-* New API k4a_device_get_color_control_capabilities() to read color control capabilities was added.
+* New API k4a_device_get_color_control_capabilities() to read color control capabilities was added. (#319)
 * C++ wrapper added.
+* Linux, Color camera support added.
+* K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY deprecated. (#277)
+* New K4A_*_TRACK tags added to recordings for track identification. (#259)
+* Playback External Sync example added. (#274)
+* Playback API format conversion support added (MJPG -> BGRA32, etc...). (#237)
+* Playback IMU API added. (#213)
+* Various playback performance improvements, including read-ahead and cluster caching. (#203, #189, #142)
+* k4a_playback_seek_timestamp() functionality changed to fix edge cases. (#141)
 
 ### v1.0.0
 
