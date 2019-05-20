@@ -1,5 +1,19 @@
 ## Change Log
 
+### v1.1.0
+
+* Clean up repo documentation for going public.
+* New API k4a_device_get_color_control_capabilities() to read color control capabilities was added. (#319)
+* C++ wrapper added.
+* Linux, Color camera support added.
+* K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY deprecated. (#277)
+* New K4A_\*_TRACK tags added to recordings for track identification. (#259)
+* Playback External Sync example added. (#274)
+* Playback API format conversion support added (MJPG -> BGRA32, etc...). (#237)
+* Playback IMU API added. (#213)
+* Various playback performance improvements, including read-ahead and cluster caching. (#203, #189, #142)
+* k4a_playback_seek_timestamp() functionality changed to fix edge cases. (#141)
+
 ### v1.0.0
 
 * Breaking Change to pre-production devices, update container ID & serial number
@@ -12,9 +26,9 @@
 * Changed units of IMU Gyroscope reading from degrees per second to radians per second.
 * Breaking change to k4a_calibration_get_from_raw API, size of source calibration string is now required along with the 
 source calibration.
-* Added FW version minumum bar check
+* Added FW version minimum bar check
 * Integrated GPU transform engine into SDK to accelerate transformation between depth image and color image.
-* Depth Engine plugin versioning throught binding with SDK during loading and more logging added.
+* Depth Engine plugin versioning through binding with SDK during loading and more logging added.
 
 ### v0.7.1
 
