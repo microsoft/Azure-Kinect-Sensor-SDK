@@ -15,6 +15,13 @@
 extern "C" {
 #endif
 
+/**
+ *
+ * \addtogroup Functions
+ *
+ * @{
+ */
+
 /** Opens a new recording file for writing.
  *
  * The file will be created if it doesn't exist, or overwritten if an existing file is specified.
@@ -246,6 +253,10 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_flush(k4a_record_t recording_handle);
  * \endxmlonly
  */
 K4ARECORD_EXPORT void k4a_record_close(k4a_record_t recording_handle);
+
+/**
+ * @}
+ */
 
 #ifdef __cplusplus
 } // extern "C"

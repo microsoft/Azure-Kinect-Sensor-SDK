@@ -107,18 +107,20 @@ if (K4A_BUILD_DOCS)
     find_package(Doxygen 1.8.14 EXACT)
     if (DOXYGEN_FOUND)
         set(DOXYGEN_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/include/k4a ${CMAKE_CURRENT_SOURCE_DIR}/include/k4arecord ${DOXYGEN_MAINPAGE})
-
+        set(DOXYGEN_LAYOUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/DoxygenLayout.xml)
         # These variables are used in Doxyfile.in
         string(REPLACE ";" " " DOXYGEN_INPUT "${DOXYGEN_SOURCES}")
         set(DOXYGEN_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/docs)
+        set(DOXYGEN_PROJECT_LOGO ${CMAKE_CURRENT_SOURCE_DIR}/docs/logo.png)
+        set(DOXYGEN_TEMPLATE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/doxygen)
 
-        configure_file(Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+        configure_file(doxygen/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
         add_custom_command(
             OUTPUT ${DOXYGEN_OUTPUT_DIRECTORY}/html/index.html
             COMMAND ${DOXYGEN_EXECUTABLE}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            MAIN_DEPENDENCY Doxyfile.in
+            MAIN_DEPENDENCY doxygen/Doxyfile.in
             DEPENDS ${DOXYGEN_SOURCES}
             )
     add_custom_target(k4adocs ALL DEPENDS ${DOXYGEN_OUTPUT_DIRECTORY}/html/index.html)
@@ -140,7 +142,7 @@ if (${CLANG_FORMAT} STREQUAL "CLANG_FORMAT-NOTFOUND")
     message(STATUS "Clang-format not found")
 else()
 
-    set(VALID_CLANG_FORMAT_VERSION "6.0.0")
+    set(VALID_CLANG_FORMAT_VERSION "6\.0\.0")
     execute_process(COMMAND ${CLANG_FORMAT} -version OUTPUT_VARIABLE CLANG_VERSION_STRING)
     message(STATUS "clang-format version: ${CLANG_VERSION_STRING}")
 
