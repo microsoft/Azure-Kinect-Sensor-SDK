@@ -1,8 +1,10 @@
 ﻿param(
-    $SourceBranch = ${env:Build.SourceBranch},
-    $SourcesDirectory = ${env:Build.SourcesDirectory},
-    $DocumentationPath = "${env:Build.BinariesDirectory}\docs\html"
+    $SourceBranch = ${env:Build_SourceBranch},
+    $SourcesDirectory = ${env:Build_SourcesDirectory},
+    $DocumentationPath = "${env:Build_BinariesDirectory}\docs\html"
 )
+
+dir env:
 
 $ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
 
@@ -37,5 +39,5 @@ $Javascript = "var BRANCHES = " + ($Branches | ConvertTo-Json);
 $Javascript | Set-Content branches.js;
 
 git add *
-git commit -m "Updated documentation for $SourceBranch from commit $(${env:Build.SourceVersion})"
+git commit -m "Updated documentation for $SourceBranch from commit $(${env:Build_SourceVersion})"
 git push -c http.https://github.com.extraheader="AUTHORIZATION: Bearer $env:SYSTEM_ACCESSTOKEN"
