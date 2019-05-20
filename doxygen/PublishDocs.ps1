@@ -15,9 +15,11 @@ if ($SourceBranch.StartsWith('refs/'))
     $SourceBranch = $SourceBranch.SubString(5);
 }
 
+git config --local --add "http.https://github.com/.extraheader" "AUTHORIZATION: Bearer $env:SYSTEM_ACCESSTOKEN"
+
 # Check out the documentation branch
-git checkout gh-pages -q -c http.https://github.com.extraheader="AUTHORIZATION: Bearer $env:SYSTEM_ACCESSTOKEN"
-git pull -c http.https://github.com.extraheader="AUTHORIZATION: Bearer $env:SYSTEM_ACCESSTOKEN"
+git checkout gh-pages -q
+git pull
 
 
 
@@ -40,4 +42,4 @@ $Javascript | Set-Content branches.js;
 
 git add *
 git commit -m "Updated documentation for $SourceBranch from commit $(${env:Build_SourceVersion})"
-git push -c http.https://github.com.extraheader="AUTHORIZATION: Bearer $env:SYSTEM_ACCESSTOKEN"
+git push
