@@ -1,7 +1,7 @@
 ﻿param(
     $SourceBranch = ${env:Build.SourceBranch},
     $SourcesDirectory = ${env:Build.SourcesDirectory},
-    $DocumentationPath = "d:\git\Azure-Kinect-Sensor-SDK\build\docs\html"
+    $DocumentationPath = "${env:Build.BinariesDirectory}\docs\html"
 )
 
 $ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
