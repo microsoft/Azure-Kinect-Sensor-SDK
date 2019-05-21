@@ -14,10 +14,12 @@ if ($SourceBranch.StartsWith('refs/heads/'))
 }
 
 # Identity of the automated commits
-git config --local user.email "microsoft@users.noreply.github.com"
-git config --local user.name "Automatic Documentation Updates"
+git config --local user.email "50889231+AzureKinectBot@users.noreply.github.com"
+git config --local user.name "Azure Kinect Bot"
 
-git config --local --add "http.https://github.com/.extraheader" "AUTHORIZATION: Bearer $env:SYSTEM_ACCESSTOKEN"
+$Authorization = "Basic " + [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes( "${env:GITHUBBOT_USER}:${env:GITHUBBOT_PAT}'))
+
+git config --local --add "http.https://github.com/.extraheader" "AUTHORIZATION: $Authorization"
 
 # Check out the documentation branch
 git checkout gh-pages -q
