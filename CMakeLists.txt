@@ -113,7 +113,7 @@ if (K4A_BUILD_DOCS)
         set(DOXYGEN_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/docs)
         set(DOXYGEN_PROJECT_LOGO ${CMAKE_CURRENT_SOURCE_DIR}/docs/logo.png)
         set(DOXYGEN_TEMPLATE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/doxygen)
-        set(DOXYGEN_VERSION_STR ${VERSION_STR})
+        set(DOXYGEN_PROJECT_NUMBER ${SOURCE_BRANCH})
 
         configure_file(doxygen/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
