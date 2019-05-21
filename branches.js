@@ -1,3 +1,3 @@
 var BRANCHES = [
-    "feature/publishdocs",
+    "feature/publishdocs", 
 ]
