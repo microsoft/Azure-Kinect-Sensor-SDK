@@ -10,9 +10,9 @@ $ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
 
 cd $SourcesDirectory;
 
-if ($SourceBranch.StartsWith('refs/'))
+if ($SourceBranch.StartsWith('refs/heads/'))
 {
-    $SourceBranch = $SourceBranch.SubString(5);
+    $SourceBranch = $SourceBranch.SubString('refs/heads/'.Length);
 }
 
 # Identity of the automated commits
