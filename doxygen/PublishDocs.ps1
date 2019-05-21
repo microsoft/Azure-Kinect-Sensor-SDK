@@ -15,6 +15,10 @@ if ($SourceBranch.StartsWith('refs/'))
     $SourceBranch = $SourceBranch.SubString(5);
 }
 
+# Identity of the automated commits
+git config --local user.email "microsoft@users.noreply.github.com"
+git config --local user.name "Automatic Documentation Updates"
+
 git config --local --add "http.https://github.com/.extraheader" "AUTHORIZATION: Bearer $env:SYSTEM_ACCESSTOKEN"
 
 # Check out the documentation branch
