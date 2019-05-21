@@ -438,7 +438,7 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\doxygenexe
-      cmake -G Ninja "-DK4A_BUILD_DOCS:BOOL=ON" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory) -DSOURCE_BRANCH=$(Build.SourceBranch)"
+      cmake -G Ninja "-DK4A_BUILD_DOCS:BOOL=ON" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DSOURCE_BRANCH=$(Build.SourceBranch)" "$(Build.SourcesDirectory)"
 
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
