@@ -1,2 +1,1 @@
-var BRANCHES = [
-]
+var BRANCHES = "heads/feature/publishdocs"
