@@ -79,8 +79,66 @@ The pipeline will:
 
 ## Installer
 
-The Azure Kinect SDK installer provides both open and closed source binaries. The open source binaries are built from 
+The Azure Kinect SDK installer provides both open and closed source binaries. The open source binaries are built from
 this [GitHub repo](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK).
 
-[Release tags](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases) are used by Microsoft to label commits 
+[Release tags](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases) are used by Microsoft to label commits
 used to create a released build. Checkout the commit that matches the release label to build the desired release version.
+
+## Artifact and Packaging
+File                                                           | MSI                | NuGet              | libk4a             | libk4a-dev         | libk4a-tools
+-------------------------------------------------------------- | ------------------ | ------------------ | ------------------ | ------------------ | -----------------
+LICENSE.txt<sup>*</sup>                                        | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:
+REDIST.txt<sup>*</sup>                                         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:
+ThirdPartyNotices.txt<sup>*</sup>                              | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:
+version.txt<sup>*</sup>                                        | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:
+build/msbuild/native/Microsoft.Azure.Kinect.Sensor.targets<sup>*</sup> | :white_check_mark: | :white_check_mark: |            |                    |
+build/msbuild/dotnet/Microsoft.Azure.Kinect.Sensor.targets<sup>*</sup> | :large_blue_diamond: | :large_blue_diamond: |            |                    |
+build/cmake/x64/k4aConfig.cmake                                | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+build/cmake/x64/k4aConfigVersion.cmake                         | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+build/cmake/x64/k4aTargets-relwithdebinfo.cmake                | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+build/cmake/x64/k4aTargets.cmake                               | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+build/cmake/x64/k4arecordConfig.cmake                          | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+build/cmake/x64/k4arecordConfigVersion.cmake                   | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+build/cmake/x64/k4arecordTargets-relwithdebinfo.cmake          | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+build/cmake/x64/k4arecordTargets.cmake                         | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/k4a.h                                                  | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/k4a_export.h                                           | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/k4atypes.h                                             | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/k4aversion.h                                           | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/k4a.hpp                                                | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/k4arecord_export.h                                     | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/playback.h                                             | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/record.h                                               | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/types.h                                                | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+linux-ubuntu/x64/release/libdepthengine.so<sup>*</sup>         |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libdepthengine.so.1.0<sup>*</sup>     |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4a.so                             |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4a.so.1                           |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4a.so.1.1.0                       |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4arecord.so                       |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4arecord.so.1                     |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4arecord.so.1.1.0                 |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/tools/x64/release/AzureKinectFirmwareTool         |                    |                    |                    |                    | :white_check_mark:
+linux-ubuntu/tools/x64/release/k4arecorder                     |                    |                    |                    |                    | :white_check_mark:
+linux-ubuntu/tools/x64/release/k4aviewer                       |                    |                    |                    |                    | :white_check_mark:
+netstandard2.0/any-cpu/release/Microsoft.AzureKinect.deps.json | :large_blue_diamond: | :large_blue_diamond: |                    |                    |
+netstandard2.0/any-cpu/release/Microsoft.AzureKinect.dll       | :large_blue_diamond: | :large_blue_diamond: |                    |                    |
+netstandard2.0/any-cpu/release/Microsoft.AzureKinect.pdb       | :large_blue_diamond: | :large_blue_diamond: |                    |                    |
+netstandard2.0/any-cpu/release/Microsoft.AzureKinect.xml       | :large_blue_diamond: | :large_blue_diamond: |                    |                    |
+windows-desktop/x64/release/depthengine_1_0.dll<sup>*</sup>    | :white_check_mark: | :white_check_mark: |                    |                    |
+windows-desktop/x64/release/k4a.dll                            | :white_check_mark: | :white_check_mark: |                    |                    |
+windows-desktop/x64/release/k4a.lib                            | :white_check_mark: | :white_check_mark: |                    |                    |
+windows-desktop/x64/release/k4a.pdb                            | :white_check_mark: | :white_check_mark: |                    |                    |
+windows-desktop/x64/release/k4arecord.dll                      | :white_check_mark: | :white_check_mark: |                    |                    |
+windows-desktop/x64/release/k4arecord.lib                      | :white_check_mark: | :white_check_mark: |                    |                    |
+windows-desktop/x64/release/k4arecord.pdb                      | :white_check_mark: | :white_check_mark: |                    |                    |
+windows-desktop/tools/x64/release/AzureKinectFirmwareTool.exe  | :white_check_mark: |                    |                    |                    |
+windows-desktop/tools/x64/release/AzureKinectFirmwareTool.pdb  | :white_check_mark: |                    |                    |                    |
+windows-desktop/tools/x64/release/k4arecorder.exe              | :white_check_mark: |                    |                    |                    |
+windows-desktop/tools/x64/release/k4arecorder.pdb              | :white_check_mark: |                    |                    |                    |
+windows-desktop/tools/x64/release/k4aviewer.exe                | :white_check_mark: |                    |                    |                    |
+windows-desktop/tools/x64/release/k4aviewer.pdb                | :white_check_mark: |                    |                    |                    |
+
+* <sup>*</sup>These files are generated/included at packaging time from Microsoft Internal sources.
+* :large_blue_diamond: DotNet support planned for a future release (issue #136)
