@@ -4,8 +4,6 @@
     $DocumentationPath = "${env:Build_BinariesDirectory}\docs\html"
 )
 
-dir env:
-
 $ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop;
 
 cd $SourcesDirectory;
