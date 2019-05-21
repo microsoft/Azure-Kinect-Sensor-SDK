@@ -14,7 +14,7 @@ if ($SourceBranch.StartsWith('refs/heads/'))
 }
 
 # Identity of the automated commits
-git config --local user.email "50889231+AzureKinectBot@users.noreply.github.com"
+git config --local user.email "k4abot@microsoft.com"
 git config --local user.name "Azure Kinect Bot"
 
 $Authorization = "Basic " + [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes( "${env:GITHUBBOT_USER}:${env:GITHUBBOT_PAT}"))
