@@ -2,7 +2,7 @@ var NAVTREE =
 [
   [ "Azure Kinect Sensor SDK", "index.html", [
     [ "Reference", "modules.html", "modules" ],
-    [ "Class List", "annotated.html", "annotated" ]
+    [ "Data Structures", "annotated.html", "annotated" ]
   ] ]
 ];
 
