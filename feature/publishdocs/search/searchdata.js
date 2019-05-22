@@ -7,8 +7,7 @@ var indexSectionsWithContent =
   4: "k",
   5: "k",
   6: "k",
-  7: "cdefhms",
-  8: "w"
+  7: "cdefhms"
 };
 
 var indexSectionNames =
@@ -20,20 +19,18 @@ var indexSectionNames =
   4: "typedefs",
   5: "enums",
   6: "enumvalues",
-  7: "groups",
-  8: "pages"
+  7: "groups"
 };
 
 var indexSectionLabels =
 {
   0: "All",
-  1: "Data Structures",
+  1: "Classes",
   2: "Functions",
   3: "Variables",
   4: "Typedefs",
   5: "Enumerations",
   6: "Enumerator",
-  7: "Modules",
-  8: "Pages"
+  7: "Modules"
 };
 
