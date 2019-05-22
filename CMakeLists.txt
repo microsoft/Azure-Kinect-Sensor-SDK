@@ -106,13 +106,15 @@ add_subdirectory(tools)
 if (K4A_BUILD_DOCS)
     find_package(Doxygen 1.8.14 EXACT)
     if (DOXYGEN_FOUND)
+        set(DOXYGEN_MAINPAGE ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/mainpage.md) 
         set(DOXYGEN_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/include/k4a ${CMAKE_CURRENT_SOURCE_DIR}/include/k4arecord ${DOXYGEN_MAINPAGE})
-        set(DOXYGEN_LAYOUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/DoxygenLayout.xml)
+        set(DOXYGEN_LAYOUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/DoxygenLayout.xml)
         # These variables are used in Doxyfile.in
         string(REPLACE ";" " " DOXYGEN_INPUT "${DOXYGEN_SOURCES}")
         set(DOXYGEN_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/docs)
         set(DOXYGEN_PROJECT_LOGO ${CMAKE_CURRENT_SOURCE_DIR}/docs/logo.png)
         set(DOXYGEN_TEMPLATE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/doxygen)
+        set(DOXYGEN_PROJECT_NUMBER ${SOURCE_BRANCH})
 
         configure_file(doxygen/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 

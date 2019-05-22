@@ -43,3 +43,8 @@ into this repo under scripts/99-k4a.rules. To do so:
 * Detach and reattach Azure Kinect devices if attached during this process.
 
 Once complete, the Azure Kinect camera is available without being root.
+
+## API Documentation
+
+See https://microsoft.github.io/Azure-Kinect-Sensor-SDK/ for the most recent API documentation, including documentation for the current
+development branch.
