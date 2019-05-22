@@ -1,1 +1,3 @@
-var BRANCHES = "feature/publishdocs"
+var BRANCHES = [
+    "feature/publishdocs"
+]
