@@ -41,7 +41,7 @@ Copy-Item -Recurse $DocumentationPath -Destination ($DestinationDirectory.FullNa
 $Branches = dir -r -fi index.html |? { $_.Directory.FullName.Length -gt $SourcesDirectory.Length } |% { $_.Directory.FullName.Substring($SourcesDirectory.Length + 1).Replace('\', '/') } |? { -not $_.StartsWith('build/') }
 
 # Save the branch metadata in branches.js
-$Javascript = "var BRANCHES = " + (ConvertTo-Json $Branches);
+$Javascript = "var BRANCHES = " + (ConvertTo-Json @($Branches));
 $Javascript | Set-Content branches.js;
 
 git add *
