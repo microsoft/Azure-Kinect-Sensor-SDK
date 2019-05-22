@@ -38,7 +38,7 @@ Copy-Item -Recurse $DocumentationPath -Destination ($DestinationDirectory.FullNa
 
 
 # Find all documentation branches (any subdirectory with index.html)
-$Branches = dir -r -fi index.html |? { $_.Directory.FullName.Length -gt $SourcesDirectory.Length } |% { $_.Directory.FullName.Substring($SourcesDirectory.Length + 1).Replace('\', '/') } |? { -not $_.StartsWith('build/') }
+$Branches = Get-ChildItem -Recurse -Filter index.html |? { $_.Directory.FullName.Length -gt $SourcesDirectory.Length } |% { $_.Directory.FullName.Substring($SourcesDirectory.Length + 1).Replace('\', '/') } |? { -not $_.StartsWith('build/') }
 
 # Save the branch metadata in branches.js
 $Javascript = "var BRANCHES = " + (ConvertTo-Json @($Branches));
