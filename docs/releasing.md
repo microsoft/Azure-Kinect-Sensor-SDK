@@ -94,16 +94,16 @@ LICENSE.txt \*                                                 | :white_check_ma
 REDIST.txt \*                                                  | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:
 ThirdPartyNotices.txt \*                                       | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:
 version.txt \*                                                 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:
-build/msbuild/native/Microsoft.Azure.Kinect.Sensor.targets \*  | :white_check_mark: | :white_check_mark: |                    |                    |
-build/msbuild/netstandard2.0/Microsoft.Azure.Kinect.Sensor.targets \* | :large_blue_diamond: | :large_blue_diamond: |         |                    |
-build/cmake/x64/k4aConfig.cmake                                | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-build/cmake/x64/k4aConfigVersion.cmake                         | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-build/cmake/x64/k4aTargets-relwithdebinfo.cmake                | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-build/cmake/x64/k4aTargets.cmake                               | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-build/cmake/x64/k4arecordConfig.cmake                          | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-build/cmake/x64/k4arecordConfigVersion.cmake                   | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-build/cmake/x64/k4arecordTargets-relwithdebinfo.cmake          | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-build/cmake/x64/k4arecordTargets.cmake                         | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+build/msbuild/native/Microsoft.Azure.Kinect.Sensor.targets \*  | :one:              | :white_check_mark: |                    |                    |
+build/msbuild/netstandard2.0/Microsoft.Azure.Kinect.Sensor.targets \* | :two:       | :two:              |                    |                    |
+build/cmake/x64/k4aConfig.cmake                                | :one:              | :one:              |                    | :white_check_mark: |
+build/cmake/x64/k4aConfigVersion.cmake                         | :one:              | :one:              |                    | :white_check_mark: |
+build/cmake/x64/k4aTargets-relwithdebinfo.cmake                | :one:              | :one:              |                    | :white_check_mark: |
+build/cmake/x64/k4aTargets.cmake                               | :one:              | :one:              |                    | :white_check_mark: |
+build/cmake/x64/k4arecordConfig.cmake                          | :one:              | :one:              |                    | :white_check_mark: |
+build/cmake/x64/k4arecordConfigVersion.cmake                   | :one:              | :one:              |                    | :white_check_mark: |
+build/cmake/x64/k4arecordTargets-relwithdebinfo.cmake          | :one:              | :one:              |                    | :white_check_mark: |
+build/cmake/x64/k4arecordTargets.cmake                         | :one:              | :one:              |                    | :white_check_mark: |
 include/k4a.h                                                  | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 include/k4a_export.h                                           | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 include/k4atypes.h                                             | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
@@ -124,10 +124,10 @@ linux-ubuntu/x64/release/libk4arecord.so.1.1.0                 |                
 linux-ubuntu/tools/x64/release/AzureKinectFirmwareTool         |                    |                    |                    |                    | :white_check_mark:
 linux-ubuntu/tools/x64/release/k4arecorder                     |                    |                    |                    |                    | :white_check_mark:
 linux-ubuntu/tools/x64/release/k4aviewer                       |                    |                    |                    |                    | :white_check_mark:
-netstandard2.0/any-cpu/release/Microsoft.AzureKinect.deps.json | :large_blue_diamond: | :large_blue_diamond: |                |                    |
-netstandard2.0/any-cpu/release/Microsoft.AzureKinect.dll       | :large_blue_diamond: | :large_blue_diamond: |                |                    |
-netstandard2.0/any-cpu/release/Microsoft.AzureKinect.pdb       | :large_blue_diamond: | :large_blue_diamond: |                |                    |
-netstandard2.0/any-cpu/release/Microsoft.AzureKinect.xml       | :large_blue_diamond: | :large_blue_diamond: |                |                    |
+netstandard2.0/any-cpu/release/Microsoft.AzureKinect.deps.json | :two:              | :two:              |                    |                    |
+netstandard2.0/any-cpu/release/Microsoft.AzureKinect.dll       | :two:              | :two:              |                    |                    |
+netstandard2.0/any-cpu/release/Microsoft.AzureKinect.pdb       | :two:              | :two:              |                    |                    |
+netstandard2.0/any-cpu/release/Microsoft.AzureKinect.xml       | :two:              | :two:              |                    |                    |
 windows-desktop/x64/release/depthengine_1_0.dl \*              | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/x64/release/k4a.dll                            | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/x64/release/k4a.lib                            | :white_check_mark: | :white_check_mark: |                    |                    |
@@ -143,4 +143,5 @@ windows-desktop/tools/x64/release/k4aviewer.exe                | :white_check_ma
 windows-desktop/tools/x64/release/k4aviewer.pdb                | :white_check_mark: |                    |                    |                    |
 
 * \* These files are generated/included at packaging time from Microsoft Internal sources.
-* :large_blue_diamond: .NET support planned for a future release (issue #136)
+* :one: Include CMake and MS Build files in the MSI (issue #370)
+* :two: .NET support planned for a future release (issue #136)
