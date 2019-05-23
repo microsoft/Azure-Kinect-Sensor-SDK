@@ -51,7 +51,10 @@ add_library(k4a::k4arecord ALIAS k4arecord)
 set_target_properties(
     k4arecord
     PROPERTIES
-        OUTPUT_NAME "k4arecord-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+        VERSION
+            "${K4A_VERSION_MAJOR}.${K4A_VERSION_MINOR}.${K4A_VERSION_PATCH}"
+        SOVERSION
+            "${K4A_VERSION_MAJOR}.${K4A_VERSION_MINOR}")
 
 # Setup install
 include(GNUInstallDirs)
@@ -65,6 +68,8 @@ install(
             ${CMAKE_INSTALL_LIBDIR}
         COMPONENT
             runtime
+        NAMELINK_COMPONENT
+            development
     ARCHIVE
         DESTINATION
             ${CMAKE_INSTALL_LIBDIR}
