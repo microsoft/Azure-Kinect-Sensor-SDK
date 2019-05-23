@@ -7,8 +7,6 @@ add_library(k4a SHARED
             dll_main.c
             ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
-
-
 # Generate k4a_export.h
 # This is a platform specific header defining the macros for the export functions
 # of the shared library. This header is referenced by k4a.h and needs to be installed
@@ -62,8 +60,7 @@ add_library(k4a::k4a ALIAS k4a)
 set_target_properties(
     k4a
     PROPERTIES
-        VERSION ${K4A_VERSION}
-        SOVERSION ${K4A_VERSION_MAJOR})
+        OUTPUT_NAME "k4a-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 
 
 # Setup install

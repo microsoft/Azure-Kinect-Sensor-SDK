@@ -51,8 +51,7 @@ add_library(k4a::k4arecord ALIAS k4arecord)
 set_target_properties(
     k4arecord
     PROPERTIES
-        VERSION ${K4A_VERSION}
-        SOVERSION ${K4A_VERSION_MAJOR})
+        OUTPUT_NAME "k4arecord-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 
 # Setup install
 include(GNUInstallDirs)
