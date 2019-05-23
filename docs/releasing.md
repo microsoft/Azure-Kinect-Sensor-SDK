@@ -88,7 +88,7 @@ used to create a released build. Checkout the commit that matches the release la
 ## Artifacts and Packaging
 The following table contains all artifacts that are released in installers and packages. The file paths listed in the table are only representative, within any given package they will be different to match the standards and conventions for those packages. Each unique released artifact is listed in this table only once, although they will potentially appear duplicate times in packages or installers.
 
-File                                                           | MSI                | NuGet              | libk4a             | libk4a-dev         | libk4a-tools
+File                                                           | MSI                | NuGet              | Runtime Debian Package             | Development Debian Package         | Tooling Debian Package
 -------------------------------------------------------------- | ------------------ | ------------------ | ------------------ | ------------------ | -----------------
 LICENSE.txt \*                                                 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:
 REDIST.txt \*                                                  | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark:
