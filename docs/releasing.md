@@ -124,10 +124,10 @@ linux-ubuntu/x64/release/libk4arecord.so.1.1.0                 |                
 linux-ubuntu/tools/x64/release/AzureKinectFirmwareTool         |                    |                    |                    |                    | :white_check_mark:
 linux-ubuntu/tools/x64/release/k4arecorder                     |                    |                    |                    |                    | :white_check_mark:
 linux-ubuntu/tools/x64/release/k4aviewer                       |                    |                    |                    |                    | :white_check_mark:
-netstandard2.0/any-cpu/release/Microsoft.AzureKinect.deps.json | :two:              | :two:              |                    |                    |
-netstandard2.0/any-cpu/release/Microsoft.AzureKinect.dll       | :two:              | :two:              |                    |                    |
-netstandard2.0/any-cpu/release/Microsoft.AzureKinect.pdb       | :two:              | :two:              |                    |                    |
-netstandard2.0/any-cpu/release/Microsoft.AzureKinect.xml       | :two:              | :two:              |                    |                    |
+netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.deps.json  | :two:              | :two:              |                    |                    |
+netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.dll        | :two:              | :two:              |                    |                    |
+netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.pdb        | :two:              | :two:              |                    |                    |
+netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.xml        | :two:              | :two:              |                    |                    |
 windows-desktop/x64/release/depthengine_1_0.dl \*              | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/x64/release/k4a.dll                            | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/x64/release/k4a.lib                            | :white_check_mark: | :white_check_mark: |                    |                    |
@@ -143,5 +143,5 @@ windows-desktop/tools/x64/release/k4aviewer.exe                | :white_check_ma
 windows-desktop/tools/x64/release/k4aviewer.pdb                | :white_check_mark: |                    |                    |                    |
 
 * \* These files are generated/included at packaging time from Microsoft Internal sources.
-* :one: Include CMake and MS Build files in the MSI (issue #370)
-* :two: .NET support planned for a future release (issue #136)
+* :one: Include CMake and MS Build files in the MSI \(issue #370\)
+* :two: .NET support planned for a future release \(issue #136\)
