@@ -143,5 +143,5 @@ windows-desktop/tools/x64/release/k4aviewer.exe                | :white_check_ma
 windows-desktop/tools/x64/release/k4aviewer.pdb                | :white_check_mark: |                    |                    |                    |
 
 * \* These files are generated/included at packaging time from Microsoft Internal sources.
-* :one: Include CMake and MS Build files in the MSI \(issue #370\)
-* :two: .NET support planned for a future release \(issue #136\)
+* :one: Include CMake and MS Build files in the MSI (issue [#370](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/370))
+* :two: .NET support planned for a future release (issue [#136](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/136))
