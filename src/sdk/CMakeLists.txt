@@ -7,8 +7,6 @@ add_library(k4a SHARED
             dll_main.c
             ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
-
-
 # Generate k4a_export.h
 # This is a platform specific header defining the macros for the export functions
 # of the shared library. This header is referenced by k4a.h and needs to be installed
@@ -62,8 +60,7 @@ add_library(k4a::k4a ALIAS k4a)
 set_target_properties(
     k4a
     PROPERTIES
-        VERSION ${K4A_VERSION}
-        SOVERSION ${K4A_VERSION_MAJOR})
+        OUTPUT_NAME "k4a-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 
 
 # Setup install
@@ -73,12 +70,21 @@ install(
         k4a
     EXPORT
         k4aTargets
-    LIBRARY DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION
-        ${CMAKE_INSTALL_BINDIR}
+    LIBRARY
+        DESTINATION
+            ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT
+            runtime
+    ARCHIVE
+        DESTINATION
+            ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT
+            development
+    RUNTIME
+        DESTINATION
+            ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            runtime
 )
 
 include(CMakePackageConfigHelpers)
@@ -97,6 +103,8 @@ install(
         k4a::
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/k4a
+    COMPONENT
+        development
 )
 
 configure_file("${PROJECT_SOURCE_DIR}/cmake/k4aConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/k4aConfig.cmake" COPYONLY)
@@ -107,6 +115,8 @@ install(
         "${CMAKE_CURRENT_BINARY_DIR}/k4aConfigVersion.cmake"
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/k4a
+    COMPONENT
+        development
 )
 
 install(
@@ -118,6 +128,8 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/include/k4a/k4a_export.h
     DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}/k4a
+    COMPONENT
+        development
 )
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -126,6 +138,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
             $<TARGET_PDB_FILE:k4a>
         DESTINATION
             ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            runtime
         OPTIONAL
     )
 endif()

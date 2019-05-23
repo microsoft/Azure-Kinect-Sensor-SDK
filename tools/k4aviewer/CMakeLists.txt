@@ -101,3 +101,28 @@ endif()
 
 add_executable(k4aviewer WIN32 ${SOURCE_FILES})
 target_link_libraries(k4aviewer PRIVATE ${EXTERNAL_LIBRARIES})
+
+
+# Setup install
+include(GNUInstallDirs)
+
+install(
+    TARGETS
+        k4aviewer
+    RUNTIME DESTINATION
+        ${CMAKE_INSTALL_BINDIR}
+    COMPONENT
+        tools
+)
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    install(
+        FILES
+            $<TARGET_PDB_FILE:k4aviewer>
+        DESTINATION
+            ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            tools
+        OPTIONAL
+    )
+endif()
