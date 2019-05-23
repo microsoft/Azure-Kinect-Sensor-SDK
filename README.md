@@ -35,7 +35,7 @@ The latest stable binaries are available for download.
 ---------|----------------
   [v1.0.2](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.0.2) | [Azure Kinect SDK 1.0.2.msi](http://download.microsoft.com/download/B/4/D/B4D26442-DDA5-40C2-9913-3B23AE84A806/Azure%20Kinect%20SDK%201.0.2.msi)
 
-Please see [usage](docs/usage.md) for info on how to use the SDK.
+Please see [usage](docs/usage.md) for info on how to use the SDK. [API documentation](https://microsoft.github.io/Azure-Kinect-Sensor-SDK/) is also available.
 
 ## Building
 
