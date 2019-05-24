@@ -68,8 +68,7 @@ install(
             ${CMAKE_INSTALL_LIBDIR}
         COMPONENT
             runtime
-        NAMELINK_COMPONENT
-            development
+        NAMELINK_SKIP
     ARCHIVE
         DESTINATION
             ${CMAKE_INSTALL_LIBDIR}
