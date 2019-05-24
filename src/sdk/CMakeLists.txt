@@ -60,7 +60,10 @@ add_library(k4a::k4a ALIAS k4a)
 set_target_properties(
     k4a
     PROPERTIES
-        OUTPUT_NAME "k4a-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+        VERSION
+            "${K4A_VERSION_MAJOR}.${K4A_VERSION_MINOR}.${K4A_VERSION_PATCH}"
+        SOVERSION
+            "${K4A_VERSION_MAJOR}.${K4A_VERSION_MINOR}")
 
 
 # Setup install
@@ -75,6 +78,8 @@ install(
             ${CMAKE_INSTALL_LIBDIR}
         COMPONENT
             runtime
+        NAMELINK_COMPONENT
+            development
     ARCHIVE
         DESTINATION
             ${CMAKE_INSTALL_LIBDIR}
