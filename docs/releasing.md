@@ -105,10 +105,10 @@ build/cmake/x64/k4arecordConfigVersion.cmake                   | :one:          
 build/cmake/x64/k4arecordTargets-relwithdebinfo.cmake          | :one:              | :one:              |                    | :white_check_mark: |
 build/cmake/x64/k4arecordTargets.cmake                         | :one:              | :one:              |                    | :white_check_mark: |
 include/k4a/k4a.h                                              | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+include/k4a/k4a.hpp                                            | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 include/k4a/k4a_export.h                                       | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 include/k4a/k4atypes.h                                         | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 include/k4a/k4aversion.h                                       | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-include/k4a/k4a.hpp                                            | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 include/k4arecord/k4arecord_export.h                           | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 include/k4arecord/playback.h                                   | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 include/k4arecord/record.h                                     | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
