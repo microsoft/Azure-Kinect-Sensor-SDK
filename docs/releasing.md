@@ -116,10 +116,10 @@ include/k4arecord/types.h                                      | :white_check_ma
 linux-ubuntu/x64/release/libdepthengine.so \*                  |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libdepthengine.so.1.0 \*              |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libk4a.so                             |                    |                    | :white_check_mark: |                    |
-linux-ubuntu/x64/release/libk4a.so.1                           |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4a.so.1.1                         |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libk4a.so.1.1.0                       |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libk4arecord.so                       |                    |                    | :white_check_mark: |                    |
-linux-ubuntu/x64/release/libk4arecord.so.1                     |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4arecord.so.1.1                   |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libk4arecord.so.1.1.0                 |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/tools/x64/release/AzureKinectFirmwareTool         |                    |                    |                    |                    | :white_check_mark:
 linux-ubuntu/tools/x64/release/k4arecorder                     |                    |                    |                    |                    | :white_check_mark:
@@ -128,7 +128,7 @@ netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.deps.json  | :two:          
 netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.dll        | :two:              | :two:              |                    |                    |
 netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.pdb        | :two:              | :two:              |                    |                    |
 netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.xml        | :two:              | :two:              |                    |                    |
-windows-desktop/amd64/release/depthengine_1_0.dl \*            | :white_check_mark: | :white_check_mark: |                    |                    |
+windows-desktop/amd64/release/depthengine_1_0.dll \*           | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/amd64/release/k4a.dll                          | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/amd64/release/k4a.lib                          | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/amd64/release/k4a.pdb                          | :white_check_mark: | :white_check_mark: |                    |                    |
