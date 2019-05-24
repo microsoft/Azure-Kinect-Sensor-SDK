@@ -147,16 +147,16 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback
  */
 K4ARECORD_EXPORT bool k4a_playback_track_check_exists(k4a_playback_t playback_handle, const char *track_name);
 
-/** Gets the track video information with the given track name
+/** Gets the video-specific track information for a particular video track.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
  *
  * \param track_name
- * The track name to be queried the video information
+ * The track name to be queried for video settings.
  *
- * \param video_info
- * Location to write the video_info
+ * \param video_settings
+ * Location to write the track's video settings.
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
  *
@@ -168,9 +168,9 @@ K4ARECORD_EXPORT bool k4a_playback_track_check_exists(k4a_playback_t playback_ha
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t playback_handle,
-                                                                const char *track_name,
-                                                                k4a_record_video_info_t *video_info);
+K4ARECORD_EXPORT k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handle,
+                                                                    const char *track_name,
+                                                                    k4a_record_video_settings_t *video_settings);
 
 /** Gets the codec id with the given track name
  *

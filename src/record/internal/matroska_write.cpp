@@ -162,7 +162,12 @@ track_header_t *add_track(k4a_record_context_t *context,
         GetChild<KaxCodecPrivate>(*track).CopyBuffer(codec_private, (uint32)codec_private_size);
     }
 
-    auto entry = context->tracks.emplace(std::string(name), track_header_t{ track, false });
+    auto entry = context->tracks.emplace(std::string(name),
+                                         track_header_t{
+                                             track,
+                                             false, /* custom_track */
+                                             false  /* high_freq_data */
+                                         });
 
     return &entry.first->second;
 }

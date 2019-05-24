@@ -177,8 +177,8 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
  * \param codec_context_size
  * The size of the codec context buffer.
  *
- * \param video_info
- * The general information of the video track data.
+ * \param track_settings
+ * Additional metadata for the video track such as resolution and framerate.
  *
  * \headerfile record.h <k4arecord/record.h>
  *
@@ -205,7 +205,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_video_track(const k4a_record
                                                                 const char *codec_id,
                                                                 const uint8_t *codec_context,
                                                                 size_t codec_context_size,
-                                                                const k4a_record_video_info_t *video_info);
+                                                                const k4a_record_video_settings_t *track_settings);
 
 /** Adds custom subtitle tracks to the recording.
  *
@@ -230,6 +230,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_video_track(const k4a_record
  * \param codec_context_size
  * The size of the codec context buffer.
  *
+ * \param track_settings
+ * Additional metadata for the subtitle track. If NULL, the default settings will be used.
+ *
  * \headerfile record.h <k4arecord/record.h>
  *
  * \relates k4a_record_t
@@ -250,11 +253,13 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_video_track(const k4a_record
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_subtitle_track(const k4a_record_t recording_handle,
-                                                                   const char *track_name,
-                                                                   const char *codec_id,
-                                                                   const uint8_t *codec_context,
-                                                                   size_t codec_context_size);
+K4ARECORD_EXPORT k4a_result_t
+k4a_record_add_custom_subtitle_track(const k4a_record_t recording_handle,
+                                     const char *track_name,
+                                     const char *codec_id,
+                                     const uint8_t *codec_context,
+                                     size_t codec_context_size,
+                                     const k4a_record_subtitle_settings_t *track_settings);
 
 /** Writes the recording header and metadata to file.
  *

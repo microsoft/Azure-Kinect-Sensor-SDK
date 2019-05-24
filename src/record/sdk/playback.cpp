@@ -203,15 +203,15 @@ bool k4a_playback_track_check_exists(k4a_playback_t playback_handle, const char 
     return track_reader != nullptr;
 }
 
-k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t playback_handle,
-                                               const char *track_name,
-                                               k4a_record_video_info_t *video_info)
+k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handle,
+                                                   const char *track_name,
+                                                   k4a_record_video_settings_t *video_settings)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, video_info == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, video_settings == NULL);
 
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
@@ -226,9 +226,9 @@ k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t playback_handle,
         return K4A_RESULT_FAILED;
     }
 
-    video_info->width = track_reader->width;
-    video_info->height = track_reader->height;
-    video_info->frame_rate = static_cast<uint64_t>(1_s / track_reader->frame_period_ns);
+    video_settings->width = track_reader->width;
+    video_settings->height = track_reader->height;
+    video_settings->frame_rate = static_cast<uint64_t>(1_s / track_reader->frame_period_ns);
 
     return K4A_RESULT_SUCCEEDED;
 }

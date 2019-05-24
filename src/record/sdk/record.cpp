@@ -459,12 +459,12 @@ k4a_result_t k4a_record_add_custom_video_track(const k4a_record_t recording_hand
                                                const char *codec_id,
                                                const uint8_t *codec_context,
                                                size_t codec_context_size,
-                                               const k4a_record_video_info_t *video_info)
+                                               const k4a_record_video_settings_t *track_settings)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, codec_id == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, video_info == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_settings == NULL);
 
     k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
@@ -481,7 +481,8 @@ k4a_result_t k4a_record_add_custom_video_track(const k4a_record_t recording_hand
         LOG_ERROR("Failed to add custom video track: %s", track_name);
         return K4A_RESULT_FAILED;
     }
-    set_track_info_video(track, video_info->width, video_info->height, video_info->frame_rate);
+    set_track_info_video(track, track_settings->width, track_settings->height, track_settings->frame_rate);
+    track->custom_track = true;
 
     uint64_t track_uid = GetChild<KaxTrackUID>(*track->track).GetValue();
     std::ostringstream track_tag_str, track_uid_str;
@@ -496,7 +497,8 @@ k4a_result_t k4a_record_add_custom_subtitle_track(const k4a_record_t recording_h
                                                   const char *track_name,
                                                   const char *codec_id,
                                                   const uint8_t *codec_context,
-                                                  size_t codec_context_size)
+                                                  size_t codec_context_size,
+                                                  const k4a_record_subtitle_settings_t *track_settings)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
@@ -517,6 +519,11 @@ k4a_result_t k4a_record_add_custom_subtitle_track(const k4a_record_t recording_h
         LOG_ERROR("Failed to add custom subtitle track: %s", track_name);
         return K4A_RESULT_FAILED;
     }
+    if (track_settings != NULL)
+    {
+        track->high_freq_data = track_settings->high_freq_data;
+    }
+    track->custom_track = true;
 
     uint64_t track_uid = GetChild<KaxTrackUID>(*track->track).GetValue();
     std::ostringstream track_tag_str, track_uid_str;
@@ -733,7 +740,12 @@ k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_han
     auto itr = context->tracks.find(track_name);
     if (itr == context->tracks.end())
     {
-        LOG_ERROR("The custom track is not created.", 0);
+        LOG_ERROR("The custom track does not exist: %s", track_name);
+        return K4A_RESULT_FAILED;
+    }
+    if (!itr->second.custom_track)
+    {
+        LOG_ERROR("Custom track data cannot be written to built-in track: %s", track_name);
         return K4A_RESULT_FAILED;
     }
 

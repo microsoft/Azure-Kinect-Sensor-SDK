@@ -53,10 +53,10 @@ protected:
         depth_codec_header.biCompression = 0x32595559; // YUY2 little endian
         depth_codec_header.biSizeImage = sizeof(uint16_t) * test_depth_width * test_depth_height;
 
-        k4a_record_video_info_t depth_video_info;
-        depth_video_info.width = test_depth_width;
-        depth_video_info.height = test_depth_height;
-        depth_video_info.frame_rate = test_camera_fps;
+        k4a_record_video_settings_t depth_video_settings;
+        depth_video_settings.width = test_depth_width;
+        depth_video_settings.height = test_depth_height;
+        depth_video_settings.frame_rate = test_camera_fps;
 
         // Add custom tracks to the k4a_record_t
         result = k4a_record_add_custom_video_track(handle,
@@ -64,7 +64,7 @@ protected:
                                                    "V_MS/VFW/FOURCC",
                                                    reinterpret_cast<uint8_t *>(&depth_codec_header),
                                                    sizeof(depth_codec_header),
-                                                   &depth_video_info);
+                                                   &depth_video_settings);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         result = k4a_record_add_custom_video_track(handle,
@@ -72,13 +72,14 @@ protected:
                                                    "V_MS/VFW/FOURCC",
                                                    reinterpret_cast<uint8_t *>(&depth_codec_header),
                                                    sizeof(depth_codec_header),
-                                                   &depth_video_info);
+                                                   &depth_video_settings);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         result = k4a_record_add_tag(handle, "K4A_DEPTH_MODE", "NFOV_UNBINNED");
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        result = k4a_record_add_custom_subtitle_track(handle, "CUSTOM_TRACK_1", "S_K4A/CUSTOM_TRACK_1", nullptr, 0);
+        result =
+            k4a_record_add_custom_subtitle_track(handle, "CUSTOM_TRACK_1", "S_K4A/CUSTOM_TRACK_1", nullptr, 0, nullptr);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         result = k4a_record_add_tag(handle, "CUSTOM_TRACK_1_VERSION", "1.0.0");
@@ -201,20 +202,20 @@ TEST_F(custom_track_ut, read_track_information)
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
     // Read video track information
-    k4a_record_video_info_t video_info;
-    result = k4a_playback_track_get_video_info(handle, "DEPTH", &video_info);
+    k4a_record_video_settings_t video_settings;
+    result = k4a_playback_track_get_video_settings(handle, "DEPTH", &video_settings);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-    ASSERT_EQ(video_info.width, test_depth_width);
-    ASSERT_EQ(video_info.height, test_depth_height);
-    ASSERT_EQ(video_info.frame_rate, test_camera_fps);
+    ASSERT_EQ(video_settings.width, test_depth_width);
+    ASSERT_EQ(video_settings.height, test_depth_height);
+    ASSERT_EQ(video_settings.frame_rate, test_camera_fps);
 
-    result = k4a_playback_track_get_video_info(handle, "IR", &video_info);
+    result = k4a_playback_track_get_video_settings(handle, "IR", &video_settings);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-    ASSERT_EQ(video_info.width, test_depth_width);
-    ASSERT_EQ(video_info.height, test_depth_height);
-    ASSERT_EQ(video_info.frame_rate, test_camera_fps);
+    ASSERT_EQ(video_settings.width, test_depth_width);
+    ASSERT_EQ(video_settings.height, test_depth_height);
+    ASSERT_EQ(video_settings.frame_rate, test_camera_fps);
 
-    result = k4a_playback_track_get_video_info(handle, "CUSTOM_TRACK_1", &video_info);
+    result = k4a_playback_track_get_video_settings(handle, "CUSTOM_TRACK_1", &video_settings);
     ASSERT_EQ(result, K4A_RESULT_FAILED);
 
     // Read codec id

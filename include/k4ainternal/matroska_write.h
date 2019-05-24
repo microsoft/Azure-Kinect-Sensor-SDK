@@ -19,6 +19,7 @@ namespace k4arecord
 typedef struct _track_header_t
 {
     libmatroska::KaxTrackEntry *track;
+    bool custom_track = false;
 
     /**
      * Some tracks such as IMU record small samples at a high rate. This changes the recording mode to use BlockGroup's

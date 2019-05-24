@@ -146,7 +146,7 @@ typedef struct _k4a_record_configuration_t
     uint32_t start_timestamp_offset_usec;
 } k4a_record_configuration_t;
 
-/** Structure containing the video information used to add or parse a video custom track
+/** Structure containing additional metadata specific to custom video tracks.
  *
  * \xmlonly
  * <requirements>
@@ -154,12 +154,30 @@ typedef struct _k4a_record_configuration_t
  * </requirements>
  * \endxmlonly
  */
-typedef struct _k4a_record_video_info_t
+typedef struct _k4a_record_video_settings_t
 {
     uint64_t width;      /**< Frame width of the video */
     uint64_t height;     /**< Frame height of the video  */
     uint64_t frame_rate; /**< Frame rate (frame-per-second) of the video */
-} k4a_record_video_info_t;
+} k4a_record_video_settings_t;
+
+/** Structure containing additional metadata specific to custom subtitle tracks.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">types.h (include k4arecord/types.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef struct _k4a_record_subtitle_settings_t
+{
+    /**
+     * If true, data will be grouped together in batches to reduce overhead. Exact timestamps will not be stored, so the
+     * data written should contain its own timestamp if precise timestamps are required.
+     * If false, data will be stored in individual blocks with full timestamp information (Default).
+     */
+    bool high_freq_data;
+} k4a_record_subtitle_settings_t;
 
 #ifdef __cplusplus
 }
