@@ -8,8 +8,11 @@ packages as well.
 
 Links to the latest downloads are on the main [README.md](../README.md#documentation-and-official-builds).
 
-The installer will put all the needed headers, binaries, and tools in the location you choose (by deafult this
-is `C:\Program Files\Azure Kinect SDK version\sdk`)
+The installer will put all the needed headers, binaries, and tools in the location you choose (by default this
+is `C:\Program Files\Azure Kinect SDK version\sdk`).
+
+If you want to build your own copy of the SDK, you can follow the instruction in [building](building.md) for how to build
+from source.
 
 ## Using tools
 
@@ -20,9 +23,8 @@ available in the installer tools directory.
 
 ## Including the SDK in your project
 
-Update your project to link to k4a.lib and add the incude path such that you can `#include <k4a.k4a.h>`.
-You also need to ensure that k4a.dll and depthengine_1_0.dll are in your path or in the same directory
-as your application.
+If you are including the Azure Kinect SDK in a C or C++ project, update your project to link to **k4a.lib** and 
+add the incude path such that you can `#include <k4a/k4a.h>`. You also need to ensure that **k4a.dll** and **depthengine_1_0.dll** are in your path or in the same directory as your application.
 
 ## Dependencies
 
