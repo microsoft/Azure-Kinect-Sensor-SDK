@@ -25,7 +25,7 @@ The Azure Kinect SDK enables you to get the most out of your Azure Kinect camera
 
 ## Installation
 
-To use the SDK please refer to the installation instructions here.
+To use the SDK please refer to the installation instructions in [usage](docs/usage.md)
 
 ## Documentation and Official Builds
 
