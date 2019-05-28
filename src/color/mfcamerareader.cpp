@@ -1063,7 +1063,10 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
                         result = K4A_RESULT_FAILED;
                         LOG_ERROR("IMFSample::GetUINT64(MFSampleExtension_DeviceTimestamp) failed; hr=0x%08X", hr);
                     }
-                    image_set_system_timestamp_nsec(image, mf_device_time_100nsec * 100);
+                    else
+                    {
+                        image_set_system_timestamp_nsec(image, mf_device_time_100nsec * 100);
+                    }
                 }
 
                 if (K4A_SUCCEEDED(result))

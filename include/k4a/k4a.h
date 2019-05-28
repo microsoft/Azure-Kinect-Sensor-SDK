@@ -804,7 +804,7 @@ K4A_EXPORT int k4a_image_get_stride_bytes(k4a_image_t image_handle);
  * of a recording or the start of streaming.
  *
  * \deprecated
- * Deprecated starting in 1.1.0. Please use k4a_image_get_device_timestamp_usec().
+ * Deprecated starting in 1.2.0. Please use k4a_image_get_device_timestamp_usec().
  *
  * \relates k4a_image_t
  *
@@ -853,6 +853,9 @@ K4A_EXPORT uint64_t k4a_image_get_device_timestamp_usec(k4a_image_t image_handle
  * Returns the system timestamp of the image. Timestamps are recorded by the host. They may be used for relative
  * comparision, as they are relative to the corresponding system clock. The absolute value is a monotonic count from
  * an arbitrary point in the past.
+ *
+ * \remarks
+ * The system timestamp is captured at the moment host PC finishes receiving the image.
  *
  * \remarks
  * On Linux the system timestamp is read from clock_gettime(CLOCK_MONOTONIC), which measures realtime and is not
@@ -998,7 +1001,7 @@ K4A_EXPORT void k4a_image_set_device_timestamp_usec(k4a_image_t image_handle, ui
  * \relates k4a_image_t
  *
  * \deprecated
- * Deprecated starting in 1.1.0. Please use k4a_image_set_device_timestamp_usec().
+ * Deprecated starting in 1.2.0. Please use k4a_image_set_device_timestamp_usec().
  *
  * \xmlonly
  * <requirements>
@@ -1080,7 +1083,7 @@ K4A_EXPORT void k4a_image_set_exposure_usec(k4a_image_t image_handle, uint64_t e
  * exposure time.
  *
  * \deprecated
- * Deprecated starting in 1.1.0. Please use k4a_image_set_exposure_usec().
+ * Deprecated starting in 1.2.0. Please use k4a_image_set_exposure_usec().
  *
  * \relates k4a_image_t
  *

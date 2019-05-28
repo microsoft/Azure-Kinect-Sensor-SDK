@@ -96,8 +96,8 @@ TEST_P(color_functional_test, color_streaming_test)
     tickcounter_ms_t delta_ms;
     uint32_t error_tolerance;
 
-    uint64_t ts_d;
-    uint64_t ts_s;
+    uint64_t ts_d = 0;
+    uint64_t ts_s = 0;
     bool ts_init = false;
 
     stream_count = STREAM_RUN_TIME_SEC * as.expected_fps;

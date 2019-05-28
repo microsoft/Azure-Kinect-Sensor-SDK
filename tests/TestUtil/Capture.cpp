@@ -105,7 +105,7 @@ static void image_stream_callback(k4a_result_t result, k4a_image_t image_handle,
     printf("%11d", stream_count);
     if (tickcounter_get_current_ms(tick_handle, &now) == 0)
     {
-        printf("%12d", (int)now);
+        printf("%12lld", now);
     }
 
     if (p_type[0] == 'd')
@@ -113,11 +113,11 @@ static void image_stream_callback(k4a_result_t result, k4a_image_t image_handle,
         p_frame += capture_size;
         p_frame -= sizeof(InputFrameFooter_t);
         p_depth_info = (InputFrameFooter_t *)p_frame;
-        printf("%32d    ", (int)(K4A_90K_HZ_TICK_TO_USEC(p_depth_info->TimeStamp)));
+        printf("%32lld    ", K4A_90K_HZ_TICK_TO_USEC(p_depth_info->TimeStamp));
     }
     else
     {
-        printf("%16d                    ", (int)image_get_device_timestamp_usec(image_handle));
+        printf("%16lld                    ", image_get_device_timestamp_usec(image_handle));
     }
     printf("%10zu\n", capture_size);
     if (p_file != NULL)
@@ -126,16 +126,16 @@ static void image_stream_callback(k4a_result_t result, k4a_image_t image_handle,
         fprintf(p_file, "%d, ", stream_count);
         if (tickcounter_get_current_ms(tick_handle, &now) == 0)
         {
-            fprintf(p_file, "%d, ", (int)now);
+            fprintf(p_file, "%lld, ", now);
         }
 
         if (p_type[0] == 'd')
         {
-            fprintf(p_file, "%d, ", (int)(K4A_90K_HZ_TICK_TO_USEC(p_depth_info->TimeStamp)));
+            fprintf(p_file, "%lld, ", K4A_90K_HZ_TICK_TO_USEC(p_depth_info->TimeStamp));
         }
         else
         {
-            fprintf(p_file, "%d, ", (int)image_get_device_timestamp_usec(image_handle));
+            fprintf(p_file, "%lld, ", image_get_device_timestamp_usec(image_handle));
         }
         fprintf(p_file, "%zu", capture_size);
     }
