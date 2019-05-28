@@ -20,6 +20,14 @@
 namespace k4a
 {
 
+/**
+ * \defgroup cppsdk C++ Reference
+ *
+ * Functions part of the SDK.
+ *
+ * @{
+ */
+
 /** Exception type thrown when a K4A API call fails
  */
 class error : public std::runtime_error
@@ -1211,6 +1219,11 @@ public:
 private:
     k4a_device_t m_handle;
 };
+
+/**
+ * @}
+ */
+
 } // namespace k4a
 
 #endif

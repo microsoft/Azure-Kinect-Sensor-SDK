@@ -37,6 +37,20 @@ extern "C" {
         size_t _rsvd; /**< Reserved, do not use. */                                                                    \
     } * _handle_name_;
 
+/**
+ * \defgroup csdk C Reference
+ *
+ */
+/**
+ * \defgroup Handles Handles
+ * \ingroup csdk
+ * Handles represent object instances.
+ *
+ * Handles are opaque pointers returned by the SDK which represent an object.
+ *
+ * @{
+ */
+
 /** \class k4a_device_t k4a.h <k4a/k4a.h>
  * Handle to an Azure Kinect device.
  *
@@ -180,51 +194,17 @@ K4A_DECLARE_HANDLE(k4a_image_t);
  */
 K4A_DECLARE_HANDLE(k4a_transformation_t);
 
-/*
- * Environment Variables
+/**
  *
- * K4A_ENABLE_LOG_TO_A_FILE =
- *    0    - completely disable logging to a file
- *    log\custom.log - log all messages to the path and file specified - must end in '.log' to
- *                     be considered a valid entry
- *    ** When enabled this takes precedence over the value of K4A_ENABLE_LOG_TO_STDOUT
+ * @}
  *
- * K4A_ENABLE_LOG_TO_STDOUT =
- *    0    - disable logging to stdout
- *    all else  - log all messages to stdout
+ * \defgroup Enumerations Enumerations
+ * \ingroup csdk
  *
- * K4A_LOG_LEVEL =
- *    'c'  - log all messages of level 'critical' criticality
- *    'e'  - log all messages of level 'error' or higher criticality
- *    'w'  - log all messages of level 'warning' or higher criticality
- *    'i'  - log all messages of level 'info' or higher criticality
- *    't'  - log all messages of level 'trace' or higher criticality
- *    DEFAULT - log all message of level 'error' or higher criticality
+ * Enumeration types used by APIs.
  *
- * See remarks section of \p k4a_set_debug_message_handler
+ * @{
  */
-
-/** Default device index.
- *
- * Passed as an argument to \ref k4a_device_open() to open the default sensor
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-#define K4A_DEVICE_DEFAULT (0)
-
-/** An infinite wait time for functions that take a timeout parameter.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-#define K4A_WAIT_INFINITE (-1)
 
 /** Result code returned by Azure Kinect APIs.
  *
@@ -269,26 +249,6 @@ typedef enum
     K4A_WAIT_RESULT_FAILED,        /**< The result was a failure */
     K4A_WAIT_RESULT_TIMEOUT,       /**< The operation timed out */
 } k4a_wait_result_t;
-
-/** Validate that a k4a_result_t is successful.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-#define K4A_SUCCEEDED(_result_) (_result_ == K4A_RESULT_SUCCEEDED)
-
-/** Validate that a k4a_result_t is failed.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-#define K4A_FAILED(_result_) (!K4A_SUCCEEDED(_result_))
 
 /** Verbosity levels of debug messaging
  *
@@ -615,6 +575,24 @@ typedef enum
     K4A_COLOR_CONTROL_MODE_MANUAL,   /**< set the associated k4a_color_control_command_t to manual*/
 } k4a_color_control_mode_t;
 
+/** Synchronization mode when connecting two or more devices together.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef enum
+{
+    K4A_WIRED_SYNC_MODE_STANDALONE, /**< Neither 'Sync In' or 'Sync Out' connections are used. */
+    K4A_WIRED_SYNC_MODE_MASTER,     /**< The 'Sync Out' jack is enabled and synchronization data it driven out the
+                                       connected wire.*/
+    K4A_WIRED_SYNC_MODE_SUBORDINATE /**< The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the
+                                       next device in the chain. 'Sync Out' is a mirror of 'Sync In' for this mode.
+                                     */
+} k4a_wired_sync_mode_t;
+
 /** Calibration types.
  *
  * Specifies a type of calibration.
@@ -687,7 +665,19 @@ typedef enum
     K4A_FIRMWARE_SIGNATURE_UNSIGNED /**< Unsigned firmware. */
 } k4a_firmware_signature_t;
 
-/** Synchronization mode when connecting two or more devices together.
+/**
+ *
+ * @}
+ *
+ * \defgroup Macros Macros
+ * \ingroup csdk
+ *
+ * Public macros for API consumers.
+ *
+ * @{
+ */
+
+/** Validate that a k4a_result_t is successful.
  *
  * \xmlonly
  * <requirements>
@@ -695,17 +685,9 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
-typedef enum
-{
-    K4A_WIRED_SYNC_MODE_STANDALONE, /**< Neither 'Sync In' or 'Sync Out' connections are used. */
-    K4A_WIRED_SYNC_MODE_MASTER,     /**< The 'Sync Out' jack is enabled and synchronization data it driven out the
-                                       connected wire.*/
-    K4A_WIRED_SYNC_MODE_SUBORDINATE /**< The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the
-                                       next device in the chain. 'Sync Out' is a mirror of 'Sync In' for this mode.
-                                     */
-} k4a_wired_sync_mode_t;
+#define K4A_SUCCEEDED(_result_) (_result_ == K4A_RESULT_SUCCEEDED)
 
-/** Version information.
+/** Validate that a k4a_result_t is failed.
  *
  * \xmlonly
  * <requirements>
@@ -713,32 +695,128 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
-typedef struct _k4a_version_t
-{
-    uint32_t major;     /**< Major version; represents a breaking change. */
-    uint32_t minor;     /**< Minor version; represents additional features, no regression from lower versions with same
-                           major version. */
-    uint32_t iteration; /**< Reserved. */
-} k4a_version_t;
+#define K4A_FAILED(_result_) (!K4A_SUCCEEDED(_result_))
 
-/** Structure to define hardware version.
+/**
+ *
+ * @}
+ *
+ * \defgroup Logging Error and event logging
+ *
+ * The SDK can log data to the console, files, or to a custom handler.
+ *
+ * Environment Variables
+ *
+ * K4A_ENABLE_LOG_TO_A_FILE =
+ *    0    - completely disable logging to a file
+ *    log\custom.log - log all messages to the path and file specified - must end in '.log' to
+ *                     be considered a valid entry
+ *    ** When enabled this takes precedence over the value of K4A_ENABLE_LOG_TO_STDOUT
+ *
+ * K4A_ENABLE_LOG_TO_STDOUT =
+ *    0    - disable logging to stdout
+ *    all else  - log all messages to stdout
+ *
+ * K4A_LOG_LEVEL =
+ *    'c'  - log all messages of level 'critical' criticality
+ *    'e'  - log all messages of level 'error' or higher criticality
+ *    'w'  - log all messages of level 'warning' or higher criticality
+ *    'i'  - log all messages of level 'info' or higher criticality
+ *    't'  - log all messages of level 'trace' or higher criticality
+ *    DEFAULT - log all message of level 'error' or higher criticality
+ *
+ * See remarks section of \p k4a_set_debug_message_handler
+ *
+ * @{
+ *
+ *
+ */
+
+/**
+ *
+ * @}
+ *
+ * \defgroup Prototypes Callback Function prototypes
+ * \ingroup csdk
+ *
+ * Prototypes used in callbacks.
+ *
+ * @{
+ */
+
+/** Callback function for debug messages being generated by the Azure Kinect SDK.
+ *
+ * \param context
+ * The context of the callback function. This is the context that was supplied by the caller to \p
+ * k4a_set_debug_message_handler.
+ *
+ * \param level
+ * The level of the message that has been created.
+ *
+ * \param file
+ * The file name of the source file that generated the message.
+ *
+ * \param line
+ * The line number of the source file that generated the message.
+ *
+ * \param message
+ * The messaged generated by the Azure Kinect SDK.
+ *
+ * \remarks
+ * The callback is called asynchronously when the Azure Kinext SDK generates a message at a \p level that is equal to
+ * or more critical than the level specified when calling \ref k4a_set_debug_message_handler() to register the callback.
+ *
+ * \remarks
+ * This callback can occur from any thread and blocks the calling thread. The k4a_logging_message_cb_t function user
+ * must protect it's logging resources from concurrent calls. All care should be made to minimize the amount of time
+ * locks are held.
  *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
  * </requirements>
  * \endxmlonly
+ *
  */
-typedef struct _k4a_hardware_version_t
-{
-    k4a_version_t rgb;          /**< Color camera firmware version. */
-    k4a_version_t depth;        /**< Depth camera firmware version. */
-    k4a_version_t audio;        /**< Audio device firmware version. */
-    k4a_version_t depth_sensor; /**< Depth sensor firmware version. */
+typedef void(k4a_logging_message_cb_t)(void *context,
+                                       k4a_log_level_t level,
+                                       const char *file,
+                                       const int line,
+                                       const char *message);
 
-    k4a_firmware_build_t firmware_build;         /**< Build type reported by the firmware. */
-    k4a_firmware_signature_t firmware_signature; /**< Signature type of the firmware. */
-} k4a_hardware_version_t;
+/** Callback function for a memory object being destroyed.
+ *
+ * \param buffer
+ * The buffer pointer that was supplied by the caller as \p buffer_release_cb to \ref k4a_image_create_from_buffer().
+ *
+ * \param context
+ * The context for the memory object that needs to be destroyed that was supplied by the caller as \p
+ * buffer_release_cb_context to \ref k4a_image_create_from_buffer().
+ *
+ * \remarks
+ * When all references for the memory object are released, this callback will be invoked as the final destroy for the
+ * given memory.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ *
+ */
+typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
+
+/**
+ *
+ * @}
+ *
+ * \defgroup Structures Structures
+ * \ingroup csdk
+ *
+ * Structures used in the API.
+ *
+ * @{
+ */
 
 /** Configuration parameters for an Azure Kinect device.
  *
@@ -821,83 +899,6 @@ typedef struct _k4a_device_configuration_t
      * This setting disables that behavior and keeps the LED in an off state. */
     bool disable_streaming_indicator;
 } k4a_device_configuration_t;
-
-/** Initial configuration setting for disabling all sensors.
- *
- * \remarks
- * Use this setting to initialize a \ref k4a_device_configuration_t to a disabled state.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = { K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                                               K4A_COLOR_RESOLUTION_OFF,
-                                                                               K4A_DEPTH_MODE_OFF,
-                                                                               K4A_FRAMES_PER_SECOND_30,
-                                                                               false,
-                                                                               0,
-                                                                               K4A_WIRED_SYNC_MODE_STANDALONE,
-                                                                               0,
-                                                                               false };
-
-/** Two dimensional floating point vector.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-typedef union
-{
-    /** XY or array representation of vector */
-    struct _xy
-    {
-        float x; /**< X component of a vector */
-        float y; /**< Y component of a vector */
-    } xy;        /**< X, Y representation of a vector */
-    float v[2];  /**< Array representation of a vector */
-} k4a_float2_t;
-
-/** Three dimensional floating point vector.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-typedef union
-{
-    /** XYZ or array representation of vector. */
-    struct _xyz
-    {
-        float x; /**< X component of a vector. */
-        float y; /**< Y component of a vector. */
-        float z; /**< Z component of a vector. */
-    } xyz;       /**< X, Y, Z representation of a vector. */
-    float v[3];  /**< Array representation of a vector. */
-} k4a_float3_t;
-
-/** IMU sample.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-typedef struct _k4a_imu_sample_t
-{
-    float temperature;            /**< Temperature reading of this sample (Celsius). */
-    k4a_float3_t acc_sample;      /**< Accelerometer sample in meters per second squared. */
-    uint64_t acc_timestamp_usec;  /**< Timestamp of the accelerometer in microseconds. */
-    k4a_float3_t gyro_sample;     /**< Gyro sample in radians per second. */
-    uint64_t gyro_timestamp_usec; /**< Timestamp of the gyroscope in microseconds */
-} k4a_imu_sample_t;
 
 /** Extrinsic calibration data.
  *
@@ -1028,67 +1029,155 @@ typedef struct _k4a_calibration_t
     k4a_color_resolution_t color_resolution; /**< Color camera resolution for which calibration was obtained. */
 } k4a_calibration_t;
 
-/** Callback function for a memory object being destroyed.
- *
- * \param buffer
- * The buffer pointer that was supplied by the caller as \p buffer_release_cb to \ref k4a_image_create_from_buffer().
- *
- * \param context
- * The context for the memory object that needs to be destroyed that was supplied by the caller as \p
- * buffer_release_cb_context to \ref k4a_image_create_from_buffer().
- *
- * \remarks
- * When all references for the memory object are released, this callback will be invoked as the final destroy for the
- * given memory.
+/** Version information.
  *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
  * </requirements>
  * \endxmlonly
- *
  */
-typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
+typedef struct _k4a_version_t
+{
+    uint32_t major;     /**< Major version; represents a breaking change. */
+    uint32_t minor;     /**< Minor version; represents additional features, no regression from lower versions with same
+                           major version. */
+    uint32_t iteration; /**< Reserved. */
+} k4a_version_t;
 
-/** Callback function for debug messages being generated by the Azure Kinect SDK.
- *
- * \param context
- * The context of the callback function. This is the context that was supplied by the caller to \p
- * k4a_set_debug_message_handler.
- *
- * \param level
- * The level of the message that has been created.
- *
- * \param file
- * The file name of the source file that generated the message.
- *
- * \param line
- * The line number of the source file that generated the message.
- *
- * \param message
- * The messaged generated by the Azure Kinect SDK.
- *
- * \remarks
- * The callback is called asynchronously when the Azure Kinext SDK generates a message at a \p level that is equal to
- * or more critical than the level specified when calling \ref k4a_set_debug_message_handler() to register the callback.
- *
- * \remarks
- * This callback can occur from any thread and blocks the calling thread. The k4a_logging_message_cb_t function user
- * must protect it's logging resources from concurrent calls. All care should be made to minimize the amount of time
- * locks are held.
+/** Structure to define hardware version.
  *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
  * </requirements>
  * \endxmlonly
- *
  */
-typedef void(k4a_logging_message_cb_t)(void *context,
-                                       k4a_log_level_t level,
-                                       const char *file,
-                                       const int line,
-                                       const char *message);
+typedef struct _k4a_hardware_version_t
+{
+    k4a_version_t rgb;          /**< Color camera firmware version. */
+    k4a_version_t depth;        /**< Depth camera firmware version. */
+    k4a_version_t audio;        /**< Audio device firmware version. */
+    k4a_version_t depth_sensor; /**< Depth sensor firmware version. */
+
+    k4a_firmware_build_t firmware_build;         /**< Build type reported by the firmware. */
+    k4a_firmware_signature_t firmware_signature; /**< Signature type of the firmware. */
+} k4a_hardware_version_t;
+
+/** Two dimensional floating point vector.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef union
+{
+    /** XY or array representation of vector */
+    struct _xy
+    {
+        float x; /**< X component of a vector */
+        float y; /**< Y component of a vector */
+    } xy;        /**< X, Y representation of a vector */
+    float v[2];  /**< Array representation of a vector */
+} k4a_float2_t;
+
+/** Three dimensional floating point vector.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef union
+{
+    /** XYZ or array representation of vector. */
+    struct _xyz
+    {
+        float x; /**< X component of a vector. */
+        float y; /**< Y component of a vector. */
+        float z; /**< Z component of a vector. */
+    } xyz;       /**< X, Y, Z representation of a vector. */
+    float v[3];  /**< Array representation of a vector. */
+} k4a_float3_t;
+
+/** IMU sample.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef struct _k4a_imu_sample_t
+{
+    float temperature;            /**< Temperature reading of this sample (Celsius). */
+    k4a_float3_t acc_sample;      /**< Accelerometer sample in meters per second squared. */
+    uint64_t acc_timestamp_usec;  /**< Timestamp of the accelerometer in microseconds. */
+    k4a_float3_t gyro_sample;     /**< Gyro sample in radians per second. */
+    uint64_t gyro_timestamp_usec; /**< Timestamp of the gyroscope in microseconds */
+} k4a_imu_sample_t;
+
+/**
+ *
+ * @}
+ *
+ * \defgroup Definitions Definitions
+ * \ingroup csdk
+ *
+ * Definition of constant values.
+ *
+ * @{
+ */
+
+/** Default device index.
+ *
+ * Passed as an argument to \ref k4a_device_open() to open the default sensor
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_DEVICE_DEFAULT (0)
+
+/** An infinite wait time for functions that take a timeout parameter.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_WAIT_INFINITE (-1)
+
+/** Initial configuration setting for disabling all sensors.
+ *
+ * \remarks
+ * Use this setting to initialize a \ref k4a_device_configuration_t to a disabled state.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = { K4A_IMAGE_FORMAT_COLOR_MJPG,
+                                                                               K4A_COLOR_RESOLUTION_OFF,
+                                                                               K4A_DEPTH_MODE_OFF,
+                                                                               K4A_FRAMES_PER_SECOND_30,
+                                                                               false,
+                                                                               0,
+                                                                               K4A_WIRED_SYNC_MODE_STANDALONE,
+                                                                               0,
+                                                                               false };
+
+/**
+ * @}
+ */
 
 #ifdef __cplusplus
 }

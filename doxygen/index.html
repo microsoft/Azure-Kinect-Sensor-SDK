@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Azure Kinect Sensor SDK Documentation</title>
+  <script src="branches.js" type="text/javascript">
+  </script>
+  <script type="text/javascript">
+    console.log(BRANCHES);
+
+    window.onload = function()
+      {
+        var branchlist = document.getElementById('branchlist');
+
+        for (i = 0; i < BRANCHES.length; i++)
+        {
+          var element = BRANCHES[i];
+          var newItem = document.createElement("li");
+          var link = document.createElement("a");
+          link.href = element + "/index.html";
+          link.title = element;
+
+          var branchName = document.createTextNode(element);
+          link.appendChild(branchName);
+          newItem.appendChild(link);
+          branchlist.appendChild(newItem);
+        };
+      };
+  </script>
+</head>
+<body>
+  <h1>API Documentation</h1>
+
+  <div>
+    For the most recent stable build see <a href="master/index.html">master</a>.
+  </div>
+  <div>
+      For the most recent development build see <a href="develop/index.html">develop</a>.
+  </div>
+
+  <h2>Branches</h2>
+  <!-- List of branches populated from branches.js -->
+  <ul id="branchlist">
+
+  </ul>
+  
+</html>
+

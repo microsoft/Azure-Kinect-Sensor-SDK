@@ -106,19 +106,23 @@ add_subdirectory(tools)
 if (K4A_BUILD_DOCS)
     find_package(Doxygen 1.8.14 EXACT)
     if (DOXYGEN_FOUND)
+        set(DOXYGEN_MAINPAGE ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/mainpage.md) 
         set(DOXYGEN_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/include/k4a ${CMAKE_CURRENT_SOURCE_DIR}/include/k4arecord ${DOXYGEN_MAINPAGE})
-
+        set(DOXYGEN_LAYOUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/DoxygenLayout.xml)
         # These variables are used in Doxyfile.in
         string(REPLACE ";" " " DOXYGEN_INPUT "${DOXYGEN_SOURCES}")
         set(DOXYGEN_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/docs)
+        set(DOXYGEN_PROJECT_LOGO ${CMAKE_CURRENT_SOURCE_DIR}/docs/logo.png)
+        set(DOXYGEN_TEMPLATE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/doxygen)
+        set(DOXYGEN_PROJECT_NUMBER ${SOURCE_BRANCH})
 
-        configure_file(Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+        configure_file(doxygen/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
         add_custom_command(
             OUTPUT ${DOXYGEN_OUTPUT_DIRECTORY}/html/index.html
             COMMAND ${DOXYGEN_EXECUTABLE}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            MAIN_DEPENDENCY Doxyfile.in
+            MAIN_DEPENDENCY doxygen/Doxyfile.in
             DEPENDS ${DOXYGEN_SOURCES}
             )
     add_custom_target(k4adocs ALL DEPENDS ${DOXYGEN_OUTPUT_DIRECTORY}/html/index.html)
@@ -140,7 +144,7 @@ if (${CLANG_FORMAT} STREQUAL "CLANG_FORMAT-NOTFOUND")
     message(STATUS "Clang-format not found")
 else()
 
-    set(VALID_CLANG_FORMAT_VERSION "6.0.0")
+    set(VALID_CLANG_FORMAT_VERSION "6\.0\.0")
     execute_process(COMMAND ${CLANG_FORMAT} -version OUTPUT_VARIABLE CLANG_VERSION_STRING)
     message(STATUS "clang-format version: ${CLANG_VERSION_STRING}")
 
@@ -218,6 +222,10 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 endif()
 
 # Packaging support
+set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ             GROUP_EXECUTE
+    WORLD_READ             WORLD_EXECUTE)
 set(CPACK_PACKAGE_VENDOR "Microsoft")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C/C++ SDK for Kinect for Azure")
 set(CPACK_PACKAGE_DESCRIPTION "C/C++ SDK for Kinect for Azure")
@@ -230,6 +238,36 @@ set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(CPACK_PACKAGE_NAME "k4asdk")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${K4A_VERSION_STR}.${CMAKE_SYSTEM_NAME}.${TARGET_ARCH}.${CMAKE_BUILD_TYPE}")
 
+set(CPACK_COMPONENTS_GROUPING "ONE_PER_GROUP")
+
 set(CPACK_GENERATOR "TGZ" "ZIP")
 
 include(CPack)
+
+cpack_add_component(
+    runtime
+    DISPLAY_NAME
+        Runtime
+    DESCRIPTION
+        "Dynamic Libraries for Azure Kinect Runtime"
+    REQUIRED)
+
+cpack_add_component(
+    development
+    DISPLAY_NAME
+        Development
+    DESCRIPTION
+        "Headers and cmake files needed for Azure Kinect Development"
+    REQUIRED
+    DEPENDS
+        runtime)
+
+cpack_add_component(
+    tools
+    DISPLAY_NAME
+        Tools
+    DESCRIPTION
+        "Tools for Azure Kinect Development"
+    REQUIRED
+    DEPENDS
+        runtime)
