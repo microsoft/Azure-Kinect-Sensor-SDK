@@ -976,9 +976,6 @@ K4A_EXPORT uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle);
  * \ref k4a_image_t.
  *
  * \remarks
- * Set a timestamp of 0 to indicate that the timestamp is not valid.
- *
- * \remarks
  * The device timestamp represents the mid-point of exposure of the image, as captured by the hardware.
  *
  * \relates k4a_image_t
@@ -1004,9 +1001,6 @@ K4A_EXPORT void k4a_image_set_device_timestamp_usec(k4a_image_t image_handle, ui
  * \remarks
  * Use this function in conjunction with k4a_image_create() or k4a_image_create_from_buffer() to construct a
  * \ref k4a_image_t.
- *
- * \remarks
- * Set a timestamp of 0 to indicate that the timestamp is not valid.
  *
  * \remarks
  * The device timestamp represents the mid-point of exposure of the image, as captured by the hardware.
@@ -1039,11 +1033,8 @@ K4A_DEPRECATED_EXPORT void k4a_image_set_timestamp_usec(k4a_image_t image_handle
  * \ref k4a_image_t.
  *
  * \remarks
- * Set a timestamp of 0 to indicate that the timestamp is not valid.
- *
- * \remarks
  * The system timestamp is a high performance and increasing clock (from boot). The timestamp represents the time
- * immediately after the image buffer was ready by the host PC.
+ * immediately after the image buffer was read by the host PC.
  *
  * \relates k4a_image_t
  *

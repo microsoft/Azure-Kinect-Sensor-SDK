@@ -25,10 +25,12 @@ typedef struct _guid_t
 
 #define COUNTOF(x) (sizeof(x) / sizeof(x[0]))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) \
-({ __typeof__ (a) _a = (a); \
-   __typeof__ (b) _b = (b); \
-   (_a > _b) ? _a : _b; })
+#define MAX(a, b)                                                                                                      \
+    ({                                                                                                                 \
+        __typeof__(a) _a = (a);                                                                                        \
+        __typeof__(b) _b = (b);                                                                                        \
+        (_a > _b) ? _a : _b;                                                                                           \
+    })
 #define STRINGIFY(string) #string
 
 // Clock tick runs 90kHz and convert sec to micro sec
