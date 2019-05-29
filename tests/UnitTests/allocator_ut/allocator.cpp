@@ -18,7 +18,6 @@ int main(int argc, char **argv)
 }
 
 #define GTEST_LOG_ERROR std::cout << "[    ERROR ] "
-#define GTEST_LOG_INFO std::cout << "[     INFO ] "
 
 typedef struct _allocator_thread_adjust_ref_data_t
 {
