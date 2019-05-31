@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fastpointcloud", "fastpoint
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "k4arecorder", "k4arecorder\k4arecorder.vcxproj", "{92A1A302-5530-4944-869B-F8F4B1E4B1E4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kinfu_example", "kinfu\kinfu_example.vcxproj", "{AE82EE82-2782-474F-98A9-06CFC7A3BB4D}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "streaming", "streaming\streaming.vcxproj", "{369B1FB5-256C-4B6E-8BDC-94F5A3B337A1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "transformation", "transformation\transformation.vcxproj", "{5F1CF02B-67F7-4E5C-8CA3-EB059EAD450B}"
@@ -35,6 +37,10 @@ Global
 		{92A1A302-5530-4944-869B-F8F4B1E4B1E4}.Debug|x64.Build.0 = Debug|x64
 		{92A1A302-5530-4944-869B-F8F4B1E4B1E4}.Release|x64.ActiveCfg = Release|x64
 		{92A1A302-5530-4944-869B-F8F4B1E4B1E4}.Release|x64.Build.0 = Release|x64
+		{AE82EE82-2782-474F-98A9-06CFC7A3BB4D}.Debug|x64.ActiveCfg = Debug|x64
+		{AE82EE82-2782-474F-98A9-06CFC7A3BB4D}.Debug|x64.Build.0 = Debug|x64
+		{AE82EE82-2782-474F-98A9-06CFC7A3BB4D}.Release|x64.ActiveCfg = Release|x64
+		{AE82EE82-2782-474F-98A9-06CFC7A3BB4D}.Release|x64.Build.0 = Release|x64
 		{369B1FB5-256C-4B6E-8BDC-94F5A3B337A1}.Debug|x64.ActiveCfg = Debug|x64
 		{369B1FB5-256C-4B6E-8BDC-94F5A3B337A1}.Debug|x64.Build.0 = Debug|x64
 		{369B1FB5-256C-4B6E-8BDC-94F5A3B337A1}.Release|x64.ActiveCfg = Release|x64
