@@ -8,27 +8,27 @@ If the user has OpenCV/OpenCV_Contrib/VTK installed, the OpenCV-specific code in
 - Download VTK-8.2.0
 - Follow the instruction from opencv_contrib to build opencv with extra modules (we used cmake-gui to generate sln file and built opencv and opencv_contrib modules with Visual Studio 2017, the user needs to configure the WITH_VTK and VTK_DIR in the cmake-gui before generating sln)
 - The user needs to add opencv/opencv_contrib includes and lib dependencies in the kinfu_example.vcxproj file (AdditionalIncludeDirectories, AdditionalDependencies and AdditionalLibraryDirectories), then build the Examples.sln, the following is a list of dependencies we need for this example
-	Includes:
-		opencv-4.1\include
-		opencv_contrib-4.1\modules\rgbd\include
-		opencv_contrib-4.1\modules\viz\include
-	Libs:
-		opencv_core410d.lib
-		opencv_calib3d410d.lib
-		opencv_rgbd410d.lib
-		opencv_highgui410d.lib
-		opencv_viz410d.lib
-		opencv_imgproc410d.lib
+    Includes:
+        opencv-4.1\include
+        opencv_contrib-4.1\modules\rgbd\include
+        opencv_contrib-4.1\modules\viz\include
+    Libs:
+        opencv_core410d.lib
+        opencv_calib3d410d.lib
+        opencv_rgbd410d.lib
+        opencv_highgui410d.lib
+        opencv_viz410d.lib
+        opencv_imgproc410d.lib
 - You need to copy the opencv dlls as well as Azure Kinect SDK dlls to the kinfu_example.exe folder before running the application.
 
 ## Usage Info
 
-	Usage: kinfu_example.exe
-	Keys:   	q - Quit
-		r - Reset KinFu
-		v - Enable Viz Render Cloud (default is OFF, enable it slows down frame rate)
-	The application will generate a kinectfusion_output.ply in the same folder when you quit use key q
+    Usage: kinfu_example.exe
+    Keys:   	q - Quit
+        r - Reset KinFu
+        v - Enable Viz Render Cloud (default is OFF, enable it slows down frame rate)
+    The application will generate a kinectfusion_output.ply in the same folder when you quit use key q
 
 Example:
 
-	Usage: kinfu_example.exe
+    Usage: kinfu_example.exe
