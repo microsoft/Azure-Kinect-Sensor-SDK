@@ -98,7 +98,8 @@ TEST_F(playback_perf, test_open)
             {
                 std::cout << std::endl;
                 std::cout << "First " << images[i].second << " image:" << std::endl;
-                std::cout << "    Timestamp: " << k4a_image_get_timestamp_usec(images[i].first) << " usec" << std::endl;
+                std::cout << "    Timestamp: " << k4a_image_get_device_timestamp_usec(images[i].first) << " usec"
+                          << std::endl;
                 std::cout << "    Image format: " << format_names[k4a_image_get_format(images[i].first)] << std::endl;
                 std::cout << "    Resolution: " << k4a_image_get_width_pixels(images[i].first) << "x"
                           << k4a_image_get_height_pixels(images[i].first) << std::endl;
