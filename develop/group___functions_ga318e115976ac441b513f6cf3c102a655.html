@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: k4a_image_t::k4a_image_get_timestamp_usec</title>
+<title>Azure Kinect Sensor SDK: k4a_image_t::k4a_image_get_device_timestamp_usec</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('group___functions_gad73e407d26f55450f9202340543145d3.html','');});
+$(document).ready(function(){initNavTree('group___functions_ga318e115976ac441b513f6cf3c102a655.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,8 +84,8 @@ $(document).ready(function(){initNavTree('group___functions_gad73e407d26f55450f9
 </div>
 
 <div class="contents">
-<a id="gad73e407d26f55450f9202340543145d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gad73e407d26f55450f9202340543145d3">&#9670;&nbsp;</a></span>k4a_image_get_timestamp_usec()</h2>
+<a id="ga318e115976ac441b513f6cf3c102a655"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga318e115976ac441b513f6cf3c102a655">&#9670;&nbsp;</a></span>k4a_image_get_device_timestamp_usec()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -94,7 +94,7 @@ $(document).ready(function(){initNavTree('group___functions_gad73e407d26f55450f9
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint64_t k4a_image_get_timestamp_usec </td>
+          <td class="memname">uint64_t k4a_image_get_device_timestamp_usec </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structk4a__image__t.html">k4a_image_t</a>&#160;</td>
           <td class="paramname"><em>image_handle</em></td><td>)</td>
@@ -108,14 +108,14 @@ $(document).ready(function(){initNavTree('group___functions_gad73e407d26f55450f9
 </table>
 </div><div class="memdoc">
 
-<p>Get the image timestamp in microseconds. </p>
+<p>Get the image's device timestamp in microseconds. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">image_handle</td><td>Handle of the image for which the get operation is performed on.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section remark"><dt>Remarks</dt><dd>Returns the timestamp of the image. Timestamps are recorded by the device and represent the mid-point of exposure. They may be used for relative comparison, but their absolute value has no defined meaning.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Returns the device timestamp of the image, as captured by the hardware. Timestamps are recorded by the device and represent the mid-point of exposure. They may be used for relative comparison, but their absolute value has no defined meaning.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>If the <code>image_handle</code> is invalid or if no timestamp was set for the image, this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.</dd></dl>
  
 </div>
