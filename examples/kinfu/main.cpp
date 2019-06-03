@@ -166,8 +166,10 @@ int main(int argc, char ** /*argv*/)
         UMat frame;
         create_mat_from_buffer<uint16_t>(depth_buffer, width, height).copyTo(frame);
 
-        // Undistort the depth frame (bilinear approach will introduce floating noise between valid and invalid depth,
-        // as an example, we use nearest neighbor here)
+        // Undistort the depth frame (INTER_LINEAR will introduce floating noise between valid and invalid depth. As a
+        // demonstration, this example here uses the naive INTER_NEAREST mode, which can generate some "ring" artifacts.
+        // One can implement bilinear undistortion with invalid depth pixels awareness and edge preserving without
+        // introducing the artificial noise between invalid and valid depth pixels.
         UMat undistortedFrame;
         remap(frame, undistortedFrame, map1, map2, INTER_NEAREST);
         if (undistortedFrame.empty())
