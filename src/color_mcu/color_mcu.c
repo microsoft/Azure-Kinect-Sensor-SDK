@@ -217,7 +217,7 @@ k4a_result_t colormcu_get_external_sync_jack_state(colormcu_t colormcu_handle,
  *   K4A_RESULT_FAILED       Operation failed
  *
  */
-k4a_result_t colormcu_set_multi_device_mode(colormcu_t colormcu_handle, k4a_device_configuration_t *config)
+k4a_result_t colormcu_set_multi_device_mode(colormcu_t colormcu_handle, const k4a_device_configuration_t *config)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, colormcu_t, colormcu_handle)
     colormcu_context_t *colormcu = colormcu_t_get_context(colormcu_handle);
