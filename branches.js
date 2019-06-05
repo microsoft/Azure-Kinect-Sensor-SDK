@@ -1,5 +1,6 @@
 var BRANCHES = [
     "develop",
     "feature/publishdocs",
-    "master"
+    "master",
+    "release/1.1.x"
 ]

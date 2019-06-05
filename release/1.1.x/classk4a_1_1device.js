@@ -1,0 +1,27 @@
+var classk4a_1_1device =
+[
+    [ "device", "classk4a_1_1device_a060093e3ad034aaeb05ea9dc69958a58.html#a060093e3ad034aaeb05ea9dc69958a58", null ],
+    [ "device", "classk4a_1_1device.html#a7543679a25b5761293869d1856d219aa", null ],
+    [ "device", "classk4a_1_1device.html#a1fa84c8b8ee250c93489810ef4b6e05b", null ],
+    [ "~device", "classk4a_1_1device.html#a8fe9d10dae7aef6d6d786e88280a634e", null ],
+    [ "close", "classk4a_1_1device_a1060f1cee688cbb125d112259b7b0739.html#a1060f1cee688cbb125d112259b7b0739", null ],
+    [ "get_calibration", "classk4a_1_1device_ac857cfc66cd1c367d48cb83fba8a032c.html#ac857cfc66cd1c367d48cb83fba8a032c", null ],
+    [ "get_capture", "classk4a_1_1device_a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e.html#a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e", null ],
+    [ "get_color_control", "classk4a_1_1device_a4a0757363fc3e7937908f90b30f3666d.html#a4a0757363fc3e7937908f90b30f3666d", null ],
+    [ "get_imu_sample", "classk4a_1_1device_a59acd51c256b17441c6a2a4e335bc982.html#a59acd51c256b17441c6a2a4e335bc982", null ],
+    [ "get_installed_count", "classk4a_1_1device_a8e55f0b0001b72db094aaf613eb48c15.html#a8e55f0b0001b72db094aaf613eb48c15", null ],
+    [ "get_raw_calibration", "classk4a_1_1device_a9d2c806f63893cb9486bd42bb634747f.html#a9d2c806f63893cb9486bd42bb634747f", null ],
+    [ "get_serialnum", "classk4a_1_1device_a452df45f6aa4ce3d8ae442bc1f2e7e7d.html#a452df45f6aa4ce3d8ae442bc1f2e7e7d", null ],
+    [ "get_version", "classk4a_1_1device_a56dd0f20dcc26c014cdd8b47145a523b.html#a56dd0f20dcc26c014cdd8b47145a523b", null ],
+    [ "is_sync_in_connected", "classk4a_1_1device_acaba6c5d8a28965882a4703e8806810a.html#acaba6c5d8a28965882a4703e8806810a", null ],
+    [ "is_sync_out_connected", "classk4a_1_1device_aec0191ecf75549f650af7ac61d0afbef.html#aec0191ecf75549f650af7ac61d0afbef", null ],
+    [ "open", "classk4a_1_1device_a0094acf44bc68ab3d48f0851619d3467.html#a0094acf44bc68ab3d48f0851619d3467", null ],
+    [ "operator bool", "classk4a_1_1device.html#a015a45ab5362697ef77ec4be2f387e31", null ],
+    [ "operator=", "classk4a_1_1device.html#af20f4c5988b3b4a8053bd63c3930b331", null ],
+    [ "operator=", "classk4a_1_1device.html#aed3433182911420149e64721764df383", null ],
+    [ "set_color_control", "classk4a_1_1device_af257d6c8181222823c7cfbdf57e032d7.html#af257d6c8181222823c7cfbdf57e032d7", null ],
+    [ "start_cameras", "classk4a_1_1device_ab400fa1eaca5f538027434cce985ed89.html#ab400fa1eaca5f538027434cce985ed89", null ],
+    [ "start_imu", "classk4a_1_1device_abc8bb828de9b48b10fefa5ca6b8482c7.html#abc8bb828de9b48b10fefa5ca6b8482c7", null ],
+    [ "stop_cameras", "classk4a_1_1device_a54390cae2a759ad9e36f47a30c223fd5.html#a54390cae2a759ad9e36f47a30c223fd5", null ],
+    [ "stop_imu", "classk4a_1_1device_a18f23e91f38643520228d784435938e5.html#a18f23e91f38643520228d784435938e5", null ]
+];
