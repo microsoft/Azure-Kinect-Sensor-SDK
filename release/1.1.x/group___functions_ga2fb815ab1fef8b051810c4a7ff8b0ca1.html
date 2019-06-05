@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: k4a_image_t::k4a_image_get_system_timestamp_nsec</title>
+<title>Azure Kinect Sensor SDK: k4a_image_t::k4a_image_set_timestamp_usec</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('group___functions_ga98ba229d1ee1cf3b7c27a0f95e14826b.html','');});
+$(document).ready(function(){initNavTree('group___functions_ga2fb815ab1fef8b051810c4a7ff8b0ca1.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,8 +84,8 @@ $(document).ready(function(){initNavTree('group___functions_ga98ba229d1ee1cf3b7c
 </div>
 
 <div class="contents">
-<a id="ga98ba229d1ee1cf3b7c27a0f95e14826b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga98ba229d1ee1cf3b7c27a0f95e14826b">&#9670;&nbsp;</a></span>k4a_image_get_system_timestamp_nsec()</h2>
+<a id="ga2fb815ab1fef8b051810c4a7ff8b0ca1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2fb815ab1fef8b051810c4a7ff8b0ca1">&#9670;&nbsp;</a></span>k4a_image_set_timestamp_usec()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -94,11 +94,21 @@ $(document).ready(function(){initNavTree('group___functions_ga98ba229d1ee1cf3b7c
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint64_t k4a_image_get_system_timestamp_nsec </td>
+          <td class="memname">void k4a_image_set_timestamp_usec </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structk4a__image__t.html">k4a_image_t</a>&#160;</td>
-          <td class="paramname"><em>image_handle</em></td><td>)</td>
+          <td class="paramname"><em>image_handle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>timestamp_usec</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -108,19 +118,17 @@ $(document).ready(function(){initNavTree('group___functions_ga98ba229d1ee1cf3b7c
 </table>
 </div><div class="memdoc">
 
-<p>Get the image's system timestamp in nanoseconds. </p>
+<p>Set the time stamp, in microseconds, of the image. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">image_handle</td><td>Handle of the image for which the get operation is performed on.</td></tr>
+    <tr><td class="paramname">image_handle</td><td>Handle of the image to set the timestamp on.</td></tr>
+    <tr><td class="paramname">timestamp_usec</td><td>Timestamp of the image in microseconds.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section remark"><dt>Remarks</dt><dd>Returns the system timestamp of the image. Timestamps are recorded by the host. They may be used for relative comparision, as they are relative to the corresponding system clock. The absolute value is a monotonic count from an arbitrary point in the past.</dd>
+<dl class="section remark"><dt>Remarks</dt><dd>Use this function in conjunction with <a class="el" href="group___functions_ga859554581bb97a620ff8e92a893e71ef.html#ga859554581bb97a620ff8e92a893e71ef" title="Create an image. ">k4a_image_create()</a> or <a class="el" href="group___functions_gaf84f2a271bcf6afae429bbccd47071b3.html#gaf84f2a271bcf6afae429bbccd47071b3" title="Create an image from a pre-allocated buffer. ">k4a_image_create_from_buffer()</a> to construct a <a class="el" href="structk4a__image__t.html">k4a_image_t</a>.</dd>
 <dd>
-The system timestamp is captured at the moment host PC finishes receiving the image.</dd>
-<dd>
-On Linux the system timestamp is read from clock_gettime(CLOCK_MONOTONIC), which measures realtime and is not impacted by adjustments to the system clock. It starts from an arbitrary point in the past. On Windows the system timestamp is read from QueryPerformanceCounter(), it also measures realtime and is not impacted by adjustments to the system clock. It also starts from an arbitrary point in the past.</dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>If the <code>image_handle</code> is invalid or if no timestamp was set for the image, this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.</dd></dl>
+Set a timestamp of 0 to indicate that the timestamp is not valid.</dd></dl>
  
 </div>
 </div>

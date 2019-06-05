@@ -15,7 +15,6 @@ var classk4a_1_1image =
     [ "get_iso_speed", "classk4a_1_1image_a666dca56f2e7224488b95ac3b6ae8a6b.html#a666dca56f2e7224488b95ac3b6ae8a6b", null ],
     [ "get_size", "classk4a_1_1image_a681ade955c81f42d967d41dcbaf065d4.html#a681ade955c81f42d967d41dcbaf065d4", null ],
     [ "get_stride_bytes", "classk4a_1_1image_a5e22c7875e15ecf102cc4cf4accb27c2.html#a5e22c7875e15ecf102cc4cf4accb27c2", null ],
-    [ "get_system_timestamp", "classk4a_1_1image_aa691f71650646a9183352cae0c993e40.html#aa691f71650646a9183352cae0c993e40", null ],
     [ "get_white_balance", "classk4a_1_1image_a98fc61c44d56d183125ddd1f519f4cc8.html#a98fc61c44d56d183125ddd1f519f4cc8", null ],
     [ "get_width_pixels", "classk4a_1_1image_a2ed85b2247946a21251c790071612904.html#a2ed85b2247946a21251c790071612904", null ],
     [ "handle", "classk4a_1_1image.html#a88a5e67e8dd75677502e2421b3ba7c2c", null ],

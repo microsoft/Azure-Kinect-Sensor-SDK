@@ -19,7 +19,6 @@ var searchData=
   ['get_5fserialnum',['get_serialnum',['../classk4a_1_1device_a452df45f6aa4ce3d8ae442bc1f2e7e7d.html#a452df45f6aa4ce3d8ae442bc1f2e7e7d',1,'k4a::device']]],
   ['get_5fsize',['get_size',['../classk4a_1_1image_a681ade955c81f42d967d41dcbaf065d4.html#a681ade955c81f42d967d41dcbaf065d4',1,'k4a::image']]],
   ['get_5fstride_5fbytes',['get_stride_bytes',['../classk4a_1_1image_a5e22c7875e15ecf102cc4cf4accb27c2.html#a5e22c7875e15ecf102cc4cf4accb27c2',1,'k4a::image']]],
-  ['get_5fsystem_5ftimestamp',['get_system_timestamp',['../classk4a_1_1image_aa691f71650646a9183352cae0c993e40.html#aa691f71650646a9183352cae0c993e40',1,'k4a::image']]],
   ['get_5ftemperature_5fc',['get_temperature_c',['../classk4a_1_1capture_a48bbcd6a4e69cf1c5574162d2d0f0d33.html#a48bbcd6a4e69cf1c5574162d2d0f0d33',1,'k4a::capture']]],
   ['get_5fversion',['get_version',['../classk4a_1_1device_a56dd0f20dcc26c014cdd8b47145a523b.html#a56dd0f20dcc26c014cdd8b47145a523b',1,'k4a::device']]],
   ['get_5fwhite_5fbalance',['get_white_balance',['../classk4a_1_1image_a98fc61c44d56d183125ddd1f519f4cc8.html#a98fc61c44d56d183125ddd1f519f4cc8',1,'k4a::image']]],

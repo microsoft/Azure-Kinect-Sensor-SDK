@@ -1,7 +1,6 @@
 var searchData=
 [
   ['definitions',['Definitions',['../group___definitions.html',1,'']]],
-  ['deprecated_20list',['Deprecated List',['../deprecated.html',1,'']]],
   ['depth',['depth',['../structk4a__hardware__version__t_a0a633007ba808514d59a8b710a11db04.html#a0a633007ba808514d59a8b710a11db04',1,'k4a_hardware_version_t']]],
   ['depth_5fcamera_5fcalibration',['depth_camera_calibration',['../structk4a__calibration__t_afb9c6f1ed401107b0f65a7fa6a5af910.html#afb9c6f1ed401107b0f65a7fa6a5af910',1,'k4a_calibration_t']]],
   ['depth_5fdelay_5foff_5fcolor_5fusec',['depth_delay_off_color_usec',['../structk4a__device__configuration__t_a65f787c15d6b0a75119c2179054b5db4.html#a65f787c15d6b0a75119c2179054b5db4',1,'k4a_device_configuration_t::depth_delay_off_color_usec()'],['../structk4a__record__configuration__t_a26d517a14ee493076a73071146013236.html#a26d517a14ee493076a73071146013236',1,'k4a_record_configuration_t::depth_delay_off_color_usec()']]],
