@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#ifndef _MSC_VER
+#define _ISOC11_SOURCE /* for aligned_alloc() */
+#endif
+
 #include <k4ainternal/logging.h>
 #include <k4ainternal/deloader.h>
 #include <k4ainternal/tewrapper.h>
