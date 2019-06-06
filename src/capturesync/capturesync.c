@@ -475,7 +475,7 @@ void capturesync_destroy(capturesync_t capturesync_handle)
     capturesync_t_destroy(capturesync_handle);
 }
 
-k4a_result_t capturesync_start(capturesync_t capturesync_handle, k4a_device_configuration_t *config)
+k4a_result_t capturesync_start(capturesync_t capturesync_handle, const k4a_device_configuration_t *config)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, capturesync_t, capturesync_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);

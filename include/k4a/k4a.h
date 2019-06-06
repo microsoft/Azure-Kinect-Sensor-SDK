@@ -1220,7 +1220,7 @@ K4A_EXPORT void k4a_image_release(k4a_image_t image_handle);
  * </requirements>
  * \endxmlonly
  */
-K4A_EXPORT k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_configuration_t *config);
+K4A_EXPORT k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, const k4a_device_configuration_t *config);
 
 /** Stops the color and depth camera capture.
  *

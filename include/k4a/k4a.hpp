@@ -996,7 +996,7 @@ public:
      *
      * \sa k4a_device_start_cameras
      */
-    void start_cameras(k4a_device_configuration_t *configuration)
+    void start_cameras(const k4a_device_configuration_t *configuration)
     {
         k4a_result_t result = k4a_device_start_cameras(m_handle, configuration);
         if (K4A_RESULT_SUCCEEDED != result)

@@ -101,7 +101,7 @@ void colormcu_destroy(colormcu_t colormcu_handle);
  *
  * \return K4A_RESULT_SUCCEEDED if the call succeeded
  */
-k4a_result_t colormcu_set_multi_device_mode(colormcu_t colormcu_handle, k4a_device_configuration_t *config);
+k4a_result_t colormcu_set_multi_device_mode(colormcu_t colormcu_handle, const k4a_device_configuration_t *config);
 
 /** Writes the device synchronization settings
  *
