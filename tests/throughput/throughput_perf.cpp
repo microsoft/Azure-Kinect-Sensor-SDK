@@ -26,6 +26,7 @@ static k4a_wired_sync_mode_t g_wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
 static int g_capture_count = 100;
 static bool g_synchronized_images_only = false;
 static bool g_no_imu = false;
+static uint32_t g_subordinate_delay_off_master_usec = 0;
 
 using ::testing::ValuesIn;
 
@@ -246,6 +247,7 @@ TEST_P(throughput_perf, testTest)
     config.depth_delay_off_color_usec = g_depth_delay_off_color_usec;
     config.wired_sync_mode = g_wired_sync_mode;
     config.synchronized_images_only = g_synchronized_images_only;
+    config.subordinate_delay_off_master_usec = g_subordinate_delay_off_master_usec;
     if (g_depth_delay_off_color_usec == 0)
     {
         // Create delay that can be +fps to -fps
@@ -791,6 +793,20 @@ int main(int argc, char **argv)
                 error = true;
             }
         }
+        else if (strcmp(argument, "--subordinate_delay_off_master_usec") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_subordinate_delay_off_master_usec = (int)strtol(argv[i + 1], NULL, 10);
+                printf("g_subordinate_delay_off_master_usec = %d\n", g_subordinate_delay_off_master_usec);
+                i++;
+            }
+            else
+            {
+                printf("Error: index parameter missing\n");
+                error = true;
+            }
+        }
         else if (strcmp(argument, "--capture_count") == 0)
         {
             if (i + 1 <= argc)
@@ -838,6 +854,10 @@ int main(int argc, char **argv)
         printf("  --synchronized_images_only\n");
         printf("      By default this setting is false, enabling this will for the test to wait for\n");
         printf("      both and depth images to be available.\n");
+        printf("  --subordinate_delay_off_master_usec <+ microseconds>\n");
+        printf("      This is the time delay the device captures off the master devices capture sync\n");
+        printf("      pulse. This value needs to be less than one image sample period, i.e for 30FPS \n");
+        printf("      this needs to be less than 33333us.\n");
 
         return 1; // Indicates an error or warning
     }
