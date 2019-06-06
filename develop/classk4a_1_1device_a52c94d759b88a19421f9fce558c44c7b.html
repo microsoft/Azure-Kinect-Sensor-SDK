@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: k4a_device_t::k4a_device_start_cameras</title>
+<title>Azure Kinect Sensor SDK: k4a::device::start_cameras</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('group___functions_ga4dc81cbeb54b07e4bbb7d639c448f6eb.html','');});
+$(document).ready(function(){initNavTree('classk4a_1_1device_a52c94d759b88a19421f9fce558c44c7b.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,8 +84,8 @@ $(document).ready(function(){initNavTree('group___functions_ga4dc81cbeb54b07e4bb
 </div>
 
 <div class="contents">
-<a id="ga4dc81cbeb54b07e4bbb7d639c448f6eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga4dc81cbeb54b07e4bbb7d639c448f6eb">&#9670;&nbsp;</a></span>k4a_device_start_cameras()</h2>
+<a id="a52c94d759b88a19421f9fce558c44c7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52c94d759b88a19421f9fce558c44c7b">&#9670;&nbsp;</a></span>start_cameras()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -94,43 +94,23 @@ $(document).ready(function(){initNavTree('group___functions_ga4dc81cbeb54b07e4bb
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5.html#ga4b419a99aa2220b076a4520dc2afd1e5">k4a_result_t</a> k4a_device_start_cameras </td>
+          <td class="memname">void k4a::device::start_cameras </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structk4a__device__t.html">k4a_device_t</a>&#160;</td>
-          <td class="paramname"><em>device_handle</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const <a class="el" href="structk4a__device__configuration__t.html">k4a_device_configuration_t</a> *&#160;</td>
+          <td class="paramname"><em>configuration</em></td><td>)</td>
           <td></td>
-          <td class="paramtype"><a class="el" href="structk4a__device__configuration__t.html">k4a_device_configuration_t</a> *&#160;</td>
-          <td class="paramname"><em>config</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">related</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Starts color and depth camera capture. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">device_handle</td><td>Handle obtained by <a class="el" href="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113.html#ga3d4eb5dfbf4d576d4978b66ea419f113" title="Open an Azure Kinect device. ">k4a_device_open()</a>.</td></tr>
-    <tr><td class="paramname">config</td><td>The configuration we want to run the device in. This can be initialized with <a class="el" href="group___definitions_ga4f693ace52a6eeec10cc6ca0350d6601.html#ga4f693ace52a6eeec10cc6ca0350d6601" title="Initial configuration setting for disabling all sensors. ">K4A_DEVICE_CONFIG_INIT_DISABLE_ALL</a>.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5.html#gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" title="The result was successful. ">K4A_RESULT_SUCCEEDED</a> is returned on success.</dd></dl>
-<dl class="section remark"><dt>Remarks</dt><dd>Individual sensors configured to run will now start to stream captured data.</dd>
-<dd>
-It is not valid to call <a class="el" href="group___functions_ga4dc81cbeb54b07e4bbb7d639c448f6eb.html#ga4dc81cbeb54b07e4bbb7d639c448f6eb" title="Starts color and depth camera capture. ">k4a_device_start_cameras()</a> a second time on the same <a class="el" href="structk4a__device__t.html">k4a_device_t</a> until <a class="el" href="group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8.html#ga4fa0e0a011a7105309ad97f081a5d6b8" title="Stops the color and depth camera capture. ">k4a_device_stop_cameras()</a> has been called.</dd></dl>
- 
+<p>Starts the K4A device's cameras Throws error on failure. </p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___functions_gaad7a85e1e5471810262442fc4a8e217a.html#gaad7a85e1e5471810262442fc4a8e217a" title="Starts color and depth camera capture. ">k4a_device_start_cameras</a> </dd></dl>
+
 </div>
 </div>
 </div><!-- contents -->
@@ -139,7 +119,7 @@ It is not valid to call <a class="el" href="group___functions_ga4dc81cbeb54b07e4
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="structk4a__device__t.html">k4a_device_t</a></li>
+    <li class="navelem"><b>k4a</b></li><li class="navelem"><a class="el" href="classk4a_1_1device.html">device</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.14 </li>

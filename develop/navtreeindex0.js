@@ -38,13 +38,13 @@ var NAVTREEINDEX0 =
 "classk4a_1_1device_a18f23e91f38643520228d784435938e5.html#a18f23e91f38643520228d784435938e5":[2,0,5,23],
 "classk4a_1_1device_a452df45f6aa4ce3d8ae442bc1f2e7e7d.html#a452df45f6aa4ce3d8ae442bc1f2e7e7d":[2,0,5,11],
 "classk4a_1_1device_a4a0757363fc3e7937908f90b30f3666d.html#a4a0757363fc3e7937908f90b30f3666d":[2,0,5,7],
+"classk4a_1_1device_a52c94d759b88a19421f9fce558c44c7b.html#a52c94d759b88a19421f9fce558c44c7b":[2,0,5,20],
 "classk4a_1_1device_a54390cae2a759ad9e36f47a30c223fd5.html#a54390cae2a759ad9e36f47a30c223fd5":[2,0,5,22],
 "classk4a_1_1device_a56dd0f20dcc26c014cdd8b47145a523b.html#a56dd0f20dcc26c014cdd8b47145a523b":[2,0,5,12],
 "classk4a_1_1device_a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e.html#a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e":[2,0,5,6],
 "classk4a_1_1device_a59acd51c256b17441c6a2a4e335bc982.html#a59acd51c256b17441c6a2a4e335bc982":[2,0,5,8],
 "classk4a_1_1device_a8e55f0b0001b72db094aaf613eb48c15.html#a8e55f0b0001b72db094aaf613eb48c15":[2,0,5,9],
 "classk4a_1_1device_a9d2c806f63893cb9486bd42bb634747f.html#a9d2c806f63893cb9486bd42bb634747f":[2,0,5,10],
-"classk4a_1_1device_ab400fa1eaca5f538027434cce985ed89.html#ab400fa1eaca5f538027434cce985ed89":[2,0,5,20],
 "classk4a_1_1device_abc8bb828de9b48b10fefa5ca6b8482c7.html#abc8bb828de9b48b10fefa5ca6b8482c7":[2,0,5,21],
 "classk4a_1_1device_ac857cfc66cd1c367d48cb83fba8a032c.html#ac857cfc66cd1c367d48cb83fba8a032c":[2,0,5,5],
 "classk4a_1_1device_acaba6c5d8a28965882a4703e8806810a.html#acaba6c5d8a28965882a4703e8806810a":[2,0,5,13],
@@ -248,6 +248,6 @@ var NAVTREEINDEX0 =
 "group___functions_ga473abb7de733bf5f53329f3b1a86594c.html#ga473abb7de733bf5f53329f3b1a86594c":[2,1,0,14],
 "group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a.html#ga4dac757a33657f4d3dbf1ae8b21c158a":[2,1,0,18],
 "group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a.html#ga4dac757a33657f4d3dbf1ae8b21c158a":[2,1,1,0,3],
-"group___functions_ga4dc81cbeb54b07e4bbb7d639c448f6eb.html#ga4dc81cbeb54b07e4bbb7d639c448f6eb":[2,1,0,29],
-"group___functions_ga4dc81cbeb54b07e4bbb7d639c448f6eb.html#ga4dc81cbeb54b07e4bbb7d639c448f6eb":[2,1,1,0,14]
+"group___functions_ga4e43940d8d8db48da266c7a7842c8d78.html#ga4e43940d8d8db48da266c7a7842c8d78":[2,1,0,17],
+"group___functions_ga4e43940d8d8db48da266c7a7842c8d78.html#ga4e43940d8d8db48da266c7a7842c8d78":[2,1,1,0,2]
 };

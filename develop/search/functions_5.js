@@ -29,7 +29,7 @@ var searchData=
   ['k4a_5fdevice_5fget_5fversion',['k4a_device_get_version',['../group___functions_gaea1def0a70bfa64ba275534be945669e.html#gaea1def0a70bfa64ba275534be945669e',1,'k4a_device_t']]],
   ['k4a_5fdevice_5fopen',['k4a_device_open',['../group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113.html#ga3d4eb5dfbf4d576d4978b66ea419f113',1,'k4a_device_t']]],
   ['k4a_5fdevice_5fset_5fcolor_5fcontrol',['k4a_device_set_color_control',['../group___functions_gae81269489170b26b7f0bbe1a7f9d31d6.html#gae81269489170b26b7f0bbe1a7f9d31d6',1,'k4a_device_t']]],
-  ['k4a_5fdevice_5fstart_5fcameras',['k4a_device_start_cameras',['../group___functions_ga4dc81cbeb54b07e4bbb7d639c448f6eb.html#ga4dc81cbeb54b07e4bbb7d639c448f6eb',1,'k4a_device_t']]],
+  ['k4a_5fdevice_5fstart_5fcameras',['k4a_device_start_cameras',['../group___functions_gaad7a85e1e5471810262442fc4a8e217a.html#gaad7a85e1e5471810262442fc4a8e217a',1,'k4a_device_t']]],
   ['k4a_5fdevice_5fstart_5fimu',['k4a_device_start_imu',['../group___functions_gaa855688659a69c0098ce9e0b2ffcc152.html#gaa855688659a69c0098ce9e0b2ffcc152',1,'k4a_device_t']]],
   ['k4a_5fdevice_5fstop_5fcameras',['k4a_device_stop_cameras',['../group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8.html#ga4fa0e0a011a7105309ad97f081a5d6b8',1,'k4a_device_t']]],
   ['k4a_5fdevice_5fstop_5fimu',['k4a_device_stop_imu',['../group___functions_ga731c3ddd0833ce86d31e278992cf3453.html#ga731c3ddd0833ce86d31e278992cf3453',1,'k4a_device_t']]],

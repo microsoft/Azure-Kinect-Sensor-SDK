@@ -20,7 +20,7 @@ var classk4a_1_1device =
     [ "operator=", "classk4a_1_1device.html#af20f4c5988b3b4a8053bd63c3930b331", null ],
     [ "operator=", "classk4a_1_1device.html#aed3433182911420149e64721764df383", null ],
     [ "set_color_control", "classk4a_1_1device_af257d6c8181222823c7cfbdf57e032d7.html#af257d6c8181222823c7cfbdf57e032d7", null ],
-    [ "start_cameras", "classk4a_1_1device_ab400fa1eaca5f538027434cce985ed89.html#ab400fa1eaca5f538027434cce985ed89", null ],
+    [ "start_cameras", "classk4a_1_1device_a52c94d759b88a19421f9fce558c44c7b.html#a52c94d759b88a19421f9fce558c44c7b", null ],
     [ "start_imu", "classk4a_1_1device_abc8bb828de9b48b10fefa5ca6b8482c7.html#abc8bb828de9b48b10fefa5ca6b8482c7", null ],
     [ "stop_cameras", "classk4a_1_1device_a54390cae2a759ad9e36f47a30c223fd5.html#a54390cae2a759ad9e36f47a30c223fd5", null ],
     [ "stop_imu", "classk4a_1_1device_a18f23e91f38643520228d784435938e5.html#a18f23e91f38643520228d784435938e5", null ]
