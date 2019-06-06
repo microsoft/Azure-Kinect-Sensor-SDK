@@ -347,7 +347,11 @@ static k4a_result_t transformation_allocate_xy_tables(const k4a_calibration_t *c
         return K4A_RESULT_FAILED;
     }
 
-    *buffer = malloc(xy_tables_data_size * sizeof(float));
+#ifdef _MSC_VER
+    *buffer = _aligned_malloc(xy_tables_data_size * sizeof(float), 16);
+#else
+    *buffer = aligned_alloc(16, xy_tables_data_size * sizeof(float));
+#endif
 
     if (K4A_BUFFER_RESULT_SUCCEEDED !=
         TRACE_BUFFER_CALL(transformation_init_xy_tables(calibration, camera, *buffer, &xy_tables_data_size, xy_tables)))
@@ -439,11 +443,19 @@ void transformation_destroy(k4a_transformation_t transformation_handle)
 
     if (transformation_context->memory_depth_camera_xy_tables != 0)
     {
+#ifdef _MSC_VER
+        _aligned_free(transformation_context->memory_depth_camera_xy_tables);
+#else
         free(transformation_context->memory_depth_camera_xy_tables);
+#endif
     }
     if (transformation_context->memory_color_camera_xy_tables != 0)
     {
+#ifdef _MSC_VER
+        _aligned_free(transformation_context->memory_color_camera_xy_tables);
+#else
         free(transformation_context->memory_color_camera_xy_tables);
+#endif
     }
     if (transformation_context->tewrapper)
     {
