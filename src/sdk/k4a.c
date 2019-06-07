@@ -522,7 +522,7 @@ void k4a_image_release(k4a_image_t image_handle)
     image_dec_ref(image_handle);
 }
 
-static k4a_result_t validate_configuration(k4a_context_t *device, k4a_device_configuration_t *config)
+static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_device_configuration_t *config)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device == NULL);
@@ -686,7 +686,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, k4a_device_con
     return result;
 }
 
-k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_configuration_t *config)
+k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, const k4a_device_configuration_t *config)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
