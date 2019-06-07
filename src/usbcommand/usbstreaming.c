@@ -111,7 +111,8 @@ void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *bulk_transfer)
         }
         else
         {
-            if (bulk_transfer->status != LIBUSB_TRANSFER_CANCELLED)
+            if ((bulk_transfer->status != LIBUSB_TRANSFER_CANCELLED) &&
+                (bulk_transfer->status != LIBUSB_TRANSFER_COMPLETED))
             {
                 LOG_ERROR("LibUSB transfer status of %08X unexpected", bulk_transfer->status);
             }
