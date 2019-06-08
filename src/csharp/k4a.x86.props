@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <K4aGeneratorSourcesDirectory>D:/a/1/b/src</K4aGeneratorSourcesDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <K4aBinaryDirectory>D:/a/1/b/bin</K4aBinaryDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <K4aBinaryDirectory>D:/a/1/b/bin</K4aBinaryDirectory>
+  </PropertyGroup>
+</Project>
