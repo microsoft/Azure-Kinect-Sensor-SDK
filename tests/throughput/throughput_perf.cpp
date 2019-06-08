@@ -324,7 +324,7 @@ TEST_P(throughput_perf, testTest)
             if (image)
             {
                 color = true;
-                ts = k4a_image_get_timestamp_usec(image);
+                ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts, adjusted_max_ts);
                 static_assert(sizeof(ts) == 8, "this should not be wrong");
                 printf(" Color TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_color_ts));
@@ -345,7 +345,7 @@ TEST_P(throughput_perf, testTest)
             if (image)
             {
                 depth = true;
-                ts = k4a_image_get_timestamp_usec(image);
+                ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
                 printf(" | Ir16  TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
 
@@ -364,7 +364,7 @@ TEST_P(throughput_perf, testTest)
             image = k4a_capture_get_depth_image(capture);
             if (image)
             {
-                ts = k4a_image_get_timestamp_usec(image);
+                ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
                 printf(" | Depth16 TS:%6lld[%4lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
 

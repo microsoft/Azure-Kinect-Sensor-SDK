@@ -17,3 +17,27 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/version.rc
     @ONLY
     )
+
+# Setup install
+include(GNUInstallDirs)
+
+install(
+    TARGETS
+        k4arecorder
+    RUNTIME DESTINATION
+        ${CMAKE_INSTALL_BINDIR}
+    COMPONENT
+        tools
+)
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    install(
+        FILES
+            $<TARGET_PDB_FILE:k4arecorder>
+        DESTINATION
+            ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            tools
+        OPTIONAL
+    )
+endif()

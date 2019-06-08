@@ -15,6 +15,13 @@
 extern "C" {
 #endif
 
+/**
+ *
+ * \addtogroup Functions
+ *
+ * @{
+ */
+
 /** Opens an existing recording file for reading.
  *
  * \param path
@@ -449,6 +456,10 @@ K4ARECORD_EXPORT uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t pl
  * \endxmlonly
  */
 K4ARECORD_EXPORT void k4a_playback_close(k4a_playback_t playback_handle);
+
+/**
+ * @}
+ */
 
 #ifdef __cplusplus
 } // extern "C"

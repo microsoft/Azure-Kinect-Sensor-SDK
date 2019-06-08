@@ -51,8 +51,10 @@ add_library(k4a::k4arecord ALIAS k4arecord)
 set_target_properties(
     k4arecord
     PROPERTIES
-        VERSION ${K4A_VERSION}
-        SOVERSION ${K4A_VERSION})
+        VERSION
+            "${K4A_VERSION_MAJOR}.${K4A_VERSION_MINOR}.${K4A_VERSION_PATCH}"
+        SOVERSION
+            "${K4A_VERSION_MAJOR}.${K4A_VERSION_MINOR}")
 
 # Setup install
 include(GNUInstallDirs)
@@ -61,12 +63,22 @@ install(
         k4arecord
     EXPORT
         k4arecordTargets
-    LIBRARY DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION
-        ${CMAKE_INSTALL_BINDIR}
+    LIBRARY
+        DESTINATION
+            ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT
+            runtime
+        NAMELINK_SKIP
+    ARCHIVE
+        DESTINATION
+            ${CMAKE_INSTALL_LIBDIR}
+        COMPONENT
+            development
+    RUNTIME
+        DESTINATION
+            ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            runtime
 )
 
 include(CMakePackageConfigHelpers)
@@ -85,6 +97,8 @@ install(
         k4a::
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/k4arecord
+    COMPONENT
+        development
 )
 
 configure_file("${PROJECT_SOURCE_DIR}/cmake/k4arecordConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfig.cmake" COPYONLY)
@@ -95,6 +109,8 @@ install(
         "${CMAKE_CURRENT_BINARY_DIR}/k4arecordConfigVersion.cmake"
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/k4arecord
+    COMPONENT
+        development
 )
 
 install(
@@ -105,6 +121,8 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/include/k4arecord/k4arecord_export.h
     DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}/k4arecord
+    COMPONENT
+        development
 )
 
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -113,6 +131,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
             $<TARGET_PDB_FILE:k4arecord>
         DESTINATION
             ${CMAKE_INSTALL_BINDIR}
+        COMPONENT
+            runtime
         OPTIONAL
     )
 endif()

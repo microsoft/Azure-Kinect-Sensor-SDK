@@ -26,122 +26,120 @@
 /**
  *  Utility function for releasing the transfer resources
  *
- *  @param p_bulk_transfer
+ *  @param bulk_transfer
  *   Pointer to the resources allocated for doing the usb transfer
  *
  */
-static void usb_cmd_release_xfr(struct libusb_transfer *p_bulk_transfer)
+static void usb_cmd_release_xfr(struct libusb_transfer *bulk_transfer)
 {
-    usbcmd_context_t *usbcmd = (usbcmd_context_t *)(p_bulk_transfer->user_data);
+    usb_async_transfer_data_t *transfer = (usb_async_transfer_data_t *)(bulk_transfer->user_data);
+    usbcmd_context_t *usbcmd = transfer->usbcmd;
 
-    for (uint32_t i = 0; i < USB_CMD_MAX_XFR_COUNT; i++)
+    if (usbcmd->transfer_list[transfer->list_index] == transfer)
     {
-        if (usbcmd->p_bulk_transfer[i] == p_bulk_transfer)
-        {
-            usbcmd->p_bulk_transfer[i] = NULL;
-            // dereference allocator handle if one was allocated
-            if (usbcmd->image[i] != NULL)
-            {
-                image_dec_ref(usbcmd->image[i]);
-                usbcmd->image[i] = NULL;
-            }
-
-            break;
-        }
+        usbcmd->transfer_list[transfer->list_index] = NULL;
+    }
+    if (transfer->image)
+    {
+        image_dec_ref(transfer->image);
+        transfer->image = NULL;
     }
 
     // free the allocated resources
-    libusb_free_transfer(p_bulk_transfer);
+    libusb_free_transfer(bulk_transfer);
+    free(transfer);
 }
+
 /**
  *  Function for handling the callback from the libusb library as a result of a transfer request
  *
- *  @param p_bulk_transfer
+ *  @param bulk_transfer
  *   Pointer to the resources allocated for doing the usb transfer
  *
  */
-void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer)
+void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *bulk_transfer)
 {
-    usbcmd_context_t *usbcmd = (usbcmd_context_t *)(p_bulk_transfer->user_data);
+    usb_async_transfer_data_t *transfer = (usb_async_transfer_data_t *)(bulk_transfer->user_data);
+    usbcmd_context_t *usbcmd = transfer->usbcmd;
     k4a_result_t result = K4A_RESULT_FAILED;
-    uint8_t image_index = 0;
 
-    // Get index to allocated handle
-    for (image_index = 0; image_index < USB_CMD_MAX_XFR_COUNT; image_index++)
+    result = image_apply_system_timestamp(transfer->image);
+    if (K4A_SUCCEEDED(result))
     {
-        if (usbcmd->p_bulk_transfer[image_index] == p_bulk_transfer)
+        if (((bulk_transfer->status == LIBUSB_TRANSFER_COMPLETED) ||
+             bulk_transfer->status == LIBUSB_TRANSFER_TIMED_OUT) &&
+            (usbcmd->stream_going))
         {
-            break;
-        }
-    }
+            // if callback provided, callback with associated information
+            if ((bulk_transfer->status == LIBUSB_TRANSFER_COMPLETED) && (usbcmd->callback != NULL))
+            {
+                image_set_size(transfer->image, (size_t)bulk_transfer->actual_length);
+                usbcmd->callback(K4A_RESULT_SUCCEEDED, transfer->image, usbcmd->stream_context);
+            }
+            else
+            {
+                LOG_WARNING("USB timeout on streaming endpoint for %s",
+                            usbcmd->interface == USB_CMD_DEPTH_INTERFACE ? "depth" : "imu");
+            }
 
-    assert(image_index < USB_CMD_MAX_XFR_COUNT);
+            // We guarantee the capture is valid during the callback if someone wants it to survive longer then they
+            // need to add a ref
+            image_dec_ref(transfer->image);
+            transfer->image = NULL;
 
-    if (((p_bulk_transfer->status == LIBUSB_TRANSFER_COMPLETED) ||
-         p_bulk_transfer->status == LIBUSB_TRANSFER_TIMED_OUT) &&
-        (usbcmd->stream_going) && (image_index < USB_CMD_MAX_XFR_COUNT))
-    {
-        // if callback provided, callback with associated information
-        if ((p_bulk_transfer->status == LIBUSB_TRANSFER_COMPLETED) && (usbcmd->callback != NULL))
-        {
-            image_set_size(usbcmd->image[image_index], (size_t)p_bulk_transfer->actual_length);
-            usbcmd->callback(K4A_RESULT_SUCCEEDED, usbcmd->image[image_index], usbcmd->stream_context);
+            // allocate next buffer and re-use transfer
+            result = TRACE_CALL(image_create_empty_internal(usbcmd->source, usbcmd->stream_size, &transfer->image));
+            if (K4A_SUCCEEDED(result))
+            {
+                int err = LIBUSB_ERROR_OTHER;
+                libusb_fill_bulk_transfer(bulk_transfer,
+                                          usbcmd->libusb,
+                                          usbcmd->stream_endpoint,
+                                          image_get_buffer(transfer->image),
+                                          (int)usbcmd->stream_size,
+                                          usb_cmd_libusb_cb,
+                                          transfer,
+                                          USB_CMD_MAX_WAIT_TIME);
+                if ((err = libusb_submit_transfer(bulk_transfer)) != LIBUSB_SUCCESS)
+                {
+                    result = K4A_RESULT_FAILED;
+                    LOG_ERROR("Error calling libusb_submit_transfer for tx, result:%s", libusb_error_name(err));
+                    image_dec_ref(transfer->image);
+                    transfer->image = NULL;
+                }
+            }
         }
         else
         {
-            LOG_WARNING("USB timeout on streaming endpoint for %s",
-                        usbcmd->interface == USB_CMD_DEPTH_INTERFACE ? "depth" : "imu");
-        }
-
-        // We guarantee the capture is valid during the callback if someone wants it to survive longer then they
-        // need to add a ref
-        image_dec_ref(usbcmd->image[image_index]);
-        usbcmd->image[image_index] = NULL;
-
-        // allocate next buffer and re-use transfer
-        result = TRACE_CALL(
-            image_create_empty_internal(usbcmd->source, usbcmd->stream_size, &usbcmd->image[image_index]));
-        if (K4A_SUCCEEDED(result))
-        {
-            int err = LIBUSB_ERROR_OTHER;
-            libusb_fill_bulk_transfer(p_bulk_transfer,
-                                      usbcmd->libusb,
-                                      usbcmd->stream_endpoint,
-                                      image_get_buffer(usbcmd->image[image_index]),
-                                      (int)usbcmd->stream_size,
-                                      usb_cmd_libusb_cb,
-                                      usbcmd,
-                                      USB_CMD_MAX_WAIT_TIME);
-            if ((err = libusb_submit_transfer(p_bulk_transfer)) != LIBUSB_SUCCESS)
+            if (bulk_transfer->status != LIBUSB_TRANSFER_CANCELLED)
             {
-                result = K4A_RESULT_FAILED;
-                LOG_ERROR("Error calling libusb_submit_transfer for tx, result:%s", libusb_error_name(err));
-                image_dec_ref(usbcmd->image[image_index]);
-                usbcmd->image[image_index] = NULL;
+                LOG_ERROR("LibUSB transfer status of %08X unexpected", bulk_transfer->status);
             }
+            // Shutdown condition or an error happened.
+            result = K4A_RESULT_FAILED;
         }
     }
     if (K4A_FAILED(result))
     {
-        if (usbcmd->stream_going && (p_bulk_transfer->status != LIBUSB_TRANSFER_CANCELLED) &&
-            (p_bulk_transfer->status != LIBUSB_TRANSFER_OVERFLOW))
+        if (usbcmd->stream_going && (bulk_transfer->status != LIBUSB_TRANSFER_CANCELLED) &&
+            (bulk_transfer->status != LIBUSB_TRANSFER_OVERFLOW))
         {
             // Note: The overflow happens when the thread tries to submit the next transfer and the kernel doesn't
             // have the space for it. This is where the adaptive detection mechanism takes place. The adaptive
             // method submits until it gets an error from the submit call. The error produces the libusb_transfer_
             // overflow error which shows up in the callback. It's ignored since it is expected behavior during
             // the submission process and there are other trace messages that record the event.
-            LOG_ERROR("Error LIBUSB transfer failed, result:%s", libusb_error_name((int)p_bulk_transfer->status));
+            LOG_ERROR("Error LIBUSB transfer failed, result:%s", libusb_error_name((int)bulk_transfer->status));
 
             // check if the error state can be propagated
-            if ((image_index < USB_CMD_MAX_XFR_COUNT) && (usbcmd->callback != NULL))
+            if (usbcmd->callback != NULL)
             {
-                image_set_size(usbcmd->image[image_index], (size_t)0);
-                usbcmd->callback(K4A_RESULT_FAILED, usbcmd->image[image_index], usbcmd->stream_context);
+                image_set_size(transfer->image, (size_t)0);
+                usbcmd->callback(K4A_RESULT_FAILED, transfer->image, usbcmd->stream_context);
             }
         }
         // release resource for phy related changes or transfer stopped
-        usb_cmd_release_xfr(p_bulk_transfer);
+        usb_cmd_release_xfr(bulk_transfer);
     }
 }
 
@@ -185,57 +183,74 @@ static int usb_cmd_lib_usb_thread(void *var)
         // set up the transfers.  Limit the overall amount of resources to a predefined amount
         for (uint32_t i = 0; (i < USB_CMD_MAX_XFR_COUNT) && (xfer_pool < max_xfr_pool); i++)
         {
-            xfer_pool += usbcmd->stream_size;
-            usbcmd->p_bulk_transfer[i] = libusb_alloc_transfer(0);
-            if (usbcmd->p_bulk_transfer[i] == NULL)
+            usb_async_transfer_data_t *transfer;
+            transfer = calloc(sizeof(usb_async_transfer_data_t), sizeof(int));
+            result = K4A_RESULT_FROM_BOOL(transfer != NULL);
+
+            if (K4A_SUCCEEDED(result))
             {
-                LOG_ERROR("libusb transfer could not be allocated", 0);
-                result = K4A_RESULT_FAILED;
-                break;
+                xfer_pool += usbcmd->stream_size;
+                transfer->usbcmd = usbcmd;
+                transfer->list_index = i;
+                usbcmd->transfer_list[i] = transfer;
+                transfer->bulk_transfer = libusb_alloc_transfer(0);
+                result = K4A_RESULT_FROM_BOOL(transfer->bulk_transfer != NULL);
             }
 
-            result = TRACE_CALL(image_create_empty_internal(usbcmd->source, usbcmd->stream_size, &usbcmd->image[i]));
+            if (K4A_SUCCEEDED(result))
+            {
+                result = TRACE_CALL(image_create_empty_internal(usbcmd->source, usbcmd->stream_size, &transfer->image));
+            }
+
+            if (K4A_SUCCEEDED(result))
+            {
+
+                libusb_fill_bulk_transfer(transfer->bulk_transfer,
+                                          usbcmd->libusb,
+                                          usbcmd->stream_endpoint,
+                                          image_get_buffer(transfer->image),
+                                          (int)usbcmd->stream_size,
+                                          usb_cmd_libusb_cb,
+                                          transfer,
+                                          USB_CMD_MAX_WAIT_TIME);
+
+                if ((err = libusb_submit_transfer(transfer->bulk_transfer)) != LIBUSB_SUCCESS)
+                {
+                    if (i == 0)
+                    {
+                        // Could not even submit one.  This is an error
+                        LOG_ERROR("No libusb transfers could not be submitted, error:%s", libusb_error_name(err));
+                        result = K4A_RESULT_FAILED;
+                    }
+                    else
+                    {
+                        // Could not allocate a transfer within the predefined amount.
+                        // This could indicate other resource are competing and the allocation
+                        // pool needs to be adjusted
+                        LOG_WARNING(
+                            "Less than optimal %d libusb transfers submitted. Please evaluate available resources",
+                            i + 1);
+                    }
+                }
+            }
 
             if (K4A_FAILED(result))
             {
-                LOG_ERROR("stream buffer could not be allocated", 0);
-                result = K4A_RESULT_FAILED;
-                break;
-            }
-
-            libusb_fill_bulk_transfer(usbcmd->p_bulk_transfer[i],
-                                      usbcmd->libusb,
-                                      usbcmd->stream_endpoint,
-                                      image_get_buffer(usbcmd->image[i]),
-                                      (int)usbcmd->stream_size,
-                                      usb_cmd_libusb_cb,
-                                      usbcmd,
-                                      USB_CMD_MAX_WAIT_TIME);
-
-            if ((err = libusb_submit_transfer(usbcmd->p_bulk_transfer[i])) != LIBUSB_SUCCESS)
-            {
-                if (i == 0)
+                if (transfer)
                 {
-                    // Could not even submit one.  This is an error
-                    LOG_ERROR("No libusb transfers could not be submitted, error:%s", libusb_error_name(err));
-                    result = K4A_RESULT_FAILED;
-                }
-                else
-                {
-                    // Could not allocate a transfer within the predefined amount.
-                    // This could indicate other resource are competing and the allocation
-                    // pool needs to be adjusted
-                    LOG_WARNING("Less than optimal %d libusb transfers submitted. Please evaluate available resources",
-                                i + 1);
+                    if (transfer->image)
+                    {
+                        image_dec_ref(transfer->image);
+                    }
+                    if (transfer->bulk_transfer)
+                    {
+                        libusb_free_transfer(transfer->bulk_transfer);
+                    }
+                    free(transfer);
                 }
 
-                image_dec_ref(usbcmd->image[i]);
-                usbcmd->image[i] = NULL;
-
-                // dealloc transfer
-                libusb_free_transfer(usbcmd->p_bulk_transfer[i]);
-                usbcmd->p_bulk_transfer[i] = NULL;
-                break;
+                usbcmd->transfer_list[i] = NULL;
+                break; // exit loop
             }
         }
     }
@@ -257,10 +272,10 @@ static int usb_cmd_lib_usb_thread(void *var)
     // cancel everything just in case of errors
     for (uint32_t i = 0; i < USB_CMD_MAX_XFR_COUNT; i++)
     {
-        if (usbcmd->p_bulk_transfer[i] != NULL)
+        if (usbcmd->transfer_list[i] != NULL)
         {
             // Cancel any outstanding transfer
-            libusb_cancel_transfer(usbcmd->p_bulk_transfer[i]);
+            libusb_cancel_transfer(usbcmd->transfer_list[i]->bulk_transfer);
             // Service the library after  cancellation
             if ((err = libusb_handle_events_timeout_completed(p_ctx, &tv, NULL)) < 0)
             {

@@ -316,8 +316,9 @@ static int depth_engine_thread(void *param)
             {
                 cleanup_capture_byte_ptr = false; // buffer is now owned by image;
                 INC_REF_VAR(shared_image_context->ref);
-                image_set_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(outputCaptureInfo.center_of_exposure_in_ticks));
-
+                image_set_device_timestamp_usec(image,
+                                                K4A_90K_HZ_TICK_TO_USEC(outputCaptureInfo.center_of_exposure_in_ticks));
+                image_set_system_timestamp_nsec(image, image_get_system_timestamp_nsec(image_raw));
                 capture_set_depth_image(capture, image);
                 image_dec_ref(image);
             }
@@ -346,8 +347,9 @@ static int depth_engine_thread(void *param)
             {
                 cleanup_capture_byte_ptr = false; // buffer is now owned by image;
                 INC_REF_VAR(shared_image_context->ref);
-                image_set_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(outputCaptureInfo.center_of_exposure_in_ticks));
-
+                image_set_device_timestamp_usec(image,
+                                                K4A_90K_HZ_TICK_TO_USEC(outputCaptureInfo.center_of_exposure_in_ticks));
+                image_set_system_timestamp_nsec(image, image_get_system_timestamp_nsec(image_raw));
                 capture_set_ir_image(capture, image);
                 image_dec_ref(image);
             }

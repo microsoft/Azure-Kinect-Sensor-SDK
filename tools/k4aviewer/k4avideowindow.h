@@ -155,7 +155,7 @@ private:
             ImGui::Text("Average frame rate: %.2f fps", m_imageSource->GetFrameRate());
         }
 
-        ImGui::Text("Timestamp: %llu", static_cast<long long int>(image.get_timestamp().count()));
+        ImGui::Text("Timestamp: %llu", static_cast<long long int>(image.get_device_timestamp().count()));
     }
 
     void RenderHoveredDepthPixelValue(const k4a::image &depthImage, const ImVec2 hoveredPixel, const char *units)

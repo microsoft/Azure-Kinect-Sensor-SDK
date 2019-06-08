@@ -96,6 +96,10 @@ TEST_P(color_functional_test, color_streaming_test)
     tickcounter_ms_t delta_ms;
     uint32_t error_tolerance;
 
+    uint64_t ts_d = 0;
+    uint64_t ts_s = 0;
+    bool ts_init = false;
+
     stream_count = STREAM_RUN_TIME_SEC * as.expected_fps;
 
     // Configure the stream
@@ -159,6 +163,28 @@ TEST_P(color_functional_test, color_streaming_test)
             break;
         default:
             break;
+        }
+
+        if (ts_init)
+        {
+            // Ensure the device and system time stamps are increasing, image might get dropped, which is ok for this
+            // portion of the test.
+            uint64_t ts;
+            ts = k4a_image_get_device_timestamp_usec(image);
+            ASSERT_GT(ts, ts_d); // We don't test upper max, because we expect the next sample to be larger, this also
+                                 // allows frames to be dropped and not error out.
+            ts_d = ts;
+
+            ts = k4a_image_get_system_timestamp_nsec(image);
+            ASSERT_GT(ts, ts_s); // We don't test upper max, because we expect the next sample to be larger, this also
+                                 // allows frames to be dropped and not error out.
+            ts_s = ts;
+        }
+        else
+        {
+            ts_d = k4a_image_get_device_timestamp_usec(image);
+            ts_s = k4a_image_get_system_timestamp_nsec(image);
+            ts_init = true;
         }
 
         k4a_image_release(image);
@@ -511,6 +537,12 @@ TEST_F(color_functional_test, colorExposureTest)
     k4a_color_control_mode_t control_mode;
     int32_t value;
     uint64_t exposure_time;
+    int32_t min_value;
+    int32_t max_value;
+    int32_t step_value;
+    int32_t default_value;
+    bool supports_auto;
+    k4a_color_control_mode_t default_mode = K4A_COLOR_CONTROL_MODE_AUTO;
 
     // Create two valid configs that are expected to yield different-sized color payloads
     //
@@ -546,12 +578,31 @@ TEST_F(color_functional_test, colorExposureTest)
     k4a_image_release(image);
     k4a_capture_release(capture);
 
-    // Set exposure time to auto
+    // Reset exposure time to default
+    EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+              k4a_device_get_color_control_capabilities(m_device,
+                                                        K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                                        &supports_auto,
+                                                        &min_value,
+                                                        &max_value,
+                                                        &step_value,
+                                                        &default_value,
+                                                        &default_mode));
     EXPECT_EQ(K4A_RESULT_SUCCEEDED,
               k4a_device_set_color_control(m_device,
                                            K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-                                           K4A_COLOR_CONTROL_MODE_AUTO,
-                                           0));
+                                           K4A_COLOR_CONTROL_MODE_MANUAL,
+                                           default_value));
+
+    // If default mode is not manual, recover color control mode as well
+    if (default_mode != K4A_COLOR_CONTROL_MODE_MANUAL)
+    {
+        EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               default_mode,
+                                               default_value));
+    }
 
     k4a_device_stop_cameras(m_device);
 }
@@ -559,10 +610,8 @@ TEST_F(color_functional_test, colorExposureTest)
 struct color_control_parameter
 {
     k4a_color_control_command_t command;
-    bool test_auto;
-    int32_t min;
-    int32_t max;
-    int32_t step;
+    k4a_color_control_mode_t default_mode;
+    int32_t default_value;
 
     friend std::ostream &operator<<(std::ostream &os, const color_control_parameter &obj)
     {
@@ -617,19 +666,50 @@ public:
 TEST_P(color_control_test, control_test)
 {
     auto as = GetParam();
-    k4a_color_control_mode_t initial_mode = K4A_COLOR_CONTROL_MODE_AUTO;
     k4a_color_control_mode_t control_mode = K4A_COLOR_CONTROL_MODE_AUTO;
-    int32_t initial_value = 0;
+    int32_t min_value;
+    int32_t max_value;
+    int32_t step_value;
+    int32_t default_value;
+    k4a_color_control_mode_t default_mode = K4A_COLOR_CONTROL_MODE_AUTO;
+    int32_t current_value;
+    k4a_color_control_mode_t current_mode = K4A_COLOR_CONTROL_MODE_MANUAL;
+    bool supports_auto;
     int32_t value = 0;
 
     // Invalid device handle test
     EXPECT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_control(nullptr, as.command, &control_mode, &value));
     EXPECT_EQ(K4A_RESULT_FAILED, k4a_device_set_color_control(nullptr, as.command, control_mode, value));
 
-    // Read initial value
-    EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, as.command, &initial_mode, &initial_value));
+    // Read control capabilities
+    EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+              k4a_device_get_color_control_capabilities(m_device,
+                                                        as.command,
+                                                        &supports_auto,
+                                                        &min_value,
+                                                        &max_value,
+                                                        &step_value,
+                                                        &default_value,
+                                                        &default_mode));
 
-    if (as.test_auto)
+    EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, as.command, &current_mode, &current_value));
+
+    // Verify default values
+    EXPECT_EQ(default_mode, as.default_mode);
+    EXPECT_EQ(default_value, as.default_value);
+
+    if (current_mode != default_mode)
+    {
+        std::cout << "Current mode (" << current_mode << ") is not equal to default mode (" << default_mode
+                  << "), please reset device before running test.\n";
+    }
+    if (current_value != default_value)
+    {
+        std::cout << "Current value (" << current_value << ") is not equal to default value (" << default_value
+                  << "), please reset device before running test.\n";
+    }
+
+    if (supports_auto)
     {
         EXPECT_EQ(K4A_RESULT_SUCCEEDED,
                   k4a_device_set_color_control(m_device, as.command, K4A_COLOR_CONTROL_MODE_AUTO, 0));
@@ -642,38 +722,67 @@ TEST_P(color_control_test, control_test)
 
     if (as.command == K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE)
     {
+#ifdef _WIN32
+        // Windows only support exposure time value as log base 2 seconds.
+        // Convert micro sec unit of min, max and step to Windows based values and test
+        min_value = (int32_t)log2f((float)min_value * 0.000001f);
+        max_value = (int32_t)log2f((float)max_value * 0.000001f);
+        step_value = 1;
+
         // Test valid range
-        for (int32_t testValue = as.min; testValue <= as.max; testValue += as.step)
+        for (int32_t testValue = min_value; testValue <= max_value; testValue += step_value)
         {
             // Set test value
             EXPECT_EQ(K4A_RESULT_SUCCEEDED,
                       k4a_device_set_color_control(m_device,
                                                    as.command,
                                                    K4A_COLOR_CONTROL_MODE_MANUAL,
-                                                   (int32_t)(exp2f((float)testValue) * 1000000.0f)));
+                                                   (int32_t)(exp2f((float)testValue) * 1000000.0f))); // Convert Windows
+                                                                                                      // based parameter
+                                                                                                      // to micro sec.
 
             // Get current value
             EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, as.command, &control_mode, &value));
 
             EXPECT_EQ(control_mode, K4A_COLOR_CONTROL_MODE_MANUAL);
-#ifdef _WIN32
+            // Compare applied value in micro sec unit.
             EXPECT_EQ(value, (int32_t)(exp2f((float)testValue) * 1000000.0f));
-#else
-            // LibUVC exposure time camera control has 0.0001 sec precision
-            EXPECT_EQ(value, (int32_t)(exp2f((float)testValue) * 10000.0f) * 100);
-#endif
         }
+#else
+        // Test valid range
+        step_value *= 3; // skip test to do not too many test cases
+        for (int32_t testValue = min_value; testValue <= max_value; testValue += step_value)
+        {
+            // Set test value
+            EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+                      k4a_device_set_color_control(m_device, as.command, K4A_COLOR_CONTROL_MODE_MANUAL, testValue));
+
+            // Get current value
+            EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, as.command, &control_mode, &value));
+
+            EXPECT_EQ(control_mode, K4A_COLOR_CONTROL_MODE_MANUAL);
+
+            // LibUVC exposure time camera control has 0.0001 sec precision
+            EXPECT_EQ(value, testValue);
+        }
+#endif
     }
     else
     {
         // Test invalid range
         EXPECT_EQ(K4A_RESULT_FAILED,
-                  k4a_device_set_color_control(m_device, as.command, K4A_COLOR_CONTROL_MODE_MANUAL, as.min - as.step));
+                  k4a_device_set_color_control(m_device,
+                                               as.command,
+                                               K4A_COLOR_CONTROL_MODE_MANUAL,
+                                               min_value - step_value));
         EXPECT_EQ(K4A_RESULT_FAILED,
-                  k4a_device_set_color_control(m_device, as.command, K4A_COLOR_CONTROL_MODE_MANUAL, as.max + as.step));
+                  k4a_device_set_color_control(m_device,
+                                               as.command,
+                                               K4A_COLOR_CONTROL_MODE_MANUAL,
+                                               max_value + step_value));
 
         // Test valid range
-        for (int32_t testValue = as.min; testValue <= as.max; testValue += as.step)
+        for (int32_t testValue = min_value; testValue <= max_value; testValue += step_value)
         {
             // Set test value
             EXPECT_EQ(K4A_RESULT_SUCCEEDED,
@@ -688,39 +797,38 @@ TEST_P(color_control_test, control_test)
     }
 
     // Recover to initial value
-    EXPECT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, as.command, initial_mode, initial_value));
+    EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+              k4a_device_set_color_control(m_device, as.command, K4A_COLOR_CONTROL_MODE_MANUAL, default_value));
+
+    // If default mode is not manual, recover color control mode as well
+    if (default_mode != K4A_COLOR_CONTROL_MODE_MANUAL)
+    {
+        EXPECT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device, as.command, default_mode, default_value));
+    }
 }
 
-// Windows internally handles some values different than the underlying UVC layer.
-// This means that the minimum supported value is different between the two platforms.
 #ifdef _WIN32
-static const int32_t EXPOSURE_TIME_ABSOLUTE_CONTROL_MAXIMUM_VALUE = 1;
-static const int32_t POWERLINE_FREQUENCY_CONTROL_MINIMUM_VALUE = 1;
+#define EXPOSURE_TIME_ABSOLUTE_CONTROL_DEFAULT_VALUE 15625
 #else
-static const int32_t EXPOSURE_TIME_ABSOLUTE_CONTROL_MAXIMUM_VALUE = 0;
-static const int32_t POWERLINE_FREQUENCY_CONTROL_MINIMUM_VALUE = 0;
+#define EXPOSURE_TIME_ABSOLUTE_CONTROL_DEFAULT_VALUE 12700
 #endif
 
 INSTANTIATE_TEST_CASE_P(
     color_control,
     color_control_test,
-    ::testing::Values(color_control_parameter{ K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-                                               true,
-                                               -11,
-                                               EXPOSURE_TIME_ABSOLUTE_CONTROL_MAXIMUM_VALUE,
-                                               1 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_BRIGHTNESS, false, 0, 255, 1 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_CONTRAST, false, 0, 10, 1 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_SATURATION, false, 0, 63, 1 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_SHARPNESS, false, 0, 4, 1 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_WHITEBALANCE, true, 2500, 12500, 10 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, false, 0, 1, 1 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_GAIN, false, 0, 255, 1 },
-                      color_control_parameter{ K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
-                                               false,
-                                               POWERLINE_FREQUENCY_CONTROL_MINIMUM_VALUE,
-                                               2,
-                                               1 }));
+    ::testing::Values(
+        color_control_parameter{ K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                 K4A_COLOR_CONTROL_MODE_AUTO,
+                                 EXPOSURE_TIME_ABSOLUTE_CONTROL_DEFAULT_VALUE },
+        color_control_parameter{ K4A_COLOR_CONTROL_BRIGHTNESS, K4A_COLOR_CONTROL_MODE_MANUAL, 128 },
+        color_control_parameter{ K4A_COLOR_CONTROL_CONTRAST, K4A_COLOR_CONTROL_MODE_MANUAL, 5 },
+        color_control_parameter{ K4A_COLOR_CONTROL_SATURATION, K4A_COLOR_CONTROL_MODE_MANUAL, 32 },
+        color_control_parameter{ K4A_COLOR_CONTROL_SHARPNESS, K4A_COLOR_CONTROL_MODE_MANUAL, 2 },
+        color_control_parameter{ K4A_COLOR_CONTROL_WHITEBALANCE, K4A_COLOR_CONTROL_MODE_AUTO, 4500 },
+        color_control_parameter{ K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION, K4A_COLOR_CONTROL_MODE_MANUAL, 0 },
+        color_control_parameter{ K4A_COLOR_CONTROL_GAIN, K4A_COLOR_CONTROL_MODE_MANUAL, 0 },
+        color_control_parameter{ K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, 2 }));
 
 int main(int argc, char **argv)
 {

@@ -16,5 +16,9 @@ target_link_libraries(k4a_transformation PUBLIC
     k4ainternal::tewrapper
     )
 
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    target_compile_options(k4a_transformation PRIVATE "-msse4.1")
+endif()
+
 # Define alias for other targets to link against
 add_library(k4ainternal::transformation ALIAS k4a_transformation)

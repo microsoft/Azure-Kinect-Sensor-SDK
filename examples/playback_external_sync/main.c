@@ -26,7 +26,7 @@ static uint64_t first_capture_timestamp(k4a_capture_t capture)
     {
         if (images[i] != NULL)
         {
-            uint64_t timestamp = k4a_image_get_timestamp_usec(images[i]);
+            uint64_t timestamp = k4a_image_get_device_timestamp_usec(images[i]);
             if (timestamp < min_timestamp)
             {
                 min_timestamp = timestamp;
@@ -51,7 +51,7 @@ static void print_capture_info(recording_t *file)
     {
         if (images[i] != NULL)
         {
-            uint64_t timestamp = k4a_image_get_timestamp_usec(images[i]) +
+            uint64_t timestamp = k4a_image_get_device_timestamp_usec(images[i]) +
                                  (uint64_t)file->record_config.start_timestamp_offset_usec;
             printf("  %7ju usec", timestamp);
             k4a_image_release(images[i]);

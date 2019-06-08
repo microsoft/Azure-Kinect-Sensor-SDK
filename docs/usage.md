@@ -1,5 +1,34 @@
 # Using Azure Kinect SDK
 
+## Installation
+
+If you aren't making changes to the SDK itself, you should use the binary distribution. On Windows
+this is currently available as an installer. The binaries will soon be available in NuGet and Debian
+packages as well.
+
+Links to the latest downloads are on the main [README.md](../README.md#documentation-and-official-builds).
+
+The installer will put all the needed headers, binaries, and tools in the location you choose (by default this
+is `C:\Program Files\Azure Kinect SDK version\sdk`).
+
+If you want to build your own copy of the SDK, you can follow the instruction in [building](building.md) for how to build
+from source.
+
+## Using tools
+
+The installer comes with a pre-built viewer application (k4aviewer.exe) which can be used to verify the
+functionality of your device and explore its capabilities. The installer puts a link to this in your start
+menu as Azure Kinect Viewer. Other command line tools, such as the recorder and firmware update utilites, are
+available in the installer tools directory.
+
+## Including the SDK in your project
+
+If you are including the Azure Kinect SDK in a C or C++ project, update your project to link to **k4a.lib** and 
+add the incude path such that you can `#include <k4a/k4a.h>`. You also need to ensure that **k4a.dll** and **depthengine_1_0.dll** are in your path or in the same directory as your application.
+
+For recording and playback you will need to also reference **k4arecord.lib** and the headers in include/k4arecord, and have
+**k4arecord.dll** in your path.
+
 ## Dependencies
 
 The following dependencies are needed for the Azure Kinect SDK to run.
@@ -43,3 +72,8 @@ into this repo under scripts/99-k4a.rules. To do so:
 * Detach and reattach Azure Kinect devices if attached during this process.
 
 Once complete, the Azure Kinect camera is available without being root.
+
+## API Documentation
+
+See https://microsoft.github.io/Azure-Kinect-Sensor-SDK/ for the most recent API documentation, including documentation for the current
+development branch.

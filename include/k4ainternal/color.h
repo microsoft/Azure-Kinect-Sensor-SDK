@@ -118,6 +118,45 @@ void color_stop(color_t color_handle);
  */
 tickcounter_ms_t color_get_sensor_start_time_tick(const color_t color_handle);
 
+/** Gets the capabilities of the given color camera's control command setting.
+ *
+ * \param color_handle
+ * Handle to the color camera
+ *
+ * \param command
+ * The targeted color control command to read the the value for.
+ *
+ * \param supports_auto
+ * Location to store whether the color sensor's control support auto mode or not.
+ * true if it supports auto mode, otherwise false.
+ *
+ * \param min_value
+ * Location to store the color sensor's control minimum value of /p command.
+ *
+ * \param max_value
+ * Location to store the color sensor's control maximum value of /p command.
+ *
+ * \param step_value
+ * Location to store the color sensor's control step value of /p command.
+ *
+ * \param default_value
+ * Location to store the color sensor's control default value of /p command.
+ *
+ * \param default_mode
+ * Location to store the color sensor's control default mode of /p command.
+ *
+ * \return ::K4A_RESULT_FAILED if the value could not be read. ::K4A_RESULT_SUCCEEDED if successful. Details of the
+ * error can be read from the debug output
+ */
+k4a_result_t color_get_control_capabilities(const color_t color_handle,
+                                            const k4a_color_control_command_t command,
+                                            bool *supports_auto,
+                                            int32_t *min_value,
+                                            int32_t *max_value,
+                                            int32_t *step_value,
+                                            int32_t *default_value,
+                                            k4a_color_control_mode_t *default_mode);
+
 /** Gets the value of the given color camera's control command setting.
  *
  * \param color_handle
