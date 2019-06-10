@@ -247,7 +247,7 @@ TEST_P(throughput_perf, testTest)
                   k4a_device_set_color_control(m_device,
                                                K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                                                K4A_COLOR_CONTROL_MODE_MANUAL,
-                                               g_exposure_setting));
+                                               (int32_t)g_exposure_setting));
         printf("Manual Exposure: %d\n", g_exposure_setting);
     }
     else
