@@ -35,7 +35,10 @@ The latest stable binaries are available for download.
 
    Tag   | Download
 ---------|----------------
+  [v1.1.0](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.0) | [Azure Kinect SDK 1.1.0.msi](http://download.microsoft.com/download/E/B/D/EBDBB3C1-ED3F-4236-96D6-2BCB352F3710/Azure%20Kinect%20SDK%201.1.0.msi)
   [v1.0.2](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.0.2) | [Azure Kinect SDK 1.0.2.msi](http://download.microsoft.com/download/B/4/D/B4D26442-DDA5-40C2-9913-3B23AE84A806/Azure%20Kinect%20SDK%201.0.2.msi)
+
+Directly include the Sensor SDK in your project using [Nuget](https://www.nuget.org/packages/microsoft.azure.kinect.sensor/).
 
 Please see [usage](docs/usage.md) for info on how to use the SDK. [API documentation](https://microsoft.github.io/Azure-Kinect-Sensor-SDK/) is also available.
 
