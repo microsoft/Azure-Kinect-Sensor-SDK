@@ -77,8 +77,7 @@ properly.*
 
 ### Linux Dependencies
 
-Most of these dependencies should be available through the distribution's
-package manager.
+The following build tools are needed to build the SDK on Linux.
 
 * [CMake](https://cmake.org/download/). Add CMake to the PATH. Must be
   version 3.10 or higher. If your distribution has a version of CMake that is too old,
@@ -89,26 +88,20 @@ package manager.
 
 * gcc or clang (6.0.0)
 
-* pkgconfig
-
 * python3
 
 * doxygen (optional)
 
 * zip (needed for VS cross compiled builds)
 
-* libssl
+There are also a list of libraries that must be installed on your machine in
+order to build. Those libraries can be found in our CI script
+[bootstrap-ubuntu.sh](../scripts/bootstrap-ubuntu.sh).
 
-* uuid-dev
-
-* Depth Engine. The depth engine (DE) is a closed source binary shipped with the
-  SDK installer. The DE binary needs to be copied to the host system and added 
-  to the path. **NOTE** *This step is not need for building, but is required 
-  running the SDK*
-  
-If you are using Ubuntu, you can use our CI script
-[bootstrap-ubuntu.sh](../scripts/bootstrap-ubuntu.sh) to download and
-install all needed tools and libraries.
+Lastly, the depth engine is needed as well. The depth engine (DE) is a closed
+source binary shipped with the linux debian package. The DE binary needs to be
+copied to the host system and added to the loader path. **NOTE** *This step is
+not need for building, but is required running the SDK*
 
 ## Building
 
