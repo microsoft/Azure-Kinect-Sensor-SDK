@@ -76,7 +76,7 @@ It depends on your use case and the service that you are running. Check out aka.
 
 No sensors are detachable from the device.
 
-## Can more than one sensor be connected to a single PC?
+### Can more than one sensor be connected to a single PC?
 
 Yes, performance depends use case and PC configuration.
 
