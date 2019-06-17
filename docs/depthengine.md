@@ -23,5 +23,4 @@ frames from the Azure Kinect DK.
 
 ### Linux
 
-The depth engine binary is part of the libk4a<major>.<minor>-dev and libk4a<major>.<minor> 
-packages.
+The depth engine binary is part of the libk4a<major>.<minor> package.
