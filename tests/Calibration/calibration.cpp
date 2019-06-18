@@ -350,5 +350,5 @@ TEST(calibration_ut, validate_raw_data_api)
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }
