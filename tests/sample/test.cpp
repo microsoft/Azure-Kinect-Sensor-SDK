@@ -4,7 +4,7 @@
 #include <k4a/k4a.h>
 #include <gtest/gtest.h>
 
-TEST(k4a, example)
+TEST(k4a, sample)
 {
     k4a_device_t device = nullptr;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_open(K4A_DEVICE_DEFAULT, &device));
