@@ -56,13 +56,7 @@ For SDK feedback or to report a bug, please file a [GitHub Issue](https://github
 
 ## Q&A
 
-### What does it mean that it is DK? DK stands for Developer Kit and it is a combination of 4 different sensors?
-
- (1MP Time-of-Flight, depth camera, 7-microphone array, 12MP RGB camera, and IMU). This device is meant for developers not consumers. It is meant for use in an ambient temperature range of 10-25 degrees Celsius. Azure Kinect DK is not a replacement for Xbox Kinect.
-
-### Can I only use Azure Kinect DK with Azure?
-
-No. Azure Kinect DK was designed to make it easy for developers to work with Azure, but you can use it with or without any cloud provider.
+Welcome to the [Q&A](kinect-qa.md) corner!
 
 ## Join Our Developer Program
 
@@ -85,4 +79,3 @@ email to ensure we received your original message. Further information, includin
 ## License
 
 [MIT License](LICENSE)
-
