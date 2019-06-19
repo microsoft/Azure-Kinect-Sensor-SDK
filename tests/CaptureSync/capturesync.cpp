@@ -35,7 +35,7 @@
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }
 
 TEST(capturesync_ut, capturesync)
@@ -414,7 +414,7 @@ capturesync_push_single_capture(k4a_result_t status, capturesync_t sync, bool co
 
     if (K4A_SUCCEEDED(result))
     {
-        image_set_timestamp_usec(image, timestamp);
+        image_set_device_timestamp_usec(image, timestamp);
         if (color_capture)
         {
             capture_set_color_image(capture, image);
@@ -598,7 +598,7 @@ static void capturesync_validate_synchronization(capturesync_test_timing_t *test
                     *ts = 0;
                     if (image)
                     {
-                        *ts = image_get_timestamp_usec(image);
+                        *ts = image_get_device_timestamp_usec(image);
                         image_dec_ref(image);
                     }
                 }

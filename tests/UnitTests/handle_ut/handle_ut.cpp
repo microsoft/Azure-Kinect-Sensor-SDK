@@ -134,5 +134,5 @@ TEST(handle_ut, K4A_DECLARE_CONTEXT_in_shared_header)
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }

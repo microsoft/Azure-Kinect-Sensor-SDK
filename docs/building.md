@@ -1,5 +1,9 @@
 # Building and Dependencies
 
+This information is for how to build your own copy of the SDK binaries. Most users of 
+the Azure Kinect DK should not need to re-build the SDK, if you just need to use the SDK
+see [usage](usage.md) for more information.
+
 ## Support Configurations
 
 Compilers:

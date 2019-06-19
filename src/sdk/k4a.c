@@ -443,9 +443,21 @@ int k4a_image_get_stride_bytes(k4a_image_t image_handle)
 {
     return image_get_stride_bytes(image_handle);
 }
+
+// Deprecated
 uint64_t k4a_image_get_timestamp_usec(k4a_image_t image_handle)
 {
-    return image_get_timestamp_usec(image_handle);
+    return image_get_device_timestamp_usec(image_handle);
+}
+
+uint64_t k4a_image_get_device_timestamp_usec(k4a_image_t image_handle)
+{
+    return image_get_device_timestamp_usec(image_handle);
+}
+
+uint64_t k4a_image_get_system_timestamp_nsec(k4a_image_t image_handle)
+{
+    return image_get_system_timestamp_nsec(image_handle);
 }
 
 uint64_t k4a_image_get_exposure_usec(k4a_image_t image_handle)
@@ -463,13 +475,31 @@ uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle)
     return image_get_iso_speed(image_handle);
 }
 
+void k4a_image_set_device_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec)
+{
+    image_set_device_timestamp_usec(image_handle, timestamp_usec);
+}
+
+// Deprecated
 void k4a_image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec)
 {
-    image_set_timestamp_usec(image_handle, timestamp_usec);
+    image_set_device_timestamp_usec(image_handle, timestamp_usec);
 }
+
+void k4a_image_set_system_timestamp_nsec(k4a_image_t image_handle, uint64_t timestamp_nsec)
+{
+    image_set_system_timestamp_nsec(image_handle, timestamp_nsec);
+}
+
+// Deprecated
 void k4a_image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_usec)
 {
-    image_set_exposure_time_usec(image_handle, exposure_usec);
+    image_set_exposure_usec(image_handle, exposure_usec);
+}
+
+void k4a_image_set_exposure_usec(k4a_image_t image_handle, uint64_t exposure_usec)
+{
+    image_set_exposure_usec(image_handle, exposure_usec);
 }
 
 void k4a_image_set_white_balance(k4a_image_t image_handle, uint32_t white_balance)
@@ -492,7 +522,7 @@ void k4a_image_release(k4a_image_t image_handle)
     image_dec_ref(image_handle);
 }
 
-static k4a_result_t validate_configuration(k4a_context_t *device, k4a_device_configuration_t *config)
+static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_device_configuration_t *config)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device == NULL);
@@ -656,7 +686,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, k4a_device_con
     return result;
 }
 
-k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_configuration_t *config)
+k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, const k4a_device_configuration_t *config)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);

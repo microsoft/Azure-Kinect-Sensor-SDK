@@ -111,12 +111,15 @@ k4a_image_format_t image_get_format(k4a_image_t image_handle);
 int image_get_width_pixels(k4a_image_t image_handle);
 int image_get_height_pixels(k4a_image_t image_handle);
 int image_get_stride_bytes(k4a_image_t image_handle);
-uint64_t image_get_timestamp_usec(k4a_image_t image_handle);
+uint64_t image_get_device_timestamp_usec(k4a_image_t image_handle);
+uint64_t image_get_system_timestamp_nsec(k4a_image_t image_handle);
 uint64_t image_get_exposure_usec(k4a_image_t image_handle);
 uint32_t image_get_white_balance(k4a_image_t image_handle);
 uint32_t image_get_iso_speed(k4a_image_t image_handle);
-void image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
-void image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_time_usec);
+void image_set_device_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
+void image_set_system_timestamp_nsec(k4a_image_t image_handle, uint64_t timestamp_nsec);
+k4a_result_t image_apply_system_timestamp(k4a_image_t image_handle);
+void image_set_exposure_usec(k4a_image_t image_handle, uint64_t exposure_usec);
 void image_set_white_balance(k4a_image_t image_handle, uint32_t white_balance);
 void image_set_iso_speed(k4a_image_t image_handle, uint32_t iso_speed);
 

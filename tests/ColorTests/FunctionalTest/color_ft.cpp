@@ -96,6 +96,10 @@ TEST_P(color_functional_test, color_streaming_test)
     tickcounter_ms_t delta_ms;
     uint32_t error_tolerance;
 
+    uint64_t ts_d = 0;
+    uint64_t ts_s = 0;
+    bool ts_init = false;
+
     stream_count = STREAM_RUN_TIME_SEC * as.expected_fps;
 
     // Configure the stream
@@ -159,6 +163,28 @@ TEST_P(color_functional_test, color_streaming_test)
             break;
         default:
             break;
+        }
+
+        if (ts_init)
+        {
+            // Ensure the device and system time stamps are increasing, image might get dropped, which is ok for this
+            // portion of the test.
+            uint64_t ts;
+            ts = k4a_image_get_device_timestamp_usec(image);
+            ASSERT_GT(ts, ts_d); // We don't test upper max, because we expect the next sample to be larger, this also
+                                 // allows frames to be dropped and not error out.
+            ts_d = ts;
+
+            ts = k4a_image_get_system_timestamp_nsec(image);
+            ASSERT_GT(ts, ts_s); // We don't test upper max, because we expect the next sample to be larger, this also
+                                 // allows frames to be dropped and not error out.
+            ts_s = ts;
+        }
+        else
+        {
+            ts_d = k4a_image_get_device_timestamp_usec(image);
+            ts_s = k4a_image_get_system_timestamp_nsec(image);
+            ts_init = true;
         }
 
         k4a_image_release(image);
@@ -806,5 +832,5 @@ INSTANTIATE_TEST_CASE_P(
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }
