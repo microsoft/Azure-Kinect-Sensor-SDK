@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Numerics;
+using NUnit.Framework;
 using Microsoft.AzureKinect.Test.StubGenerator;
 using Microsoft.AzureKinect;
 
@@ -8,9 +9,9 @@ namespace Microsoft.AzureKinect.UnitTests
     public class StructureTests
     {
         [Test]
-        public void Float2()
+        public void Vector2()
         {
-            Float2 f = new Float2(1, 2.0f);
+            Vector2 f = new Vector2(1, 2.0f);
 
             Assert.AreEqual(1, f.X);
             Assert.AreEqual(2.0f, f.Y);
@@ -20,19 +21,19 @@ namespace Microsoft.AzureKinect.UnitTests
             f.Y = 4.0f;
             Assert.AreEqual(4.0f, f.Y);
 
-            Float2 f2 = new Float2(3.0f, 4.0f);
+            Vector2 f2 = new Vector2(3.0f, 4.0f);
 
             Assert.AreEqual(f, f2);
 
-            Float2 f3 = new Float2(3.0f, 5.0f);
+            Vector2 f3 = new Vector2(3.0f, 5.0f);
             Assert.AreNotEqual(f2, f3);
             
         }
 
         [Test]
-        public void Float3()
+        public void Vector3()
         {
-            Float3 f = new Float3(1, 2.0f, 3.0f);
+            Vector3 f = new Vector3(1, 2.0f, 3.0f);
 
             Assert.AreEqual(1, f.X);
             Assert.AreEqual(2.0f, f.Y);
@@ -45,11 +46,11 @@ namespace Microsoft.AzureKinect.UnitTests
             f.Z = 5.5f;
             Assert.AreEqual(5.5f, f.Z);
 
-            Float3 f2 = new Float3(3.0f, 4.0f, 5.5f);
+            Vector3 f2 = new Vector3(3.0f, 4.0f, 5.5f);
 
             Assert.AreEqual(f, f2);
 
-            Float3 f3 = new Float3(3.0f, 5.0f, 6.0f);
+            Vector3 f3 = new Vector3(3.0f, 5.0f, 6.0f);
             Assert.AreNotEqual(f2, f3);
 
         }
