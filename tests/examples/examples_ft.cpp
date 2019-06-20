@@ -29,12 +29,20 @@ TEST(examples_ft, fastpointcloud)
     fastpoint_command += "./fastpointcloud ";
     fastpoint_command += fastpoint_out;
     fastpoint_command += " 2>&1";
-    FILE *first = popen(fastpoint_command.c_str(), "r");
+#ifdef _WIN32
+    FILE *first = _popen(fastpoint_command.c_str(), "r");
+#else
+	FILE *first = popen(fastpoint_command.c_str(), "r");
+#endif
     ASSERT_NE(first, nullptr);
     // TODO errno?
     // ASSERT_NE(fgets(buffer, 10000, first), nullptr);
 
+#ifdef _WIN32
+    ASSERT_EQ(_pclose(first), EXIT_SUCCESS);
+#else
     ASSERT_EQ(pclose(first), EXIT_SUCCESS);
+#endif
 
     std::ifstream fastpointcloud_results(fastpoint_out.c_str());
     std::string s;
