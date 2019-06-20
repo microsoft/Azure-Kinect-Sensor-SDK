@@ -32,7 +32,7 @@ TEST(examples_ft, fastpointcloud)
 #ifdef _WIN32
     FILE *first = _popen(fastpoint_command.c_str(), "r");
 #else
-	FILE *first = popen(fastpoint_command.c_str(), "r");
+    FILE *first = popen(fastpoint_command.c_str(), "r");
 #endif
     ASSERT_NE(first, nullptr);
     // TODO errno?
