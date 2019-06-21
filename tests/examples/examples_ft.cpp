@@ -3,6 +3,7 @@
 
 #include <iostream> // TODO remove
 #include <string>
+#include <regex>
 #include <fstream>
 #include <k4a/k4a.h>
 #include <utcommon.h>
@@ -12,6 +13,7 @@ void run_and_record_executable(const std::string &executable_path,
                                const std::string &args,
                                const std::string &output_path)
 {
+    // TODO fflush needed here?
     std::string formatted_command = executable_path;
 #ifdef _WIN32
     formatted_command += ".exe";
@@ -49,7 +51,6 @@ TEST(examples_ft, enumerate)
 
 TEST(examples_ft, fastpointcloud)
 {
-    // TODO fflush needed here?
     // TODO better place to dump
     // TODO needs to be random?
     // TODO remove file, first?
@@ -59,11 +60,17 @@ TEST(examples_ft, fastpointcloud)
     run_and_record_executable(fastpoint_path, fastpoint_write_file, fastpoint_stdout_file);
 
     std::ifstream fastpointcloud_results(fastpoint_write_file.c_str());
-    std::string s;
-    while (fastpointcloud_results >> s)
-    {
-        std::cout << s << std::endl;
-    }
+    ASSERT_TRUE(fastpointcloud_results);
+    std::ostringstream fastpointcloud_content;
+    fastpointcloud_content << fastpointcloud_results.rdbuf();
+    fastpointcloud_results.close();
+    std::string results = fastpointcloud_content.str();
+
+    std::regex pointcloud_correctness("ply\nformat ascii 1.0\nelement vertex[0-9]+\nproperty float x\nproperty float "
+                                      "y\nproperty float z\nend_header.*");
+    ASSERT_TRUE(std::regex_match(results, pointcloud_correctness));
+
+    std::cout << results << std::endl;
 }
 
 int main(int argc, char **argv)
