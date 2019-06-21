@@ -8,13 +8,42 @@
 #include <utcommon.h>
 #include <gtest/gtest.h>
 
+void run_and_record_executable(const std::string &executable_path,
+                               const std::string &args,
+                               const std::string &output_path)
+{
+    std::string formatted_command = executable_path;
+#ifdef _WIN32
+    formatted_command += ".exe";
+#endif
+    formatted_command += " " + args + " &> " + output_path;
+#ifdef _WIN32
+    FILE *process_stream = _popen(formatted_command.c_str(), "r");
+#else
+    FILE *process_stream = popen(formatted_command.c_str(), "r");
+#endif
+
+    // TODO errno?
+    // ASSERT_NE(fgets(buffer, 10000, first), nullptr);
+    // TODO temporary, make better
+    // Not in hereASSERT_NE(process_stream, nullptr);, EXIT_SUCCESS
+#ifdef _WIN32
+    _pclose(process_stream);
+#else
+    pclose(process_stream);
+#endif
+    // throw error maybe or something?
+}
+
 TEST(examples_ft, calibration)
 {
+    // TODO complete
     ASSERT_EQ(true, true);
 }
 
 TEST(examples_ft, enumerate)
 {
+    // TODO complete
     ASSERT_EQ(true, false);
 }
 
@@ -23,28 +52,13 @@ TEST(examples_ft, fastpointcloud)
     // TODO fflush needed here?
     // TODO better place to dump
     // TODO needs to be random?
-    std::string fastpoint_out = "/tmp/fastpointcloud-test-out";
-    std::string fastpoint_command;
-    // TODO less ugly
-    fastpoint_command += "./fastpointcloud ";
-    fastpoint_command += fastpoint_out;
-    fastpoint_command += " 2>&1";
-#ifdef _WIN32
-    FILE *first = _popen(fastpoint_command.c_str(), "r");
-#else
-    FILE *first = popen(fastpoint_command.c_str(), "r");
-#endif
-    ASSERT_NE(first, nullptr);
-    // TODO errno?
-    // ASSERT_NE(fgets(buffer, 10000, first), nullptr);
+    // TODO remove file, first?
+    std::string fastpoint_write_file = "/tmp/fastpointcloud-test-record";
+    std::string fastpoint_stdout_file = "/tmp/fastpointcloud-test-stdout";
+    std::string fastpoint_path = "bin/fastpointcloud";
+    run_and_record_executable(fastpoint_path, fastpoint_write_file, fastpoint_stdout_file);
 
-#ifdef _WIN32
-    ASSERT_EQ(_pclose(first), EXIT_SUCCESS);
-#else
-    ASSERT_EQ(pclose(first), EXIT_SUCCESS);
-#endif
-
-    std::ifstream fastpointcloud_results(fastpoint_out.c_str());
+    std::ifstream fastpointcloud_results(fastpoint_write_file.c_str());
     std::string s;
     while (fastpointcloud_results >> s)
     {
