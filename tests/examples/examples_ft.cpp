@@ -5,6 +5,7 @@
 #include <string>
 #include <regex>
 #include <fstream>
+#include <vector>
 #include <k4a/k4a.h>
 #include <utcommon.h>
 #include <gtest/gtest.h>
@@ -50,32 +51,35 @@ TEST(examples_ft, enumerate)
 
 TEST(examples_ft, fastpointcloud)
 {
-    // TODO better place to dump
-    // TODO needs to be random?
-    // TODO remove file, first?
 #ifdef _WIN32
     std::string fastpoint_write_file = "examples_test_temp\\fastpointcloud-test-record";
     std::string fastpoint_stdout_file = "examples_test_temp\\fastpointcloud-test-stdout";
     std::string fastpoint_path = "bin\\fastpointcloud.exe";
 #else
-    std::string fastpoint_write_file = "/tmp/fastpointcloud-test-record";
-    std::string fastpoint_stdout_file = "/tmp/fastpointcloud-test-stdout";
-    std::string fastpoint_path = "bin/fastpointcloud";
+    std::string fastpoint_write_file = "examples_test_temp/fastpointcloud-test-record";
+    std::string fastpoint_stdout_file = "examples_test_temp/fastpointcloud-test-stdout";
+    std::string fastpoint_path = "./bin/fastpointcloud";
 #endif
     run_and_record_executable(fastpoint_path, fastpoint_write_file, fastpoint_stdout_file);
 
     std::ifstream fastpointcloud_results(fastpoint_write_file.c_str());
     ASSERT_TRUE(fastpointcloud_results.good());
-    std::ostringstream fastpointcloud_content;
-    fastpointcloud_content << fastpointcloud_results.rdbuf();
-    fastpointcloud_results.close();
-    std::string results = fastpointcloud_content.str();
 
-    std::regex pointcloud_correctness("ply[\\r\\n]+format ascii 1.0[\\r\\n]+element vertex [0-9]+[\\r\\n]+property float x[\\r\\n]+property float "
-                                      "y[\\r\\n]+property float z[\\r\\n]+end_header[^]*");
-    ASSERT_TRUE(std::regex_match(results, pointcloud_correctness));
+    std::vector<std::string> regexes{ "ply",
+                                      "format ascii 1.0",
+                                      "element vertex [0-9]+",
+                                      "property float x",
+                                      "property float y",
+                                      "property float z",
+                                      "end_header" };
 
-    std::cout << results << std::endl;
+    for (const std::string &regex_str : regexes)
+    {
+        std::string results;
+        getline(fastpointcloud_results, results);
+        std::regex pointcloud_correctness(regex_str);
+        ASSERT_TRUE(std::regex_match(results, pointcloud_correctness));
+    }
 }
 
 int main(int argc, char **argv)
