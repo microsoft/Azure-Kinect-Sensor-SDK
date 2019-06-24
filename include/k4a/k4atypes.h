@@ -705,13 +705,19 @@ typedef enum
  *
  * The SDK can log data to the console, files, or to a custom handler.
  *
- * Environment Variables
+ * Environment Variables:
+ *
+ * K4A_ENABLE_LOG_TO_A_FILE / K4A_RECORD_ENABLE_LOG_TO_A_FILE
+ * Specifies the log file to save the log to. K4a.dll and k4arecord.dll can not log to the same file.
  *
  * K4A_ENABLE_LOG_TO_A_FILE =
+ * K4A_RECORD_ENABLE_LOG_TO_A_FILE =
  *    0    - completely disable logging to a file
  *    log\custom.log - log all messages to the path and file specified - must end in '.log' to
  *                     be considered a valid entry
- *    ** When enabled this takes precedence over the value of K4A_ENABLE_LOG_TO_STDOUT
+ *    NOTE 1: When enabled this takes precedence over the value of K4A_ENABLE_LOG_TO_STDOUT.
+ *    NOTE 2: This can not be set to the same value as K4A_RECORD_ENABLE_LOG_TO_A_FILE as they represent separate
+ *            logger instance that do not allowed shared access to the file being written to.
  *
  * K4A_ENABLE_LOG_TO_STDOUT =
  *    0    - disable logging to stdout
