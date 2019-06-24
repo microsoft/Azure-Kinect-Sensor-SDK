@@ -10,7 +10,7 @@
 #include <utcommon.h>
 #include <gtest/gtest.h>
 
-void run_and_record_executable(const std::string &executable_path,
+static void run_and_record_executable(const std::string &executable_path,
                                const std::string &args,
                                const std::string &output_path)
 {
