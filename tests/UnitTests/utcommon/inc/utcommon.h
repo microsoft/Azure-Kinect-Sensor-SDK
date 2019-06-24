@@ -25,7 +25,7 @@ void k4a_unittest_deinit();
 void k4a_unittest_init_logging_with_processid();
 #endif
 
-int k4a_test_commmon_main(int argc, char **argv);
+int k4a_test_common_main(int argc, char **argv);
 }
 
 #endif

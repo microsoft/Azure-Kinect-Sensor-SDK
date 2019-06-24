@@ -552,5 +552,5 @@ TEST_F(depthmcu_ut, depthmcu_get_serialnum_extra_long)
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }

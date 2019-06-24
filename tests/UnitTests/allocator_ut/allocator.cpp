@@ -14,7 +14,7 @@
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }
 
 #define GTEST_LOG_ERROR std::cout << "[    ERROR ] "
