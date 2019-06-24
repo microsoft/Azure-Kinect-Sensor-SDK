@@ -11,8 +11,8 @@
 #include <gtest/gtest.h>
 
 static void run_and_record_executable(const std::string &executable_path,
-                               const std::string &args,
-                               const std::string &output_path)
+                                      const std::string &args,
+                                      const std::string &output_path)
 {
     // TODO fflush needed here?
     std::string formatted_command = executable_path;
