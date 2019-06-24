@@ -10,13 +10,21 @@
 #include <utcommon.h>
 #include <gtest/gtest.h>
 
+const static std::string TEST_TEMP_DIR = "examples_test_temp";
+
+// run the specified executable and record the output to output_path
+// if output_path is empty, just output to stdout
 static void run_and_record_executable(const std::string &executable_path,
                                       const std::string &args,
                                       const std::string &output_path)
 {
     // TODO fflush needed here?
     std::string formatted_command = executable_path;
-    formatted_command += " " + args + " 2>&1 > " + output_path;
+    formatted_command += " " + args;
+    if (!output_path.empty())
+    {
+        formatted_command += " 2>&1 > " + output_path;
+    }
     std::cout << formatted_command << std::endl;
 #ifdef _WIN32
     FILE *process_stream = _popen(formatted_command.c_str(), "r");
@@ -52,14 +60,15 @@ TEST(examples_ft, enumerate)
 TEST(examples_ft, fastpointcloud)
 {
 #ifdef _WIN32
-    std::string fastpoint_write_file = "examples_test_temp\\fastpointcloud-test-record";
-    std::string fastpoint_stdout_file = "examples_test_temp\\fastpointcloud-test-stdout";
-    std::string fastpoint_path = "bin\\fastpointcloud.exe";
+    const std::string fastpoint_write_file = TEST_TEMP_DIR + "\\fastpointcloud-record";
+    const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "\\fastpointcloud-stdout";
+    const std::string fastpoint_path = "bin\\fastpointcloud.exe";
 #else
-    std::string fastpoint_write_file = "examples_test_temp/fastpointcloud-test-record";
-    std::string fastpoint_stdout_file = "examples_test_temp/fastpointcloud-test-stdout";
-    std::string fastpoint_path = "./bin/fastpointcloud";
+    const std::string fastpoint_write_file = TEST_TEMP_DIR + "/fastpointcloud-record";
+    const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "/fastpointcloud-stdout";
+    const std::string fastpoint_path = "./bin/fastpointcloud";
 #endif
+    run_and_record_executable("mkdir -p examples_test_temp", "", "");
     run_and_record_executable(fastpoint_path, fastpoint_write_file, fastpoint_stdout_file);
 
     std::ifstream fastpointcloud_results(fastpoint_write_file.c_str());
