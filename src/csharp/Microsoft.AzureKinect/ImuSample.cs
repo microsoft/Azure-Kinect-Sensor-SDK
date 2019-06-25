@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 using System.Runtime.InteropServices;
 
@@ -10,9 +11,9 @@ namespace Microsoft.AzureKinect
     public class ImuSample
     {
         public float Temperature { get; set; }
-        public Float3 AccelerometerSample { get; set; }
+        public Vector3 AccelerometerSample { get; set; }
         public Int64 AccelerometerTimestampInUsec { get; set; }
-        public Float3 GyroSample { get; set; }
+        public Vector3 GyroSample { get; set; }
         public Int64 GyroTimestampInUsec { get; set; }
 
     }

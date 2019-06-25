@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 using System.Runtime.InteropServices;
 
@@ -90,7 +91,7 @@ namespace Microsoft.AzureKinect
             Num
         }
         
-        public Float2? TransformTo2D(Float2 sourcePoint2D,
+        public Vector2? TransformTo2D(Vector2 sourcePoint2D,
                                      float sourceDepth,
                                      DeviceType sourceCamera,
                                      DeviceType targetCamera)
@@ -101,14 +102,14 @@ namespace Microsoft.AzureKinect
                 sourceDepth,
                 sourceCamera,
                 targetCamera,
-                out Float2 target_point2d,
+                out Vector2 target_point2d,
                 out bool valid));
             if (valid)
                 return target_point2d;
             return null;
         }
 
-        public Float3? TransformTo3D(Float2 sourcePoint2D, float sourceDepth, DeviceType sourceCamera, DeviceType targetCamera)
+        public Vector3? TransformTo3D(Vector2 sourcePoint2D, float sourceDepth, DeviceType sourceCamera, DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_3d(
                 this,
@@ -116,7 +117,7 @@ namespace Microsoft.AzureKinect
                 sourceDepth,
                 sourceCamera,
                 targetCamera,
-                out Float3 target_point3d,
+                out Vector3 target_point3d,
                 out bool valid));
 
             if (valid)
@@ -124,14 +125,14 @@ namespace Microsoft.AzureKinect
             return null;
         }
 
-        public Float2? TransformTo2D(Float3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
+        public Vector2? TransformTo2D(Vector3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_2d(
                 this,
                 ref sourcePoint3D,
                 sourceCamera,
                 targetCamera,
-                out Float2 target_point2d,
+                out Vector2 target_point2d,
                 out bool valid));
 
             if (valid)
@@ -139,14 +140,14 @@ namespace Microsoft.AzureKinect
             return null;
         }
 
-        public Float3? TransformTo3D(Float3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
+        public Vector3? TransformTo3D(Vector3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
         {
             Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_3d(
                 this,
                 ref sourcePoint3D,
                 sourceCamera,
                 targetCamera,
-                out Float3 target_point3d,
+                out Vector3 target_point3d,
                 out bool valid));
 
             if (valid)

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Numerics;
+using NUnit.Framework;
 using Microsoft.AzureKinect;
 namespace WrapperTests
 {
@@ -56,8 +57,8 @@ namespace WrapperTests
 
                 Calibration cal = Calibration.GetFromRaw(raw, DepthMode.WFOV_2x2Binned, ColorResolution.r1080p);
 
-                Float2 source = new Float2(0, 0);
-                Float2? result = cal.TransformTo2D(source, 1.0f, Calibration.DeviceType.Color, Calibration.DeviceType.Depth);
+                Vector2 source = new Vector2(0, 0);
+                Vector2? result = cal.TransformTo2D(source, 1.0f, Calibration.DeviceType.Color, Calibration.DeviceType.Depth);
 
             }
         }
