@@ -56,19 +56,36 @@ static void test_stream_against_regexes(std::istream &input_stream, const std::v
     }
 }
 
-TEST(examples_ft, calibration)
+class examples_ft : public ::testing::Test
 {
-    // TODO complete
-    ASSERT_EQ(true, true);
+protected:
+    void SetUp() override
+    {
+        run_and_record_executable("mkdir -p examples_test_temp", "", "");
+    }
+};
+
+TEST_F(examples_ft, calibration)
+{
+#ifdef _WIN32
+    const std::string calibration_path = "bin\\fastpointcloud.exe";
+    const std::string calibration_out = TEST_TEMP_DIR + "\\calibration-out";
+#else
+    const std::string calibration_path = "./bin/fastpointcloud";
+    const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out";
+#endif
+
+    //
+    run_and_record_executable(calibration_path, "", calibration_out);
 }
 
-TEST(examples_ft, enumerate)
+TEST_F(examples_ft, enumerate)
 {
     // TODO complete
     ASSERT_EQ(true, false);
 }
 
-TEST(examples_ft, fastpointcloud)
+TEST_F(examples_ft, fastpointcloud)
 {
 #ifdef _WIN32
     const std::string fastpoint_write_file = TEST_TEMP_DIR + "\\fastpointcloud-record";
@@ -79,7 +96,6 @@ TEST(examples_ft, fastpointcloud)
     const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "/fastpointcloud-stdout";
     const std::string fastpoint_path = "./bin/fastpointcloud";
 #endif
-    run_and_record_executable("mkdir -p examples_test_temp", "", "");
     run_and_record_executable(fastpoint_path, fastpoint_write_file, fastpoint_stdout_file);
 
     std::ifstream fastpointcloud_results(fastpoint_write_file.c_str());
