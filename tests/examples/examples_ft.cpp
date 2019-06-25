@@ -45,6 +45,17 @@ static void run_and_record_executable(const std::string &executable_path,
     // throw error maybe or something?
 }
 
+static void test_stream_against_regexes(std::istream &input_stream, const std::vector<std::string> &regexes)
+{
+    for (const std::string &regex_str : regexes)
+    {
+        std::string results;
+        getline(input_stream, results);
+        std::regex pointcloud_correctness(regex_str);
+        ASSERT_TRUE(std::regex_match(results, pointcloud_correctness));
+    }
+}
+
 TEST(examples_ft, calibration)
 {
     // TODO complete
@@ -82,13 +93,7 @@ TEST(examples_ft, fastpointcloud)
                                       "property float z",
                                       "end_header" };
 
-    for (const std::string &regex_str : regexes)
-    {
-        std::string results;
-        getline(fastpointcloud_results, results);
-        std::regex pointcloud_correctness(regex_str);
-        ASSERT_TRUE(std::regex_match(results, pointcloud_correctness));
-    }
+    test_stream_against_regexes(fastpointcloud_results, regexes);
 }
 
 int main(int argc, char **argv)
