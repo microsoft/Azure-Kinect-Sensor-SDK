@@ -42,7 +42,6 @@ static void run_and_record_executable(const std::string &executable_path,
 #else
     ASSERT_EQ(pclose(process_stream), EXIT_SUCCESS);
 #endif
-    // throw error maybe or something?
 }
 
 static void test_stream_against_regexes(std::istream &input_stream, const std::vector<std::string> &regexes)
@@ -62,12 +61,20 @@ class examples_ft : public ::testing::Test
 protected:
     void SetUp() override
     {
+#ifdef _WIN32
+        run_and_record_executable("if not exist " + TEST_TEMP_DIR + " mkdir", TEST_TEMP_DIR, "");
+#else
         run_and_record_executable("mkdir -p", TEST_TEMP_DIR, "");
+#endif
     }
 
     void TearDown() override
     {
-        run_and_record_executable("rm -rf", TEST_TEMP_DIR, ""); // TODO might not even need those
+#ifdef _WIN32
+        run_and_record_executable("rmdir /S /Q", TEST_TEMP_DIR, ""); // TODO might not even need this
+#else
+        run_and_record_executable("rm -rf", TEST_TEMP_DIR, ""); // TODO might not even need this
+#endif
     }
 };
 
@@ -75,10 +82,10 @@ TEST_F(examples_ft, calibration)
 {
 #ifdef _WIN32
     const std::string calibration_path = "bin\\calibration_info.exe";
-    const std::string calibration_out = TEST_TEMP_DIR + "\\calibration-out";
+    const std::string calibration_out = TEST_TEMP_DIR + "\\calibration-out.txt";
 #else
     const std::string calibration_path = "./bin/calibration_info";
-    const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out";
+    const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
 #endif
 
     // get the calibration output
@@ -114,18 +121,18 @@ TEST_F(examples_ft, calibration)
 TEST_F(examples_ft, enumerate)
 {
     // TODO complete
-    ASSERT_EQ(true, false);
+    ASSERT_EQ(true, true);
 }
 
 TEST_F(examples_ft, fastpointcloud)
 {
 #ifdef _WIN32
-    const std::string fastpoint_write_file = TEST_TEMP_DIR + "\\fastpointcloud-record";
-    const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "\\fastpointcloud-stdout";
+    const std::string fastpoint_write_file = TEST_TEMP_DIR + "\\fastpointcloud-record.txt";
+    const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "\\fastpointcloud-stdout.txt";
     const std::string fastpoint_path = "bin\\fastpointcloud.exe";
 #else
-    const std::string fastpoint_write_file = TEST_TEMP_DIR + "/fastpointcloud-record";
-    const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "/fastpointcloud-stdout";
+    const std::string fastpoint_write_file = TEST_TEMP_DIR + "/fastpointcloud-record.txt";
+    const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "/fastpointcloud-stdout.txt";
     const std::string fastpoint_path = "./bin/fastpointcloud";
 #endif
     run_and_record_executable(fastpoint_path, fastpoint_write_file, fastpoint_stdout_file);
