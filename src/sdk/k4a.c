@@ -574,7 +574,8 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             if (K4A_SUCCEEDED(result) && config->color_resolution == K4A_COLOR_RESOLUTION_OFF)
             {
                 LOG_ERROR("Device wired_sync_mode is set to K4A_WIRED_SYNC_MODE_MASTER, so color camera must be used "
-                          "on master device. Color_resolution can not be set to K4A_COLOR_RESOLUTION_OFF.",0);
+                          "on master device. Color_resolution can not be set to K4A_COLOR_RESOLUTION_OFF.",
+                          0);
                 return K4A_RESULT_FAILED;
             }
         }
