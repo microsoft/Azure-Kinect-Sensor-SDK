@@ -221,5 +221,5 @@ TEST_F(color_ut, exposure_control)
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }

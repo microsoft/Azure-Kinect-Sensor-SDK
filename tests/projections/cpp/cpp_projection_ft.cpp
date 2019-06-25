@@ -154,5 +154,5 @@ TEST_F(cpp_projection_ft, test_depth)
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }

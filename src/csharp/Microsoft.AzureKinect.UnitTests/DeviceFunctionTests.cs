@@ -418,7 +418,7 @@ k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle,
 ");
 
             count = NativeK4a.CountCalls();
-            //Validate that we get exceptions from the first call to k4a_device_get_serialnum
+            //Validate that we get exceptions from the first call to k4a_device_get_raw_calibration
             using (Device device = Device.Open(0))
             {
                 Assert.Throws<Microsoft.AzureKinect.Exception>(() =>
@@ -514,7 +514,7 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
                 NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_start_cameras(
     k4a_device_t device_handle,
-    k4a_device_configuration_t * config
+    const k4a_device_configuration_t * config
 )
 {
     STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
@@ -1283,7 +1283,7 @@ k4a_result_t k4a_device_get_version(
             NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_start_cameras(
     k4a_device_t device_handle,
-    k4a_device_configuration_t * config
+    const k4a_device_configuration_t * config
 )
 {
     STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
@@ -1319,7 +1319,7 @@ k4a_result_t k4a_device_start_cameras(
                     NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_start_cameras(
     k4a_device_t device_handle,
-    k4a_device_configuration_t * config
+    const k4a_device_configuration_t * config
 )
 {
     STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);

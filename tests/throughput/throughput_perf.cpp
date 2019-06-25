@@ -26,6 +26,10 @@ static k4a_wired_sync_mode_t g_wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
 static int g_capture_count = 100;
 static bool g_synchronized_images_only = false;
 static bool g_no_imu = false;
+static bool g_no_startup_flush = false;
+static uint32_t g_subordinate_delay_off_master_usec = 0;
+static bool g_manual_exposure = false;
+static uint32_t g_exposure_setting = 0;
 
 using ::testing::ValuesIn;
 
@@ -237,6 +241,25 @@ TEST_P(throughput_perf, testTest)
 
     printf("Capturing %d frames for test: %s\n", g_capture_count, as.test_name);
 
+    if (g_manual_exposure)
+    {
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               K4A_COLOR_CONTROL_MODE_MANUAL,
+                                               (int32_t)g_exposure_setting));
+        printf("Manual Exposure: %d\n", g_exposure_setting);
+    }
+    else
+    {
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               K4A_COLOR_CONTROL_MODE_AUTO,
+                                               0));
+        printf("Auto Exposure\n");
+    }
+
     fps_in_usec = 1000000 / k4a_convert_fps_to_uint(as.fps);
 
     config.color_format = as.color_format;
@@ -246,6 +269,7 @@ TEST_P(throughput_perf, testTest)
     config.depth_delay_off_color_usec = g_depth_delay_off_color_usec;
     config.wired_sync_mode = g_wired_sync_mode;
     config.synchronized_images_only = g_synchronized_images_only;
+    config.subordinate_delay_off_master_usec = g_subordinate_delay_off_master_usec;
     if (g_depth_delay_off_color_usec == 0)
     {
         // Create delay that can be +fps to -fps
@@ -271,26 +295,36 @@ TEST_P(throughput_perf, testTest)
         ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&th1, _throughput_imu_thread, &thread));
     }
 
-    //
-    // Wait allow streams to start and then purge the data collected
-    //
-    if (as.fps == K4A_FRAMES_PER_SECOND_30)
+    if (!g_no_startup_flush)
     {
-        ThreadAPI_Sleep(2000);
-    }
-    else if (as.fps == K4A_FRAMES_PER_SECOND_15)
-    {
-        ThreadAPI_Sleep(3000);
+        //
+        // Wait for streams to start and then purge the data collected
+        //
+        if (as.fps == K4A_FRAMES_PER_SECOND_30)
+        {
+            printf("Flushing first 2s of data\n");
+            ThreadAPI_Sleep(2000);
+        }
+        else if (as.fps == K4A_FRAMES_PER_SECOND_15)
+        {
+            printf("Flushing first 3s of data\n");
+            ThreadAPI_Sleep(3000);
+        }
+        else
+        {
+            printf("Flushing first 4s of data\n");
+            ThreadAPI_Sleep(4000);
+        }
+        while (K4A_WAIT_RESULT_SUCCEEDED == k4a_device_get_capture(m_device, &capture, 0))
+        {
+            // Drain the queue
+            k4a_capture_release(capture);
+        };
     }
     else
     {
-        ThreadAPI_Sleep(4000);
+        printf("Flushing no start of stream data\n");
     }
-    while (K4A_WAIT_RESULT_SUCCEEDED == k4a_device_get_capture(m_device, &capture, 0))
-    {
-        // Drain the queue
-        k4a_capture_release(capture);
-    };
 
     // For consistent IMU timing, block entering the while loop until we get 1 sample
     if (K4A_WAIT_RESULT_SUCCEEDED == k4a_device_get_capture(m_device, &capture, 1000))
@@ -585,6 +619,12 @@ TEST_P(throughput_perf, testTest)
         fclose(file_handle);
     }
 
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              k4a_device_set_color_control(m_device,
+                                           K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                           K4A_COLOR_CONTROL_MODE_AUTO,
+                                           0));
+
     ASSERT_EQ(failed, false);
     return;
 }
@@ -777,6 +817,11 @@ int main(int argc, char **argv)
             g_synchronized_images_only = true;
             printf("g_synchronized_images_only = true\n");
         }
+        else if (strcmp(argument, "--no_startup_flush") == 0)
+        {
+            g_no_startup_flush = true;
+            printf("g_no_startup_flush = true\n");
+        }
         else if (strcmp(argument, "--index") == 0)
         {
             if (i + 1 <= argc)
@@ -791,12 +836,41 @@ int main(int argc, char **argv)
                 error = true;
             }
         }
+        else if (strcmp(argument, "--subordinate_delay_off_master_usec") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_subordinate_delay_off_master_usec = (uint32_t)strtol(argv[i + 1], NULL, 10);
+                printf("g_subordinate_delay_off_master_usec = %d\n", g_subordinate_delay_off_master_usec);
+                i++;
+            }
+            else
+            {
+                printf("Error: index parameter missing\n");
+                error = true;
+            }
+        }
         else if (strcmp(argument, "--capture_count") == 0)
         {
             if (i + 1 <= argc)
             {
                 g_capture_count = (int)strtol(argv[i + 1], NULL, 10);
                 printf("g_capture_count g_device_index = %d\n", g_capture_count);
+                i++;
+            }
+            else
+            {
+                printf("Error: index parameter missing\n");
+                error = true;
+            }
+        }
+        else if (strcmp(argument, "--exposure") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_exposure_setting = (uint32_t)strtol(argv[i + 1], NULL, 10);
+                printf("g_exposure_setting = %d\n", g_capture_count);
+                g_manual_exposure = true;
                 i++;
             }
             else
@@ -838,6 +912,16 @@ int main(int argc, char **argv)
         printf("  --synchronized_images_only\n");
         printf("      By default this setting is false, enabling this will for the test to wait for\n");
         printf("      both and depth images to be available.\n");
+        printf("  --subordinate_delay_off_master_usec <+ microseconds>\n");
+        printf("      This is the time delay the device captures off the master devices capture sync\n");
+        printf("      pulse. This value needs to be less than one image sample period, i.e for 30FPS \n");
+        printf("      this needs to be less than 33333us.\n");
+        printf("  --no_startup_flush\n");
+        printf("      By default the test will wait for streams to run for X seconds to stabilize. This\n");
+        printf("      disables that.\n");
+        printf("  --exposure <exposure in usec>\n");
+        printf("      By default the test uses auto exposure. This will test with the manual exposure setting\n");
+        printf("      that is passed in.\n");
 
         return 1; // Indicates an error or warning
     }

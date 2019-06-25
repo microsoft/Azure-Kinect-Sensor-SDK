@@ -27,17 +27,11 @@ The Azure Kinect SDK enables you to get the most out of your Azure Kinect camera
 
 ## Installation
 
-To use the SDK please refer to the installation instructions in [usage](docs/usage.md)
+To use the SDK, please refer to the installation instructions in [usage](docs/usage.md)
 
-## Documentation and Official Builds
+## Documentation
 
-The latest stable binaries are available for download.
-
-   Tag   | Download
----------|----------------
-  [v1.0.2](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.0.2) | [Azure Kinect SDK 1.0.2.msi](http://download.microsoft.com/download/B/4/D/B4D26442-DDA5-40C2-9913-3B23AE84A806/Azure%20Kinect%20SDK%201.0.2.msi)
-
-Please see [usage](docs/usage.md) for info on how to use the SDK. [API documentation](https://microsoft.github.io/Azure-Kinect-Sensor-SDK/) is also available.
+API documentation is avaliable [here](https://microsoft.github.io/Azure-Kinect-Sensor-SDK/).
 
 ## Building
 
@@ -60,6 +54,10 @@ We welcome your contributions! Please see the [contribution guidelines](CONTRIBU
 
 For SDK feedback or to report a bug, please file a [GitHub Issue](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/issues). For general suggestions or ideas, visit our [feedback forum](https://aka.ms/azurekinectfeedback).
 
+## Q&A
+
+Welcome to the [Q&A](kinect-qa.md) corner!
+
 ## Join Our Developer Program
 
 Complete your developer profile [here](https://aka.ms/iwantmr) to get connected with our Mixed Reality Developer Program. You will receive the latest on our developer tools, events, and early access offers.
@@ -81,4 +79,3 @@ email to ensure we received your original message. Further information, includin
 ## License
 
 [MIT License](LICENSE)
-
