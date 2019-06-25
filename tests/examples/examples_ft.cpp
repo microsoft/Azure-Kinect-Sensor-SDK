@@ -46,14 +46,19 @@ static void run_and_record_executable(const std::string &executable_path,
 
 static void test_stream_against_regexes(std::istream &input_stream, const std::vector<std::string> &regexes)
 {
-    for (const std::string &regex_str : regexes)
+    auto regex_iter = regexes.cbegin();
+    // ensure that all regexes are matched before the end of the file, in this order
+    while (regex_iter != regexes.cend() && input_stream)
     {
         std::string results;
         getline(input_stream, results);
-        std::regex pointcloud_correctness(regex_str);
-        std::cout << results << std::endl;
-        ASSERT_TRUE(std::regex_match(results, pointcloud_correctness));
+        std::regex desired_out(*regex_iter);
+        std::cout << results << std::endl; // TODO delete this
+        ASSERT_TRUE(std::regex_match(results, desired_out));
+        ++regex_iter;
     }
+    ASSERT_EQ(regex_iter, regexes.cend())
+        << "Reached the end of the example output before matching all of the required regular expressions.";
 }
 
 class examples_ft : public ::testing::Test
