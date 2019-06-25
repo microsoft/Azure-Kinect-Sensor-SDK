@@ -52,6 +52,7 @@ static void test_stream_against_regexes(std::istream &input_stream, const std::v
         std::string results;
         getline(input_stream, results);
         std::regex pointcloud_correctness(regex_str);
+        std::cout << results << std::endl;
         ASSERT_TRUE(std::regex_match(results, pointcloud_correctness));
     }
 }
@@ -61,22 +62,53 @@ class examples_ft : public ::testing::Test
 protected:
     void SetUp() override
     {
-        run_and_record_executable("mkdir -p examples_test_temp", "", "");
+        run_and_record_executable("mkdir -p", TEST_TEMP_DIR, "");
+    }
+
+    void TearDown() override
+    {
+        run_and_record_executable("rm -rf", TEST_TEMP_DIR, ""); // TODO might not even need those
     }
 };
 
 TEST_F(examples_ft, calibration)
 {
 #ifdef _WIN32
-    const std::string calibration_path = "bin\\fastpointcloud.exe";
+    const std::string calibration_path = "bin\\calibration_info.exe";
     const std::string calibration_out = TEST_TEMP_DIR + "\\calibration-out";
 #else
-    const std::string calibration_path = "./bin/fastpointcloud";
+    const std::string calibration_path = "./bin/calibration_info";
     const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out";
 #endif
 
-    //
+    // get the calibration output
     run_and_record_executable(calibration_path, "", calibration_out);
+
+    std::ifstream results(calibration_out.c_str());
+    // make sure the calibration output has the right format
+    std::vector<std::string> regexes{ "Found [^]* connected devices:",
+                                      "",
+                                      "===== Device [^]* =====",
+                                      "resolution width: [^]*",
+                                      "resolution height: [^]*",
+                                      "principal point x: [^]*",
+                                      "principal point y: [^]*",
+                                      "focal length x: [^]*",
+                                      "focal length y: [^]*",
+                                      "radial distortion coefficients:",
+                                      "k1: [^]*",
+                                      "k2: [^]*",
+                                      "k3: [^]*",
+                                      "k4: [^]*",
+                                      "k5: [^]*",
+                                      "k6: [^]*",
+                                      "center of distortion in Z=1 plane, x: [^]*",
+                                      "center of distortion in Z=1 plane, y: [^]*",
+                                      "tangential distortion coefficient x: [^]*",
+                                      "tangential distortion coefficient y: [^]*",
+                                      "metric radius: [^]*" };
+
+    test_stream_against_regexes(results, regexes);
 }
 
 TEST_F(examples_ft, enumerate)
