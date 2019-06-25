@@ -41,6 +41,7 @@ set(SOURCE_FILES
 # to embed version information
 set(K4A_FILEDESCRIPTION "Azure Kinect Viewer")
 set(K4A_ORIGINALFILENAME "k4aviewer.exe")
+set(K4A_USE_ICON 1)
 configure_file(
     ${K4A_VERSION_RC}
     ${CMAKE_CURRENT_BINARY_DIR}/version.rc
