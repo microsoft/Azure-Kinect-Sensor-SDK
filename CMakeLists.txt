@@ -31,6 +31,10 @@ include(GitCommands)
 # Set the project version
 include(K4AProjectVersion)
 
+# Default to not embed an icon in resources
+set(K4A_USE_ICON 0)
+set(K4A_ICON_PATH ${CMAKE_CURRENT_LIST_DIR}/kinect-viewer.ico)
+
 set(PROJ_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(INCLUDE_DIR ${PROJ_DIR}/include)
 
