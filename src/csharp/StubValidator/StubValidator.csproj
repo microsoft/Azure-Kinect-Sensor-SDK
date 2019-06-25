@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.AzureKinect.Test.StubGenerator\Microsoft.AzureKinect.Test.StubGenerator.csproj" />
+    <ProjectReference Include="..\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator.csproj" />
   </ItemGroup>
 
   <ItemGroup>
