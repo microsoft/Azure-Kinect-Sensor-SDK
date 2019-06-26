@@ -394,21 +394,21 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     context->timecode_scale = GetChild<KaxTimecodeScale>(*context->segment_info).GetValue();
 
-    context->color_track.track = find_track(context, "COLOR", "K4A_COLOR_TRACK");
-    context->depth_track.track = find_track(context, "DEPTH", "K4A_DEPTH_TRACK");
-    context->ir_track.track = find_track(context, "IR", "K4A_IR_TRACK");
-    if (context->ir_track.track == NULL)
+    if (K4A_FAILED(parse_tracks(context)))
+    {
+        LOG_ERROR("Reading track data failed.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    context->color_track = find_track(context, "COLOR", "K4A_COLOR_TRACK");
+    context->depth_track = find_track(context, "DEPTH", "K4A_DEPTH_TRACK");
+    context->ir_track = find_track(context, "IR", "K4A_IR_TRACK");
+    if (context->ir_track == NULL)
     {
         // Support legacy IR track naming.
-        context->ir_track.track = find_track(context, "DEPTH_IR", NULL);
+        context->ir_track = find_track(context, "DEPTH_IR", NULL);
     }
-    context->imu_track.track = find_track(context, "IMU", "K4A_IMU_TRACK");
-
-    if (K4A_FAILED(parse_custom_tracks(context)))
-    {
-        // The rest of the recording can still be read if read custom track failed
-        LOG_WARNING("Read custom track data failed.", 0);
-    }
+    context->imu_track = find_track(context, "IMU", "K4A_IMU_TRACK");
 
     // Read device calibration attachment
     context->calibration_attachment = get_attachment_by_tag(context, "K4A_CALIBRATION_FILE");
@@ -423,32 +423,24 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     }
 
     uint64_t frame_period_ns = 0;
-    if (context->color_track.track)
+    if (context->color_track)
     {
-        context->color_track.type = static_cast<track_type>(
-            GetChild<KaxTrackType>(*context->color_track.track).GetValue());
-
-        if (context->color_track.type != track_video)
+        if (context->color_track->type != track_video)
         {
             LOG_ERROR("Color track is not a video track.", 0);
             return K4A_RESULT_FAILED;
         }
 
-        KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*context->color_track.track);
-        context->color_track.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
-        context->color_track.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
+        frame_period_ns = context->color_track->frame_period_ns;
 
-        frame_period_ns = GetChild<KaxTrackDefaultDuration>(*context->color_track.track).GetValue();
-        context->color_track.frame_period_ns = frame_period_ns;
-
-        RETURN_IF_ERROR(read_bitmap_info_header(&context->color_track));
+        RETURN_IF_ERROR(read_bitmap_info_header(context->color_track));
         context->record_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
         for (size_t i = 0; i < arraysize(color_resolutions); i++)
         {
             uint32_t width, height;
             if (k4a_convert_resolution_to_width_height(color_resolutions[i], &width, &height))
             {
-                if (context->color_track.width == width && context->color_track.height == height)
+                if (context->color_track->width == width && context->color_track->height == height)
                 {
                     context->record_config.color_resolution = color_resolutions[i];
                     break;
@@ -460,13 +452,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         {
             LOG_WARNING("The color resolution is not officially supported: %dx%d. You cannot get the calibration "
                         "information for this color resolution",
-                        context->color_track.width,
-                        context->color_track.height);
+                        context->color_track->width,
+                        context->color_track->height);
         }
 
         context->record_config.color_track_enabled = true;
-        context->record_config.color_format = context->color_track.format;
-        context->color_format_conversion = context->color_track.format;
+        context->record_config.color_format = context->color_track->format;
+        context->color_format_conversion = context->color_track->format;
     }
     else
     {
@@ -477,7 +469,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     }
 
     KaxTag *depth_mode_tag = get_tag(context, "K4A_DEPTH_MODE");
-    if (depth_mode_tag == NULL && (context->depth_track.track || context->ir_track.track))
+    if (depth_mode_tag == NULL && (context->depth_track || context->ir_track))
     {
         LOG_ERROR("K4A_DEPTH_MODE tag is missing.", 0);
         return K4A_RESULT_FAILED;
@@ -527,88 +519,86 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
     }
 
-    if (context->depth_track.track)
+    if (context->depth_track)
     {
-        context->depth_track.type = static_cast<track_type>(
-            GetChild<KaxTrackType>(*context->depth_track.track).GetValue());
-
-        KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*context->depth_track.track);
-        context->depth_track.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
-        context->depth_track.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
-
-        uint64_t depth_period_ns = GetChild<KaxTrackDefaultDuration>(*context->depth_track.track).GetValue();
-        context->depth_track.frame_period_ns = depth_period_ns;
-        if (frame_period_ns == 0)
+        if (context->depth_track->type != track_video)
         {
-            frame_period_ns = depth_period_ns;
-        }
-        else if (frame_period_ns != depth_period_ns)
-        {
-            LOG_ERROR("Track frame durations don't match (Depth): %llu ns != %llu ns",
-                      frame_period_ns,
-                      depth_period_ns);
+            LOG_ERROR("Depth track is not a video track.", 0);
             return K4A_RESULT_FAILED;
         }
 
-        if (context->depth_track.width != depth_width || context->depth_track.height != depth_height)
+        if (frame_period_ns == 0)
+        {
+            frame_period_ns = context->depth_track->frame_period_ns;
+        }
+        else if (frame_period_ns != context->depth_track->frame_period_ns)
+        {
+            LOG_ERROR("Track frame durations don't match (Depth): %llu ns != %llu ns",
+                      frame_period_ns,
+                      context->depth_track->frame_period_ns);
+            return K4A_RESULT_FAILED;
+        }
+
+        if (context->depth_track->width != depth_width || context->depth_track->height != depth_height)
         {
             LOG_ERROR("Unsupported depth resolution / mode: %dx%d (%s)",
-                      context->depth_track.width,
-                      context->depth_track.height,
+                      context->depth_track->width,
+                      context->depth_track->height,
                       depth_mode_str.c_str());
             return K4A_RESULT_FAILED;
         }
 
-        RETURN_IF_ERROR(read_bitmap_info_header(&context->depth_track));
+        RETURN_IF_ERROR(read_bitmap_info_header(context->depth_track));
 
         context->record_config.depth_track_enabled = true;
     }
 
-    if (context->ir_track.track)
+    if (context->ir_track)
     {
-        context->ir_track.type = static_cast<track_type>(GetChild<KaxTrackType>(*context->ir_track.track).GetValue());
-        KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*context->ir_track.track);
-        context->ir_track.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
-        context->ir_track.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
-
-        uint64_t ir_period_ns = GetChild<KaxTrackDefaultDuration>(*context->ir_track.track).GetValue();
-        context->ir_track.frame_period_ns = ir_period_ns;
-        if (frame_period_ns == 0)
+        if (context->ir_track->type != track_video)
         {
-            frame_period_ns = ir_period_ns;
-        }
-        else if (frame_period_ns != ir_period_ns)
-        {
-            LOG_ERROR("Track frame durations don't match (IR): %llu ns != %llu ns", frame_period_ns, ir_period_ns);
+            LOG_ERROR("IR track is not a video track.", 0);
             return K4A_RESULT_FAILED;
         }
 
-        if (context->depth_track.track)
+        if (frame_period_ns == 0)
         {
-            if (context->ir_track.width != context->depth_track.width ||
-                context->ir_track.height != context->depth_track.height)
+            frame_period_ns = context->ir_track->frame_period_ns;
+        }
+        else if (frame_period_ns != context->ir_track->frame_period_ns)
+        {
+            LOG_ERROR("Track frame durations don't match (IR): %llu ns != %llu ns",
+                      frame_period_ns,
+                      context->ir_track->frame_period_ns);
+            return K4A_RESULT_FAILED;
+        }
+
+        if (context->depth_track)
+        {
+            if (context->ir_track->width != context->depth_track->width ||
+                context->ir_track->height != context->depth_track->height)
             {
                 LOG_ERROR("Depth and IR track have different resolutions: Depth %dx%d, IR %dx%d",
-                          context->depth_track.width,
-                          context->depth_track.height,
-                          context->ir_track.width,
-                          context->ir_track.height);
+                          context->depth_track->width,
+                          context->depth_track->height,
+                          context->ir_track->width,
+                          context->ir_track->height);
                 return K4A_RESULT_FAILED;
             }
         }
-        else if (context->ir_track.width != depth_width || context->ir_track.height != depth_height)
+        else if (context->ir_track->width != depth_width || context->ir_track->height != depth_height)
         {
             LOG_ERROR("Unsupported IR resolution / depth mode: %dx%d (%s)",
-                      context->ir_track.width,
-                      context->ir_track.height,
+                      context->ir_track->width,
+                      context->ir_track->height,
                       depth_mode_str.c_str());
             return K4A_RESULT_FAILED;
         }
 
-        RETURN_IF_ERROR(read_bitmap_info_header(&context->ir_track));
-        if (context->ir_track.format == K4A_IMAGE_FORMAT_DEPTH16)
+        RETURN_IF_ERROR(read_bitmap_info_header(context->ir_track));
+        if (context->ir_track->format == K4A_IMAGE_FORMAT_DEPTH16)
         {
-            context->ir_track.format = K4A_IMAGE_FORMAT_IR16;
+            context->ir_track->format = K4A_IMAGE_FORMAT_IR16;
         }
 
         context->record_config.ir_track_enabled = true;
@@ -641,7 +631,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     }
 
-    // Read depth_delay_off_color_usec and set offsets for each default track accordingly.
+    // Read depth_delay_off_color_usec and set offsets for each builtin track accordingly.
     KaxTag *depth_delay_tag = get_tag(context, "K4A_DEPTH_DELAY_NS");
     if (depth_delay_tag != NULL)
     {
@@ -656,12 +646,12 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             // Only set positive delays so that we don't wrap around near 0.
             if (depth_delay_ns > 0)
             {
-                context->color_track.sync_delay_ns = (uint64_t)depth_delay_ns;
+                context->color_track->sync_delay_ns = (uint64_t)depth_delay_ns;
             }
             else if (depth_delay_ns < 0)
             {
-                context->depth_track.sync_delay_ns = (uint64_t)(-depth_delay_ns);
-                context->ir_track.sync_delay_ns = (uint64_t)(-depth_delay_ns);
+                context->depth_track->sync_delay_ns = (uint64_t)(-depth_delay_ns);
+                context->ir_track->sync_delay_ns = (uint64_t)(-depth_delay_ns);
             }
         }
         else
@@ -675,10 +665,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         context->record_config.depth_delay_off_color_usec = 0;
     }
 
-    if (context->imu_track.track)
+    if (context->imu_track && context->imu_track->type == track_subtitle)
     {
         context->record_config.imu_track_enabled = true;
-        context->imu_track.type = static_cast<track_type>(GetChild<KaxTrackType>(*context->imu_track.track).GetValue());
     }
 
     // Read wired_sync_mode and subordinate_delay_off_master_usec.
@@ -767,8 +756,8 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track->track == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track->codec_id.empty());
 
-    track->codec_id = GetChild<KaxCodecID>(*track->track).GetValue();
     if (track->codec_id == "V_MS/VFW/FOURCC")
     {
         KaxCodecPrivate &codec_private = GetChild<KaxCodecPrivate>(*track->track);
@@ -825,22 +814,60 @@ void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestam
     RETURN_VALUE_IF_ARG(VOID_VALUE, context == NULL);
 
     context->seek_timestamp_ns = seek_timestamp_ns;
-    context->color_track.current_block.reset();
-    context->depth_track.current_block.reset();
-    context->ir_track.current_block.reset();
-    context->imu_track.current_block.reset();
-    context->imu_sample_index = -1;
 
-    for (auto &itr : context->custom_track_map)
+    for (auto &itr : context->track_map)
     {
         auto &track_reader = itr.second;
         track_reader.current_block.reset();
     }
-
-    context->capture_tracks_sync_is_broken = false;
+    context->imu_sample_index = -1;
 }
 
-KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name)
+k4a_result_t parse_tracks(k4a_playback_context_t *context)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->tracks == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->timecode_scale == 0);
+
+    KaxTrackEntry *track = NULL;
+    for (EbmlElement *e : context->tracks->GetElementList())
+    {
+        if (check_element_type(e, &track))
+        {
+            std::string track_name = GetChild<KaxTrackName>(*track).GetValueUTF8();
+
+            track_reader_t track_reader;
+            track_reader.track = track;
+
+            // Read generic tracks information
+            track_reader.track_name = GetChild<KaxTrackName>(*track).GetValueUTF8();
+            track_reader.track_uid = GetChild<KaxTrackUID>(*track).GetValue();
+            track_reader.codec_id = GetChild<KaxCodecID>(*track).GetValue();
+            KaxCodecPrivate &codec_private = GetChild<KaxCodecPrivate>(*track);
+            track_reader.codec_private.assign(codec_private.GetBuffer(),
+                                              codec_private.GetBuffer() + codec_private.GetSize());
+
+            track_reader.frame_period_ns = GetChild<KaxTrackDefaultDuration>(*track).GetValue();
+
+            track_reader.track->SetGlobalTimecodeScale(context->timecode_scale);
+
+            // Read track type specific information
+            track_reader.type = static_cast<track_type>(GetChild<KaxTrackType>(*track).GetValue());
+            if (track_reader.type == track_video)
+            {
+                KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*track);
+                track_reader.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
+                track_reader.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
+            }
+
+            context->track_map.insert(std::pair<std::string, track_reader_t>(track_name, track_reader));
+        }
+    }
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+track_reader_t *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
     RETURN_VALUE_IF_ARG(NULL, context->tracks == nullptr);
@@ -872,114 +899,45 @@ KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, con
         }
     }
 
-    KaxTrackEntry *track_found = NULL;
-    for (EbmlElement *e : context->tracks->GetElementList())
+    track_reader_t *found_reader = NULL;
+    for (auto &itr : context->track_map)
     {
-        KaxTrackEntry *track = NULL;
-        if (check_element_type(e, &track))
+        auto &reader = itr.second;
+        if (search_uid != 0 && reader.track_uid == search_uid)
         {
-            std::string track_name = GetChild<KaxTrackName>(*track).GetValueUTF8();
-            uint64_t track_uid = GetChild<KaxTrackUID>(*track).GetValue();
-            std::string track_codec_id = GetChild<KaxCodecID>(*track).GetValue();
-
-            if (search_uid != 0 && track_uid == search_uid)
-            {
-                track_found = track;
-                break;
-            }
-            else if (track_name == search_name)
-            {
-                track_found = track;
-                // Search by UID has priority over search by name, keep searching for a matching UID.
-            }
+            found_reader = &reader;
+            break;
+        }
+        else if (reader.track_name == search_name)
+        {
+            found_reader = &reader;
+            // Search by UID has priority over search by name, keep searching for a matching UID.
         }
     }
 
-    if (track_found != NULL)
-    {
-        track_found->SetGlobalTimecodeScale(context->timecode_scale);
-    }
-    return track_found;
+    return found_reader;
 }
 
-static bool check_track_name_default_track(std::string track_name)
+bool check_track_reader_is_builtin(k4a_playback_context_t *context, track_reader_t *track_reader)
 {
-    return track_name == depth_track_name || track_name == ir_track_name || track_name == color_track_name ||
-           track_name == imu_track_name;
-}
+    RETURN_VALUE_IF_ARG(false, context == NULL);
+    RETURN_VALUE_IF_ARG(false, track_reader == NULL);
 
-bool check_track_name_capture_track(std::string track_name)
-{
-    return track_name == depth_track_name || track_name == ir_track_name || track_name == color_track_name;
+    return track_reader == context->color_track || track_reader == context->depth_track ||
+           track_reader == context->ir_track || track_reader == context->imu_track;
 }
 
 track_reader_t *get_track_reader_by_name(k4a_playback_context_t *context, std::string track_name)
 {
     RETURN_VALUE_IF_ARG(nullptr, context == NULL);
-    if (track_name == depth_track_name)
-    {
-        return context->record_config.depth_track_enabled ? &context->depth_track : nullptr;
-    }
-    else if (track_name == ir_track_name)
-    {
-        return context->record_config.ir_track_enabled ? &context->ir_track : nullptr;
-    }
-    else if (track_name == color_track_name)
-    {
-        return context->record_config.color_track_enabled ? &context->color_track : nullptr;
-    }
-    else if (track_name == imu_track_name)
-    {
-        return context->record_config.imu_track_enabled ? &context->imu_track : nullptr;
-    }
 
-    auto itr = context->custom_track_map.find(track_name);
-    if (itr != context->custom_track_map.end())
+    auto itr = context->track_map.find(track_name);
+    if (itr != context->track_map.end())
     {
         return &itr->second;
     }
 
     return nullptr;
-}
-
-k4a_result_t parse_custom_tracks(k4a_playback_context_t *context)
-{
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->tracks == NULL);
-
-    KaxTrackEntry *track = NULL;
-    for (EbmlElement *e : context->tracks->GetElementList())
-    {
-        if (check_element_type(e, &track))
-        {
-            std::string track_name = GetChild<KaxTrackName>(*track).GetValueUTF8();
-            if (!check_track_name_default_track(track_name))
-            {
-                track_reader_t track_reader;
-                track_reader.track = track;
-
-                // Read custom tracks information
-                track_reader.codec_id = GetChild<KaxCodecID>(*track).GetValue();
-                KaxCodecPrivate &codec_private = GetChild<KaxCodecPrivate>(*track);
-                track_reader.codec_private.assign(codec_private.GetBuffer(),
-                                                  codec_private.GetBuffer() + codec_private.GetSize());
-
-                track_reader.frame_period_ns = GetChild<KaxTrackDefaultDuration>(*track).GetValue();
-
-                track_reader.type = static_cast<track_type>(GetChild<KaxTrackType>(*track).GetValue());
-                if (track_reader.type == track_video)
-                {
-                    KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*track);
-                    track_reader.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
-                    track_reader.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
-                }
-
-                context->custom_track_map.insert(std::pair<std::string, track_reader_t>(track_name, track_reader));
-            }
-        }
-    }
-
-    return K4A_RESULT_SUCCEEDED;
 }
 
 KaxTag *get_tag(k4a_playback_context_t *context, const char *name)
@@ -1897,17 +1855,17 @@ k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k
 
     k4a_image_t image_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
-    if (block->reader == &context->color_track)
+    if (block->reader == context->color_track)
     {
         result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, context->color_format_conversion));
         k4a_capture_set_color_image(*capture_handle, image_handle);
     }
-    else if (block->reader == &context->depth_track)
+    else if (block->reader == context->depth_track)
     {
         result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, K4A_IMAGE_FORMAT_DEPTH16));
         k4a_capture_set_depth_image(*capture_handle, image_handle);
     }
-    else if (block->reader == &context->ir_track)
+    else if (block->reader == context->ir_track)
     {
         result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, K4A_IMAGE_FORMAT_IR16));
         k4a_capture_set_ir_image(*capture_handle, image_handle);
@@ -1930,19 +1888,12 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, capture_handle == NULL);
 
-    if (context->capture_tracks_sync_is_broken)
-    {
-        LOG_ERROR("Capture tracks sync is broken by k4a_playback_get_next_data_block or "
-                  "k4a_playback_get_previous_data_block function call. Try to call k4a_playback_seek_timestamp to "
-                  "bring the capture tracks back to sync!",
-                  0);
-        return K4A_STREAM_RESULT_FAILED;
-    }
-
-    track_reader_t *blocks[] = { &context->color_track, &context->depth_track, &context->ir_track };
-    std::shared_ptr<block_info_t> next_blocks[] = { context->color_track.current_block,
-                                                    context->depth_track.current_block,
-                                                    context->ir_track.current_block };
+    track_reader_t *blocks[] = { context->color_track, context->depth_track, context->ir_track };
+    std::shared_ptr<block_info_t> next_blocks[] = { context->color_track ? context->color_track->current_block :
+                                                                           nullptr,
+                                                    context->depth_track ? context->depth_track->current_block :
+                                                                           nullptr,
+                                                    context->ir_track ? context->ir_track->current_block : nullptr };
     static_assert(arraysize(blocks) == arraysize(next_blocks), "Track / block mapping does not match");
 
     uint64_t timestamp_start_ns = UINT64_MAX;
@@ -1952,7 +1903,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     int enabled_tracks = 0;
     for (size_t i = 0; i < arraysize(blocks); i++)
     {
-        if (blocks[i]->track != NULL)
+        if (blocks[i] != NULL)
         {
             enabled_tracks++;
 
@@ -2037,7 +1988,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             bool filled = false;
             for (size_t i = 0; i < arraysize(blocks); i++)
             {
-                if (blocks[i]->track != NULL && next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
+                if (blocks[i] != NULL && next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
                 {
                     std::shared_ptr<block_info_t> test_block = find_block(context,
                                                                           blocks[i],
@@ -2134,19 +2085,19 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, imu_sample == NULL);
 
-    if (context->imu_track.track == NULL)
+    if (context->imu_track == NULL)
     {
         LOG_WARNING("Recording has no IMU track.", 0);
         *imu_sample = { 0 };
         return K4A_STREAM_RESULT_EOF;
     }
 
-    std::shared_ptr<block_info_t> block_info = context->imu_track.current_block;
+    std::shared_ptr<block_info_t> block_info = context->imu_track->current_block;
 
     if (block_info == nullptr)
     {
         // There is no current IMU sample, find the next/previous sample based on seek_timestamp.
-        block_info = find_block(context, &context->imu_track, context->seek_timestamp_ns);
+        block_info = find_block(context, context->imu_track, context->seek_timestamp_ns);
         if (block_info && !block_info->block)
         {
             // The seek timestamp is past the end of the file, get the last block instead.
@@ -2155,7 +2106,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
 
         if (block_info && block_info->block)
         {
-            context->imu_track.current_block = block_info;
+            context->imu_track->current_block = block_info;
 
             size_t sample_count = block_info->block->NumberFrames();
             if (block_info->sync_timestamp_ns > context->seek_timestamp_ns)
@@ -2227,7 +2178,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
             block_info = next_block(context, block_info.get(), next);
             if (block_info && block_info->block)
             {
-                context->imu_track.current_block = block_info;
+                context->imu_track->current_block = block_info;
                 context->imu_sample_index = next ? 0 : (int)(block_info->block->NumberFrames() - 1);
             }
         }

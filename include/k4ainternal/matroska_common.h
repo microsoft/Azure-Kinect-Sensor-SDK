@@ -14,7 +14,6 @@
 #include <memory>
 #include <string>
 #include <thread>
-#include <unordered_map>
 
 #if defined(__clang__)
 
@@ -130,7 +129,7 @@ constexpr uint16_t swap_bytes_16(uint16_t input)
 
 namespace k4arecord
 {
-// Define all the default track names here
+// Define all the built-in track names here
 const std::string depth_track_name = "DEPTH";
 const std::string ir_track_name = "IR";
 const std::string color_track_name = "COLOR";

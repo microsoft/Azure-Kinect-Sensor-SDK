@@ -152,7 +152,13 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT bool k4a_playback_track_check_exists(k4a_playback_t playback_handle, const char *track_name);
+K4ARECORD_EXPORT bool k4a_playback_check_track_exists(k4a_playback_t playback_handle, const char *track_name);
+
+K4ARECORD_EXPORT size_t k4a_playback_get_track_count(k4a_playback_t playback_handle);
+K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_track_name(k4a_playback_t playback_handle,
+                                                                 size_t track_index,
+                                                                 char *track_name,
+                                                                 size_t *track_name_size);
 
 /** Gets the video-specific track information for a particular video track.
  *
@@ -165,7 +171,8 @@ K4ARECORD_EXPORT bool k4a_playback_track_check_exists(k4a_playback_t playback_ha
  * \param video_settings
  * Location to write the track's video settings.
  *
- * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success, ::K4A_RESULT_FAILED is returned if the specified track does
+ * not exist or is not a video track.
  *
  * \xmlonly
  * <requirements>
@@ -202,8 +209,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_track_get_video_settings(k4a_playback
  * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p value has been filled in. If the buffer is too small the
  * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p value buffer is returned in the \p
  * codec_id_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track_name does not exist. All other failures
- * return
- * ::K4A_BUFFER_RESULT_FAILED.
+ * return ::K4A_BUFFER_RESULT_FAILED.
  *
  * \xmlonly
  * <requirements>
@@ -240,8 +246,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
  * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p value has been filled in. If the buffer is too small the
  * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p value buffer is returned in the \p
  * codec_context_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track_name does not exist. All other
- * failures return
- * ::K4A_BUFFER_RESULT_FAILED.
+ * failures return ::K4A_BUFFER_RESULT_FAILED.
  *
  * \xmlonly
  * <requirements>
@@ -536,7 +541,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * The track name defines the track that you want to get the next data block from.
  *
  * \param data_block_handle
- * The location to write the data block.
+ * The location to write the data block handle.
  *
  * \returns
  * ::K4A_STREAM_RESULT_SUCCEEDED if a data block is returned, or ::K4A_STREAM_RESULT_EOF if the end of the recording is
@@ -557,11 +562,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * block in the recording closest to the seek time with a timestamp greater than or equal to the seek time.
  *
  * \remarks
- * The k4a_playback_get_next_data_block is allowed to move the default track as well when passing in the default track
- * names: "DEPTH", "IR", "COLOR", "IMU". However, but it will break the timestamp synchronization among DEPTH/IR/COLOR
- * tracks. Once k4a_playback_get_next_data_block is called, the k4a_playback_get_next_capture and
- * k4a_playback_get_previous_capture API will return failure until k4a_playback_seek_timestamp API is called afterwards
- * to realign the timestamps.
+ * k4a_playback_get_next_data_block cannot be used with the built-in tracks: "COLOR", "DEPTH", "IR", or "IMU"
  *
  * \remarks
  * If the call is successful, callers must call k4a_playback_data_block_release() to return the allocated memory for
@@ -613,11 +614,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playba
  * data_block_handle.
  *
  * \remarks
- * The k4a_playback_get_next_data_block is allowed to move the default track as well when passing in the default track
- * names: "DEPTH", "IR", "COLOR", "IMU". However, but it will break the timestamp synchronization among DEPTH/IR/COLOR
- * tracks. Once k4a_playback_get_previous_data_block is called, the k4a_playback_get_next_capture and
- * k4a_playback_get_previous_capture API will return failure until k4a_playback_seek_timestamp API is called afterwards
- * to realign the timestamps.
+ * k4a_playback_get_previous_data_block cannot be used with the built-in tracks: "COLOR", "DEPTH", "IR", or "IMU"
  *
  * \xmlonly
  * <requirements>

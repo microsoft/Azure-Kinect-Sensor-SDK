@@ -12,6 +12,7 @@
 #include <set>
 #include <condition_variable>
 #include <mutex>
+#include <unordered_map>
 
 namespace k4arecord
 {

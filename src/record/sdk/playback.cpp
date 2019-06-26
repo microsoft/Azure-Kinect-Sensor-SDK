@@ -193,14 +193,62 @@ k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handl
     return K4A_RESULT_SUCCEEDED;
 }
 
-bool k4a_playback_track_check_exists(k4a_playback_t playback_handle, const char *track_name)
+bool k4a_playback_check_track_exists(k4a_playback_t playback_handle, const char *track_name)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(false, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
-    RETURN_VALUE_IF_ARG(false, context == NULL || track_name == NULL);
+    RETURN_VALUE_IF_ARG(false, context == NULL);
+    RETURN_VALUE_IF_ARG(false, track_name == NULL);
 
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     return track_reader != nullptr;
+}
+
+size_t k4a_playback_get_track_count(k4a_playback_t playback_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(0, context == NULL);
+
+    return context->track_map.size();
+}
+
+k4a_buffer_result_t k4a_playback_get_track_name(k4a_playback_t playback_handle,
+                                                size_t track_index,
+                                                char *track_name,
+                                                size_t *track_name_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context->track_map.empty());
+
+    size_t index = 0;
+    for (auto &itr : context->track_map)
+    {
+        if (index == track_index)
+        {
+            auto track_reader = &itr.second;
+
+            // std::string doesn't include the appending zero at the end when counting size
+            const size_t append_zero = 1;
+            if (track_name != NULL && *track_name_size >= track_reader->track_name.size() + append_zero)
+            {
+                memcpy(track_name, track_reader->track_name.c_str(), track_reader->track_name.size() + append_zero);
+                *track_name_size = track_reader->track_name.size() + append_zero;
+                return K4A_BUFFER_RESULT_SUCCEEDED;
+            }
+            else
+            {
+                *track_name_size = track_reader->track_name.size() + append_zero;
+                return K4A_BUFFER_RESULT_TOO_SMALL;
+            }
+        }
+        index++;
+    }
+
+    LOG_ERROR("Track index out of bounds: %u", track_index);
+    return K4A_BUFFER_RESULT_FAILED;
 }
 
 k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handle,
@@ -337,7 +385,7 @@ k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle, k
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
 
-    if (context->color_track.track == NULL)
+    if (context->color_track == NULL)
     {
         LOG_ERROR("The color track is not enabled in this recording. The color conversion format cannot be set.", 0);
         return K4A_RESULT_FAILED;
@@ -346,7 +394,7 @@ k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle, k
     switch (target_format)
     {
     case K4A_IMAGE_FORMAT_COLOR_MJPG:
-        if (context->color_track.format == K4A_IMAGE_FORMAT_COLOR_MJPG)
+        if (context->color_track->format == K4A_IMAGE_FORMAT_COLOR_MJPG)
         {
             context->color_format_conversion = target_format;
         }
@@ -452,13 +500,14 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        LOG_ERROR("Track name cannot be found.", 0);
+        LOG_ERROR("Track name cannot be found: %s", track_name);
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    if (check_track_name_capture_track(track_name))
+    if (check_track_reader_is_builtin(context, track_reader))
     {
-        context->capture_tracks_sync_is_broken = true;
+        LOG_ERROR("k4a_playback_get_next_data_block cannot be used with the built-in track: %s", track_name);
+        return K4A_STREAM_RESULT_FAILED;
     }
 
     std::shared_ptr<block_info_t> read_block = track_reader->current_block;
@@ -519,9 +568,10 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    if (check_track_name_capture_track(track_name))
+    if (check_track_reader_is_builtin(context, track_reader))
     {
-        context->capture_tracks_sync_is_broken = true;
+        LOG_ERROR("k4a_playback_get_previous_data_block cannot be used with the built-in track: %s", track_name);
+        return K4A_STREAM_RESULT_FAILED;
     }
 
     std::shared_ptr<block_info_t> read_block = track_reader->current_block;
