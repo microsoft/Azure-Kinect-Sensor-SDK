@@ -154,7 +154,57 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback
  */
 K4ARECORD_EXPORT bool k4a_playback_check_track_exists(k4a_playback_t playback_handle, const char *track_name);
 
+/** Get the number of tracks in a playback file.
+ *
+ * \param playback_handle
+ * Handle obtained by k4a_playback_open().
+ *
+ * \returns the number of tracks in the playback file
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4ARECORD_EXPORT size_t k4a_playback_get_track_count(k4a_playback_t playback_handle);
+
+/** Gets the name of a track at a specific index.
+ *
+ * \param playback_handle
+ * Handle obtained by k4a_playback_open().
+ *
+ * \param track_index
+ * The index of the track to read the name form.
+ *
+ * \param track_name
+ * Location to write the track name. This will be a UTF8 null terminated string. If a NULL buffer is specified, \p
+ * track_name_size will be set to the size of buffer needed to store the string.
+ *
+ * \param track_name_size
+ * On input, the size of the \p track_name buffer. On output, this is set to the length of the track_name value
+ * (including the null terminator).
+ *
+ * \returns
+ * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p track_name has been filled in. If the buffer is too small
+ * the function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p track_name buffer is returned in the
+ * \p track_name_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track index does not exist. All other
+ * failures return ::K4A_BUFFER_RESULT_FAILED.
+ *
+ * \remarks
+ * When used along with k4a_playback_get_track_count(), this function can be used to enumerate all the available tracks
+ * in a playback file.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_track_name(k4a_playback_t playback_handle,
                                                                  size_t track_index,
                                                                  char *track_name,
@@ -166,7 +216,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_track_name(k4a_playback_t 
  * Handle obtained by k4a_playback_open().
  *
  * \param track_name
- * The track name to be queried for video settings.
+ * The track name to read video settings from.
  *
  * \param video_settings
  * Location to write the track's video settings.
@@ -195,21 +245,21 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_track_get_video_settings(k4a_playback
  * Handle obtained by k4a_playback_open().
  *
  * \param track_name
- * The track name to be queried the codec id
+ * The track name to read the codec id from.
  *
  * \param codec_id
  * Location to write the codec id. This will be a UTF8 null terminated string. If a NULL buffer is specified, \p
  * codec_id_size will be set to the size of buffer needed to store the string.
  *
  * \param codec_id_size
- * On input, the size of the \p value buffer. On output, this is set to the length of the codec_id value (including the
- * null terminator).
+ * On input, the size of the \p codec_id buffer. On output, this is set to the length of the codec_id value (including
+ * the null terminator).
  *
  * \returns
- * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p value has been filled in. If the buffer is too small the
- * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p value buffer is returned in the \p
- * codec_id_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track_name does not exist. All other failures
- * return ::K4A_BUFFER_RESULT_FAILED.
+ * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p codec_id has been filled in. If the buffer is too small
+ * the function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p codec_id buffer is returned in the
+ * \p codec_id_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track_name does not exist. All other
+ * failures return ::K4A_BUFFER_RESULT_FAILED.
  *
  * \xmlonly
  * <requirements>
@@ -233,20 +283,20 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
  * Handle obtained by k4a_playback_open().
  *
  * \param track_name
- * The track name to be queried the codec id
+ * The track name to read the codec context from.
  *
  * \param codec_context
  * Location to write the codec context data. If a NULL buffer is specified, \p codec_context_size will be set to the
  * size of buffer needed to store the data.
  *
  * \param codec_context_size
- * On input, the size of the \p value buffer. On output, this is set to the length of the codec_context data.
+ * On input, the size of the \p codec_context buffer. On output, this is set to the length of the codec_context data.
  *
  * \returns
- * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p value has been filled in. If the buffer is too small the
- * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p value buffer is returned in the \p
- * codec_context_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track_name does not exist. All other
- * failures return ::K4A_BUFFER_RESULT_FAILED.
+ * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p codec_context has been filled in. If the buffer is too
+ * small the function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p codec_context buffer is
+ * returned in the \p codec_context_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track_name does not
+ * exist. All other failures return ::K4A_BUFFER_RESULT_FAILED.
  *
  * \xmlonly
  * <requirements>

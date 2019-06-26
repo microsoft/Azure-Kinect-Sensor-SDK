@@ -200,8 +200,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
 k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next);
 
 // Template helper functions
-template<typename T>
-T *read_element(k4a_playback_context_t *context, EbmlElement *element, ScopeMode readFully = SCOPE_ALL_DATA)
+template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElement *element)
 {
     try
     {
@@ -209,7 +208,7 @@ T *read_element(k4a_playback_context_t *context, EbmlElement *element, ScopeMode
         EbmlElement *dummy = nullptr;
 
         T *typed_element = static_cast<T *>(element);
-        typed_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true, readFully);
+        typed_element->Read(*context->stream, T::ClassInfos.Context, upper_level, dummy, true);
         return typed_element;
     }
     catch (std::ios_base::failure &e)
