@@ -142,7 +142,7 @@ The first call to <a class="el" href="group___functions_ga47a2aaa8c429054691e451
 <dd>
 If the call is successful, callers must call <a class="el" href="group___functions_gadd485580daed3b8e0213118f56e5e0c0.html#gadd485580daed3b8e0213118f56e5e0c0" title="Release the data block. ">k4a_playback_data_block_release()</a> to return the allocated memory for data_block_handle.</dd>
 <dd>
-The k4a_playback_get_next_data_block is allowed to move the default track as well when passing in the default track names: "DEPTH", "IR", "COLOR", "IMU". However, but it will break the timestamp synchronization among DEPTH/IR/COLOR tracks. Once k4a_playback_get_previous_data_block is called, the k4a_playback_get_next_capture and k4a_playback_get_previous_capture API will return failure until k4a_playback_seek_timestamp API is called afterwards to realign the timestamps.</dd></dl>
+k4a_playback_get_previous_data_block cannot be used with the built-in tracks: "COLOR", "DEPTH", "IR", or "IMU"</dd></dl>
  
 </div>
 </div>

@@ -129,7 +129,7 @@ $(document).ready(function(){initNavTree('group___functions_ga2bca9aea2bcfa318f2
   <table class="params">
     <tr><td class="paramname">playback_handle</td><td>Handle obtained by <a class="el" href="group___functions_gacb254ac941b2ab3c202ca68f4537f368.html#gacb254ac941b2ab3c202ca68f4537f368" title="Opens an existing recording file for reading. ">k4a_playback_open()</a>.</td></tr>
     <tr><td class="paramname">track_name</td><td>The track name defines the track that you want to get the next data block from.</td></tr>
-    <tr><td class="paramname">data_block_handle</td><td>The location to write the data block.</td></tr>
+    <tr><td class="paramname">data_block_handle</td><td>The location to write the data block handle.</td></tr>
   </table>
   </dd>
 </dl>
@@ -140,7 +140,7 @@ If a call was made to <a class="el" href="group___functions_ga47a2aaa8c429054691
 <dd>
 The first call to <a class="el" href="group___functions_ga2bca9aea2bcfa318f2625f059d4ed807.html#ga2bca9aea2bcfa318f2625f059d4ed807" title="Read the next data block of a track with the given track name. ">k4a_playback_get_next_data_block()</a> after <a class="el" href="group___functions_gaea748994a121543bd77f90417cf428f6.html#gaea748994a121543bd77f90417cf428f6" title="Seek to a specific timestamp within a recording. ">k4a_playback_seek_timestamp()</a> will return the data block in the recording closest to the seek time with a timestamp greater than or equal to the seek time.</dd>
 <dd>
-The k4a_playback_get_next_data_block is allowed to move the default track as well when passing in the default track names: "DEPTH", "IR", "COLOR", "IMU". However, but it will break the timestamp synchronization among DEPTH/IR/COLOR tracks. Once k4a_playback_get_next_data_block is called, the k4a_playback_get_next_capture and k4a_playback_get_previous_capture API will return failure until k4a_playback_seek_timestamp API is called afterwards to realign the timestamps.</dd>
+k4a_playback_get_next_data_block cannot be used with the built-in tracks: "COLOR", "DEPTH", "IR", or "IMU"</dd>
 <dd>
 If the call is successful, callers must call <a class="el" href="group___functions_gadd485580daed3b8e0213118f56e5e0c0.html#gadd485580daed3b8e0213118f56e5e0c0" title="Release the data block. ">k4a_playback_data_block_release()</a> to return the allocated memory for data_block_handle.</dd></dl>
  

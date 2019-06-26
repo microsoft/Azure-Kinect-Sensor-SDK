@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: k4a_playback_track_check_exists</title>
+<title>Azure Kinect Sensor SDK: k4a_playback_get_track_name</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('group___functions_ga0e5c2a65e0d89020927fd9a21cf7c746.html','');});
+$(document).ready(function(){initNavTree('group___functions_gaaa6e6d931691c5fde0db0a831286109f.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,14 +84,14 @@ $(document).ready(function(){initNavTree('group___functions_ga0e5c2a65e0d8902092
 </div>
 
 <div class="contents">
-<a id="ga0e5c2a65e0d89020927fd9a21cf7c746"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga0e5c2a65e0d89020927fd9a21cf7c746">&#9670;&nbsp;</a></span>k4a_playback_track_check_exists()</h2>
+<a id="gaaa6e6d931691c5fde0db0a831286109f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaaa6e6d931691c5fde0db0a831286109f">&#9670;&nbsp;</a></span>k4a_playback_get_track_name()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool k4a_playback_track_check_exists </td>
+          <td class="memname"><a class="el" href="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c.html#ga71b3cf304a2cd8fbac2f86c876deda5c">k4a_buffer_result_t</a> k4a_playback_get_track_name </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structk4a__playback__t.html">k4a_playback_t</a>&#160;</td>
           <td class="paramname"><em>playback_handle</em>, </td>
@@ -99,8 +99,20 @@ $(document).ready(function(){initNavTree('group___functions_ga0e5c2a65e0d8902092
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>track_name</em>&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>track_index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>track_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>track_name_size</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -110,15 +122,18 @@ $(document).ready(function(){initNavTree('group___functions_ga0e5c2a65e0d8902092
       </table>
 </div><div class="memdoc">
 
-<p>Checks whether a track with the given track name exists in the playback file. </p>
+<p>Gets the name of a track at a specific index. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">playback_handle</td><td>Handle obtained by <a class="el" href="group___functions_gacb254ac941b2ab3c202ca68f4537f368.html#gacb254ac941b2ab3c202ca68f4537f368" title="Opens an existing recording file for reading. ">k4a_playback_open()</a>.</td></tr>
-    <tr><td class="paramname">track_name</td><td>The track name to be checked to see whether it exists or not.</td></tr>
+    <tr><td class="paramname">track_index</td><td>The index of the track to read the name form.</td></tr>
+    <tr><td class="paramname">track_name</td><td>Location to write the track name. This will be a UTF8 null terminated string. If a NULL buffer is specified, <code>track_name_size</code> will be set to the size of buffer needed to store the string.</td></tr>
+    <tr><td class="paramname">track_name_size</td><td>On input, the size of the <code>track_name</code> buffer. On output, this is set to the length of the track_name value (including the null terminator).</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>true if the track exists</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A return of <a class="el" href="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c.html#gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3" title="The result was successful. ">K4A_BUFFER_RESULT_SUCCEEDED</a> means that the <code>track_name</code> has been filled in. If the buffer is too small the function returns <a class="el" href="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c.html#gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248" title="The input buffer was too small. ">K4A_BUFFER_RESULT_TOO_SMALL</a> and the needed size of the <code>track_name</code> buffer is returned in the <code>track_name_size</code> parameter. <a class="el" href="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c.html#gga71b3cf304a2cd8fbac2f86c876deda5ca29305af05427c7e739e910f02f72709a" title="The result was a failure. ">K4A_BUFFER_RESULT_FAILED</a> is returned if the track index does not exist. All other failures return <a class="el" href="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c.html#gga71b3cf304a2cd8fbac2f86c876deda5ca29305af05427c7e739e910f02f72709a" title="The result was a failure. ">K4A_BUFFER_RESULT_FAILED</a>.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>When used along with <a class="el" href="group___functions_ga2a8efd45172f305bd5e3527f27b8e421.html#ga2a8efd45172f305bd5e3527f27b8e421" title="Get the number of tracks in a playback file. ">k4a_playback_get_track_count()</a>, this function can be used to enumerate all the available tracks in a playback file.</dd></dl>
  
 </div>
 </div>
