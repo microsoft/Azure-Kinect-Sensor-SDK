@@ -48,7 +48,6 @@ K4A_DECLARE_HANDLE(k4a_record_t);
  */
 K4A_DECLARE_HANDLE(k4a_playback_t);
 
-<<<<<<< HEAD
 /** \class k4a_playback_data_block_t types.h <k4arecord/types.h>
  * Handle to a block of data read from a k4a_playback_t custom track.
  *
@@ -63,14 +62,13 @@ K4A_DECLARE_HANDLE(k4a_playback_t);
  * \endxmlonly
  */
 K4A_DECLARE_HANDLE(k4a_playback_data_block_t)
-=======
+
 /**
  * @}
  *
  * \addtogroup Enumerations
  * @{
  */
->>>>>>> develop
 
 /** Return codes returned by Azure Kinect playback API.
  *
@@ -167,7 +165,6 @@ typedef struct _k4a_record_configuration_t
     uint32_t start_timestamp_offset_usec;
 } k4a_record_configuration_t;
 
-<<<<<<< HEAD
 /** Structure containing additional metadata specific to custom video tracks.
  *
  * \xmlonly
@@ -200,11 +197,10 @@ typedef struct _k4a_record_subtitle_settings_t
      */
     bool high_freq_data;
 } k4a_record_subtitle_settings_t;
-=======
+
 /**
  * @}
  */
->>>>>>> develop
 
 #ifdef __cplusplus
 }

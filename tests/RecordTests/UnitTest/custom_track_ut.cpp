@@ -104,14 +104,14 @@ protected:
 
             result = k4a_record_write_custom_track_data(handle,
                                                         "DEPTH",
-                                                        k4a_image_get_timestamp_usec(depth_image),
+                                                        k4a_image_get_device_timestamp_usec(depth_image),
                                                         k4a_image_get_buffer(depth_image),
                                                         static_cast<uint32_t>(k4a_image_get_size(depth_image)));
             ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
             result = k4a_record_write_custom_track_data(handle,
                                                         "IR",
-                                                        k4a_image_get_timestamp_usec(ir_image),
+                                                        k4a_image_get_device_timestamp_usec(ir_image),
                                                         k4a_image_get_buffer(ir_image),
                                                         static_cast<uint32_t>(k4a_image_get_size(ir_image)));
             ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
