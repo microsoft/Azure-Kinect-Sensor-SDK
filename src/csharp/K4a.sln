@@ -3,27 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureKinect.Examples.WPFViewer", "Microsoft.AzureKinect.Examples.WPFViewer\Microsoft.AzureKinect.Examples.WPFViewer.csproj", "{CCD99E9D-1EE2-41F5-AD3F-4110A466A9A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer", "Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer\Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer.csproj", "{CCD99E9D-1EE2-41F5-AD3F-4110A466A9A4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AzureKinect", "Microsoft.AzureKinect\Microsoft.AzureKinect.csproj", "{847B31D5-C253-4766-BF81-032F4670589D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Kinect.Sensor", "Microsoft.Azure.Kinect.Sensor\Microsoft.Azure.Kinect.Sensor.csproj", "{847B31D5-C253-4766-BF81-032F4670589D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AzureKinect.FunctionalTests", "Microsoft.AzureKinect.FunctionalTests\Microsoft.AzureKinect.FunctionalTests.csproj", "{41510BD0-7F25-470B-A1DC-12E1DB1AB3B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Kinect.Sensor.FunctionalTests", "Microsoft.Azure.Kinect.Sensor.FunctionalTests\Microsoft.Azure.Kinect.Sensor.FunctionalTests.csproj", "{41510BD0-7F25-470B-A1DC-12E1DB1AB3B7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StubValidator", "StubValidator\StubValidator.csproj", "{9C78ECE9-FDCF-4E72-979A-6C93E1201DA9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AzureKinect.Test.StubGenerator", "Microsoft.AzureKinect.Test.StubGenerator\Microsoft.AzureKinect.Test.StubGenerator.csproj", "{FCD1E629-1E96-4BDD-A247-35B50F31137A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Kinect.Sensor.Test.StubGenerator", "Microsoft.Azure.Kinect.Sensor.Test.StubGenerator\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator.csproj", "{FCD1E629-1E96-4BDD-A247-35B50F31137A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AzureKinect.UnitTests", "Microsoft.AzureKinect.UnitTests\Microsoft.AzureKinect.UnitTests.csproj", "{6D4EC05A-3A81-4B92-8881-96F499F5986B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Kinect.Sensor.UnitTests", "Microsoft.Azure.Kinect.Sensor.UnitTests\Microsoft.Azure.Kinect.Sensor.UnitTests.csproj", "{6D4EC05A-3A81-4B92-8881-96F499F5986B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StubGenerator", "StubGenerator", "{5C3A9F92-56B4-4A7B-86EC-BACBE07C5AAE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AzureKinect.Test.StubGenerator.UnitTests", "Microsoft.AzureKinect.Test.StubGenerator.UnitTests\Microsoft.AzureKinect.Test.StubGenerator.UnitTests.csproj", "{E1B3CC41-BC1C-47B7-A6A6-AA50E6994C05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Kinect.Sensor.Test.StubGenerator.UnitTests", "Microsoft.Azure.Kinect.Sensor.Test.StubGenerator.UnitTests\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator.UnitTests.csproj", "{E1B3CC41-BC1C-47B7-A6A6-AA50E6994C05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureKinect.WPF", "Microsoft.AzureKinect.WPF\Microsoft.AzureKinect.WPF.csproj", "{4762DD42-3CF3-4742-9AEA-5D39781FD2A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Kinect.Sensor.WPF", "Microsoft.Azure.Kinect.Sensor.WPF\Microsoft.Azure.Kinect.Sensor.WPF.csproj", "{4762DD42-3CF3-4742-9AEA-5D39781FD2A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureKinect.Examples.WinForms", "Microsoft.AzureKinect.Examples.WinForms\Microsoft.AzureKinect.Examples.WinForms.csproj", "{8A14FB66-07CD-4E4C-A533-89DE0AFF4FCB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Kinect.Sensor.Examples.WinForms", "Microsoft.Azure.Kinect.Sensor.Examples.WinForms\Microsoft.Azure.Kinect.Sensor.Examples.WinForms.csproj", "{8A14FB66-07CD-4E4C-A533-89DE0AFF4FCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AzureKinect.WinForms", "Microsoft.AzureKinect.WinForms\Microsoft.AzureKinect.WinForms.csproj", "{618E28C5-0624-463F-9ADB-040BA5DAED68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Kinect.Sensor.WinForms", "Microsoft.Azure.Kinect.Sensor.WinForms\Microsoft.Azure.Kinect.Sensor.WinForms.csproj", "{618E28C5-0624-463F-9ADB-040BA5DAED68}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
