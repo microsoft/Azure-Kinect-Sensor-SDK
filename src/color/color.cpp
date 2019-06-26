@@ -11,6 +11,7 @@
 #include <string.h>
 #include <assert.h>
 #include <new>
+#include <array>
 
 #include "color_priv.h"
 
@@ -33,7 +34,7 @@ typedef struct _color_context_t
     color_cb_streaming_capture_t *capture_ready_cb;
     void *capture_ready_cb_context;
     tickcounter_ms_t sensor_start_time_tick;
-
+    std::array<color_control_cap_t, K4A_COLOR_CONTROL_POWERLINE_FREQUENCY + 1> control_cap = {};
 #ifdef _WIN32
     Microsoft::WRL::ComPtr<CMFCameraReader> m_spCameraReader;
 #else
@@ -64,10 +65,7 @@ k4a_result_t color_create(TICK_COUNTER_HANDLE tick_handle,
         color->capture_ready_cb_context = capture_ready_context;
         color->sensor_start_time_tick = 0;
         color->tick = tick_handle;
-    }
 
-    if (K4A_SUCCEEDED(result))
-    {
 #ifdef _WIN32
         (void)(serial_number);
         static_assert(sizeof(guid_t) == sizeof(GUID), "Windows GUID and this guid_t are not the same");
@@ -226,6 +224,46 @@ tickcounter_ms_t color_get_sensor_start_time_tick(const color_t handle)
     RETURN_VALUE_IF_HANDLE_INVALID(0, color_t, handle);
     color_context_t *color = color_t_get_context(handle);
     return color->sensor_start_time_tick;
+}
+
+k4a_result_t color_get_control_capabilities(const color_t handle,
+                                            const k4a_color_control_command_t command,
+                                            bool *supports_auto,
+                                            int32_t *min_value,
+                                            int32_t *max_value,
+                                            int32_t *step_value,
+                                            int32_t *default_value,
+                                            k4a_color_control_mode_t *default_mode)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, color_t, handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
+                        command < K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE ||
+                            command > K4A_COLOR_CONTROL_POWERLINE_FREQUENCY);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, supports_auto == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, min_value == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, max_value == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, step_value == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, default_value == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, default_mode == NULL);
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    color_context_t *color = color_t_get_context(handle);
+
+    if (color->control_cap[command].valid == false)
+    {
+        result = color->m_spCameraReader->GetCameraControlCapabilities(command, &(color->control_cap[command]));
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        *supports_auto = color->control_cap[command].supportAuto;
+        *min_value = color->control_cap[command].minValue;
+        *max_value = color->control_cap[command].maxValue;
+        *step_value = color->control_cap[command].stepValue;
+        *default_value = color->control_cap[command].defaultValue;
+        *default_mode = color->control_cap[command].defaultMode;
+    }
+
+    return result;
 }
 
 k4a_result_t color_get_control(const color_t handle,

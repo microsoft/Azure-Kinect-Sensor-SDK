@@ -61,6 +61,14 @@ extern "C" {
 #define USB_CMD_IMU_STREAM_ENDPOINT 0x82
 
 //************************ Typedefs *****************************
+typedef struct _usb_async_transfer_data_t
+{
+    struct _usbcmd_context_t *usbcmd;
+    struct libusb_transfer *bulk_transfer;
+    k4a_image_t image;
+    uint32_t list_index;
+} usb_async_transfer_data_t;
+
 typedef struct _usbcmd_context_t
 {
     allocation_source_t source;
@@ -83,8 +91,7 @@ typedef struct _usbcmd_context_t
     usb_cmd_stream_cb_t *callback;
     void *stream_context;
     bool stream_going;
-    struct libusb_transfer *p_bulk_transfer[USB_CMD_MAX_XFR_COUNT];
-    k4a_image_t image[USB_CMD_MAX_XFR_COUNT];
+    usb_async_transfer_data_t *transfer_list[USB_CMD_MAX_XFR_COUNT];
     size_t stream_size;
     LOCK_HANDLE lock;
     THREAD_HANDLE stream_handle;
@@ -95,7 +102,7 @@ K4A_DECLARE_CONTEXT(usbcmd_t, usbcmd_context_t);
 //************ Declarations (Statics and globals) ***************
 
 //******************* Function Prototypes ***********************
-void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *p_bulk_transfer);
+void LIBUSB_CALL usb_cmd_libusb_cb(struct libusb_transfer *bulk_transfer);
 
 #ifdef __cplusplus
 }

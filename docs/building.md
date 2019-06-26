@@ -1,5 +1,9 @@
 # Building and Dependencies
 
+This information is for how to build your own copy of the SDK binaries. Most users of 
+the Azure Kinect DK should not need to re-build the SDK, if you just need to use the SDK
+see [usage](usage.md) for more information.
+
 ## Support Configurations
 
 Compilers:
@@ -11,7 +15,7 @@ Architectures:
 * amd64
 * x86 (limited, no testing is performed)
 
-Toolchain files in [cmake/toolchains](cmake/toolchains) are mainly used for our
+Toolchain files in [cmake/toolchains](../cmake/toolchains) are mainly used for our
 CI system but can be used to test specific flavors if needed.
 
 ## Dependencies
@@ -68,7 +72,7 @@ binaries that are tested. (The command prompt should be called something like
 x64 Native Tools Command Prompt for VS 2017). Note: call the command line tool
 with the option ```-arch=amd64``` for x64 builds i.e ```VsDevCmd.bat -arch=amd64```
 
-**NOTE:** *You can run [scripts/verify-windows.ps1](scripts/verify-windows.ps1) to verify that your Windows PC is setup 
+**NOTE:** *You can run [scripts/verify-windows.ps1](../scripts/verify-windows.ps1) to verify that your Windows PC is setup 
 properly.*
 
 ### Linux Dependencies
@@ -103,7 +107,7 @@ package manager.
   running the SDK*
   
 If you are using Ubuntu, you can use our CI script
-[scripts/bootstrap-ubuntu.sh](scripts/bootstrap-ubuntu.sh) to download and
+[bootstrap-ubuntu.sh](../scripts/bootstrap-ubuntu.sh) to download and
 install all needed tools and libraries.
 
 ## Building

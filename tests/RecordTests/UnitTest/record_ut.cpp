@@ -24,16 +24,15 @@ protected:
         context->ebml_file = make_unique<libebml::MemIOCallback>();
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
         context->file_segment = make_unique<libmatroska::KaxSegment>();
-        context->pending_clusters = make_unique<std::list<cluster_t *>>();
     }
 
     void TearDown() override
     {
-        for (cluster_t *cluster : *context->pending_clusters)
+        for (cluster_t *cluster : context->pending_clusters)
         {
             delete cluster;
         }
-        context->pending_clusters->clear();
+        context->pending_clusters.clear();
 
         k4a_record_t_destroy(recording_handle);
     }
@@ -43,7 +42,7 @@ static_assert(MAX_CLUSTER_LENGTH_NS > 10, "Tests need to run with clusters > 10n
 
 TEST_F(record_ut, new_clusters_in_order)
 {
-    ASSERT_EQ(context->pending_clusters->size(), 0u);
+    ASSERT_EQ(context->pending_clusters.size(), 0u);
     ASSERT_EQ(context->last_written_timestamp, 0);
 
     // Create 3 clusters in order
@@ -58,7 +57,7 @@ TEST_F(record_ut, new_clusters_in_order)
     ASSERT_EQ(cluster2->time_end_ns, MAX_CLUSTER_LENGTH_NS * 2);
     ASSERT_NE(cluster2, cluster1);
 
-    ASSERT_EQ(context->pending_clusters->size(), 2u);
+    ASSERT_EQ(context->pending_clusters.size(), 2u);
 
     // Try looking up each cluster by timestamp
     for (uint64 timestamp = 0; timestamp < 10; timestamp++)
@@ -76,12 +75,12 @@ TEST_F(record_ut, new_clusters_in_order)
         ASSERT_EQ(cluster, cluster2);
     }
 
-    ASSERT_EQ(context->pending_clusters->size(), 2u);
+    ASSERT_EQ(context->pending_clusters.size(), 2u);
 }
 
 TEST_F(record_ut, new_cluster_out_of_order)
 {
-    ASSERT_EQ(context->pending_clusters->size(), 0u);
+    ASSERT_EQ(context->pending_clusters.size(), 0u);
     ASSERT_EQ(context->last_written_timestamp, 0);
 
     // Create 3 clusters out of order
@@ -103,7 +102,7 @@ TEST_F(record_ut, new_cluster_out_of_order)
     ASSERT_NE(cluster2, cluster1);
     ASSERT_NE(cluster2, cluster3);
 
-    ASSERT_EQ(context->pending_clusters->size(), 3u);
+    ASSERT_EQ(context->pending_clusters.size(), 3u);
 
     // Try looking up each cluster by timestamp
     for (uint64 timestamp = 0; timestamp < 10; timestamp++)
@@ -127,10 +126,10 @@ TEST_F(record_ut, new_cluster_out_of_order)
         ASSERT_EQ(cluster, cluster3);
     }
 
-    ASSERT_EQ(context->pending_clusters->size(), 3u);
+    ASSERT_EQ(context->pending_clusters.size(), 3u);
 }
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }

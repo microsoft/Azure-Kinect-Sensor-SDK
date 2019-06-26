@@ -94,6 +94,9 @@ public:
 
     void Shutdown();
 
+    k4a_result_t GetCameraControlCapabilities(const k4a_color_control_command_t command,
+                                              color_control_cap_t *capabilities);
+
     k4a_result_t GetCameraControl(const k4a_color_control_command_t command,
                                   k4a_color_control_mode_t *mode,
                                   int32_t *pValue);
@@ -119,19 +122,21 @@ private:
                               ULONG *pcbData);
 
     // Camera controls
-    HRESULT GetVideoProcAmpValue(const KSPROPERTY_VIDCAP_VIDEOPROCAMP PropertyId,
-                                 LONG *pValue,
-                                 ULONG *pFlags,
-                                 ULONG *pCapability);
+    HRESULT GetCameraControlCap(const GUID PropertySet,
+                                const ULONG PropertyId,
+                                bool *supportAuto,
+                                LONG *minValue,
+                                LONG *maxValue,
+                                ULONG *stepValue,
+                                LONG *defaultValue);
 
-    HRESULT SetVideoProcAmpValue(const KSPROPERTY_VIDCAP_VIDEOPROCAMP PropertyId, LONG newValue, ULONG newFlags);
-
-    HRESULT GetCameraControlValue(const KSPROPERTY_VIDCAP_CAMERACONTROL PropertyId,
+    HRESULT GetCameraControlValue(const GUID PropertySet,
+                                  const ULONG PropertyId,
                                   LONG *pValue,
                                   ULONG *pFlags,
                                   ULONG *pCapability);
 
-    HRESULT SetCameraControlValue(const KSPROPERTY_VIDCAP_CAMERACONTROL PropertyId, LONG newValue, ULONG newFlags);
+    HRESULT SetCameraControlValue(const GUID PropertySet, const ULONG PropertyId, LONG newValue, ULONG newFlags);
 
     k4a_result_t k4aResultFromHRESULT(const HRESULT hr)
     {

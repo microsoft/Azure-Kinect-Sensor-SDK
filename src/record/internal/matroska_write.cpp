@@ -232,7 +232,6 @@ write_track_data(k4a_record_context_t *context, track_header_t *track, uint64_t 
 cluster_t *get_cluster_for_timestamp(k4a_record_context_t *context, uint64_t timestamp_ns)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
-    RETURN_VALUE_IF_ARG(NULL, context->pending_clusters == NULL);
 
     if (context->last_written_timestamp > timestamp_ns)
     {
@@ -243,8 +242,8 @@ cluster_t *get_cluster_for_timestamp(k4a_record_context_t *context, uint64_t tim
     // Pending clusters are ordered from oldest to newest timestamp.
     // Clusters are not created until at least 1 track buffer is added within the timestamp range.
     // Find the newest pending cluster before this timestamp.
-    auto selected_cluster = context->pending_clusters->rbegin();
-    auto cluster_end = context->pending_clusters->rend();
+    auto selected_cluster = context->pending_clusters.rbegin();
+    auto cluster_end = context->pending_clusters.rend();
     for (; selected_cluster != cluster_end; selected_cluster++)
     {
         if ((*selected_cluster)->time_start_ns <= timestamp_ns)
@@ -273,12 +272,12 @@ cluster_t *get_cluster_for_timestamp(k4a_record_context_t *context, uint64_t tim
         if (selected_cluster == cluster_end)
         {
             // The new cluster's timestamp is before all pending clusters.
-            context->pending_clusters->push_front(new_cluster);
+            context->pending_clusters.push_front(new_cluster);
         }
         else
         {
             // The new cluster's timestamp is before the selected cluster.
-            context->pending_clusters->insert(selected_cluster.base(), new_cluster);
+            context->pending_clusters.insert(selected_cluster.base(), new_cluster);
         }
         return new_cluster;
     }
@@ -468,13 +467,13 @@ static void matroska_writer_thread(k4a_record_context_t *context)
 
             // Check the oldest pending cluster to see if we should write to disk.
             cluster_t *oldest_cluster = NULL;
-            if (!context->pending_clusters->empty())
+            if (!context->pending_clusters.empty())
             {
-                oldest_cluster = context->pending_clusters->front();
+                oldest_cluster = context->pending_clusters.front();
                 if (oldest_cluster->time_end_ns + CLUSTER_WRITE_DELAY_NS < context->most_recent_timestamp)
                 {
                     assert(oldest_cluster->time_start_ns >= context->last_written_timestamp);
-                    context->pending_clusters->pop_front();
+                    context->pending_clusters.pop_front();
                     context->last_written_timestamp = oldest_cluster->time_end_ns;
                 }
                 else

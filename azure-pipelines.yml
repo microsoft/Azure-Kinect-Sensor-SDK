@@ -19,6 +19,7 @@ trigger:
     - develop
     - release/*
     - hotfix/*
+    - feature/*
 
 jobs:
 - job: WindowsK4ABuildTest
@@ -437,7 +438,7 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\doxygenexe
-      cmake -G Ninja "-DK4A_BUILD_DOCS:BOOL=ON" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)"
+      cmake -G Ninja "-DK4A_BUILD_DOCS:BOOL=ON" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DSOURCE_BRANCH=$(Build.SourceBranch)" "$(Build.SourcesDirectory)"
 
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
@@ -458,6 +459,14 @@ jobs:
       ArtifactName: docs
       parallel: true
       parallelCount: 8
+
+  - task: PowerShell@2
+    displayName: 'Publish Documentation HTML'
+    inputs:
+      targetType: 'filePath'
+      filePath: '$(Build.SourcesDirectory)\doxygen\PublishDocs.ps1'
+    condition: and(eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564'), and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')))
+
 
 - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
   - job: WindowsFunctionalTests
@@ -588,7 +597,7 @@ jobs:
       displayName: 'Add execution property to findconnectedport'
 
     - task: CopyFiles@2
-      displayName: "Copy DepthEnginePlugin into LD_LIBRARY_PATH"
+      displayName: "Copy DepthEnginePlugin into Build Artifacts"
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
         contents: "libdepthengine.so*"
@@ -598,11 +607,6 @@ jobs:
     - script: 'chmod +x ./x86_64-linux-clang-relwithdebinfo/bin/*'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Add execution property to binary files'
-
-      # Adding the bin folder to the LD_LIBRARY_PATH, so the executables can find the necessary .so files.
-    - script: 'echo "##vso[task.setvariable variable=LD_LIBRARY_PATH]$BUILD_ARTIFACTSTAGINGDIRECTORY/x86_64-linux-clang-relwithdebinfo/bin/"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
-      displayName: 'set LD_LIBRARY_PATH'
 
       # Set the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
     - script: 'echo "##vso[task.setvariable variable=DISPLAY]:0"'

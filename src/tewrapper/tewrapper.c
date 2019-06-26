@@ -27,6 +27,7 @@ typedef struct _tewrapper_context_t
     COND_HANDLE worker_condition;
     volatile bool thread_started;
     volatile bool thread_stop;
+    volatile bool worker_locked;
     k4a_result_t thread_start_result;
     k4a_result_t thread_processing_result;
 
@@ -81,6 +82,7 @@ static int transform_engine_thread(void *param)
     Lock(tewrapper->main_lock);
     tewrapper->thread_started = true;
     tewrapper->thread_start_result = result;
+    tewrapper->worker_locked = false;
     Condition_Post(tewrapper->main_condition);
     Unlock(tewrapper->main_lock);
 
@@ -88,6 +90,8 @@ static int transform_engine_thread(void *param)
     {
         // Waiting the main thread to request processing a frame
         Lock(tewrapper->worker_lock);
+        tewrapper->worker_locked = true;
+        Condition_Post(tewrapper->main_condition);
         int infinite_timeout = 0;
         COND_RESULT cond_result = Condition_Wait(tewrapper->worker_condition, tewrapper->worker_lock, infinite_timeout);
         result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
@@ -130,6 +134,7 @@ static int transform_engine_thread(void *param)
         tewrapper->thread_processing_result = result;
         Condition_Post(tewrapper->main_condition);
         Unlock(tewrapper->worker_lock);
+        tewrapper->worker_locked = false;
     }
 
     transform_engine_stop_helper(tewrapper);
@@ -148,31 +153,45 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
 {
     tewrapper_context_t *tewrapper = tewrapper_t_get_context(tewrapper_handle);
 
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
     Lock(tewrapper->main_lock);
 
-    // Notify the transform engine thread to process a frame
-    Lock(tewrapper->worker_lock);
-    tewrapper->type = type;
-    tewrapper->depth_image_data = depth_image_data;
-    tewrapper->depth_image_size = depth_image_size;
-    tewrapper->color_image_data = color_image_data;
-    tewrapper->color_image_size = color_image_size;
-    tewrapper->transformed_image_data = transformed_image_data;
-    tewrapper->transformed_image_size = transformed_image_size;
-    Condition_Post(tewrapper->worker_condition);
-
-    // Waiting the transform engine thread to finish processing
-    int infinite_timeout = 0;
-    COND_RESULT cond_result = Condition_Wait(tewrapper->main_condition, tewrapper->worker_lock, infinite_timeout);
-    k4a_result_t result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
-
-    if (K4A_SUCCEEDED(result) && K4A_FAILED(tewrapper->thread_processing_result))
+    // Ensure the worker thread loop to acquire the worker lock before this function acquires the worker lock to avoid
+    // dead lock
+    if (!tewrapper->worker_locked)
     {
-        LOG_ERROR("Transform Engine thread failed to process", 0);
-        result = tewrapper->thread_processing_result;
+        int infinite_timeout = 0;
+        COND_RESULT cond_result = Condition_Wait(tewrapper->main_condition, tewrapper->main_lock, infinite_timeout);
+        result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
     }
 
-    Unlock(tewrapper->worker_lock);
+    if (K4A_SUCCEEDED(result))
+    {
+        // Notify the transform engine thread to process a frame
+        Lock(tewrapper->worker_lock);
+        tewrapper->type = type;
+        tewrapper->depth_image_data = depth_image_data;
+        tewrapper->depth_image_size = depth_image_size;
+        tewrapper->color_image_data = color_image_data;
+        tewrapper->color_image_size = color_image_size;
+        tewrapper->transformed_image_data = transformed_image_data;
+        tewrapper->transformed_image_size = transformed_image_size;
+        Condition_Post(tewrapper->worker_condition);
+
+        // Waiting the transform engine thread to finish processing
+        int infinite_timeout = 0;
+        COND_RESULT cond_result = Condition_Wait(tewrapper->main_condition, tewrapper->worker_lock, infinite_timeout);
+        result = K4A_RESULT_FROM_BOOL(cond_result == COND_OK);
+
+        if (K4A_SUCCEEDED(result) && K4A_FAILED(tewrapper->thread_processing_result))
+        {
+            LOG_ERROR("Transform Engine thread failed to process", 0);
+            result = tewrapper->thread_processing_result;
+        }
+
+        Unlock(tewrapper->worker_lock);
+    }
 
     Unlock(tewrapper->main_lock);
 

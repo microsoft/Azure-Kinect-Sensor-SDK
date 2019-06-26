@@ -21,7 +21,7 @@ if (NOT CMAKE_PROJECT_NAME)
 endif()
 
 project(K4A LANGUAGES C CXX
-    VERSION 1.0)
+    VERSION 1.1)
 
 option(K4A_BUILD_DOCS "Build K4A doxygen documentation" OFF)
 option(K4A_MTE_VERSION "Skip FW version check" OFF)
@@ -30,6 +30,10 @@ include(GitCommands)
 
 # Set the project version
 include(K4AProjectVersion)
+
+# Default to not embed an icon in resources
+set(K4A_USE_ICON 0)
+set(K4A_ICON_PATH ${CMAKE_CURRENT_LIST_DIR}/kinect-viewer.ico)
 
 set(PROJ_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(INCLUDE_DIR ${PROJ_DIR}/include)
@@ -40,6 +44,13 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Before CMake 3.14 setting CMAKE_POSITION_INDEPENDENT_CODE did not set the
+# "-pie" flag for GCC or Clang
+if("${CMAKE_VERSION}" VERSION_LESS "3.14.0")
+    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")
+    endif()
+endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
@@ -50,6 +61,18 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     include(MSVCLinkerFlags)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /ZH:SHA_256")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZH:SHA_256")
+endif()
+
+# If using clang or GCC, only linked shared libraries if needed
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed")
+endif()
+
+# If using clang or GCC, be sure to include a build id
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id")
 endif()
 
 # Find all dependencies
@@ -71,6 +94,20 @@ if ("${K4A_ENABLE_LEAK_DETECTION_CMAKE}" STREQUAL "1")
     add_definitions(-DK4A_ENABLE_LEAK_DETECTION)
 endif()
 
+# Sets the RUNPATH entry in the .dynamic section of an elf. RUNPATH is
+# interpreted by the linux loader as an additional path to search for shared
+# objects. $ORIGIN is a special setting telling the loader to search the path
+# relative to the exectuable.
+#
+# These specific settings tell the loader to search the directory of the
+# executable for shared objects. This is done on Linux to emulate the default
+# behavior of the Windows loader, which searches for DLLs in the path of the
+# executable.
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH YES)
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+endif()
+
 add_subdirectory(examples)
 add_subdirectory(src)
 add_subdirectory(tests)
@@ -79,19 +116,23 @@ add_subdirectory(tools)
 if (K4A_BUILD_DOCS)
     find_package(Doxygen 1.8.14 EXACT)
     if (DOXYGEN_FOUND)
+        set(DOXYGEN_MAINPAGE ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/mainpage.md) 
         set(DOXYGEN_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/include/k4a ${CMAKE_CURRENT_SOURCE_DIR}/include/k4arecord ${DOXYGEN_MAINPAGE})
-
+        set(DOXYGEN_LAYOUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/DoxygenLayout.xml)
         # These variables are used in Doxyfile.in
         string(REPLACE ";" " " DOXYGEN_INPUT "${DOXYGEN_SOURCES}")
         set(DOXYGEN_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/docs)
+        set(DOXYGEN_PROJECT_LOGO ${CMAKE_CURRENT_SOURCE_DIR}/docs/logo.png)
+        set(DOXYGEN_TEMPLATE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/doxygen)
+        set(DOXYGEN_PROJECT_NUMBER ${SOURCE_BRANCH})
 
-        configure_file(Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+        configure_file(doxygen/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
         add_custom_command(
             OUTPUT ${DOXYGEN_OUTPUT_DIRECTORY}/html/index.html
             COMMAND ${DOXYGEN_EXECUTABLE}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            MAIN_DEPENDENCY Doxyfile.in
+            MAIN_DEPENDENCY doxygen/Doxyfile.in
             DEPENDS ${DOXYGEN_SOURCES}
             )
     add_custom_target(k4adocs ALL DEPENDS ${DOXYGEN_OUTPUT_DIRECTORY}/html/index.html)
@@ -113,7 +154,7 @@ if (${CLANG_FORMAT} STREQUAL "CLANG_FORMAT-NOTFOUND")
     message(STATUS "Clang-format not found")
 else()
 
-    set(VALID_CLANG_FORMAT_VERSION "6.0.0")
+    set(VALID_CLANG_FORMAT_VERSION "6\.0\.0")
     execute_process(COMMAND ${CLANG_FORMAT} -version OUTPUT_VARIABLE CLANG_VERSION_STRING)
     message(STATUS "clang-format version: ${CLANG_VERSION_STRING}")
 
@@ -191,6 +232,10 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 endif()
 
 # Packaging support
+set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ             GROUP_EXECUTE
+    WORLD_READ             WORLD_EXECUTE)
 set(CPACK_PACKAGE_VENDOR "Microsoft")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C/C++ SDK for Kinect for Azure")
 set(CPACK_PACKAGE_DESCRIPTION "C/C++ SDK for Kinect for Azure")
@@ -203,6 +248,36 @@ set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(CPACK_PACKAGE_NAME "k4asdk")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${K4A_VERSION_STR}.${CMAKE_SYSTEM_NAME}.${TARGET_ARCH}.${CMAKE_BUILD_TYPE}")
 
+set(CPACK_COMPONENTS_GROUPING "ONE_PER_GROUP")
+
 set(CPACK_GENERATOR "TGZ" "ZIP")
 
 include(CPack)
+
+cpack_add_component(
+    runtime
+    DISPLAY_NAME
+        Runtime
+    DESCRIPTION
+        "Dynamic Libraries for Azure Kinect Runtime"
+    REQUIRED)
+
+cpack_add_component(
+    development
+    DISPLAY_NAME
+        Development
+    DESCRIPTION
+        "Headers and cmake files needed for Azure Kinect Development"
+    REQUIRED
+    DEPENDS
+        runtime)
+
+cpack_add_component(
+    tools
+    DISPLAY_NAME
+        Tools
+    DESCRIPTION
+        "Tools for Azure Kinect Development"
+    REQUIRED
+    DEPENDS
+        runtime)

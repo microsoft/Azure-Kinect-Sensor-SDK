@@ -209,7 +209,7 @@ create_test_image(uint64_t timestamp_us, k4a_image_format_t format, uint32_t wid
                                                        &image);
     EXIT_IF_FALSE(result == K4A_RESULT_SUCCEEDED);
 
-    k4a_image_set_timestamp_usec(image, timestamp_us);
+    k4a_image_set_device_timestamp_usec(image, timestamp_us);
     return image;
 }
 
@@ -223,7 +223,7 @@ bool validate_test_image(k4a_image_t image,
     if (image != NULL)
     {
         // Round to file timescale, and then convert check timestamp.
-        uint64_t image_timestamp = k4a_image_get_timestamp_usec(image) * 1000 / MATROSKA_TIMESCALE_NS;
+        uint64_t image_timestamp = k4a_image_get_device_timestamp_usec(image) * 1000 / MATROSKA_TIMESCALE_NS;
         uint64_t expected_timestamp = timestamp_us * 1000 / MATROSKA_TIMESCALE_NS;
         VALIDATE_PARAMETER(image_timestamp, expected_timestamp);
         VALIDATE_PARAMETER(k4a_image_get_format(image), format);

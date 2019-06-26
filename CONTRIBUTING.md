@@ -112,6 +112,10 @@ Often, multiple iterations will be needed to respond to feedback from reviewers.
 [past pull requests](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/pulls?q=is%3Apr+is%3Aclosed) to see what the 
 experience might be like.
 
+After at least one member of the Azure Kinect team has approved your request, it will be merged by a member of the Azure
+Kinect team. For Pull Requests where feedback is desired but the change is not complete, please mark the Pull Request
+as a draft.
+
 # Contributor License Agreement
 Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have
 the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.

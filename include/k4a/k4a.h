@@ -20,9 +20,20 @@
 extern "C" {
 #endif
 
+/**
+ * \defgroup Functions Functions
+ * \ingroup csdk
+ *
+ * Public functions of the API
+ *
+ * @{
+ */
+
 /** Gets the number of connected devices
  *
  * \returns Number of sensors connected to the PC.
+ *
+ * \relates k4a_device_t
  *
  * \remarks
  * This API counts the number of Azure Kinect devices connected to the host PC.
@@ -92,6 +103,8 @@ K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *
  *
  * \param device_handle
  * Output parameter which on success will return a handle to the device.
+ *
+ * \relates k4a_device_t
  *
  * \return ::K4A_RESULT_SUCCEEDED if the device was opened successfully.
  *
@@ -789,19 +802,22 @@ K4A_EXPORT int k4a_image_get_height_pixels(k4a_image_t image_handle);
  */
 K4A_EXPORT int k4a_image_get_stride_bytes(k4a_image_t image_handle);
 
-/** Get the image timestamp in microseconds
+/** Get the image's device timestamp in microseconds.
  *
  * \param image_handle
  * Handle of the image for which the get operation is performed on.
  *
  * \remarks
- * Returns the timestamp of the image. Timestamps are recorded by the device and represent the mid-point of exposure.
- * They may be used for relative comparison, but their absolute value has no defined meaning.
+ * Returns the device timestamp of the image. Timestamps are recorded by the device and represent the mid-point of
+ * exposure. They may be used for relative comparison, but their absolute value has no defined meaning.
  *
  * \returns
  * If the \p image_handle is invalid or if no timestamp was set for the image,
  * this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning
  * of a recording or the start of streaming.
+ *
+ * \deprecated
+ * Deprecated starting in 1.2.0. Please use k4a_image_get_device_timestamp_usec().
  *
  * \relates k4a_image_t
  *
@@ -813,7 +829,68 @@ K4A_EXPORT int k4a_image_get_stride_bytes(k4a_image_t image_handle);
  * </requirements>
  * \endxmlonly
  */
-K4A_EXPORT uint64_t k4a_image_get_timestamp_usec(k4a_image_t image_handle);
+K4A_DEPRECATED_EXPORT uint64_t k4a_image_get_timestamp_usec(k4a_image_t image_handle);
+
+/** Get the image's device timestamp in microseconds.
+ *
+ * \param image_handle
+ * Handle of the image for which the get operation is performed on.
+ *
+ * \remarks
+ * Returns the device timestamp of the image, as captured by the hardware. Timestamps are recorded by the device and
+ * represent the mid-point of exposure. They may be used for relative comparison, but their absolute value has no
+ * defined meaning.
+ *
+ * \returns
+ * If the \p image_handle is invalid or if no timestamp was set for the image, this function will return 0. It is also
+ * possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.
+ *
+ * \relates k4a_image_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT uint64_t k4a_image_get_device_timestamp_usec(k4a_image_t image_handle);
+
+/** Get the image's system timestamp in nanoseconds.
+ *
+ * \param image_handle
+ * Handle of the image for which the get operation is performed on.
+ *
+ * \remarks
+ * Returns the system timestamp of the image. Timestamps are recorded by the host. They may be used for relative
+ * comparision, as they are relative to the corresponding system clock. The absolute value is a monotonic count from
+ * an arbitrary point in the past.
+ *
+ * \remarks
+ * The system timestamp is captured at the moment host PC finishes receiving the image.
+ *
+ * \remarks
+ * On Linux the system timestamp is read from clock_gettime(CLOCK_MONOTONIC), which measures realtime and is not
+ * impacted by adjustments to the system clock. It starts from an arbitrary point in the past. On Windows the system
+ * timestamp is read from QueryPerformanceCounter(), it also measures realtime and is not impacted by adjustments to the
+ * system clock. It also starts from an arbitrary point in the past.
+ *
+ * \returns
+ * If the \p image_handle is invalid or if no timestamp was set for the image, this function will return 0. It is also
+ * possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.
+ *
+ * \relates k4a_image_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT uint64_t k4a_image_get_system_timestamp_nsec(k4a_image_t image_handle);
 
 /** Get the image exposure in microseconds.
  *
@@ -886,20 +963,20 @@ K4A_EXPORT uint32_t k4a_image_get_white_balance(k4a_image_t image_handle);
  */
 K4A_EXPORT uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle);
 
-/** Set the time stamp, in microseconds, of the image.
+/** Set the device time stamp, in microseconds, of the image.
  *
  * \param image_handle
  * Handle of the image to set the timestamp on.
  *
  * \param timestamp_usec
- * Timestamp of the image in microseconds.
+ * Device timestamp of the image in microseconds.
  *
  * \remarks
  * Use this function in conjunction with k4a_image_create() or k4a_image_create_from_buffer() to construct a
  * \ref k4a_image_t.
  *
  * \remarks
- * Set a timestamp of 0 to indicate that the timestamp is not valid.
+ * The device timestamp represents the mid-point of exposure of the image, as captured by the hardware.
  *
  * \relates k4a_image_t
  *
@@ -911,7 +988,65 @@ K4A_EXPORT uint32_t k4a_image_get_iso_speed(k4a_image_t image_handle);
  * </requirements>
  * \endxmlonly
  */
-K4A_EXPORT void k4a_image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
+K4A_EXPORT void k4a_image_set_device_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
+
+/** Set the device time stamp, in microseconds, of the image.
+ *
+ * \param image_handle
+ * Handle of the image to set the timestamp on.
+ *
+ * \param timestamp_usec
+ * Device timestamp of the image in microseconds.
+ *
+ * \remarks
+ * Use this function in conjunction with k4a_image_create() or k4a_image_create_from_buffer() to construct a
+ * \ref k4a_image_t.
+ *
+ * \remarks
+ * The device timestamp represents the mid-point of exposure of the image, as captured by the hardware.
+ *
+ * \relates k4a_image_t
+ *
+ * \deprecated
+ * Deprecated starting in 1.2.0. Please use k4a_image_set_device_timestamp_usec().
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_DEPRECATED_EXPORT void k4a_image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
+
+/** Set the system time stamp, in nanoseconds, of the image.
+ *
+ * \param image_handle
+ * Handle of the image to set the timestamp on.
+ *
+ * \param timestamp_nsec
+ * Timestamp of the image in nanoseconds.
+ *
+ * \remarks
+ * Use this function in conjunction with k4a_image_create() or k4a_image_create_from_buffer() to construct a
+ * \ref k4a_image_t.
+ *
+ * \remarks
+ * The system timestamp is a high performance and increasing clock (from boot). The timestamp represents the time
+ * immediately after the image buffer was read by the host PC.
+ *
+ * \relates k4a_image_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT void k4a_image_set_system_timestamp_nsec(k4a_image_t image_handle, uint64_t timestamp_nsec);
 
 /** Set the exposure time, in microseconds, of the image.
  *
@@ -936,7 +1071,35 @@ K4A_EXPORT void k4a_image_set_timestamp_usec(k4a_image_t image_handle, uint64_t 
  * </requirements>
  * \endxmlonly
  */
-K4A_EXPORT void k4a_image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_usec);
+K4A_EXPORT void k4a_image_set_exposure_usec(k4a_image_t image_handle, uint64_t exposure_usec);
+
+/** Set the exposure time, in microseconds, of the image.
+ *
+ * \param image_handle
+ * Handle of the image to set the exposure time on.
+ *
+ * \param exposure_usec
+ * Exposure time of the image in microseconds.
+ *
+ * \remarks
+ * Use this function in conjunction with k4a_image_create() or k4a_image_create_from_buffer() to construct a
+ * \ref k4a_image_t. An exposure time of 0 is considered invalid. Only color image formats are expected to have a valid
+ * exposure time.
+ *
+ * \deprecated
+ * Deprecated starting in 1.2.0. Please use k4a_image_set_exposure_usec().
+ *
+ * \relates k4a_image_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_DEPRECATED_EXPORT void k4a_image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_usec);
 
 /** Set the white balance of the image.
  *
@@ -1057,7 +1220,7 @@ K4A_EXPORT void k4a_image_release(k4a_image_t image_handle);
  * </requirements>
  * \endxmlonly
  */
-K4A_EXPORT k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, k4a_device_configuration_t *config);
+K4A_EXPORT k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, const k4a_device_configuration_t *config);
 
 /** Stops the color and depth camera capture.
  *
@@ -1203,7 +1366,57 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_hand
  */
 K4A_EXPORT k4a_result_t k4a_device_get_version(k4a_device_t device_handle, k4a_hardware_version_t *version);
 
-/** Get the Azure Kinect color sensor control value.
+/** Get the Azure Kinect color sensor control capabilities.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param command
+ * Color sensor control command.
+ *
+ * \param supports_auto
+ * Location to store whether the color sensor's control support auto mode or not.
+ * true if it supports auto mode, otherwise false.
+ *
+ * \param min_value
+ * Location to store the color sensor's control minimum value of /p command.
+ *
+ * \param max_value
+ * Location to store the color sensor's control maximum value of /p command.
+ *
+ * \param step_value
+ * Location to store the color sensor's control step value of /p command.
+ *
+ * \param default_value
+ * Location to store the color sensor's control default value of /p command.
+ *
+ * \param default_mode
+ * Location to store the color sensor's control default mode of /p command.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if the value was successfully returned, ::K4A_RESULT_FAILED if an error occurred
+ *
+ * \relates k4a_device_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_color_control_capabilities(k4a_device_t device_handle,
+                                                                  k4a_color_control_command_t command,
+                                                                  bool *supports_auto,
+                                                                  int32_t *min_value,
+                                                                  int32_t *max_value,
+                                                                  int32_t *step_value,
+                                                                  int32_t *default_value,
+                                                                  k4a_color_control_mode_t *default_mode);
+
+/** Get the Azure Kinect color sensor control
+ * value.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
@@ -1212,27 +1425,27 @@ K4A_EXPORT k4a_result_t k4a_device_get_version(k4a_device_t device_handle, k4a_h
  * Color sensor control command.
  *
  * \param mode
- * Location to store the color sensor's control mode. This mode represents whether the command is in automatic or manual
- * mode.
+ * Location to store the color sensor's control mode. This mode represents whether the command is in automatic or
+ * manual mode.
  *
  * \param value
- * Location to store the color sensor's control value. This value is always written, but is only valid when the \p mode
- * returned is ::K4A_COLOR_CONTROL_MODE_MANUAL for the current \p command.
+ * Location to store the color sensor's control value. This value is always written, but is only valid when the \p
+ * mode returned is ::K4A_COLOR_CONTROL_MODE_MANUAL for the current \p command.
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if the value was successfully returned, ::K4A_RESULT_FAILED if an error occurred
  *
  * \remarks
- * Each control command may be set to manual or automatic. See the definition of \ref k4a_color_control_command_t on how
- * to interpret the \p value for each command.
+ * Each control command may be set to manual or automatic. See the definition of \ref k4a_color_control_command_t on
+ * how to interpret the \p value for each command.
  *
  * \remarks
- * Some control commands are only supported in manual mode. When a command is in automatic mode, the \p value for that
- * command is not valid.
+ * Some control commands are only supported in manual mode. When a command is in automatic mode, the \p value for
+ * that command is not valid.
  *
  * \remarks
- * Control values set on a device are reset only when the device is power cycled. The device will retain the settings
- * even if the \ref k4a_device_t is closed or the application is restarted.
+ * Control values set on a device are reset only when the device is power cycled. The device will retain the
+ * settings even if the \ref k4a_device_t is closed or the application is restarted.
  *
  * \relates k4a_device_t
  *
@@ -1873,6 +2086,10 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
                                                                       const k4a_image_t depth_image,
                                                                       const k4a_calibration_type_t camera,
                                                                       k4a_image_t xyz_image);
+
+/**
+ * @}
+ */
 
 #ifdef __cplusplus
 }

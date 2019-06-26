@@ -32,6 +32,9 @@ public:
 
     void Shutdown();
 
+    k4a_result_t GetCameraControlCapabilities(const k4a_color_control_command_t command,
+                                              color_control_cap_t *capabilities);
+
     k4a_result_t GetCameraControl(const k4a_color_control_command_t command,
                                   k4a_color_control_mode_t *mode,
                                   int32_t *pValue);

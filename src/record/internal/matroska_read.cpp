@@ -1871,7 +1871,7 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
                                                          &free_vector_buffer,
                                                          buffer,
                                                          image_out));
-        k4a_image_set_timestamp_usec(*image_out, in_block->timestamp_ns / 1000);
+        k4a_image_set_device_timestamp_usec(*image_out, in_block->timestamp_ns / 1000);
     }
 
     if (K4A_FAILED(result) && buffer != NULL)
