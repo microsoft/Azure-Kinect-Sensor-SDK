@@ -587,7 +587,9 @@ typedef enum
 {
     K4A_WIRED_SYNC_MODE_STANDALONE, /**< Neither 'Sync In' or 'Sync Out' connections are used. */
     K4A_WIRED_SYNC_MODE_MASTER,     /**< The 'Sync Out' jack is enabled and synchronization data it driven out the
-                                       connected wire.*/
+                                       connected wire. While in master mode the color camera must be enabled as part of the
+                                       multi device sync signalling logic. Even if the color image is not needed, the color
+                                       camera must be running.*/
     K4A_WIRED_SYNC_MODE_SUBORDINATE /**< The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the
                                        next device in the chain. 'Sync Out' is a mirror of 'Sync In' for this mode.
                                      */
