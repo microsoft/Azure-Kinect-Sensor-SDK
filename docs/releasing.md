@@ -115,11 +115,11 @@ include/k4arecord/record.h                                     | :white_check_ma
 include/k4arecord/types.h                                      | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 linux-ubuntu/x64/release/libdepthengine.so \*                  |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libdepthengine.so.1.0 \*              |                    |                    | :white_check_mark: |                    |
-linux-ubuntu/x64/release/libk4a.so                             |                    |                    | :white_check_mark: |                    |
-linux-ubuntu/x64/release/libk4a.so.1.1                         |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4a.so (symlink)                   |                    |                    |                    | :white_check_mark: |
+linux-ubuntu/x64/release/libk4a.so.1.1 (symlink)               |                    |                    |                    | :white_check_mark: |
 linux-ubuntu/x64/release/libk4a.so.1.1.0                       |                    |                    | :white_check_mark: |                    |
-linux-ubuntu/x64/release/libk4arecord.so                       |                    |                    | :white_check_mark: |                    |
-linux-ubuntu/x64/release/libk4arecord.so.1.1                   |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libk4arecord.so (symlink)             |                    |                    |                    | :white_check_mark: |
+linux-ubuntu/x64/release/libk4arecord.so.1.1 (symlink)         |                    |                    |                    | :white_check_mark: |
 linux-ubuntu/x64/release/libk4arecord.so.1.1.0                 |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/tools/x64/release/AzureKinectFirmwareTool         |                    |                    |                    |                    | :white_check_mark:
 linux-ubuntu/tools/x64/release/k4arecorder                     |                    |                    |                    |                    | :white_check_mark:
