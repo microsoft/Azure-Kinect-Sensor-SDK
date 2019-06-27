@@ -12,9 +12,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
     internal class NativeMethods
     {
-        // These types are used internally by the interop dll for marshalling purposes and are not exposed
+        // These types are used internally by the interop dll for marshaling purposes and are not exposed
         // over the public surface of the managed dll. 
-
 
         #region Handle Types
 
