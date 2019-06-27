@@ -307,6 +307,7 @@ std::vector<uint8_t> create_test_custom_track_block(uint64_t timestamp_us)
 
     uint32_t item_number = static_cast<uint32_t>(std::rand()) % 100;
     std::vector<uint8_t> track_data;
+    write_value(timestamp_us, &track_data);
     write_value(item_number, &track_data);
     for (uint32_t i = 0; i < item_number; i++)
     {
@@ -321,24 +322,20 @@ bool validate_custom_track_block(const uint8_t *block, size_t block_size, uint64
     std::srand(static_cast<uint32_t>(timestamp_us));
     uint32_t expected_item_number = static_cast<uint32_t>(std::rand()) % 100;
 
-    if (block_size != (expected_item_number + 1) * sizeof(uint32_t))
-    {
-        return false;
-    }
+    EXIT_IF_FALSE(block_size >= sizeof(uint32_t) + sizeof(uint64_t));
 
-    const uint32_t *block_data = reinterpret_cast<const uint32_t *>(block);
-    if (*block_data++ != expected_item_number)
-    {
-        return false;
-    }
+    const uint64_t *block_timestamp_us = reinterpret_cast<const uint64_t *>(block);
+    VALIDATE_PARAMETER(*block_timestamp_us, timestamp_us);
 
-    for (uint32_t i = 0; i < expected_item_number; i++)
+    VALIDATE_PARAMETER(block_size, (expected_item_number + 3) * sizeof(uint32_t));
+
+    const uint32_t *block_data = reinterpret_cast<const uint32_t *>(block + sizeof(uint64_t));
+    VALIDATE_PARAMETER(*block_data, expected_item_number);
+
+    for (uint32_t i = 1; i <= expected_item_number; i++)
     {
         uint32_t expected_value = static_cast<uint32_t>(std::rand());
-        if (block_data[i] != expected_value)
-        {
-            return false;
-        }
+        VALIDATE_PARAMETER(block_data[i], expected_value);
     }
 
     return true;

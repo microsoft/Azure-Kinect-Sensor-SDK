@@ -50,7 +50,8 @@ protected:
         depth_codec_header.biWidth = test_depth_width;
         depth_codec_header.biHeight = test_depth_height;
         depth_codec_header.biBitCount = 16;
-        depth_codec_header.biCompression = 0x32595559; // YUY2 little endian
+        // YUY2 little endian (no longer used for recording, but still expected to be supported).
+        depth_codec_header.biCompression = 0x32595559;
         depth_codec_header.biSizeImage = sizeof(uint16_t) * test_depth_width * test_depth_height;
 
         k4a_record_video_settings_t depth_video_settings;
@@ -58,7 +59,7 @@ protected:
         depth_video_settings.height = test_depth_height;
         depth_video_settings.frame_rate = test_camera_fps;
 
-        // Add custom tracks to the k4a_record_t
+        // Create the normally built-in DEPTH and IR tracks using the custom track API
         result = k4a_record_add_custom_video_track(handle,
                                                    "DEPTH",
                                                    "V_MS/VFW/FOURCC",
@@ -78,11 +79,31 @@ protected:
         result = k4a_record_add_tag(handle, "K4A_DEPTH_MODE", "NFOV_UNBINNED");
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-        result =
-            k4a_record_add_custom_subtitle_track(handle, "CUSTOM_TRACK_1", "S_K4A/CUSTOM_TRACK_1", nullptr, 0, nullptr);
+        // Add two subtitle tracks with and without the high-frequency data flag
+        k4a_record_subtitle_settings_t subtitle_settings;
+
+        subtitle_settings.high_freq_data = false;
+        result = k4a_record_add_custom_subtitle_track(handle,
+                                                      "CUSTOM_TRACK_1",
+                                                      "S_K4A/CUSTOM_TRACK",
+                                                      nullptr,
+                                                      0,
+                                                      &subtitle_settings);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        subtitle_settings.high_freq_data = true;
+        result = k4a_record_add_custom_subtitle_track(handle,
+                                                      "CUSTOM_TRACK_2",
+                                                      "S_K4A/CUSTOM_TRACK",
+                                                      nullptr,
+                                                      0,
+                                                      &subtitle_settings);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         result = k4a_record_add_tag(handle, "CUSTOM_TRACK_1_VERSION", "1.0.0");
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        result = k4a_record_add_tag(handle, "CUSTOM_TRACK_2_VERSION", "1.1.0");
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         ASSERT_EQ(k4a_record_write_header(handle), K4A_RESULT_SUCCEEDED);
@@ -116,12 +137,19 @@ protected:
                                                         static_cast<uint32_t>(k4a_image_get_size(ir_image)));
             ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-            // Test custom track to start from different index
+            // Start writing custom track data at a different index
             if (i >= custom_track_start_index)
             {
                 std::vector<uint8_t> custom_track_block = create_test_custom_track_block(timestamp_usec);
                 result = k4a_record_write_custom_track_data(handle,
                                                             "CUSTOM_TRACK_1",
+                                                            timestamp_usec,
+                                                            custom_track_block.data(),
+                                                            custom_track_block.size());
+                ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+                result = k4a_record_write_custom_track_data(handle,
+                                                            "CUSTOM_TRACK_2",
                                                             timestamp_usec,
                                                             custom_track_block.data(),
                                                             custom_track_block.size());
@@ -163,6 +191,7 @@ TEST_F(custom_track_ut, open_custom_track_file)
     k4a_record_configuration_t config;
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_CUSTOM);
     ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_OFF);
     ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
     ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
@@ -170,6 +199,10 @@ TEST_F(custom_track_ut, open_custom_track_file)
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);
     ASSERT_FALSE(config.imu_track_enabled);
+    ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+    ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_STANDALONE);
+    ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)0);
+    ASSERT_EQ(config.start_timestamp_offset_usec, (uint32_t)0);
 
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
@@ -191,6 +224,57 @@ TEST_F(custom_track_ut, open_custom_track_file)
     stream_result = k4a_playback_get_next_capture(handle, &capture);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
     ASSERT_EQ(capture, (k4a_capture_t)NULL);
+
+    k4a_playback_close(handle);
+}
+
+TEST_F(custom_track_ut, list_available_tracks)
+{
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_custom_track.mkv", &handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    // Read recording configuration
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_CUSTOM);
+    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_OFF);
+    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_FALSE(config.color_track_enabled);
+    ASSERT_TRUE(config.depth_track_enabled);
+    ASSERT_TRUE(config.ir_track_enabled);
+    ASSERT_FALSE(config.imu_track_enabled);
+    ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+    ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_STANDALONE);
+    ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)0);
+    ASSERT_EQ(config.start_timestamp_offset_usec, (uint32_t)0);
+
+    // Loop through all tracks and validate the name and codec id
+    static const char *track_names[] = { "CUSTOM_TRACK_1", "CUSTOM_TRACK_2", "DEPTH", "IR" };
+    static const char *track_codecs[] = { "S_K4A/CUSTOM_TRACK",
+                                          "S_K4A/CUSTOM_TRACK",
+                                          "V_MS/VFW/FOURCC",
+                                          "V_MS/VFW/FOURCC" };
+    size_t track_count = k4a_playback_get_track_count(handle);
+
+    ASSERT_EQ(track_count, _countof(track_names));
+
+    for (size_t i = 0; i < track_count; i++)
+    {
+        char name[256];
+        size_t name_len = 256;
+        k4a_buffer_result_t buffer_result = k4a_playback_get_track_name(handle, i, name, &name_len);
+        ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_SUCCEEDED);
+        ASSERT_STREQ(name, track_names[i]);
+
+        char codec_id[256];
+        size_t codec_id_len = 256;
+        buffer_result = k4a_playback_track_get_codec_id(handle, name, codec_id, &codec_id_len);
+        ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_SUCCEEDED);
+        ASSERT_STREQ(codec_id, track_codecs[i]);
+    }
 
     k4a_playback_close(handle);
 }
@@ -225,14 +309,14 @@ TEST_F(custom_track_ut, read_track_information)
     codec_id.resize(data_size);
     ASSERT_EQ(k4a_playback_track_get_codec_id(handle, "DEPTH", codec_id.data(), &data_size),
               K4A_BUFFER_RESULT_SUCCEEDED);
-    ASSERT_STREQ(reinterpret_cast<char *>(codec_id.data()), "V_MS/VFW/FOURCC");
+    ASSERT_STREQ(codec_id.data(), "V_MS/VFW/FOURCC");
 
     ASSERT_EQ(k4a_playback_track_get_codec_id(handle, "CUSTOM_TRACK_1", nullptr, &data_size),
               K4A_BUFFER_RESULT_TOO_SMALL);
     codec_id.resize(data_size);
     ASSERT_EQ(k4a_playback_track_get_codec_id(handle, "CUSTOM_TRACK_1", codec_id.data(), &data_size),
               K4A_BUFFER_RESULT_SUCCEEDED);
-    ASSERT_STREQ(reinterpret_cast<char *>(codec_id.data()), "S_K4A/CUSTOM_TRACK_1");
+    ASSERT_STREQ(codec_id.data(), "S_K4A/CUSTOM_TRACK");
 
     // Read private codec
     std::vector<uint8_t> codec_context;
@@ -280,12 +364,28 @@ TEST_F(custom_track_ut, read_custom_track_data)
             ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
 
             k4a_playback_data_block_release(data_block);
+
+            stream_result = k4a_playback_get_next_data_block(handle, "CUSTOM_TRACK_2", &data_block);
+            ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+
+            timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
+            ASSERT_EQ(timestamp_usec, expected_timestamp_usec);
+
+            block_size = k4a_playback_data_block_get_buffer_size(data_block);
+            block_buffer = k4a_playback_data_block_get_buffer(data_block);
+
+            ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
+
+            k4a_playback_data_block_release(data_block);
         }
 
         expected_timestamp_usec += test_timestamp_delta_usec;
     }
     k4a_playback_data_block_t data_block = NULL;
     stream_result = k4a_playback_get_next_data_block(handle, "CUSTOM_TRACK_1", &data_block);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+
+    stream_result = k4a_playback_get_next_data_block(handle, "CUSTOM_TRACK_2", &data_block);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
 
     // After getting K4A_STREAM_RESULT_EOF, calling k4a_playback_get_previous_data_block is expected to get the last
@@ -297,6 +397,15 @@ TEST_F(custom_track_ut, read_custom_track_data)
     ASSERT_EQ(timestamp_usec, last_frame_expected_timestamp_usec);
     size_t block_size = k4a_playback_data_block_get_buffer_size(data_block);
     uint8_t *block_buffer = k4a_playback_data_block_get_buffer(data_block);
+    ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
+    k4a_playback_data_block_release(data_block);
+
+    stream_result = k4a_playback_get_previous_data_block(handle, "CUSTOM_TRACK_2", &data_block);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
+    ASSERT_EQ(timestamp_usec, last_frame_expected_timestamp_usec);
+    block_size = k4a_playback_data_block_get_buffer_size(data_block);
+    block_buffer = k4a_playback_data_block_get_buffer(data_block);
     ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
     k4a_playback_data_block_release(data_block);
 
