@@ -1,4 +1,6 @@
-﻿
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 typedef void(RaiseError)(char *szFile, int line, char *expression);
 
 RaiseError *g_ErrorHandler = NULL;

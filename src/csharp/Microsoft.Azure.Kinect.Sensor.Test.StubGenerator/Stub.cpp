@@ -1,4 +1,7 @@
-﻿#include "Stub.h"
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+#include "Stub.h"
 #include "StubImplementation.h"
 
 std::map<std::string, FARPROC> functionLookup;
