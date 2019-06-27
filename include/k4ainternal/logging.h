@@ -41,6 +41,8 @@ K4A_DECLARE_HANDLE(logger_t);
 #define K4A_LOG_FILE_NAME "k4a.log"
 #define K4A_LOG_FILE_50MB_MAX_SIZE (1048576 * 50)
 
+#define K4A_RECORD_ENABLE_LOG_TO_A_FILE "K4A_RECORD_ENABLE_LOG_TO_A_FILE"
+
 /** Logger configuration - allows logger to be used in seperate DLL's and
     provide different ENV vars for processes that need to load both instances.
     For example Azure Kinect SDK and potentially Azure Kinect playback.
