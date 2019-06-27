@@ -3,6 +3,8 @@
 
 #include "test_helpers.h"
 
+#include <k4ainternal/matroska_common.h>
+
 #include <cstdio>
 #include <k4arecord/record.h>
 #include <k4arecord/playback.h>
@@ -259,7 +261,7 @@ TEST_F(custom_track_ut, list_available_tracks)
                                           "V_MS/VFW/FOURCC" };
     size_t track_count = k4a_playback_get_track_count(handle);
 
-    ASSERT_EQ(track_count, _countof(track_names));
+    ASSERT_EQ(track_count, COUNTOF(track_names));
 
     for (size_t i = 0; i < track_count; i++)
     {
