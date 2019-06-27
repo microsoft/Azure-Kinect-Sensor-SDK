@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -29,9 +31,7 @@ namespace Tests
         }
 
         [DllImport("k4a")]
-
         public static extern k4a_result_t k4a_device_open(UInt32 index, out k4a_device_t device_handle);
-
 
         [DllImport("k4a")]
         public static extern void k4a_device_close(IntPtr device_handle);

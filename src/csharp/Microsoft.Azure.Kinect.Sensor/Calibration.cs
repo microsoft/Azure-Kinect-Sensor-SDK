@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+using System;
 using System.Numerics;
-using System.Text;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Azure.Kinect.Sensor
