@@ -1,11 +1,9 @@
-﻿using System.Numerics;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 using NUnit.Framework;
-using Microsoft.Azure.Kinect.Sensor.Test.StubGenerator;
-using Microsoft.Azure.Kinect.Sensor;
 
 namespace Microsoft.Azure.Kinect.Sensor.UnitTests
 {
-   
     public class StructureTests
     {
         [Test]

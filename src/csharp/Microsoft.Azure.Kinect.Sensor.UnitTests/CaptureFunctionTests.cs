@@ -1,4 +1,6 @@
-﻿using Microsoft.Azure.Kinect.Sensor.Test.StubGenerator;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+using Microsoft.Azure.Kinect.Sensor.Test.StubGenerator;
 using NUnit.Framework;
 
 namespace Microsoft.Azure.Kinect.Sensor.UnitTests
