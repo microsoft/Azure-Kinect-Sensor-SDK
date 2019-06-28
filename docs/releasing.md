@@ -116,7 +116,7 @@ include/k4arecord/types.h                                      | :white_check_ma
 linux-ubuntu/x64/release/libdepthengine.so \*                  |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libdepthengine.so.1.0 \*              |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libk4a.so (symlink)                   |                    |                    |                    | :white_check_mark: |
-linux-ubuntu/x64/release/libk4a.so.1.1 (symlink)               |                    |                    |                    | :white_check_mark: |
+linux-ubuntu/x64/release/libk4a.so.1.1 (symlink)               |                    |                    | :white_check_mark: |                   |
 linux-ubuntu/x64/release/libk4a.so.1.1.0                       |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libk4arecord.so (symlink)             |                    |                    |                    | :white_check_mark: |
 linux-ubuntu/x64/release/libk4arecord.so.1.1 (symlink)         |                    |                    |                    | :white_check_mark: |
