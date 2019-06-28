@@ -115,7 +115,6 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    fetchDepth: 20
     lfs: false
     persistCredentials: true
     submodules: true
@@ -303,7 +302,6 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    fetchDepth: 20
     lfs: false
     persistCredentials: true
     submodules: true
@@ -381,7 +379,6 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    fetchDepth: 20
     lfs: false
     persistCredentials: true
     submodules: true
