@@ -69,8 +69,14 @@ class examples_ft : public ::testing::Test
 protected:
     void SetUp() override
     {
+#ifdef _WIN32
+        // _putenv_s("K4A_ENABLE_LOG_TO_STDOUT", "0");
+        // _putenv_s("K4A_LOG_LEVEL", "i");
+#else
         setenv("K4A_ENABLE_LOG_TO_STDOUT", "0", 1);
         setenv("K4A_LOG_LEVEL", "i", 1);
+#endif
+
 #ifdef _WIN32
         run_and_record_executable("if not exist " + TEST_TEMP_DIR + " mkdir", TEST_TEMP_DIR, "");
 #else
