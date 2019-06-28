@@ -48,17 +48,20 @@ static void test_stream_against_regexes(std::istream &input_stream, const std::v
 {
     auto regex_iter = regexes.cbegin();
     // ensure that all regexes are matched before the end of the file, in this order
-    while (regex_iter != regexes.cend() && input_stream)
+    while (input_stream && regex_iter != regexes.cend())
     {
         std::string results;
         getline(input_stream, results);
         std::regex desired_out(*regex_iter);
         std::cout << results << std::endl; // TODO delete this
-        ASSERT_TRUE(std::regex_match(results, desired_out));
-        ++regex_iter;
+        if (std::regex_match(results, desired_out))
+        {
+            ++regex_iter;
+        }
     }
-    ASSERT_EQ(regex_iter, regexes.cend())
-        << "Reached the end of the example output before matching all of the required regular expressions.";
+    ASSERT_EQ(regex_iter, regexes.cend()) << "Reached the end of the example output before matching all of the "
+                                             "required regular expressions.\nExpected \""
+                                          << *regex_iter << "\", but never saw it.";
 }
 
 class examples_ft : public ::testing::Test
@@ -101,7 +104,6 @@ TEST_F(examples_ft, calibration)
     std::ifstream results(calibration_out.c_str());
     // make sure the calibration output has the right format
     std::vector<std::string> regexes{ "Found [^]* connected devices:",
-                                      "",
                                       "===== Device [^]* =====",
                                       "resolution width: [^]*",
                                       "resolution height: [^]*",
@@ -127,8 +129,20 @@ TEST_F(examples_ft, calibration)
 
 TEST_F(examples_ft, enumerate)
 {
-    // TODO complete
-    ASSERT_EQ(true, true);
+#ifdef _WIN32
+    const std::string enumerate_path = "bin\\enumerate_devices.exe";
+    const std::string enumerate_out = TEST_TEMP_DIR + "\\enumerate-out.txt";
+#else
+    const std::string enumerate_path = "./bin/enumerate_devices";
+    const std::string enumerate_out = TEST_TEMP_DIR + "/enumerate-out.txt";
+#endif
+    run_and_record_executable(enumerate_path, "", enumerate_out);
+    std::ifstream results(enumerate_out.c_str());
+    std::vector<std::string> regexes{ // Assume tests run with 1 device plugged in. TODO is that the case?
+                                      "Found [1-5] connected devices:",
+                                      "0: Device [^]*"
+    };
+    test_stream_against_regexes(results, regexes);
 }
 
 TEST_F(examples_ft, fastpointcloud)
