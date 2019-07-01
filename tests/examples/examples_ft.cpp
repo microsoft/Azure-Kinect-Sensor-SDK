@@ -245,6 +245,22 @@ TEST_F(examples_ft, transformation)
     test_stream_against_regexes(transformation_results_d2c, regexes);
 }
 
+TEST_F(examples_ft, undistort)
+{
+#ifdef _WIN32
+    const std::string undistort_write_file = TEST_TEMP_DIR + "\\undistort-record.txt";
+    const std::string undistort_path = "bin\\undistort.exe";
+#else
+    const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.txt";
+    const std::string undistort_path = "./bin/undistort";
+#endif
+    run_and_record_executable(undistort_path, undistort_write_file, "");
+
+    std::ifstream undistort_results(undistort_write_file);
+    // don't bother checking the file- just make sure it's there
+    ASSERT_TRUE(undistort_results.good());
+}
+
 int main(int argc, char **argv)
 {
     return k4a_test_common_main(argc, argv);
