@@ -178,6 +178,17 @@ TEST_F(examples_ft, fastpointcloud)
     test_stream_against_regexes(fastpointcloud_results, regexes);
 }
 
+TEST_F(examples_ft, opencv_compatibility)
+{
+    const std::string transformation_dir = TEST_TEMP_DIR;
+#ifdef _WIN32
+    const std::string transformation_path = "bin\\opencv_example.exe";
+#else
+    const std::string transformation_path = "./bin/opencv_example";
+#endif
+    run_and_record_executable(transformation_path, "", "");
+}
+
 TEST_F(examples_ft, transformation)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
