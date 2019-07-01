@@ -14,13 +14,10 @@ const static std::string TEST_TEMP_DIR = "examples_test_temp";
 
 // run the specified executable and record the output to output_path
 // if output_path is empty, just output to stdout
-static void run_and_record_executable(const std::string &executable_path,
-                                      const std::string &args,
-                                      const std::string &output_path)
+static void run_and_record_executable(const std::string &shell_command_path, const std::string &output_path)
 {
     // TODO fflush needed here?
-    std::string formatted_command = executable_path;
-    formatted_command += " " + args;
+    std::string formatted_command = shell_command_path;
     if (!output_path.empty())
     {
         formatted_command += " 2>&1 > " + output_path;
@@ -28,18 +25,11 @@ static void run_and_record_executable(const std::string &executable_path,
     std::cout << formatted_command << std::endl;
 #ifdef _WIN32
     FILE *process_stream = _popen(formatted_command.c_str(), "r");
-#else
-    FILE *process_stream = popen(formatted_command.c_str(), "r");
-#endif
     ASSERT_TRUE(process_stream);
-
-    // TODO errno?
-    // ASSERT_NE(fgets(buffer, 10000, first), nullptr);
-    // TODO temporary, make better
-    // Not in hereASSERT_NE(process_stream, nullptr);, EXIT_SUCCESS
-#ifdef _WIN32
     ASSERT_EQ(_pclose(process_stream), EXIT_SUCCESS);
 #else
+    FILE *process_stream = popen(formatted_command.c_str(), "r");
+    ASSERT_TRUE(process_stream);
     ASSERT_EQ(pclose(process_stream), EXIT_SUCCESS);
 #endif
 }
@@ -70,26 +60,26 @@ protected:
     void SetUp() override
     {
 #ifdef _WIN32
-        // _putenv_s("K4A_ENABLE_LOG_TO_STDOUT", "0");
-        // _putenv_s("K4A_LOG_LEVEL", "i");
+        _putenv_s("K4A_ENABLE_LOG_TO_STDOUT", "0");
+        _putenv_s("K4A_LOG_LEVEL", "i");
 #else
         setenv("K4A_ENABLE_LOG_TO_STDOUT", "0", 1);
         setenv("K4A_LOG_LEVEL", "i", 1);
 #endif
 
 #ifdef _WIN32
-        run_and_record_executable("if not exist " + TEST_TEMP_DIR + " mkdir", TEST_TEMP_DIR, "");
+        run_and_record_executable("if not exist " + TEST_TEMP_DIR + " mkdir " + TEST_TEMP_DIR, "");
 #else
-        run_and_record_executable("mkdir -p", TEST_TEMP_DIR, "");
+        run_and_record_executable("mkdir -p " + TEST_TEMP_DIR, "");
 #endif
     }
 
     void TearDown() override
     {
 #ifdef _WIN32
-        run_and_record_executable("rmdir /S /Q", TEST_TEMP_DIR, ""); // TODO might not even need this
+        run_and_record_executable("rmdir /S /Q " + TEST_TEMP_DIR, ""); // TODO might not even need this
 #else
-        run_and_record_executable("rm -rf", TEST_TEMP_DIR, ""); // TODO might not even need this
+        run_and_record_executable("rm -rf " + TEST_TEMP_DIR, ""); // TODO might not even need this
 #endif
     }
 };
@@ -97,15 +87,15 @@ protected:
 TEST_F(examples_ft, calibration)
 {
 #ifdef _WIN32
-    const std::string calibration_path = "bin\\calibration_info.exe";
-    const std::string calibration_out = TEST_TEMP_DIR + "\\calibration-out.txt";
+    const std::string calibration_path = "bin/calibration_info.exe";
+    const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
 #else
     const std::string calibration_path = "./bin/calibration_info";
     const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
 #endif
 
     // get the calibration output
-    run_and_record_executable(calibration_path, "", calibration_out);
+    run_and_record_executable(calibration_path, calibration_out);
 
     std::ifstream results(calibration_out.c_str());
     // make sure the calibration output has the right format
@@ -136,13 +126,12 @@ TEST_F(examples_ft, calibration)
 TEST_F(examples_ft, enumerate)
 {
 #ifdef _WIN32
-    const std::string enumerate_path = "bin\\enumerate_devices.exe";
-    const std::string enumerate_out = TEST_TEMP_DIR + "\\enumerate-out.txt";
+    const std::string enumerate_path = "bin/enumerate_devices.exe";
 #else
     const std::string enumerate_path = "./bin/enumerate_devices";
-    const std::string enumerate_out = TEST_TEMP_DIR + "/enumerate-out.txt";
 #endif
-    run_and_record_executable(enumerate_path, "", enumerate_out);
+    const std::string enumerate_out = TEST_TEMP_DIR + "/enumerate-out.txt";
+    run_and_record_executable(enumerate_path, enumerate_out);
     std::ifstream results(enumerate_out.c_str());
     std::vector<std::string> regexes{ // Assume tests run with 1 device plugged in. TODO is that the case?
                                       "Found [1-5] connected devices:",
@@ -154,15 +143,13 @@ TEST_F(examples_ft, enumerate)
 TEST_F(examples_ft, fastpointcloud)
 {
 #ifdef _WIN32
-    const std::string fastpoint_write_file = TEST_TEMP_DIR + "\\fastpointcloud-record.txt";
-    const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "\\fastpointcloud-stdout.txt";
     const std::string fastpoint_path = "bin\\fastpointcloud.exe";
 #else
-    const std::string fastpoint_write_file = TEST_TEMP_DIR + "/fastpointcloud-record.txt";
-    const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "/fastpointcloud-stdout.txt";
     const std::string fastpoint_path = "./bin/fastpointcloud";
 #endif
-    run_and_record_executable(fastpoint_path, fastpoint_write_file, fastpoint_stdout_file);
+    const std::string fastpoint_write_file = TEST_TEMP_DIR + "/fastpointcloud-record.txt";
+    const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "/fastpointcloud-stdout.txt";
+    run_and_record_executable(fastpoint_path + " " + fastpoint_write_file, fastpoint_stdout_file);
 
     std::ifstream fastpointcloud_results(fastpoint_write_file.c_str());
     ASSERT_TRUE(fastpointcloud_results.good());
@@ -182,23 +169,22 @@ TEST_F(examples_ft, opencv_compatibility)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
 #ifdef _WIN32
-    const std::string transformation_path = "bin\\opencv_example.exe";
+    const std::string transformation_path = "bin/opencv_example.exe";
 #else
     const std::string transformation_path = "./bin/opencv_example";
 #endif
-    run_and_record_executable(transformation_path, "", "");
+    run_and_record_executable(transformation_path, "");
 }
 
 TEST_F(examples_ft, streaming)
 {
 #ifdef _WIN32
-    const std::string streaming_path = "bin\\streaming_samples.exe";
-    const std::string streaming_stdout_file = TEST_TEMP_DIR + "\\streaming-stdout.txt";
+    const std::string streaming_path = "bin/streaming_samples.exe";
 #else
     const std::string streaming_path = "./bin/streaming_samples";
-    const std::string streaming_stdout_file = TEST_TEMP_DIR + "/streaming-stdout.txt";
 #endif
-    run_and_record_executable(streaming_path, "20", streaming_stdout_file);
+    const std::string streaming_stdout_file = TEST_TEMP_DIR + "/streaming-stdout.txt";
+    run_and_record_executable(streaming_path + " 20", streaming_stdout_file);
 
     std::ifstream streaming_results(streaming_stdout_file);
     ASSERT_TRUE(streaming_results.good());
@@ -215,16 +201,15 @@ TEST_F(examples_ft, transformation)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
 #ifdef _WIN32
-    const std::string delim = "\\";
-    const std::string transformation_path = "bin\\transformation_example.exe";
+    const std::string transformation_path = "bin/transformation_example.exe";
 #else
-    const std::string delim = "/";
     const std::string transformation_path = "./bin/transformation_example";
 #endif
-    const std::string transformation_stdout_file = TEST_TEMP_DIR + delim + "transformation-stdout.txt";
-    run_and_record_executable(transformation_path, "capture " + transformation_dir + " 0", transformation_stdout_file);
+    const std::string transformation_stdout_file = TEST_TEMP_DIR + "/transformation-stdout.txt";
+    run_and_record_executable(transformation_path + " capture " + transformation_dir + " 0",
+                              transformation_stdout_file);
 
-    std::ifstream transformation_results_d2c(transformation_dir + delim + "depth_to_color.ply");
+    std::ifstream transformation_results_d2c(transformation_dir + "/depth_to_color.ply");
     ASSERT_TRUE(transformation_results_d2c.good());
 
     std::vector<std::string> regexes{ "ply",
@@ -238,7 +223,7 @@ TEST_F(examples_ft, transformation)
                                       "property uchar blue",
                                       "end_header" };
 
-    std::ifstream transformation_results_c2d(transformation_dir + delim + "depth_to_color.ply");
+    std::ifstream transformation_results_c2d(transformation_dir + "/depth_to_color.ply");
     ASSERT_TRUE(transformation_results_c2d.good());
 
     test_stream_against_regexes(transformation_results_c2d, regexes);
@@ -248,13 +233,12 @@ TEST_F(examples_ft, transformation)
 TEST_F(examples_ft, undistort)
 {
 #ifdef _WIN32
-    const std::string undistort_write_file = TEST_TEMP_DIR + "\\undistort-record.txt";
     const std::string undistort_path = "bin\\undistort.exe";
 #else
-    const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.txt";
     const std::string undistort_path = "./bin/undistort";
 #endif
-    run_and_record_executable(undistort_path, undistort_write_file, "");
+    const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.txt";
+    run_and_record_executable(undistort_path + " " + undistort_write_file, "");
 
     std::ifstream undistort_results(undistort_write_file);
     // don't bother checking the file- just make sure it's there
