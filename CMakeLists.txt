@@ -31,6 +31,10 @@ include(GitCommands)
 # Set the project version
 include(K4AProjectVersion)
 
+# Default to not embed an icon in resources
+set(K4A_USE_ICON 0)
+set(K4A_ICON_PATH ${CMAKE_CURRENT_LIST_DIR}/kinect-viewer.ico)
+
 set(PROJ_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(INCLUDE_DIR ${PROJ_DIR}/include)
 
@@ -59,10 +63,16 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZH:SHA_256")
 endif()
 
-# If using clang or GCC only linked shared libraries if needed
+# If using clang or GCC, only linked shared libraries if needed
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed")
+endif()
+
+# If using clang or GCC, be sure to include a build id
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id")
 endif()
 
 # Find all dependencies
