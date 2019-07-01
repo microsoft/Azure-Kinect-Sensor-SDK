@@ -178,6 +178,40 @@ TEST_F(examples_ft, fastpointcloud)
     test_stream_against_regexes(fastpointcloud_results, regexes);
 }
 
+TEST_F(examples_ft, transformation)
+{
+    const std::string transformation_dir = TEST_TEMP_DIR;
+#ifdef _WIN32
+    const std::string delim = "\\";
+    const std::string transformation_path = "bin\\transformation_example.exe";
+#else
+    const std::string delim = "/";
+    const std::string transformation_path = "./bin/transformation_example";
+#endif
+    const std::string transformation_stdout_file = TEST_TEMP_DIR + delim + "transformation-stdout.txt";
+    run_and_record_executable(transformation_path, "capture " + transformation_dir + " 0", transformation_stdout_file);
+
+    std::ifstream transformation_results_d2c(transformation_dir + delim + "depth_to_color.ply");
+    ASSERT_TRUE(transformation_results_d2c.good());
+
+    std::vector<std::string> regexes{ "ply",
+                                      "format ascii 1.0",
+                                      "element vertex [0-9]+",
+                                      "property float x",
+                                      "property float y",
+                                      "property float z",
+                                      "property uchar red",
+                                      "property uchar green",
+                                      "property uchar blue",
+                                      "end_header" };
+
+    std::ifstream transformation_results_c2d(transformation_dir + delim + "depth_to_color.ply");
+    ASSERT_TRUE(transformation_results_c2d.good());
+
+    test_stream_against_regexes(transformation_results_c2d, regexes);
+    test_stream_against_regexes(transformation_results_d2c, regexes);
+}
+
 int main(int argc, char **argv)
 {
     return k4a_test_common_main(argc, argv);
