@@ -1,6 +1,8 @@
-﻿using System.Numerics;
-using NUnit.Framework;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+using System.Numerics;
 using Microsoft.Azure.Kinect.Sensor;
+using NUnit.Framework;
 
 namespace WrapperTests
 {

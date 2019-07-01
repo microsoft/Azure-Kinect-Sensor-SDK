@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>Microsoft.Azure.Kinect.Sensor.xml</DocumentationFile>
+    <DocumentationFile>$(OutputPath)Microsoft.Azure.Kinect.Sensor.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

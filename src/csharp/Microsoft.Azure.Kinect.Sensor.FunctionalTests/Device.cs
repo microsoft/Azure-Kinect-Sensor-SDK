@@ -1,5 +1,7 @@
-using NUnit.Framework;
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 using Microsoft.Azure.Kinect.Sensor;
+using NUnit.Framework;
 
 namespace WrapperTests
 {
