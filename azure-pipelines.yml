@@ -7,9 +7,9 @@ variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
 - name: 'linux_firmware_version'
-  value: '1.6.987014'
+  value: '1.6.102075014'
 - name: 'windows_firmware_version'
-  value: '1.6.987014'
+  value: '1.6.102075014'
 
 trigger:
   batch: false
@@ -147,7 +147,6 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    fetchDepth: 20
     lfs: false
     persistCredentials: true
     submodules: true
@@ -385,7 +384,6 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    fetchDepth: 20
     lfs: false
     persistCredentials: true
     submodules: true
@@ -463,7 +461,6 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    fetchDepth: 20
     lfs: false
     persistCredentials: true
     submodules: true
