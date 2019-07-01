@@ -101,6 +101,7 @@ $(document).ready(function(){initNavTree('group___enumerations_ga6404c655dd8656e
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c"></a>K4A_WIRED_SYNC_MODE_STANDALONE&#160;</td><td class="fielddoc"><p>Neither 'Sync In' or 'Sync Out' connections are used. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga6404c655dd8656efb745c6ee90da2505a014b98f7b0c962a994abe1a472bf6697"></a>K4A_WIRED_SYNC_MODE_MASTER&#160;</td><td class="fielddoc"><p>The 'Sync Out' jack is enabled and synchronization data it driven out the connected wire. </p>
+<p>While in master mode the color camera must be enabled as part of the multi device sync signalling logic. Even if the color image is not needed, the color camera must be running. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga6404c655dd8656efb745c6ee90da2505a8140f817b21902d275832a1ef6c216ca"></a>K4A_WIRED_SYNC_MODE_SUBORDINATE&#160;</td><td class="fielddoc"><p>The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the next device in the chain. </p>
 <p>'Sync Out' is a mirror of 'Sync In' for this mode. </p>
