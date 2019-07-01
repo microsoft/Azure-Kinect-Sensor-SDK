@@ -189,6 +189,28 @@ TEST_F(examples_ft, opencv_compatibility)
     run_and_record_executable(transformation_path, "", "");
 }
 
+TEST_F(examples_ft, streaming)
+{
+#ifdef _WIN32
+    const std::string streaming_path = "bin\\streaming_samples.exe";
+    const std::string streaming_stdout_file = TEST_TEMP_DIR + "\\streaming-stdout.txt";
+#else
+    const std::string streaming_path = "./bin/streaming_samples";
+    const std::string streaming_stdout_file = TEST_TEMP_DIR + "/streaming-stdout.txt";
+#endif
+    run_and_record_executable(streaming_path, "20", streaming_stdout_file);
+
+    std::ifstream streaming_results(streaming_stdout_file);
+    ASSERT_TRUE(streaming_results.good());
+
+    std::vector<std::string>
+        regexes{ "Capturing 20 frames",
+                 "Capture \\| Color res:[0-9]+x[0-9]+ stride: [^\\|]*\\| Ir16 res: [0-9]+x [0-9]+ stride: "
+                 "[0-9]+[^\\|]*\\| Depth16 res: [0-9]+x [0-9]+ stride: [0-9]+" };
+
+    test_stream_against_regexes(streaming_results, regexes);
+}
+
 TEST_F(examples_ft, transformation)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
