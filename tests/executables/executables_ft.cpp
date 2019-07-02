@@ -29,7 +29,7 @@
 #define SETENV(env, value) setenv(env, value, 1)
 #endif
 
-const static std::string TEST_TEMP_DIR = "examples_test_temp";
+const static std::string TEST_TEMP_DIR = "executables_test_temp";
 
 // run the specified executable and record the output to output_path
 // if output_path is empty, just output to stdout
@@ -63,12 +63,12 @@ static void test_stream_against_regexes(std::istream &input_stream, const std::v
             ++regex_iter;
         }
     }
-    ASSERT_EQ(regex_iter, regexes.cend()) << "Reached the end of the example output before matching all of the "
+    ASSERT_EQ(regex_iter, regexes.cend()) << "Reached the end of the executable output before matching all of the "
                                              "required regular expressions.\nExpected \""
                                           << *regex_iter << "\", but never saw it.";
 }
 
-class examples_ft : public ::testing::Test
+class executables_ft : public ::testing::Test
 {
 protected:
     void SetUp() override
@@ -86,7 +86,7 @@ protected:
     }
 };
 
-TEST_F(examples_ft, calibration)
+TEST_F(executables_ft, calibration)
 {
     const std::string calibration_path = PATH_TO_BIN("calibration_info");
     const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
@@ -117,7 +117,7 @@ TEST_F(examples_ft, calibration)
     test_stream_against_regexes(results, regexes);
 }
 
-TEST_F(examples_ft, enumerate)
+TEST_F(executables_ft, enumerate)
 {
     const std::string enumerate_path = PATH_TO_BIN("enumerate_devices");
     const std::string enumerate_out = TEST_TEMP_DIR + "/enumerate-out.txt";
@@ -127,7 +127,7 @@ TEST_F(examples_ft, enumerate)
     test_stream_against_regexes(results, regexes);
 }
 
-TEST_F(examples_ft, fastpointcloud)
+TEST_F(executables_ft, fastpointcloud)
 {
     const std::string fastpoint_path = PATH_TO_BIN("fastpointcloud");
     const std::string fastpoint_write_file = TEST_TEMP_DIR + "/fastpointcloud-record.txt";
@@ -148,14 +148,14 @@ TEST_F(examples_ft, fastpointcloud)
     test_stream_against_regexes(fastpointcloud_results, regexes);
 }
 
-TEST_F(examples_ft, opencv_compatibility)
+TEST_F(executables_ft, opencv_compatibility)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
     const std::string transformation_path = PATH_TO_BIN("opencv_example");
     run_and_record_executable(transformation_path, "");
 }
 
-TEST_F(examples_ft, streaming)
+TEST_F(executables_ft, streaming)
 {
     const std::string streaming_path = PATH_TO_BIN("streaming_samples");
     const std::string streaming_stdout_file = TEST_TEMP_DIR + "/streaming-stdout.txt";
@@ -172,7 +172,7 @@ TEST_F(examples_ft, streaming)
     test_stream_against_regexes(streaming_results, regexes);
 }
 
-TEST_F(examples_ft, transformation)
+TEST_F(executables_ft, transformation)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
     const std::string transformation_path = PATH_TO_BIN("transformation_example");
@@ -201,7 +201,7 @@ TEST_F(examples_ft, transformation)
     test_stream_against_regexes(transformation_results_d2c, regexes);
 }
 
-TEST_F(examples_ft, undistort)
+TEST_F(executables_ft, undistort)
 {
     const std::string undistort_path = PATH_TO_BIN("undistort");
     const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.csv";
