@@ -10,6 +10,12 @@
 #include <utcommon.h>
 #include <gtest/gtest.h>
 
+#ifdef _WIN32
+#define PATH_TO_BIN(binary) "bin\\" binary ".exe"
+#else
+#define PATH_TO_BIN(binary) "./bin/" binary
+#endif
+
 const static std::string TEST_TEMP_DIR = "examples_test_temp";
 
 // run the specified executable and record the output to output_path
@@ -86,13 +92,8 @@ protected:
 
 TEST_F(examples_ft, calibration)
 {
-#ifdef _WIN32
-    const std::string calibration_path = "bin\\calibration_info.exe";
+    const std::string calibration_path = PATH_TO_BIN("calibration_info");
     const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
-#else
-    const std::string calibration_path = "./bin/calibration_info";
-    const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
-#endif
 
     // get the calibration output
     run_and_record_executable(calibration_path, calibration_out);
@@ -125,11 +126,7 @@ TEST_F(examples_ft, calibration)
 
 TEST_F(examples_ft, enumerate)
 {
-#ifdef _WIN32
-    const std::string enumerate_path = "bin\\enumerate_devices.exe";
-#else
-    const std::string enumerate_path = "./bin/enumerate_devices";
-#endif
+    const std::string enumerate_path = PATH_TO_BIN("enumerate_devices");
     const std::string enumerate_out = TEST_TEMP_DIR + "/enumerate-out.txt";
     run_and_record_executable(enumerate_path, enumerate_out);
     std::ifstream results(enumerate_out.c_str());
@@ -142,11 +139,7 @@ TEST_F(examples_ft, enumerate)
 
 TEST_F(examples_ft, fastpointcloud)
 {
-#ifdef _WIN32
-    const std::string fastpoint_path = "bin\\fastpointcloud.exe";
-#else
-    const std::string fastpoint_path = "./bin/fastpointcloud";
-#endif
+    const std::string fastpoint_path = PATH_TO_BIN("fastpointcloud");
     const std::string fastpoint_write_file = TEST_TEMP_DIR + "/fastpointcloud-record.txt";
     const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "/fastpointcloud-stdout.txt";
     run_and_record_executable(fastpoint_path + " " + fastpoint_write_file, fastpoint_stdout_file);
@@ -168,31 +161,24 @@ TEST_F(examples_ft, fastpointcloud)
 TEST_F(examples_ft, opencv_compatibility)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
-#ifdef _WIN32
-    const std::string transformation_path = "bin\\opencv_example.exe";
-#else
-    const std::string transformation_path = "./bin/opencv_example";
-#endif
+    const std::string transformation_path = PATH_TO_BIN("opencv_example");
     run_and_record_executable(transformation_path, "");
 }
 
 TEST_F(examples_ft, streaming)
 {
-#ifdef _WIN32
-    const std::string streaming_path = "bin\\streaming_samples.exe";
-#else
-    const std::string streaming_path = "./bin/streaming_samples";
-#endif
+    const std::string streaming_path = PATH_TO_BIN("streaming_samples");
     const std::string streaming_stdout_file = TEST_TEMP_DIR + "/streaming-stdout.txt";
     run_and_record_executable(streaming_path + " 20", streaming_stdout_file);
 
     std::ifstream streaming_results(streaming_stdout_file);
     ASSERT_TRUE(streaming_results.good());
 
-    std::vector<std::string>
-        regexes{ "Capturing 20 frames",
-                 "Capture \\| Color res:[0-9]+x[0-9]+ stride: [^\\|]*\\| Ir16 res: [0-9]+x [0-9]+ stride: "
-                 "[0-9]+[^\\|]*\\| Depth16 res: [0-9]+x [0-9]+ stride: [0-9]+" };
+    std::vector<std::string> regexes{
+        "Capturing 20 frames",
+        "Capture \\| Color res:[0-9]+x[0-9]+ stride: [^\\|]*\\| Ir16 res: [0-9]+x [0-9]+ stride: "
+        "[0-9]+[^\\|]*\\| Depth16 res: [0-9]+x [0-9]+ stride: [0-9]+"
+    };
 
     test_stream_against_regexes(streaming_results, regexes);
 }
@@ -200,11 +186,7 @@ TEST_F(examples_ft, streaming)
 TEST_F(examples_ft, transformation)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
-#ifdef _WIN32
-    const std::string transformation_path = "bin\\transformation_example.exe";
-#else
-    const std::string transformation_path = "./bin/transformation_example";
-#endif
+    const std::string transformation_path = PATH_TO_BIN("transformation_example");
     const std::string transformation_stdout_file = TEST_TEMP_DIR + "/transformation-stdout.txt";
     run_and_record_executable(transformation_path + " capture " + transformation_dir + " 0",
                               transformation_stdout_file);
@@ -232,11 +214,7 @@ TEST_F(examples_ft, transformation)
 
 TEST_F(examples_ft, undistort)
 {
-#ifdef _WIN32
-    const std::string undistort_path = "bin\\undistort.exe";
-#else
-    const std::string undistort_path = "./bin/undistort";
-#endif
+    const std::string undistort_path = PATH_TO_BIN("undistort");
     const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.txt";
     run_and_record_executable(undistort_path + " " + undistort_write_file, "");
 
