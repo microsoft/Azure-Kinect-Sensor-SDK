@@ -225,7 +225,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             ref Vector3 source_point3d,
             Calibration.DeviceType source_camera,
             Calibration.DeviceType target_camera,
-            out Float3 target_point3d);
+            out Vector3 target_point3d);
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
