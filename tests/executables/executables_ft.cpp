@@ -14,14 +14,14 @@
 #include <gtest/gtest.h>
 
 #ifdef _WIN32
-#define PATH_TO_BIN(binary) "bin\\" binary ".exe"
+#define PATH_TO_BIN(binary) binary ".exe"
 #define MKDIR(path) "if not exist " + path + " mkdir " + path
 #define RMDIR(path) "rmdir /S /Q " + path
 #define POPEN _popen
 #define PCLOSE _pclose
 #define SETENV(env, value) _putenv_s(env, value)
 #else
-#define PATH_TO_BIN(binary) "./bin/" binary
+#define PATH_TO_BIN(binary) "./" binary
 #define MKDIR(path) "mkdir -p " + path
 #define RMDIR(path) "rm -rf " + path
 #define POPEN popen
