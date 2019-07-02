@@ -13,7 +13,7 @@
 #ifdef _WIN32
 #define PATH_TO_BIN(binary) "bin\\" binary ".exe"
 #define MKDIR(path) "if not exist " + path + " mkdir " + path
-#define RMDIR(path) "rmdir /S /Q " path
+#define RMDIR(path) "rmdir /S /Q " + path
 #define POPEN _popen
 #define PCLOSE _pclose
 #define SETENV(env, value) _putenv_s(env, value)
