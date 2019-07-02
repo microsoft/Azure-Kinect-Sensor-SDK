@@ -263,7 +263,8 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (disposedValue)
                     throw new ObjectDisposedException(nameof(Device));
 
-                Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_start_cameras(handle, configuration.GetNativeConfiguration()));
+                NativeMethods.k4a_device_configuration_t nativeConfig = configuration.GetNativeConfiguration();
+                Exception.ThrowIfNotSuccess(NativeMethods.k4a_device_start_cameras(handle, ref nativeConfig));
 
                 this.CurrentDepthMode = configuration.DepthMode;
                 this.CurrentColorResolution = configuration.ColorResolution;
