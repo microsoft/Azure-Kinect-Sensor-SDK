@@ -14,12 +14,14 @@
 #include <gtest/gtest.h>
 
 #ifdef _WIN32
+#define PATH_TO_BIN(binary) "bin\\" binary ".exe"
 #define MKDIR(path) "if not exist " + path + " mkdir " + path
 #define RMDIR(path) "rmdir /S /Q " + path
 #define POPEN _popen
 #define PCLOSE _pclose
 #define SETENV(env, value) _putenv_s(env, value)
 #else
+#define PATH_TO_BIN(binary) "./bin/" binary
 #define MKDIR(path) "mkdir -p " + path
 #define RMDIR(path) "rm -rf " + path
 #define POPEN popen
@@ -86,7 +88,7 @@ protected:
 
 TEST_F(executables_ft, calibration)
 {
-    const std::string calibration_path = "./calibration_info";
+    const std::string calibration_path = PATH_TO_BIN("calibration_info");
     const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
 
     run_and_record_executable(calibration_path, calibration_out);
@@ -117,7 +119,7 @@ TEST_F(executables_ft, calibration)
 
 TEST_F(executables_ft, enumerate)
 {
-    const std::string enumerate_path = "./enumerate_devices";
+    const std::string enumerate_path = PATH_TO_BIN("enumerate_devices");
     const std::string enumerate_out = TEST_TEMP_DIR + "/enumerate-out.txt";
     run_and_record_executable(enumerate_path, enumerate_out);
     std::ifstream results(enumerate_out.c_str());
@@ -127,7 +129,7 @@ TEST_F(executables_ft, enumerate)
 
 TEST_F(executables_ft, fastpointcloud)
 {
-    const std::string fastpoint_path = "./fastpointcloud";
+    const std::string fastpoint_path = PATH_TO_BIN("fastpointcloud");
     const std::string fastpoint_write_file = TEST_TEMP_DIR + "/fastpointcloud-record.txt";
     const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "/fastpointcloud-stdout.txt";
     run_and_record_executable(fastpoint_path + " " + fastpoint_write_file, fastpoint_stdout_file);
@@ -149,13 +151,13 @@ TEST_F(executables_ft, fastpointcloud)
 TEST_F(executables_ft, opencv_compatibility)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
-    const std::string transformation_path = "./opencv_example";
+    const std::string transformation_path = PATH_TO_BIN("opencv_example");
     run_and_record_executable(transformation_path, "");
 }
 
 TEST_F(executables_ft, streaming)
 {
-    const std::string streaming_path = "./streaming_samples";
+    const std::string streaming_path = PATH_TO_BIN("streaming_samples");
     const std::string streaming_stdout_file = TEST_TEMP_DIR + "/streaming-stdout.txt";
     run_and_record_executable(streaming_path + " 20", streaming_stdout_file);
 
@@ -173,7 +175,7 @@ TEST_F(executables_ft, streaming)
 TEST_F(executables_ft, transformation)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
-    const std::string transformation_path = "./transformation_example";
+    const std::string transformation_path = PATH_TO_BIN("transformation_example");
     const std::string transformation_stdout_file = TEST_TEMP_DIR + "/transformation-stdout.txt";
     run_and_record_executable(transformation_path + " capture " + transformation_dir + " 0",
                               transformation_stdout_file);
@@ -201,7 +203,7 @@ TEST_F(executables_ft, transformation)
 
 TEST_F(executables_ft, undistort)
 {
-    const std::string undistort_path = "./undistort";
+    const std::string undistort_path = PATH_TO_BIN("undistort");
     const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.csv";
     run_and_record_executable(undistort_path + " " + undistort_write_file, "");
 
