@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#include <iostream> // TODO remove
+// Tests for executables. These tests will run binaries that are created as part of the build, store their outputs to
+// files, and ensure that the contents of those files are the contents that we expect.
+
+#include <iostream>
 #include <string>
 #include <regex>
 #include <fstream>
@@ -32,13 +35,15 @@ const static std::string TEST_TEMP_DIR = "examples_test_temp";
 // if output_path is empty, just output to stdout
 static void run_and_record_executable(const std::string &shell_command_path, const std::string &output_path)
 {
-    // TODO fflush needed here?
     std::string formatted_command = shell_command_path;
     if (!output_path.empty())
     {
         formatted_command += " 2>&1 > " + output_path;
     }
-    std::cout << formatted_command << std::endl;
+    // In Linux, forking a process causes the under buffers to be forked, too. So, because popen uses fork under the
+    // hood, there may have been a risk of printing something in both processes. I'm not sure if this could happen in
+    // this situation, but better safe than sorry.
+    std::cout << std::endl;
     FILE *process_stream = POPEN(formatted_command.c_str(), "r");
     ASSERT_TRUE(process_stream);
     ASSERT_EQ(PCLOSE(process_stream), EXIT_SUCCESS);
@@ -53,7 +58,6 @@ static void test_stream_against_regexes(std::istream &input_stream, const std::v
         std::string results;
         getline(input_stream, results);
         std::regex desired_out(*regex_iter);
-        std::cout << results << std::endl; // TODO delete this
         if (std::regex_match(results, desired_out))
         {
             ++regex_iter;
@@ -69,6 +73,8 @@ class examples_ft : public ::testing::Test
 protected:
     void SetUp() override
     {
+        // environment variables are only set for this process and processes it creates, so this won't mess up the
+        // environment for the user in the future.
         SETENV("K4A_ENABLE_LOG_TO_STDOUT", "0");
         SETENV("K4A_LOG_LEVEL", "i");
         run_and_record_executable(MKDIR(TEST_TEMP_DIR), "");
@@ -85,11 +91,8 @@ TEST_F(examples_ft, calibration)
     const std::string calibration_path = PATH_TO_BIN("calibration_info");
     const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
 
-    // get the calibration output
     run_and_record_executable(calibration_path, calibration_out);
-
     std::ifstream results(calibration_out.c_str());
-    // make sure the calibration output has the right format
     std::vector<std::string> regexes{ "Found [^]* connected devices:",
                                       "===== Device [^]* =====",
                                       "resolution width: [^]*",
@@ -120,10 +123,7 @@ TEST_F(examples_ft, enumerate)
     const std::string enumerate_out = TEST_TEMP_DIR + "/enumerate-out.txt";
     run_and_record_executable(enumerate_path, enumerate_out);
     std::ifstream results(enumerate_out.c_str());
-    std::vector<std::string> regexes{ // Assume tests run with 1 device plugged in. TODO is that the case?
-                                      "Found [1-5] connected devices:",
-                                      "0: Device [^]*"
-    };
+    std::vector<std::string> regexes{ "Found [1-5] connected devices:", "0: Device [^]*" };
     test_stream_against_regexes(results, regexes);
 }
 
@@ -204,11 +204,11 @@ TEST_F(examples_ft, transformation)
 TEST_F(examples_ft, undistort)
 {
     const std::string undistort_path = PATH_TO_BIN("undistort");
-    const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.txt";
+    const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.csv";
     run_and_record_executable(undistort_path + " " + undistort_write_file, "");
 
     std::ifstream undistort_results(undistort_write_file);
-    // don't bother checking the file- just make sure it's there
+    // don't bother checking the csv file- just make sure it's there
     ASSERT_TRUE(undistort_results.good());
 }
 
