@@ -12,8 +12,18 @@
 
 #ifdef _WIN32
 #define PATH_TO_BIN(binary) "bin\\" binary ".exe"
+#define MKDIR(path) "if not exist " + path + " mkdir " + path
+#define RMDIR(path) "rmdir /S /Q " path
+#define POPEN _popen
+#define PCLOSE _pclose
+#define SETENV(env, value) _putenv_s(env, value)
 #else
 #define PATH_TO_BIN(binary) "./bin/" binary
+#define MKDIR(path) "mkdir -p " + path
+#define RMDIR(path) "rm -rf " + path
+#define POPEN popen
+#define PCLOSE pclose
+#define SETENV(env, value) setenv(env, value, 1)
 #endif
 
 const static std::string TEST_TEMP_DIR = "examples_test_temp";
@@ -29,15 +39,9 @@ static void run_and_record_executable(const std::string &shell_command_path, con
         formatted_command += " 2>&1 > " + output_path;
     }
     std::cout << formatted_command << std::endl;
-#ifdef _WIN32
-    FILE *process_stream = _popen(formatted_command.c_str(), "r");
+    FILE *process_stream = POPEN(formatted_command.c_str(), "r");
     ASSERT_TRUE(process_stream);
-    ASSERT_EQ(_pclose(process_stream), EXIT_SUCCESS);
-#else
-    FILE *process_stream = popen(formatted_command.c_str(), "r");
-    ASSERT_TRUE(process_stream);
-    ASSERT_EQ(pclose(process_stream), EXIT_SUCCESS);
-#endif
+    ASSERT_EQ(PCLOSE(process_stream), EXIT_SUCCESS);
 }
 
 static void test_stream_against_regexes(std::istream &input_stream, const std::vector<std::string> &regexes)
@@ -65,28 +69,14 @@ class examples_ft : public ::testing::Test
 protected:
     void SetUp() override
     {
-#ifdef _WIN32
-        _putenv_s("K4A_ENABLE_LOG_TO_STDOUT", "0");
-        _putenv_s("K4A_LOG_LEVEL", "i");
-#else
-        setenv("K4A_ENABLE_LOG_TO_STDOUT", "0", 1);
-        setenv("K4A_LOG_LEVEL", "i", 1);
-#endif
-
-#ifdef _WIN32
-        run_and_record_executable("if not exist " + TEST_TEMP_DIR + " mkdir " + TEST_TEMP_DIR, "");
-#else
-        run_and_record_executable("mkdir -p " + TEST_TEMP_DIR, "");
-#endif
+        SETENV("K4A_ENABLE_LOG_TO_STDOUT", "0");
+        SETENV("K4A_LOG_LEVEL", "i");
+        run_and_record_executable(MKDIR(TEST_TEMP_DIR), "");
     }
 
     void TearDown() override
     {
-#ifdef _WIN32
-        run_and_record_executable("rmdir /S /Q " + TEST_TEMP_DIR, ""); // TODO might not even need this
-#else
-        run_and_record_executable("rm -rf " + TEST_TEMP_DIR, ""); // TODO might not even need this
-#endif
+        run_and_record_executable(RMDIR(TEST_TEMP_DIR), "");
     }
 };
 
