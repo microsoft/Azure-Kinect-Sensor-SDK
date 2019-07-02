@@ -1,8 +1,8 @@
 ---
-name: Bug report
+name: Code Sample Bug report
 about: Create a report to help us improve
 title: ''
-labels: Bug, Triage Needed
+labels: Bug, Triage Needed, Code Sample
 assignees: ''
 
 ---
