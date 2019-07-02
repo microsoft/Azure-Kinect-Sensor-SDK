@@ -87,7 +87,7 @@ protected:
 TEST_F(examples_ft, calibration)
 {
 #ifdef _WIN32
-    const std::string calibration_path = "bin/calibration_info.exe";
+    const std::string calibration_path = "bin\\calibration_info.exe";
     const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
 #else
     const std::string calibration_path = "./bin/calibration_info";
@@ -126,7 +126,7 @@ TEST_F(examples_ft, calibration)
 TEST_F(examples_ft, enumerate)
 {
 #ifdef _WIN32
-    const std::string enumerate_path = "bin/enumerate_devices.exe";
+    const std::string enumerate_path = "bin\\enumerate_devices.exe";
 #else
     const std::string enumerate_path = "./bin/enumerate_devices";
 #endif
@@ -169,7 +169,7 @@ TEST_F(examples_ft, opencv_compatibility)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
 #ifdef _WIN32
-    const std::string transformation_path = "bin/opencv_example.exe";
+    const std::string transformation_path = "bin\\opencv_example.exe";
 #else
     const std::string transformation_path = "./bin/opencv_example";
 #endif
@@ -179,7 +179,7 @@ TEST_F(examples_ft, opencv_compatibility)
 TEST_F(examples_ft, streaming)
 {
 #ifdef _WIN32
-    const std::string streaming_path = "bin/streaming_samples.exe";
+    const std::string streaming_path = "bin\\streaming_samples.exe";
 #else
     const std::string streaming_path = "./bin/streaming_samples";
 #endif
@@ -201,7 +201,7 @@ TEST_F(examples_ft, transformation)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
 #ifdef _WIN32
-    const std::string transformation_path = "bin/transformation_example.exe";
+    const std::string transformation_path = "bin\\transformation_example.exe";
 #else
     const std::string transformation_path = "./bin/transformation_example";
 #endif
