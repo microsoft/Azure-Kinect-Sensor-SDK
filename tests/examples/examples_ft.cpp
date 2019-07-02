@@ -174,11 +174,10 @@ TEST_F(examples_ft, streaming)
     std::ifstream streaming_results(streaming_stdout_file);
     ASSERT_TRUE(streaming_results.good());
 
-    std::vector<std::string> regexes{
-        "Capturing 20 frames",
-        "Capture \\| Color res:[0-9]+x[0-9]+ stride: [^\\|]*\\| Ir16 res: [0-9]+x [0-9]+ stride: "
-        "[0-9]+[^\\|]*\\| Depth16 res: [0-9]+x [0-9]+ stride: [0-9]+"
-    };
+    std::vector<std::string>
+        regexes{ "Capturing 20 frames",
+                 "Capture \\| Color res:[0-9]+x[0-9]+ stride: [^\\|]*\\| Ir16 res: [0-9]+x [0-9]+ stride: "
+                 "[0-9]+[^\\|]*\\| Depth16 res: [0-9]+x [0-9]+ stride: [0-9]+" };
 
     test_stream_against_regexes(streaming_results, regexes);
 }
