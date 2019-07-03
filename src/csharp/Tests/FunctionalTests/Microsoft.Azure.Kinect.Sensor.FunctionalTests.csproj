@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\k4a.props" />
+  <Import Project="..\..\k4a.props" />
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Azure.Kinect.Sensor\Microsoft.Azure.Kinect.Sensor.csproj" />
+    <ProjectReference Include="..\..\SDK\Microsoft.Azure.Kinect.Sensor.csproj" />
   </ItemGroup>
 
 </Project>
