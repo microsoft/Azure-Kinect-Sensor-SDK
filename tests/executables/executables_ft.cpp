@@ -43,7 +43,7 @@ static void run_and_record_executable(const std::string &shell_command_path, con
     // In Linux, forking a process causes the under buffers to be forked, too. So, because popen uses fork under the
     // hood, there may have been a risk of printing something in both processes. I'm not sure if this could happen in
     // this situation, but better safe than sorry.
-    std::cout << std::endl;
+    std::cout.flush();
     FILE *process_stream = POPEN(formatted_command.c_str(), "r");
     ASSERT_TRUE(process_stream);
     ASSERT_EQ(PCLOSE(process_stream), EXIT_SUCCESS);
