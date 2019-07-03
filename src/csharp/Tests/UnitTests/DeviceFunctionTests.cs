@@ -129,7 +129,7 @@ void k4a_device_close(k4a_device_t device_handle)
 }}
 
 ");
-            Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+            Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
             {
                 using (Device.Open(5))
                 {
@@ -266,7 +266,7 @@ k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle,
             //Validate that we get exceptions from the second call to k4a_device_get_serialnum
             using (Device device = Device.Open(0))
             {
-                Assert.Throws<Microsoft.Azure.Kinect.Sensor.Exception>(() =>
+                Assert.Throws<Microsoft.Azure.Kinect.Sensor.AzureKinectException>(() =>
                 {
                     Assert.AreEqual("1234", device.SerialNum);
                 });
@@ -390,7 +390,7 @@ k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle,
             //Validate that we get exceptions from the second call to k4a_device_get_serialnum
             using (Device device = Device.Open(0))
             {
-                Assert.Throws<Microsoft.Azure.Kinect.Sensor.Exception>(() =>
+                Assert.Throws<Microsoft.Azure.Kinect.Sensor.AzureKinectException>(() =>
                 {
                     device.GetRawCalibration();
                 });
@@ -423,7 +423,7 @@ k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle,
             //Validate that we get exceptions from the first call to k4a_device_get_raw_calibration
             using (Device device = Device.Open(0))
             {
-                Assert.Throws<Microsoft.Azure.Kinect.Sensor.Exception>(() =>
+                Assert.Throws<Microsoft.Azure.Kinect.Sensor.AzureKinectException>(() =>
                 {
                     device.GetRawCalibration();
                 });
@@ -508,7 +508,7 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
 
 
                 // GetCalibration with no arguments will throw if the device is not yet started
-                Assert.Throws(typeof(Exception), () =>
+                Assert.Throws(typeof(AzureKinectException), () =>
                 {
                     device.GetCalibration();
                 });
@@ -543,7 +543,7 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
                 device.StopCameras();
 
                 // GetCalibration will fail again after the cameras are stopped
-                Assert.Throws(typeof(Exception), () =>
+                Assert.Throws(typeof(AzureKinectException), () =>
                 {
                     device.GetCalibration();
                 });
@@ -579,7 +579,7 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
 ");
             using (Device device = Device.Open(0))
             {
-                Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
                         Calibration calibration = device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.r1440p);
                     });
@@ -733,7 +733,7 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
                     Assert.AreEqual(0, count.Calls("k4a_device_get_capture"));
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
 
-                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
                         using (Capture capture = device.GetCapture(2345))
                         {
@@ -767,7 +767,7 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
                     Assert.AreEqual(0, count.Calls("k4a_device_get_capture"));
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
 
-                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
                         using (Capture capture = device.GetCapture(2345))
                         {
@@ -840,7 +840,7 @@ k4a_result_t k4a_device_set_color_control(k4a_device_t device_handle, k4a_color_
                 using (Device device = Device.Open(0))
                 {
                     Assert.AreEqual(0, count.Calls("k4a_device_set_color_control"));
-                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
                         device.SetColorControl(ColorControlCommand.PowerlineFrequency, ColorControlMode.Manual, 2345);
                     });
@@ -922,7 +922,7 @@ k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle, k4a_color_
                 using (Device device = Device.Open(0))
                 {
                     Assert.AreEqual(0, count.Calls("k4a_device_get_color_control"));
-                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
                         device.GetColorControl(ColorControlCommand.PowerlineFrequency, out ColorControlMode mode);
                     });
@@ -1048,7 +1048,7 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
                 {
                     Assert.AreEqual(0, count.Calls("k4a_device_get_imu_sample"));
 
-                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
                         ImuSample sample = device.GetImuSample(2345);
                     });
@@ -1161,12 +1161,12 @@ k4a_result_t k4a_device_get_sync_jack(
                 using (Device device = Device.Open(0))
                 {
 
-                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
                         bool instate = device.SyncInJackConnected;
                     });
 
-                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
                         bool instate = device.SyncOutJackConnected;
                     });
@@ -1266,7 +1266,7 @@ k4a_result_t k4a_device_get_version(
 ");
             {
                 CallCount count = NativeK4a.CountCalls();
-                Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                 {
                     using (Device device = Device.Open(0))
                     {
@@ -1449,7 +1449,7 @@ k4a_result_t k4a_device_start_imu(
                 CallCount count = NativeK4a.CountCalls();
                 using (Device device = Device.Open(0))
                 {
-                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.Exception), () =>
+                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
                         device.StartImu();
                     });

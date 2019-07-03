@@ -27,7 +27,7 @@ namespace Microsoft.Azure.Kinect.Sensor.WPF
                         pixelFormat = PixelFormats.Gray16;
                         break;
                     default:
-                        throw new Exception($"Pixel format {reference.Format} cannot be converted to a BitmapSource");
+                        throw new AzureKinectException($"Pixel format {reference.Format} cannot be converted to a BitmapSource");
                 }
 
                 // BitmapSource.Create copies the unmanaged memory, so there is no need to keep

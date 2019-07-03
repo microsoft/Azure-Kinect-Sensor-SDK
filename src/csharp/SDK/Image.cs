@@ -28,14 +28,14 @@ namespace Microsoft.Azure.Kinect.Sensor
                     pixelSize = 2;
                     break;
                 default:
-                    throw new Exception($"Unable to allocate {typeof(T).Name} array for format {format}");
+                    throw new AzureKinectException($"Unable to allocate {typeof(T).Name} array for format {format}");
             }
 
             int stride_bytes = pixelSize * width_pixels;
 
             if (stride_bytes % Marshal.SizeOf(typeof(T)) != 0)
             {
-                throw new Exception($"{typeof(T).Name} does not fit evenly on a line of {width_pixels} pixels of type {format}");
+                throw new AzureKinectException($"{typeof(T).Name} does not fit evenly on a line of {width_pixels} pixels of type {format}");
             }
 
             // Allocate the buffer
@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             try
             {
                 int size = height_pixels * stride_bytes;
-                Exception.ThrowIfNotSuccess(NativeMethods.k4a_image_create_from_buffer(format,
+                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create_from_buffer(format,
                     width_pixels,
                     height_pixels,
                     stride_bytes,
@@ -95,7 +95,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     {
         public Image(ImageFormat format, int width_pixels, int height_pixels, int stride_bytes)
         {
-            Exception.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
                 width_pixels,
                 height_pixels,
                 stride_bytes,
@@ -289,7 +289,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     _Buffer = NativeMethods.k4a_image_get_buffer(handle);
                     if (_Buffer == IntPtr.Zero)
                     {
-                        throw new Exception("Image has NULL buffer");
+                        throw new AzureKinectException("Image has NULL buffer");
                     }
 
                     return (void*)_Buffer;
