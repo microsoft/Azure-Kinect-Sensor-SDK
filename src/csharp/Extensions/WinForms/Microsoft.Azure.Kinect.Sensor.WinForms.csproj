@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\k4a.props" />
+  <Import Project="..\..\k4a.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <OutputPath Condition="'$(OutputPath)' == ''">bin\Debug\</OutputPath>	
+    <OutputPath Condition="'$(OutputPath)' == ''">bin\Debug\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -31,7 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <OutputPath Condition="'$(OutputPath)' == ''">bin\Release\</OutputPath>	
+    <OutputPath Condition="'$(OutputPath)' == ''">bin\Release\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
@@ -50,7 +50,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Azure.Kinect.Sensor\Microsoft.Azure.Kinect.Sensor.csproj">
+    <ProjectReference Include="..\..\SDK\Microsoft.Azure.Kinect.Sensor.csproj">
       <Project>{847b31d5-c253-4766-bf81-032f4670589d}</Project>
       <Name>Microsoft.Azure.Kinect.Sensor</Name>
     </ProjectReference>

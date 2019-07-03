@@ -5,4 +5,5 @@
 /StubGenerator.*.json
 /StubGenerator.*.xml
 
-/Microsoft.Azure.Kinect.Sensor/Microsoft.Azure.Kinect.Sensor.xml
+## Ignore the generated documentation file
+/SDK/Microsoft.Azure.Kinect.Sensor.xml

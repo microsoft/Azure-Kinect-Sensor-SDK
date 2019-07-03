@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\k4a.props" />
+  <Import Project="..\..\k4a.props" />
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\k4a.props" />
+  <Import Project="..\..\k4a.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -97,11 +97,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Azure.Kinect.Sensor.WinForms\Microsoft.Azure.Kinect.Sensor.WinForms.csproj">
+    <ProjectReference Include="..\..\Extensions\WinForms\Microsoft.Azure.Kinect.Sensor.WinForms.csproj">
       <Project>{618e28c5-0624-463f-9adb-040ba5daed68}</Project>
       <Name>Microsoft.Azure.Kinect.Sensor.WinForms</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Azure.Kinect.Sensor\Microsoft.Azure.Kinect.Sensor.csproj">
+    <ProjectReference Include="..\..\SDK\Microsoft.Azure.Kinect.Sensor.csproj">
       <Project>{847b31d5-c253-4766-bf81-032f4670589d}</Project>
       <Name>Microsoft.Azure.Kinect.Sensor</Name>
     </ProjectReference>

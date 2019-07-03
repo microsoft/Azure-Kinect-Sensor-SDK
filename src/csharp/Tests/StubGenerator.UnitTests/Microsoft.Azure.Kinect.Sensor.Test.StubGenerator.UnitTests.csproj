@@ -1,5 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\k4a.props" />
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\k4a.props" />
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -11,13 +11,13 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Content Include="..\StubGenerator.$(Platform).xml" Link="appsettings.xml">
+    <Content Include="..\..\StubGenerator.$(Platform).xml" Link="appsettings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\..\include\k4a\k4a.h" Link="k4a\k4a.h">
+    <Content Include="..\..\..\..\include\k4a\k4a.h" Link="k4a\k4a.h">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\..\include\k4a\k4atypes.h" Link="k4a\k4atypes.h">
+    <Content Include="..\..\..\..\include\k4a\k4atypes.h" Link="k4a\k4atypes.h">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="$(K4aGeneratorSourcesDirectory)\sdk\include\k4a\k4aversion.h" Link="k4a\k4aversion.h">
@@ -32,13 +32,13 @@
     <Content Include="$(K4aBinaryDirectory)\k4a.pdb" Link="k4a\k4a.pdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator\Stub.cpp" Link="stub\Stub.cpp">
+    <Content Include="..\StubGenerator\Stub.cpp" Link="stub\Stub.cpp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator\Stub.h" Link="stub\Stub.h">
+    <Content Include="..\StubGenerator\Stub.h" Link="stub\Stub.h">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator\StubImplementation.h" Link="stub\StubImplementation.h">
+    <Content Include="..\StubGenerator\StubImplementation.h" Link="stub\StubImplementation.h">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -50,7 +50,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator.csproj" />
-    <ProjectReference Include="..\Microsoft.Azure.Kinect.Sensor\Microsoft.Azure.Kinect.Sensor.csproj" />
+    <ProjectReference Include="..\StubGenerator\Microsoft.Azure.Kinect.Sensor.Test.StubGenerator.csproj" />
   </ItemGroup>
 </Project>
