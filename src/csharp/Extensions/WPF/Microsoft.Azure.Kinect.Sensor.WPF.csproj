@@ -13,6 +13,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <OutputPath Condition="'$(BaseOutputPath)' != ''">$(BaseOutputPath)\$(AssemblyName)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

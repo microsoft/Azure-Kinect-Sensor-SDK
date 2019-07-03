@@ -5,6 +5,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
 
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <OutputPath Condition="'$(BaseOutputPath)' != ''">$(BaseOutputPath)\$(AssemblyName)\</OutputPath>
   </PropertyGroup>
 

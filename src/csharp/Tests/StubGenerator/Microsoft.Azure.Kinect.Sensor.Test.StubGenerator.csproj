@@ -4,6 +4,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
 	
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <OutputPath Condition="'$(BaseOutputPath)' != ''">$(BaseOutputPath)\$(AssemblyName)\</OutputPath>
   </PropertyGroup>
 
