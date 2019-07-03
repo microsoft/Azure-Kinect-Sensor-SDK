@@ -119,7 +119,7 @@ linux-ubuntu/x64/release/libk4a.so (symlink)                   |                
 linux-ubuntu/x64/release/libk4a.so.1.1 (symlink)               |                    |                    | :white_check_mark: |                   |
 linux-ubuntu/x64/release/libk4a.so.1.1.0                       |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libk4arecord.so (symlink)             |                    |                    |                    | :white_check_mark: |
-linux-ubuntu/x64/release/libk4arecord.so.1.1 (symlink)         |                    |                    |                    | :white_check_mark: |
+linux-ubuntu/x64/release/libk4arecord.so.1.1 (symlink)         |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libk4arecord.so.1.1.0                 |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/tools/x64/release/AzureKinectFirmwareTool         |                    |                    |                    |                    | :white_check_mark:
 linux-ubuntu/tools/x64/release/k4arecorder                     |                    |                    |                    |                    | :white_check_mark:
