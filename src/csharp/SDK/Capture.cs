@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public static Capture Create()
         {
-            Exception.ThrowIfNotSuccess(
+            AzureKinectException.ThrowIfNotSuccess(
                 NativeMethods.k4a_capture_create(out NativeMethods.k4a_capture_t handle));
 
             return new Capture(handle);

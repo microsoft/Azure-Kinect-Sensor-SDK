@@ -27,7 +27,7 @@ namespace Microsoft.Azure.Kinect.Sensor.WinForms
                             pixelFormat = System.Drawing.Imaging.PixelFormat.Format16bppGrayScale;
                             break;
                         default:
-                            throw new Exception($"Pixel format {reference.Format} cannot be converted to a BitmapSource");
+                            throw new AzureKinectException($"Pixel format {reference.Format} cannot be converted to a BitmapSource");
                     }
 
                     return new Bitmap(image.WidthPixels,

@@ -15,7 +15,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             this.handle = NativeMethods.k4a_transformation_create(ref calibration);
             if (this.handle == null)
             {
-                throw new Exception("Failed to create transformation object");
+                throw new AzureKinectException("Failed to create transformation object");
             }
         }
 
@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 using (Image depthReference = depth.Reference())
                 using (Image transformedReference = transformed.Reference())
                 {
-                    Exception.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_color_camera(
+                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_color_camera(
                         handle,
                         depthReference.DangerousGetHandle(),
                         transformedReference.DangerousGetHandle()
@@ -105,7 +105,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 using (Image colorReference = color.Reference())
                 using (Image transformedReference = transformed.Reference())
                 {
-                    Exception.ThrowIfNotSuccess(NativeMethods.k4a_transformation_color_image_to_depth_camera(
+                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_color_image_to_depth_camera(
                         handle,
                         depthReference.DangerousGetHandle(),
                         colorReference.DangerousGetHandle(),
@@ -136,7 +136,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 using (Image depthReference = depth.Reference())
                 using (Image pointCloudReference = pointCloud.Reference())
                 {
-                    Exception.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_point_cloud(
+                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_point_cloud(
                         handle,
                         depthReference.DangerousGetHandle(),
                         camera,

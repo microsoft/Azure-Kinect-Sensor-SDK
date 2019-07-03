@@ -96,7 +96,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                                      DeviceType sourceCamera,
                                      DeviceType targetCamera)
         {
-            Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_2d(
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_2d(
                 ref this,
                 ref sourcePoint2D,
                 sourceDepth,
@@ -111,7 +111,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public Vector3? TransformTo3D(Vector2 sourcePoint2D, float sourceDepth, DeviceType sourceCamera, DeviceType targetCamera)
         {
-            Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_3d(
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_calibration_2d_to_3d(
                 ref this,
                 ref sourcePoint2D,
                 sourceDepth,
@@ -127,7 +127,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public Vector2? TransformTo2D(Vector3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
         {
-            Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_2d(
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_2d(
                 ref this,
                 ref sourcePoint3D,
                 sourceCamera,
@@ -142,7 +142,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public Vector3? TransformTo3D(Vector3 sourcePoint3D, DeviceType sourceCamera, DeviceType targetCamera)
         {
-            Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_3d(
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_calibration_3d_to_3d(
                 ref this,
                 ref sourcePoint3D,
                 sourceCamera,
@@ -154,7 +154,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public static Calibration GetFromRaw(byte[] raw, DepthMode depthMode, ColorResolution colorResolution)
         {
-            Exception.ThrowIfNotSuccess(NativeMethods.k4a_calibration_get_from_raw(
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_calibration_get_from_raw(
                 raw,
                 (UIntPtr)raw.Length,
                 depthMode,
