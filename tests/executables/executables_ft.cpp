@@ -33,7 +33,7 @@ const static std::string TEST_TEMP_DIR = "executables_test_temp";
 
 // run the specified executable and record the output to output_path
 // if output_path is empty, just output to stdout
-static void run_and_record_executable(const std::string &shell_command_path, const std::string &output_path)
+static int run_and_record_executable(const std::string &shell_command_path, const std::string &output_path)
 {
     std::string formatted_command = shell_command_path;
     if (!output_path.empty())
@@ -45,8 +45,11 @@ static void run_and_record_executable(const std::string &shell_command_path, con
     // this situation, but better safe than sorry.
     std::cout.flush();
     FILE *process_stream = POPEN(formatted_command.c_str(), "r");
-    ASSERT_TRUE(process_stream);
-    ASSERT_EQ(PCLOSE(process_stream), EXIT_SUCCESS);
+    if (!process_stream)
+    {
+        return EXIT_FAILURE; // if popen fails, it returns null, which is an error
+    }
+    return PCLOSE(process_stream);
 }
 
 static void test_stream_against_regexes(std::istream &input_stream, const std::vector<std::string> &regexes)
@@ -63,7 +66,7 @@ static void test_stream_against_regexes(std::istream &input_stream, const std::v
             ++regex_iter;
         }
     }
-    ASSERT_EQ(regex_iter, regexes.cend()) << "Reached the end of the executable output before matching all of the "
+    EXPECT_EQ(regex_iter, regexes.cend()) << "Reached the end of the executable output before matching all of the "
                                              "required regular expressions.\nExpected \""
                                           << *regex_iter << "\", but never saw it.";
 }
@@ -77,12 +80,12 @@ protected:
         // environment for the user in the future.
         SETENV("K4A_ENABLE_LOG_TO_STDOUT", "0");
         SETENV("K4A_LOG_LEVEL", "i");
-        run_and_record_executable(MKDIR(TEST_TEMP_DIR), "");
+        ASSERT_EQ(run_and_record_executable(MKDIR(TEST_TEMP_DIR), ""), EXIT_SUCCESS);
     }
 
     void TearDown() override
     {
-        run_and_record_executable(RMDIR(TEST_TEMP_DIR), "");
+        ASSERT_EQ(run_and_record_executable(RMDIR(TEST_TEMP_DIR), ""), EXIT_SUCCESS);
     }
 };
 
@@ -91,7 +94,7 @@ TEST_F(executables_ft, calibration)
     const std::string calibration_path = PATH_TO_BIN("calibration_info");
     const std::string calibration_out = TEST_TEMP_DIR + "/calibration-out.txt";
 
-    run_and_record_executable(calibration_path, calibration_out);
+    ASSERT_EQ(run_and_record_executable(calibration_path, calibration_out), EXIT_SUCCESS);
     std::ifstream results(calibration_out.c_str());
     std::vector<std::string> regexes{ "Found [^]* connected devices:",
                                       "===== Device [^]* =====",
@@ -121,7 +124,7 @@ TEST_F(executables_ft, enumerate)
 {
     const std::string enumerate_path = PATH_TO_BIN("enumerate_devices");
     const std::string enumerate_out = TEST_TEMP_DIR + "/enumerate-out.txt";
-    run_and_record_executable(enumerate_path, enumerate_out);
+    ASSERT_EQ(run_and_record_executable(enumerate_path, enumerate_out), EXIT_SUCCESS);
     std::ifstream results(enumerate_out.c_str());
     std::vector<std::string> regexes{ "Found [1-5] connected devices:", "0: Device [^]*" };
     test_stream_against_regexes(results, regexes);
@@ -132,7 +135,8 @@ TEST_F(executables_ft, fastpointcloud)
     const std::string fastpoint_path = PATH_TO_BIN("fastpointcloud");
     const std::string fastpoint_write_file = TEST_TEMP_DIR + "/fastpointcloud-record.txt";
     const std::string fastpoint_stdout_file = TEST_TEMP_DIR + "/fastpointcloud-stdout.txt";
-    run_and_record_executable(fastpoint_path + " " + fastpoint_write_file, fastpoint_stdout_file);
+    ASSERT_EQ(run_and_record_executable(fastpoint_path + " " + fastpoint_write_file, fastpoint_stdout_file),
+              EXIT_SUCCESS);
 
     std::ifstream fastpointcloud_results(fastpoint_write_file.c_str());
     ASSERT_TRUE(fastpointcloud_results.good());
@@ -152,14 +156,14 @@ TEST_F(executables_ft, opencv_compatibility)
 {
     const std::string transformation_dir = TEST_TEMP_DIR;
     const std::string transformation_path = PATH_TO_BIN("opencv_example");
-    run_and_record_executable(transformation_path, "");
+    ASSERT_EQ(run_and_record_executable(transformation_path, ""), EXIT_SUCCESS);
 }
 
 TEST_F(executables_ft, streaming)
 {
     const std::string streaming_path = PATH_TO_BIN("streaming_samples");
     const std::string streaming_stdout_file = TEST_TEMP_DIR + "/streaming-stdout.txt";
-    run_and_record_executable(streaming_path + " 20", streaming_stdout_file);
+    ASSERT_EQ(run_and_record_executable(streaming_path + " 20", streaming_stdout_file), EXIT_SUCCESS);
 
     std::ifstream streaming_results(streaming_stdout_file);
     ASSERT_TRUE(streaming_results.good());
@@ -177,8 +181,9 @@ TEST_F(executables_ft, transformation)
     const std::string transformation_dir = TEST_TEMP_DIR;
     const std::string transformation_path = PATH_TO_BIN("transformation_example");
     const std::string transformation_stdout_file = TEST_TEMP_DIR + "/transformation-stdout.txt";
-    run_and_record_executable(transformation_path + " capture " + transformation_dir + " 0",
-                              transformation_stdout_file);
+    ASSERT_EQ(run_and_record_executable(transformation_path + " capture " + transformation_dir + " 0",
+                                        transformation_stdout_file),
+              EXIT_SUCCESS);
 
     std::ifstream transformation_results_d2c(transformation_dir + "/depth_to_color.ply");
     ASSERT_TRUE(transformation_results_d2c.good());
@@ -205,7 +210,7 @@ TEST_F(executables_ft, undistort)
 {
     const std::string undistort_path = PATH_TO_BIN("undistort");
     const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.csv";
-    run_and_record_executable(undistort_path + " " + undistort_write_file, "");
+    ASSERT_EQ(run_and_record_executable(undistort_path + " " + undistort_write_file, ""), EXIT_SUCCESS);
 
     std::ifstream undistort_results(undistort_write_file);
     // don't bother checking the csv file- just make sure it's there
