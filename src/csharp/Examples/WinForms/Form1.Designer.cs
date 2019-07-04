@@ -30,21 +30,23 @@
         {
             this.pictureBoxColor = new System.Windows.Forms.PictureBox();
             this.pictureBoxDepth = new System.Windows.Forms.PictureBox();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.splitContainer = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxColor)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxDepth)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
+            this.splitContainer.Panel1.SuspendLayout();
+            this.splitContainer.Panel2.SuspendLayout();
+            this.splitContainer.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBoxColor
             // 
             this.pictureBoxColor.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBoxColor.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxColor.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBoxColor.Name = "pictureBoxColor";
-            this.pictureBoxColor.Size = new System.Drawing.Size(266, 547);
+            this.pictureBoxColor.Size = new System.Drawing.Size(683, 673);
+            this.pictureBoxColor.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxColor.TabIndex = 0;
             this.pictureBoxColor.TabStop = false;
             // 
@@ -52,43 +54,48 @@
             // 
             this.pictureBoxDepth.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBoxDepth.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxDepth.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBoxDepth.Name = "pictureBoxDepth";
-            this.pictureBoxDepth.Size = new System.Drawing.Size(530, 547);
+            this.pictureBoxDepth.Size = new System.Drawing.Size(379, 673);
+            this.pictureBoxDepth.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxDepth.TabIndex = 1;
             this.pictureBoxDepth.TabStop = false;
             // 
-            // splitContainer1
+            // splitContainer
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer.Name = "splitContainer";
             // 
-            // splitContainer1.Panel1
+            // splitContainer.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.pictureBoxColor);
+            this.splitContainer.Panel1.Controls.Add(this.pictureBoxColor);
             // 
-            // splitContainer1.Panel2
+            // splitContainer.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.pictureBoxDepth);
-            this.splitContainer1.Size = new System.Drawing.Size(800, 547);
-            this.splitContainer1.SplitterDistance = 266;
-            this.splitContainer1.TabIndex = 2;
+            this.splitContainer.Panel2.Controls.Add(this.pictureBoxDepth);
+            this.splitContainer.Size = new System.Drawing.Size(1067, 673);
+            this.splitContainer.SplitterDistance = 683;
+            this.splitContainer.SplitterWidth = 5;
+            this.splitContainer.TabIndex = 2;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 547);
-            this.Controls.Add(this.splitContainer1);
+            this.ClientSize = new System.Drawing.Size(1067, 673);
+            this.Controls.Add(this.splitContainer);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxColor)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxDepth)).EndInit();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
+            this.splitContainer.Panel1.ResumeLayout(false);
+            this.splitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
+            this.splitContainer.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -97,7 +104,7 @@
 
         private System.Windows.Forms.PictureBox pictureBoxColor;
         private System.Windows.Forms.PictureBox pictureBoxDepth;
-        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.SplitContainer splitContainer;
     }
 }
 

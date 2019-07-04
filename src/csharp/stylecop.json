@@ -5,11 +5,8 @@
       "useTabs": false
     },
     "documentationRules": {
-      "companyName": "Microsoft Corporation",
-      "copyrightText": "Copyright (c) {companyName}. All rights reserved.\nLicensed under the {licenseName} License.",
-      "variables": {
-        "licenseName": "MIT"
-      }
+      "companyName": "Microsoft",
+      "copyrightText": "Copyright (c) Microsoft Corporation. All rights reserved.\nLicensed under the MIT License."
     },
     "orderingRules": {
       "systemUsingDirectivesFirst": true,
