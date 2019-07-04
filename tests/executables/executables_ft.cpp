@@ -52,6 +52,30 @@ static int run_and_record_executable(const std::string &shell_command_path, cons
     return PCLOSE(process_stream);
 }
 
+/*
+ * This function is used to verify test output. Specifically, it takes a stream (for the test output being checked) and
+ * a list of regular expressions. This function ensures that each regular expression provided matches a line in the
+ * output, in order. For example:
+ *
+ * input_stream:
+ * The device is plugged in on port 8.
+ * Today is Wednesday.
+ * The device is ready for use.
+ *
+ * Case 1
+ * regexes: { "The device is plugged in on port [0-9]+.", "The device is ready for use." }
+ *
+ * Pass; the first regex is tested against the first line and it matches. The second regex is tested against the second
+ * line and it does not match. So, the line is passed over, and the second regex is tested against the third line and
+ * does match.
+ *
+ * Case 2
+ * regexes: { "Today is Monday.", "The device is plugged .*" }
+ *
+ * Fail; the first regex is tested against the first line. It doesn't match, so the first regex is tested against the
+ * third line. It passes, so we move on to the third line and the second regex, which don't match. Note the importance
+ * of ordering.
+ */
 static void test_stream_against_regexes(std::istream &input_stream, const std::vector<std::string> &regexes)
 {
     auto regex_iter = regexes.cbegin();
