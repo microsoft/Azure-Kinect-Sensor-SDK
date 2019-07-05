@@ -4,7 +4,6 @@ using System;
 
 namespace Microsoft.Azure.Kinect.Sensor.Native
 {
-
     /// <summary>
     /// Attribute indicating the native equivalent.
     /// </summary>
@@ -12,6 +11,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Native
     public sealed class NativeReferenceAttribute : Attribute
     {
         readonly string referenceName;
+
         public NativeReferenceAttribute()
         {
             this.referenceName = null;
@@ -21,5 +21,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Native
         {
             this.referenceName = referenceName;
         }
+
+        public string ReferenceName { get; }
     }
 }
