@@ -113,6 +113,9 @@ jobs:
     vmImage: $(vmImage)
 
   steps:
+  - script: 'ping nasm.us'
+    displayName: "Testing NASM"
+
   - checkout: self
     clean: true
     lfs: false
@@ -574,7 +577,7 @@ jobs:
       displayName: 'Download Azure Kinect Firmware'
       inputs:
         script: curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin --create-dirs
-                
+
     - task: CmdLine@2
       displayName: 'Download DepthEngine Plugin'
       inputs:
