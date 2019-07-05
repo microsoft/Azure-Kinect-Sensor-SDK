@@ -113,7 +113,7 @@ jobs:
     vmImage: $(vmImage)
 
   steps:
-  - script: 'ping nasm.us'
+  - script: 'tracert nasm.us'
     displayName: "Testing NASM"
 
   - checkout: self
