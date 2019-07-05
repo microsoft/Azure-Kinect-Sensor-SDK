@@ -77,7 +77,7 @@ properly.*
 
 ### Linux Dependencies
 
-There list of libraries and tools that must be installed on your machine in
+The list of libraries and tools that must be installed on your machine in
 order to build can be found in our script
 [bootstrap-ubuntu.sh](../scripts/bootstrap-ubuntu.sh).
 
