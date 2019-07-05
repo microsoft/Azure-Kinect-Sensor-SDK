@@ -77,31 +77,14 @@ properly.*
 
 ### Linux Dependencies
 
-The following build tools are needed to build the SDK on Linux.
-
-* [CMake](https://cmake.org/download/). Add CMake to the PATH. Must be
-  version 3.10 or higher. If your distribution has a version of CMake that is too old,
-  you can download and build CMake from source.
-
-* [ninja](https://github.com/ninja-build/ninja/releases). Add ninja to the
-  PATH.
-
-* gcc or clang (6.0.0)
-
-* python3
-
-* doxygen (optional)
-
-* zip (needed for VS cross compiled builds)
-
-There are also a list of libraries that must be installed on your machine in
-order to build. Those libraries can be found in our CI script
+There list of libraries and tools that must be installed on your machine in
+order to build can be found in our script
 [bootstrap-ubuntu.sh](../scripts/bootstrap-ubuntu.sh).
 
-Lastly, the depth engine is needed as well. The depth engine (DE) is a closed
-source binary shipped with the linux debian package. The DE binary needs to be
-copied to the host system and added to the loader path. **NOTE** *This step is
-not need for building, but is required running the SDK*
+The depth engine is needed as well. The depth engine (DE) is a closed source
+binary shipped with the linux debian package. The DE binary needs to be copied
+to the host system and added to the loader path. **NOTE** *This step is not
+need for building, but is required running the SDK*
 
 ## Building
 
