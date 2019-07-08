@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         private int value;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BGRA"/> struct.
+        /// Initializes a new instance of the <see cref="BGRA"/> structure.
         /// </summary>
         /// <param name="blue">The blue channel value of the color.</param>
         /// <param name="green">The green channel value of the color.</param>
