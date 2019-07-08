@@ -134,6 +134,7 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
     const char *enable_file_logging = nullptr;
     const char *enable_stdout_logging = nullptr;
     const char *logging_level = nullptr;
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     // environment_get_variable will return null or "\0" if the env var is not set - depends on the OS.
     if (config->env_var_log_to_a_file)
@@ -189,17 +190,28 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
 
         if (log_file)
         {
-            // Create a file rotating logger with 50mb size max and 3 rotated files
-            g_env_logger = spdlog::rotating_logger_mt(K4A_LOGGER, log_file, config->max_log_size, LOG_FILE_MAX_FILES);
+            try
+            {
+                // Create a file rotating logger with 50mb size max and 3 rotated files
+                g_env_logger =
+                    spdlog::rotating_logger_mt(K4A_LOGGER, log_file, config->max_log_size, LOG_FILE_MAX_FILES);
 
-            spdlog::set_pattern("%v");
-            g_env_logger->info("\n\nNew logging session started\n");
-            g_env_logger_is_file_based = true;
+                spdlog::set_pattern("%v");
+                g_env_logger->info("\n\nNew logging session started\n");
+                g_env_logger_is_file_based = true;
+            }
+            catch (...)
+            {
+                // Probably trying to use a file that is already opened by another instance.
+                g_env_logger = nullptr;
+                printf("ERROR: Unable to open log file \"%s\".\n", log_file);
+                result = K4A_RESULT_FAILED;
+            }
         }
     }
 
     // log to stdout if enabled via ENV var AND if file logging is not enabled.
-    if (g_env_logger == NULL)
+    if (K4A_SUCCEEDED(result) && (g_env_logger == NULL))
     {
         bool enable_stdout_logger = false;
 
@@ -225,7 +237,7 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
         }
     }
 
-    if (g_env_logger)
+    if (K4A_SUCCEEDED(result) && (g_env_logger))
     {
         context->logger = g_env_logger;
         g_env_log_level = K4A_LOG_LEVEL_ERROR;
@@ -269,7 +281,7 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
 
         g_env_logger->flush_on(spdlog::level::warn);
     }
-    return K4A_RESULT_SUCCEEDED;
+    return result;
 }
 
 void logger_destroy(logger_t logger_handle)
