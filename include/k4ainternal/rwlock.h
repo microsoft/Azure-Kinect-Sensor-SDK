@@ -10,7 +10,11 @@
 #include <k4a/k4atypes.h>
 
 #include <stddef.h>
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <pthread.h>
+#endif
 
 
 #ifdef __cplusplus

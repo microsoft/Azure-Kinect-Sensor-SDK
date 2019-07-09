@@ -158,14 +158,14 @@ static void thread_writer2(threaded_rwlock_test_context_t* context)
         rwlock_acquire_write(&context->test_lock);
         
         int reader1 = context->reader1_count;
-        //int reader2 = context->reader2_count;
+        int reader2 = context->reader2_count;
         int writer1 = context->writer1_count;
 
         context->writer2_count++;
 
         // The other writer, nor any readers should have the lock while we do
         ASSERT_EQ(reader1, context->reader1_count);
-        ASSERT_EQ(reader1, context->reader2_count);
+        ASSERT_EQ(reader2, context->reader2_count);
         ASSERT_EQ(writer1, context->writer1_count);
 
         rwlock_release_write(&context->test_lock);
