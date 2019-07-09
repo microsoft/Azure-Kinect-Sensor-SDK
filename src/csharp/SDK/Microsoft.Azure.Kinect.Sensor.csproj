@@ -13,6 +13,12 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>$(OutputPath)Microsoft.Azure.Kinect.Sensor.xml</DocumentationFile>
+    <Description>Microsoft Azure Kinect Sensor SDK</Description>
+    <Company>Microsoft</Company>
+    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
+    <PackageLicenseExpression>Licensed under the MIT License.</PackageLicenseExpression>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
   
   <ItemGroup>

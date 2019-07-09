@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 using System.Windows;
 
-namespace K4aWpfTestApplication
+namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
 {
     /// <summary>
     /// Interaction logic for App.xaml
