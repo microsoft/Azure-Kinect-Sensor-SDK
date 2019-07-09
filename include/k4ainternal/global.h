@@ -24,18 +24,18 @@ typedef pthread_once_t k4a_init_once_t;
 #define K4A_INIT_ONCE PTHREAD_ONCE_INIT
 #endif
 
-typedef int (k4a_init_once_function_t)();
+typedef void (k4a_init_once_function_t)();
 
 void global_init_once(k4a_init_once_t* init_once, k4a_init_once_function_t* init_function);
 
 #define K4A_DECLARE_GLOBAL(_global_type_, _init_function_) \
     static k4a_init_once_t g_ ## _global_type_ ## _init_once = K4A_INIT_ONCE; \
     static _global_type_ _ ## _global_type_ ## _private; \
-    static int fn_ ## _global_type_ ## _init_function() \
+    static void fn_ ## _global_type_ ## _init_function() \
     { \
         memset(&_ ## _global_type_ ## _private, 0, sizeof(_ ## _global_type_ ## _private)); \
         _init_function_(&_ ## _global_type_ ## _private); \
-        return 0; \
+        return; \
     } \
     static _global_type_* _global_type_ ## _get() \
     { \
