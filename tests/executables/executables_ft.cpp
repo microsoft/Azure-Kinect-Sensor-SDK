@@ -80,7 +80,7 @@ static void test_stream_against_regexes(std::istream *input_stream, const std::v
 {
     auto regex_iter = regexes->cbegin();
     // ensure that all regexes are matched before the end of the file, in this order
-    while (input_stream && regex_iter != regexes->cend())
+    while (*input_stream && regex_iter != regexes->cend())
     {
         std::string results;
         getline(*input_stream, results);
