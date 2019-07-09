@@ -5,5 +5,6 @@ var BRANCHES = [
     "feature/support-custom-track-record-playback",
     "master",
     "refs/pull/413/merge",
+    "refs/pull/469/merge",
     "release/1.1.x"
 ]
