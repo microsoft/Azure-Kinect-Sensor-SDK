@@ -1985,6 +1985,87 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_color_camera(k4a_trans
                                                                        const k4a_image_t depth_image,
                                                                        k4a_image_t transformed_depth_image);
 
+/** Transforms depth map and a custom image into the geometry of the color camera.
+*
+* \param transformation_handle
+* Transformation handle.
+*
+* \param depth_image
+* Handle to input depth image.
+*
+* \param custom_image
+* Handle to input custom image.
+*
+* \param transformed_depth_image
+* Handle to output transformed depth image.
+*
+* \param transformed_custom_image
+* Handle to output transformed custom image.
+*
+* \param interpolation_type
+* Parameter that controls how pixels in \p custom_image should be interpolated when transformed to color camera space.
+* K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR if linear interpolation should be used.
+* K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST if nearest neighbor interpolation should be used.
+*
+* \param invalid_custom_value
+* Defines the custom image pixel value that should be written to \p transformed_custom_image in case the corresponding
+* depth pixel can not be transformed into the color camera space.
+*
+* \remarks
+* This produces a depth image and a corresponding custom image for which each pixel matches the corresponding
+* pixel coordinates of the color camera.
+*
+* \remarks
+* \p depth_image and \p transformed_depth_image must be of format ::K4A_IMAGE_FORMAT_DEPTH16.
+*
+* \remarks
+* \p custom_image and \p transformed_custom_image must be of format ::K4A_IMAGE_FORMAT_MONO8 or
+* ::K4A_IMAGE_FORMAT_MONO16.
+*
+* \remarks
+* \p transformed_depth_image and \p transformed_custom _image must have a width and height matching the width and
+* height of the color camera in the mode specified by the \ref k4a_calibration_t used to create the
+* \p transformation_handle with k4a_transformation_create().
+*
+* \remarks
+* The contents \p transformed_depth_image will be filled with the depth values derived from \p depth_image in the color
+* camera's coordinate space.
+*
+* \remarks
+* The contents \p transformed_custom_image will be filled with the values derived from \p custom_image in the color
+* camera's coordinate space.
+*
+* \remarks
+* \p transformed_depth_image and \p transformed_custom_image should be created by the caller using k4a_image_create()
+* or k4a_image_create_from_buffer().
+*
+* \remarks
+* Using linear interpolation could create new values to \p transformed_custom_image which do no exist in \p custom_image.
+* Setting \p use_linear_interpolation to false will prevent this from happenning but will result in less smooth image.
+*
+* \returns
+* ::K4A_RESULT_SUCCEEDED if \p transformed_depth_image and \p transformed_custom_image were successfully written and
+* ::K4A_RESULT_FAILED otherwise.
+*
+* \relates k4a_transformation_t
+*
+* \xmlonly
+* <requirements>
+*   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+*   <requirement name="Library">k4a.lib</requirement>
+*   <requirement name="DLL">k4a.dll</requirement>
+* </requirements>
+* \endxmlonly
+*/
+K4A_EXPORT k4a_result_t k4a_transformation_custom_depth_image_to_color_camera(
+    k4a_transformation_t transformation_handle,
+    const k4a_image_t depth_image,
+    const k4a_image_t custom_image,
+    k4a_image_t transformed_depth_image,
+    k4a_image_t transformed_custom_image,
+    k4a_transformation_interpolation_type_t interpolation_type,
+    uint32_t invalid_custom_value);
+
 /** Transforms a color image into the geometry of the depth camera.
  *
  * \param transformation_handle

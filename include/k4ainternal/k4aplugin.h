@@ -28,7 +28,7 @@ extern "C" {
  * \remarks The MAJOR version must be updated to denote any breaking change
  * that would cause an older SDK to not be able to use this plugin.
  */
-#define K4A_PLUGIN_MAJOR_VERSION 1 /**< Azure Kinect plugin major version */
+#define K4A_PLUGIN_MAJOR_VERSION 2 /**< Azure Kinect plugin major version */
 #define K4A_PLUGIN_MINOR_VERSION 0 /**< Azure Kinect plugin minor version */
 
 /**
@@ -87,10 +87,20 @@ typedef enum
  */
 typedef enum
 {
-    K4A_TRANSFORM_ENGINE_TYPE_COLOR_TO_DEPTH = 0, /**< Transforms the color image into the geometry of the depth camera
-                                                   */
-    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR /**< Transforms the depth image into the geometry of the color camera */
+    K4A_TRANSFORM_ENGINE_TYPE_COLOR_TO_DEPTH = 0,   /**< Transforms color image into the geometry of the depth camera */
+    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR,       /**< Transforms depth image into the geometry of the color camera */
+    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_AUX8_TO_COLOR,  /**< Transforms depth + 8 bit aux into the color camera geometry */
+    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_AUX16_TO_COLOR, /**< Transforms depth + 16 bit aux into the color camera geometry */
 } k4a_transform_engine_type_t;
+
+/** Transform Engine interpolation type
+ *
+ */
+typedef enum
+{
+    K4A_TRANSFORM_ENGINE_INTERPOLATION_NEAREST = 0, /**< Nearest neighbor interpolation */
+    K4A_TRANSFORM_ENGINE_INTERPOLATION_LINEAR       /**< Linear interpolation */
+} k4a_transform_engine_interpolation_t;
 
 /** Depth Engine output frame information
  *
@@ -130,6 +140,8 @@ typedef enum
     K4A_DEPTH_ENGINE_RESULT_DATA_ERROR_INVALID_INPUT_BUFFER_SIZE = 1,  /**< Invalid input buffer size */
     K4A_DEPTH_ENGINE_RESULT_DATA_ERROR_INVALID_OUTPUT_BUFFER_SIZE = 2, /**< Invalid output buffer size */
     K4A_DEPTH_ENGINE_RESULT_DATA_ERROR_INVALID_CAPTURE_SEQUENCE = 3,   /**< Invalid input capture data */
+    K4A_DEPTH_ENGINE_RESULT_DATA_ERROR_NULL_INPUT_BUFFER = 4,          /**< Invalid input buffer pointer */
+    K4A_DEPTH_ENGINE_RESULT_DATA_ERROR_NULL_OUTPUT_BUFFER = 5,         /**< Invalid output buffer pointer */
 
     // System fatal error, require caller to restart depth engine
     K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_NULL_ENGINE_POINTER = 101,       /**< Depth Engine was not initialized */
@@ -147,6 +159,8 @@ typedef enum
     K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_FROM_API = 204,            /**< GPU API returns failure */
     K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_INTERNAL = 205,            /**< GPU processing internal error */
     K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_SHADER_COMPILATION = 206,  /**< GPU shader compilation error */
+    K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_OPENGL_CONTEXT = 207,      /**< OpenGL context creation error */
+    K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_TIMEOUT = 208,             /**< GPU processing timed out */
 
     // Frame dropped during asynchronous call, only be sent to async caller with event listener
     K4A_DEPTH_ENGINE_RESULT_FRAME_DROPPED_ASYNC = 301, /**< Frame dropped during asynchronous call */
@@ -185,10 +199,14 @@ typedef struct k4a_transform_engine_context_t k4a_transform_engine_context_t;
  *
  * \param output_frame
  * The final processed buffer passed back out to the user
+ *
+ * \param output_frame2
+ * Second output buffer passed back out to the user or null
  */
-typedef void(__stdcall k4a_processing_complete_cb_t)(void *context, int status, void *output_frame);
+typedef void(
+    __stdcall k4a_processing_complete_cb_t)(void *context, int status, void *output_frame, void *output_frame2);
 
-/** Function for creating and initialzing the depth engine.
+/** Function for creating and initializing the depth engine.
  *
  * \param context
  * An opaque pointer to be passed around to the rest of the depth engine calls.
@@ -285,7 +303,7 @@ typedef size_t(__stdcall *k4a_de_get_output_frame_size_fn_t)(k4a_depth_engine_co
  */
 typedef void(__stdcall *k4a_de_destroy_fn_t)(k4a_depth_engine_context_t **context);
 
-/** Function for creating and initialzing the transform engine.
+/** Function for creating and initializing the transform engine.
  *
  * \param context
  * An opaque pointer to be passed around to the rest of the transform engine calls
@@ -317,17 +335,23 @@ typedef k4a_depth_engine_result_code_t(__stdcall *k4a_te_create_and_initialize_f
  * \param type
  * The type of transform engine
  *
+ * \param interpolation
+ * The interpolation type for aux frame data
+ *
+ * \param invalid_value
+ * The desired value for invalid pixel data
+ *
  * \param depth_frame
  * Frame buffer containing depth frame data
  *
  * \param depth_frame_size
  * Size of the depth_frame buffer in bytes
  *
- * \param color_frame
- * Frame buffer containing color frame data
+ * \param frame2
+ * Frame buffer containing color or aux frame data
  *
- * \param color_frame_size
- * Size of the color_frame buffer in bytes
+ * \param frame2_size
+ * Size of the frame2 buffer in bytes
  *
  * \param output_frame
  * The buffer of the output frame
@@ -335,18 +359,29 @@ typedef k4a_depth_engine_result_code_t(__stdcall *k4a_te_create_and_initialize_f
  * \param output_frame_size
  * Size of the output_frame buffer in bytes
  *
+ * \param output_frame2
+ * Second output buffer or null if there is none
+ *
+ * \param output_frame2_size
+ * Size of the output_frame2 buffer in bytes
+ *
  * \returns
  * ::K4A_DEPTH_ENGINE_RESULT_SUCCEEDED on success, or the proper failure code on
  * failure
  */
-typedef k4a_depth_engine_result_code_t(__stdcall *k4a_te_process_frame_fn_t)(k4a_transform_engine_context_t *context,
-                                                                             k4a_transform_engine_type_t type,
-                                                                             const void *depth_frame,
-                                                                             size_t depth_frame_size,
-                                                                             const void *color_frame,
-                                                                             size_t color_frame_size,
-                                                                             void *output_frame,
-                                                                             size_t output_frame_size);
+typedef k4a_depth_engine_result_code_t(__stdcall* k4a_te_process_frame_fn_t)(
+    k4a_transform_engine_context_t *context,
+    k4a_transform_engine_type_t type,
+    k4a_transform_engine_interpolation_t interpolation,
+    uint32_t invalid_value,
+    const void *depth_frame,
+    size_t depth_frame_size,
+    const void *frame2,
+    size_t frame2_size,
+    void *output_frame,
+    size_t output_frame_size,
+    void *output_frame2,
+    size_t output_frame2_size);
 
 /** Get the size of the output frame in bytes.
  *
