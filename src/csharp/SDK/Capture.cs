@@ -34,10 +34,12 @@ namespace Microsoft.Azure.Kinect.Sensor
             // It is still possible for that Image to be accessed or Disposed while this lock is held
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Capture));
+                }
 
-                NativeMethods.k4a_image_t image = nativeMethod(handle);
+                NativeMethods.k4a_image_t image = nativeMethod(this.handle);
                 // This try block ensures that we close image
                 try
                 {
@@ -95,24 +97,26 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             get
             {
-                return GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_color_image, ref _Color);
+                return this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_color_image, ref this._Color);
             }
             set
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Capture));
+                    }
 
                     // If the assignment is a new managed wrapper we need
                     // to release the reference to the old wrapper.
                     // If it is the same object though, we should not dispose it.
-                    if (_Color != null && !object.ReferenceEquals(
-                        _Color, value))
+                    if (this._Color != null && !object.ReferenceEquals(
+                        this._Color, value))
                     {
-                        _Color.Dispose();
+                        this._Color.Dispose();
                     }
-                    _Color = value;
+                    this._Color = value;
                 }
             }
         }
@@ -122,24 +126,26 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Image Depth {
             get
             {
-                return GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_depth_image, ref _Depth);
+                return this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_depth_image, ref this._Depth);
             }
             set
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Capture));
+                    }
 
                     // If the assignment is a new managed wrapper we need
                     // to release the reference to the old wrapper
                     // If it is the same object though, we should not dispose it.
-                    if (_Depth != null && !object.ReferenceEquals(
-                        _Depth, value))
+                    if (this._Depth != null && !object.ReferenceEquals(
+                        this._Depth, value))
                     {
-                        _Depth.Dispose();
+                        this._Depth.Dispose();
                     }
-                    _Depth = value;
+                    this._Depth = value;
                 }
             }
         }
@@ -148,24 +154,26 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Image IR {
             get
             {
-                return GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_ir_image, ref _IR);
+                return this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_ir_image, ref this._IR);
             }
             set
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Capture));
+                    }
 
                     // If the assignment is a new managed wrapper we need
                     // to release the reference to the old wrapper
                     // If it is the same object though, we should not dispose it.
-                    if (_IR != null && !object.ReferenceEquals(
-                        _IR, value))
+                    if (this._IR != null && !object.ReferenceEquals(
+                        this._IR, value))
                     {
-                        _IR.Dispose();
+                        this._IR.Dispose();
                     }
-                    _IR = value;
+                    this._IR = value;
                 }
             }
         }

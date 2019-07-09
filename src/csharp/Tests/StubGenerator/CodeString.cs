@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+using System.Diagnostics;
 using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
 {
     /// <summary>
-    /// A string representation of C code
+    /// A string representation of C code.
     /// </summary>
     /// <remarks>
     /// This class captures source and line metadata for the location where the string was assigned.
-    /// 
     /// This information is used when compiling the code, or in debugging the code, to reference back to the
     /// source location where the string was assigned.
     /// </remarks>
@@ -20,7 +20,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
         }
 
         /// <summary>
-        /// Create a CodeString with some C code
+        /// Initializes a new instance of the <see cref="CodeString"/> class with the specified C code.
         /// </summary>
         /// <param name="code">The C code string to represent.</param>
         public CodeString(string code)
@@ -37,8 +37,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
         private void AssignCode(string code)
         {
             int frameDepth = 0;
-            var trace = new System.Diagnostics.StackTrace(true);
-            var frame = trace.GetFrame(frameDepth);
+            StackTrace trace = new StackTrace(true);
+            StackFrame frame = trace.GetFrame(frameDepth);
 
             while (frame.GetMethod().DeclaringType == typeof(CodeString))
             {

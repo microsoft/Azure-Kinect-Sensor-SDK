@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
         internal CallCount(StubbedModule module)
         {
             this.module = module;
-            foreach (var function in module.NativeInterface.Functions)
+            foreach (FunctionInfo function in module.NativeInterface.Functions)
             {
                 initialCount.Add(function.Name, module.GetTotalCallCount(function.Name));
             }

@@ -5,7 +5,7 @@ using System.Windows;
 using Microsoft.Azure.Kinect.Sensor;
 using Microsoft.Azure.Kinect.Sensor.WPF;
 
-namespace K4aWpfTestApplication
+namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

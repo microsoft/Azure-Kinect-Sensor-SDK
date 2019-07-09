@@ -29,6 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		AzureKinectSensorSDK.ruleset = AzureKinectSensorSDK.ruleset
 		stylecop.json = stylecop.json
+		VersionInfo.cs = VersionInfo.cs
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{D946946D-56B5-4F64-B4FC-5C79F15295C4}"
