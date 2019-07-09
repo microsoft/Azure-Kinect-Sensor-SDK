@@ -3,6 +3,7 @@
 
 add_subdirectory(calibration)
 add_subdirectory(enumerate)
+add_subdirectory(greenscreen)
 add_subdirectory(playback_external_sync)
 add_subdirectory(fastpointcloud)
 add_subdirectory(opencv_compatibility)
