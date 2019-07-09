@@ -195,14 +195,22 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
     }
 
     // Compute color point cloud by warping color image into depth camera geometry
+#ifdef _WIN32
     file_name = output_dir + "\\color_to_depth.ply";
+#else
+    file_name = output_dir + "/color_to_depth.ply";
+#endif
     if (point_cloud_color_to_depth(transformation, depth_image, color_image, file_name.c_str()) == false)
     {
         goto Exit;
     }
 
     // Compute color point cloud by warping depth image into color camera geometry
+#ifdef _WIN32
     file_name = output_dir + "\\depth_to_color.ply";
+#else
+    file_name = output_dir + "/depth_to_color.ply";
+#endif
     if (point_cloud_depth_to_color(transformation, depth_image, color_image, file_name.c_str()) == false)
     {
         goto Exit;
