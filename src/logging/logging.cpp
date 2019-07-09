@@ -50,19 +50,19 @@ typedef struct
     k4a_rwlock_t lock;
 
     // Logger data for forwarding debug messages to registered callback.
-    k4a_logging_message_cb_t *      user_callback;
-    void *                          user_callback_context;
-    k4a_log_level_t                 user_log_level;
+    k4a_logging_message_cb_t *user_callback;
+    void *user_callback_context;
+    k4a_log_level_t user_log_level;
 
     // Logger data used for forwarding debug message to stdout or a dedicated k4a file.
     std::shared_ptr<spdlog::logger> env_logger;
-    bool                            env_logger_is_file_based;
-    k4a_log_level_t                 env_log_level;
-    int                             env_logger_count;
+    bool env_logger_is_file_based;
+    k4a_log_level_t env_log_level;
+    int env_logger_count;
 } logger_global_context_t;
 
 // This function runs once to initialize the global context for the logger
-void logger_init_function(logger_global_context_t* global)
+void logger_init_function(logger_global_context_t *global)
 {
     rwlock_init(&global->lock);
 
@@ -71,7 +71,6 @@ void logger_init_function(logger_global_context_t* global)
 }
 
 K4A_DECLARE_GLOBAL(logger_global_context_t, logger_init_function);
-
 
 #define K4A_LOGGER "k4a_logger"
 
@@ -83,8 +82,8 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
                                               void *message_cb_context,
                                               k4a_log_level_t min_level)
 {
-    logger_global_context_t* g_context = logger_global_context_t_get();
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;    
+    logger_global_context_t *g_context = logger_global_context_t_get();
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     // Validate parameters
     if (message_cb)
@@ -97,9 +96,8 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
 
     // The user may set or clear the callback, or set the callback to the
     // same value it was previously. It is a failure to change the callback
-    // from an existing registration. 
-    if (g_context->user_callback == NULL || message_cb == NULL ||
-        g_context->user_callback == message_cb)
+    // from an existing registration.
+    if (g_context->user_callback == NULL || message_cb == NULL || g_context->user_callback == message_cb)
     {
         // Store the user log level
         g_context->user_log_level = min_level;
@@ -124,7 +122,7 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config->max_log_size == 0);
 
     logger_context_t *context = logger_t_create(logger_handle);
-    logger_global_context_t* g_context = logger_global_context_t_get();
+    logger_global_context_t *g_context = logger_global_context_t_get();
 
     rwlock_acquire_write(&g_context->lock);
 
@@ -217,8 +215,9 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
         else if (g_context->user_callback == NULL)
         {
             // Default with user_callback disabled is use stdout logging unless specifically disabled
-            if (g_context->user_callback == NULL && (enable_stdout_logging == NULL || enable_stdout_logging[0] == '\0' ||
-                                                  (enable_stdout_logging && enable_stdout_logging[0] != '0')))
+            if (g_context->user_callback == NULL &&
+                (enable_stdout_logging == NULL || enable_stdout_logging[0] == '\0' ||
+                 (enable_stdout_logging && enable_stdout_logging[0] != '0')))
             {
                 enable_stdout_logger = true;
             }
@@ -287,10 +286,10 @@ void logger_destroy(logger_t logger_handle)
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, logger_t, logger_handle);
 
     logger_context_t *context = logger_t_get_context(logger_handle);
-    logger_global_context_t* g_context = logger_global_context_t_get();
+    logger_global_context_t *g_context = logger_global_context_t_get();
 
     rwlock_acquire_write(&g_context->lock);
-    
+
     g_context->env_logger_count--;
 
     // Destroy the logger
@@ -310,9 +309,6 @@ void logger_destroy(logger_t logger_handle)
     rwlock_release_write(&g_context->lock);
 
     logger_t_destroy(logger_handle);
-
-    
-
 }
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -321,7 +317,7 @@ __attribute__((__format__ (__printf__, 2, 0)))
 #endif
 void logger_log(k4a_log_level_t level, const char * file, const int line, const char *format, ...)
 {
-    logger_global_context_t* g_context = logger_global_context_t_get();
+    logger_global_context_t *g_context = logger_global_context_t_get();
 
     rwlock_acquire_read(&g_context->lock);
 
@@ -385,7 +381,7 @@ void logger_log(k4a_log_level_t level, const char * file, const int line, const 
 
 bool logger_is_file_based()
 {
-    logger_global_context_t* g_context = logger_global_context_t_get();
+    logger_global_context_t *g_context = logger_global_context_t_get();
     return g_context->env_logger_is_file_based;
 }
 

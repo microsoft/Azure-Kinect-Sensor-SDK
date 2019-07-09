@@ -14,19 +14,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
-
 #ifdef _WIN32
 static INIT_ONCE g_InitOnce = INIT_ONCE_STATIC_INIT;
 
-static BOOL CALLBACK InitGlobalFunction(
-    PINIT_ONCE InitOnce,
-    PVOID Parameter,
-    PVOID *lpContext)
+static BOOL CALLBACK InitGlobalFunction(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContext)
 {
     UNREFERENCED_PARAMETER(InitOnce);
     UNREFERENCED_PARAMETER(lpContext);
 
-    k4a_init_once_function_t* callback = (k4a_init_once_function_t*)Parameter;
+    k4a_init_once_function_t *callback = (k4a_init_once_function_t *)Parameter;
 
     callback();
 
@@ -34,20 +30,16 @@ static BOOL CALLBACK InitGlobalFunction(
 }
 #endif
 
-void global_init_once(k4a_init_once_t* init_once, k4a_init_once_function_t* init_function)
+void global_init_once(k4a_init_once_t *init_once, k4a_init_once_function_t *init_function)
 {
 
 #ifdef _WIN32
-    if (InitOnceExecuteOnce(init_once,
-        InitGlobalFunction,
-        (void*)init_function,
-        NULL))
+    if (InitOnceExecuteOnce(init_once, InitGlobalFunction, (void *)init_function, NULL))
     {
         return;
     }
 #else
-    if (0 == pthread_once(init_once,
-        init_function))
+    if (0 == pthread_once(init_once, init_function))
     {
         return;
     }
@@ -56,5 +48,3 @@ void global_init_once(k4a_init_once_t* init_once, k4a_init_once_function_t* init
     assert(false);
     return;
 }
-
-

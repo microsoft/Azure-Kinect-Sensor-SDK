@@ -54,12 +54,12 @@ typedef struct
     volatile bool run_test;
 } threaded_rwlock_test_context_t;
 
-static void thread_reader1(threaded_rwlock_test_context_t* context)
-{    
+static void thread_reader1(threaded_rwlock_test_context_t *context)
+{
     while (context->run_test)
     {
         rwlock_acquire_read(&context->test_lock);
-        
+
         int writer1 = context->writer1_count;
         int writer2 = context->writer2_count;
 
@@ -75,15 +75,15 @@ static void thread_reader1(threaded_rwlock_test_context_t* context)
         ThreadAPI_Sleep(1);
     }
 }
-static int thread_reader1_threadproc(void* ctx)
+static int thread_reader1_threadproc(void *ctx)
 {
-    thread_reader1((threaded_rwlock_test_context_t*)ctx);
+    thread_reader1((threaded_rwlock_test_context_t *)ctx);
     return 0;
 }
 
-static void thread_reader2(threaded_rwlock_test_context_t* context)
+static void thread_reader2(threaded_rwlock_test_context_t *context)
 {
-    
+
     while (context->run_test)
     {
         if (rwlock_try_acquire_read(&context->test_lock))
@@ -109,14 +109,13 @@ static void thread_reader2(threaded_rwlock_test_context_t* context)
     }
 }
 
-static int thread_reader2_threadproc(void* ctx)
+static int thread_reader2_threadproc(void *ctx)
 {
-    thread_reader2((threaded_rwlock_test_context_t*)ctx);
+    thread_reader2((threaded_rwlock_test_context_t *)ctx);
     return 0;
 }
 
-
-static void thread_writer1(threaded_rwlock_test_context_t* context)
+static void thread_writer1(threaded_rwlock_test_context_t *context)
 {
     while (context->run_test)
     {
@@ -129,7 +128,7 @@ static void thread_writer1(threaded_rwlock_test_context_t* context)
         int writer2 = context->writer2_count;
 
         context->writer1_count++;
-        
+
         // Wait a moment to allow other threads to run
         ThreadAPI_Sleep(100);
 
@@ -148,13 +147,13 @@ static void thread_writer1(threaded_rwlock_test_context_t* context)
     }
 }
 
-static int thread_writer1_threadproc(void* ctx)
+static int thread_writer1_threadproc(void *ctx)
 {
-    thread_writer1((threaded_rwlock_test_context_t*)ctx);
+    thread_writer1((threaded_rwlock_test_context_t *)ctx);
     return 0;
 }
 
-static void thread_writer2(threaded_rwlock_test_context_t* context)
+static void thread_writer2(threaded_rwlock_test_context_t *context)
 {
     while (context->run_test)
     {
@@ -182,16 +181,16 @@ static void thread_writer2(threaded_rwlock_test_context_t* context)
     }
 }
 
-static int thread_writer2_threadproc(void* ctx)
+static int thread_writer2_threadproc(void *ctx)
 {
-    thread_writer2((threaded_rwlock_test_context_t*)ctx);
+    thread_writer2((threaded_rwlock_test_context_t *)ctx);
     return 0;
 }
 
 TEST(rwlock_ut, rwlock_threaded_test)
 {
     /*
-    
+
     This test creates four threads which have contention over a rwlock.
 
     Reader1:
@@ -211,7 +210,7 @@ TEST(rwlock_ut, rwlock_threaded_test)
     threaded_rwlock_test_context_t test_context;
     memset(&test_context, 0, sizeof(test_context));
     test_context.run_test = true;
-    
+
     rwlock_init(&test_context.test_lock);
 
     ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&r1, thread_reader1_threadproc, &test_context));
@@ -244,5 +243,4 @@ TEST(rwlock_ut, rwlock_threaded_test)
     GTEST_LOG_INFO << "writer1_count " << test_context.writer1_count << std::endl;
     GTEST_LOG_INFO << "writer2_count " << test_context.writer2_count << std::endl;
     GTEST_LOG_INFO << "writer2_fail_count " << test_context.writer2_fail_count << std::endl;
-
 }
