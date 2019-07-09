@@ -33,7 +33,7 @@ const static std::string TEST_TEMP_DIR = "executables_test_temp";
 
 // run the specified executable and record the output to output_path
 // if output_path is empty, just output to stdout
-static int run_and_record_executable(const std::string &shell_command_path, const std::string &output_path)
+static int run_and_record_executable(std::string shell_command_path, std::string output_path)
 {
     std::string formatted_command = shell_command_path;
     if (!output_path.empty())
@@ -76,23 +76,23 @@ static int run_and_record_executable(const std::string &shell_command_path, cons
  * third line. It passes, so we move on to the third line and the second regex, which don't match. Note the importance
  * of ordering.
  */
-static void test_stream_against_regexes(std::istream &input_stream, const std::vector<std::string> &regexes)
+static void test_stream_against_regexes(std::istream *input_stream, const std::vector<std::string> *regexes)
 {
-    auto regex_iter = regexes.cbegin();
+    auto regex_iter = regexes->cbegin();
     // ensure that all regexes are matched before the end of the file, in this order
-    while (input_stream && regex_iter != regexes.cend())
+    while (input_stream && regex_iter != regexes->cend())
     {
         std::string results;
-        getline(input_stream, results);
+        getline(*input_stream, results);
         std::regex desired_out(*regex_iter);
         if (std::regex_match(results, desired_out))
         {
             ++regex_iter;
         }
     }
-    EXPECT_EQ(regex_iter, regexes.cend()) << "Reached the end of the executable output before matching all of the "
-                                             "required regular expressions.\nExpected \""
-                                          << *regex_iter << "\", but never saw it.";
+    EXPECT_EQ(regex_iter, regexes->cend()) << "Reached the end of the executable output before matching all of the "
+                                              "required regular expressions.\nExpected \""
+                                           << *regex_iter << "\", but never saw it.";
 }
 
 class executables_ft : public ::testing::Test
@@ -141,7 +141,7 @@ TEST_F(executables_ft, calibration)
                                       "tangential distortion coefficient y: [^]*",
                                       "metric radius: [^]*" };
 
-    test_stream_against_regexes(results, regexes);
+    test_stream_against_regexes(&results, &regexes);
 }
 
 TEST_F(executables_ft, enumerate)
@@ -151,7 +151,7 @@ TEST_F(executables_ft, enumerate)
     ASSERT_EQ(run_and_record_executable(enumerate_path, enumerate_out), EXIT_SUCCESS);
     std::ifstream results(enumerate_out.c_str());
     std::vector<std::string> regexes{ "Found [1-5] connected devices:", "0: Device [^]*" };
-    test_stream_against_regexes(results, regexes);
+    test_stream_against_regexes(&results, &regexes);
 }
 
 TEST_F(executables_ft, fastpointcloud)
@@ -173,7 +173,7 @@ TEST_F(executables_ft, fastpointcloud)
                                       "property float z",
                                       "end_header" };
 
-    test_stream_against_regexes(fastpointcloud_results, regexes);
+    test_stream_against_regexes(&fastpointcloud_results, &regexes);
 }
 
 TEST_F(executables_ft, opencv_compatibility)
@@ -197,7 +197,7 @@ TEST_F(executables_ft, streaming)
                  "Capture \\| Color res:[0-9]+x[0-9]+ stride: [^\\|]*\\| Ir16 res: [0-9]+x [0-9]+ stride: "
                  "[0-9]+[^\\|]*\\| Depth16 res: [0-9]+x [0-9]+ stride: [0-9]+" };
 
-    test_stream_against_regexes(streaming_results, regexes);
+    test_stream_against_regexes(&streaming_results, &regexes);
 }
 
 TEST_F(executables_ft, transformation)
@@ -226,8 +226,8 @@ TEST_F(executables_ft, transformation)
     std::ifstream transformation_results_c2d(transformation_dir + "/depth_to_color.ply");
     ASSERT_TRUE(transformation_results_c2d.good());
 
-    test_stream_against_regexes(transformation_results_c2d, regexes);
-    test_stream_against_regexes(transformation_results_d2c, regexes);
+    test_stream_against_regexes(&transformation_results_c2d, &regexes);
+    test_stream_against_regexes(&transformation_results_d2c, &regexes);
 }
 
 TEST_F(executables_ft, undistort)
