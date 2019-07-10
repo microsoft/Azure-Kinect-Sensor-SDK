@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-typedef void* k4a_rwlock_t;
+typedef void *k4a_rwlock_t;
 
 void rwlock_init(k4a_rwlock_t *lock);
 void rwlock_deinit(k4a_rwlock_t *lock);

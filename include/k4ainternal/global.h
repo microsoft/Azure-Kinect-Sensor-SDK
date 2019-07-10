@@ -16,8 +16,11 @@
 extern "C" {
 #endif
 
-typedef void* k4a_init_once_t;
-#define K4A_INIT_ONCE {0}
+typedef void *k4a_init_once_t;
+#define K4A_INIT_ONCE                                                                                                  \
+    {                                                                                                                  \
+        0                                                                                                              \
+    }
 
 typedef void(k4a_init_once_function_t)(void);
 
