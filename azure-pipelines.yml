@@ -31,83 +31,115 @@ jobs:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2017_x64-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x64-msvc_rel_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_rel_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
       VS2019_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'amd64'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'debug'
+      #   MSBuildPlatform: 'x64'
+      #   MSBuildConfiguration: 'Debug'
       #   vmImage: 'windows-2019'
       # VS2019_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
       #   CMakeArch: 'amd64'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'relwithdebinfo'
+      #   MSBuildPlatform: 'x64'
+      #   MSBuildConfiguration: 'Release'
       #   vmImage: 'windows-2019'
       VS2019_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
       VS2019_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'x86'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'debug'
+      #   MSBuildPlatform: 'x86'
+      #   MSBuildConfiguration: 'Debug'
       #   vmImage: 'windows-2019'
       # VS2019_x86-pc-windows-msvc_relwithdebinfo_msbuild:
       #   CMakeArch: 'x86'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'relwithdebinfo'
+      #   MSBuildPlatform: 'x86'
+      #   MSBuildConfiguration: 'Release'
       #   vmImage: 'windows-2019'
   pool:
     vmImage: $(vmImage)
@@ -222,7 +254,7 @@ jobs:
 
   - script: 'ctest -V -C "$(CMakeConfiguration)" -L unit'
     workingDirectory: '$(Build.BinariesDirectory)'
-    displayName: 'Unit Tests'
+    displayName: 'Run Native Unit Tests'
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
@@ -233,13 +265,63 @@ jobs:
       testRunTitle: 'Unit Tests'
     condition: succeededOrFailed()
 
+  # Create a placeholder version of the depth engine to satisfy MSBuild copy rules.
+  # This version is not needed for actual execution.
+  # In the future we should fetch the real version from a valid source.
+  - powershell: |
+      if ("$(BuildGenerator)" -eq "Ninja")
+      {
+        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+      }
+      elseif ("$(BuildGenerator)" -like "Visual Studio *")
+      {
+        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+      }
+      else
+      {
+        Write-Error "Unknown Generator <<$(BuildGenerator)>>"
+      }
+    displayName: 'Create placeholder depth engine'
+
+  - task: NuGetToolInstaller@0
+    inputs:
+      versionSpec: '>=4.3.1' 
+
+  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2 # NuGetCommand@2
+    inputs:
+      command: 'restore'
+      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+
+  - task: VSBuild@1
+    displayName: 'Build C# Wrappers'
+    inputs:
+      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+      msbuildArgs: '/p:BaseOutputPath="$(Build.BinariesDirectory)\bin\$(MSBuildConfiguration)\\"'
+      platform: '$(MSBuildPlatform)'
+      configuration: '$(MSBuildConfiguration)'
+
+  - task: VSTest@2
+    displayName: 'Run C# Unit Tests'
+    inputs:
+      testSelector: 'testAssemblies'
+      searchFolder: '$(Build.BinariesDirectory)\bin'
+      platform: '$(MSBuildPlatform)'
+      configuration: '$(MSBuildConfiguration)'
+      testAssemblyVer2: |
+        **/*UnitTests.dll
+        !**/obj/**
+  
+  # Clean up any placeholder version of the depth engine that were created.
+  - powershell:  Get-ChildItem -Path "$(Build.BinariesDirectory)\bin\\" -Filter "DepthEngine_*.dll" -Recurse | Remove-Item
+    displayName: 'Clean up temp depth engine'
+
   - task: CopyFiles@2
     displayName: 'Copy build folder to Staging'
     inputs:
       SourceFolder: '$(Build.BinariesDirectory)'
       Contents: |
         *
-        bin/*
+        bin/**/*
         docs/**/*
         CMakeFiles/**/*
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
@@ -259,7 +341,7 @@ jobs:
     displayName: 'Publish K4A Symbols'
     inputs:
       symbolsFolder: '$(Build.BinariesDirectory)'
-      searchPattern: 'bin/*.pdb'
+      searchPattern: 'bin/**/*.pdb'
       indexSources: true
       publishSymbols: true
       symbolServerType: 'teamServices'
@@ -478,6 +560,9 @@ jobs:
       - Agent.OS -equals Windows_NT
 
     steps:
+    - task: VisualStudioTestPlatformInstaller@1
+      displayName: 'Install Visual Studio Test Platform tools'
+
     - checkout: self
       clean: true
       lfs: false
@@ -503,13 +588,20 @@ jobs:
          Invoke-WebRequest -uri "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin"
       displayName: 'Download Resources'
 
-
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into bin folder"
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEnginePlugin into C# functional tests folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
         flattenFolders: true
 
     - task: PowerShell@2
@@ -526,23 +618,34 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check Device Health'
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list amd64-windows-msvc-RelWithDebInfo/bin/functional_test_list.txt --bin amd64-windows-msvc-RelWithDebInfo/bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
       displayName: 'Run Functional Tests'
       timeoutInMinutes: 15
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list amd64-windows-msvc-RelWithDebInfo/bin/functional_test_list.txt --bin amd64-windows-msvc-RelWithDebInfo/bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
       displayName: 'Run Functional Tests - Onboarding'
       timeoutInMinutes: 15
       continueOnError: true
+
+    - task: VSTest@2
+      displayName: 'Run C# Functional Tests'
+      inputs:
+        testSelector: 'testAssemblies'
+        searchFolder: '$(Build.BinariesDirectory)'
+        platform: '$(MSBuildPlatform)'
+        configuration: '$(MSBuildConfiguration)'
+        vsTestVersion: 'toolsInstaller'
+        testAssemblyVer2: |
+          **/*FunctionalTests.dll
+          !**/obj/**
 
     - task: PowerShell@2
       inputs:
         targetType: 'filePath'
         filePath: './scripts/Reset-Device.ps1'
       displayName: 'Reset K4A Device'
-
 
 - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
   - job: LinuxFunctionalTests
@@ -634,13 +737,13 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check Device Health'
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list x86_64-linux-clang-relwithdebinfo/bin/functional_test_list.txt --bin x86_64-linux-clang-relwithdebinfo/bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
       displayName: 'Run Functional Tests'
       timeoutInMinutes: 15
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list x86_64-linux-clang-relwithdebinfo/bin/functional_test_list.txt --bin x86_64-linux-clang-relwithdebinfo/bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
       displayName: 'Run Functional Tests - Onboarding'
       timeoutInMinutes: 15
       continueOnError: true
