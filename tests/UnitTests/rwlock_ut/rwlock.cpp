@@ -16,8 +16,6 @@ int main(int argc, char **argv)
     return k4a_test_common_main(argc, argv);
 }
 
-#define GTEST_LOG_ERROR std::cout << "[    ERROR ] "
-#define GTEST_LOG_WARNING std::cout << "[  WARNING ] "
 #define GTEST_LOG_INFO std::cout << "[     INFO ] "
 
 TEST(rwlock_ut, rwlock_init)
