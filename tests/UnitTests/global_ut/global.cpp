@@ -54,7 +54,7 @@ static void globalInitFunction2(test_global2_t *global)
     ASSERT_EQ(0, g_GlobalCounter2);
 
     ASSERT_EQ(1, INC_REF_VAR(g_GlobalCounter2));
-    
+
     global->value1 = 1;
 
     // Sleep to simulate an init function that takes some time

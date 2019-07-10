@@ -73,7 +73,6 @@ static void thread_reader1(threaded_rwlock_test_context_t *context)
         rwlock_release_read(&context->test_lock);
 
         ThreadAPI_Sleep(1);
-
     }
 }
 static int thread_reader1_threadproc(void *ctx)
