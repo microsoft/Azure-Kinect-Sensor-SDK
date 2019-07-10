@@ -8,9 +8,8 @@
 #include <k4ainternal/common.h>
 #include <gtest/gtest.h>
 
-#include <azure_c_shared_utility/lock.h>
-#include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/threadapi.h>
+#include <azure_c_shared_utility/refcount.h>
 
 int main(int argc, char **argv)
 {
@@ -42,7 +41,7 @@ static void globalInitFunction(test_global_t* global)
 
 K4A_DECLARE_GLOBAL(test_global_t, globalInitFunction);
 
-static int g_GlobalCounter2 = 0;
+static volatile long g_GlobalCounter2 = 0;
 
 typedef struct
 {
@@ -56,7 +55,7 @@ static void globalInitFunction2(test_global2_t* global)
     ASSERT_EQ(0, global->value2);
     ASSERT_EQ(0, g_GlobalCounter2);
 
-    g_GlobalCounter2++;
+    ASSERT_EQ(1, INC_REF_VAR(g_GlobalCounter2));
     
     global->value1 = 1;
 

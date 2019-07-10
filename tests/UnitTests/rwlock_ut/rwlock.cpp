@@ -68,9 +68,12 @@ static void thread_reader1(threaded_rwlock_test_context_t *context)
         EXPECT_EQ(writer1, context->writer1_count);
         EXPECT_EQ(writer2, context->writer2_count);
 
+        ThreadAPI_Sleep(1);
+
         rwlock_release_read(&context->test_lock);
 
         ThreadAPI_Sleep(1);
+
     }
 }
 static int thread_reader1_threadproc(void *ctx)
@@ -95,6 +98,8 @@ static void thread_reader2(threaded_rwlock_test_context_t *context)
             // a reader has the lock
             EXPECT_EQ(writer1, context->writer1_count);
             EXPECT_EQ(writer2, context->writer2_count);
+
+            ThreadAPI_Sleep(2);
 
             rwlock_release_read(&context->test_lock);
         }
@@ -124,6 +129,7 @@ static void thread_writer1(threaded_rwlock_test_context_t *context)
         int reader2 = context->reader2_count;
         int reader2_fail = context->reader2_fail_count;
         int writer2 = context->writer2_count;
+        int writer2_fail = context->writer2_fail_count;
 
         context->writer1_count++;
 
@@ -135,9 +141,10 @@ static void thread_writer1(threaded_rwlock_test_context_t *context)
         EXPECT_EQ(reader2, context->reader2_count);
         EXPECT_EQ(writer2, context->writer2_count);
 
-        // Since we have held the lock for some time, we expect reader 2 to have
-        // failed to acquire the lock while we have held it
+        // Since we have held the lock for some time, we expect reader 2 and writer 2
+        // to have failed to acquire the lock while we have held it
         EXPECT_NE(reader2_fail, context->reader2_fail_count);
+        EXPECT_NE(writer2_fail, context->writer2_fail_count);
 
         rwlock_release_write(&context->test_lock);
 
@@ -168,6 +175,8 @@ static void thread_writer2(threaded_rwlock_test_context_t *context)
             EXPECT_EQ(reader2, context->reader2_count);
             EXPECT_EQ(writer1, context->writer1_count);
 
+            ThreadAPI_Sleep(3);
+
             rwlock_release_write(&context->test_lock);
         }
         else
@@ -175,7 +184,7 @@ static void thread_writer2(threaded_rwlock_test_context_t *context)
             context->writer2_fail_count++;
         }
 
-        ThreadAPI_Sleep(1);
+        ThreadAPI_Sleep(2);
     }
 }
 
@@ -192,13 +201,13 @@ TEST(rwlock_ut, rwlock_threaded_test)
     This test creates four threads which have contention over a rwlock.
 
     Reader1:
-        Tries to acquire a read lock as quickly as possible
+        Tries to acquire a read lock every 2 ms
     Reader2:
-        Uses the try acquire method to try getting the read lock as quickly as possible
+        Uses the try acquire method to try getting the read lock every 3 ms
     Writer1:
         Gets and releases the write lock with a delay. It holds the lock for a while as well.
     Writer2:
-        Uses the try acquire method to try getting the write lock as quickly as possible
+        Uses the try acquire method to try getting the write lock every 5 ms
 
     Each thread checks for the known invariants of the behavior of the other threads. E.g. a read
     lock can't be acquired while the write lock is held.
