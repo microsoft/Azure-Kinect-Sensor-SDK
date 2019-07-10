@@ -9,25 +9,11 @@
 
 #include <k4a/k4atypes.h>
 
-#include <stddef.h>
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <pthread.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct
-{
-#ifdef _WIN32
-    SRWLOCK _lock;
-#else
-    pthread_rwlock_t _lock;
-#endif
-} k4a_rwlock_t;
+typedef void* k4a_rwlock_t;
 
 void rwlock_init(k4a_rwlock_t *lock);
 void rwlock_deinit(k4a_rwlock_t *lock);

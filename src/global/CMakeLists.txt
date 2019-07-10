@@ -11,6 +11,7 @@ target_include_directories(k4a_global PUBLIC
 
 # Dependencies of this library
 target_link_libraries(k4a_global PUBLIC 
+    k4ainternal::rwlock
     azure::aziotsharedutil)
 
 # Define alias for other targets to link against

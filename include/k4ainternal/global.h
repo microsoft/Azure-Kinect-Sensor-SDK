@@ -16,13 +16,8 @@
 extern "C" {
 #endif
 
-#ifdef _WIN32
-typedef INIT_ONCE k4a_init_once_t;
-#define K4A_INIT_ONCE INIT_ONCE_STATIC_INIT
-#else
-typedef pthread_once_t k4a_init_once_t;
-#define K4A_INIT_ONCE PTHREAD_ONCE_INIT
-#endif
+typedef void* k4a_init_once_t;
+#define K4A_INIT_ONCE {0}
 
 typedef void(k4a_init_once_function_t)(void);
 

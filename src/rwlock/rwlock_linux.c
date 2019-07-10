@@ -10,14 +10,16 @@
 #include <assert.h>
 #include <pthread.h>
 
+C_ASSERT(sizeof(k4a_rwlock_t) == sizeof(pthread_rwlock_t));
+
 // If one of the lock synchronization functions fails, retry forever
-// rather than return an error code since callers are unlikley to
+// rather than return an error code since callers are unlikeley to
 // properly test the error condition and crashing should be avoided.
 
 void rwlock_init(k4a_rwlock_t *lock)
 {
     int err;
-    while ((err = pthread_rwlock_init(&lock->_lock, NULL)))
+    while ((err = pthread_rwlock_init((pthread_rwlock_t*)lock, NULL)))
     {
         assert(err == 0);
     }
@@ -25,7 +27,7 @@ void rwlock_init(k4a_rwlock_t *lock)
 void rwlock_deinit(k4a_rwlock_t *lock)
 {
     int err;
-    while ((err = pthread_rwlock_destroy(&lock->_lock)))
+    while ((err = pthread_rwlock_destroy((pthread_rwlock_t*)lock)))
     {
         assert(err == 0);
     }
@@ -34,7 +36,7 @@ void rwlock_deinit(k4a_rwlock_t *lock)
 void rwlock_acquire_read(k4a_rwlock_t *lock)
 {
     int err;
-    while ((err = pthread_rwlock_rdlock(&lock->_lock)))
+    while ((err = pthread_rwlock_rdlock((pthread_rwlock_t*)lock)))
     {
         assert(err == 0);
     }
@@ -42,14 +44,14 @@ void rwlock_acquire_read(k4a_rwlock_t *lock)
 
 bool rwlock_try_acquire_read(k4a_rwlock_t *lock)
 {
-    int err = pthread_rwlock_tryrdlock(&lock->_lock);
+    int err = pthread_rwlock_tryrdlock((pthread_rwlock_t*)lock);
     return err == 0;
 }
 
 void rwlock_acquire_write(k4a_rwlock_t *lock)
 {
     int err;
-    while ((err = pthread_rwlock_wrlock(&lock->_lock)))
+    while ((err = pthread_rwlock_wrlock((pthread_rwlock_t*)lock)))
     {
         assert(err == 0);
     }
@@ -57,16 +59,16 @@ void rwlock_acquire_write(k4a_rwlock_t *lock)
 
 bool rwlock_try_acquire_write(k4a_rwlock_t *lock)
 {
-    int err = pthread_rwlock_trywrlock(&lock->_lock);
+    int err = pthread_rwlock_trywrlock((pthread_rwlock_t*)lock);
     return err == 0;
 }
 
 void rwlock_release_read(k4a_rwlock_t *lock)
 {
-    pthread_rwlock_unlock(&lock->_lock);
+    pthread_rwlock_unlock((pthread_rwlock_t*)lock);
 }
 
 void rwlock_release_write(k4a_rwlock_t *lock)
 {
-    pthread_rwlock_unlock(&lock->_lock);
+    pthread_rwlock_unlock((pthread_rwlock_t*)lock);
 }
