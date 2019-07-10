@@ -19,7 +19,6 @@ int main(int argc, char **argv)
 
 #define GTEST_LOG_INFO std::cout << "[     INFO ] "
 
-
 static int g_GlobalCounter1 = 0;
 
 typedef struct
@@ -27,7 +26,7 @@ typedef struct
     int valueToInit;
 } test_global_t;
 
-static void globalInitFunction(test_global_t* global)
+static void globalInitFunction(test_global_t *global)
 {
     ASSERT_EQ(0, global->valueToInit);
     ASSERT_EQ(0, g_GlobalCounter1);
@@ -37,7 +36,6 @@ static void globalInitFunction(test_global_t* global)
 
     // Sleep to simulate an init function that takes some time
     ThreadAPI_Sleep(50);
-
 }
 
 K4A_DECLARE_GLOBAL(test_global_t, globalInitFunction);
@@ -50,14 +48,14 @@ typedef struct
     int value2;
 } test_global2_t;
 
-static void globalInitFunction2(test_global2_t* global)
+static void globalInitFunction2(test_global2_t *global)
 {
     ASSERT_EQ(0, global->value1);
     ASSERT_EQ(0, global->value2);
     ASSERT_EQ(0, g_GlobalCounter2);
 
     g_GlobalCounter2++;
-    
+
     global->value1 = 1;
 
     // Sleep to simulate an init function that takes some time
@@ -76,13 +74,13 @@ TEST(global_ut, global_init_singlethread)
     ASSERT_EQ(0, g_GlobalCounter1);
 
     // Get the global context, and verify that it is initalized
-    test_global_t* g_test = test_global_t_get();
+    test_global_t *g_test = test_global_t_get();
 
     ASSERT_EQ(1, g_GlobalCounter1);
     ASSERT_EQ(1, g_test->valueToInit);
 
     // Get it again and verify initialization hasn't been run more than once
-    test_global_t* g_test2 = test_global_t_get();
+    test_global_t *g_test2 = test_global_t_get();
 
     ASSERT_EQ(1, g_GlobalCounter1);
     ASSERT_EQ(1, g_test2->valueToInit);
@@ -91,14 +89,14 @@ TEST(global_ut, global_init_singlethread)
     ASSERT_EQ(g_test, g_test2);
 }
 
-static void thread_testinit(k4a_rwlock_t* lock)
+static void thread_testinit(k4a_rwlock_t *lock)
 {
     ASSERT_EQ(0, g_GlobalCounter2);
 
     // Block on the lock to attempt simultaneous release of threads
     rwlock_acquire_read(lock);
 
-    test_global2_t* g_test = test_global2_t_get();
+    test_global2_t *g_test = test_global2_t_get();
 
     ASSERT_EQ(1, g_GlobalCounter2);
     ASSERT_EQ(1, g_test->value1);
@@ -109,7 +107,7 @@ static void thread_testinit(k4a_rwlock_t* lock)
 
 static int thread_testinit_threadproc(void *ctx)
 {
-    thread_testinit((k4a_rwlock_t*)ctx);
+    thread_testinit((k4a_rwlock_t *)ctx);
 
     return 0;
 }
@@ -148,7 +146,7 @@ TEST(global_ut, global_init_multithread)
     rwlock_deinit(&lock);
 
     // Verify initialization happened once
-    test_global2_t* g_test = test_global2_t_get();
+    test_global2_t *g_test = test_global2_t_get();
 
     ASSERT_EQ(1, g_GlobalCounter2);
     ASSERT_EQ(1, g_test->value1);

@@ -29,12 +29,12 @@ void global_init_once(k4a_init_once_t *init_once, k4a_init_once_function_t *init
 {
 
 #ifdef _WIN32
-    if (InitOnceExecuteOnce((INIT_ONCE*)init_once, InitGlobalFunction, (void *)init_function, NULL))
+    if (InitOnceExecuteOnce((INIT_ONCE *)init_once, InitGlobalFunction, (void *)init_function, NULL))
     {
         return;
     }
 #else
-    if (0 == pthread_once((pthread_once_t*)init_once, init_function))
+    if (0 == pthread_once((pthread_once_t *)init_once, init_function))
     {
         return;
     }

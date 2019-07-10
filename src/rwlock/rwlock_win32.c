@@ -11,7 +11,7 @@ C_ASSERT(sizeof(k4a_rwlock_t) == sizeof(SRWLOCK));
 
 void rwlock_init(k4a_rwlock_t *lock)
 {
-    InitializeSRWLock((SRWLOCK*)lock);
+    InitializeSRWLock((SRWLOCK *)lock);
 }
 
 void rwlock_deinit(k4a_rwlock_t *lock)
@@ -22,30 +22,30 @@ void rwlock_deinit(k4a_rwlock_t *lock)
 
 void rwlock_acquire_read(k4a_rwlock_t *lock)
 {
-    AcquireSRWLockShared((SRWLOCK*)lock);
+    AcquireSRWLockShared((SRWLOCK *)lock);
 }
 
 bool rwlock_try_acquire_read(k4a_rwlock_t *lock)
 {
-    return TryAcquireSRWLockShared((SRWLOCK*)lock);
+    return TryAcquireSRWLockShared((SRWLOCK *)lock);
 }
 
 void rwlock_acquire_write(k4a_rwlock_t *lock)
 {
-    AcquireSRWLockExclusive((SRWLOCK*)lock);
+    AcquireSRWLockExclusive((SRWLOCK *)lock);
 }
 
 bool rwlock_try_acquire_write(k4a_rwlock_t *lock)
 {
-    return TryAcquireSRWLockExclusive((SRWLOCK*)lock);
+    return TryAcquireSRWLockExclusive((SRWLOCK *)lock);
 }
 
 void rwlock_release_read(k4a_rwlock_t *lock)
 {
-    ReleaseSRWLockShared((SRWLOCK*)lock);
+    ReleaseSRWLockShared((SRWLOCK *)lock);
 }
 
 void rwlock_release_write(k4a_rwlock_t *lock)
 {
-    ReleaseSRWLockExclusive((SRWLOCK*)lock);
+    ReleaseSRWLockExclusive((SRWLOCK *)lock);
 }
