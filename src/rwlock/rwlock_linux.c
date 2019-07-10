@@ -10,30 +10,34 @@
 #include <assert.h>
 #include <pthread.h>
 
+// If one of the lock synchronization functions fails, retry forever
+// rather than return an error code since callers are unlikley to
+// properly test the error condition and crashing should be avoided.
+
 void rwlock_init(k4a_rwlock_t *lock)
 {
-    int err = pthread_rwlock_init(&lock->_lock, NULL);
-    assert(err == 0);
-    while (err != 0)
+    int err;
+    while ((err = pthread_rwlock_init(&lock->_lock, NULL)))
     {
-    };
+        assert(err == 0);
+    }
 }
 void rwlock_deinit(k4a_rwlock_t *lock)
 {
-    int err = pthread_rwlock_destroy(&lock->_lock);
-    assert(err == 0);
-    while (err != 0)
+    int err;
+    while ((err = pthread_rwlock_destroy(&lock->_lock)))
     {
-    };
+        assert(err == 0);
+    }
 }
 
 void rwlock_acquire_read(k4a_rwlock_t *lock)
 {
-    int err = pthread_rwlock_rdlock(&lock->_lock);
-    assert(err == 0);
-    while (err != 0)
+    int err;
+    while ((err = pthread_rwlock_rdlock(&lock->_lock)))
     {
-    };
+        assert(err == 0);
+    }
 }
 
 bool rwlock_try_acquire_read(k4a_rwlock_t *lock)
@@ -44,11 +48,11 @@ bool rwlock_try_acquire_read(k4a_rwlock_t *lock)
 
 void rwlock_acquire_write(k4a_rwlock_t *lock)
 {
-    int err = pthread_rwlock_wrlock(&lock->_lock);
-    assert(err == 0);
-    while (err != 0)
+    int err;
+    while ((err = pthread_rwlock_wrlock(&lock->_lock)))
     {
-    };
+        assert(err == 0);
+    }
 }
 
 bool rwlock_try_acquire_write(k4a_rwlock_t *lock)
