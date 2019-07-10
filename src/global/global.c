@@ -5,7 +5,7 @@
 #include <k4ainternal/global.h>
 
 // System dependencies
-
+    
 #ifdef _WIN32
 #include <windows.h>
 #else

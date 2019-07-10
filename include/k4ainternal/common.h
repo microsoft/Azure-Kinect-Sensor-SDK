@@ -30,7 +30,10 @@ typedef struct _guid_t
 #define STRINGIFY(string) #string
 
 #ifndef C_ASSERT
+#ifndef _WIN32
+// Defined in windows.h
 #define C_ASSERT(e) typedef char __C_ASSERT__[(e) ? 1 : -1]
+#endif
 #endif
 
 // Clock tick runs 90kHz and convert sec to micro sec
