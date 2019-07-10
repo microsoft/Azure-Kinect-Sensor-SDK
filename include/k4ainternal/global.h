@@ -7,11 +7,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include <k4a/k4atypes.h>
-#include <k4ainternal/rwlock.h>
-
-#include <stddef.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

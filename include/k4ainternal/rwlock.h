@@ -7,7 +7,7 @@
 #ifndef RWLOCK_H
 #define RWLOCK_H
 
-#include <k4a/k4atypes.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {

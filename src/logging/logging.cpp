@@ -5,6 +5,7 @@
 #include <k4ainternal/logging.h>
 
 #include <k4ainternal/global.h>
+#include <k4ainternal/rwlock.h>
 
 #include <azure_c_shared_utility/envvariable.h>
 #include <azure_c_shared_utility/refcount.h>
@@ -64,12 +65,15 @@ typedef struct
 // This function runs once to initialize the global context for the logger
 static void logger_init_function(logger_global_context_t *global)
 {
+    // All other members are initialized to zero
     rwlock_init(&global->lock);
 
     global->env_log_level = K4A_LOG_LEVEL_OFF;
     global->user_log_level = K4A_LOG_LEVEL_OFF;
 }
 
+// Creates a function called logger_global_context_t_get() which returns the initialized
+// singleton global
 K4A_DECLARE_GLOBAL(logger_global_context_t, logger_init_function);
 
 #define K4A_LOGGER "k4a_logger"
@@ -94,7 +98,7 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
 
     rwlock_acquire_write(&g_context->lock);
 
-    // The user may set or clear the callback, or set the callback to the
+    // The user may set the callback,  clear the callback, or set the callback to the
     // same value it was previously. It is a failure to change the callback
     // from an existing registration.
     if (g_context->user_callback == NULL || message_cb == NULL || g_context->user_callback == message_cb)

@@ -7,8 +7,6 @@
 #include <k4ainternal/common.h>
 #include <gtest/gtest.h>
 
-#include <azure_c_shared_utility/lock.h>
-#include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/threadapi.h>
 
 int main(int argc, char **argv)

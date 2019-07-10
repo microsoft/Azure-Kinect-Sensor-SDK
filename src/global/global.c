@@ -5,10 +5,9 @@
 #include <k4ainternal/global.h>
 
 // System dependencies
-#include <windows.h>
 #include <assert.h>
-
 #ifdef _WIN32
+#include <windows.h>
 
 C_ASSERT(sizeof(k4a_init_once_t) == sizeof(INIT_ONCE));
 
@@ -40,6 +39,6 @@ void global_init_once(k4a_init_once_t *init_once, k4a_init_once_function_t *init
     }
 #endif
 
-    assert(false);
+    assert(0);
     return;
 }
