@@ -13,7 +13,12 @@
 extern "C" {
 #endif
 
+#ifdef _WIN32
 typedef void *k4a_rwlock_t;
+#else
+#include <pthread.h>
+typedef pthread_rwlock_t k4a_rwlock_t;
+#endif
 
 void rwlock_init(k4a_rwlock_t *lock);
 void rwlock_deinit(k4a_rwlock_t *lock);

@@ -5,9 +5,15 @@
 #include <k4ainternal/global.h>
 
 // System dependencies
-#include <assert.h>
+
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
+#include <assert.h>
+#ifdef _WIN32
 
 C_ASSERT(sizeof(k4a_init_once_t) == sizeof(INIT_ONCE));
 
