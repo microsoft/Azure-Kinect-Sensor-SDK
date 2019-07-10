@@ -62,7 +62,7 @@ typedef struct
 } logger_global_context_t;
 
 // This function runs once to initialize the global context for the logger
-void logger_init_function(logger_global_context_t *global)
+static void logger_init_function(logger_global_context_t *global)
 {
     rwlock_init(&global->lock);
 
