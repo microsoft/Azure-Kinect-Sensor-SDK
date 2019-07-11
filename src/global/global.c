@@ -15,7 +15,7 @@
 #include <assert.h>
 #ifdef _WIN32
 
-C_ASSERT(sizeof(k4a_init_once_t) == sizeof(INIT_ONCE));
+static_assert(sizeof(k4a_init_once_t) == sizeof(INIT_ONCE), "Windows INIT_ONCE size doesn't match generic k4a_init_once_t size");
 
 static BOOL CALLBACK InitGlobalFunction(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContext)
 {
