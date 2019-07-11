@@ -67,7 +67,7 @@ static void globalInitFunction2(test_global2_t *global)
 
 K4A_DECLARE_GLOBAL(test_global2_t, globalInitFunction2);
 
-TEST(global_ut, global_init_singlethread)
+TEST(global_ft, global_init_singlethread)
 {
     // We should start uninitialized
     ASSERT_EQ(0, g_GlobalCounter1);
@@ -112,7 +112,7 @@ static int thread_testinit_threadproc(void *ctx)
 }
 
 #define THREAD_COUNT 10
-TEST(global_ut, global_init_multithread)
+TEST(global_ft, global_init_multithread)
 {
     THREAD_HANDLE thread[THREAD_COUNT];
     // Try spinning up a series of threads to simultaneously try initialization

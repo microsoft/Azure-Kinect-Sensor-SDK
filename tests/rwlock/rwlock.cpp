@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 
 #define GTEST_LOG_INFO std::cout << "[     INFO ] "
 
-TEST(rwlock_ut, rwlock_init)
+TEST(rwlock_ft, rwlock_init)
 {
     k4a_rwlock_t lock;
 
@@ -191,7 +191,7 @@ static int thread_writer2_threadproc(void *ctx)
     return 0;
 }
 
-TEST(rwlock_ut, rwlock_threaded_test)
+TEST(rwlock_ft, rwlock_threaded_test)
 {
     /*
 

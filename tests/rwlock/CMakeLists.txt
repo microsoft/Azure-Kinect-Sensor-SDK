@@ -1,12 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-add_executable(global_ut global.cpp)
+add_executable(rwlock_ft rwlock.cpp)
 
-target_link_libraries(global_ut PRIVATE
+target_link_libraries(rwlock_ft PRIVATE
     azure::aziotsharedutil
     gtest::gtest
-    k4ainternal::global
+    k4ainternal::rwlock
     k4ainternal::utcommon)
 
-k4a_add_tests(TARGET global_ut TEST_TYPE UNIT)
+k4a_add_tests(TARGET rwlock_ft TEST_TYPE FUNCTIONAL)
