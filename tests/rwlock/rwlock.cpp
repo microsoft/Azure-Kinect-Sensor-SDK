@@ -134,8 +134,7 @@ static void thread_writer1(threaded_rwlock_test_context_t *context)
         ThreadAPI_Sleep(100);
 
         // Wait for the other threads to hit contention
-        while (reader2_fail == context->reader2_fail_count ||
-               writer2_fail == context->writer2_fail_count)
+        while (reader2_fail == context->reader2_fail_count || writer2_fail == context->writer2_fail_count)
         {
             ThreadAPI_Sleep(10);
 

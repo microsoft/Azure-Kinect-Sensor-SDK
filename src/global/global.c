@@ -32,7 +32,8 @@ static BOOL CALLBACK InitGlobalFunction(PINIT_ONCE InitOnce, PVOID Parameter, PV
 
 #else
 
-static_assert(sizeof(k4a_init_once_t) == sizeof(pthread_once_t), "Linux pthread_once_t size doesn't match generic k4a_init_once_t size");
+static_assert(sizeof(k4a_init_once_t) == sizeof(pthread_once_t),
+              "Linux pthread_once_t size doesn't match generic k4a_init_once_t size");
 
 #endif
 
