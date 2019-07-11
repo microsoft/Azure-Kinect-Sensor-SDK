@@ -8,7 +8,8 @@
 #include <windows.h>
 #include <assert.h>
 
-static_assert(sizeof(k4a_rwlock_t) == sizeof(SRWLOCK), "Windows SRWLOCK size doesn't match generic k4a_rwlock_t size");
+// TODO: static_assert be available with C11. See Issue #482
+// static_assert(sizeof(k4a_rwlock_t) == sizeof(SRWLOCK), "Windows SRWLOCK size doesn't match generic k4a_rwlock_t size");
 
 void rwlock_init(k4a_rwlock_t *lock)
 {
