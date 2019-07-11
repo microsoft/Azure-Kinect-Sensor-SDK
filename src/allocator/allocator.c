@@ -7,10 +7,10 @@
 // Dependent libraries
 #include <k4ainternal/capture.h>
 #include <azure_c_shared_utility/lock.h>
-#include <azure_c_shared_utility/refcount.h>
 
 // System dependencies
 #include <stdlib.h>
+#include <stdatomic.h>
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -34,20 +34,20 @@ typedef enum
 //
 // Globals have the drawback that they are shared for instances in the same process. So they count the allocations for
 // the entire process, not just the current session (k4a_device_open). As a result we must also count the active
-// sessions so we can properly report leaks when all active sessions end (k4a_device_close).
-static volatile long g_allocated_image_count_user = 0;
-static volatile long g_allocated_image_count_color = 0;
-static volatile long g_allocated_image_count_depth = 0;
-static volatile long g_allocated_image_count_imu = 0;
-static volatile long g_allocated_image_count_usb_depth = 0;
-static volatile long g_allocated_image_count_usb_imu = 0;
+// sessions atomic_int can properly report leaks when all active sessions end (k4a_device_close).
+static atomic_int g_allocated_image_count_user = 0;
+static atomic_int g_allocated_image_count_color = 0;
+static atomic_int g_allocated_image_count_depth = 0;
+static atomic_int g_allocated_image_count_imu = 0;
+static atomic_int g_allocated_image_count_usb_depth = 0;
+static atomic_int g_allocated_image_count_usb_imu = 0;
 
 // Count the number of active sessions for this process. A session maps to k4a_device_open
-static volatile long g_allocator_sessions = 0;
+static atomic_int g_allocator_sessions = 0;
 
 typedef struct _capture_context_t
 {
-    volatile long ref_count;
+    atomic_int ref_count;
     LOCK_HANDLE lock;
 
     k4a_image_t image[IMAGE_TYPE_COUNT];
@@ -59,12 +59,12 @@ K4A_DECLARE_CONTEXT(k4a_capture_t, capture_context_t);
 
 void allocator_initialize(void)
 {
-    INC_REF_VAR(g_allocator_sessions);
+    atomic_fetch_add(&g_allocator_sessions, 1);
 }
 
 void allocator_deinitialize(void)
 {
-    DEC_REF_VAR(g_allocator_sessions);
+    atomic_fetch_sub(&g_allocator_sessions, 1);
 }
 
 uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size, void **context)
@@ -73,7 +73,7 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size, void **c
     RETURN_VALUE_IF_ARG(NULL, alloc_size == 0);
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
 
-    volatile long *ref = NULL;
+    atomic_int *ref = NULL;
     switch (source)
     {
     case ALLOCATION_SOURCE_USER:
@@ -99,7 +99,7 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size, void **c
         break;
     }
 
-    INC_REF_VAR(*ref);
+    atomic_fetch_add(ref, 1);
 
     memcpy((uint8_t *)context, &source, sizeof(allocation_source_t));
 
@@ -114,7 +114,7 @@ void allocator_free(void *buffer, void *context)
     RETURN_VALUE_IF_ARG(VOID_VALUE, source < ALLOCATION_SOURCE_USER || source > ALLOCATION_SOURCE_USB_IMU);
     RETURN_VALUE_IF_ARG(VOID_VALUE, buffer == NULL);
 
-    volatile long *ref = NULL;
+    atomic_int *ref = NULL;
 
     switch (source)
     {
@@ -141,7 +141,7 @@ void allocator_free(void *buffer, void *context)
         break;
     }
 
-    DEC_REF_VAR(*ref);
+    atomic_fetch_sub(ref, 1);
     free(buffer);
 }
 
@@ -185,9 +185,9 @@ void capture_dec_ref(k4a_capture_t capture_handle)
     capture_context_t *capture = k4a_capture_t_get_context(capture_handle);
     long new_count;
 
-    new_count = DEC_REF_VAR(capture->ref_count);
+    new_count = atomic_fetch_sub(&capture->ref_count, 1);
 
-    if (new_count == 0)
+    if (new_count == 1)
     {
         Lock(capture->lock);
         for (int x = 0; x < IMAGE_TYPE_COUNT; x++)
@@ -208,7 +208,7 @@ void capture_inc_ref(k4a_capture_t capture_handle)
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_capture_t, capture_handle);
     capture_context_t *capture = k4a_capture_t_get_context(capture_handle);
 
-    INC_REF_VAR(capture->ref_count);
+    atomic_fetch_add(&capture->ref_count, 1);
 }
 
 k4a_result_t capture_create(k4a_capture_t *capture_handle)

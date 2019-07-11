@@ -12,12 +12,12 @@
 #include <azure_c_shared_utility/condition.h>
 #include <azure_c_shared_utility/tickcounter.h>
 #include <azure_c_shared_utility/lock.h>
-#include <azure_c_shared_utility/refcount.h>
 
 // System dependencies
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdatomic.h>
 
 #define DEWRAPPER_QUEUE_DEPTH ((uint32_t)2) // We should not need to store more than 1
 
@@ -53,7 +53,7 @@ typedef struct _shared_image_context_t
     uint8_t *buffer;
     image_destroy_cb_t *memory_free_cb;
     void *memory_free_cb_context;
-    volatile long ref;
+    atomic_int ref;
 } shared_image_context_t;
 
 K4A_DECLARE_CONTEXT(dewrapper_t, dewrapper_context_t);
@@ -112,9 +112,9 @@ static void free_shared_depth_image(void *buffer, void *context)
 
     shared_image_context_t *shared_context = context;
 
-    long count = DEC_REF_VAR(shared_context->ref);
+    long count = atomic_fetch_sub(&shared_context->ref, 1);
 
-    if (count == 0)
+    if (count == 1)
     {
         shared_context->memory_free_cb(shared_context->buffer, shared_context->memory_free_cb_context);
         free(context);
@@ -315,7 +315,7 @@ static int depth_engine_thread(void *param)
             if (K4A_SUCCEEDED(result))
             {
                 cleanup_capture_byte_ptr = false; // buffer is now owned by image;
-                INC_REF_VAR(shared_image_context->ref);
+                atomic_fetch_add(&shared_image_context->ref, 1);
                 image_set_device_timestamp_usec(image,
                                                 K4A_90K_HZ_TICK_TO_USEC(outputCaptureInfo.center_of_exposure_in_ticks));
                 image_set_system_timestamp_nsec(image, image_get_system_timestamp_nsec(image_raw));
@@ -346,7 +346,7 @@ static int depth_engine_thread(void *param)
             if (K4A_SUCCEEDED(result))
             {
                 cleanup_capture_byte_ptr = false; // buffer is now owned by image;
-                INC_REF_VAR(shared_image_context->ref);
+                atomic_fetch_add(&shared_image_context->ref, 1);
                 image_set_device_timestamp_usec(image,
                                                 K4A_90K_HZ_TICK_TO_USEC(outputCaptureInfo.center_of_exposure_in_ticks));
                 image_set_system_timestamp_nsec(image, image_get_system_timestamp_nsec(image_raw));

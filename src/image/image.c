@@ -7,11 +7,11 @@
 
 // Dependent libraries
 #include <azure_c_shared_utility/lock.h>
-#include <azure_c_shared_utility/refcount.h>
 
 // System dependencies
 #include <stdlib.h>
 #include <assert.h>
+#include <stdatomic.h>
 
 #ifndef _WIN32
 #include <time.h>
@@ -19,7 +19,7 @@
 
 typedef struct _image_context_t
 {
-    volatile long ref_count;
+    atomic_int ref_count;
     LOCK_HANDLE lock;
 
     uint8_t *buffer;
@@ -197,9 +197,9 @@ void image_dec_ref(k4a_image_t image_handle)
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
     image_context_t *image = k4a_image_t_get_context(image_handle);
 
-    long count = DEC_REF_VAR(image->ref_count);
+    long count = atomic_fetch_sub(&image->ref_count, 1);
 
-    if (count == 0)
+    if (count == 1)
     {
         if (image->memory_free_cb)
         {
@@ -215,7 +215,7 @@ void image_inc_ref(k4a_image_t image_handle)
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, k4a_image_t, image_handle);
     image_context_t *image = k4a_image_t_get_context(image_handle);
 
-    INC_REF_VAR(image->ref_count);
+    atomic_fetch_add(&image->ref_count, 1);
 }
 
 uint8_t *image_get_buffer(k4a_image_t image_handle)

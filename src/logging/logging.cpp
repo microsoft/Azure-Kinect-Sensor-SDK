@@ -5,7 +5,6 @@
 #include <k4ainternal/logging.h>
 
 #include <azure_c_shared_utility/envvariable.h>
-#include <azure_c_shared_utility/refcount.h>
 #include <azure_c_shared_utility/threadapi.h>
 
 // System dependencies
@@ -23,6 +22,8 @@
 #ifdef _MSC_VER
 #pragma warning(default : 4702)
 #endif
+
+#include <stdatomic.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,12 +53,12 @@ K4A_DECLARE_CONTEXT(logger_t, logger_context_t);
 
 // Logger data for forwarding debug messages to registered callback.
 static volatile logger_user_cb_info_t *g_user_logger_cb_info = nullptr;
-static volatile long g_user_logger_cb_info_ref = 0;
+static atomic_int g_user_logger_cb_info_ref = 0;
 static k4a_log_level_t g_user_log_level = K4A_LOG_LEVEL_OFF;
 
 // Logger data used for forwarding debug message to stdout or a dedicated k4a file.
 static std::shared_ptr<spdlog::logger> g_env_logger = nullptr;
-static volatile long g_env_logger_count = 0;
+static atomic_int g_env_logger_count = 0;
 static bool g_env_logger_is_file_based = false;
 static k4a_log_level_t g_env_log_level = K4A_LOG_LEVEL_OFF;
 
@@ -78,8 +79,8 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
         result = K4A_RESULT_FROM_BOOL(min_level >= K4A_LOG_LEVEL_CRITICAL && min_level <= K4A_LOG_LEVEL_OFF);
         if (K4A_SUCCEEDED(result))
         {
-            long count_of_registered_callbacks = INC_REF_VAR(g_user_logger_cb_info_ref);
-            if (count_of_registered_callbacks == 1)
+            long count_of_registered_callbacks = atomic_fetch_add(&g_user_logger_cb_info_ref, 1);
+            if (count_of_registered_callbacks == 0)
             {
                 // We won the right to register and create logger_cb_t
                 g_user_logger_cb_info = new logger_user_cb_info_t();
@@ -91,14 +92,14 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
             {
                 // User is calling to update the min_level
                 g_user_log_level = min_level;
-                DEC_REF_VAR(g_user_logger_cb_info_ref);
+                atomic_fetch_sub(&g_user_logger_cb_info_ref, 1);
             }
             else
             {
                 // Disallow the caller from registering a 2nd callback. A new callback can be established by clearing
                 // the existing callback function.
                 result = K4A_RESULT_FROM_BOOL(count_of_registered_callbacks == 1);
-                DEC_REF_VAR(g_user_logger_cb_info_ref);
+                atomic_fetch_sub(&g_user_logger_cb_info_ref, 1);
                 result = K4A_RESULT_FAILED;
             }
         }
@@ -107,7 +108,7 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
     {
         volatile logger_user_cb_info_t *logger_info = g_user_logger_cb_info;
         g_user_logger_cb_info = nullptr;
-        DEC_REF_VAR(g_user_logger_cb_info_ref);
+        atomic_fetch_sub(&g_user_logger_cb_info_ref, 1);
 
         // NOTE: this loop could loop forever if user calls start and a new g_user_logger_cb_info is allocated, which
         // would add a ref to g_user_logger_cb_info_ref. We don't expect there to be races between 1 thread trying to
@@ -150,13 +151,7 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
         logging_level = environment_get_variable(config->env_var_log_level);
     }
 
-#if defined(REFCOUNT_USE_STD_ATOMIC)
-    // Validate implementation of INC_REF_VAR. Documentation for the implementation in this mode indicates the API
-    // behaves differently than the others. REFCOUNT_USE_STD_ATOMIC returns the pre-opperation value while other return
-    // the post opperation value
-    static_assert(0, "This configuration needs to be confirmed");
-#endif
-    if ((INC_REF_VAR(g_env_logger_count) > 1) || (g_env_logger))
+    if ((atomic_fetch_add(&g_env_logger_count, 1) > 0) || (g_env_logger))
     {
         // Reuse the configured logger settings in the event we have more than 1 active handle at a time
         context->logger = g_env_logger;
@@ -291,7 +286,7 @@ void logger_destroy(logger_t logger_handle)
     logger_context_t *context = logger_t_get_context(logger_handle);
 
     // Destroy the logger
-    if (DEC_REF_VAR(g_env_logger_count) == 0)
+    if (atomic_fetch_sub(&g_env_logger_count, 1) == 1)
     {
         bool drop_logger = g_env_logger != NULL;
         g_env_logger = NULL;
@@ -338,14 +333,14 @@ void logger_log(k4a_log_level_t level, const char * file, const int line, const 
         {
             // must ++ before getting the shared pointer, or the wait in releasing the callback function can return
             // without waiting for all pending instances using this context to complete.
-            INC_REF_VAR(g_user_logger_cb_info_ref);
+            atomic_fetch_add(&g_user_logger_cb_info_ref, 1);
             volatile logger_user_cb_info_t *logger_cb = g_user_logger_cb_info;
             if (logger_cb)
             {
                 logger_cb->callback(logger_cb->callback_context, level, file, line, buffer);
                 logger_cb = nullptr;
             }
-            DEC_REF_VAR(g_user_logger_cb_info_ref);
+            atomic_fetch_sub(&g_user_logger_cb_info_ref, 1);
         }
         if ((level <= g_env_log_level) && (g_env_log_level != K4A_LOG_LEVEL_OFF))
         {
