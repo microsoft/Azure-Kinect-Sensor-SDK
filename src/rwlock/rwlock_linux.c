@@ -10,7 +10,8 @@
 #include <assert.h>
 #include <pthread.h>
 
-static_assert(sizeof(k4a_rwlock_t) == sizeof(pthread_rwlock_t), "Linux pthread_rwlock_t size doesn't match generic k4a_rwlock_t size");
+static_assert(sizeof(k4a_rwlock_t) == sizeof(pthread_rwlock_t),
+              "Linux pthread_rwlock_t size doesn't match generic k4a_rwlock_t size");
 
 // If one of the lock synchronization functions fails, retry forever
 // rather than return an error code since callers are unlikeley to
