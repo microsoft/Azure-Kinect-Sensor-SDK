@@ -48,3 +48,8 @@ elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 else()
     message(FATAL_ERROR "Unknown C++ compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    # Enable Linux features in glibc
+    add_compile_options(-D_GNU_SOURCE)
+endif()
