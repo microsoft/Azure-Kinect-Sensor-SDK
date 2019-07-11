@@ -133,15 +133,33 @@ static void thread_writer1(threaded_rwlock_test_context_t *context)
         // Wait a moment to allow other threads to run
         ThreadAPI_Sleep(100);
 
+        // Wait for the other threads to hit contention
+        while (reader2_fail == context->reader2_fail_count ||
+               writer2_fail == context->writer2_fail_count)
+        {
+            ThreadAPI_Sleep(10);
+
+            // Don't wait if we reach the end of the test
+            if (!context->run_test)
+            {
+                break;
+            }
+        }
+
         // No other thread should have the lock, the values should not change
         EXPECT_EQ(reader1, context->reader1_count);
         EXPECT_EQ(reader2, context->reader2_count);
         EXPECT_EQ(writer2, context->writer2_count);
 
-        // Since we have held the lock for some time, we expect reader 2 and writer 2
-        // to have failed to acquire the lock while we have held it
-        EXPECT_NE(reader2_fail, context->reader2_fail_count);
-        EXPECT_NE(writer2_fail, context->writer2_fail_count);
+        // If we reached the end of the test, we may not have waited long enough
+        // for these to be true
+        if (context->run_test)
+        {
+            // Since we have held the lock for some time, we expect reader 2 and writer 2
+            // to have failed to acquire the lock while we have held it
+            EXPECT_NE(reader2_fail, context->reader2_fail_count);
+            EXPECT_NE(writer2_fail, context->writer2_fail_count);
+        }
 
         rwlock_release_write(&context->test_lock);
 
@@ -233,7 +251,7 @@ TEST(rwlock_ft, rwlock_threaded_test)
 
     rwlock_deinit(&test_context.test_lock);
 
-    // Ensure all the threads have acquired the lock
+    // Ensure all the threads have acquired the lock and hit failure contention
     ASSERT_NE(0, test_context.reader1_count);
     ASSERT_NE(0, test_context.reader2_count);
     ASSERT_NE(0, test_context.reader2_fail_count);
