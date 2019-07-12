@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.Azure.Kinect.Sensor.Native;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {

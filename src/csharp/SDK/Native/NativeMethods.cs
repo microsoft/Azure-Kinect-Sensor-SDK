@@ -4,16 +4,15 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.Azure.Kinect.Sensor.Native;
 
-namespace Microsoft.Azure.Kinect.Sensor
+namespace Microsoft.Azure.Kinect.Sensor.Native
 {
 #pragma warning disable IDE1006 // Naming Styles
 
     internal class NativeMethods
     {
         // These types are used internally by the interop dll for marshaling purposes and are not exposed
-        // over the public surface of the managed dll. 
+        // over the public surface of the managed dll.
 
         #region Handle Types
 
@@ -122,6 +121,20 @@ namespace Microsoft.Azure.Kinect.Sensor
             K4A_STREAM_RESULT_EOF
         }
 
+        /// <summary>
+        /// Verbosity levels of debug messaging.
+        /// </summary>
+        [NativeReference]
+        public enum k4a_log_level_t
+        {
+            K4A_LOG_LEVEL_CRITICAL = 0, /** Most severe level of debug messaging. */
+            K4A_LOG_LEVEL_ERROR,        /** 2nd most severe level of debug messaging. */
+            K4A_LOG_LEVEL_WARNING,      /** 3nd most severe level of debug messaging. */
+            K4A_LOG_LEVEL_INFO,         /** 2nd least severe level of debug messaging. */
+            K4A_LOG_LEVEL_TRACE,        /** Least severe level of debug messaging. */
+            K4A_LOG_LEVEL_OFF,          /** No logging is performed */
+        }
+
         #endregion
 
         #region Structures
@@ -182,7 +195,6 @@ namespace Microsoft.Azure.Kinect.Sensor
 
 
         #endregion
-
 
         #region Functions
 
@@ -488,6 +500,15 @@ namespace Microsoft.Azure.Kinect.Sensor
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
         public static extern IntPtr k4a_image_get_buffer(k4a_image_t image_handle);
+
+        public delegate void k4a_logging_message_cb_t(IntPtr context, k4a_log_level_t level, [MarshalAs(UnmanagedType.LPStr)] string file, int line, [MarshalAs(UnmanagedType.LPStr)] string message);
+
+        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [NativeReference]
+        public static extern k4a_result_t logger_register_message_callback(
+            k4a_logging_message_cb_t message_cb,
+            IntPtr message_cb_context,
+            k4a_log_level_t min_level);
 
         #endregion
 

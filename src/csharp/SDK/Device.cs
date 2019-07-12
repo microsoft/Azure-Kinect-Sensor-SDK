@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Text;
+using Microsoft.Azure.Kinect.Sensor.Native;
 
 [assembly: CLSCompliant(true)]
 

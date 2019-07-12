@@ -4,6 +4,7 @@
 // </copyright>
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Azure.Kinect.Sensor.Native;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {

@@ -3,6 +3,7 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Microsoft.Azure.Kinect.Sensor.Native;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
