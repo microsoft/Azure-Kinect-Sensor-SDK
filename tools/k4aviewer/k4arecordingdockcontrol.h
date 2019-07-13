@@ -11,11 +11,10 @@
 
 // Library headers
 //
+#include <k4arecord/playback.hpp>
 
 // Project headers
 //
-#include "playback.hpp"
-
 #include "ik4adockcontrol.h"
 #include "k4adatasource.h"
 #include "k4aimugraphdatagenerator.h"
