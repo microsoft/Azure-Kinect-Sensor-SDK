@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Azure.Kinect.Sensor;
@@ -12,16 +13,25 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
     /// </summary>
     public partial class MainWindow : Window
     {
+        bool running = true;
+
         public MainWindow()
         {
             InitializeComponent();
+            Logger.LogMessage += this.Logger_LogMessage;
+        }
+
+        private void Logger_LogMessage(object sender, LogMessageData e)
+        {
+            Console.WriteLine("{0} {1}@{2}: {3}", e.level, e.file, e.line, e.message);
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             using (Device device = Device.Open(0))
             {
-                device.StartCameras(new DeviceConfiguration {
+                device.StartCameras(new DeviceConfiguration
+                {
                     ColorFormat = ImageFormat.ColorBGRA32,
                     ColorResolution = ColorResolution.r1440p,
                     DepthMode = DepthMode.WFOV_2x2Binned,
@@ -36,7 +46,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 using (ArrayImage<ushort> transformedDepth = new ArrayImage<ushort>(ImageFormat.Depth16, colorWidth, colorHeight))
                 using (Transformation transform = device.GetCalibration().CreateTransformation())
                 {
-                    while (true)
+                    while (running)
                     {
                         // Wait for a capture on a thread pool thread
                         using (Capture capture = await Task.Run(() => { return device.GetCapture(); }))
@@ -74,6 +84,10 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                     }
                 }
             }
+        }
+
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
         }
     }
 }

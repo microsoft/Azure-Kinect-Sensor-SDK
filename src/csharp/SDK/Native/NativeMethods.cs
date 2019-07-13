@@ -505,7 +505,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Native
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
-        public static extern k4a_result_t logger_register_message_callback(
+        public static extern k4a_result_t k4a_set_debug_message_handler(
             k4a_logging_message_cb_t message_cb,
             IntPtr message_cb_context,
             k4a_log_level_t min_level);
