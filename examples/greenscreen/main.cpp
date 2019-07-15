@@ -46,9 +46,9 @@ int main()
         // NOTE: Both cameras must have the same configuration (TODO) what exactly needs to
         k4a_device_configuration_t camera_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        camera_config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
-        camera_config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
-        camera_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+        camera_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
+        camera_config.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+        camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
         camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE; // TODO SUBORDINATE
         camera_config.subordinate_delay_off_master_usec = 0; // TODO nope this should be the min, sort through all
                                                              // the syncing
@@ -57,14 +57,15 @@ int main()
         // special case: the first config needs to be set to be the master
         configurations.front().wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
         configurations.front().subordinate_delay_off_master_usec = 0; // TODO delay for the rest
-        configurations.front().color_resolution = K4A_COLOR_RESOLUTION_1080P;
+        configurations.front().color_resolution = K4A_COLOR_RESOLUTION_720P;
         configurations.front().synchronized_images_only = true;
 
         vector<k4a::calibration> calibrations;
         // fill the calibrations vector
-        for (const k4a::device &d : devices)
+        for (size_t i = 0; i < devices.size(); ++i)
         {
-            calibrations.emplace_back(d.get_calibration(camera_config.depth_mode, camera_config.color_resolution));
+            calibrations.emplace_back(
+                devices[i].get_calibration(configurations[i].depth_mode, configurations[i].color_resolution));
         }
 
         // make sure that the master has sync out connected (ready to send commands)
@@ -111,15 +112,10 @@ int main()
                 continue;
             }
 
-            vector<k4a::image> color_images;
-            color_images.reserve(devices.size());
-            for (const k4a::capture &cap : device_captures)
+            k4a::image master_color_image = device_captures[0].get_color_image();
+            if (!master_color_image)
             {
-                color_images.emplace_back(cap.get_color_image());
-            }
-            if (!std::all_of(color_images.cbegin(), color_images.cend(), [](const k4a::image &i) { return i; }))
-            {
-                cout << "One or more invalid color images!\n"; // << std::endl;
+                cout << "Master doesn't have a color image!\n";
                 continue;
             }
 
@@ -148,9 +144,9 @@ int main()
             // first: let's get the depth image into the color camera space
             // create a copy with the same parameters
             k4a::image k4a_master_depth_in_master_color = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16,
-                                                                             color_images[0].get_width_pixels(),
-                                                                             color_images[0].get_height_pixels(),
-                                                                             color_images[0].get_width_pixels() *
+                                                                             master_color_image.get_width_pixels(),
+                                                                             master_color_image.get_height_pixels(),
+                                                                             master_color_image.get_width_pixels() *
                                                                                  static_cast<int>(sizeof(uint16_t)));
             // now fill it with the shifted version
             // to do so, we need the transformation from TODO
@@ -161,18 +157,13 @@ int main()
             // now, create an OpenCV version of the depth matrix for easy usage
             cv::Mat opencv_master_depth_in_master_color = k4a_depth_to_opencv(k4a_master_depth_in_master_color);
 
-            cv::Mat output_image(color_images[0].get_height_pixels(),
-                                 color_images[0].get_width_pixels(),
+            cv::Mat output_image(master_color_image.get_height_pixels(),
+                                 master_color_image.get_width_pixels(),
                                  CV_8UC3,
                                  cv::Scalar(0, 255, 0));
 
             // next, let's get some OpenCV images
-            vector<cv::Mat> opencv_color_images;
-            opencv_color_images.reserve(color_images.size());
-            for (const k4a::image &im : color_images)
-            {
-                opencv_color_images.emplace_back(k4a_color_to_opencv(im));
-            }
+            cv::Mat master_opencv_color_image = k4a_color_to_opencv(master_color_image);
 
             // GOTCHA: if you use std::endl to force flushes, you will likely drop frames.
             // now mask it
@@ -181,7 +172,7 @@ int main()
             cv::bitwise_and(opencv_master_depth_in_master_color < THRESHOLD,
                             opencv_master_depth_in_master_color != 0,
                             mask);
-            opencv_color_images[0].copyTo(output_image, mask);
+            master_opencv_color_image.copyTo(output_image, mask);
             // please?
             cv::imshow("Test", output_image);
             cv::waitKey(1);
