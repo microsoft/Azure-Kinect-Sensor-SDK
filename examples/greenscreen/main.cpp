@@ -112,6 +112,7 @@ int main()
             }
 
             vector<k4a::image> color_images;
+            color_images.reserve(devices.size());
             for (const k4a::capture &cap : device_captures)
             {
                 color_images.emplace_back(cap.get_color_image());
@@ -124,6 +125,7 @@ int main()
 
             // get depth images
             vector<k4a::image> depth_images;
+            depth_images.reserve(devices.size());
             for (const k4a::capture &cap : device_captures)
             {
                 depth_images.emplace_back(cap.get_depth_image());
@@ -135,41 +137,34 @@ int main()
             }
             // if we reach this point, we know that we're good to go.
             // first, let's check out the timestamps.
-            for (size_t i = 0; i < depth_images.size(); ++i)
-            {
-                cout << "Color image timestamp: " << i << " " << color_images[i].get_device_timestamp().count() << "\n";
-                cout << "Depth image timestamp: " << i << " " << depth_images[i].get_device_timestamp().count() << "\n";
-            }
+            // for (size_t i = 0; i < depth_images.size(); ++i)
+            // {
+            //     cout << "Color image timestamp: " << i << " " << color_images[i].get_device_timestamp().count() <<
+            //     "\n"; cout << "Depth image timestamp: " << i << " " << depth_images[i].get_device_timestamp().count()
+            //     << "\n";
+            // }
 
             // let's greenscreen out things that are far away.
             // first: let's get the depth image into the color camera space
             // create a copy with the same parameters
-            cout << color_images[0].get_width_pixels() << std::endl;
-            cout << color_images[0].get_height_pixels() << std::endl;
-            cout << color_images[0].get_stride_bytes() << std::endl;
             k4a::image k4a_master_depth_in_master_color = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16,
                                                                              color_images[0].get_width_pixels(),
                                                                              color_images[0].get_height_pixels(),
-                                                                             color_images[0].get_stride_bytes());
+                                                                             color_images[0].get_width_pixels() *
+                                                                                 static_cast<int>(sizeof(uint16_t)));
             // now fill it with the shifted version
-            // to do so, we need the transformation from
-            cout << "Test" << std::endl;
+            // to do so, we need the transformation from TODO
             k4a::transformation master_depth_to_master_color(calibrations[0]);
-            cout << "Test" << std::endl;
             master_depth_to_master_color.depth_image_to_color_camera(depth_images[0],
                                                                      &k4a_master_depth_in_master_color);
-            cout << "Test2" << std::endl;
 
             // now, create an OpenCV version of the depth matrix for easy usage
-            cv::Mat opencv_master_depth_in_master_color = k4a_depth_to_opencv(depth_images[0]);
+            cv::Mat opencv_master_depth_in_master_color = k4a_depth_to_opencv(k4a_master_depth_in_master_color);
 
-            for (int w = 0; w < opencv_master_depth_in_master_color.cols; ++w)
-            {
-                for (int h = 0; h < opencv_master_depth_in_master_color.rows; ++h)
-                {
-                    cout << opencv_master_depth_in_master_color.at<uint16_t>(w, h);
-                }
-            }
+            cv::Mat output_image(color_images[0].get_height_pixels(),
+                                 color_images[0].get_width_pixels(),
+                                 CV_8UC3,
+                                 cv::Scalar(0, 255, 0));
 
             // next, let's get some OpenCV images
             vector<cv::Mat> opencv_color_images;
@@ -178,11 +173,18 @@ int main()
             {
                 opencv_color_images.emplace_back(k4a_color_to_opencv(im));
             }
-            // please?
-            cv::imshow("Test", opencv_color_images[0]);
-            cv::waitKey(0);
 
             // GOTCHA: if you use std::endl to force flushes, you will likely drop frames.
+            // now mask it
+            const uint16_t THRESHOLD = 1000; // TODO
+            cv::Mat mask;
+            cv::bitwise_and(opencv_master_depth_in_master_color < THRESHOLD,
+                            opencv_master_depth_in_master_color != 0,
+                            mask);
+            opencv_color_images[0].copyTo(output_image, mask);
+            // please?
+            cv::imshow("Test", output_image);
+            cv::waitKey(1);
         }
     }
     catch (std::exception &e)
