@@ -69,6 +69,11 @@ k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *message_cb,
     return logger_register_message_callback(message_cb, message_cb_context, min_level);
 }
 
+k4a_result_t k4a_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memory_destroy_cb_t free)
+{
+    return allocator_set_allocator(allocate, free);
+}
+
 depth_cb_streaming_capture_t depth_capture_ready;
 color_cb_streaming_capture_t color_capture_ready;
 
