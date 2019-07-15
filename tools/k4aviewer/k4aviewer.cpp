@@ -105,6 +105,11 @@ K4AViewer::K4AViewer(const K4AViewerArgs &args)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     m_window = glfwCreateWindow(1440, 900, "Azure Kinect Viewer", nullptr, nullptr);
+    if (!m_window)
+    {
+        LogGlfwError(0, "glfwCreateWindow failed!");
+        exit(GlfwFailureExitCode);
+    }
 
     glfwMakeContextCurrent(m_window);
     glfwSwapInterval(1); // Enable vsync

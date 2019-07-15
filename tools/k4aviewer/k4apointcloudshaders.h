@@ -10,27 +10,28 @@ constexpr char const PointCloudFragmentShader[] =
 R"(
 #version 430
 
-in vec4 fragmentColor;
+in vec4 vertexColor;
+out vec4 fragmentColor;
 
 uniform bool enableShading;
 
 void main()
 {
-    if (fragmentColor.a == 0.0f)
+    if (vertexColor.a == 0.0f)
     {
         discard;
     }
 
-    gl_FragColor = fragmentColor;
+    fragmentColor = vertexColor;
 }
 )";
 
 constexpr char const PointCloudVertexShader[] =
 R"(
 #version 430
-layout(location = 0) in vec4 vertexColor;
+layout(location = 0) in vec4 inColor;
 
-out vec4 fragmentColor;
+out vec4 vertexColor;
 
 uniform mat4 view;
 uniform mat4 projection;
@@ -62,13 +63,13 @@ void main()
 
     gl_Position = projection * view * vec4(vertexPosition, 1);
 
-    fragmentColor = vertexColor;
+    vertexColor = inColor;
 
     // Pass along the 'invalid pixel' flag as the alpha channel
     //
     if (vertexPosition.z == 0.0f)
     {
-        fragmentColor.a = 0.0f;
+        vertexColor.a = 0.0f;
     }
 
     if (enableShading)
@@ -122,7 +123,7 @@ void main()
         //
         float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * distance * distance);
 
-        fragmentColor = vec4(attenuation * diffuse * fragmentColor.rgb, fragmentColor.a);
+        vertexColor = vec4(attenuation * diffuse * vertexColor.rgb, vertexColor.a);
     }
 }
 )";
