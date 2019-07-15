@@ -814,6 +814,8 @@ typedef void(k4a_logging_message_cb_t)(void *context,
  */
 typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
 
+
+typedef uint8_t* (k4a_memory_allocate_cb_t)(int size, void** context);
 /**
  *
  * @}

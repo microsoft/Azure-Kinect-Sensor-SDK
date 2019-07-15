@@ -48,10 +48,10 @@ extern "C" {
  */
 K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
 
-/** Sets and clears the callback function to recieve debug messages from the Azure Kinect device.
+/** Sets and clears the callback function to receive debug messages from the Azure Kinect device.
  *
  * \param message_cb
- * The callback function to recieve messages from. Set to NULL to unregister the callback function.
+ * The callback function to receive messages from. Set to NULL to unregister the callback function.
  *
  * \param message_cb_context
  * The callback functions context.
@@ -95,6 +95,9 @@ K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
 K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *message_cb,
                                                       void *message_cb_context,
                                                       k4a_log_level_t min_level);
+
+
+K4A_EXPORT k4a_result_t k4a_set_image_buffer_allocator(k4a_memory_allocate_cb_t allocate, k4a_memory_destroy_cb_t free);
 
 /** Open an Azure Kinect device.
  *

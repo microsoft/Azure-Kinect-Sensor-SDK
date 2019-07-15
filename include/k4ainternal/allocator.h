@@ -60,9 +60,8 @@ void allocator_deinitialize(void);
  * This function should return 0 to indicate the number of outstanding allocations. Consider this the
  * number of leaked allocations.
  */
-uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size, void **context);
-void allocator_free(void *buffer, void *context);
-
+uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size);
+void allocator_free(void *buffer);
 long allocator_test_for_leaks(void);
 
 #ifdef __cplusplus

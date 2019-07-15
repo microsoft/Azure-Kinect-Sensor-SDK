@@ -164,19 +164,12 @@ CFrameContext::~CFrameContext()
     }
 }
 
-typedef struct _mf_buffer_wrapper_t
-{
-    void *allocator_context;
-    CFrameContext *pFrameContext;
-} mf_buffer_wrapper_t;
-
 void FrameDestroyCallback(void *frame, void *context)
 {
     (void)frame;
-    mf_buffer_wrapper_t *wrapper = (mf_buffer_wrapper_t *)context;
-
-    delete wrapper->pFrameContext;
-    allocator_free(wrapper, wrapper->allocator_context);
+    CFrameContext* pFrameContext = (CFrameContext*)context;
+    
+    delete pFrameContext;
 }
 
 CMFCameraReader::CMFCameraReader()
@@ -948,17 +941,6 @@ int CMFCameraReader::GetStride()
 
 k4a_result_t CMFCameraReader::CreateImage(CFrameContext *pFrameContext, k4a_image_t *image)
 {
-    void *context;
-    mf_buffer_wrapper_t *wrapper;
-
-    // We use a wrapper here so that we can keep track of the MF frame buffers in use; ALLOCATION_SOURCE_COLOR will
-    // count outstanding allocations. If too many are used then MF stops receiving images over USB until the captures
-    // are released.
-    wrapper = (mf_buffer_wrapper_t *)allocator_alloc(ALLOCATION_SOURCE_COLOR, sizeof(mf_buffer_wrapper_t), &context);
-
-    wrapper->allocator_context = context;
-    wrapper->pFrameContext = pFrameContext;
-
     return TRACE_CALL(image_create_from_buffer(m_image_format,
                                                m_width_pixels,
                                                m_height_pixels,
@@ -966,7 +948,7 @@ k4a_result_t CMFCameraReader::CreateImage(CFrameContext *pFrameContext, k4a_imag
                                                pFrameContext->GetBuffer(),
                                                pFrameContext->GetFrameSize(),
                                                FrameDestroyCallback,
-                                               wrapper,
+                                               pFrameContext,
                                                image));
 }
 
@@ -974,30 +956,20 @@ k4a_result_t CMFCameraReader::CreateImageCopy(CFrameContext *pFrameContext, k4a_
 {
 
     size_t size = pFrameContext->GetFrameSize();
-    void *context;
+    
     k4a_result_t result;
-    uint8_t *buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, size, &context);
-    result = K4A_RESULT_FROM_BOOL(buffer != NULL);
+    result = TRACE_CALL(image_create(m_image_format,
+                                    m_width_pixels,
+                                    m_height_pixels,
+                                    GetStride(),
+                                    image));
 
     if (K4A_SUCCEEDED(result))
     {
-        memcpy(buffer, pFrameContext->GetBuffer(), size);
+        assert(image_get_size(*image) == size);
+        memcpy(image_get_buffer(*image), pFrameContext->GetBuffer(), size);
+    }
 
-        result = TRACE_CALL(image_create_from_buffer(m_image_format,
-                                                     m_width_pixels,
-                                                     m_height_pixels,
-                                                     GetStride(),
-                                                     buffer,
-                                                     size,
-                                                     allocator_free,
-                                                     context,
-                                                     image));
-    }
-    else
-    {
-        // cleanup if there was an error
-        allocator_free(buffer, context);
-    }
     return result;
 }
 
