@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Azure.Kinect.Sensor;
@@ -21,9 +22,12 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
             Logger.LogMessage += this.Logger_LogMessage;
         }
 
-        private void Logger_LogMessage(object sender, LogMessageData e)
+        private void Logger_LogMessage(object sender, DebugMessageEventArgs e)
         {
-            Console.WriteLine("{0} {1}@{2}: {3}", e.level, e.file, e.line, e.message);
+            if (e.LogLevel < LogLevel.Information)
+            {
+                Console.WriteLine("{0} [{1}] {2}@{3}: {4}", DateTime.Now, e.LogLevel, e.FileName, e.Line, e.Message);
+            }
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -35,7 +39,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                     ColorFormat = ImageFormat.ColorBGRA32,
                     ColorResolution = ColorResolution.r1440p,
                     DepthMode = DepthMode.WFOV_2x2Binned,
-                    SynchronizedImagesOnly = true
+                    SynchronizedImagesOnly = true,
                 });
 
                 int colorWidth = device.GetCalibration().color_camera_calibration.resolution_width;
@@ -46,8 +50,13 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 using (ArrayImage<ushort> transformedDepth = new ArrayImage<ushort>(ImageFormat.Depth16, colorWidth, colorHeight))
                 using (Transformation transform = device.GetCalibration().CreateTransformation())
                 {
+                    Stopwatch sw = new Stopwatch();
+                    int frameCount = 0;
+
+                    sw.Start();
                     while (running)
                     {
+                        //GC.Collect();
                         // Wait for a capture on a thread pool thread
                         using (Capture capture = await Task.Run(() => { return device.GetCapture(); }))
                         {
@@ -80,6 +89,13 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
 
                                 return modifiedColor;
                             })).CreateBitmapSource();
+                        }
+
+                        if (++frameCount >= 30)
+                        {
+                            Console.WriteLine("{0}ms => {1} FPS", sw.Elapsed.TotalMilliseconds, frameCount / sw.Elapsed.TotalSeconds);
+                            sw.Restart();
+                            frameCount = 0;
                         }
                     }
                 }

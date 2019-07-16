@@ -1,61 +1,74 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="Logger.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
-using System.Text;
 using Microsoft.Azure.Kinect.Sensor.Native;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-    public class LogMessageData
-    {
-        public string level { get; set; }
-        public string file { get; set; }
-        public int line { get; set; }
-        public string message { get; set; }
-    }
-
+    /// <summary>
+    /// The Azure Kinect logging system. Enables access to the debug messages from the Azure Kinect device.
+    /// </summary>
     public static class Logger
     {
-        private static EventHandler<LogMessageData> logMessageHandlers;
-        private static NativeMethods.k4a_logging_message_cb_t messageHandler = logHandler;
-        private static TraceSource source = new TraceSource("AzureKinect");
+        private static readonly NativeMethods.k4a_logging_message_cb_t DebugMessageHandler = OnDebugMessage;
+        private static EventHandler<DebugMessageEventArgs> logMessageHandlers;
+        //private static TraceSource source = new TraceSource("AzureKinect");
 
         /// <summary>
-        /// Initializes static members of the <see cref="Logger"/> class.
+        /// Occurs when the Azure Kinect Sensor SDK delivers a debug message.
         /// </summary>
-        //[SwitchAttribute("SourceSwitch", typeof(SourceSwitch))]
-        static Logger()
-        {
-            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_Exit;
-            AppDomain.CurrentDomain.DomainUnload += CurrentDomain_Exit;
-            NativeMethods.k4a_result_t result = NativeMethods.k4a_set_debug_message_handler(messageHandler, IntPtr.Zero, NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_WARNING);
-            if (result != NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED)
-            {
-                throw new Exception();
-            }
-
-            DisplayProperties(source);
-        }
-
-        /// <summary>
-        /// Event that occurs whenever a log message is received from the Azure Kinect Sensor SDK.
-        /// </summary>
-        public static event EventHandler<LogMessageData> LogMessage
+        public static event EventHandler<DebugMessageEventArgs> LogMessage
         {
             add
             {
+                if (!Initialized)
+                {
+                    Logger.Initialize();
+                }
+
                 logMessageHandlers += value;
             }
 
             remove
             {
                 logMessageHandlers -= value;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="Logger"/> class has been initialized and connected to the Azure Kinect Sensor SDK.
+        /// </summary>
+        public static bool Initialized { get; private set; }
+
+        /// <summary>
+        /// Initializes the <see cref="Logger"/> class to begin receiving messages from the Azure Kinect Sensor SDK.
+        /// </summary>
+        public static void Initialize()
+        {
+            lock (DebugMessageHandler)
+            {
+                if (Logger.Initialized)
+                {
+                    return;
+                }
+
+                AppDomain.CurrentDomain.ProcessExit += CurrentDomain_Exit;
+                AppDomain.CurrentDomain.DomainUnload += CurrentDomain_Exit;
+                NativeMethods.k4a_result_t result = NativeMethods.k4a_set_debug_message_handler(DebugMessageHandler, IntPtr.Zero, LogLevel.Trace);
+                if (result != NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED)
+                {
+                    throw new AzureKinectException("Failed to set the Debug Message Handler");
+                }
+
+                //DisplayProperties(source);
+                Logger.Initialized = true;
             }
         }
 
@@ -91,7 +104,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     Console.Write("TraceListener: " + traceListener.Name + "\t");
                     // The following output can be used to update the configuration file.
-                    Console.WriteLine("AssemblyQualifiedName = " + (traceListener.GetType().AssemblyQualifiedName));
+                    Console.WriteLine("AssemblyQualifiedName = " + traceListener.GetType().AssemblyQualifiedName);
                 }
             }
             catch (Exception ex)
@@ -100,11 +113,11 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-        private static void logHandler(IntPtr context, NativeMethods.k4a_log_level_t level, string file, int line, string message)
+        private static void OnDebugMessage(IntPtr context, LogLevel level, string file, int line, string message)
         {
-            LogMessageData data = new LogMessageData() { level = level.ToString(), file = file, line = line, message = message };
+            DebugMessageEventArgs data = new DebugMessageEventArgs() { LogLevel = level, FileName = file, Line = line, Message = message };
 
-            EventHandler<LogMessageData> eventhandler = logMessageHandlers;
+            EventHandler<DebugMessageEventArgs> eventhandler = logMessageHandlers;
             if (eventhandler != null)
             {
                 eventhandler(null, data);
@@ -116,43 +129,44 @@ namespace Microsoft.Azure.Kinect.Sensor
             //source.TraceEvent(System.Diagnostics.TraceEventType.Error, )
             //    source.TraceData(TraceEventType.Transfer, )
 
-            TraceEventType traceEventType;
-            switch (level)
-            {
-                case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_CRITICAL:
-                    traceEventType = TraceEventType.Critical;
-                    break;
+            //TraceEventType traceEventType;
+            //switch (level)
+            //{
+            //    case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_CRITICAL:
+            //        traceEventType = TraceEventType.Critical;
+            //        break;
 
-                case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_ERROR:
-                    traceEventType = TraceEventType.Error;
-                    break;
+            //    case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_ERROR:
+            //        traceEventType = TraceEventType.Error;
+            //        break;
 
-                case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_WARNING:
-                    traceEventType = TraceEventType.Warning;
-                    break;
+            //    case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_WARNING:
+            //        traceEventType = TraceEventType.Warning;
+            //        break;
 
-                case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_INFO:
-                    traceEventType = TraceEventType.Information;
-                    break;
+            //    case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_INFO:
+            //        traceEventType = TraceEventType.Information;
+            //        break;
 
-                case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_TRACE:
-                    traceEventType = TraceEventType.Verbose;
-                    break;
+            //    case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_TRACE:
+            //        traceEventType = TraceEventType.Verbose;
+            //        break;
 
-                case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_OFF:
-                default:
-                    throw new AzureKinectException("Unexpected log level.");
-            }
+            //    case NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_OFF:
+            //    default:
+            //        throw new AzureKinectException("Unexpected log level.");
+            //}
 
-            source.TraceEvent(traceEventType, 1, message);
+            //// TODO: How do we want to format the trace event?
+            //source.TraceEvent(traceEventType, 1, message);
         }
 
         private static void CurrentDomain_Exit(object sender, EventArgs e)
         {
-            NativeMethods.k4a_result_t result = NativeMethods.k4a_set_debug_message_handler(null, IntPtr.Zero, NativeMethods.k4a_log_level_t.K4A_LOG_LEVEL_OFF);
+            NativeMethods.k4a_result_t result = NativeMethods.k4a_set_debug_message_handler(null, IntPtr.Zero, LogLevel.Off);
             if (result != NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED)
             {
-                Debug.WriteLine("Failed to close the debug message handler");
+                Trace.WriteLine("Failed to close the debug message handler");
             }
         }
     }
