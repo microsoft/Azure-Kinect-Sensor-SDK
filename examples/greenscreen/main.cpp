@@ -1,11 +1,13 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include <k4a/k4a.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
 #include <opencv2/calib3d.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 using std::cout;
 using std::vector;
@@ -28,6 +30,24 @@ cv::Mat k4a_depth_to_opencv(const k4a::image &im)
                    im.get_stride_bytes());
 }
 
+cv::Mat k4a_calibration_to_depth_camera_matrix(const k4a::calibration &cal)
+{
+    const k4a_calibration_intrinsic_parameters_t::_param &i = cal.depth_camera_calibration.intrinsics.parameters.param;
+    cv::Mat camera_matrix = cv::Mat::zeros(3, 3, CV_64F);
+    camera_matrix.at<double>(0, 0) = i.fx;
+    camera_matrix.at<double>(1, 1) = i.fx;
+    camera_matrix.at<double>(0, 2) = i.cx;
+    camera_matrix.at<double>(1, 2) = i.cy;
+    camera_matrix.at<double>(2, 2) = 1;
+    return camera_matrix;
+}
+
+vector<double> k4a_calibration_to_depth_camera_dist_coeffs(const k4a::calibration &cal)
+{
+    const k4a_calibration_intrinsic_parameters_t::_param &i = cal.depth_camera_calibration.intrinsics.parameters.param;
+    return { i.k1, i.k2, i.p1, i.p2, i.k3, i.k4, i.k5, i.k6 };
+}
+
 int main()
 {
     try
@@ -46,7 +66,7 @@ int main()
         // NOTE: Both cameras must have the same configuration (TODO) what exactly needs to
         k4a_device_configuration_t camera_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        camera_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
+        camera_config.color_resolution = K4A_COLOR_RESOLUTION_720P; // TODO none after calib
         camera_config.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
         camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
         camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE; // TODO SUBORDINATE
@@ -89,7 +109,120 @@ int main()
         }
         devices[0].start_cameras(&configurations[0]);
 
-        // the cameras have been started. Now let's get the images we need.
+        // the cameras have been started. Calibration time!
+        while (true)
+        {
+            vector<k4a::capture> device_captures(devices.size());
+            bool got_captures = true;
+            for (size_t i = 0; i < devices.size(); ++i)
+            {
+                if (!devices[i].get_capture(&device_captures[i], std::chrono::milliseconds{ K4A_WAIT_INFINITE }) ||
+                    !device_captures[i] || !device_captures[i].get_color_image())
+                {
+                    got_captures = false;
+                }
+            }
+
+            if (!got_captures)
+            {
+                cout << "Didn't get the capture and depth image...trying again\n"; // TODO depth?
+                continue;
+            }
+
+            vector<cv::Mat> color_images;
+            color_images.reserve(devices.size());
+            for (const k4a::capture &cap : device_captures)
+            {
+                color_images.emplace_back(k4a_color_to_opencv(cap.get_color_image()));
+            }
+
+            // depths are present on both images. Time to calibrate.
+            size_t board_height = 8;
+            size_t board_width = 6;
+            double board_square_size = .033; // mine was 33 millimeters TODO generalize
+            cv::Size chessboard_pattern(board_height, board_width);
+
+            vector<vector<cv::Point2d>> corners(devices.size());
+            bool found_chessboard = true;
+            for (size_t i = 0; i < color_images.size(); ++i)
+            {
+                found_chessboard = found_chessboard && cv::findChessboardCorners(color_images[i],
+                                                                                 chessboard_pattern,
+                                                                                 corners[i],
+                                                                                 cv::CALIB_CB_ADAPTIVE_THRESH);
+                // TODO get subpixel working
+                // if (found_chessboard)
+                // {
+                //     // Term criteria was taken from OpenCV's website
+                //     cv::cornerSubPix(color_images[i],
+                //                      corners[i],
+                //                      chessboard_pattern,
+                //                      cv::Size(-1, -1),
+                //                      cv::TermCriteria(cv::TermCriteria::EPS | cv::TermCriteria::COUNT, 30, 0.1));
+                // }
+            }
+
+            if (!found_chessboard)
+            {
+                cout << "Couldn't find the chessboard corners...trying again\n";
+                continue;
+            }
+
+            // TODO print out seeing the image
+            for (size_t i = 0; i < color_images.size(); ++i)
+            {
+                cv::drawChessboardCorners(color_images[i], chessboard_pattern, corners[i], found_chessboard);
+                cv::imshow(std::string("Chessboard view from camera ") + std::to_string(i), color_images[i]);
+                cv::waitKey(0);
+            }
+
+            // now construct the points needed to calibrate
+            vector<cv::Point3d> chessboard_corners_3d;
+            // the points exist on a plane
+            for (size_t h = 0; h < board_height; ++h)
+            {
+                for (size_t w = 0; w < board_width; ++w)
+                {
+                    chessboard_corners_3d.emplace_back(h * board_square_size, w * board_square_size, 0.0);
+                }
+            }
+
+            // We need camera matrices and distortion coefficients for each of the devices
+
+            // get a rotation and translation between the master and subordinate camera
+            const vector<cv::Point2d> &master_corners_2d = corners.front();
+            const vector<cv::Point2d> &subordinate_corners_2d = corners.back();
+            const k4a::calibration &master_calib =
+                devices.front().get_calibration(configurations.front().depth_mode,
+                                                configurations.front().color_resolution);
+            const k4a::calibration &sub_calib = devices.back().get_calibration(configurations.back().depth_mode,
+                                                                               configurations.back().color_resolution);
+
+            // TODO depth, not color!
+
+            cv::Mat R, F, E;
+
+            cv::Vec3d T;
+            cv::stereoCalibrate(chessboard_corners_3d,
+                                master_corners_2d,
+                                subordinate_corners_2d,
+                                k4a_calibration_to_depth_camera_matrix(master_calib),
+                                k4a_calibration_to_depth_camera_dist_coeffs(master_calib),
+                                k4a_calibration_to_depth_camera_matrix(sub_calib),
+                                k4a_calibration_to_depth_camera_dist_coeffs(sub_calib),
+                                color_images[0].size(),
+                                R,
+                                T,
+                                E,
+                                F);
+
+            cout << R << std::endl;
+            cout << T << std::endl;
+
+            break;
+        }
+
+        // Now let's get the images we need.
 
         while (true)
         {
@@ -174,8 +307,8 @@ int main()
                             mask);
             master_opencv_color_image.copyTo(output_image, mask);
             // please?
-            cv::imshow("Test", output_image);
-            cv::waitKey(1);
+            // cv::imshow("Test", output_image);
+            // cv::waitKey(1);
         }
     }
     catch (std::exception &e)
