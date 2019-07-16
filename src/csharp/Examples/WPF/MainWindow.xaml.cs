@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                             {
                                 // Transform the depth image
                                 transform.DepthImageToColorCamera(capture, transformedDepth);
-   
+
                                 Span<ushort> depthBuffer = MemoryMarshal.Cast<byte, ushort>(transformedDepth.Memory.Span);
                                 Span<BGRA> colorBuffer = MemoryMarshal.Cast<byte, BGRA>(capture.Color.Memory.Span);
 

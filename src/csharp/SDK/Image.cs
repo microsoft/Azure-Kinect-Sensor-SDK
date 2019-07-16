@@ -65,20 +65,17 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (disposedValue)
                     throw new ObjectDisposedException(nameof(Image));
 
-                byte[] copy = new byte[this.Size];
-                using (MemoryHandle pin = this.Pin())
-                {
-                    System.Runtime.InteropServices.Marshal.Copy((IntPtr)pin.Pointer, copy, 0, checked((int)this.Size));
-                }
-                return copy;
+                return this.Memory.ToArray();
             }
         }
 
 
         private byte[] bufferCopy = null;
+        private AzureKinectMemoryManager memoryManager = null;
+
         private IntPtr _Buffer = IntPtr.Zero;
 
-        private unsafe void* NativeBuffer
+        public unsafe void* Buffer
         {
             get
             {
@@ -105,12 +102,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
             }
         }
-
-        public MemoryHandle Pin()
-        {
-            return this.Memory.Pin();
-        }
-
+        
         public unsafe Memory<byte> Memory
         {
             get
@@ -125,8 +117,12 @@ namespace Microsoft.Azure.Kinect.Sensor
                     {
                         return new Memory<byte>(bufferCopy);
                     }
+                    if (memoryManager != null)
+                    {
+                        return memoryManager.Memory;
+                    }
 
-                    IntPtr bufferAddress = (IntPtr)this.NativeBuffer;
+                    IntPtr bufferAddress = (IntPtr)this.Buffer;
 
                     Memory<byte> memory = this.Allocator.GetMemory(bufferAddress, this.Size);
                     if (!memory.IsEmpty)
@@ -135,12 +131,21 @@ namespace Microsoft.Azure.Kinect.Sensor
                     }
 
                     // The underlying buffer is not in managed memory
-                    // Create a copy
-                    this.bufferCopy = new byte[this.Size];
-                    
-                    System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.NativeBuffer, this.bufferCopy, 0, checked((int)this.Size));
 
-                    return new Memory<byte>(bufferCopy);
+                    if (Allocator.CopyNativeBuffers)
+                    {
+                        // Create a copy
+                        this.bufferCopy = new byte[this.Size];
+
+                        System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, this.bufferCopy, 0, checked((int)this.Size));
+
+                        return new Memory<byte>(bufferCopy);
+                    }
+                    else
+                    {
+                        memoryManager = new AzureKinectMemoryManager(this);
+                        return memoryManager.Memory;
+                    }
                 }
             }
         }
@@ -156,7 +161,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     unsafe
                     {
-                        System.Runtime.InteropServices.Marshal.Copy(this.bufferCopy, 0, (IntPtr)this.NativeBuffer, (int)this.Size);
+                        System.Runtime.InteropServices.Marshal.Copy(this.bufferCopy, 0, (IntPtr)this.Buffer, (int)this.Size);
                     }
                 }
             }
@@ -173,7 +178,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     unsafe
                     {
-                        System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.NativeBuffer, this.bufferCopy, 0, checked((int)this.Size));
+                        System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, this.bufferCopy, 0, checked((int)this.Size));
                     }
                 }
             }
@@ -414,24 +419,22 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     if (disposing)
                     {
+                        this.FlushMemory();
+
+                        //((IDisposable)this.memoryManager)?.Dispose();
+
                         // TODO: dispose managed state (managed objects).
                         Allocator.Singleton.Unhook(this);
-                    }
 
-                    handle.Close();
-                    handle = null;
+                        handle.Close();
+                        handle = null;
+                    }
 
                     disposedValue = true;
                 }
             }
         }
 
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~Image()
-        // {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
 
         // This code added to correctly implement the disposable pattern.
         public void Dispose()

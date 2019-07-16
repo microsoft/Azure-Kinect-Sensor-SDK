@@ -17,21 +17,24 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public static Allocator Singleton { get; } = new Allocator();
 
-        private readonly HashSet<IDisposable> disposables = new HashSet<IDisposable>();
+        private readonly HashSet<WeakReference<IDisposable>> disposables = new HashSet<WeakReference<IDisposable>>();
 
-        public bool UseManagedAllocator { get; set; } = true;
+        public bool UseManagedAllocator { get; set; } = false;
+
+        public bool CopyNativeBuffers { get; set; } = false;
         
         public void Hook(IDisposable disposable)
         {
             lock (this)
             {
-                this.disposables.Add(disposable);
+                this.disposables.Add(new WeakReference<IDisposable>(disposable));
 
                 if (this.hooked)
                 {
                     return;
                 }
 
+                
                 this.allocateDelegate = new NativeMethods.k4a_memory_allocate_cb_t(this.AllocateFunction);
                 this.freeDelegate = new NativeMethods.k4a_memory_destroy_cb_t(this.FreeFunction);
 
@@ -51,7 +54,13 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             lock (this)
             {
-                disposables.Remove(disposable);
+                disposables.RemoveWhere((r) => 
+                    {
+                        IDisposable target;
+                        bool alive = r.TryGetTarget(out target);
+
+                        return alive || target == disposable;
+                });
             }
         }
 
@@ -152,10 +161,16 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             lock (this)
             {
-                foreach (IDisposable i in disposables)
+                
+                foreach (var r in disposables)
                 {
-                    i.Dispose();
+                    IDisposable disposable;
+                    if (r.TryGetTarget(out disposable))
+                    {
+                        disposable.Dispose();
+                    }
                 }
+                disposables.Clear();
 
                 if (this.allocations.Count > 0)
                 {
@@ -163,7 +178,6 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
             }
         }
-
 
         private class AllocationContext
         {
@@ -176,4 +190,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             public NativeMethods.k4a_memory_destroy_cb_t CallbackDelegate { get; set; }
         }
     }
+
+
 }

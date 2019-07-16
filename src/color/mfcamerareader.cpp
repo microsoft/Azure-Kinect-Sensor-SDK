@@ -179,6 +179,7 @@ CMFCameraReader::CMFCameraReader()
     {
         m_use_mf_buffer = false;
     }
+    m_use_mf_buffer = false;
 }
 
 CMFCameraReader::~CMFCameraReader()

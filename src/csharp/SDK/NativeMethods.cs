@@ -60,14 +60,24 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
             }
 
+            private k4a_image_t(k4a_image_t original) : base(true)
+            {
+                NativeMethods.k4a_image_reference(original.handle);
+                this.handle = original.handle;
+            }
+
             public k4a_image_t DuplicateReference()
             {
+                return new k4a_image_t(this);
+                /*
                 k4a_image_t duplicate = new k4a_image_t();
 
-                NativeMethods.k4a_image_reference(handle);
+                
                 duplicate.handle = this.handle;
                 return duplicate;
+                */
             }
+
             protected override bool ReleaseHandle()
             {
                 NativeMethods.k4a_image_release(handle);

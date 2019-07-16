@@ -263,7 +263,6 @@ void k4a_device_close(k4a_device_t device_handle)
     }
     k4a_device_t_destroy(device_handle);
     allocator_deinitialize();
-    assert(allocator_test_for_leaks() == 0);
 }
 
 k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,

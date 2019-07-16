@@ -36,7 +36,7 @@ namespace Microsoft.Azure.Kinect.Sensor.WPF
 
                 unsafe
                 {
-                    using (var pin = reference.Pin())
+                    using (var pin = reference.Memory.Pin())
                     {
                         return BitmapSource.Create(
                                     reference.WidthPixels,
