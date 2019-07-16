@@ -11,8 +11,11 @@ namespace Microsoft.Azure.Kinect.Sensor
     {
         private Device(NativeMethods.k4a_device_t handle)
         {
+            Allocator.Singleton.Hook(this);
+
             this.handle = handle;
         }
+
         public static int GetInstalledCount()
         {
             return (int)NativeMethods.k4a_device_get_installed_count();
@@ -319,6 +322,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
+                    Allocator.Singleton.Unhook(this);
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

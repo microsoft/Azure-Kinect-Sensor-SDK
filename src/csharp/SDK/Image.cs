@@ -1,21 +1,28 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Buffers;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-
-    public class ArrayImage<T> : Image where T : unmanaged
+    public class Image : IDisposable
     {
+        Allocator Allocator = Allocator.Singleton;
 
-        private class CallbackContext
+        public Image(ImageFormat format, int width_pixels, int height_pixels, int stride_bytes)
         {
-            public GCHandle BufferPin { get; set; }
-            public NativeMethods.k4a_memory_destroy_cb_t CallbackDelegate { get; set; }
+            Allocator.Singleton.Hook(this);
+
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
+                width_pixels,
+                height_pixels,
+                stride_bytes,
+                out this.handle));
         }
 
-        private static NativeMethods.k4a_image_t CreateHandle(ImageFormat format, int width_pixels, int height_pixels, out T[] data)
+        public Image(ImageFormat format, int width_pixels, int height_pixels)
         {
             int pixelSize;
             switch (format)
@@ -28,73 +35,13 @@ namespace Microsoft.Azure.Kinect.Sensor
                     pixelSize = 2;
                     break;
                 default:
-                    throw new AzureKinectException($"Unable to allocate {typeof(T).Name} array for format {format}");
+                    throw new AzureKinectException($"Unable to allocate array for format {format}");
             }
 
-            int stride_bytes = pixelSize * width_pixels;
+            int stride_bytes = width_pixels * pixelSize;
 
-            if (stride_bytes % Marshal.SizeOf(typeof(T)) != 0)
-            {
-                throw new AzureKinectException($"{typeof(T).Name} does not fit evenly on a line of {width_pixels} pixels of type {format}");
-            }
+            Allocator.Singleton.Hook(this);
 
-            // Allocate the buffer
-            data = new T[height_pixels * stride_bytes / Marshal.SizeOf(typeof(T))];
-
-            CallbackContext context = new CallbackContext()
-            {
-                BufferPin = GCHandle.Alloc(data, GCHandleType.Pinned),
-                CallbackDelegate = new NativeMethods.k4a_memory_destroy_cb_t(MemoryDestroyCallback)
-            };
-
-            GCHandle ContextPin = GCHandle.Alloc(context);
-            try
-            {
-                int size = height_pixels * stride_bytes;
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create_from_buffer(format,
-                    width_pixels,
-                    height_pixels,
-                    stride_bytes,
-                    context.BufferPin.AddrOfPinnedObject(),
-                    (UIntPtr)size,
-                    context.CallbackDelegate,
-                    (IntPtr)ContextPin,
-                    out NativeMethods.k4a_image_t handle
-                    ));
-
-                return handle;
-            }
-            catch
-            {
-                context?.BufferPin.Free();
-                ContextPin.Free();
-                
-                throw;
-            }
-        }
-
-
-        public ArrayImage(ImageFormat format, int width_pixels, int height_pixels) :
-            base(CreateHandle(format, width_pixels, height_pixels, out T[] data))
-        {
-            Buffer = data;
-        }
-
-        public T[] Buffer { get; private set; }
-
-        private static void MemoryDestroyCallback(IntPtr buffer, IntPtr context)
-        {
-            GCHandle contextPin = (GCHandle)context;
-            CallbackContext ctx = (CallbackContext)contextPin.Target;
-            ctx.BufferPin.Free();
-            contextPin.Free();
-        }
-    }
-
-    public class Image : IDisposable
-    {
-        public Image(ImageFormat format, int width_pixels, int height_pixels, int stride_bytes)
-        {
             AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
                 width_pixels,
                 height_pixels,
@@ -102,13 +49,14 @@ namespace Microsoft.Azure.Kinect.Sensor
                 out this.handle));
         }
 
-
-        internal Image(NativeMethods.k4a_image_t handle)
+        internal Image(NativeMethods.k4a_image_t handle, Image clone = null)
         {
             this.handle = handle;
+            if (clone != null)
+            {
+                this.bufferCopy = clone.bufferCopy;
+            }
         }
-
-        
 
         public unsafe byte[] GetBufferCopy()
         {
@@ -118,158 +66,19 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Image));
 
                 byte[] copy = new byte[this.Size];
-                System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, copy, 0, checked((int)this.Size));
+                using (MemoryHandle pin = this.Pin())
+                {
+                    System.Runtime.InteropServices.Marshal.Copy((IntPtr)pin.Pointer, copy, 0, checked((int)this.Size));
+                }
                 return copy;
             }
         }
 
-        public void CopyBytesTo(byte[] destination, int destinationOffset, int sourceOffset, int count)
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
 
-                if (destination == null)
-                    throw new ArgumentNullException(nameof(destination));
-                if (destinationOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(destinationOffset));
-                if (sourceOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(sourceOffset));
-                if (count < 0)
-                    throw new ArgumentOutOfRangeException(nameof(count));
-                if (destination.Length < checked(destinationOffset + count))
-                    throw new ArgumentException("Destination buffer not long enough", nameof(destination));
-                if (this.Size < checked((long)(sourceOffset + count)))
-                    throw new ArgumentException("Source buffer not long enough");
-
-                unsafe
-                {
-                    System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, destination, destinationOffset, count);
-                }
-            }
-        }
-
-        public void CopyTo<T>(T[] destination, int destinationOffset, int sourceOffsetElements, int countElements) where T : unmanaged
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                unsafe
-                {
-                    int elementSize = sizeof(T);
-
-                    if (destination == null)
-                        throw new ArgumentNullException(nameof(destination));
-                    if (destinationOffset < 0)
-                        throw new ArgumentOutOfRangeException(nameof(destinationOffset));
-                    if (sourceOffsetElements < 0)
-                        throw new ArgumentOutOfRangeException(nameof(sourceOffsetElements));
-                    if (countElements < 0)
-                        throw new ArgumentOutOfRangeException(nameof(countElements));
-                    if (destination.Length < checked(destinationOffset + countElements))
-                        throw new ArgumentException("Destination buffer not long enough", nameof(destination));
-                    if (this.Size < checked((long)((sourceOffsetElements + countElements) * elementSize))) 
-                        throw new ArgumentException("Source buffer not long enough");
-
-                    fixed(T* destinationPointer = &destination[destinationOffset])
-                    {
-                        this.CopyBytesTo(destinationPointer, 
-                            (destination.Length - destinationOffset) * elementSize, 
-                            0, sourceOffsetElements * elementSize, 
-                            countElements * elementSize);
-                    }
-
-                    //System.Runtime.InteropServices.Marshal.Copy(UnmanagedBufferPointer, destination, destinationOffset, count);
-                }
-            }
-        }
-
-        public void CopyBytesTo(Image destination, int destinationOffset, int sourceOffset, int count)
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                // Take a new reference on the destinaion image to ensure that if the destinaion object
-                // is disposed by another thread, the underlying native memory cannot be freed
-                using (Image referenceDestination= destination.Reference())
-                {
-                    unsafe
-                    {
-                        void* destinationPointer = referenceDestination.Buffer;
-
-                        this.CopyBytesTo(
-                            destinationPointer,
-                            checked((int)referenceDestination.Size),
-                            destinationOffset,
-                            sourceOffset,
-                            count);
-                    }
-                }
-            }
-        }
-
-        public void CopyBytesFrom(byte[] source, int sourceOffset, int destinationOffset, int count)
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                if (source == null)
-                    throw new ArgumentNullException(nameof(source));
-                if (sourceOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(sourceOffset));
-                if (destinationOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(destinationOffset));
-                if (count < 0)
-                    throw new ArgumentOutOfRangeException(nameof(count));
-                if (source.Length < checked(sourceOffset + count))
-                    throw new ArgumentException("Source buffer not long enough", nameof(source));
-                if (this.Size < checked((long)(destinationOffset + count)))
-                    throw new ArgumentException("Destination buffer not long enough");
-
-                unsafe
-                {
-                    System.Runtime.InteropServices.Marshal.Copy(source, sourceOffset, (IntPtr)this.Buffer, count);
-                }
-            }
-        }
-
-        public void CopyBytesFrom(Image source, int sourceOffset, int destinationOffset, int count)
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                // Take a new reference on the source Image to ensure that if the source object
-                // is disposed by another thread, the underlying native memory cannot be freed
-                using (Image sourceReference = source.Reference())
-                {
-                    unsafe
-                    {
-                        void* sourcePointer = sourceReference.Buffer;
-
-                        this.CopyBytesFrom(
-                            sourcePointer,
-                            checked((int)sourceReference.Size),
-                            sourceOffset,
-                            destinationOffset,
-                            count);
-                    }
-                }
-            }
-        }
-
+        private byte[] bufferCopy = null;
         private IntPtr _Buffer = IntPtr.Zero;
 
-        
-        public unsafe void* Buffer
+        private unsafe void* NativeBuffer
         {
             get
             {
@@ -297,53 +106,75 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-        protected unsafe void CopyBytesTo(void* destination, int destinationLength, int destinationOffset, int sourceOffset, int count)
+        public MemoryHandle Pin()
         {
-            lock (this)
+            return this.Memory.Pin();
+        }
+
+        public unsafe Memory<byte> Memory
+        {
+            get
             {
-                // We don't need to check to see if we are disposed since the call to UnmanagedBufferPointer will 
-                // perform that check
+                lock (this)
+                {
+                
+                    if (disposedValue)
+                        throw new ObjectDisposedException(nameof(Image));
 
-                if (destination == null)
-                    throw new ArgumentNullException(nameof(destination));
-                if (destinationOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(destination));
-                if (sourceOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(sourceOffset));
-                if (count < 0)
-                    throw new ArgumentOutOfRangeException(nameof(count));
-                if (destinationLength < checked(destinationOffset + count))
-                    throw new ArgumentException("Destination buffer not long enough", nameof(destination));
-                if (this.Size < checked((long)(sourceOffset + count)))
-                    throw new ArgumentException("Source buffer not long enough");
+                    if (bufferCopy != null)
+                    {
+                        return new Memory<byte>(bufferCopy);
+                    }
 
-                System.Buffer.MemoryCopy(this.Buffer, destination, destinationLength, count);
+                    IntPtr bufferAddress = (IntPtr)this.NativeBuffer;
+
+                    Memory<byte> memory = this.Allocator.GetMemory(bufferAddress, this.Size);
+                    if (!memory.IsEmpty)
+                    {
+                        return memory;
+                    }
+
+                    // The underlying buffer is not in managed memory
+                    // Create a copy
+                    this.bufferCopy = new byte[this.Size];
+                    
+                    System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.NativeBuffer, this.bufferCopy, 0, checked((int)this.Size));
+
+                    return new Memory<byte>(bufferCopy);
+                }
             }
         }
 
-        protected unsafe void CopyBytesFrom(void* source, int sourceLength, int sourceOffset, int destinationOffset, int count)
+        internal void FlushMemory()
         {
             lock (this)
             {
-                // We don't need to check to see if we are disposed since the call to this.UnsafeBufferPointer will 
-                // perform that check
+                if (disposedValue)
+                    throw new ObjectDisposedException(nameof(Image));
 
-                if (source == null)
-                    throw new ArgumentNullException(nameof(source));
-                if (sourceOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(sourceOffset));
-                if (destinationOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(destinationOffset));
-                if (count < 0)
-                    throw new ArgumentOutOfRangeException(nameof(count));
-                if (sourceLength < checked(sourceOffset + count))
-                    throw new ArgumentException("Source buffer not long enough", nameof(source));
-                if (this.Size < checked((long)(destinationOffset + count)))
-                    throw new ArgumentException("Destination buffer not long enough");
-
-                unsafe
+                if (this.bufferCopy != null)
                 {
-                    System.Buffer.MemoryCopy((void*)source, (void*)this.Buffer, this.Size, (long)count);
+                    unsafe
+                    {
+                        System.Runtime.InteropServices.Marshal.Copy(this.bufferCopy, 0, (IntPtr)this.NativeBuffer, (int)this.Size);
+                    }
+                }
+            }
+        }
+
+        internal void InvalidateMemory()
+        {
+            lock (this)
+            {
+                if (disposedValue)
+                    throw new ObjectDisposedException(nameof(Image));
+
+                if (this.bufferCopy != null)
+                {
+                    unsafe
+                    {
+                        System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.NativeBuffer, this.bufferCopy, 0, checked((int)this.Size));
+                    }
                 }
             }
         }
@@ -568,7 +399,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (disposedValue)
                     throw new ObjectDisposedException(nameof(Image));
 
-                return new Image(handle.DuplicateReference());
+                return new Image(handle.DuplicateReference(), this);
             }
         }
 
@@ -584,6 +415,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     if (disposing)
                     {
                         // TODO: dispose managed state (managed objects).
+                        Allocator.Singleton.Unhook(this);
                     }
 
                     handle.Close();

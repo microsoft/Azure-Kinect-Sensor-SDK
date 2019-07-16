@@ -85,9 +85,6 @@ k4a_result_t allocator_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memo
  * \param alloc_size
  * size of the memory to allocate
  *
- * \param context [OUT]
- * context to go with the allocation be used when freed
- *
  * This call only cleans up the allocator handle.
  * This function should not be called until all outstanding \ref k4a_capture_t objects are freed.
  *

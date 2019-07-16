@@ -139,6 +139,9 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size)
     RETURN_VALUE_IF_ARG(NULL, source < ALLOCATION_SOURCE_USER || source > ALLOCATION_SOURCE_USB_IMU);
     RETURN_VALUE_IF_ARG(NULL, alloc_size == 0);
 
+    size_t required_bytes = alloc_size + sizeof(allocation_context_t);
+    RETURN_VALUE_IF_ARG(NULL, required_bytes > INT32_MAX);
+
     volatile long *ref = NULL;
     switch (source)
     {
@@ -170,7 +173,8 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size)
     rwlock_acquire_read(&g_allocator->lock);
     
     void* user_context;
-    allocation_context_t* allocation_context = (allocation_context_t*)g_allocator->alloc(alloc_size + sizeof(allocation_context_t), &user_context);
+    
+    allocation_context_t* allocation_context = (allocation_context_t*)g_allocator->alloc((int)required_bytes, &user_context);
 
     allocation_context->source = source;
     allocation_context->free = g_allocator->free;

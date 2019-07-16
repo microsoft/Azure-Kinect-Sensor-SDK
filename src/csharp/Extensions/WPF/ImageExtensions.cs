@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Diagnostics;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -35,16 +36,19 @@ namespace Microsoft.Azure.Kinect.Sensor.WPF
 
                 unsafe
                 {
-                    return BitmapSource.Create(
-                                reference.WidthPixels,
-                                reference.HeightPixels,
-                                dpiX,
-                                dpiY,
-                                pixelFormat,
-                                /* palette: */ null,
-                                (IntPtr)reference.Buffer,
-                                checked((int)reference.Size),
-                                reference.StrideBytes);
+                    using (var pin = reference.Pin())
+                    {
+                        return BitmapSource.Create(
+                                    reference.WidthPixels,
+                                    reference.HeightPixels,
+                                    dpiX,
+                                    dpiY,
+                                    pixelFormat,
+                                    /* palette: */ null,
+                                    (IntPtr)pin.Pointer,
+                                    checked((int)reference.Size),
+                                    reference.StrideBytes);
+                    }
                 }
             }
         }
