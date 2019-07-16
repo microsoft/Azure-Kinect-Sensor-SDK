@@ -58,11 +58,10 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 {
                     Stopwatch sw = new Stopwatch();
                     int frameCount = 0;
-
                     sw.Start();
-                    while (running)
+
+                    while (this.running)
                     {
-                        //GC.Collect();
                         // Wait for a capture on a thread pool thread
                         using (Capture capture = await Task.Run(() => { return device.GetCapture(); }))
                         {
