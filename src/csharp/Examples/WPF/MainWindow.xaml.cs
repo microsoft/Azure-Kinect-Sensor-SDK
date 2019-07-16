@@ -1,24 +1,30 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="MainWindow.xaml.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
-using Microsoft.Azure.Kinect.Sensor;
 using Microsoft.Azure.Kinect.Sensor.WPF;
 
 namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow.xaml.
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool running = true;
+        private bool running = true;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
             Logger.LogMessage += this.Logger_LogMessage;
         }
 
@@ -104,6 +110,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
 
         private void Window_Closed(object sender, System.EventArgs e)
         {
+            Logger.LogMessage -= this.Logger_LogMessage;
         }
     }
 }
