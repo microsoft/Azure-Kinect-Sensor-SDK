@@ -159,7 +159,7 @@ k4a_result_t k4a_record_create(const char *path,
             populate_bitmap_info_header(&codec_info, color_width, color_height, device_config.color_format));
 
         context->color_track = add_track(context,
-                                         color_track_name.c_str(),
+                                         K4A_TRACK_NAME_COLOR,
                                          track_video,
                                          "V_MS/VFW/FOURCC",
                                          reinterpret_cast<uint8_t *>(&codec_info),
@@ -195,7 +195,7 @@ k4a_result_t k4a_record_create(const char *path,
                 populate_bitmap_info_header(&codec_info, depth_width, depth_height, K4A_IMAGE_FORMAT_DEPTH16));
 
             context->depth_track = add_track(context,
-                                             depth_track_name.c_str(),
+                                             K4A_TRACK_NAME_DEPTH,
                                              track_video,
                                              "V_MS/VFW/FOURCC",
                                              reinterpret_cast<uint8_t *>(&codec_info),
@@ -225,7 +225,7 @@ k4a_result_t k4a_record_create(const char *path,
         result = TRACE_CALL(populate_bitmap_info_header(&codec_info, depth_width, depth_height, K4A_IMAGE_FORMAT_IR16));
 
         context->ir_track = add_track(context,
-                                      ir_track_name.c_str(),
+                                      K4A_TRACK_NAME_IR,
                                       track_video,
                                       "V_MS/VFW/FOURCC",
                                       reinterpret_cast<uint8_t *>(&codec_info),
@@ -435,7 +435,7 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
         return K4A_RESULT_FAILED;
     }
 
-    context->imu_track = add_track(context, imu_track_name.c_str(), track_subtitle, "S_K4A/IMU");
+    context->imu_track = add_track(context, K4A_TRACK_NAME_IMU, track_subtitle, "S_K4A/IMU");
     if (context->imu_track == NULL)
     {
         LOG_ERROR("Failed to add imu track.", 0);

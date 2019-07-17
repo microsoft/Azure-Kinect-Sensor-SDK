@@ -66,6 +66,53 @@ K4A_DECLARE_HANDLE(k4a_playback_data_block_t)
 /**
  * @}
  *
+ * \addtogroup Definitions
+ * @{
+ */
+
+/** Name of the built-in color track used in recordings.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">types.h (include k4arecord/types.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_TRACK_NAME_COLOR "COLOR"
+
+/** Name of the built-in depth track used in recordings.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">types.h (include k4arecord/types.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_TRACK_NAME_DEPTH "DEPTH"
+
+/** Name of the built-in IR track used in recordings.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">types.h (include k4arecord/types.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_TRACK_NAME_IR "IR"
+
+/** Name of the built-in imu track used in recordings.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">types.h (include k4arecord/types.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_TRACK_NAME_IMU "IMU"
+
+/**
+ * @}
+ *
  * \addtogroup Enumerations
  * @{
  */
