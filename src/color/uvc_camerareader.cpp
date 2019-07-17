@@ -909,10 +909,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
             res = uvc_set_exposure_abs(m_pDeviceHandle, MapK4aExposureToLinux(newValue));
             if (res < 0)
             {
-                LOG_ERROR("Failed to set exposure time abs: (%d)%s %d",
-                          res,
-                          uvc_strerror(res),
-                          MapK4aExposureToLinux(newValue));
+                LOG_ERROR("Failed to set exposure time abs: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
         }

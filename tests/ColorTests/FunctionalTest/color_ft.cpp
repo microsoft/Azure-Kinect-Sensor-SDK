@@ -750,12 +750,10 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
     {
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   k4a_device_set_color_control(m_device, command, K4A_COLOR_CONTROL_MODE_AUTO, 0));
-        std::cout << "Mode set to Auto\n";
     }
     else
     {
         ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_set_color_control(m_device, command, K4A_COLOR_CONTROL_MODE_AUTO, 0));
-        std::cout << "Mode set to Auto: confirmed it can't be set to auto.\n";
     }
 
     if (command == K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE)
@@ -766,7 +764,7 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
         for (uint32_t x = 0; x < COUNTOF(device_exposure_mapping); x++)
         {
             int32_t threshold = b_sixty_hertz ? device_exposure_mapping[x].exposure_mapped_60Hz_usec :
-                                                device_exposure_mapping[x].exposure_mapped_60Hz_usec;
+                                                device_exposure_mapping[x].exposure_mapped_50Hz_usec;
 
             // For this test we test the mapping value transitions; 1 below, 1 above, and the exact value.
             int32_t testValue = threshold - 1;
