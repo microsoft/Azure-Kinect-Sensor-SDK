@@ -19,7 +19,6 @@ using namespace LIBMATROSKA_NAMESPACE;
 
 namespace k4arecord
 {
-
 std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlElement *parent)
 {
     try
@@ -644,14 +643,16 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             context->record_config.depth_delay_off_color_usec = (int32_t)(depth_delay_ns / 1000);
 
             // Only set positive delays so that we don't wrap around near 0.
-            if (depth_delay_ns > 0)
+            if (depth_delay_ns > 0 && context->color_track)
             {
                 context->color_track->sync_delay_ns = (uint64_t)depth_delay_ns;
             }
             else if (depth_delay_ns < 0)
             {
-                context->depth_track->sync_delay_ns = (uint64_t)(-depth_delay_ns);
-                context->ir_track->sync_delay_ns = (uint64_t)(-depth_delay_ns);
+                if (context->depth_track)
+                    context->depth_track->sync_delay_ns = (uint64_t)(-depth_delay_ns);
+                if (context->ir_track)
+                    context->ir_track->sync_delay_ns = (uint64_t)(-depth_delay_ns);
             }
         }
         else
@@ -665,9 +666,17 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         context->record_config.depth_delay_off_color_usec = 0;
     }
 
-    if (context->imu_track && context->imu_track->type == track_subtitle)
+    if (context->imu_track)
     {
-        context->record_config.imu_track_enabled = true;
+        if (context->imu_track->type == track_subtitle)
+        {
+            context->record_config.imu_track_enabled = true;
+        }
+        else
+        {
+            LOG_WARNING("IMU track is not correct type, treating as a custom track.", 0);
+            context->imu_track = nullptr;
+        }
     }
 
     // Read wired_sync_mode and subordinate_delay_off_master_usec.
@@ -1889,12 +1898,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, capture_handle == NULL);
 
     track_reader_t *blocks[] = { context->color_track, context->depth_track, context->ir_track };
-    std::shared_ptr<block_info_t> next_blocks[] = { context->color_track ? context->color_track->current_block :
-                                                                           nullptr,
-                                                    context->depth_track ? context->depth_track->current_block :
-                                                                           nullptr,
-                                                    context->ir_track ? context->ir_track->current_block : nullptr };
-    static_assert(arraysize(blocks) == arraysize(next_blocks), "Track / block mapping does not match");
+    std::shared_ptr<block_info_t> next_blocks[arraysize(blocks)];
 
     uint64_t timestamp_start_ns = UINT64_MAX;
     uint64_t timestamp_end_ns = 0;
@@ -1903,12 +1907,12 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     int enabled_tracks = 0;
     for (size_t i = 0; i < arraysize(blocks); i++)
     {
-        if (blocks[i] != NULL)
+        if (blocks[i] != nullptr)
         {
             enabled_tracks++;
 
             // If the current block is NULL, find the next block before/after the seek timestamp.
-            if (next_blocks[i] == nullptr)
+            if (blocks[i]->current_block == nullptr)
             {
                 next_blocks[i] = find_block(context, blocks[i], context->seek_timestamp_ns);
                 if (!next && next_blocks[i])
@@ -1918,7 +1922,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             }
             else
             {
-                next_blocks[i] = next_block(context, next_blocks[i].get(), next);
+                next_blocks[i] = next_block(context, blocks[i]->current_block.get(), next);
             }
             if (next_blocks[i] && next_blocks[i]->block)
             {

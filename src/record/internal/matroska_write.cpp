@@ -588,6 +588,9 @@ KaxAttached *add_attachment(k4a_record_context_t *context,
                             size_t buffer_size)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
+    RETURN_VALUE_IF_ARG(NULL, file_name == NULL);
+    RETURN_VALUE_IF_ARG(NULL, mime_type == NULL);
+    RETURN_VALUE_IF_ARG(NULL, buffer == NULL);
     RETURN_VALUE_IF_ARG(NULL, context->header_written);
 
     auto &attachments = GetChild<KaxAttachments>(*context->file_segment);

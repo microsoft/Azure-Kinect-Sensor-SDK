@@ -165,7 +165,7 @@ k4a_result_t k4a_record_create(const char *path,
                                          "V_MS/VFW/FOURCC",
                                          reinterpret_cast<uint8_t *>(&codec_info),
                                          sizeof(codec_info));
-        if (context->color_track != NULL)
+        if (context->color_track != nullptr)
         {
             set_track_info_video(context->color_track, color_width, color_height, context->camera_fps);
 
@@ -201,7 +201,7 @@ k4a_result_t k4a_record_create(const char *path,
                                              "V_MS/VFW/FOURCC",
                                              reinterpret_cast<uint8_t *>(&codec_info),
                                              sizeof(codec_info));
-            if (context->depth_track != NULL)
+            if (context->depth_track != nullptr)
             {
                 set_track_info_video(context->depth_track, depth_width, depth_height, context->camera_fps);
 
@@ -231,7 +231,7 @@ k4a_result_t k4a_record_create(const char *path,
                                       "V_MS/VFW/FOURCC",
                                       reinterpret_cast<uint8_t *>(&codec_info),
                                       sizeof(codec_info));
-        if (context->ir_track != NULL)
+        if (context->ir_track != nullptr)
         {
             set_track_info_video(context->ir_track, depth_width, depth_height, context->camera_fps);
 
@@ -430,14 +430,14 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
         return K4A_RESULT_FAILED;
     }
 
-    if (context->imu_track != NULL)
+    if (context->imu_track)
     {
         LOG_ERROR("The IMU track has already been added to this recording.", 0);
         return K4A_RESULT_FAILED;
     }
 
     context->imu_track = add_track(context, K4A_TRACK_NAME_IMU, track_subtitle, "S_K4A/IMU");
-    if (context->imu_track == NULL)
+    if (context->imu_track == nullptr)
     {
         LOG_ERROR("Failed to add imu track.", 0);
         return K4A_RESULT_FAILED;
@@ -727,6 +727,8 @@ k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_han
                                                 size_t buffer_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, buffer == NULL);
 
     k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);

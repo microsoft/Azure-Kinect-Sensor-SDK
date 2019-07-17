@@ -83,10 +83,10 @@ typedef struct _k4a_record_context_t
     std::unique_ptr<libebml::EbmlVoid> segment_info_void;
     std::unique_ptr<libebml::EbmlVoid> tags_void;
 
-    track_header_t *color_track;
-    track_header_t *depth_track;
-    track_header_t *ir_track;
-    track_header_t *imu_track;
+    track_header_t *color_track = nullptr;
+    track_header_t *depth_track = nullptr;
+    track_header_t *ir_track = nullptr;
+    track_header_t *imu_track = nullptr;
     std::unordered_map<std::string, track_header_t> tracks;
 
     std::list<cluster_t *> pending_clusters;
