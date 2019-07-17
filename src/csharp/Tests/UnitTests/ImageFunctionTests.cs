@@ -4,6 +4,7 @@ using Microsoft.Azure.Kinect.Sensor.Test.StubGenerator;
 using NUnit.Framework;
 using System;
 using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -35,7 +36,7 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
         }
 
         // Helper function to implement basic create/release behavior
-        private void SetCreateReleaseImplementation()
+        private void SetImageStubImplementation()
         {
             NativeK4a.SetImplementation(@"
 
@@ -79,6 +80,26 @@ uint8_t* k4a_image_get_buffer(k4a_image_t image_handle)
     return (uint8_t*)dummybuffer; 
 }
 
+int k4a_image_get_stride_bytes(k4a_image_t image_handle)
+{
+    STUB_ASSERT(image_handle == (k4a_image_t)0x0D001234);
+
+    return 640*2;
+}
+
+int k4a_image_get_width_pixels(k4a_image_t image_handle)
+{
+    STUB_ASSERT(image_handle == (k4a_image_t)0x0D001234);
+
+    return 640;
+}
+
+int k4a_image_get_height_pixels(k4a_image_t image_handle)
+{
+    STUB_ASSERT(image_handle == (k4a_image_t)0x0D001234);
+
+    return 480;
+}
 
 void k4a_image_reference(k4a_image_t image_handle)
 {
@@ -109,7 +130,7 @@ void k4a_image_release(k4a_image_t image_handle)
         [Test]
         public void ImageGarbageCollection()
         {
-            SetCreateReleaseImplementation();
+            SetImageStubImplementation();
 
             CallCount count = NativeK4a.CountCalls();
 
@@ -156,7 +177,7 @@ void k4a_image_release(k4a_image_t image_handle)
         [Test]
         public void GetBufferCopyTest()
         {
-            SetCreateReleaseImplementation();
+            SetImageStubImplementation();
             
             CallCount count = NativeK4a.CountCalls();
 
@@ -256,7 +277,7 @@ uint8_t* k4a_image_get_buffer(k4a_image_t image_handle)
         [Test]
         public void ManagedAllocatorTest()
         {
-            SetCreateReleaseImplementation();
+            SetImageStubImplementation();
             
             CallCount count = NativeK4a.CountCalls();
 
@@ -291,6 +312,53 @@ uint8_t* k4a_image_get_buffer(k4a_image_t image_handle)
         
             Assert.AreEqual(count.Calls("k4a_image_reference") + 1, count.Calls("k4a_image_release"), "References not zero");
         }
+
+
+        [Test]
+        public void ManagedAllocatorTest2()
+        {
+            SetImageStubImplementation();
+
+            CallCount count = NativeK4a.CountCalls();
+
+            Memory<byte> memory;
+            Span<ushort> pixels;
+            
+            Image image = new Image(ImageFormat.Custom, 640, 480, 640 * 2);
+
+            memory = image.Memory;
+
+            pixels = MemoryMarshal.Cast<byte, ushort>(memory.Span);
+
+            // Re-assign memory
+            // The optimizer seems to only sometimes release the reference on the memory local if it
+            // isn't used again
+            memory = new Memory<byte>(new byte[10]);
+
+            // Verify we can read the memory and it has been initialized to the known values
+            Assert.AreEqual(0, pixels[0]);
+            Assert.AreEqual(1, pixels[1]);
+            Assert.AreEqual(2, pixels[2]);
+
+            GC.Collect(0, GCCollectionMode.Forced, true, true);
+            GC.WaitForPendingFinalizers();
+
+            Debugger.Break();
+
+            // Verify that the image has no references
+            // The native memory is now free to be released
+            Assert.AreEqual(
+                count.Calls("k4a_image_reference") + count.Calls("k4a_image_create"),
+                count.Calls("k4a_image_release"), 
+                "References not zero");
+    
+            // Write to the native memory
+            // (We shouldn't be able to do this since the memory is freed)
+            pixels[0] = 99;
+                
+            Assert.AreNotEqual(99, pixels[0], "Managed code has modified freed memory!");
+        }
+
     }
 
 

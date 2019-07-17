@@ -7,9 +7,69 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-    public class Image : IDisposable
+    public class Image : IMemoryOwner<byte>, IDisposable
     {
+
         Allocator Allocator = Allocator.Singleton;
+
+        /// <summary>
+        /// Gets a Span of all the pixels in the image.
+        /// </summary>
+        /// <typeparam name="PixelT">The type of each pixel.</typeparam>
+        /// <remarks>If the image stride does not evenly align with the number of pixels in each row, this function will throw an exception.</remarks>
+        /// <returns>Span representing the set of pixels in the image.</returns>
+        public Span<PixelT> GetPixels<PixelT>()
+            where PixelT : unmanaged
+        {
+            if (this.StrideBytes != Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels)
+            {
+                throw new AzureKinectException("Pixels not aligned to stride of each line");
+            }
+
+            return MemoryMarshal.Cast<byte, PixelT>(this.Memory.Span.Slice(0, this.WidthPixels * this.HeightPixels * Marshal.SizeOf(typeof(PixelT))));
+        }
+
+        /// <summary>
+        /// Gets a Span of all the pixels on a row of an image.
+        /// </summary>
+        /// <typeparam name="PixelT">The type of each pixel.</typeparam>
+        /// <param name="row">Row of the image to get the pixels for</param>
+        /// <returns>Span representing the set of pixels in the image.</returns>
+        public Span<PixelT> GetPixels<PixelT>(int row)
+            where PixelT : unmanaged
+        {
+            if (row > this.HeightPixels || row < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(row));
+            }
+
+            if (this.StrideBytes < Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels)
+            {
+                throw new AzureKinectException("The image stride is not large enough for pixels of this size");
+            }
+
+            return MemoryMarshal.Cast<byte, PixelT>(this.Memory.Span.Slice(row * this.StrideBytes, Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels));
+        }
+
+        /// <summary>
+        /// Gets a pixel value in the image.
+        /// </summary>
+        /// <typeparam name="PixelT">The type of the pixel.</typeparam>
+        /// <param name="row">The image row.</param>
+        /// <param name="col">The image column.</param>
+        /// <returns>A reference to the pixel at the row and column.</returns>
+        public ref PixelT GetPixel<PixelT>(int row, int col)
+            where PixelT : unmanaged
+        {
+            if (col < 0 || col > this.WidthPixels)
+            {
+                throw new ArgumentOutOfRangeException(nameof(col));
+            }
+
+            Span<PixelT> rowPixels = GetPixels<PixelT>(row);
+
+            return ref rowPixels[col];
+        }
 
         public Image(ImageFormat format, int width_pixels, int height_pixels, int stride_bytes)
         {
@@ -75,6 +135,22 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         private IntPtr _Buffer = IntPtr.Zero;
 
+        /// <summary>
+        /// Returns a native pointer to the underlying memory.
+        /// </summary>
+        /// <remarks>
+        /// This property may only be accessed by unsafe code.
+        ///
+        /// This returns an unsafe pointer to the image's memory. It is important that the
+        /// caller ensures the Image is not Disposed or garbage collected while this pointer is
+        /// in use, since it may become invalid when the Image is disposed or finalized.
+        /// 
+        /// If this method needs to be used in a context where the caller cannot garantee that the
+        /// Image will be disposed by another thread, the caller can call <see cref="Reference"/>
+        /// to create a duplicate reference to the Image which can be disposed separately.
+        /// 
+        /// For safe buffer access <see cref="Memory"/>. 
+        /// </remarks>
         public unsafe void* Buffer
         {
             get
@@ -103,6 +179,17 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
         
+
+        /// <summary>
+        /// Returns a reference to the the underlying memory.
+        /// </summary>
+        /// <remarks>
+        /// This returns an accessor to the Image's memory without making
+        /// a copy.
+        /// 
+        /// Once managed code has accessed the image's memory, the memory
+        /// will be retained until it is garbage collected.
+        /// </remarks>
         public unsafe Memory<byte> Memory
         {
             get
