@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 using System;
 using System.Runtime.InteropServices;
-using Microsoft.Azure.Kinect.Sensor.Native;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -607,7 +606,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            GC.SuppressFinalize(this);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
         }
         #endregion
     }

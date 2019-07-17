@@ -1,10 +1,11 @@
-﻿// <copyright file="AzureKinectException.cs" company="Microsoft">
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectException.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Runtime.Serialization;
-using Microsoft.Azure.Kinect.Sensor.Native;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {

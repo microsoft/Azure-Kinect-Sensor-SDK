@@ -5,9 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
-using System.Collections;
 using System.Diagnostics;
-using Microsoft.Azure.Kinect.Sensor.Native;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {

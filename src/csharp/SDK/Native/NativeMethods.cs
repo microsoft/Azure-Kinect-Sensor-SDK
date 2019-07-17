@@ -8,8 +8,9 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Azure.Kinect.Sensor.Native;
 
-namespace Microsoft.Azure.Kinect.Sensor.Native
+namespace Microsoft.Azure.Kinect.Sensor
 {
 #pragma warning disable IDE1006 // Naming Styles
 
