@@ -376,7 +376,7 @@ TEST_P(throughput_perf, testTest)
                 printf(" %9lld[%6lld][%6lld]",
                        TS_TO_MS(ts),
                        TS_TO_MS(ts - last_color_ts),
-                       k4a_image_get_exposure_usec(image));
+                       (long long int)k4a_image_get_exposure_usec(image));
 
                 // TS should increase
                 EXPECT_GT(ts, last_color_ts);
