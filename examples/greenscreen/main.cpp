@@ -109,6 +109,10 @@ int main()
         }
         devices[0].start_cameras(&configurations[0]);
 
+        // These will hold the rotation and translation we want
+        cv::Mat R;
+        cv::Vec3d T;
+
         // the cameras have been started. Calibration time!
         while (true)
         {
@@ -142,14 +146,20 @@ int main()
             double board_square_size = .033; // mine was 33 millimeters TODO generalize
             cv::Size chessboard_pattern(board_height, board_width);
 
-            vector<vector<cv::Point2d>> corners(devices.size());
+            // indexing: first by camera, then by frame, then by which corner
+            // TODO add more frames?
+            vector<vector<cv::Point2d>> one_initialized_frame(1);
+            vector<vector<vector<cv::Point2d>>> corners(devices.size(), one_initialized_frame);
             bool found_chessboard = true;
             for (size_t i = 0; i < color_images.size(); ++i)
             {
-                found_chessboard = found_chessboard && cv::findChessboardCorners(color_images[i],
-                                                                                 chessboard_pattern,
-                                                                                 corners[i],
-                                                                                 cv::CALIB_CB_ADAPTIVE_THRESH);
+                found_chessboard = found_chessboard &&
+                                   cv::findChessboardCorners(color_images[i],
+                                                             chessboard_pattern,
+                                                             corners[i][0],
+                                                             cv::CALIB_CB_ADAPTIVE_THRESH); // TODO
+                                                                                            // CV_CALIB_CB_FILTER_QUADS
+                found_chessboard = found_chessboard && !corners[i][0].empty();
                 // TODO get subpixel working
                 // if (found_chessboard)
                 // {
@@ -171,50 +181,92 @@ int main()
             // TODO print out seeing the image
             for (size_t i = 0; i < color_images.size(); ++i)
             {
-                cv::drawChessboardCorners(color_images[i], chessboard_pattern, corners[i], found_chessboard);
+                // For some bizarre reason, drawChessboardCorners doesn't like doubles.
+                vector<cv::Point2f> corners_float;
+                corners_float.reserve(corners[i][0].size());
+                for (const cv::Point2d &p : corners[i][0])
+                {
+                    corners_float.emplace_back(cv::Point2f{ static_cast<float>(p.x), static_cast<float>(p.y) });
+                }
+                cv::drawChessboardCorners(color_images[i], chessboard_pattern, corners_float, found_chessboard);
                 cv::imshow(std::string("Chessboard view from camera ") + std::to_string(i), color_images[i]);
                 cv::waitKey(0);
             }
 
             // now construct the points needed to calibrate
-            vector<cv::Point3d> chessboard_corners_3d;
+            // indexed by frame, then by point index
+            // TODO support multiple frames
+            vector<vector<cv::Point3d>> chessboard_corners_3d(1); // start with 1 frame
             // the points exist on a plane
+            cout << "Filling plane details!" << std::endl;
             for (size_t h = 0; h < board_height; ++h)
             {
                 for (size_t w = 0; w < board_width; ++w)
                 {
-                    chessboard_corners_3d.emplace_back(h * board_square_size, w * board_square_size, 0.0);
+                    chessboard_corners_3d[0].emplace_back(
+                        cv::Point3d{ h * board_square_size, w * board_square_size, 0.0 });
+                }
+            }
+
+            // this whole next section is only necessary because collectCalibrationData in OpenCV doesn't work with
+            // doubles
+            vector<vector<cv::Point3f>> chessboard_corners_3d_float(1); // ugh opencv
+            for (const cv::Point3d &p : chessboard_corners_3d[0])
+            {
+                chessboard_corners_3d_float[0].emplace_back(
+                    cv::Point3f{ static_cast<float>(p.x), static_cast<float>(p.y), static_cast<float>(p.z) });
+            }
+            vector<vector<vector<cv::Point2f>>> corners_float; // ugh opencv
+            for (const vector<vector<cv::Point2d>> &p_vec_vec : corners)
+            {
+                corners_float.emplace_back();        // make a vector for this camera's corners
+                corners_float.back().emplace_back(); // make a vector for this camera's corners with 1 frame
+                for (const cv::Point2d &p : p_vec_vec[0])
+                {
+                    corners_float.back()[0].emplace_back(
+                        cv::Point2f{ static_cast<float>(p.x), static_cast<float>(p.y) });
                 }
             }
 
             // We need camera matrices and distortion coefficients for each of the devices
 
             // get a rotation and translation between the master and subordinate camera
-            const vector<cv::Point2d> &master_corners_2d = corners.front();
-            const vector<cv::Point2d> &subordinate_corners_2d = corners.back();
+            cout << "Getting references!" << std::endl;
+            const vector<vector<cv::Point2f>> &master_corners_2d = corners_float.front();
+            const vector<vector<cv::Point2f>> &subordinate_corners_2d = corners_float.back();
             const k4a::calibration &master_calib =
                 devices.front().get_calibration(configurations.front().depth_mode,
                                                 configurations.front().color_resolution);
             const k4a::calibration &sub_calib = devices.back().get_calibration(configurations.back().depth_mode,
                                                                                configurations.back().color_resolution);
+            cout << "Getting camera matrices!" << std::endl;
+            cv::Mat master_camera_matrix = k4a_calibration_to_depth_camera_matrix(master_calib);
+            cv::Mat sub_camera_matrix = k4a_calibration_to_depth_camera_matrix(sub_calib);
+            cout << "Getting camera dist coefficients!" << std::endl;
+            vector<double> master_dist_coeff = k4a_calibration_to_depth_camera_dist_coeffs(master_calib);
+            vector<double> sub_dist_coeff = k4a_calibration_to_depth_camera_dist_coeffs(sub_calib);
 
             // TODO depth, not color!
 
-            cv::Mat R, F, E;
+            cv::Mat E, F;
 
-            cv::Vec3d T;
-            cv::stereoCalibrate(chessboard_corners_3d,
+            cout << master_camera_matrix << std::endl;
+            cout << sub_camera_matrix << std::endl;
+            cout << "Preparing to calibrate!" << std::endl;
+            cv::stereoCalibrate(chessboard_corners_3d_float,
                                 master_corners_2d,
                                 subordinate_corners_2d,
-                                k4a_calibration_to_depth_camera_matrix(master_calib),
-                                k4a_calibration_to_depth_camera_dist_coeffs(master_calib),
-                                k4a_calibration_to_depth_camera_matrix(sub_calib),
-                                k4a_calibration_to_depth_camera_dist_coeffs(sub_calib),
+                                master_camera_matrix,
+                                master_dist_coeff,
+                                sub_camera_matrix,
+                                sub_dist_coeff,
                                 color_images[0].size(),
                                 R,
                                 T,
                                 E,
-                                F);
+                                F,
+                                cv::CALIB_FIX_INTRINSIC);
+            cout << "Finished calibrating!" << std::endl;
 
             cout << R << std::endl;
             cout << T << std::endl;
