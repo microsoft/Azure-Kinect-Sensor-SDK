@@ -1,5 +1,9 @@
 var NAVTREEINDEX2 =
 {
+"structk4a__record__video__settings__t.html#a1bb98cba5ef359198eb3a54e6fa66954":[2,1,5,12,2],
+"structk4a__record__video__settings__t.html#a7b40b07cebe856518ee708e9edb767bd":[2,1,5,12,0],
+"structk4a__record__video__settings__t.html#abd4c12123e81ac48040a250e7bac0176":[2,1,5,12,1],
+"structk4a__transformation__t.html":[2,1,1,3],
 "structk4a__version__t.html":[2,1,5,6],
 "structk4a__version__t_a52626a80e919cac31d837efa3d01abfb.html#a52626a80e919cac31d837efa3d01abfb":[2,1,5,6,2],
 "structk4a__version__t_a9f3ec6a118f81533c7748b9080f68acf.html#a9f3ec6a118f81533c7748b9080f68acf":[2,1,5,6,0],
