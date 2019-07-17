@@ -73,8 +73,9 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     // We don't record a depth track if the camera is started in passive IR mode
     //
     m_recordingHasDepth = m_recordConfiguration.depth_track_enabled;
+    m_recordingHasIR = m_recordConfiguration.ir_track_enabled;
     std::stringstream depthSS;
-    if (m_recordingHasDepth)
+    if (m_recordingHasDepth || m_recordingHasIR)
     {
         depthSS << m_recordConfiguration.depth_mode;
     }
@@ -469,7 +470,7 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
                                          &m_playbackThreadState.CaptureDataSource,
                                          imuDataSource,
                                          nullptr, // Audio source - sound is not supported in recordings
-                                         m_recordingHasDepth,
+                                         m_recordingHasDepth || m_recordingHasIR,
                                          m_recordConfiguration.depth_mode,
                                          m_recordingHasColor,
                                          m_recordConfiguration.color_format,

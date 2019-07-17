@@ -28,6 +28,7 @@ k4a_result_t k4a_record_create(const char *path,
     // Instantiate the logger as early as possible
     logger_config_t logger_config;
     logger_config_init_default(&logger_config);
+    logger_config.env_var_log_to_a_file = K4A_RECORD_ENABLE_LOG_TO_A_FILE;
     result = TRACE_CALL(logger_create(&logger_config, &logger_handle));
 
     if (K4A_SUCCEEDED(result))

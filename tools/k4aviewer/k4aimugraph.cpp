@@ -121,7 +121,8 @@ void K4AImuGraph::PlotGraph(const char *name,
     std::stringstream nameBuilder;
     nameBuilder << "##" << name;
 
-    const float currentData = graphData[static_cast<size_t>(graphFrontIdx)].v[offset];
+    const float currentData =
+        graphData[(static_cast<size_t>(graphFrontIdx) + graphData.size() - 1) % graphData.size()].v[offset];
 
     std::string label;
     if (K4AViewerSettingsManager::Instance().GetViewerOption(ViewerOption::ShowInfoPane))
