@@ -1,5 +1,7 @@
 # Testing Azure Kinect SDK
 
+To run the tests, be sure the [Depth Engine](depthengine.md) is present.
+
 ## Test Categories
 
 The Azure Kinect repo has several categories of tests:

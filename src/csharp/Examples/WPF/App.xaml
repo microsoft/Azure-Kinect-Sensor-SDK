@@ -1,0 +1,9 @@
+﻿<Application x:Class="Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>
