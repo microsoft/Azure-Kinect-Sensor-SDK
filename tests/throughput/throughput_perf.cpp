@@ -15,7 +15,7 @@
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/envvariable.h>
 
-#define TS_TO_MS(ts) ((long long)((ts) / 1000)) // TS convertion to milliseconds
+#define TS_TO_MS(ts) ((long long)((ts) / 1)) // TS convertion to milliseconds
 
 #define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
 
@@ -332,9 +332,21 @@ TEST_P(throughput_perf, testTest)
         k4a_capture_release(capture);
     }
 
-    printf("\n");
-    printf("       | TS [Delta TS]          | TS [Delta TS]          | TS [Delta TS]           | TS Delta (C&D)\n");
-    printf("===================================================================================================\n");
+    {
+        // BUG
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
+                                               K4A_COLOR_CONTROL_MODE_MANUAL,
+                                               2));
+        printf("Power Line Mode set to manual and 60Hz\n");
+    }
+
+    printf("All times in us\n");
+    printf("+---------------------------+-------------------+-------------------+--------+\n");
+    printf("|         Color Info        |     IR 16 Info    |   Depth16 Info    | TS Del |\n");
+    printf("|  TS [Delta TS][Exposure]  |   TS [Delta TS]   |   TS [Delta TS]   | (C-D)  |\n");
+    printf("+---------------------------+-------------------+-------------------+--------+\n");
 
     thread.enable_counting = true; // start counting IMU samples
     while (capture_count-- > 0)
@@ -351,7 +363,7 @@ TEST_P(throughput_perf, testTest)
         {
             k4a_image_t image;
 
-            printf("Capture:");
+            printf("|");
 
             // Probe for a color image
             image = k4a_capture_get_color_image(capture);
@@ -361,7 +373,10 @@ TEST_P(throughput_perf, testTest)
                 ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts, adjusted_max_ts);
                 static_assert(sizeof(ts) == 8, "this should not be wrong");
-                printf(" Color TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_color_ts));
+                printf(" %9lld[%6lld][%6lld]",
+                       TS_TO_MS(ts),
+                       TS_TO_MS(ts - last_color_ts),
+                       (long long int)k4a_image_get_exposure_usec(image));
 
                 // TS should increase
                 EXPECT_GT(ts, last_color_ts);
@@ -371,7 +386,7 @@ TEST_P(throughput_perf, testTest)
             }
             else
             {
-                printf(" Color None            ");
+                printf(" Color None               ");
             }
 
             // probe for a IR16 image
@@ -381,7 +396,7 @@ TEST_P(throughput_perf, testTest)
                 depth = true;
                 ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
-                printf(" | Ir16  TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
+                printf(" | %9lld[%6lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
 
                 // TS should increase
                 EXPECT_GT(ts, last_ir16_ts);
@@ -391,7 +406,7 @@ TEST_P(throughput_perf, testTest)
             }
             else
             {
-                printf(" | Ir16 None             ");
+                printf(" |                  ");
             }
 
             // Probe for a depth16 image
@@ -400,7 +415,7 @@ TEST_P(throughput_perf, testTest)
             {
                 ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
-                printf(" | Depth16 TS:%6lld[%4lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
+                printf(" | %9lld[%6lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
 
                 // TS should increase
                 EXPECT_GT(ts, last_depth16_ts);
@@ -410,7 +425,7 @@ TEST_P(throughput_perf, testTest)
             }
             else
             {
-                printf(" | Depth16 None           ");
+                printf(" |                  ");
             }
         }
         else if (wresult == K4A_WAIT_RESULT_TIMEOUT)
@@ -428,7 +443,7 @@ TEST_P(throughput_perf, testTest)
             both_count++;
 
             int64_t delta = (int64_t)(last_ir16_ts - last_color_ts);
-            printf(" | %" PRId64 "us\n", delta);
+            printf(" | %6" PRId64, delta);
 
             delta -= config.depth_delay_off_color_usec;
             if (delta < 0)
@@ -442,14 +457,16 @@ TEST_P(throughput_perf, testTest)
         }
         else if (depth)
         {
-            printf(" | ---us\n");
+            printf(" | ------");
             depth_count++;
         }
         else if (color)
         {
-            printf(" | ---us\n");
+            printf(" | ------");
             color_count++;
         }
+
+        printf(" |\n");
 
         EXPECT_NE(adjusted_max_ts, 0);
         if (last_ts == UINT64_MAX)
