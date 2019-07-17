@@ -30,6 +30,7 @@ static bool g_no_startup_flush = false;
 static uint32_t g_subordinate_delay_off_master_usec = 0;
 static bool g_manual_exposure = false;
 static uint32_t g_exposure_setting = 0;
+static bool g_power_line_50_hz = false;
 
 using ::testing::ValuesIn;
 
@@ -241,14 +242,35 @@ TEST_P(throughput_perf, testTest)
 
     printf("Capturing %d frames for test: %s\n", g_capture_count, as.test_name);
 
+    {
+        int32_t power_line_setting = g_power_line_50_hz ? 1 : 2;
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
+                                               K4A_COLOR_CONTROL_MODE_MANUAL,
+                                               power_line_setting));
+        printf("Power line mode set to manual and %s.\n", power_line_setting == 1 ? "50Hz" : "60Hz");
+    }
+
     if (g_manual_exposure)
     {
+        k4a_color_control_mode_t read_mode;
+        int32_t read_exposure;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   k4a_device_set_color_control(m_device,
                                                K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                                                K4A_COLOR_CONTROL_MODE_MANUAL,
                                                (int32_t)g_exposure_setting));
-        printf("Manual Exposure: %d\n", g_exposure_setting);
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_get_color_control(m_device,
+                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               &read_mode,
+                                               &read_exposure));
+        printf(
+            "Setting exposure to manual mode, exposure target is: %d.   Actual mode is: %s.   Actual value is: %d.\n",
+            g_exposure_setting,
+            read_mode == K4A_COLOR_CONTROL_MODE_AUTO ? "auto" : "manual",
+            read_exposure);
     }
     else
     {
@@ -330,16 +352,6 @@ TEST_P(throughput_perf, testTest)
     if (K4A_WAIT_RESULT_SUCCEEDED == k4a_device_get_capture(m_device, &capture, 1000))
     {
         k4a_capture_release(capture);
-    }
-
-    {
-        // BUG
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  k4a_device_set_color_control(m_device,
-                                               K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
-                                               K4A_COLOR_CONTROL_MODE_MANUAL,
-                                               2));
-        printf("Power Line Mode set to manual and 60Hz\n");
     }
 
     printf("All times in us\n");
@@ -839,6 +851,16 @@ int main(int argc, char **argv)
             g_no_startup_flush = true;
             printf("g_no_startup_flush = true\n");
         }
+        else if (strcmp(argument, "--60hz") == 0)
+        {
+            g_power_line_50_hz = false;
+            printf("g_power_line_50_hz = false\n");
+        }
+        else if (strcmp(argument, "--50hz") == 0)
+        {
+            g_power_line_50_hz = true;
+            printf("g_power_line_50_hz = true\n");
+        }
         else if (strcmp(argument, "--index") == 0)
         {
             if (i + 1 <= argc)
@@ -939,6 +961,10 @@ int main(int argc, char **argv)
         printf("  --exposure <exposure in usec>\n");
         printf("      By default the test uses auto exposure. This will test with the manual exposure setting\n");
         printf("      that is passed in.\n");
+        printf("  --60hz\n");
+        printf("      <default> Sets the power line compensation frequency to 60Hz\n");
+        printf("  --50hz\n");
+        printf("      Sets the power line compensation frequency to 50Hz\n");
 
         return 1; // Indicates an error or warning
     }
