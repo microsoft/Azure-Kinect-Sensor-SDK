@@ -768,6 +768,7 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
             int32_t threshold = b_sixty_hertz ? device_exposure_mapping[x].exposure_mapped_60Hz_usec :
                                                 device_exposure_mapping[x].exposure_mapped_60Hz_usec;
 
+            // For this test we test the mapping value transitions; 1 below, 1 above, and the exact value.
             int32_t testValue = threshold - 1;
             ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, command, manual, testValue));
             ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, command, &current_mode, &value));
