@@ -93,6 +93,7 @@ private:
 
     bool m_recordingHasColor = false;
     bool m_recordingHasDepth = false;
+    bool m_recordingHasIR = false;
 
     K4AWindowSet::ViewType m_viewType = K4AWindowSet::ViewType::Normal;
 
