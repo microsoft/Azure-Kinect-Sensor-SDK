@@ -295,9 +295,9 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
         // 0.0001 sec to uSec
         capabilities->supportAuto = true;
         capabilities->stepValue = (int32_t)(step_exposure_time * CONV_100USEC_TO_USEC);
-        capabilities->minValue = MapLinuxExposureToK4a(min_exposure_time);
-        capabilities->maxValue = MapLinuxExposureToK4a(max_exposure_time);
-        capabilities->defaultValue = MapLinuxExposureToK4a(default_exposure_time);
+        capabilities->minValue = MapLinuxExposureToK4a((int32_t)min_exposure_time);
+        capabilities->maxValue = MapLinuxExposureToK4a((int32_t)max_exposure_time);
+        capabilities->defaultValue = MapLinuxExposureToK4a((int32_t)default_exposure_time);
         capabilities->valid = true;
     }
     break;
@@ -906,7 +906,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
                 return K4A_RESULT_FAILED;
             }
 
-            res = uvc_set_exposure_abs(m_pDeviceHandle, MapK4aExposureToLinux(newValue));
+            res = uvc_set_exposure_abs(m_pDeviceHandle, (uint32_t)MapK4aExposureToLinux(newValue));
             if (res < 0)
             {
                 LOG_ERROR("Failed to set exposure time abs: %s", uvc_strerror(res));
@@ -1296,20 +1296,19 @@ UVCCameraReader::DecodeMJPEGtoBGRA32(uint8_t *in_buf, const size_t in_size, uint
 }
 
 // Returns exposure in 100us time base
-uint32_t UVCCameraReader::MapK4aExposureToLinux(uint32_t K4aExposure_usec)
+int32_t UVCCameraReader::MapK4aExposureToLinux(int32_t K4aExposure_usec)
 {
     // We map to the expected exposure then convert to 100us time base to ensure we roll over to the next exposure
     // setting in the same way Windows does.
     for (uint32_t x = 0; x < COUNTOF(device_exposure_mapping); x++)
     {
-        uint32_t mapped_exposure = device_exposure_mapping[x].exposure_mapped_50Hz_usec;
-        ;
+        int32_t mapped_exposure = device_exposure_mapping[x].exposure_mapped_50Hz_usec;
         if (m_using_60hz_power)
         {
             mapped_exposure = device_exposure_mapping[x].exposure_mapped_60Hz_usec;
         }
 
-        if (K4aExposure_usec <= (uint32_t)mapped_exposure)
+        if (K4aExposure_usec <= mapped_exposure)
         {
             return mapped_exposure / CONV_100USEC_TO_USEC;
         }
@@ -1319,12 +1318,12 @@ uint32_t UVCCameraReader::MapK4aExposureToLinux(uint32_t K4aExposure_usec)
     return MAX_EXPOSURE(m_using_60hz_power) / CONV_100USEC_TO_USEC;
 }
 
-uint32_t UVCCameraReader::MapLinuxExposureToK4a(uint32_t LinuxExposure)
+int32_t UVCCameraReader::MapLinuxExposureToK4a(int32_t LinuxExposure)
 {
     LinuxExposure *= CONV_100USEC_TO_USEC; // Convert Linux 100us units to us.
     for (uint32_t x = 0; x < COUNTOF(device_exposure_mapping); x++)
     {
-        uint32_t mapped_exposure = device_exposure_mapping[x].exposure_mapped_50Hz_usec;
+        int32_t mapped_exposure = device_exposure_mapping[x].exposure_mapped_50Hz_usec;
         if (m_using_60hz_power)
         {
             mapped_exposure = device_exposure_mapping[x].exposure_mapped_60Hz_usec;

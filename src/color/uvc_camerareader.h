@@ -53,8 +53,8 @@ private:
 
     k4a_result_t DecodeMJPEGtoBGRA32(uint8_t *in_buf, const size_t in_size, uint8_t *out_buf, const size_t out_size);
 
-    uint32_t MapK4aExposureToLinux(uint32_t K4aExposure);
-    uint32_t MapLinuxExposureToK4a(uint32_t LinuxExposure);
+    int32_t MapK4aExposureToLinux(int32_t K4aExposure);
+    int32_t MapLinuxExposureToK4a(int32_t LinuxExposure);
 
 private:
     // Lock
