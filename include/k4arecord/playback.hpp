@@ -295,8 +295,9 @@ public:
         return std::chrono::microseconds(k4a_playback_get_last_timestamp_usec(m_handle));
     }
 
-    /** Set the image format that color captures will be converted to.
-     * By default the conversion format will be the same as the image format stored in the recording file, and no conversion will occur.
+    /** Set the image format that color captures will be converted to. By default the conversion format will be the same
+     * as the image format stored in the recording file, and no conversion will occur.
+     *
      * Throws error on failure.
      *
      * \sa k4a_playback_set_color_conversion
