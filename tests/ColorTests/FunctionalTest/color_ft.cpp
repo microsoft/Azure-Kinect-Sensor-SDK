@@ -686,9 +686,12 @@ public:
                              const int32_t default_value);
 
     k4a_device_t m_device = nullptr;
+
+private:
+    int32_t map_manual_exposure(int32_t value, bool sixty_hertz);
 };
 
-int32_t map_manual_exposure(int32_t value, bool sixty_hertz)
+int32_t color_control_test::map_manual_exposure(int32_t value, bool sixty_hertz)
 {
 
     for (uint32_t x = 0; x < COUNTOF(device_exposure_mapping); x++)
