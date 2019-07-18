@@ -30,6 +30,19 @@ cv::Mat k4a_depth_to_opencv(const k4a::image &im)
                    im.get_stride_bytes());
 }
 
+// TODO this doesn't actually work that well and I'm not sure whether it will be useful.
+cv::Mat k4a_ir_to_opencv(const k4a::image &im)
+{
+    // TODO the docs really need an explanation of K4A_IMAGE_FORMAT_IR16 that clearly explains what it is
+    cout << im.get_height_pixels() << std::endl;
+    cout << im.get_width_pixels() << std::endl;
+    cv::Mat normalized(im.get_height_pixels(), im.get_width_pixels(), CV_16UC1);
+    cv::Mat result(im.get_height_pixels(), im.get_width_pixels(), CV_8UC1);
+    cv::normalize(k4a_depth_to_opencv(im), normalized, 1, 0, cv::NORM_MINMAX);
+    normalized.convertTo(result, CV_8UC1);
+    return result;
+}
+
 cv::Mat k4a_calibration_to_depth_camera_matrix(const k4a::calibration &cal)
 {
     const k4a_calibration_intrinsic_parameters_t::_param &i = cal.depth_camera_calibration.intrinsics.parameters.param;
@@ -110,7 +123,7 @@ int main()
         devices[0].start_cameras(&configurations[0]);
 
         // These will hold the rotation and translation we want
-        cv::Mat R;
+        cv::Mat R, E, F;
         cv::Vec3d T;
 
         // the cameras have been started. Calibration time!
@@ -190,7 +203,7 @@ int main()
                 }
                 cv::drawChessboardCorners(color_images[i], chessboard_pattern, corners_float, found_chessboard);
                 cv::imshow(std::string("Chessboard view from camera ") + std::to_string(i), color_images[i]);
-                cv::waitKey(0);
+                cv::waitKey(500);
             }
 
             // now construct the points needed to calibrate
@@ -248,18 +261,16 @@ int main()
 
             // TODO depth, not color!
 
-            cv::Mat E, F;
-
             cout << master_camera_matrix << std::endl;
             cout << sub_camera_matrix << std::endl;
             cout << "Preparing to calibrate!" << std::endl;
             cv::stereoCalibrate(chessboard_corners_3d_float,
-                                master_corners_2d,
                                 subordinate_corners_2d,
-                                master_camera_matrix,
-                                master_dist_coeff,
+                                master_corners_2d,
                                 sub_camera_matrix,
                                 sub_dist_coeff,
+                                master_camera_matrix,
+                                master_dist_coeff,
                                 color_images[0].size(),
                                 R,
                                 T,
@@ -317,7 +328,7 @@ int main()
                 continue;
             }
             // if we reach this point, we know that we're good to go.
-            // first, let's check out the timestamps.
+            // first, let's check out the timestamps. TODO
             // for (size_t i = 0; i < depth_images.size(); ++i)
             // {
             //     cout << "Color image timestamp: " << i << " " << color_images[i].get_device_timestamp().count() <<
@@ -326,13 +337,14 @@ int main()
             // }
 
             // let's greenscreen out things that are far away.
-            // first: let's get the depth image into the color camera space
+            // first: let's get the master depth image into the color camera space
             // create a copy with the same parameters
             k4a::image k4a_master_depth_in_master_color = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16,
                                                                              master_color_image.get_width_pixels(),
                                                                              master_color_image.get_height_pixels(),
                                                                              master_color_image.get_width_pixels() *
                                                                                  static_cast<int>(sizeof(uint16_t)));
+
             // now fill it with the shifted version
             // to do so, we need the transformation from TODO
             k4a::transformation master_depth_to_master_color(calibrations[0]);
@@ -342,6 +354,58 @@ int main()
             // now, create an OpenCV version of the depth matrix for easy usage
             cv::Mat opencv_master_depth_in_master_color = k4a_depth_to_opencv(k4a_master_depth_in_master_color);
 
+            // now let's get the subordinate depth image into the color camera space
+            k4a::image k4a_sub_depth_in_sub_color = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16,
+                                                                       master_color_image.get_width_pixels(),
+                                                                       master_color_image.get_height_pixels(),
+                                                                       master_color_image.get_width_pixels() *
+                                                                           static_cast<int>(sizeof(uint16_t)));
+            k4a::transformation sub_depth_to_sub_color(calibrations[1]);
+            master_depth_to_master_color.depth_image_to_color_camera(depth_images[1], &k4a_sub_depth_in_sub_color);
+            cv::Mat opencv_sub_depth_in_sub_color = k4a_depth_to_opencv(k4a_sub_depth_in_sub_color);
+            cout << opencv_sub_depth_in_sub_color.size() << std::endl;
+            cout << (opencv_sub_depth_in_sub_color.type() == CV_16UC1) << std::endl;
+            cv::Mat normalized_opencv_sub_depth_in_sub_color;
+            cv::Mat normalized_opencv_master_depth_in_master_color;
+            cv::normalize(opencv_sub_depth_in_sub_color,
+                          normalized_opencv_sub_depth_in_sub_color,
+                          1,
+                          128,
+                          cv::NORM_MINMAX);
+            cv::normalize(opencv_master_depth_in_master_color,
+                          normalized_opencv_master_depth_in_master_color,
+                          1,
+                          128,
+                          cv::NORM_MINMAX);
+            cv::Mat grayscale_opencv_sub_depth_in_sub_color;
+            cv::Mat grayscale_opencv_master_depth_in_master_color;
+            normalized_opencv_sub_depth_in_sub_color.convertTo(grayscale_opencv_sub_depth_in_sub_color, CV_8UC1);
+            normalized_opencv_master_depth_in_master_color.convertTo(grayscale_opencv_master_depth_in_master_color,
+                                                                     CV_8UC1);
+            cv::Mat test(3, 3, CV_64F, cv::Scalar(0));
+            test.at<double>(0, 0) = test.at<double>(1, 1) = test.at<double>(2, 2) = 1;
+            cv::Mat opencv_sub_depth_in_master_color;
+            cv::warpPerspective(grayscale_opencv_sub_depth_in_sub_color,
+                                grayscale_opencv_master_depth_in_master_color,
+                                test,
+                                opencv_master_depth_in_master_color.size());
+
+            vector<cv::Mat> channels;
+            cv::Mat overlay;
+            cout << "Space" << std::endl;
+            cout << grayscale_opencv_master_depth_in_master_color.depth() << std::endl;
+            cout << grayscale_opencv_sub_depth_in_sub_color.depth() << std::endl;
+            cv::Mat zeros = cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1);
+            cout << zeros.depth() << std::endl;
+            channels.emplace_back(grayscale_opencv_master_depth_in_master_color);
+            channels.emplace_back(cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1));
+            channels.emplace_back(grayscale_opencv_sub_depth_in_sub_color);
+            cv::merge(channels, overlay);
+
+            cv::imshow("overlay", overlay);
+            cv::waitKey(0);
+
+            // create the image that will be be used as output
             cv::Mat output_image(master_color_image.get_height_pixels(),
                                  master_color_image.get_width_pixels(),
                                  CV_8UC3,
