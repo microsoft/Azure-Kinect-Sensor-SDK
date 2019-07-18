@@ -143,12 +143,12 @@ $(document).ready(function(){initNavTree('group___functions_ga1b2fd9b91c2779b912
 </div><div class="memdoc">
 
 <p>Adds custom video tracks to the recording. </p>
-<p>Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created after the k4a_record_create API is called. Use this API to add additional custom video tracks to save your own custom data.</p>
+<p>Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created automatically when the <a class="el" href="group___functions_gae14f4181e9688e710d1c80b215413831.html#gae14f4181e9688e710d1c80b215413831" title="Opens a new recording file for writing. ">k4a_record_create()</a> API is called. This API can be used to add additional video tracks to save custom data.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">recording_handle</td><td>The handle of a new recording, obtained by <a class="el" href="group___functions_gae14f4181e9688e710d1c80b215413831.html#gae14f4181e9688e710d1c80b215413831" title="Opens a new recording file for writing. ">k4a_record_create()</a>.</td></tr>
-    <tr><td class="paramname">track_name</td><td>The name of the custom video track to be added</td></tr>
-    <tr><td class="paramname">codec_id</td><td>This will be a UTF8 null terminated string. The codec ID is a string that corresponds to the codec. Some of the existing formats are listed here: <a href="https://www.matroska.org/technical/specs/codecid/index.html">https://www.matroska.org/technical/specs/codecid/index.html</a>. It can also be custom defined by the user. Video codec id's should start with 'V_'.</td></tr>
+    <tr><td class="paramname">track_name</td><td>The name of the custom video track to be added.</td></tr>
+    <tr><td class="paramname">codec_id</td><td>A UTF8 null terminated string containing the codec ID of the track. Some of the existing formats are listed here: <a href="https://www.matroska.org/technical/specs/codecid/index.html">https://www.matroska.org/technical/specs/codecid/index.html</a>. The codec ID can also be custom defined by the user. Video codec ID's should start with 'V_'.</td></tr>
     <tr><td class="paramname">codec_context</td><td>The codec context is a codec-specific buffer that contains any required codec metadata that is only known to the codec. It is mapped to the matroska 'CodecPrivate' element.</td></tr>
     <tr><td class="paramname">codec_context_size</td><td>The size of the codec context buffer.</td></tr>
     <tr><td class="paramname">track_settings</td><td>Additional metadata for the video track such as resolution and framerate.</td></tr>
