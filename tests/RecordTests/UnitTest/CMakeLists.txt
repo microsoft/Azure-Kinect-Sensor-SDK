@@ -3,8 +3,8 @@
 
 add_executable(record_ut record_ut.cpp)
 add_executable(playback_ut playback_ut.cpp test_helpers.cpp sample_recordings.cpp)
+add_executable(custom_track_ut custom_track_ut.cpp test_helpers.cpp sample_recordings.cpp)
 add_executable(playback_perf playback_perf.cpp test_helpers.cpp)
-add_executable(custom_track_ut custom_track_ut.cpp test_helpers.cpp)
 
 target_link_libraries(record_ut PRIVATE
     k4ainternal::utcommon

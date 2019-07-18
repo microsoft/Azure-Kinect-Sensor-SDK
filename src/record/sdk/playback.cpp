@@ -271,7 +271,7 @@ k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handl
 
     if (track_reader->type != track_type::track_video)
     {
-        // The track is not a video track, return failed without logging any errors
+        LOG_ERROR("Track is not a video track.", 0);
         return K4A_RESULT_FAILED;
     }
 
@@ -424,6 +424,7 @@ k4a_playback_get_attachment(k4a_playback_t playback_handle, const char *file_nam
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, k4a_playback_t, playback_handle);
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, file_name == NULL);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, data_size == NULL);
 
     KaxAttached *attachment = get_attachment_by_name(context, file_name);
@@ -444,6 +445,7 @@ k4a_playback_get_attachment(k4a_playback_t playback_handle, const char *file_nam
     }
     else
     {
+        LOG_ERROR("Attachment file name cannot be found.", 0);
         return K4A_BUFFER_RESULT_FAILED;
     }
 }
@@ -634,7 +636,7 @@ size_t k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_bl
 
 uint8_t *k4a_playback_data_block_get_buffer(k4a_playback_data_block_t data_block_handle)
 {
-    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_data_block_t, data_block_handle);
+    RETURN_VALUE_IF_HANDLE_INVALID(nullptr, k4a_playback_data_block_t, data_block_handle);
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_get_context(data_block_handle);
     return data_block_context->data_block.data();
 }

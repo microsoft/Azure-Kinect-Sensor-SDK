@@ -294,48 +294,40 @@ bool validate_null_imu_sample(k4a_imu_sample_t &imu_sample)
 #pragma clang diagnostic pop
 #endif
 
-template<typename T> void write_value(const T &value, std::vector<uint8_t> *stream)
-{
-    const uint8_t *valueBegin = reinterpret_cast<const uint8_t *>(&value);
-    const uint8_t *valueEnd = valueBegin + sizeof(value);
-    stream->insert(stream->end(), valueBegin, valueEnd);
-}
-
 std::vector<uint8_t> create_test_custom_track_block(uint64_t timestamp_us)
 {
     std::srand(static_cast<uint32_t>(timestamp_us));
 
-    uint32_t item_number = static_cast<uint32_t>(std::rand()) % 100;
-    std::vector<uint8_t> track_data;
-    write_value(timestamp_us, &track_data);
-    write_value(item_number, &track_data);
-    for (uint32_t i = 0; i < item_number; i++)
+    uint32_t item_count = static_cast<uint32_t>(std::rand()) % 100;
+    std::vector<uint8_t> data(sizeof(custom_track_test_data) + sizeof(uint32_t) * item_count);
+    custom_track_test_data *test_data = reinterpret_cast<custom_track_test_data *>(data.data());
+
+    test_data->timestamp_us = timestamp_us;
+    test_data->item_count = item_count;
+    for (uint32_t i = 0; i < item_count; i++)
     {
-        write_value(static_cast<uint32_t>(std::rand()), &track_data);
+        test_data->items[i] = i;
     }
 
-    return track_data;
+    return data;
 }
 
 bool validate_custom_track_block(const uint8_t *block, size_t block_size, uint64_t timestamp_us)
 {
     std::srand(static_cast<uint32_t>(timestamp_us));
-    uint32_t expected_item_number = static_cast<uint32_t>(std::rand()) % 100;
+    uint32_t expected_item_count = static_cast<uint32_t>(std::rand()) % 100;
 
-    EXIT_IF_FALSE(block_size >= sizeof(uint32_t) + sizeof(uint64_t));
+    EXIT_IF_FALSE(block_size >= sizeof(custom_track_test_data));
 
-    const uint64_t *block_timestamp_us = reinterpret_cast<const uint64_t *>(block);
-    VALIDATE_PARAMETER(*block_timestamp_us, timestamp_us);
+    const custom_track_test_data *test_data = reinterpret_cast<const custom_track_test_data *>(block);
+    VALIDATE_PARAMETER(test_data->timestamp_us, timestamp_us);
+    VALIDATE_PARAMETER(test_data->item_count, expected_item_count);
 
-    VALIDATE_PARAMETER(block_size, (expected_item_number + 3) * sizeof(uint32_t));
+    VALIDATE_PARAMETER(block_size, sizeof(custom_track_test_data) + sizeof(uint32_t) * expected_item_count);
 
-    const uint32_t *block_data = reinterpret_cast<const uint32_t *>(block + sizeof(uint64_t));
-    VALIDATE_PARAMETER(*block_data, expected_item_number);
-
-    for (uint32_t i = 1; i <= expected_item_number; i++)
+    for (uint32_t i = 0; i < expected_item_count; i++)
     {
-        uint32_t expected_value = static_cast<uint32_t>(std::rand());
-        VALIDATE_PARAMETER(block_data[i], expected_value);
+        VALIDATE_PARAMETER(test_data->items[i], i);
     }
 
     return true;

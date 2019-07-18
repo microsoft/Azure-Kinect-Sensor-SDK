@@ -163,19 +163,19 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
 
 /** Adds custom video tracks to the recording.
  *
- * Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created after the k4a_record_create API is called.
- * Use this API to add additional custom video tracks to save your own custom data.
+ * Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created automatically when the k4a_record_create()
+ * API is called. This API can be used to add additional video tracks to save custom data.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
  * \param track_name
- * The name of the custom video track to be added
+ * The name of the custom video track to be added.
  *
  * \param codec_id
- * This will be a UTF8 null terminated string. The codec ID is a string that corresponds to the codec. Some of the
- * existing formats are listed here: https://www.matroska.org/technical/specs/codecid/index.html. It can also be custom
- * defined by the user. Video codec id's should start with 'V_'.
+ * A UTF8 null terminated string containing the codec ID of the track. Some of the existing formats are listed here:
+ * https://www.matroska.org/technical/specs/codecid/index.html. The codec ID can also be custom defined by the user.
+ * Video codec ID's should start with 'V_'.
  *
  * \param codec_context
  * The codec context is a codec-specific buffer that contains any required codec metadata that is only known to the
@@ -216,19 +216,19 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_video_track(const k4a_record
 
 /** Adds custom subtitle tracks to the recording.
  *
- * Built-in subtitle tracks like the IMU track will be created after the k4a_record_add_imu_track API is called. Use
- * this API to add additional custom subtitle tracks to save your own custom data.
+ * Built-in subtitle tracks like the IMU track will be created automatically when the k4a_record_add_imu_track() API is
+ * called. This API can be used to add additional subtitle tracks to save custom data.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
  * \param track_name
- * The name of the custom subtitle track to be added
+ * The name of the custom subtitle track to be added.
  *
  * \param codec_id
- * This will be a UTF8 null terminated string. The codec ID is a string that corresponds to the codec. Some of the
- * existing formats are listed here: https://www.matroska.org/technical/specs/codecid/index.html. It can also be custom
- * defined by the user. Subtitle codec id's should start with 'S_'.
+ * A UTF8 null terminated string containing the codec ID of the track. Some of the existing formats are listed here:
+ * https://www.matroska.org/technical/specs/codecid/index.html. The codec ID can also be custom defined by the user.
+ * Subtitle codec ID's should start with 'S_'.
  *
  * \param codec_context
  * The codec context is a codec-specific buffer that contains any required codec metadata that is only known to the

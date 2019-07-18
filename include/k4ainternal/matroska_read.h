@@ -65,6 +65,7 @@ typedef struct _block_info_t
     uint64_t sync_timestamp_ns = 0; // The timestamp of the block, including sychronization offsets.
     uint64_t block_duration_ns = 0; // If the block is a KaxBlockGroup, otherwise 0.
     int index = -1;                 // Index of the block element within the cluster.
+    int sub_index = -1;             // Index of the current buffer within the block.
 } block_info_t;
 
 typedef struct _track_reader_t
