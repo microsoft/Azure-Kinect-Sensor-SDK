@@ -261,8 +261,6 @@ int main()
 
             // TODO depth, not color!
 
-            cout << master_camera_matrix << std::endl;
-            cout << sub_camera_matrix << std::endl;
             cout << "Preparing to calibrate!" << std::endl;
             cv::stereoCalibrate(chessboard_corners_3d_float,
                                 subordinate_corners_2d,
@@ -281,6 +279,7 @@ int main()
 
             cout << R << std::endl;
             cout << T << std::endl;
+            cout << E << std::endl;
 
             break;
         }
@@ -363,8 +362,6 @@ int main()
             k4a::transformation sub_depth_to_sub_color(calibrations[1]);
             master_depth_to_master_color.depth_image_to_color_camera(depth_images[1], &k4a_sub_depth_in_sub_color);
             cv::Mat opencv_sub_depth_in_sub_color = k4a_depth_to_opencv(k4a_sub_depth_in_sub_color);
-            cout << opencv_sub_depth_in_sub_color.size() << std::endl;
-            cout << (opencv_sub_depth_in_sub_color.type() == CV_16UC1) << std::endl;
             cv::Mat normalized_opencv_sub_depth_in_sub_color;
             cv::Mat normalized_opencv_master_depth_in_master_color;
             cv::normalize(opencv_sub_depth_in_sub_color,
@@ -384,24 +381,32 @@ int main()
                                                                      CV_8UC1);
             cv::Mat test(3, 3, CV_64F, cv::Scalar(0));
             test.at<double>(0, 0) = test.at<double>(1, 1) = test.at<double>(2, 2) = 1;
-            cv::Mat opencv_sub_depth_in_master_color;
+            test.at<double>(0, 2) = test.at<double>(1, 2) = 20;
+            cv::Mat grayscale_opencv_sub_depth_in_master_color;
             cv::warpPerspective(grayscale_opencv_sub_depth_in_sub_color,
-                                grayscale_opencv_master_depth_in_master_color,
-                                test,
+                                grayscale_opencv_sub_depth_in_master_color,
+                                F,
                                 opencv_master_depth_in_master_color.size());
 
             vector<cv::Mat> channels;
             cv::Mat overlay;
-            cout << "Space" << std::endl;
-            cout << grayscale_opencv_master_depth_in_master_color.depth() << std::endl;
-            cout << grayscale_opencv_sub_depth_in_sub_color.depth() << std::endl;
-            cv::Mat zeros = cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1);
-            cout << zeros.depth() << std::endl;
+            // R
             channels.emplace_back(grayscale_opencv_master_depth_in_master_color);
-            channels.emplace_back(cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1));
+            // channels.emplace_back(cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1));
+
+            // G
             channels.emplace_back(grayscale_opencv_sub_depth_in_sub_color);
+            // channels.emplace_back(cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1));
+
+            // B
+            channels.emplace_back(grayscale_opencv_sub_depth_in_master_color);
+            // channels.emplace_back(cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1));
+
+            // cout << grayscale_opencv_sub_depth_in_master_color << std::endl;
             cv::merge(channels, overlay);
 
+            cv::imshow("sub in master space", grayscale_opencv_sub_depth_in_master_color);
+            cv::waitKey(0);
             cv::imshow("overlay", overlay);
             cv::waitKey(0);
 
