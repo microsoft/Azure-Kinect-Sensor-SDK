@@ -105,7 +105,7 @@
       <Rule Id="CA2234" Action="Warning" />          <!-- Pass system uri objects instead of strings -->
    </Rules>
    <Rules AnalyzerId="Microsoft.NetCore.Analyzers" RuleNamespace="Microsoft.NetCore.Analyzers">
-      <Rule Id="CA1303" Action="Warning" />          <!-- Do not pass literals as localized parameters -->
+      <Rule Id="CA1303" Action="None" />             <!-- Do not pass literals as localized parameters -->
       <Rule Id="CA1304" Action="Warning" />          <!-- Specify CultureInfo -->
       <Rule Id="CA1305" Action="Warning" />          <!-- Specify IFormatProvider -->
       <Rule Id="CA1307" Action="Warning" />          <!-- Specify StringComparison -->
