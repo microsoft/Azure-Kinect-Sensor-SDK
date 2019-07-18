@@ -745,7 +745,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
             return K4A_RESULT_FAILED;
         }
 
-        *pValue = MapLinuxExposureToK4a(exposure_time);
+        *pValue = MapLinuxExposureToK4a((int32_t)exposure_time);
     }
     break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
