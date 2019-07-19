@@ -8,6 +8,8 @@ namespace Microsoft.Azure.Kinect.Sensor
     {
         internal Capture(NativeMethods.k4a_capture_t handle)
         {
+            Allocator.Singleton.Hook(this);
+
             this.handle = handle;
         }
 

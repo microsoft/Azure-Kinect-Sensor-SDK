@@ -66,7 +66,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     if (image != null)
                     {
-                        //image.Dispose();
+                        image.Dispose();
                         image = null;
                     }
 

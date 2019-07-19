@@ -111,6 +111,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         internal Image(NativeMethods.k4a_image_t handle, Image clone = null)
         {
+            Allocator.Singleton.Hook(this);
+
             this.handle = handle;
             if (clone != null)
             {
@@ -231,6 +233,9 @@ namespace Microsoft.Azure.Kinect.Sensor
                     else
                     {
                         memoryManager = new AzureKinectMemoryManager(this);
+
+                        Allocator.Singleton.Hook(memoryManager);
+
                         return memoryManager.Memory;
                     }
                 }

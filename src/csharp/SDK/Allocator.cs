@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         private readonly HashSet<WeakReference<IDisposable>> disposables = new HashSet<WeakReference<IDisposable>>();
 
-        public bool UseManagedAllocator { get; set; } = false;
+        public bool UseManagedAllocator { get; set; } = true;
 
         public bool CopyNativeBuffers { get; set; } = false;
         
@@ -54,13 +54,13 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             lock (this)
             {
-                disposables.RemoveWhere((r) => 
-                    {
-                        IDisposable target;
-                        bool alive = r.TryGetTarget(out target);
+                _ = this.disposables.RemoveWhere((r) =>
+                      {
+                          IDisposable target;
+                          bool alive = r.TryGetTarget(out target);
 
-                        return alive || target == disposable;
-                });
+                          return !alive || target == disposable;
+                      });
             }
         }
 
@@ -161,12 +161,15 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             lock (this)
             {
-                
+
+                System.Diagnostics.Debug.WriteLine($"Disposable count {disposables.Count} (Allocation Count {allocations.Count})");
+
                 foreach (var r in disposables)
                 {
                     IDisposable disposable;
                     if (r.TryGetTarget(out disposable))
                     {
+                        System.Diagnostics.Debug.WriteLine($"Disposed {disposable} ({disposable.GetType().FullName}) (Allocation Count {allocations.Count})");
                         disposable.Dispose();
                     }
                 }
