@@ -490,6 +490,17 @@ k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback
     return get_imu_sample(context, imu_sample, false);
 }
 
+// If the block contains more than 1 frame, estimate the timestamp for the current frame based on the block duration.
+static uint64_t estimate_block_timestamp_usec(std::shared_ptr<block_info_t> &block)
+{
+    uint64_t timestamp_ns = block->block->GlobalTimecode();
+    if (block->sub_index > 0)
+    {
+        timestamp_ns += block->sub_index * (block->block_duration_ns - 1) / (block->block->NumberFrames() - 1);
+    }
+    return timestamp_ns / 1000;
+}
+
 k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_handle,
                                                      const char *track_name,
                                                      k4a_playback_data_block_t *data_block_handle)
@@ -545,10 +556,9 @@ k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_han
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    uint64_t timestamp_ns = track_reader->current_block->block->GlobalTimecode();
-    DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(0);
+    DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(track_reader->current_block->sub_index);
 
-    data_block_context->timestamp_usec = timestamp_ns / 1000;
+    data_block_context->timestamp_usec = estimate_block_timestamp_usec(track_reader->current_block);
     data_block_context->data_block.assign(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
 
     return K4A_STREAM_RESULT_SUCCEEDED;
@@ -611,10 +621,9 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    uint64_t timestamp_ns = track_reader->current_block->block->GlobalTimecode();
-    DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(0);
+    DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(track_reader->current_block->sub_index);
 
-    data_block_context->timestamp_usec = timestamp_ns / 1000;
+    data_block_context->timestamp_usec = estimate_block_timestamp_usec(track_reader->current_block);
     data_block_context->data_block.assign(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
 
     return K4A_STREAM_RESULT_SUCCEEDED;

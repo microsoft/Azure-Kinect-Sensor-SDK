@@ -829,7 +829,6 @@ void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestam
         auto &track_reader = itr.second;
         track_reader.current_block.reset();
     }
-    context->imu_sample_index = -1;
 }
 
 k4a_result_t parse_tracks(k4a_playback_context_t *context)
@@ -1527,6 +1526,7 @@ std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context, track_
     std::shared_ptr<block_info_t> block = std::make_shared<block_info_t>();
     block->reader = reader;
     block->index = -1;
+    block->sub_index = 0;
     cluster_info_t *cluster_info = find_cluster(context, timestamp_ns);
     if (cluster_info == NULL)
     {
@@ -1575,8 +1575,16 @@ std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_
     assert(track_number <= UINT16_MAX);
     uint16_t search_number = static_cast<uint16_t>(track_number);
 
-    // Copy the current block and start the search at the next index.
+    // Copy the current block and start the search at the next index / sub-index.
     std::shared_ptr<block_info_t> next_block = std::shared_ptr<block_info_t>(new block_info_t(*current));
+    if (next_block->block != NULL)
+    {
+        next_block->sub_index += next ? 1 : -1;
+        if (next_block->sub_index >= 0 && next_block->sub_index < (int)next_block->block->NumberFrames())
+        {
+            return next_block;
+        }
+    }
     next_block->index += next ? 1 : -1;
 
     std::shared_ptr<loaded_cluster_t> search_cluster = next_block->cluster;
@@ -1618,6 +1626,7 @@ std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_
                 // We found a valid block for this track, update the timestamp and return it.
                 next_block->timestamp_ns = next_block->block->GlobalTimecode();
                 next_block->sync_timestamp_ns = next_block->timestamp_ns + current->reader->sync_delay_ns;
+                next_block->sub_index = next ? 0 : ((int)next_block->block->NumberFrames() - 1);
 
                 return next_block;
             }
@@ -2110,23 +2119,21 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
 
         if (block_info && block_info->block)
         {
-            context->imu_track->current_block = block_info;
-
             size_t sample_count = block_info->block->NumberFrames();
             if (block_info->sync_timestamp_ns > context->seek_timestamp_ns)
             {
                 // The timestamp we're looking for is before the found block.
-                context->imu_sample_index = next ? 0 : -1;
+                block_info->sub_index = next ? 0 : -1;
             }
             else if (block_info->sync_timestamp_ns + block_info->block_duration_ns <= context->seek_timestamp_ns)
             {
                 // The timestamp we're looking for is after the found block.
-                context->imu_sample_index = (int)sample_count + (next ? 0 : -1);
+                block_info->sub_index = (int)sample_count + (next ? 0 : -1);
             }
             else
             {
                 // The timestamp we're looking for is within the found block.
-                context->imu_sample_index = -1;
+                block_info->sub_index = -1;
                 for (size_t i = 0; i < sample_count; i++)
                 {
                     matroska_imu_sample_t *sample = parse_imu_sample_buffer(
@@ -2138,53 +2145,45 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
                     }
                     else if (sample->acc_timestamp_ns >= context->seek_timestamp_ns)
                     {
-                        context->imu_sample_index = next ? (int)i : (int)i - 1;
+                        block_info->sub_index = next ? (int)i : (int)i - 1;
                         break;
                     }
                 }
+            }
+            if (block_info->sub_index < 0 || block_info->sub_index >= (int)sample_count)
+            {
+                block_info = next_block(context, block_info.get(), next);
             }
         }
     }
     else
     {
-        // Advance to the next IMU sample.
-        context->imu_sample_index += next ? 1 : -1;
+        block_info = next_block(context, block_info.get(), next);
     }
 
-    while (block_info && block_info->block)
+    context->imu_track->current_block = block_info;
+
+    if (block_info && block_info->block && block_info->sub_index >= 0 &&
+        block_info->sub_index < (int)block_info->block->NumberFrames())
     {
-        size_t sample_count = block_info->block->NumberFrames();
-        if (context->imu_sample_index >= 0 && context->imu_sample_index < (int)sample_count)
+        matroska_imu_sample_t *sample = parse_imu_sample_buffer(
+            block_info->block->GetBuffer((unsigned int)block_info->sub_index));
+        if (sample == NULL)
         {
-            matroska_imu_sample_t *sample = parse_imu_sample_buffer(
-                block_info->block->GetBuffer((unsigned int)context->imu_sample_index));
-            if (sample == NULL)
-            {
-                *imu_sample = { 0 };
-                return K4A_STREAM_RESULT_FAILED;
-            }
-            else
-            {
-                imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
-                imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
-                imu_sample->temperature = std::numeric_limits<float>::quiet_NaN();
-                for (size_t i = 0; i < 3; i++)
-                {
-                    imu_sample->acc_sample.v[i] = sample->acc_data[i];
-                    imu_sample->gyro_sample.v[i] = sample->gyro_data[i];
-                }
-                return K4A_STREAM_RESULT_SUCCEEDED;
-            }
+            *imu_sample = { 0 };
+            return K4A_STREAM_RESULT_FAILED;
         }
         else
         {
-            // If we've reached the end of the current block, advance to the next one.
-            block_info = next_block(context, block_info.get(), next);
-            if (block_info && block_info->block)
+            imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
+            imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
+            imu_sample->temperature = std::numeric_limits<float>::quiet_NaN();
+            for (size_t i = 0; i < 3; i++)
             {
-                context->imu_track->current_block = block_info;
-                context->imu_sample_index = next ? 0 : (int)(block_info->block->NumberFrames() - 1);
+                imu_sample->acc_sample.v[i] = sample->acc_data[i];
+                imu_sample->gyro_sample.v[i] = sample->gyro_data[i];
             }
+            return K4A_STREAM_RESULT_SUCCEEDED;
         }
     }
 

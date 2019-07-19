@@ -125,9 +125,7 @@ typedef struct _k4a_playback_context_t
     track_reader_t *color_track = nullptr;
     track_reader_t *depth_track = nullptr;
     track_reader_t *ir_track = nullptr;
-
     track_reader_t *imu_track = nullptr;
-    int imu_sample_index = -1;
 
     std::map<std::string, track_reader_t> track_map;
 
