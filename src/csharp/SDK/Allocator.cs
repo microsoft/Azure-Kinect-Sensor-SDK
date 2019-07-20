@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -17,11 +18,13 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public static Allocator Singleton { get; } = new Allocator();
 
+        private ArrayPool<byte> pool = ArrayPool<byte>.Shared;
+
         private readonly HashSet<WeakReference<IDisposable>> disposables = new HashSet<WeakReference<IDisposable>>();
 
         public bool UseManagedAllocator { get; set; } = true;
 
-        public bool CopyNativeBuffers { get; set; } = false;
+        public bool CopyNativeBuffers { get; set; } = true;
         
         public void Hook(IDisposable disposable)
         {
@@ -64,7 +67,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-        public Memory<byte> GetMemory(IntPtr address, long size)
+        public IMemoryOwner<byte> GetMemory(IntPtr address, long size)
         {
             lock (this)
             {
@@ -89,7 +92,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
 
                 // Return a reference to this memory
-                return new Memory<byte>(allocation.Buffer, checked((int)offset), checked((int)size));
+                return new AzureKinectArrayMemoryOwner<byte>(allocation.Buffer, checked((int)offset), checked((int)size));
             }
         }
 
@@ -122,7 +125,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         private IntPtr AllocateFunction(int size, out IntPtr context)
         {
-            byte[] buffer = new byte[size];
+            byte[] buffer = pool.Rent(size);
             AllocationContext allocationContext = new AllocationContext()
             {
                 Buffer = buffer,
@@ -154,6 +157,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
 
             allocationContext.BufferPin.Free();
+            pool.Return(allocationContext.Buffer);
             contextPin.Free();
         }
 
@@ -192,6 +196,62 @@ namespace Microsoft.Azure.Kinect.Sensor
 
             public NativeMethods.k4a_memory_destroy_cb_t CallbackDelegate { get; set; }
         }
+
+        private class BufferCacheEntry
+        {
+            public byte[] managedBufferCache { get; set; }
+            public int usedSize;
+            public int referenceCount;
+        }
+
+        private Dictionary<IntPtr, BufferCacheEntry> BufferCache = new Dictionary<IntPtr, BufferCacheEntry>();
+
+        
+        public byte[] GetBufferCache(IntPtr nativeAddress, int size)
+        {
+            lock (this)
+            {
+                if (BufferCache.ContainsKey(nativeAddress))
+                {
+                    BufferCacheEntry entry = BufferCache[nativeAddress];
+                    entry.referenceCount++;
+
+                    if (entry.usedSize != size)
+                    {
+                        throw new Exception("Multiple image buffers sharing the same address cannot have the same size");
+                    }
+                    return entry.managedBufferCache;
+                }
+                else;
+                {
+                    BufferCacheEntry entry = new BufferCacheEntry
+                    {
+                        managedBufferCache = pool.Rent(size),
+                        usedSize = size,
+                        referenceCount = 1,
+                    };
+
+                    BufferCache.Add(nativeAddress, entry);
+                    return entry.managedBufferCache;
+                }
+            }
+        }
+
+        public void ReturnBufferCache(IntPtr nativeAddress)
+        {
+            lock (this)
+            {
+                BufferCacheEntry entry = this.BufferCache[nativeAddress];
+                entry.referenceCount--;
+                if (entry.referenceCount == 0)
+                {
+                    pool.Return(entry.managedBufferCache);
+                    this.BufferCache.Remove(nativeAddress);
+                }
+            }
+        }
+
+        
     }
 
 

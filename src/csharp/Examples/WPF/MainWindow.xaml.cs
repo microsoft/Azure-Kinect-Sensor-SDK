@@ -56,22 +56,29 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                                 // Transform the depth image
                                 transform.DepthImageToColorCamera(capture, transformedDepth);
 
-                                Span<ushort> depthBuffer = MemoryMarshal.Cast<byte, ushort>(transformedDepth.Memory.Span);
-                                Span<BGRA> colorBuffer = MemoryMarshal.Cast<byte, BGRA>(capture.Color.Memory.Span);
-
-                                // Modify the color image with data from the depth image
-                                for (int i = 0; i < colorBuffer.Length; i++)
+                                using (var depthPixels = transformedDepth.GetPixels<ushort>())
+                                using (var colorPixels = capture.Color.GetPixels<BGRA>())
                                 {
-                                    if (depthBuffer[i] == 0)
+
+                                    Span<ushort> depthBuffer = depthPixels.Memory.Span;
+                                    Span<BGRA> colorBuffer = colorPixels.Memory.Span;
+
+                                    // Modify the color image with data from the depth image
+                                    for (int i = 0; i < colorBuffer.Length; i++)
                                     {
-                                        colorBuffer[i].R = 255;
-                                    }
-                                    else if (depthBuffer[i] > 1500)
-                                    {
-                                        colorBuffer[i].G = 255;
+                                        if (depthBuffer[i] == 0)
+                                        {
+                                            colorBuffer[i].R = 255;
+                                        }
+                                        else if (depthBuffer[i] > 1500)
+                                        {
+                                            colorBuffer[i].G = 255;
+                                        }
                                     }
                                 }
+
                             }).ConfigureAwait(true);
+
 
                             this.depthImageViewPane.Source = capture.Color.CreateBitmapSource();
                             frameCount++;

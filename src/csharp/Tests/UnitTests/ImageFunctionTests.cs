@@ -143,7 +143,10 @@ void k4a_image_release(k4a_image_t image_handle)
             {
                 Image i = new Image(ImageFormat.Custom, 640, 480, 640 * 2);
 
-                Span<byte> memorySpan = i.Memory.Span;
+                using (var memoryOwner = i.GetMemory())
+                {
+
+                }
 
                 // The reference should still exist and we should have not seen close called
                 Assert.AreEqual(1, count.Calls("k4a_image_create"));
@@ -288,22 +291,25 @@ uint8_t* k4a_image_get_buffer(k4a_image_t image_handle)
             {
                 using (Image image = new Image(ImageFormat.Custom, 640, 480, 640 * 2))
                 {
-                    Memory<byte> memory = image.Memory;
-                    System.Span<byte> memorySpan = memory.Span;
+                    using (IMemoryOwner<byte> owner = image.GetMemory())
+                    {
+                        Memory<byte> memory = owner.Memory;
+                        System.Span<byte> memorySpan = memory.Span;
 
-                    System.Span<short> shortSpan = MemoryMarshal.Cast<byte, short>(memorySpan);
+                        System.Span<short> shortSpan = MemoryMarshal.Cast<byte, short>(memorySpan);
 
-                    Assert.AreEqual(0, shortSpan[0]);
-                    Assert.AreEqual(1, shortSpan[1]);
-                    image.Dispose();
+                        Assert.AreEqual(0, shortSpan[0]);
+                        Assert.AreEqual(1, shortSpan[1]);
+                        image.Dispose();
 
-                    MemoryManager<byte> memoryManager;
-                    bool r = MemoryMarshal.TryGetMemoryManager<byte, MemoryManager<byte>>(memory, out memoryManager);
+                        MemoryManager<byte> memoryManager;
+                        bool r = MemoryMarshal.TryGetMemoryManager<byte, MemoryManager<byte>>(memory, out memoryManager);
 
-                    Assert.IsTrue(r);
-                    ((IDisposable)memoryManager).Dispose();
+                        Assert.IsTrue(r);
+                        ((IDisposable)memoryManager).Dispose();
 
-                    Assert.AreEqual(2, shortSpan[2], "Memory access invalid");
+                        Assert.AreEqual(2, shortSpan[2], "Memory access invalid");
+                    }
                 }
             }).Wait();
 
@@ -326,7 +332,8 @@ uint8_t* k4a_image_get_buffer(k4a_image_t image_handle)
             
             Image image = new Image(ImageFormat.Custom, 640, 480, 640 * 2);
 
-            memory = image.Memory;
+            IMemoryOwner<byte> owner = image.GetMemory();
+            memory = owner.Memory;
 
             pixels = MemoryMarshal.Cast<byte, ushort>(memory.Span);
 

@@ -2,12 +2,67 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-    public class AzureKinectMemoryManager : MemoryManager<byte>
+    class AzureKinectArrayMemoryOwner<T> : IMemoryOwner<T>
+    {
+        public AzureKinectArrayMemoryOwner(T[] array, int start, int length)
+        {
+            this.Memory = new Memory<T>(array, start, length);
+        }
+
+        public Memory<T> Memory { get; }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    class AzureKinectMemorytOwnerCast<TFrom, TTo> : MemoryManager<TTo>
+        where TFrom : unmanaged
+        where TTo : unmanaged
+    {
+        
+        public AzureKinectMemorytOwnerCast(IMemoryOwner<TFrom> memory, int from_start, int from_length)
+        {
+            this.Source = memory;
+            this.FromStart = from_start;
+            this.FromLength = from_length;
+        }
+
+        private IMemoryOwner<TFrom> Source { get; }
+
+        private int FromStart { get; }
+        private int FromLength { get; }
+
+        public override Span<TTo> GetSpan()
+        {
+            return MemoryMarshal.Cast<TFrom, TTo>(this.Source.Memory.Span.Slice(FromStart, FromLength));
+        }
+
+        public override MemoryHandle Pin(int elementIndex = 0)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Unpin()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            this.Source.Dispose();
+        }
+    }
+
+
+    class AzureKinectMemoryManager : MemoryManager<byte>
     {
         private Image image;
 

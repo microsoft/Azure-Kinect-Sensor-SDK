@@ -2,23 +2,20 @@
 // Licensed under the MIT License.
 using System;
 using System.Buffers;
+using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-    public class Image : IMemoryOwner<byte>, IDisposable
+    public class Image : IDisposable
     {
 
         Allocator Allocator = Allocator.Singleton;
 
-        /// <summary>
-        /// Gets a Span of all the pixels in the image.
-        /// </summary>
-        /// <typeparam name="PixelT">The type of each pixel.</typeparam>
-        /// <remarks>If the image stride does not evenly align with the number of pixels in each row, this function will throw an exception.</remarks>
-        /// <returns>Span representing the set of pixels in the image.</returns>
-        public Span<PixelT> GetPixels<PixelT>()
+
+        public IMemoryOwner<PixelT> GetPixels<PixelT>()
             where PixelT : unmanaged
         {
             if (this.StrideBytes != Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels)
@@ -26,16 +23,19 @@ namespace Microsoft.Azure.Kinect.Sensor
                 throw new AzureKinectException("Pixels not aligned to stride of each line");
             }
 
-            return MemoryMarshal.Cast<byte, PixelT>(this.Memory.Span.Slice(0, this.WidthPixels * this.HeightPixels * Marshal.SizeOf(typeof(PixelT))));
+            IMemoryOwner<byte> memory = GetMemory();
+            try
+            {
+                return new AzureKinectMemorytOwnerCast<byte, PixelT>(memory, 0, this.WidthPixels * this.HeightPixels * Marshal.SizeOf(typeof(PixelT)));
+            }
+            catch
+            {
+                memory.Dispose();
+                throw;
+            }
         }
 
-        /// <summary>
-        /// Gets a Span of all the pixels on a row of an image.
-        /// </summary>
-        /// <typeparam name="PixelT">The type of each pixel.</typeparam>
-        /// <param name="row">Row of the image to get the pixels for</param>
-        /// <returns>Span representing the set of pixels in the image.</returns>
-        public Span<PixelT> GetPixels<PixelT>(int row)
+        public IMemoryOwner<PixelT> GetPixels<PixelT>(int row)
             where PixelT : unmanaged
         {
             if (row > this.HeightPixels || row < 0)
@@ -48,7 +48,16 @@ namespace Microsoft.Azure.Kinect.Sensor
                 throw new AzureKinectException("The image stride is not large enough for pixels of this size");
             }
 
-            return MemoryMarshal.Cast<byte, PixelT>(this.Memory.Span.Slice(row * this.StrideBytes, Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels));
+            IMemoryOwner<byte> memory = GetMemory();
+            try
+            {
+                return new AzureKinectMemorytOwnerCast<byte, PixelT>(memory, row * this.StrideBytes, Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels);
+            }
+            catch
+            {
+                memory.Dispose();
+                throw;
+            }
         }
 
         /// <summary>
@@ -57,18 +66,37 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <typeparam name="PixelT">The type of the pixel.</typeparam>
         /// <param name="row">The image row.</param>
         /// <param name="col">The image column.</param>
-        /// <returns>A reference to the pixel at the row and column.</returns>
-        public ref PixelT GetPixel<PixelT>(int row, int col)
+        /// <returns>The pixel value at the row and column.</returns>
+        public unsafe PixelT GetPixel<PixelT>(int row, int col)
             where PixelT : unmanaged
         {
+            if (row < 0 || row > this.HeightPixels)
+            {
+                throw new ArgumentOutOfRangeException(nameof(row));
+            }
+
             if (col < 0 || col > this.WidthPixels)
             {
                 throw new ArgumentOutOfRangeException(nameof(col));
             }
 
-            Span<PixelT> rowPixels = GetPixels<PixelT>(row);
+            return *(PixelT*)((byte*)this.Buffer + (this.StrideBytes * row) + (col * sizeof(PixelT)));
+        }
 
-            return ref rowPixels[col];
+        public unsafe void SetPixel<PixelT>(int row, int col, PixelT pixel)
+            where PixelT : unmanaged
+        {
+            if (row < 0 || row > this.HeightPixels)
+            {
+                throw new ArgumentOutOfRangeException(nameof(row));
+            }
+
+            if (col < 0 || col > this.WidthPixels)
+            {
+                throw new ArgumentOutOfRangeException(nameof(col));
+            }
+
+            *(PixelT*)((byte*)this.Buffer + (this.StrideBytes * row) + (col * sizeof(PixelT))) = pixel;
         }
 
         public Image(ImageFormat format, int width_pixels, int height_pixels, int stride_bytes)
@@ -109,15 +137,11 @@ namespace Microsoft.Azure.Kinect.Sensor
                 out this.handle));
         }
 
-        internal Image(NativeMethods.k4a_image_t handle, Image clone = null)
+        internal Image(NativeMethods.k4a_image_t handle)
         {
             Allocator.Singleton.Hook(this);
 
             this.handle = handle;
-            if (clone != null)
-            {
-                this.bufferCopy = clone.bufferCopy;
-            }
         }
 
         public unsafe byte[] GetBufferCopy()
@@ -127,13 +151,20 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (disposedValue)
                     throw new ObjectDisposedException(nameof(Image));
 
-                return this.Memory.ToArray();
+                int bufferSize = checked((int)this.Size);
+                byte[] copy = new byte[bufferSize];
+
+                // If we are using a managed buffer copy, ensure the native memory is up to date
+                this.FlushMemory();
+
+                System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, copy, 0, bufferSize);
+
+                return copy;
             }
         }
 
 
-        private byte[] bufferCopy = null;
-        private AzureKinectMemoryManager memoryManager = null;
+        private byte[] managedBufferCache = null;
 
         private IntPtr _Buffer = IntPtr.Zero;
 
@@ -182,62 +213,45 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
         
 
-        /// <summary>
-        /// Returns a reference to the the underlying memory.
-        /// </summary>
-        /// <remarks>
-        /// This returns an accessor to the Image's memory without making
-        /// a copy.
-        /// 
-        /// Once managed code has accessed the image's memory, the memory
-        /// will be retained until it is garbage collected.
-        /// </remarks>
-        public unsafe Memory<byte> Memory
+        public unsafe IMemoryOwner<byte> GetMemory()
         {
-            get
+            lock (this)
             {
-                lock (this)
+
+                if (disposedValue)
+                    throw new ObjectDisposedException(nameof(Image));
+
+                if (managedBufferCache != null)
                 {
-                
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Image));
+                    return new AzureKinectArrayMemoryOwner<byte>(managedBufferCache, 0, (int)this.Size);
+                }
 
-                    if (bufferCopy != null)
-                    {
-                        return new Memory<byte>(bufferCopy);
-                    }
-                    if (memoryManager != null)
-                    {
-                        return memoryManager.Memory;
-                    }
+                IntPtr bufferAddress = (IntPtr)this.Buffer;
 
-                    IntPtr bufferAddress = (IntPtr)this.Buffer;
+                IMemoryOwner<byte> memory = this.Allocator.GetMemory(bufferAddress, this.Size);
+                if (memory != null)
+                {
+                    return memory;
+                }
 
-                    Memory<byte> memory = this.Allocator.GetMemory(bufferAddress, this.Size);
-                    if (!memory.IsEmpty)
-                    {
-                        return memory;
-                    }
+                // The underlying buffer is not in managed memory
+                if (Allocator.CopyNativeBuffers)
+                {
+                    // Create a copy
+                    int bufferSize = checked((int)this.Size);
+                    this.managedBufferCache = Allocator.GetBufferCache((IntPtr)this.Buffer, bufferSize);
 
-                    // The underlying buffer is not in managed memory
+                    System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, this.managedBufferCache, 0, bufferSize);
 
-                    if (Allocator.CopyNativeBuffers)
-                    {
-                        // Create a copy
-                        this.bufferCopy = new byte[this.Size];
+                    return new AzureKinectArrayMemoryOwner<byte>(managedBufferCache, 0, (int)this.Size);
+                }
+                else
+                {
+                    memory = new AzureKinectMemoryManager(this);
 
-                        System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, this.bufferCopy, 0, checked((int)this.Size));
+                    Allocator.Singleton.Hook(memory);
 
-                        return new Memory<byte>(bufferCopy);
-                    }
-                    else
-                    {
-                        memoryManager = new AzureKinectMemoryManager(this);
-
-                        Allocator.Singleton.Hook(memoryManager);
-
-                        return memoryManager.Memory;
-                    }
+                    return memory;
                 }
             }
         }
@@ -249,11 +263,11 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (disposedValue)
                     throw new ObjectDisposedException(nameof(Image));
 
-                if (this.bufferCopy != null)
+                if (this.managedBufferCache != null)
                 {
                     unsafe
                     {
-                        System.Runtime.InteropServices.Marshal.Copy(this.bufferCopy, 0, (IntPtr)this.Buffer, (int)this.Size);
+                        System.Runtime.InteropServices.Marshal.Copy(this.managedBufferCache, 0, (IntPtr)this.Buffer, (int)this.Size);
                     }
                 }
             }
@@ -266,11 +280,11 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (disposedValue)
                     throw new ObjectDisposedException(nameof(Image));
 
-                if (this.bufferCopy != null)
+                if (this.managedBufferCache != null)
                 {
                     unsafe
                     {
-                        System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, this.bufferCopy, 0, checked((int)this.Size));
+                        System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, this.managedBufferCache, 0, checked((int)this.Size));
                     }
                 }
             }
@@ -496,7 +510,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (disposedValue)
                     throw new ObjectDisposedException(nameof(Image));
 
-                return new Image(handle.DuplicateReference(), this);
+                return new Image(handle.DuplicateReference());
             }
         }
 
@@ -522,9 +536,23 @@ namespace Microsoft.Azure.Kinect.Sensor
                         handle = null;
                     }
 
+                    if (this.managedBufferCache != null)
+                    {
+                        unsafe
+                        {
+                            Allocator.ReturnBufferCache((IntPtr)this.Buffer);
+                        }
+                        this.managedBufferCache = null;
+                    }
+
                     disposedValue = true;
                 }
             }
+        }
+
+        ~Image()
+        {
+            Dispose(false);
         }
 
 
@@ -534,7 +562,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }
