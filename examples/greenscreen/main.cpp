@@ -10,6 +10,7 @@
 #include <opencv2/highgui.hpp>
 
 using std::cout;
+using std::endl;
 using std::vector;
 
 // ideally, we could generalize this to many OpenCV types
@@ -20,6 +21,14 @@ cv::Mat k4a_color_to_opencv(const k4a::image &im)
     cv::Mat decoded = cv::imdecode(raw_data, cv::IMREAD_COLOR);
     return decoded;
 }
+
+// TODO remove
+// static void onMouse(int, int x, int y, int, void *)
+// {
+//     // this function will be called every time you move your mouse over the image
+//     // the coordinates will be in x and y variables
+//     cout << "Coords " << x << " " << y << endl;
+// }
 
 cv::Mat k4a_depth_to_opencv(const k4a::image &im)
 {
@@ -43,21 +52,28 @@ cv::Mat k4a_ir_to_opencv(const k4a::image &im)
     return result;
 }
 
-cv::Mat k4a_calibration_to_depth_camera_matrix(const k4a::calibration &cal)
+cv::Mat k4a_calibration_to_color_camera_matrix(const k4a::calibration &cal)
 {
-    const k4a_calibration_intrinsic_parameters_t::_param &i = cal.depth_camera_calibration.intrinsics.parameters.param;
-    cv::Mat camera_matrix = cv::Mat::zeros(3, 3, CV_64F);
-    camera_matrix.at<double>(0, 0) = i.fx;
-    camera_matrix.at<double>(1, 1) = i.fx;
-    camera_matrix.at<double>(0, 2) = i.cx;
-    camera_matrix.at<double>(1, 2) = i.cy;
-    camera_matrix.at<double>(2, 2) = 1;
+    const k4a_calibration_intrinsic_parameters_t::_param &i = cal.color_camera_calibration.intrinsics.parameters.param;
+    cv::Mat camera_matrix = cv::Mat::zeros(3, 3, CV_32F);
+    camera_matrix.at<float>(0, 0) = i.fx;
+    camera_matrix.at<float>(1, 1) = i.fx;
+    camera_matrix.at<float>(0, 2) = i.cx;
+    camera_matrix.at<float>(1, 2) = i.cy;
+    camera_matrix.at<float>(2, 2) = 1;
     return camera_matrix;
 }
 
-vector<double> k4a_calibration_to_depth_camera_dist_coeffs(const k4a::calibration &cal)
+void k4a_calibration_to_depth_to_color_R_T(const k4a::calibration &cal, cv::Mat &R, cv::Vec3f &T)
 {
-    const k4a_calibration_intrinsic_parameters_t::_param &i = cal.depth_camera_calibration.intrinsics.parameters.param;
+    const k4a_calibration_extrinsics_t &i = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
+    R = cv::Mat(3, 3, CV_32F, (void *)i.rotation);
+    T = cv::Vec3f(i.translation[0], i.translation[1], i.translation[2]);
+}
+
+vector<float> k4a_calibration_to_color_camera_dist_coeffs(const k4a::calibration &cal)
+{
+    const k4a_calibration_intrinsic_parameters_t::_param &i = cal.color_camera_calibration.intrinsics.parameters.param;
     return { i.k1, i.k2, i.p1, i.p2, i.k3, i.k4, i.k5, i.k6 };
 }
 
@@ -123,8 +139,8 @@ int main()
         devices[0].start_cameras(&configurations[0]);
 
         // These will hold the rotation and translation we want
-        cv::Mat R, E, F;
-        cv::Vec3d T;
+        cv::Mat R_color_sub_to_color_master, E, F;
+        cv::Vec3d T_color_sub_to_color_master;
 
         // the cameras have been started. Calibration time!
         while (true)
@@ -156,7 +172,7 @@ int main()
             // depths are present on both images. Time to calibrate.
             size_t board_height = 8;
             size_t board_width = 6;
-            double board_square_size = .033; // mine was 33 millimeters TODO generalize
+            float board_square_size = 33.; // mine was 33 millimeters TODO generalize
             cv::Size chessboard_pattern(board_height, board_width);
 
             // indexing: first by camera, then by frame, then by which corner
@@ -202,7 +218,9 @@ int main()
                     corners_float.emplace_back(cv::Point2f{ static_cast<float>(p.x), static_cast<float>(p.y) });
                 }
                 cv::drawChessboardCorners(color_images[i], chessboard_pattern, corners_float, found_chessboard);
-                cv::imshow(std::string("Chessboard view from camera ") + std::to_string(i), color_images[i]);
+                std::string title = std::string("Chessboard view from camera ") + std::to_string(i);
+                cv::imshow(title, color_images[i]);
+                // cv::setMouseCallback(title, onMouse);
                 cv::waitKey(500);
             }
 
@@ -212,9 +230,9 @@ int main()
             vector<vector<cv::Point3d>> chessboard_corners_3d(1); // start with 1 frame
             // the points exist on a plane
             cout << "Filling plane details!" << std::endl;
-            for (size_t h = 0; h < board_height; ++h)
+            for (size_t w = 0; w < board_width; ++w)
             {
-                for (size_t w = 0; w < board_width; ++w)
+                for (size_t h = 0; h < board_height; ++h)
                 {
                     chessboard_corners_3d[0].emplace_back(
                         cv::Point3d{ h * board_square_size, w * board_square_size, 0.0 });
@@ -253,33 +271,73 @@ int main()
             const k4a::calibration &sub_calib = devices.back().get_calibration(configurations.back().depth_mode,
                                                                                configurations.back().color_resolution);
             cout << "Getting camera matrices!" << std::endl;
-            cv::Mat master_camera_matrix = k4a_calibration_to_depth_camera_matrix(master_calib);
-            cv::Mat sub_camera_matrix = k4a_calibration_to_depth_camera_matrix(sub_calib);
+            cv::Mat master_camera_matrix = k4a_calibration_to_color_camera_matrix(master_calib);
+            cv::Mat sub_camera_matrix = k4a_calibration_to_color_camera_matrix(sub_calib);
             cout << "Getting camera dist coefficients!" << std::endl;
-            vector<double> master_dist_coeff = k4a_calibration_to_depth_camera_dist_coeffs(master_calib);
-            vector<double> sub_dist_coeff = k4a_calibration_to_depth_camera_dist_coeffs(sub_calib);
+            vector<float> master_dist_coeff = k4a_calibration_to_color_camera_dist_coeffs(master_calib);
+            vector<float> sub_dist_coeff = k4a_calibration_to_color_camera_dist_coeffs(sub_calib);
 
             // TODO depth, not color!
 
             cout << "Preparing to calibrate!" << std::endl;
-            cv::stereoCalibrate(chessboard_corners_3d_float,
-                                subordinate_corners_2d,
-                                master_corners_2d,
-                                sub_camera_matrix,
-                                sub_dist_coeff,
-                                master_camera_matrix,
-                                master_dist_coeff,
-                                color_images[0].size(),
-                                R,
-                                T,
-                                E,
-                                F,
-                                cv::CALIB_FIX_INTRINSIC);
+            for (size_t i = 0; i < master_corners_2d.front().size(); ++i)
+            {
+                cout << "Master point: ";
+                cout << master_corners_2d.front()[i] << endl;
+                cout << "Subordinate point: ";
+                cout << subordinate_corners_2d.front()[i] << endl;
+                cout << "3D point: ";
+                cout << chessboard_corners_3d_float.front()[i] << endl;
+            }
+            // cout << subordinate_corners_2d << std::endl;
+            // cout << master_corners_2d << std::endl;
+            // TODO is this ok actually
+            sub_camera_matrix.convertTo(sub_camera_matrix, CV_32F);
+            master_camera_matrix.convertTo(master_camera_matrix, CV_32F);
+            cout << "Camera matrices!" << endl;
+            cout << sub_camera_matrix << endl;
+            cout << master_camera_matrix << endl;
+            cout << sub_camera_matrix << endl;
+            for (float f : sub_dist_coeff)
+            {
+                cout << f << " ";
+            }
+            cout << endl;
+            for (float f : master_dist_coeff)
+            {
+                cout << f << " ";
+            }
+            cout << endl;
+            cout << "Types" << endl;
+            cout << CV_32F << endl;
+            cout << sub_camera_matrix.type() << endl;
+            cout << master_camera_matrix.type() << endl;
+            double error = cv::stereoCalibrate(chessboard_corners_3d_float,
+                                               subordinate_corners_2d,
+                                               master_corners_2d,
+                                               sub_camera_matrix,
+                                               sub_dist_coeff,
+                                               master_camera_matrix,
+                                               master_dist_coeff,
+                                               color_images[0].size(),
+                                               R_color_sub_to_color_master,
+                                               T_color_sub_to_color_master,
+                                               E,
+                                               F,
+                                               cv::CALIB_FIX_INTRINSIC);
             cout << "Finished calibrating!" << std::endl;
+            cout << "Got error of " << error << endl;
 
-            cout << R << std::endl;
-            cout << T << std::endl;
-            cout << E << std::endl;
+            cout << R_color_sub_to_color_master << std::endl;
+            cout << T_color_sub_to_color_master << std::endl;
+
+            // the goal: the extrinsics already have the rotation + translation for depth_sub -> color_sub
+            // and we have depth_color -> camera_color so let's combine them
+            cv::Mat R_depth_sub_to_color_sub;
+            cv::Vec3f T_depth_sub_to_color_sub;
+            k4a_calibration_to_depth_to_color_R_T(sub_calib, R_depth_sub_to_color_sub, T_depth_sub_to_color_sub);
+            cout << R_depth_sub_to_color_sub << std::endl;
+            cout << T_depth_sub_to_color_sub << std::endl;
 
             break;
         }
@@ -379,9 +437,6 @@ int main()
             normalized_opencv_sub_depth_in_sub_color.convertTo(grayscale_opencv_sub_depth_in_sub_color, CV_8UC1);
             normalized_opencv_master_depth_in_master_color.convertTo(grayscale_opencv_master_depth_in_master_color,
                                                                      CV_8UC1);
-            cv::Mat test(3, 3, CV_64F, cv::Scalar(0));
-            test.at<double>(0, 0) = test.at<double>(1, 1) = test.at<double>(2, 2) = 1;
-            test.at<double>(0, 2) = test.at<double>(1, 2) = 20;
             cv::Mat grayscale_opencv_sub_depth_in_master_color;
             cv::warpPerspective(grayscale_opencv_sub_depth_in_sub_color,
                                 grayscale_opencv_sub_depth_in_master_color,
@@ -405,10 +460,10 @@ int main()
             // cout << grayscale_opencv_sub_depth_in_master_color << std::endl;
             cv::merge(channels, overlay);
 
-            cv::imshow("sub in master space", grayscale_opencv_sub_depth_in_master_color);
-            cv::waitKey(0);
-            cv::imshow("overlay", overlay);
-            cv::waitKey(0);
+            // cv::imshow("sub in master space", grayscale_opencv_sub_depth_in_master_color);
+            // cv::waitKey(0);
+            // cv::imshow("overlay", overlay);
+            // cv::waitKey(0);
 
             // create the image that will be be used as output
             cv::Mat output_image(master_color_image.get_height_pixels(),
