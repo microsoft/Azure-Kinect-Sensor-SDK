@@ -297,7 +297,6 @@ int main()
             cout << "Camera matrices!" << endl;
             cout << sub_camera_matrix << endl;
             cout << master_camera_matrix << endl;
-            cout << sub_camera_matrix << endl;
             for (float f : sub_dist_coeff)
             {
                 cout << f << " ";
@@ -324,7 +323,7 @@ int main()
                                                T_color_sub_to_color_master,
                                                E,
                                                F,
-                                               cv::CALIB_FIX_INTRINSIC);
+                                               cv::CALIB_FIX_INTRINSIC | cv::CALIB_RATIONAL_MODEL);
             cout << "Finished calibrating!" << std::endl;
             cout << "Got error of " << error << endl;
 
