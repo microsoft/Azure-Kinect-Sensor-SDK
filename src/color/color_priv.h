@@ -23,10 +23,10 @@ typedef struct _color_control_cap_t
 
 typedef struct _exposure_mapping
 {
-    int exponent;
-    int exposure_usec;
-    int exposure_mapped_50Hz_usec;
-    int exposure_mapped_60Hz_usec;
+    int exponent;                  // Windows Media Foundation implementation detail
+    int exposure_usec;             // Windows Media Foundation implementation detail
+    int exposure_mapped_50Hz_usec; // Exposure when K4A_COLOR_CONTROL_POWERLINE_FREQUENCY == 50Hz
+    int exposure_mapped_60Hz_usec; // Exposure when K4A_COLOR_CONTROL_POWERLINE_FREQUENCY == 60Hz
 } color_exposure_mapping_t;
 
 #ifdef _WIN32
