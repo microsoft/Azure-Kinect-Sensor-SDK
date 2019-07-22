@@ -64,11 +64,59 @@ cv::Mat k4a_calibration_to_color_camera_matrix(const k4a::calibration &cal)
     return camera_matrix;
 }
 
-void k4a_calibration_to_depth_to_color_R_T(const k4a::calibration &cal, cv::Mat &R, cv::Vec3f &T)
+cv::Mat construct_homogeneous(const cv::Mat &R, const cv::Vec3d &t)
+{
+    if (R.type() != CV_64F)
+    {
+        cout << "Must be 64F" << endl;
+        exit(1);
+    }
+    cv::Mat homog_matrix = cv::Mat::zeros(cv::Size(4, 4), CV_64F);
+    for (int i = 0; i < R.rows; ++i)
+    {
+        for (int j = 0; j < R.cols; ++j)
+        {
+            homog_matrix.at<double>(i, j) = R.at<double>(i, j);
+        }
+    }
+    for (int i = 0; i < t.channels; ++i)
+    {
+        homog_matrix.at<double>(i, 3) = t[i];
+    }
+    homog_matrix.at<double>(3, 3) = 1;
+    return homog_matrix;
+}
+
+void deconstruct_homogeneous(const cv::Mat &H, cv::Mat &R, cv::Vec3d &t)
+{
+    if (H.size() != cv::Size(4, 4) || H.at<double>(3, 0) != 0 || H.at<double>(3, 1) != 0 || H.at<double>(3, 2) != 0 ||
+        H.at<double>(3, 3) != 1)
+    {
+        cout << "Please use a valid homogeneous matrix." << endl;
+        exit(1);
+    }
+    R = cv::Mat::zeros(cv::Size(3, 3), CV_64F);
+    t[0] = t[1] = t[2] = 0;
+
+    for (int i = 0; i < R.rows; ++i)
+    {
+        for (int j = 0; j < R.cols; ++j)
+        {
+            R.at<double>(i, j) = H.at<double>(i, j);
+        }
+    }
+    for (size_t i = 0; i < t.channels; ++i)
+    {
+        t[i] = H.at<double>(i, 3);
+    }
+}
+
+void k4a_calibration_to_depth_to_color_R_t(const k4a::calibration &cal, cv::Mat &R, cv::Vec3f &T)
 {
     const k4a_calibration_extrinsics_t &i = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
     R = cv::Mat(3, 3, CV_32F, (void *)i.rotation);
     T = cv::Vec3f(i.translation[0], i.translation[1], i.translation[2]);
+    cv::Mat depth_sub_to_color_sub_h = cv::Mat::zeros(cv::Size(4, 4), CV_32F);
 }
 
 vector<float> k4a_calibration_to_color_camera_dist_coeffs(const k4a::calibration &cal)
@@ -140,7 +188,7 @@ int main()
 
         // These will hold the rotation and translation we want
         cv::Mat R_color_sub_to_color_master, E, F;
-        cv::Vec3d T_color_sub_to_color_master;
+        cv::Vec3d t_color_sub_to_color_master;
 
         // the cameras have been started. Calibration time!
         while (true)
@@ -320,7 +368,7 @@ int main()
                                                master_dist_coeff,
                                                color_images[0].size(),
                                                R_color_sub_to_color_master,
-                                               T_color_sub_to_color_master,
+                                               t_color_sub_to_color_master,
                                                E,
                                                F,
                                                cv::CALIB_FIX_INTRINSIC | cv::CALIB_RATIONAL_MODEL);
@@ -328,15 +376,44 @@ int main()
             cout << "Got error of " << error << endl;
 
             cout << R_color_sub_to_color_master << std::endl;
-            cout << T_color_sub_to_color_master << std::endl;
+            cout << t_color_sub_to_color_master << std::endl;
 
             // the goal: the extrinsics already have the rotation + translation for depth_sub -> color_sub
             // and we have depth_color -> camera_color so let's combine them
+            cv::Mat R_depth_sub_to_color_sub_float;
+            cv::Vec3f t_depth_sub_to_color_sub_float;
+            k4a_calibration_to_depth_to_color_R_t(sub_calib,
+                                                  R_depth_sub_to_color_sub_float,
+                                                  t_depth_sub_to_color_sub_float);
             cv::Mat R_depth_sub_to_color_sub;
-            cv::Vec3f T_depth_sub_to_color_sub;
-            k4a_calibration_to_depth_to_color_R_T(sub_calib, R_depth_sub_to_color_sub, T_depth_sub_to_color_sub);
-            cout << R_depth_sub_to_color_sub << std::endl;
-            cout << T_depth_sub_to_color_sub << std::endl;
+            cv::Vec3d t_depth_sub_to_color_sub;
+            R_depth_sub_to_color_sub_float.convertTo(R_depth_sub_to_color_sub, CV_64F);
+            for (int i = 0; i < 3; ++i)
+            {
+                t_depth_sub_to_color_sub[i] = double{ t_depth_sub_to_color_sub_float[i] };
+            }
+            cout << "Matrices obtained from camera" << endl;
+            cout << R_depth_sub_to_color_sub << endl;
+            cout << t_depth_sub_to_color_sub << endl;
+
+            // next, we're going to construct a homogeneous equivalent
+            cout << "Construct homog depth sub to color sub" << endl;
+            cv::Mat depth_sub_to_color_sub_h = construct_homogeneous(R_depth_sub_to_color_sub,
+                                                                     t_depth_sub_to_color_sub);
+            cout << depth_sub_to_color_sub_h << endl;
+            cout << "Construct homog color sub to color master" << endl;
+            cv::Mat color_sub_to_color_master_h = construct_homogeneous(R_color_sub_to_color_master,
+                                                                        t_color_sub_to_color_master);
+            cout << color_sub_to_color_master_h << endl;
+            cout << "Multiply" << endl;
+            cv::Mat depth_sub_to_color_master_h = depth_sub_to_color_sub_h * color_sub_to_color_master_h;
+            cv::Mat depth_sub_to_color_master_R;
+            cv::Vec3d depth_sub_to_color_master_t;
+            deconstruct_homogeneous(depth_sub_to_color_master_h,
+                                    depth_sub_to_color_master_R,
+                                    depth_sub_to_color_master_t);
+            cout << "Homogeneous transform depth sub to color master:" << endl;
+            cout << depth_sub_to_color_master_h << endl;
 
             break;
         }
