@@ -1513,6 +1513,19 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
     return result;
 }
 
+// If the block contains more than 1 frame, estimate the timestamp for the current frame based on the block duration.
+// See k4a_record_subtitle_settings_t::high_freq_data in record.h for more info on timestamp estimation behavior.
+uint64_t estimate_block_timestamp_ns(std::shared_ptr<block_info_t> &block)
+{
+    uint64_t timestamp_ns = block->sync_timestamp_ns;
+    size_t sample_count = block->block->NumberFrames();
+    if (block->sub_index > 0 && sample_count > 0)
+    {
+        timestamp_ns += block->sub_index * (block->block_duration_ns - 1) / (sample_count - 1);
+    }
+    return timestamp_ns;
+}
+
 // Find the first block with a timestamp >= the specified timestamp. If a block group containing the specified timestamp
 // is found, it will be returned. If no blocks are found, a pointer to EOF will be returned, or nullptr if an error
 // occurs.
@@ -1548,7 +1561,7 @@ std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context, track_
         if (block)
         {
             // Return this block if EOF was reached, or the timestamp is >= the search timestamp.
-            if (block->block == NULL || block->sync_timestamp_ns + block->block_duration_ns >= timestamp_ns)
+            if (block->block == NULL || estimate_block_timestamp_ns(block) >= timestamp_ns)
             {
                 return block;
             }
@@ -2190,6 +2203,60 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
     LOG_TRACE("%s of recording reached", next ? "End" : "Beginning");
     *imu_sample = { 0 };
     return K4A_STREAM_RESULT_EOF;
+}
+
+k4a_stream_result_t get_data_block(k4a_playback_context_t *context,
+                                   track_reader_t *track_reader,
+                                   k4a_playback_data_block_t *data_block_handle,
+                                   bool next)
+{
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, track_reader == NULL);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, data_block_handle == NULL);
+
+    std::shared_ptr<block_info_t> read_block = track_reader->current_block;
+    if (read_block == nullptr)
+    {
+        // If the track current block is nullptr, it means it just performed a seek frame operation. find_block
+        // always finds the block with timestamp >= seek_timestamp.
+        read_block = find_block(context, track_reader, context->seek_timestamp_ns);
+        if (!next && read_block)
+        {
+            // In order to find the first timestamp < seek_timestamp, we need to query the previous block.
+            read_block = next_block(context, read_block.get(), false);
+        }
+    }
+    else
+    {
+        read_block = next_block(context, read_block.get(), next);
+    }
+
+    if (read_block == nullptr)
+    {
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
+    track_reader->current_block = read_block;
+
+    // Reach EOF
+    if (read_block->block == nullptr)
+    {
+        return K4A_STREAM_RESULT_EOF;
+    }
+
+    k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
+    if (data_block_context == nullptr)
+    {
+        LOG_ERROR("Creating data block failed.", 0);
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
+    DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(track_reader->current_block->sub_index);
+
+    data_block_context->timestamp_usec = estimate_block_timestamp_ns(track_reader->current_block) / 1000;
+    data_block_context->data_block.assign(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
+
+    return K4A_STREAM_RESULT_SUCCEEDED;
 }
 
 } // namespace k4arecord

@@ -238,9 +238,13 @@ typedef struct _k4a_record_video_settings_t
 typedef struct _k4a_record_subtitle_settings_t
 {
     /**
-     * If true, data will be grouped together in batches to reduce overhead. Exact timestamps will not be stored, so the
-     * data written should contain its own timestamp if precise timestamps are required.
-     * If false, data will be stored in individual blocks with full timestamp information (Default).
+     * If true, data will be grouped together in batches to reduce overhead. In this mode, only a single timestamp will
+     * be stored per batch, and an estimated timestamp will be used by k4a_playback_seek_timestamp() and
+     * k4a_playback_data_block_get_timestamp_usec(). The estimated timestamp is calculated with the assumption that
+     * blocks are evenly spaced within a batch. If precise timestamps are required, the timestamp should be added to
+     * each data block itself.
+     *
+     * If false, data will be stored as individual blocks with full timestamp information (Default).
      */
     bool high_freq_data;
 } k4a_record_subtitle_settings_t;

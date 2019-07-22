@@ -23,9 +23,11 @@ typedef struct _track_header_t
     bool custom_track = false;
 
     /**
-     * Some tracks such as IMU record small samples at a high rate. This changes the recording mode to use BlockGroup's
-     * and lacing to reduce overhead. Lacing will only record a single timestamp for a group of samples, so the data
-     * structure should contain its own timestamp information.
+     * Some tracks such as IMU record small samples at a high rate. This setting changes the recording mode to use
+     * Matroska BlockGroups and lacing to reduce overhead. Lacing will only record a single timestamp for a group of
+     * samples, so the data structure should contain its own timestamp information to maintain accuracy.
+     *
+     * See k4a_record_subtitle_settings_t::high_freq_data in types.h for more information on timestamp behavior.
      */
     bool high_freq_data = false;
 } track_header_t;

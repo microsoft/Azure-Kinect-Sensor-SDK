@@ -185,6 +185,7 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
                                                     loaded_cluster_t *current_cluster,
                                                     bool next);
 
+uint64_t estimate_block_timestamp_ns(std::shared_ptr<block_info_t> &block);
 std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context,
                                          track_reader_t *reader,
                                          uint64_t timestamp_ns);
@@ -197,6 +198,10 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
 k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k4a_capture_t *capture_handle);
 k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *capture_handle, bool next);
 k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next);
+k4a_stream_result_t get_data_block(k4a_playback_context_t *context,
+                                   track_reader_t *track_reader,
+                                   k4a_playback_data_block_t *data_block_handle,
+                                   bool next);
 
 // Template helper functions
 template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElement *element)

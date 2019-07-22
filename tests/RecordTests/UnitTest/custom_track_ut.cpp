@@ -222,7 +222,7 @@ TEST_F(custom_track_ut, read_custom_track_data)
 
             timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
             // This timestamp is estimated, allow for +/- 1 usec for rounding errors
-            ASSERT_TRUE(timestamp_usec >= expected_timestamp_usec_high_freq - 1 &&
+            ASSERT_TRUE(timestamp_usec + 1 >= expected_timestamp_usec_high_freq &&
                         timestamp_usec <= expected_timestamp_usec_high_freq + 1);
 
             block_size = k4a_playback_data_block_get_buffer_size(data_block);
@@ -291,101 +291,110 @@ TEST_F(custom_track_ut, seek_custom_track_frame)
         if (seek_timestamps_usec[i] > max_seek_timestamp)
         {
             ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
-            continue;
         }
         else
         {
             ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+
+            uint64_t timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
+            ASSERT_EQ(timestamp_usec, seek_timestamps_usec[i]);
+
+            size_t block_size = k4a_playback_data_block_get_buffer_size(data_block);
+            uint8_t *block_buffer = k4a_playback_data_block_get_buffer(data_block);
+
+            ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
+
+            k4a_playback_data_block_release(data_block);
         }
-
-        uint64_t timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
-        ASSERT_EQ(timestamp_usec, seek_timestamps_usec[i]);
-
-        size_t block_size = k4a_playback_data_block_get_buffer_size(data_block);
-        uint8_t *block_buffer = k4a_playback_data_block_get_buffer(data_block);
-
-        ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
-
-        k4a_playback_data_block_release(data_block);
     }
 
     k4a_playback_close(handle);
 }
 
-// TODO: Seek functionality isn't fully defined yet for high_frequency data
-/*TEST_F(custom_track_ut, seek_custom_track_high_frequency)
+TEST_F(custom_track_ut, seek_custom_track_high_frequency)
 {
     k4a_playback_t handle = NULL;
     k4a_result_t result = k4a_playback_open("record_test_custom_track.mkv", &handle);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
-    std::vector<size_t> seek_frame_indices = { 200, 2, 4, 7, 1, 10, 0, 2000, 3 };
-    std::vector<uint64_t> seek_timestamps_usec(seek_frame_indices.size());
-    for (size_t i = 0; i < seek_frame_indices.size(); i++)
-    {
-        seek_timestamps_usec[i] = seek_frame_indices[i] * test_timestamp_delta_usec / 10;
-    }
+    uint64_t seek_timestamp_usec = 0;
+    uint64_t last_timestamp_usec_high_freq = 0;
     uint64_t max_seek_timestamp = k4a_playback_get_last_timestamp_usec(handle);
 
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
-    for (size_t i = 0; i < seek_timestamps_usec.size(); i++)
+    for (size_t i = 0; i < test_frame_count; i++)
     {
-        // Seek + read forward
-        result = k4a_playback_seek_timestamp(handle, (int64_t)seek_timestamps_usec[i], K4A_PLAYBACK_SEEK_BEGIN);
-        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-
-        k4a_playback_data_block_t data_block = NULL;
-        stream_result = k4a_playback_get_next_data_block(handle, "CUSTOM_TRACK_HIGH_FREQ", &data_block);
-
-        if (seek_timestamps_usec[i] > max_seek_timestamp)
+        for (size_t j = 0; j < 10; j++)
         {
-            ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
-            continue;
+            uint64_t expected_timestamp_usec_high_freq = seek_timestamp_usec + j * test_timestamp_delta_usec / 10;
+
+            // Seek + read forward
+            result = k4a_playback_seek_timestamp(handle,
+                                                 (int64_t)expected_timestamp_usec_high_freq - 10,
+                                                 K4A_PLAYBACK_SEEK_BEGIN);
+            ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+            k4a_playback_data_block_t data_block = NULL;
+            stream_result = k4a_playback_get_next_data_block(handle, "CUSTOM_TRACK_HIGH_FREQ", &data_block);
+
+            if ((int64_t)expected_timestamp_usec_high_freq - 10 > (int64_t)max_seek_timestamp)
+            {
+                ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+            }
+            else
+            {
+                ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+
+                uint64_t timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
+                // This timestamp is estimated, allow for +/- 1 usec for rounding errors
+                ASSERT_TRUE(timestamp_usec + 1 >= expected_timestamp_usec_high_freq &&
+                            timestamp_usec <= expected_timestamp_usec_high_freq + 1);
+
+                size_t block_size = k4a_playback_data_block_get_buffer_size(data_block);
+                uint8_t *block_buffer = k4a_playback_data_block_get_buffer(data_block);
+
+                ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, expected_timestamp_usec_high_freq));
+
+                k4a_playback_data_block_release(data_block);
+            }
+
+            // Seek + read backward
+            result = k4a_playback_seek_timestamp(handle,
+                                                 (int64_t)expected_timestamp_usec_high_freq - 10,
+                                                 K4A_PLAYBACK_SEEK_BEGIN);
+            ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+            stream_result = k4a_playback_get_previous_data_block(handle, "CUSTOM_TRACK_HIGH_FREQ", &data_block);
+
+            if ((int64_t)expected_timestamp_usec_high_freq - 10 <= 0)
+            {
+                ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
+            }
+            else
+            {
+                ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+
+                uint64_t timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
+                // This timestamp is estimated, allow for +/- 1 usec for rounding errors
+                ASSERT_TRUE(timestamp_usec + 1 >= last_timestamp_usec_high_freq &&
+                            timestamp_usec <= last_timestamp_usec_high_freq + 1);
+
+                size_t block_size = k4a_playback_data_block_get_buffer_size(data_block);
+                uint8_t *block_buffer = k4a_playback_data_block_get_buffer(data_block);
+
+                ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, last_timestamp_usec_high_freq));
+
+                k4a_playback_data_block_release(data_block);
+            }
+
+            last_timestamp_usec_high_freq = expected_timestamp_usec_high_freq;
         }
-        else
-        {
-            ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-        }
 
-        uint64_t timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
-        ASSERT_EQ(timestamp_usec, seek_timestamps_usec[i] - (test_timestamp_delta_usec / 10));
-
-        size_t block_size = k4a_playback_data_block_get_buffer_size(data_block);
-        uint8_t *block_buffer = k4a_playback_data_block_get_buffer(data_block);
-
-        ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
-
-        k4a_playback_data_block_release(data_block);
-
-        // Seek + read backward
-        result = k4a_playback_seek_timestamp(handle, (int64_t)seek_timestamps_usec[i], K4A_PLAYBACK_SEEK_BEGIN);
-        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
-
-        stream_result = k4a_playback_get_previous_data_block(handle, "CUSTOM_TRACK_HIGH_FREQ", &data_block);
-
-        if (seek_timestamps_usec[i] == 0)
-        {
-            ASSERT_EQ(stream_result, K4A_STREAM_RESULT_EOF);
-            continue;
-        }
-        else
-        {
-            ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
-        }
-
-        timestamp_usec = k4a_playback_data_block_get_timestamp_usec(data_block);
-        ASSERT_EQ(timestamp_usec, seek_timestamps_usec[i]);
-
-        block_size = k4a_playback_data_block_get_buffer_size(data_block);
-        block_buffer = k4a_playback_data_block_get_buffer(data_block);
-
-        ASSERT_TRUE(validate_custom_track_block(block_buffer, block_size, timestamp_usec));
-
-        k4a_playback_data_block_release(data_block);
+        seek_timestamp_usec += test_timestamp_delta_usec;
     }
 
     k4a_playback_close(handle);
-}*/
+}
 
 int main(int argc, char **argv)
 {
