@@ -534,7 +534,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
         config->color_format != K4A_IMAGE_FORMAT_COLOR_NV12 && config->color_format != K4A_IMAGE_FORMAT_COLOR_BGRA32)
     {
         result = K4A_RESULT_FAILED;
-        LOG_ERROR("The configured color format %d is not supported.", config->color_format);
+        LOG_ERROR("The configured color_format is not a valid k4a_color_format_t value.", 0);
     }
 
     if (K4A_SUCCEEDED(result))
@@ -543,7 +543,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             config->color_resolution > K4A_COLOR_RESOLUTION_3072P)
         {
             result = K4A_RESULT_FAILED;
-            LOG_ERROR("The configured color resolution %d is not supported.", config->color_resolution);
+            LOG_ERROR("The configured color_resolution is not a valid k4a_color_resolution_t value.", 0);
         }
     }
 
@@ -552,7 +552,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
         if (config->depth_mode < K4A_DEPTH_MODE_OFF || config->depth_mode > K4A_DEPTH_MODE_PASSIVE_IR)
         {
             result = K4A_RESULT_FAILED;
-            LOG_ERROR("The configured color depth mode %d is not supported.", config->depth_mode);
+            LOG_ERROR("The configured depth_mode is not a valid k4a_depth_mode_t value.", 0);
         }
     }
 
@@ -562,7 +562,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             config->camera_fps != K4A_FRAMES_PER_SECOND_30)
         {
             result = K4A_RESULT_FAILED;
-            LOG_ERROR("The configured camera fps %d is not supported.", config->camera_fps);
+            LOG_ERROR("The configured camera_fps is not a valid k4a_fps_t value.", 0);
         }
     }
 
@@ -572,7 +572,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             config->wired_sync_mode > K4A_WIRED_SYNC_MODE_SUBORDINATE)
         {
             result = K4A_RESULT_FAILED;
-            LOG_ERROR("The configured wired sync mode %d is not supported.", config->wired_sync_mode);
+            LOG_ERROR("The configured wired_sync_mode is not a valid k4a_wired_sync_mode_t value.", 0);
         }
     }
 
@@ -593,8 +593,9 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
                 if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE && !sync_in_cable_present)
                 {
                     result = K4A_RESULT_FAILED;
-                    LOG_ERROR("Failure to detect presence of sync in cable with wired sync mode %d.",
-                              config->wired_sync_mode);
+                    LOG_ERROR("Failure to detect presence of sync in cable with wired sync mode "
+                              "K4A_WIRED_SYNC_MODE_SUBORDINATE.",
+                              0);
                 }
 
                 if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER)
@@ -602,8 +603,9 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
                     if (!sync_out_cable_present)
                     {
                         result = K4A_RESULT_FAILED;
-                        LOG_ERROR("Failure to detect presence of sync out cable with wired sync mode %d.",
-                                  config->wired_sync_mode);
+                        LOG_ERROR("Failure to detect presence of sync out cable with wired sync mode "
+                                  "K4A_WIRED_SYNC_MODE_MASTER.",
+                                  0);
                     }
 
                     if (config->color_resolution == K4A_COLOR_RESOLUTION_OFF)
@@ -625,12 +627,18 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             config->subordinate_delay_off_master_usec != 0)
         {
             uint32_t fps_in_usec = 1000000 / k4a_convert_fps_to_uint(config->camera_fps);
-            if (config->subordinate_delay_off_master_usec > fps_in_usec ||
-                config->subordinate_delay_off_master_usec < 0)
+            if (config->subordinate_delay_off_master_usec > fps_in_usec)
             {
                 result = K4A_RESULT_FAILED;
-                LOG_ERROR("The configured subordinate device delay of %dusec from master device is not supported.",
-                          config->subordinate_delay_off_master_usec);
+                LOG_ERROR(
+                    "The configured subordinate device delay from the master device cannot exceed one frame interval.",
+                    0);
+            }
+
+            if (config->subordinate_delay_off_master_usec < 0)
+            {
+                result = K4A_RESULT_FAILED;
+                LOG_ERROR("The configured subordinate device delay from the master device cannot be negative.", 0);
             }
         }
 
@@ -638,9 +646,9 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             config->subordinate_delay_off_master_usec != 0)
         {
             result = K4A_RESULT_FAILED;
-            LOG_ERROR("The configured subordinate device delay of %dusec is not supported with %d wired sync mode.",
-                      config->subordinate_delay_off_master_usec,
-                      config->wired_sync_mode);
+            LOG_ERROR("When wired_sync_mode is K4A_WIRED_SYNC_MODE_STANDALONE or K4A_WIRED_SYNC_MODE_MASTER, the "
+                      "subordinate_delay_off_master_usec must be 0.",
+                      0);
         }
     }
 
@@ -662,9 +670,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             if (config->depth_delay_off_color_usec < -fps || config->depth_delay_off_color_usec > fps)
             {
                 result = K4A_RESULT_FAILED;
-                LOG_ERROR(
-                    "The configured delay of %dusec between depth capture and color image capture is not supported.",
-                    config->depth_delay_off_color_usec);
+                LOG_ERROR("The configured depth_delay_off_color_usec must be within +/- one frame interval.", 0);
             }
         }
         else if (!depth_enabled && !color_enabled)
@@ -676,11 +682,19 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
         }
         else
         {
-            if (config->depth_delay_off_color_usec != 0 || config->synchronized_images_only)
+            if (config->depth_delay_off_color_usec != 0)
             {
                 result = K4A_RESULT_FAILED;
-                LOG_ERROR("Both depth camera and color camera must be enabled to modify configuration of depth delay "
-                          "or synchronized image settings.",
+                LOG_ERROR("Both depth camera and color camera must be enabled to modify configuration of "
+                          "depth_delay_off_color_usec.",
+                          0);
+            }
+
+            if (config->synchronized_images_only)
+            {
+                result = K4A_RESULT_FAILED;
+                LOG_ERROR("Both depth camera and color camera must be enabled to modify configuration of "
+                          "synchronized_images_only.",
                           0);
             }
         }
@@ -716,9 +730,9 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             if (!depth_fps_and_mode_supported)
             {
                 result = K4A_RESULT_FAILED;
-                LOG_ERROR("The configured depth mode %d does not support fps mode %d.",
-                          config->depth_mode,
-                          config->camera_fps);
+                LOG_ERROR("The configured depth_mode %s does not support the configured camera_fps %s.",
+                          k4a_depth_mode_strings[config->depth_mode],
+                          k4a_fps_strings[config->camera_fps]);
             }
         }
     }
@@ -764,11 +778,11 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             if (!color_fps_and_res_and_format_supported)
             {
                 result = K4A_RESULT_FAILED;
-                LOG_ERROR("The configured combination of color resolution %d, color format %d, and camera fps %d is "
-                          "not supported.",
-                          config->color_resolution,
-                          config->color_format,
-                          config->camera_fps);
+                LOG_ERROR("The combination of color_resolution at %s, color_format at %s, and camera_fps at %s is not "
+                          "supported.",
+                          k4a_color_resolution_strings[config->color_resolution],
+                          k4a_image_format_strings[config->color_format],
+                          k4a_fps_strings[config->camera_fps]);
             }
         }
     }

@@ -280,6 +280,9 @@ typedef enum
  * \remarks
  * Binned modes reduce the captured camera resolution by combining adjacent sensor pixels into a bin.
  *
+ * \remarks
+ * If modes are added, update the k4a_depth_mode_strings array.
+ *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
@@ -295,6 +298,17 @@ typedef enum
     K4A_DEPTH_MODE_WFOV_UNBINNED,  /**< Depth captured at 1024x1024. Passive IR is also captured at 1024x1024. */
     K4A_DEPTH_MODE_PASSIVE_IR,     /**< Passive IR only, captured at 1024x1024. */
 } k4a_depth_mode_t;
+
+/** Depth sensor capture mode strings.
+ *
+ * \remarks
+ * If strings are added, update the k4a_depth_mode_t enum.
+ */
+static const char *k4a_depth_mode_strings[6] = {
+    "K4A_DEPTH_MODE_OFF",           "K4A_DEPTH_MODE_NFOV_2X2BINNED",
+    "K4A_DEPTH_MODE_NFOV_UNBINNED", "K4A_DEPTH_MODE_WFOV_2X2BINNED",
+    "K4A_DEPTH_MODE_WFOV_UNBINNED", "K4A_DEPTH_MODE_PASSIVE_IR",
+};
 
 /** Color sensor resolutions.
  *
@@ -315,11 +329,24 @@ typedef enum
     K4A_COLOR_RESOLUTION_3072P,   /**< 4096 * 3072 4:3  */
 } k4a_color_resolution_t;
 
+/** Color sensor resolution strings.
+ *
+ * \remarks
+ * If strings are added, update the k4a_color_resolution_t enum.
+ */
+static const char *k4a_color_resolution_strings[7] = {
+    "K4A_COLOR_RESOLUTION_OFF",   "K4A_COLOR_RESOLUTION_720P",  "K4A_COLOR_RESOLUTION_1080P",
+    "K4A_COLOR_RESOLUTION_1440P", "K4A_COLOR_RESOLUTION_1536P", "K4A_COLOR_RESOLUTION_2160P",
+    "K4A_COLOR_RESOLUTION_3072P",
+};
+
 /** Image format type.
  *
  * \remarks
  * The image format indicates how the \ref k4a_image_t buffer data is interpreted.
  *
+ * \remarks
+ * If values are added, update the k4a_image_format_strings array.
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
@@ -416,9 +443,23 @@ typedef enum
      *
      * \details
      * See the originator of the custom formatted image for information on how to interpret the data.
+     *
+     * \remarks
+     * If values are added, update the
      */
     K4A_IMAGE_FORMAT_CUSTOM,
 } k4a_image_format_t;
+
+/** Image format strings.
+ *
+ * \remarks
+ * If strings are added, update the k4a_image_format_t enum.
+ */
+static const char *k4a_image_format_strings[7] = {
+    "K4A_IMAGE_FORMAT_COLOR_MJPG",   "K4A_IMAGE_FORMAT_COLOR_NV12", "K4A_IMAGE_FORMAT_COLOR_YUY2",
+    "K4A_IMAGE_FORMAT_COLOR_BGRA32", "K4A_IMAGE_FORMAT_DEPTH16",    "K4A_IMAGE_FORMAT_IR16",
+    "K4A_IMAGE_FORMAT_CUSTOM",
+};
 
 /** Color and depth sensor frame rate.
  *
@@ -427,6 +468,8 @@ typedef enum
  * frame rate may vary slightly due to dropped data, synchronization variation between devices,
  * clock accuracy, or if the camera exposure priority mode causes reduced frame rate.
  *
+ * \remarks
+ * If values are added, update the k4a_fps_strings array.
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
@@ -439,6 +482,17 @@ typedef enum
     K4A_FRAMES_PER_SECOND_15,    /**< 15 FPS */
     K4A_FRAMES_PER_SECOND_30,    /**< 30 FPS */
 } k4a_fps_t;
+
+/** Color and depth sensor frame rate strings.
+ *
+ * \remarks
+ * If strings are added, update the k4a_fps_t enum.
+ */
+static const char *k4a_fps_strings[3] = {
+    "K4A_FRAMES_PER_SECOND_5",
+    "K4A_FRAMES_PER_SECOND_15",
+    "K4A_FRAMES_PER_SECOND_30",
+};
 
 /** Color sensor control commands
  *
