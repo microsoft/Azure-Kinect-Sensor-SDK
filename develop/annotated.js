@@ -6,6 +6,7 @@ var annotated =
       [ "device", "classk4a_1_1device.html", "classk4a_1_1device" ],
       [ "error", "classk4a_1_1error.html", null ],
       [ "image", "classk4a_1_1image.html", "classk4a_1_1image" ],
+      [ "playback", "classk4a_1_1playback.html", "classk4a_1_1playback" ],
       [ "transformation", "classk4a_1_1transformation.html", "classk4a_1_1transformation" ]
     ] ],
     [ "k4a_calibration_camera_t", "structk4a__calibration__camera__t.html", "structk4a__calibration__camera__t" ],

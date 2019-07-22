@@ -1,6 +1,8 @@
 var searchData=
 [
+  ['seek_5ftimestamp',['seek_timestamp',['../classk4a_1_1playback_a13efa05373b873fd5c0f8c9a902b3365.html#a13efa05373b873fd5c0f8c9a902b3365',1,'k4a::playback']]],
   ['set_5fcolor_5fcontrol',['set_color_control',['../classk4a_1_1device_af257d6c8181222823c7cfbdf57e032d7.html#af257d6c8181222823c7cfbdf57e032d7',1,'k4a::device']]],
+  ['set_5fcolor_5fconversion',['set_color_conversion',['../classk4a_1_1playback_a8566e35942f2d62be8b1e62214373b38.html#a8566e35942f2d62be8b1e62214373b38',1,'k4a::playback']]],
   ['set_5fcolor_5fimage',['set_color_image',['../classk4a_1_1capture_ac97e202cb82abcbd95cf584045233d64.html#ac97e202cb82abcbd95cf584045233d64',1,'k4a::capture']]],
   ['set_5fdepth_5fimage',['set_depth_image',['../classk4a_1_1capture_a6136c6d7369ebccbee2a65ef4d800f9e.html#a6136c6d7369ebccbee2a65ef4d800f9e',1,'k4a::capture']]],
   ['set_5fexposure_5ftime',['set_exposure_time',['../classk4a_1_1image_aee70ef70051ec0ec28021e528c427758.html#aee70ef70051ec0ec28021e528c427758',1,'k4a::image']]],
