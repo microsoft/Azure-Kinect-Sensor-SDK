@@ -21,6 +21,44 @@ typedef struct _color_control_cap_t
     bool valid;
 } color_control_cap_t;
 
+typedef struct _exposure_mapping
+{
+    int exponent;                  // Windows Media Foundation implementation detail
+    int exposure_usec;             // Windows Media Foundation implementation detail
+    int exposure_mapped_50Hz_usec; // Exposure when K4A_COLOR_CONTROL_POWERLINE_FREQUENCY == 50Hz
+    int exposure_mapped_60Hz_usec; // Exposure when K4A_COLOR_CONTROL_POWERLINE_FREQUENCY == 60Hz
+} color_exposure_mapping_t;
+
+#ifdef _WIN32
+#define KSELECTANY __declspec(selectany)
+#else
+#define KSELECTANY __attribute__((weak))
+#endif
+
+extern color_exposure_mapping_t device_exposure_mapping[];
+KSELECTANY color_exposure_mapping_t device_exposure_mapping[] = {
+    // clang-format off
+    //exp,   2^exp,   50Hz,   60Hz,
+    { -11,     488,    500,    500},
+    { -10,     977,   1250,   1250},
+    {  -9,    1953,   2500,   2500},
+    {  -8,    3906,  10000,   8330},
+    {  -7,    7813,  20000,  16670},
+    {  -6,   15625,  30000,  33330},
+    {  -5,   31250,  40000,  41670},
+    {  -4,   62500,  50000,  50000},
+    {  -3,  125000,  60000,  66670},
+    {  -2,  250000,  80000,  83330},
+    {  -1,  500000, 100000, 100000},
+    {   0, 1000000, 120000, 116670},
+    {   1, 2000000, 130000, 133330}
+    // clang-format on
+};
+
+#define MAX_EXPOSURE(is_using_60hz)                                                                                    \
+    (is_using_60hz ? device_exposure_mapping[COUNTOF(device_exposure_mapping) - 1].exposure_mapped_60Hz_usec :         \
+                     device_exposure_mapping[COUNTOF(device_exposure_mapping) - 1].exposure_mapped_50Hz_usec)
+
 /** Delivers a sample to the registered callback function when a capture is ready for processing.
  *
  * \param result

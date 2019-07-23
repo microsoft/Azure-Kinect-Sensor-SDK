@@ -197,18 +197,18 @@ TEST_F(color_ut, exposure_control)
     config.color_resolution = K4A_COLOR_RESOLUTION_720P;
     config.depth_mode = K4A_DEPTH_MODE_OFF;
 
-    // set exposure to 488 uSec
+    // set exposure to 500 uSec
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               color_set_control(color_handle,
                                 K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                                 K4A_COLOR_CONTROL_MODE_MANUAL,
-                                62500));
+                                500));
 
     // get exposure settings
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               color_get_control(color_handle, K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, &control_mode, &value));
     ASSERT_EQ(control_mode, K4A_COLOR_CONTROL_MODE_MANUAL);
-    ASSERT_EQ(value, 62500);
+    ASSERT_EQ(value, 500);
 
     // test color_start()
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_start(color_handle, &config));

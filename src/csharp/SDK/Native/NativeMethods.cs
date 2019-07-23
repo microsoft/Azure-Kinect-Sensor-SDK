@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="NativeMethods.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -13,7 +17,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     internal class NativeMethods
     {
         // These types are used internally by the interop dll for marshaling purposes and are not exposed
-        // over the public surface of the managed dll. 
+        // over the public surface of the managed dll.
 
         #region Handle Types
 
@@ -182,7 +186,6 @@ namespace Microsoft.Azure.Kinect.Sensor
 
 
         #endregion
-
 
         #region Functions
 
@@ -488,6 +491,15 @@ namespace Microsoft.Azure.Kinect.Sensor
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
         public static extern IntPtr k4a_image_get_buffer(k4a_image_t image_handle);
+
+        public delegate void k4a_logging_message_cb_t(IntPtr context, LogLevel level, [MarshalAs(UnmanagedType.LPStr)] string file, int line, [MarshalAs(UnmanagedType.LPStr)] string message);
+
+        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_set_debug_message_handler(
+            k4a_logging_message_cb_t message_cb,
+            IntPtr message_cb_context,
+            LogLevel min_level);
 
         #endregion
 
