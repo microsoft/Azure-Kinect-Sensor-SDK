@@ -1521,7 +1521,7 @@ uint64_t estimate_block_timestamp_ns(std::shared_ptr<block_info_t> &block)
     size_t sample_count = block->block->NumberFrames();
     if (block->sub_index > 0 && sample_count > 0)
     {
-        timestamp_ns += block->sub_index * (block->block_duration_ns - 1) / (sample_count - 1);
+        timestamp_ns += (uint64_t)block->sub_index * (block->block_duration_ns - 1) / (sample_count - 1);
     }
     return timestamp_ns;
 }
@@ -2253,7 +2253,8 @@ k4a_stream_result_t get_data_block(k4a_playback_context_t *context,
         return K4A_STREAM_RESULT_FAILED;
     }
 
-    DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(track_reader->current_block->sub_index);
+    DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(
+        (unsigned int)track_reader->current_block->sub_index);
 
     data_block_context->timestamp_usec = estimate_block_timestamp_ns(track_reader->current_block) / 1000;
     data_block_context->data_block.assign(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());

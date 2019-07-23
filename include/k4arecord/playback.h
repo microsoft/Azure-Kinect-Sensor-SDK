@@ -180,8 +180,8 @@ K4ARECORD_EXPORT size_t k4a_playback_get_track_count(k4a_playback_t playback_han
  * The index of the track to read the name form.
  *
  * \param track_name
- * Location to write the track name. This will be a UTF8 null terminated string. If a NULL buffer is specified, \p
- * track_name_size will be set to the size of buffer needed to store the string.
+ * Location to write the track name. This will be a UTF8 null terminated string. If a NULL buffer is specified,
+ * \p track_name_size will be set to the size of buffer needed to store the string.
  *
  * \param track_name_size
  * On input, the size of the \p track_name buffer. On output, this is set to the length of the track_name value
@@ -268,8 +268,8 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_track_get_video_settings(k4a_playback
  * The track name to read the codec id from.
  *
  * \param codec_id
- * Location to write the codec id. This will be a UTF8 null terminated string. If a NULL buffer is specified, \p
- * codec_id_size will be set to the size of buffer needed to store the string.
+ * Location to write the codec id. This will be a UTF8 null terminated string. If a NULL buffer is specified,
+ * \p codec_id_size will be set to the size of buffer needed to store the string.
  *
  * \param codec_id_size
  * On input, the size of the \p codec_id buffer. On output, this is set to the length of the codec_id value (including
@@ -296,8 +296,8 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
 
 /** Gets the codec context for a particular track.
  *
- * The codec context is codec-specific buffer that contains any required codec metadata that only known to the codec. It
- * is mapped to the matroska Codec Private field.
+ * The codec context is a codec-specific buffer that contains any required codec metadata that is only known to the
+ * codec. It is mapped to the matroska Codec Private field.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
@@ -340,8 +340,8 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_pl
  * The name of the tag to read.
  *
  * \param value
- * Location to write the tag value. This will be a UTF8 null terminated string. If a NULL buffer is specified, \p
- * value_size will be set to the size of buffer needed to store the string.
+ * Location to write the tag value. This will be a UTF8 null terminated string. If a NULL buffer is specified,
+ * \p value_size will be set to the size of buffer needed to store the string.
  *
  * \param value_size
  * On input, the size of the \p value buffer. On output, this is set to the length of the tag value (including the null
@@ -349,8 +349,8 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_pl
  *
  * \returns
  * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p value has been filled in. If the buffer is too small the
- * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p value buffer is returned in the \p
- * value_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the tag does not exist. All other failures return
+ * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p value buffer is returned in the
+ * \p value_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the tag does not exist. All other failures return
  * ::K4A_BUFFER_RESULT_FAILED.
  *
  * \remarks
@@ -390,8 +390,8 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
  *
  * \remarks
  * Color format conversion occurs in the user-thread, so setting \p target_format to anything other than the format
- * stored in the file may significantly increase the latency of \p k4a_playback_get_next_capture() and \p
- * k4a_playback_get_previous_capture().
+ * stored in the file may significantly increase the latency of \p k4a_playback_get_next_capture() and
+ * \p k4a_playback_get_previous_capture().
  *
  * \relates k4a_playback_t
  *
@@ -423,9 +423,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t p
  *
  * \returns
  * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p data has been filled in. If the buffer is too small the
- * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p data buffer is returned in the \p
- * data_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the attachment \p file_name does not exist. All other
- * failures return ::K4A_BUFFER_RESULT_FAILED.
+ * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p data buffer is returned in the
+ * \p data_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the attachment \p file_name does not exist. All
+ * other failures return ::K4A_BUFFER_RESULT_FAILED.
  *
  * \xmlonly
  * <requirements>

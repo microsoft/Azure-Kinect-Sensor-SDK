@@ -58,7 +58,8 @@ struct custom_track_test_data
 {
     uint64_t timestamp_us;
     uint32_t item_count;
-    uint32_t items[];
+    // Flexible array members are only valid in C, not in C++.
+    // uint32_t items[];
 };
 
 std::vector<uint8_t> create_test_custom_track_block(uint64_t timestamp_us);

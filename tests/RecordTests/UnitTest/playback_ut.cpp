@@ -93,7 +93,7 @@ TEST_F(playback_ut, open_large_file)
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 0, 1000, 1000 };
     uint64_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(config.camera_fps);
-    int i = 0;
+    size_t i = 0;
     for (; i < 50; i++)
     {
         stream_result = k4a_playback_get_next_capture(handle, &capture);
@@ -180,7 +180,7 @@ TEST_F(playback_ut, open_delay_offset_file)
     uint64_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(config.camera_fps);
 
     // Read forward
-    for (int i = 0; i < test_frame_count; i++)
+    for (size_t i = 0; i < test_frame_count; i++)
     {
         stream_result = k4a_playback_get_next_capture(handle, &capture);
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
@@ -199,7 +199,7 @@ TEST_F(playback_ut, open_delay_offset_file)
     ASSERT_EQ(capture, (k4a_capture_t)NULL);
 
     // Read backward
-    for (int i = 0; i < test_frame_count; i++)
+    for (size_t i = 0; i < test_frame_count; i++)
     {
         timestamps[0] -= timestamp_delta;
         timestamps[1] -= timestamp_delta;
@@ -656,7 +656,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     k4a_capture_release(capture);
 
     // Read the rest of the file
-    for (int i = 49; i < test_frame_count; i++)
+    for (size_t i = 49; i < test_frame_count; i++)
     {
         timestamps[0] += timestamp_delta;
         timestamps[1] += timestamp_delta;
@@ -759,7 +759,7 @@ TEST_F(playback_ut, open_imu_playback_file)
     ASSERT_TRUE(validate_null_imu_sample(imu_sample));
 
     // Test seeking to first 100 samples (covers edge cases around block boundaries)
-    for (int i = 0; i < test_frame_count; i++)
+    for (size_t i = 0; i < test_frame_count; i++)
     {
         // Seek to before sample
         result = k4a_playback_seek_timestamp(handle, (int64_t)imu_timestamp - 100, K4A_PLAYBACK_SEEK_BEGIN);
