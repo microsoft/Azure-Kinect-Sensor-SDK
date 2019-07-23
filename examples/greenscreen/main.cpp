@@ -277,6 +277,42 @@ int main()
                 continue;
             }
 
+            // Because the chessboard looks the same when rotated 180 degrees, it is possible that the chessboard corner
+            // finder may find the correct points, but in the wrong order.
+
+            // A visual:
+            //        Image 1                  Image 2
+            // .....................    .....................
+            // .....................    .....................
+            // .........xxxxx2......    .....xxxxx1..........
+            // .........xxxxxx......    .....xxxxxx..........
+            // .........xxxxxx......    .....xxxxxx..........
+            // .........1xxxxx......    .....2xxxxx..........
+            // .....................    .....................
+            // .....................    .....................
+
+            // The problem occurs when this case happens: the find_chessboard() function correctly identifies the points
+            // on the checkerboard (shown as 'x's) but the order of those points differs between what is found in the
+            // two cameras. Specifically, the first point in the list of points found for the first image (1) is the
+            // *last* point in the list of points found for the second image (2), though they correspond to the same
+            // physical point on the chessboard.
+
+            // To avoid this problem, we can make the assumption that both of the cameras will be oriented in a similar
+            // manner (e.g. turning one of the cameras upside down will break this assumption) and enforce that the
+            // vector between the first and last points found in pixel space (which will be at opposite ends of the
+            // chessboard) are pointing the same direction- so, the dot product of the two vectors is positive.
+            // TODO if we start using multiple images to calibrate, need to think about that here
+            cv::Vec2d first_image_corners_vec = corners[0][0].back() - corners[0][0].front();
+            cout << first_image_corners_vec << endl;
+            cv::Vec2d second_image_corners_vec = corners[1][0].back() - corners[1][0].front();
+            cout << second_image_corners_vec << endl;
+            if (first_image_corners_vec[0] * second_image_corners_vec[0] +
+                    first_image_corners_vec[1] * second_image_corners_vec[1] <=
+                0.0)
+            {
+                std::reverse(corners[1][0].begin(), corners[1][0].end());
+            }
+
             // TODO print out seeing the image
             for (size_t i = 0; i < color_images.size(); ++i)
             {
@@ -528,7 +564,7 @@ int main()
 
             // cv::Mat normalized_opencv_sub_depth_in_sub_color;
             // cv::Mat normalized_opencv_master_depth_in_master_color;
-            // cv::Mat normalized_opencv_sub_depth_in_master_color;
+            cv::Mat normalized_opencv_sub_depth_in_master_color;
             // cv::normalize(opencv_sub_depth_in_sub_color,
             //               normalized_opencv_sub_depth_in_sub_color,
             //               0,
@@ -539,24 +575,24 @@ int main()
             //               0,
             //               256,
             //               cv::NORM_MINMAX);
-            // cv::normalize(opencv_sub_depth_in_master_color,
-            //               normalized_opencv_sub_depth_in_master_color,
-            //               0,
-            //               256,
-            //               cv::NORM_MINMAX);
+            cv::normalize(opencv_sub_depth_in_master_color,
+                          normalized_opencv_sub_depth_in_master_color,
+                          0,
+                          256,
+                          cv::NORM_MINMAX);
             // cv::Mat grayscale_opencv_sub_depth_in_sub_color;
             // cv::Mat grayscale_opencv_master_depth_in_master_color;
-            // cv::Mat grayscale_opencv_sub_depth_in_master_color;
+            cv::Mat grayscale_opencv_sub_depth_in_master_color;
             // normalized_opencv_sub_depth_in_sub_color.convertTo(grayscale_opencv_sub_depth_in_sub_color, CV_32FC3);
             // normalized_opencv_master_depth_in_master_color.convertTo(grayscale_opencv_master_depth_in_master_color,
             //                                                          CV_32FC3);
-            // normalized_opencv_sub_depth_in_master_color.convertTo(grayscale_opencv_sub_depth_in_master_color,
-            // CV_32FC3); cv::imshow("Master depth in master color", grayscale_opencv_master_depth_in_master_color);
+            normalized_opencv_sub_depth_in_master_color.convertTo(grayscale_opencv_sub_depth_in_master_color, CV_32FC3);
+            // cv::imshow("Master depth in master color", grayscale_opencv_master_depth_in_master_color);
             // cv::waitKey(500);
             // cv::imshow("Subordinate depth in subordinate color", grayscale_opencv_sub_depth_in_sub_color);
             // cv::waitKey(500);
-            // cv::imshow("Subordinate depth in master color", grayscale_opencv_sub_depth_in_master_color);
-            // cv::waitKey(500);
+            cv::imshow("Subordinate depth in master color", grayscale_opencv_sub_depth_in_master_color);
+            cv::waitKey(1);
 
             cv::Mat master_opencv_color_image = k4a_color_to_opencv(master_color_image);
 
@@ -572,31 +608,33 @@ int main()
                           CV_32FC3,
                           cv::Scalar(0, .25, 0));
 
-            const float THRESHOLD = 1000; // TODO
-            cv::Mat combined_depth = (opencv_master_depth_in_master_color + opencv_sub_depth_in_master_color) / 2;
+            // const float THRESHOLD = 1000; // TODO
+            // cv::Mat combined_depth = (opencv_master_depth_in_master_color + opencv_sub_depth_in_master_color) / 2;
             cv::Mat only_one_depth;
-            cv::bitwise_xor(opencv_master_depth_in_master_color != 0,
-                            opencv_sub_depth_in_master_color != 0,
-                            only_one_depth);
-            cv::Mat combined_unaveraged = opencv_master_depth_in_master_color + opencv_sub_depth_in_master_color;
-            combined_unaveraged.copyTo(combined_depth, only_one_depth);
+            // cv::bitwise_xor(opencv_master_depth_in_master_color != 0,
+            //                 opencv_sub_depth_in_master_color != 0,
+            //                 only_one_depth);
+            // cv::bitwise_xor(false, opencv_sub_depth_in_master_color != 0, only_one_depth);
+            // cv::Mat combined_unaveraged = opencv_master_depth_in_master_color + opencv_sub_depth_in_master_color;
+            // combined_unaveraged.copyTo(combined_depth, only_one_depth);
 
             // cv::imshow("combined", combined_depth);
             // cv::waitKey(0);
             cv::Mat master_image_float;
             master_opencv_color_image.convertTo(master_image_float, CV_32F);
             master_image_float = master_image_float / 255.0;
-            cv::Mat greened_matrix = master_image_float + cv::Scalar(0, .25, 0);
-            cv::Mat mask;
+            // cv::Mat blue_for_master_valid = master_image_float + cv::Scalar(.25, 0, 0);
             // cout << combined_depth << endl;
-            cv::bitwise_and(combined_depth<THRESHOLD, combined_depth> .001, mask);
-            cv::Mat inverse_mask;
-            cv::bitwise_not(mask, inverse_mask);
+            // cv::bitwise_and(combined_depth<THRESHOLD, combined_depth> .001, mask);
+            // cv::bitwise_not(mask, inverse_mask);
             // cout << mask << endl;
-            master_image_float.copyTo(output_image, mask);
-            greened_matrix.copyTo(output_image, inverse_mask);
+            // master_image_float.copyTo(output_image, mask);
+            // greened_matrix.copyTo(output_image, inverse_mask);
             // please?
-            cv::imshow("Greenscreened", output_image);
+            cv::Mat output = master_image_float;
+            cv::add(output, cv::Scalar(0, .25, 0), output, opencv_sub_depth_in_master_color != 0);
+            cv::add(output, cv::Scalar(.25, 0, 0), output, opencv_master_depth_in_master_color != 0);
+            cv::imshow("Greenscreened", output);
             cv::waitKey(1);
         }
     }
