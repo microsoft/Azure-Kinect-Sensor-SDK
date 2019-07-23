@@ -33,7 +33,7 @@ target_link_libraries(custom_track_ut PRIVATE
 target_include_directories(record_ut PRIVATE $<TARGET_PROPERTY:k4ainternal::record,INTERFACE_INCLUDE_DIRECTORIES>)
 target_include_directories(playback_ut PRIVATE $<TARGET_PROPERTY:k4ainternal::playback,INTERFACE_INCLUDE_DIRECTORIES>)
 target_include_directories(playback_perf PRIVATE $<TARGET_PROPERTY:k4ainternal::playback,INTERFACE_INCLUDE_DIRECTORIES>)
-target_include_directories(custom_track_ut PRIVATE ${INCLUDE_DIR})
+target_include_directories(custom_track_ut PRIVATE $<TARGET_PROPERTY:k4ainternal::playback,INTERFACE_INCLUDE_DIRECTORIES>)
 
 k4a_add_tests(TARGET record_ut TEST_TYPE UNIT)
 k4a_add_tests(TARGET playback_ut TEST_TYPE UNIT)

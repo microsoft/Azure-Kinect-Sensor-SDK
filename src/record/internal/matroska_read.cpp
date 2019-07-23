@@ -1514,7 +1514,7 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
 }
 
 // If the block contains more than 1 frame, estimate the timestamp for the current frame based on the block duration.
-// See k4a_record_subtitle_settings_t::high_freq_data in record.h for more info on timestamp estimation behavior.
+// See k4a_record_subtitle_settings_t::high_freq_data in types.h for more info on timestamp estimation behavior.
 uint64_t estimate_block_timestamp_ns(std::shared_ptr<block_info_t> &block)
 {
     uint64_t timestamp_ns = block->sync_timestamp_ns;
@@ -1929,7 +1929,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     int enabled_tracks = 0;
     for (size_t i = 0; i < arraysize(blocks); i++)
     {
-        if (blocks[i] != nullptr)
+        if (blocks[i] != NULL)
         {
             enabled_tracks++;
 
@@ -2132,6 +2132,8 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
 
         if (block_info && block_info->block)
         {
+            // The returned block will not have an accurate sub_index due to timestamp estimation, select the correct
+            // sub_index based on the real timestamp stored in the sample.
             size_t sample_count = block_info->block->NumberFrames();
             if (block_info->sync_timestamp_ns > context->seek_timestamp_ns)
             {
@@ -2217,8 +2219,8 @@ k4a_stream_result_t get_data_block(k4a_playback_context_t *context,
     std::shared_ptr<block_info_t> read_block = track_reader->current_block;
     if (read_block == nullptr)
     {
-        // If the track current block is nullptr, it means it just performed a seek frame operation. find_block
-        // always finds the block with timestamp >= seek_timestamp.
+        // If the track current block is nullptr, it means we just performed a seek frame operation.
+        // find_block() always finds the block with timestamp >= seek_timestamp.
         read_block = find_block(context, track_reader, context->seek_timestamp_ns);
         if (!next && read_block)
         {

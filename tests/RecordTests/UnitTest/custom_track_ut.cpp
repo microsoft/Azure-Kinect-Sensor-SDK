@@ -94,8 +94,13 @@ TEST_F(custom_track_ut, list_available_tracks)
                                           "S_K4A/CUSTOM_TRACK",
                                           "V_MS/VFW/FOURCC",
                                           "V_MS/VFW/FOURCC" };
+    static const bool track_builtin[] = { false, false, true, true };
     size_t track_count = k4a_playback_get_track_count(handle);
 
+    ASSERT_EQ(k4a_playback_track_is_builtin(handle, "DEPTH"), true);
+    ASSERT_EQ(k4a_playback_track_is_builtin(handle, "IR"), true);
+    ASSERT_EQ(k4a_playback_track_is_builtin(handle, "CUSTOM_TRACK"), false);
+    ASSERT_EQ(k4a_playback_track_is_builtin(handle, "CUSTOM_TRACK_HIGH_FREQ"), false);
     ASSERT_EQ(track_count, COUNTOF(track_names));
 
     for (size_t i = 0; i < track_count; i++)
@@ -106,12 +111,16 @@ TEST_F(custom_track_ut, list_available_tracks)
         ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_SUCCEEDED);
         ASSERT_STREQ(name, track_names[i]);
 
+        ASSERT_EQ(k4a_playback_track_is_builtin(handle, name), track_builtin[i]);
+
         char codec_id[256];
         size_t codec_id_len = 256;
         buffer_result = k4a_playback_track_get_codec_id(handle, name, codec_id, &codec_id_len);
         ASSERT_EQ(buffer_result, K4A_BUFFER_RESULT_SUCCEEDED);
         ASSERT_STREQ(codec_id, track_codecs[i]);
     }
+
+    ASSERT_EQ(k4a_playback_track_is_builtin(handle, "DOES_NOT_EXIST"), false);
 
     k4a_playback_close(handle);
 }

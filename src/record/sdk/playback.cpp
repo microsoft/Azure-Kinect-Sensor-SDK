@@ -223,6 +223,7 @@ k4a_buffer_result_t k4a_playback_get_track_name(k4a_playback_t playback_handle,
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, context->track_map.empty());
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, track_name_size == NULL);
 
     size_t index = 0;
     for (auto &itr : context->track_map)
@@ -252,6 +253,17 @@ k4a_buffer_result_t k4a_playback_get_track_name(k4a_playback_t playback_handle,
     return K4A_BUFFER_RESULT_FAILED;
 }
 
+bool k4a_playback_track_is_builtin(k4a_playback_t playback_handle, const char *track_name)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(false, k4a_playback_t, playback_handle);
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(false, context == NULL);
+    RETURN_VALUE_IF_ARG(false, track_name == NULL);
+
+    track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
+    return track_reader != nullptr && check_track_reader_is_builtin(context, track_reader);
+}
+
 k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handle,
                                                    const char *track_name,
                                                    k4a_record_video_settings_t *video_settings)
@@ -265,13 +277,13 @@ k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handl
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
     if (track_reader == nullptr)
     {
-        LOG_ERROR("Track name cannot be found.", 0);
+        LOG_ERROR("Track name cannot be found: %s", track_name);
         return K4A_RESULT_FAILED;
     }
 
     if (track_reader->type != track_type::track_video)
     {
-        LOG_ERROR("Track is not a video track.", 0);
+        LOG_ERROR("Track is not a video track: %s", track_name);
         return K4A_RESULT_FAILED;
     }
 
@@ -294,10 +306,9 @@ k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_hand
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, codec_id_size == NULL);
 
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
-
     if (track_reader == nullptr)
     {
-        LOG_ERROR("Track name cannot be found.", 0);
+        LOG_ERROR("Track name cannot be found: %s", track_name);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -328,10 +339,9 @@ k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_playback_t playback
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, codec_context_size == NULL);
 
     track_reader_t *track_reader = get_track_reader_by_name(context, track_name);
-
     if (track_reader == nullptr)
     {
-        LOG_ERROR("Track name cannot be found.", 0);
+        LOG_ERROR("Track name cannot be found: %s", track_name);
         return K4A_BUFFER_RESULT_FAILED;
     }
 
@@ -445,7 +455,7 @@ k4a_playback_get_attachment(k4a_playback_t playback_handle, const char *file_nam
     }
     else
     {
-        LOG_ERROR("Attachment file name cannot be found.", 0);
+        LOG_ERROR("Attachment file name cannot be found: %s", file_name);
         return K4A_BUFFER_RESULT_FAILED;
     }
 }
@@ -546,6 +556,7 @@ uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playback_data_block_t da
 {
     RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_data_block_t, data_block_handle);
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_get_context(data_block_handle);
+    RETURN_VALUE_IF_ARG(0, data_block_context == NULL);
     return data_block_context->timestamp_usec;
 }
 
@@ -553,6 +564,7 @@ size_t k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_bl
 {
     RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_data_block_t, data_block_handle);
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_get_context(data_block_handle);
+    RETURN_VALUE_IF_ARG(0, data_block_context == NULL);
     return data_block_context->data_block.size();
 }
 
@@ -560,6 +572,7 @@ uint8_t *k4a_playback_data_block_get_buffer(k4a_playback_data_block_t data_block
 {
     RETURN_VALUE_IF_HANDLE_INVALID(nullptr, k4a_playback_data_block_t, data_block_handle);
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_get_context(data_block_handle);
+    RETURN_VALUE_IF_ARG(nullptr, data_block_context == NULL);
     return data_block_context->data_block.data();
 }
 

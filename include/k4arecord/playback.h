@@ -134,7 +134,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_calibration(k4a_playback_t playba
 K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle,
                                                                     k4a_record_configuration_t *config);
 
-/** Checks whether a track with the given track name exists in the playback file
+/** Checks whether a track with the given track name exists in the playback file.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
@@ -142,7 +142,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback
  * \param track_name
  * The track name to be checked to see whether it exists or not.
  *
- * \returns true if the track exists
+ * \returns true if the track exists.
  *
  * \xmlonly
  * <requirements>
@@ -159,7 +159,7 @@ K4ARECORD_EXPORT bool k4a_playback_check_track_exists(k4a_playback_t playback_ha
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
  *
- * \returns the number of tracks in the playback file
+ * \returns the number of tracks in the playback file.
  *
  * \xmlonly
  * <requirements>
@@ -195,7 +195,7 @@ K4ARECORD_EXPORT size_t k4a_playback_get_track_count(k4a_playback_t playback_han
  *
  * \remarks
  * When used along with k4a_playback_get_track_count(), this function can be used to enumerate all the available tracks
- * in a playback file.
+ * in a playback file. Additionally k4a_playback_track_is_builtin() can be used to filter custom tracks.
  *
  * \xmlonly
  * <requirements>
@@ -209,6 +209,26 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_track_name(k4a_playback_t 
                                                                  size_t track_index,
                                                                  char *track_name,
                                                                  size_t *track_name_size);
+
+/** Checks whether a track is one of the built-in tracks: "COLOR", "DEPTH", etc...
+ *
+ * \param playback_handle
+ * Handle obtained by k4a_playback_open().
+ *
+ * \param track_name
+ * The track name to be checked to see whether it is a built-in track.
+ *
+ * \returns true if the track is built-in. If the provided track name does not exist, false will be returned.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT bool k4a_playback_track_is_builtin(k4a_playback_t playback_handle, const char *track_name);
 
 /** Gets the video-specific track information for a particular video track.
  *
@@ -236,10 +256,10 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_track_get_video_settings(k4a_playback
                                                                     const char *track_name,
                                                                     k4a_record_video_settings_t *video_settings);
 
-/** Gets the codec id with the given track name
+/** Gets the codec id string for a particular track.
  *
- * The codec ID is a string that corresponds to the codec. Some of the existing formats are listed here:
- * https://www.matroska.org/technical/specs/codecid/index.html. It can also be custom defined by the user.
+ * The codec ID is a string that corresponds to the codec of the track's data. Some of the existing formats are listed
+ * here: https://www.matroska.org/technical/specs/codecid/index.html. It can also be custom defined by the user.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
@@ -274,7 +294,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
                                                                      char *codec_id,
                                                                      size_t *codec_id_size);
 
-/** Gets the codec context with the given track name
+/** Gets the codec context for a particular track.
  *
  * The codec context is codec-specific buffer that contains any required codec metadata that only known to the codec. It
  * is mapped to the matroska Codec Private field.
@@ -386,27 +406,26 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
 K4ARECORD_EXPORT k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle,
                                                                 k4a_image_format_t target_format);
 
-/** Reads the attachment from a recording.
+/** Reads an attachment file from a recording.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
  *
  * \param file_name
- * The attachment file name
+ * The attachment file name.
  *
  * \param data
  * Location to write the attachment data. If a NULL buffer is specified, \p data_size will be set to the size of
  * buffer needed to store the data.
  *
  * \param data_size
- * On input, the size of the \p value buffer. On output, this is set to the length of the data value
+ * On input, the size of the \p data buffer. On output, this is set to the length of the attachment data.
  *
  * \returns
- * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p value has been filled in. If the buffer is too small the
- * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p value buffer is returned in the \p
- * data_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the track_name does not exist. All other failures
- * return
- * ::K4A_BUFFER_RESULT_FAILED.
+ * A return of ::K4A_BUFFER_RESULT_SUCCEEDED means that the \p data has been filled in. If the buffer is too small the
+ * function returns ::K4A_BUFFER_RESULT_TOO_SMALL and the needed size of the \p data buffer is returned in the \p
+ * data_size parameter. ::K4A_BUFFER_RESULT_FAILED is returned if the attachment \p file_name does not exist. All other
+ * failures return ::K4A_BUFFER_RESULT_FAILED.
  *
  * \xmlonly
  * <requirements>
@@ -582,13 +601,13 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playba
 K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback_handle,
                                                                           k4a_imu_sample_t *imu_sample);
 
-/** Read the next data block of a track with the given track name.
+/** Read the next data block for a particular track.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
  *
  * \param track_name
- * The track name defines the track that you want to get the next data block from.
+ * The name of the track to read the next data block from.
  *
  * \param data_block_handle
  * The location to write the data block handle.
@@ -600,19 +619,21 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * \relates k4a_playback_t
  *
  * \remarks
- * k4a_playback_get_next_data_block() always returns the data block after the most recently returned data block.
+ * k4a_playback_get_next_data_block() always returns the data block after the most recently returned data block for a
+ * particular track.
  *
  * \remarks
  * If a call was made to k4a_playback_get_previous_data_block() which returned ::K4A_STREAM_RESULT_EOF, then the
- * playback position is at the beginning of the recording and k4a_playback_get_next_data_block() will return the first
- * data block in the recording.
+ * playback position is at the beginning of the recording and calling k4a_playback_get_next_data_block() with the same
+ * track will return the first data block in the track.
  *
  * \remarks
  * The first call to k4a_playback_get_next_data_block() after k4a_playback_seek_timestamp() will return the data
  * block in the recording closest to the seek time with a timestamp greater than or equal to the seek time.
  *
  * \remarks
- * k4a_playback_get_next_data_block cannot be used with the built-in tracks: "COLOR", "DEPTH", "IR", or "IMU"
+ * k4a_playback_get_next_data_block() cannot be used with the built-in tracks: "COLOR", "DEPTH", etc...
+ * k4a_playback_track_is_builtin() can be used to determine if a track is a built-in track.
  *
  * \remarks
  * If the call is successful, callers must call k4a_playback_data_block_release() to return the allocated memory for
@@ -630,13 +651,13 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playba
                                                                       const char *track_name,
                                                                       k4a_playback_data_block_t *data_block_handle);
 
-/** Read the previous data block of a track with the given track name.
+/** Read the previous data block for a particular track.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
  *
  * \param track_name
- * The track name defines the track that you want to get the next data block from.
+ * The name of the track to read the previous data block from.
  *
  * \param data_block_handle
  * The location to write the data block.
@@ -648,12 +669,13 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playba
  * \relates k4a_playback_t
  *
  * \remarks
- * k4a_playback_get_previous_data_block() always returns the data block before the most recently returned data block.
+ * k4a_playback_get_previous_data_block() always returns the data block before the most recently returned data block for
+ * a particular track.
  *
  * \remarks
  * If a call was made to to k4a_playback_get_next_data_block() which returned ::K4A_STREAM_RESULT_EOF, then the playback
- * position is at the end of the recording and k4a_playback_get_previous_data_block() will return the last data block in
- * the recording.
+ * position is at the end of the recording and calling k4a_playback_get_previous_data_block() with the same track will
+ * return the last data block in the track.
  *
  * \remarks
  * The first call to k4a_playback_get_previous_data_block() after k4a_playback_seek_timestamp() will return the
@@ -664,7 +686,8 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playba
  * data_block_handle.
  *
  * \remarks
- * k4a_playback_get_previous_data_block cannot be used with the built-in tracks: "COLOR", "DEPTH", "IR", or "IMU"
+ * k4a_playback_get_previous_data_block() cannot be used with the built-in tracks: "COLOR", "DEPTH", etc...
+ * k4a_playback_track_is_builtin() can be used to determine if a track is a built-in track.
  *
  * \xmlonly
  * <requirements>
@@ -677,6 +700,90 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playba
 K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback_handle,
                                                                           const char *track_name,
                                                                           k4a_playback_data_block_t *data_block_handle);
+
+/** Get the timestamp of a data block in microseconds.
+ *
+ * \param data_block_handle
+ * Handle obtained by k4a_playback_get_next_data_block() or k4a_playback_get_previous_data_block().
+ *
+ * \returns
+ * Returns the timestamp of the data block. If the \p data_block_handle is invalid this function will return 0.
+ * It is also possible for 0 to be a valid timestamp originating from the beginning of a recording.
+ *
+ * \relates k4a_playback_data_block_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playback_data_block_t data_block_handle);
+
+/** Get the buffer size of a data block.
+ *
+ * \param data_block_handle
+ * Handle obtained by k4a_playback_get_next_data_block() or k4a_playback_get_previous_data_block().
+ *
+ * \returns
+ * Returns the buffer size of the data block, or 0 if the data block is invalid.
+ *
+ * \relates k4a_playback_data_block_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT size_t k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_block_handle);
+
+/** Get the buffer of a data block.
+ *
+ * \param data_block_handle
+ * Handle obtained by k4a_playback_get_next_data_block() or k4a_playback_get_previous_data_block().
+ *
+ * \remarks
+ * Use this buffer to access the data written to a custom recording track.
+ *
+ * \returns
+ * Returns a pointer to the data block buffer, or NULL if the data block is invalid.
+ *
+ * \relates k4a_playback_data_block_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT uint8_t *k4a_playback_data_block_get_buffer(k4a_playback_data_block_t data_block_handle);
+
+/** Release a data block handle.
+ *
+ * \param data_block_handle
+ * Handle obtained by k4a_playback_get_next_data_block() or k4a_playback_get_previous_data_block().
+ *
+ * \remarks
+ * Release the memory of a data block. The caller must not access the object after it is released.
+ *
+ * \relates k4a_playback_data_block_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT void k4a_playback_data_block_release(k4a_playback_data_block_t data_block_handle);
 
 /** Seek to a specific timestamp within a recording.
  *
@@ -764,97 +871,6 @@ K4ARECORD_EXPORT uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t pl
  * \endxmlonly
  */
 K4ARECORD_EXPORT void k4a_playback_close(k4a_playback_t playback_handle);
-
-/** Get the data block timestamp in microseconds
- *
- * \param data_block_handle
- * Handle of the data block for which the get operation is performed on.
- *
- * \remarks
- * Returns the timestamp of the data block.
- *
- * \returns
- * If the \p data_block_handle is invalid or if no timestamp was set for the data block,
- * this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning
- * of a recording.
- *
- * \relates k4a_playback_data_block_t
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
- *   <requirement name="Library">k4arecord.lib</requirement>
- *   <requirement name="DLL">k4arecord.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4ARECORD_EXPORT uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playback_data_block_t data_block_handle);
-
-/** Get the data block buffer size.
- *
- * \param data_block_handle
- * Handle of the data block for which the get operation is performed on.
- *
- * \remarks
- * Returns the buffer size of the data block.
- *
- * \returns
- * The function will return 0 if there is an error, and will normally return the data block buffer size.
- *
- * \relates k4a_playback_data_block_t
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
- *   <requirement name="Library">k4arecord.lib</requirement>
- *   <requirement name="DLL">k4arecord.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4ARECORD_EXPORT size_t k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_block_handle);
-
-/** Get the data block buffer.
- *
- * \param data_block_handle
- * Handle of the data block for which the get operation is performed on.
- *
- * \remarks
- * Use this buffer to access the data block data.
- *
- * \returns
- * The function will return NULL if there is an error, and will normally return a pointer to the data block buffer.
- *
- * \relates k4a_playback_data_block_t
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
- *   <requirement name="Library">k4arecord.lib</requirement>
- *   <requirement name="DLL">k4arecord.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4ARECORD_EXPORT uint8_t *k4a_playback_data_block_get_buffer(k4a_playback_data_block_t data_block_handle);
-
-/** Release the data block
- *
- * \param data_block_handle
- * Handle of the data block for which the get operation is performed on.
- *
- * \remarks
- * Release the memory of the data block. A caller must not access the object after it is released.
- *
- * \relates k4a_playback_data_block_t
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
- *   <requirement name="Library">k4arecord.lib</requirement>
- *   <requirement name="DLL">k4arecord.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4ARECORD_EXPORT void k4a_playback_data_block_release(k4a_playback_data_block_t data_block_handle);
 
 /**
  * @}
