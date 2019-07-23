@@ -22,14 +22,6 @@ cv::Mat k4a_color_to_opencv(const k4a::image &im)
     return decoded;
 }
 
-// TODO remove
-// static void onMouse(int, int x, int y, int, void *)
-// {
-//     // this function will be called every time you move your mouse over the image
-//     // the coordinates will be in x and y variables
-//     cout << "Coords " << x << " " << y << endl;
-// }
-
 cv::Mat k4a_depth_to_opencv(const k4a::image &im)
 {
     return cv::Mat(im.get_height_pixels(),
@@ -111,12 +103,36 @@ void deconstruct_homogeneous(const cv::Mat &H, cv::Mat &R, cv::Vec3d &t)
     }
 }
 
-void k4a_calibration_to_depth_to_color_R_t(const k4a::calibration &cal, cv::Mat &R, cv::Vec3f &T)
+void k4a_calibration_to_depth_to_color_R_t(const k4a::calibration &cal, cv::Mat &R, cv::Vec3d &t)
 {
-    const k4a_calibration_extrinsics_t &i = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
-    R = cv::Mat(3, 3, CV_32F, (void *)i.rotation);
-    T = cv::Vec3f(i.translation[0], i.translation[1], i.translation[2]);
-    cv::Mat depth_sub_to_color_sub_h = cv::Mat::zeros(cv::Size(4, 4), CV_32F);
+    const k4a_calibration_extrinsics_t &ex = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
+    R = cv::Mat(3, 3, CV_64F);
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            // TODO is it row-major or column-major?
+            R.at<double>(i, j) = ex.rotation[i * 3 + j];
+        }
+    }
+    t = cv::Vec3d(ex.translation[0], ex.translation[1], ex.translation[2]);
+}
+
+void set_k4a_calibration_depth_to_color_from_R_t(k4a::calibration &cal, const cv::Mat &R, const cv::Vec3d &t)
+{
+    k4a_calibration_extrinsics_t &ex = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            // TODO is it row-major or column-major?
+            ex.rotation[i * 3 + j] = static_cast<float>(R.at<double>(i, j));
+        }
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+        ex.translation[i] = static_cast<float>(t[i]);
+    }
 }
 
 vector<float> k4a_calibration_to_color_camera_dist_coeffs(const k4a::calibration &cal)
@@ -186,9 +202,15 @@ int main()
         }
         devices[0].start_cameras(&configurations[0]);
 
-        // These will hold the rotation and translation we want
+        // These will hold the rotation and translation we get from calibration
         cv::Mat R_color_sub_to_color_master, E, F;
         cv::Vec3d t_color_sub_to_color_master;
+        cv::Mat R_depth_sub_to_color_sub;
+        cv::Vec3d t_depth_sub_to_color_sub;
+
+        // These will hold the rotation and translation we get by composing internal and calibrated transforms
+        cv::Mat R_depth_sub_to_color_master;
+        cv::Vec3d t_depth_sub_to_color_master;
 
         // the cameras have been started. Calibration time!
         while (true)
@@ -380,18 +402,7 @@ int main()
 
             // the goal: the extrinsics already have the rotation + translation for depth_sub -> color_sub
             // and we have depth_color -> camera_color so let's combine them
-            cv::Mat R_depth_sub_to_color_sub_float;
-            cv::Vec3f t_depth_sub_to_color_sub_float;
-            k4a_calibration_to_depth_to_color_R_t(sub_calib,
-                                                  R_depth_sub_to_color_sub_float,
-                                                  t_depth_sub_to_color_sub_float);
-            cv::Mat R_depth_sub_to_color_sub;
-            cv::Vec3d t_depth_sub_to_color_sub;
-            R_depth_sub_to_color_sub_float.convertTo(R_depth_sub_to_color_sub, CV_64F);
-            for (int i = 0; i < 3; ++i)
-            {
-                t_depth_sub_to_color_sub[i] = double{ t_depth_sub_to_color_sub_float[i] };
-            }
+            k4a_calibration_to_depth_to_color_R_t(sub_calib, R_depth_sub_to_color_sub, t_depth_sub_to_color_sub);
             cout << "Matrices obtained from camera" << endl;
             cout << R_depth_sub_to_color_sub << endl;
             cout << t_depth_sub_to_color_sub << endl;
@@ -407,13 +418,15 @@ int main()
             cout << color_sub_to_color_master_h << endl;
             cout << "Multiply" << endl;
             cv::Mat depth_sub_to_color_master_h = depth_sub_to_color_sub_h * color_sub_to_color_master_h;
-            cv::Mat depth_sub_to_color_master_R;
-            cv::Vec3d depth_sub_to_color_master_t;
             deconstruct_homogeneous(depth_sub_to_color_master_h,
-                                    depth_sub_to_color_master_R,
-                                    depth_sub_to_color_master_t);
+                                    R_depth_sub_to_color_master,
+                                    t_depth_sub_to_color_master);
             cout << "Homogeneous transform depth sub to color master:" << endl;
             cout << depth_sub_to_color_master_h << endl;
+            cout << "Depth sub to color master R:" << endl;
+            cout << R_depth_sub_to_color_master << endl;
+            cout << "Depth sub to color master t:" << endl;
+            cout << t_depth_sub_to_color_master << endl;
 
             break;
         }
@@ -494,73 +507,98 @@ int main()
                                                                        master_color_image.get_width_pixels() *
                                                                            static_cast<int>(sizeof(uint16_t)));
             k4a::transformation sub_depth_to_sub_color(calibrations[1]);
-            master_depth_to_master_color.depth_image_to_color_camera(depth_images[1], &k4a_sub_depth_in_sub_color);
+            sub_depth_to_sub_color.depth_image_to_color_camera(depth_images[1], &k4a_sub_depth_in_sub_color);
             cv::Mat opencv_sub_depth_in_sub_color = k4a_depth_to_opencv(k4a_sub_depth_in_sub_color);
+
+            // Finally, it's time to create the opencv image for the depth image in the master color perspective
+            k4a::image k4a_sub_depth_in_master_color = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16,
+                                                                          master_color_image.get_width_pixels(),
+                                                                          master_color_image.get_height_pixels(),
+                                                                          master_color_image.get_width_pixels() *
+                                                                              static_cast<int>(sizeof(uint16_t)));
+            // Now it's time to get clever. We're going to update the existing calibration extrinsics on getting from
+            // the sub depth camera to the sub color camera, overwriting it with the transformation to get from the sub
+            // depth camera to the master color camera
+            set_k4a_calibration_depth_to_color_from_R_t(calibrations[1],
+                                                        R_depth_sub_to_color_master,
+                                                        t_depth_sub_to_color_master);
+            k4a::transformation sub_depth_to_master_color(calibrations[1]);
+            sub_depth_to_master_color.depth_image_to_color_camera(depth_images[1], &k4a_sub_depth_in_master_color);
+            cv::Mat opencv_sub_depth_in_master_color = k4a_depth_to_opencv(k4a_sub_depth_in_master_color);
+
             cv::Mat normalized_opencv_sub_depth_in_sub_color;
             cv::Mat normalized_opencv_master_depth_in_master_color;
+            cv::Mat normalized_opencv_sub_depth_in_master_color;
             cv::normalize(opencv_sub_depth_in_sub_color,
                           normalized_opencv_sub_depth_in_sub_color,
-                          1,
-                          128,
+                          0,
+                          256,
                           cv::NORM_MINMAX);
             cv::normalize(opencv_master_depth_in_master_color,
                           normalized_opencv_master_depth_in_master_color,
-                          1,
-                          128,
+                          0,
+                          256,
+                          cv::NORM_MINMAX);
+            cv::normalize(opencv_sub_depth_in_master_color,
+                          normalized_opencv_sub_depth_in_master_color,
+                          0,
+                          256,
                           cv::NORM_MINMAX);
             cv::Mat grayscale_opencv_sub_depth_in_sub_color;
             cv::Mat grayscale_opencv_master_depth_in_master_color;
-            normalized_opencv_sub_depth_in_sub_color.convertTo(grayscale_opencv_sub_depth_in_sub_color, CV_8UC1);
-            normalized_opencv_master_depth_in_master_color.convertTo(grayscale_opencv_master_depth_in_master_color,
-                                                                     CV_8UC1);
             cv::Mat grayscale_opencv_sub_depth_in_master_color;
-            cv::warpPerspective(grayscale_opencv_sub_depth_in_sub_color,
-                                grayscale_opencv_sub_depth_in_master_color,
-                                F,
-                                opencv_master_depth_in_master_color.size());
+            normalized_opencv_sub_depth_in_sub_color.convertTo(grayscale_opencv_sub_depth_in_sub_color, CV_32FC3);
+            normalized_opencv_master_depth_in_master_color.convertTo(grayscale_opencv_master_depth_in_master_color,
+                                                                     CV_32FC3);
+            normalized_opencv_sub_depth_in_master_color.convertTo(grayscale_opencv_sub_depth_in_master_color, CV_32FC3);
+            cv::imshow("Master depth in master color", grayscale_opencv_master_depth_in_master_color);
+            cv::waitKey(500);
+            cv::imshow("Subordinate depth in subordinate color", grayscale_opencv_sub_depth_in_sub_color);
+            cv::waitKey(500);
+            cv::imshow("Subordinate depth in master color", grayscale_opencv_sub_depth_in_master_color);
+            cv::waitKey(500);
 
-            vector<cv::Mat> channels;
-            cv::Mat overlay;
-            // R
-            channels.emplace_back(grayscale_opencv_master_depth_in_master_color);
-            // channels.emplace_back(cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1));
-
-            // G
-            channels.emplace_back(grayscale_opencv_sub_depth_in_sub_color);
-            // channels.emplace_back(cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1));
-
-            // B
-            channels.emplace_back(grayscale_opencv_sub_depth_in_master_color);
-            // channels.emplace_back(cv::Mat::zeros(opencv_master_depth_in_master_color.size(), CV_8UC1));
-
-            // cout << grayscale_opencv_sub_depth_in_master_color << std::endl;
-            cv::merge(channels, overlay);
-
-            // cv::imshow("sub in master space", grayscale_opencv_sub_depth_in_master_color);
-            // cv::waitKey(0);
-            // cv::imshow("overlay", overlay);
-            // cv::waitKey(0);
-
-            // create the image that will be be used as output
-            cv::Mat output_image(master_color_image.get_height_pixels(),
-                                 master_color_image.get_width_pixels(),
-                                 CV_8UC3,
-                                 cv::Scalar(0, 255, 0));
-
-            // next, let's get some OpenCV images
             cv::Mat master_opencv_color_image = k4a_color_to_opencv(master_color_image);
 
-            // GOTCHA: if you use std::endl to force flushes, you will likely drop frames.
-            // now mask it
+            // create the image that will be be used as output
+            cv::Mat output_image(master_opencv_color_image.rows,
+                                 master_opencv_color_image.cols,
+                                 CV_32FC3,
+                                 cv::Scalar(0, 0, 0));
+
+            // this will be added
+            cv::Mat green(master_opencv_color_image.rows,
+                          master_opencv_color_image.cols,
+                          CV_32FC3,
+                          cv::Scalar(0, .25, 0));
+
             const uint16_t THRESHOLD = 1000; // TODO
+            cv::Mat combined_depth = (grayscale_opencv_master_depth_in_master_color +
+                                      grayscale_opencv_sub_depth_in_master_color) /
+                                     2;
+
+            cv::imshow("combined", combined_depth);
+            cv::waitKey(0);
+            cout << "Test1" << endl;
+            cv::Mat master_image_float;
+            master_opencv_color_image.convertTo(master_image_float, CV_32F);
+            master_image_float = master_image_float / 255.0;
+            cv::Mat greened_matrix = master_image_float + cv::Scalar(0, .25, 0);
+            cv::waitKey(0);
+            cout << "Test2" << endl;
             cv::Mat mask;
-            cv::bitwise_and(opencv_master_depth_in_master_color < THRESHOLD,
-                            opencv_master_depth_in_master_color != 0,
-                            mask);
-            master_opencv_color_image.copyTo(output_image, mask);
+            cout << "Test3" << endl;
+            cv::bitwise_and(combined_depth < THRESHOLD, combined_depth != 0, mask);
+            cout << "Test4" << endl;
+            cv::Mat inverse_mask;
+            cv::bitwise_not(mask, inverse_mask);
+            cout << "Test8" << endl;
+            cout << mask << endl;
+            master_image_float.copyTo(output_image, mask);
+            greened_matrix.copyTo(output_image, inverse_mask);
             // please?
-            // cv::imshow("Test", output_image);
-            // cv::waitKey(1);
+            cv::imshow("Greenscreened", output_image);
+            cv::waitKey(0);
         }
     }
     catch (std::exception &e)
