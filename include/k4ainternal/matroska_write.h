@@ -55,7 +55,6 @@ typedef struct _k4a_record_context_t
     uint64_t timecode_scale;
     uint32_t camera_fps;
 
-    k4a_device_t device;
     k4a_device_configuration_t device_config;
 
     /**

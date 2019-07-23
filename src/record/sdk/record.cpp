@@ -55,7 +55,6 @@ k4a_result_t k4a_record_create(const char *path,
 
     if (K4A_SUCCEEDED(result))
     {
-        context->device = device;
         context->device_config = device_config;
 
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
