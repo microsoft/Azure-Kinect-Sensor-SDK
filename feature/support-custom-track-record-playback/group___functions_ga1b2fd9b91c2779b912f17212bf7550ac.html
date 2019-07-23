@@ -156,7 +156,9 @@ $(document).ready(function(){initNavTree('group___functions_ga1b2fd9b91c2779b912
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5.html#gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" title="The result was successful. ">K4A_RESULT_SUCCEEDED</a> is returned on success</dd></dl>
-<dl class="section remark"><dt>Remarks</dt><dd>All tracks need to be added before the recording header is written.</dd>
+<dl class="section remark"><dt>Remarks</dt><dd>Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.</dd>
+<dd>
+All tracks need to be added before the recording header is written.</dd>
 <dd>
 Call <a class="el" href="group___functions_gab15dcfc0fd01ce419591b6981fecbf23.html#gab15dcfc0fd01ce419591b6981fecbf23" title="Writes data for a custom track to file. ">k4a_record_write_custom_track_data()</a> with the same track_name to write data to this track.</dd></dl>
  
