@@ -526,37 +526,37 @@ int main()
             sub_depth_to_master_color.depth_image_to_color_camera(depth_images[1], &k4a_sub_depth_in_master_color);
             cv::Mat opencv_sub_depth_in_master_color = k4a_depth_to_opencv(k4a_sub_depth_in_master_color);
 
-            cv::Mat normalized_opencv_sub_depth_in_sub_color;
-            cv::Mat normalized_opencv_master_depth_in_master_color;
-            cv::Mat normalized_opencv_sub_depth_in_master_color;
-            cv::normalize(opencv_sub_depth_in_sub_color,
-                          normalized_opencv_sub_depth_in_sub_color,
-                          0,
-                          256,
-                          cv::NORM_MINMAX);
-            cv::normalize(opencv_master_depth_in_master_color,
-                          normalized_opencv_master_depth_in_master_color,
-                          0,
-                          256,
-                          cv::NORM_MINMAX);
-            cv::normalize(opencv_sub_depth_in_master_color,
-                          normalized_opencv_sub_depth_in_master_color,
-                          0,
-                          256,
-                          cv::NORM_MINMAX);
-            cv::Mat grayscale_opencv_sub_depth_in_sub_color;
-            cv::Mat grayscale_opencv_master_depth_in_master_color;
-            cv::Mat grayscale_opencv_sub_depth_in_master_color;
-            normalized_opencv_sub_depth_in_sub_color.convertTo(grayscale_opencv_sub_depth_in_sub_color, CV_32FC3);
-            normalized_opencv_master_depth_in_master_color.convertTo(grayscale_opencv_master_depth_in_master_color,
-                                                                     CV_32FC3);
-            normalized_opencv_sub_depth_in_master_color.convertTo(grayscale_opencv_sub_depth_in_master_color, CV_32FC3);
-            cv::imshow("Master depth in master color", grayscale_opencv_master_depth_in_master_color);
-            cv::waitKey(500);
-            cv::imshow("Subordinate depth in subordinate color", grayscale_opencv_sub_depth_in_sub_color);
-            cv::waitKey(500);
-            cv::imshow("Subordinate depth in master color", grayscale_opencv_sub_depth_in_master_color);
-            cv::waitKey(500);
+            // cv::Mat normalized_opencv_sub_depth_in_sub_color;
+            // cv::Mat normalized_opencv_master_depth_in_master_color;
+            // cv::Mat normalized_opencv_sub_depth_in_master_color;
+            // cv::normalize(opencv_sub_depth_in_sub_color,
+            //               normalized_opencv_sub_depth_in_sub_color,
+            //               0,
+            //               256,
+            //               cv::NORM_MINMAX);
+            // cv::normalize(opencv_master_depth_in_master_color,
+            //               normalized_opencv_master_depth_in_master_color,
+            //               0,
+            //               256,
+            //               cv::NORM_MINMAX);
+            // cv::normalize(opencv_sub_depth_in_master_color,
+            //               normalized_opencv_sub_depth_in_master_color,
+            //               0,
+            //               256,
+            //               cv::NORM_MINMAX);
+            // cv::Mat grayscale_opencv_sub_depth_in_sub_color;
+            // cv::Mat grayscale_opencv_master_depth_in_master_color;
+            // cv::Mat grayscale_opencv_sub_depth_in_master_color;
+            // normalized_opencv_sub_depth_in_sub_color.convertTo(grayscale_opencv_sub_depth_in_sub_color, CV_32FC3);
+            // normalized_opencv_master_depth_in_master_color.convertTo(grayscale_opencv_master_depth_in_master_color,
+            //                                                          CV_32FC3);
+            // normalized_opencv_sub_depth_in_master_color.convertTo(grayscale_opencv_sub_depth_in_master_color,
+            // CV_32FC3); cv::imshow("Master depth in master color", grayscale_opencv_master_depth_in_master_color);
+            // cv::waitKey(500);
+            // cv::imshow("Subordinate depth in subordinate color", grayscale_opencv_sub_depth_in_sub_color);
+            // cv::waitKey(500);
+            // cv::imshow("Subordinate depth in master color", grayscale_opencv_sub_depth_in_master_color);
+            // cv::waitKey(500);
 
             cv::Mat master_opencv_color_image = k4a_color_to_opencv(master_color_image);
 
@@ -572,33 +572,32 @@ int main()
                           CV_32FC3,
                           cv::Scalar(0, .25, 0));
 
-            const uint16_t THRESHOLD = 1000; // TODO
-            cv::Mat combined_depth = (grayscale_opencv_master_depth_in_master_color +
-                                      grayscale_opencv_sub_depth_in_master_color) /
-                                     2;
+            const float THRESHOLD = 1000; // TODO
+            cv::Mat combined_depth = (opencv_master_depth_in_master_color + opencv_sub_depth_in_master_color) / 2;
+            cv::Mat only_one_depth;
+            cv::bitwise_xor(opencv_master_depth_in_master_color != 0,
+                            opencv_sub_depth_in_master_color != 0,
+                            only_one_depth);
+            cv::Mat combined_unaveraged = opencv_master_depth_in_master_color + opencv_sub_depth_in_master_color;
+            combined_unaveraged.copyTo(combined_depth, only_one_depth);
 
-            cv::imshow("combined", combined_depth);
-            cv::waitKey(0);
-            cout << "Test1" << endl;
+            // cv::imshow("combined", combined_depth);
+            // cv::waitKey(0);
             cv::Mat master_image_float;
             master_opencv_color_image.convertTo(master_image_float, CV_32F);
             master_image_float = master_image_float / 255.0;
             cv::Mat greened_matrix = master_image_float + cv::Scalar(0, .25, 0);
-            cv::waitKey(0);
-            cout << "Test2" << endl;
             cv::Mat mask;
-            cout << "Test3" << endl;
-            cv::bitwise_and(combined_depth < THRESHOLD, combined_depth != 0, mask);
-            cout << "Test4" << endl;
+            // cout << combined_depth << endl;
+            cv::bitwise_and(combined_depth<THRESHOLD, combined_depth> .001, mask);
             cv::Mat inverse_mask;
             cv::bitwise_not(mask, inverse_mask);
-            cout << "Test8" << endl;
-            cout << mask << endl;
+            // cout << mask << endl;
             master_image_float.copyTo(output_image, mask);
             greened_matrix.copyTo(output_image, inverse_mask);
             // please?
             cv::imshow("Greenscreened", output_image);
-            cv::waitKey(0);
+            cv::waitKey(1);
         }
     }
     catch (std::exception &e)
