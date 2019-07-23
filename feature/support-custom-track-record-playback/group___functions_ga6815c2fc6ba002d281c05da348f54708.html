@@ -108,15 +108,14 @@ $(document).ready(function(){initNavTree('group___functions_ga6815c2fc6ba002d281
 </table>
 </div><div class="memdoc">
 
-<p>Get the data block buffer size. </p>
+<p>Get the buffer size of a data block. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">data_block_handle</td><td>Handle of the data block for which the get operation is performed on.</td></tr>
+    <tr><td class="paramname">data_block_handle</td><td>Handle obtained by <a class="el" href="group___functions_ga2bca9aea2bcfa318f2625f059d4ed807.html#ga2bca9aea2bcfa318f2625f059d4ed807" title="Read the next data block for a particular track. ">k4a_playback_get_next_data_block()</a> or <a class="el" href="group___functions_ga47a2aaa8c429054691e4513a76a3ffac.html#ga47a2aaa8c429054691e4513a76a3ffac" title="Read the previous data block for a particular track. ">k4a_playback_get_previous_data_block()</a>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section remark"><dt>Remarks</dt><dd>Returns the buffer size of the data block.</dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>The function will return 0 if there is an error, and will normally return the data block buffer size.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the buffer size of the data block, or 0 if the data block is invalid.</dd></dl>
  
 </div>
 </div>

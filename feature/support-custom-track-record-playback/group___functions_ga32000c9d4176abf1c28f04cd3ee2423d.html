@@ -108,15 +108,15 @@ $(document).ready(function(){initNavTree('group___functions_ga32000c9d4176abf1c2
 </table>
 </div><div class="memdoc">
 
-<p>Get the data block buffer. </p>
+<p>Get the buffer of a data block. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">data_block_handle</td><td>Handle of the data block for which the get operation is performed on.</td></tr>
+    <tr><td class="paramname">data_block_handle</td><td>Handle obtained by <a class="el" href="group___functions_ga2bca9aea2bcfa318f2625f059d4ed807.html#ga2bca9aea2bcfa318f2625f059d4ed807" title="Read the next data block for a particular track. ">k4a_playback_get_next_data_block()</a> or <a class="el" href="group___functions_ga47a2aaa8c429054691e4513a76a3ffac.html#ga47a2aaa8c429054691e4513a76a3ffac" title="Read the previous data block for a particular track. ">k4a_playback_get_previous_data_block()</a>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section remark"><dt>Remarks</dt><dd>Use this buffer to access the data block data.</dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>The function will return NULL if there is an error, and will normally return a pointer to the data block buffer.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Use this buffer to access the data written to a custom recording track.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a pointer to the data block buffer, or NULL if the data block is invalid.</dd></dl>
  
 </div>
 </div>
