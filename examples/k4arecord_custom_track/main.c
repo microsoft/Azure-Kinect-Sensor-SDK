@@ -34,6 +34,7 @@ typedef struct
     uint32_t biClrImportant;
 } BITMAPINFOHEADER;
 
+void fill_bitmap_header(uint32_t width, uint32_t height, BITMAPINFOHEADER *out);
 void fill_bitmap_header(uint32_t width, uint32_t height, BITMAPINFOHEADER *out)
 {
     out->biSize = sizeof(BITMAPINFOHEADER);
@@ -133,7 +134,7 @@ int main(int argc, char **argv)
                 {
                     // Convert the depth value (16-bit, in millimeters) to the YUY2 color format.
                     // The YUY2 format should be playable in video players such as VLC.
-                    uint16_t depth = depth_buffer[i + 1] << 8 | depth_buffer[i];
+                    uint16_t depth = (uint16_t)(depth_buffer[i + 1] << 8 | depth_buffer[i]);
                     // Clamp the depth range to ~1 meter and scale it to fit in the Y channel of the image (8-bits).
                     if (depth > 0x3FF)
                     {
