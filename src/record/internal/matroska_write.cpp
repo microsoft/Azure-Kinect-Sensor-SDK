@@ -553,6 +553,21 @@ add_tag(k4a_record_context_t *context, const char *name, const char *value, TagT
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
 
+    const char *ch = name;
+    while (*ch != 0)
+    {
+        if (*ch == '-' || *ch == '_' || (*ch >= '0' && *ch <= '9') || (*ch >= 'A' && *ch <= 'Z'))
+        {
+            // Valid character
+            ch++;
+        }
+        else
+        {
+            LOG_ERROR("Tag name '%s' must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.", name);
+            return NULL;
+        }
+    }
+
     auto &tags = GetChild<KaxTags>(*context->file_segment);
     auto tag = new KaxTag();
     tags.PushElement(*tag); // Tag will be freed when the file is closed.

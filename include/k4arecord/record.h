@@ -89,6 +89,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_create(const char *path,
  * recording location.
  *
  * \remarks
+ * Tag names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
+ *
+ * \remarks
  * All tags need to be added before the recording header is written.
  *
  * \xmlonly
@@ -194,6 +197,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
  *
  * \remarks
+ * Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
+ *
+ * \remarks
  * All tracks need to be added before the recording header is written.
  *
  * \remarks
@@ -245,6 +251,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_video_track(const k4a_record
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
  *
  * \remarks
  * All tracks need to be added before the recording header is written.
