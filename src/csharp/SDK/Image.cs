@@ -161,7 +161,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
 
         /// <summary>
-        /// Returns a native pointer to the underlying memory.
+        /// Gets a native pointer to the underlying memory.
         /// </summary>
         /// <remarks>
         /// This property may only be accessed by unsafe code.
@@ -169,42 +169,48 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// This returns an unsafe pointer to the image's memory. It is important that the
         /// caller ensures the Image is not Disposed or garbage collected while this pointer is
         /// in use, since it may become invalid when the Image is disposed or finalized.
-        /// 
+        ///
         /// If this method needs to be used in a context where the caller cannot garantee that the
         /// Image will be disposed by another thread, the caller can call <see cref="Reference"/>
         /// to create a duplicate reference to the Image which can be disposed separately.
-        /// 
-        /// For safe buffer access <see cref="Memory"/>. 
+        ///
+        /// For safe buffer access <see cref="Memory"/>.
         /// </remarks>
-        public unsafe void* Buffer
+        internal unsafe void* Buffer
         {
             get
             {
-                if (_Buffer != IntPtr.Zero)
+                if (this._Buffer != IntPtr.Zero)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    return (void*)_Buffer;
+                    return (void*)this._Buffer;
                 }
 
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    _Buffer = NativeMethods.k4a_image_get_buffer(handle);
-                    if (_Buffer == IntPtr.Zero)
+                    this._Buffer = NativeMethods.k4a_image_get_buffer(this.handle);
+                    if (this._Buffer == IntPtr.Zero)
                     {
                         throw new AzureKinectException("Image has NULL buffer");
                     }
 
-                    return (void*)_Buffer;
+                    return (void*)this._Buffer;
                 }
             }
         }
         
-
+        /// <summary>
+        /// Gets the Memory containing the image data.
+        /// </summary>
         public unsafe Memory<byte> Memory
         {
             get
