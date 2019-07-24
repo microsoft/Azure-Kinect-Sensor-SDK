@@ -1755,7 +1755,8 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_3d(const k4a_calibration_t *calibr
  * The 2D pixel in \p source_camera coordinates.
  *
  * \param source_depth_mm
- * The depth of \p source_point2d in millimeters.
+ * The depth of \p source_point2d in millimeters. One way to derive the depth value in the color camera geometry is to
+ * use the function k4a_transformation_depth_image_to_color_camera().
  *
  * \param source_camera
  * The current camera.
@@ -1872,7 +1873,8 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_2d(const k4a_calibration_t *calibr
  * The 2D pixel in \p source_camera coordinates.
  *
  * \param source_depth_mm
- * The depth of \p source_point2d in millimeters.
+ * The depth of \p source_point2d in millimeters. One way to derive the depth value in the color camera geometry is to
+ * use the function k4a_transformation_depth_image_to_color_camera().
  *
  * \param source_camera
  * The current camera.

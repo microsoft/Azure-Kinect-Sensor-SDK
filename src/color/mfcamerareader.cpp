@@ -557,9 +557,9 @@ k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_contr
                                  &defaultValue);
 
         // Convert KSProperty exposure time value to micro-second unit
-        minValue = (LONG)(exp2f((float)minValue) * 1000000.0f);
-        maxValue = (LONG)(exp2f((float)maxValue) * 1000000.0f);
-        defaultValue = (LONG)(exp2f((float)defaultValue) * 1000000.0f);
+        minValue = MapMfExponentToK4a(minValue);
+        maxValue = MapMfExponentToK4a(maxValue);
+        defaultValue = MapMfExponentToK4a(defaultValue);
         defaultMode = K4A_COLOR_CONTROL_MODE_AUTO;
 
         // Windows KsProperty uses exposure time value as log base 2 seconds, which is not linear.
@@ -712,7 +712,7 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
                                    nullptr);
 
         // Convert KSProperty exposure time value to micro-second unit
-        propertyValue = (LONG)(exp2f((float)propertyValue) * 1000000.0f);
+        propertyValue = MapMfExponentToK4a(propertyValue);
     }
     break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
@@ -841,7 +841,7 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
         // Convert micro-second unit to KSProperty exposure time value
         hr = SetCameraControlValue(PROPSETID_VIDCAP_CAMERACONTROL,
                                    KSPROPERTY_CAMERACONTROL_EXPOSURE,
-                                   (LONG)log2f((float)newValue * 0.000001f),
+                                   MapK4aExposureToMf(newValue),
                                    flags);
     }
     break;
@@ -904,6 +904,11 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
                                    KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY,
                                    (LONG)newValue,
                                    flags);
+
+        if (SUCCEEDED(hr))
+        {
+            m_using_60hz_power = (newValue == 2);
+        }
     }
     break;
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
@@ -1420,4 +1425,39 @@ CMFCameraReader::SetCameraControlValue(const GUID PropertySet, const ULONG Prope
                                      &videoControl,
                                      sizeof(videoControl),
                                      &retSize);
+}
+
+LONG CMFCameraReader::MapK4aExposureToMf(int K4aExposure)
+{
+    for (int x = 0; x < COUNTOF(device_exposure_mapping); x++)
+    {
+        if ((m_using_60hz_power && K4aExposure <= device_exposure_mapping[x].exposure_mapped_60Hz_usec) ||
+            (!m_using_60hz_power && K4aExposure <= device_exposure_mapping[x].exposure_mapped_50Hz_usec))
+        {
+            return device_exposure_mapping[x].exponent;
+        }
+    }
+    // Default to longest capture in the event mapping failed.
+    return device_exposure_mapping[COUNTOF(device_exposure_mapping) - 1].exponent;
+}
+
+LONG CMFCameraReader::MapMfExponentToK4a(LONG MfExponent)
+{
+    for (int x = 0; x < COUNTOF(device_exposure_mapping); x++)
+    {
+        if (MfExponent <= device_exposure_mapping[x].exponent)
+        {
+            if (m_using_60hz_power)
+            {
+                return device_exposure_mapping[x].exposure_mapped_60Hz_usec;
+            }
+            else
+            {
+                return device_exposure_mapping[x].exposure_mapped_50Hz_usec;
+            }
+        }
+    }
+
+    // Default to longest capture in the event mapping failed.
+    return MAX_EXPOSURE(m_using_60hz_power);
 }

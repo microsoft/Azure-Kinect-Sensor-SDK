@@ -147,12 +147,17 @@ private:
     k4a_result_t CreateImage(CFrameContext *pFrameContext, k4a_image_t *image);
     k4a_result_t CreateImageCopy(CFrameContext *pFrameContext, k4a_image_t *image);
 
+    LONG CMFCameraReader::MapK4aExposureToMf(int K4aExposure);
+
+    LONG CMFCameraReader::MapMfExponentToK4a(LONG MfExponent);
+
 private:
     Microsoft::WRL::Wrappers::SRWLock m_lock;
     bool m_mfStarted = false;
     bool m_started = false;
     bool m_flushing = false;
     bool m_use_mf_buffer = true;
+    bool m_using_60hz_power = true;
     HANDLE m_hStreamFlushed = NULL;
 
     Microsoft::WRL::ComPtr<IMFSourceReader> m_spSourceReader;
