@@ -466,6 +466,14 @@ typedef enum
      * May be set to ::K4A_COLOR_CONTROL_MODE_AUTO or ::K4A_COLOR_CONTROL_MODE_MANUAL.
      *
      * \details
+     * The Azure Kinect supports a limited number of fixed expsore settings. When setting this, expect the exposure to
+     * be rounded up to the nearest setting. Exceptions are 1) The last value in the table is the upper limit, so a
+     * value larger than this will be overridden to the largest entry in the table. 2) The exposure time cannot be
+     * larger than the equivelent FPS. So expect 100ms exposure time to be reduced to 30ms or 33.33ms when the camera is
+     * started. The most recent copy of the table 'device_exposure_mapping' is in
+     * https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/src/color/color_priv.h
+     *
+     * \details
      * Exposure time is measured in microseconds.
      */
     K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE = 0,
