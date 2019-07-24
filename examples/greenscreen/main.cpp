@@ -26,7 +26,7 @@ cv::Mat k4a_depth_to_opencv(const k4a::image &im)
 {
     return cv::Mat(im.get_height_pixels(),
                    im.get_width_pixels(),
-                   CV_16UC1,
+                   CV_16U,
                    (void *)im.get_buffer(),
                    im.get_stride_bytes());
 }
@@ -156,20 +156,21 @@ int main()
         devices.emplace_back(k4a::device::open(0));
         devices.emplace_back(k4a::device::open(1));
         // Configure both of the cameras with the same framerate, resolution, exposure, and firmware
-        // NOTE: Both cameras must have the same configuration (TODO) what exactly needs to
+        // NOTE: Both cameras must have the same configuration (TODO) what exactly needs to be the same
         k4a_device_configuration_t camera_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
         camera_config.color_resolution = K4A_COLOR_RESOLUTION_720P; // TODO none after calib
-        camera_config.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+        camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED;
         camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
-        camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE; // TODO SUBORDINATE
-        camera_config.subordinate_delay_off_master_usec = 0; // TODO nope this should be the min, sort through all
-                                                             // the syncing
-        camera_config.synchronized_images_only = false;
+        camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
+        camera_config.subordinate_delay_off_master_usec = 100; // TODO this should be the minumum delay allowed by spec.
+                                                               // Perhaps there should be a nod to how to handle series
+                                                               // of delays
+        camera_config.synchronized_images_only = false;        // only needs to be true for the master
         vector<k4a_device_configuration_t> configurations(num_devices, camera_config);
         // special case: the first config needs to be set to be the master
         configurations.front().wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
-        configurations.front().subordinate_delay_off_master_usec = 0; // TODO delay for the rest
+        configurations.front().subordinate_delay_off_master_usec = 0;
         configurations.front().color_resolution = K4A_COLOR_RESOLUTION_720P;
         configurations.front().synchronized_images_only = true;
 
@@ -608,7 +609,7 @@ int main()
                           CV_32FC3,
                           cv::Scalar(0, .25, 0));
 
-            // const float THRESHOLD = 1000; // TODO
+            const uint16_t THRESHOLD = 1000; // TODO what should this be
             // cv::Mat combined_depth = (opencv_master_depth_in_master_color + opencv_sub_depth_in_master_color) / 2;
             cv::Mat only_one_depth;
             // cv::bitwise_xor(opencv_master_depth_in_master_color != 0,
@@ -631,9 +632,18 @@ int main()
             // master_image_float.copyTo(output_image, mask);
             // greened_matrix.copyTo(output_image, inverse_mask);
             // please?
+            cv::Mat master_valid_mask;
+            cv::bitwise_and(opencv_master_depth_in_master_color != 0,
+                            opencv_master_depth_in_master_color < THRESHOLD,
+                            master_valid_mask);
+            cv::Mat sub_valid_mask;
+            // cout << opencv_sub_depth_in_master_color << endl;
+            cv::bitwise_and(opencv_sub_depth_in_master_color != 0,
+                            opencv_sub_depth_in_master_color < THRESHOLD,
+                            sub_valid_mask);
             cv::Mat output = master_image_float;
-            cv::add(output, cv::Scalar(0, .25, 0), output, opencv_sub_depth_in_master_color != 0);
-            cv::add(output, cv::Scalar(.25, 0, 0), output, opencv_master_depth_in_master_color != 0);
+            cv::add(output, cv::Scalar(0, .25, 0), output, sub_valid_mask);
+            cv::add(output, cv::Scalar(.25, 0, 0), output, master_valid_mask);
             cv::imshow("Greenscreened", output);
             cv::waitKey(1);
         }
