@@ -174,6 +174,9 @@ int main()
         configurations.front().color_resolution = K4A_COLOR_RESOLUTION_720P;
         configurations.front().synchronized_images_only = true;
 
+        // TODO now this is 10ms eventually, should be 50us
+        const std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP = 10ms; // yes, 10 milliseconds, converted into microseconds
+
         vector<k4a::calibration> calibrations;
         // fill the calibrations vector
         for (size_t i = 0; i < devices.size(); ++i)
@@ -213,24 +216,72 @@ int main()
         cv::Mat R_depth_sub_to_color_master;
         cv::Vec3d t_depth_sub_to_color_master;
 
-        // the cameras have been started. Calibration time!
-        while (true)
-        {
-            vector<k4a::capture> device_captures(devices.size());
-            bool got_captures = true;
-            for (size_t i = 0; i < devices.size(); ++i)
-            {
-                if (!devices[i].get_capture(&device_captures[i], std::chrono::milliseconds{ K4A_WAIT_INFINITE }) ||
-                    !device_captures[i] || !device_captures[i].get_color_image())
-                {
-                    got_captures = false;
-                }
-            }
+        // Dealing with the synchronized cameras is complex. The Azure Kinect DK:
+        //      (a) does not guarantee calling get_capture() synchronously the images received will have
+        //      corresponding timestamps
+        //      (b) does not guarantee that the depth image and camera image from a single
+        //      camera's capture have the same timestamp (this delay can be changed but it will still only be
+        //      approximately the same)
+        // There are several reasons for all of this. Internally, devices keep a queue of a few of the captured images
+        // and serve those images as requested by get_capture(). However, images can also be dropped at any moment, and
+        // one device may have more images ready than another device at a given moment, et cetera.
+        //
+        // Also, the process of synchronizing is complex. The cameras are not guaranteed to exactly match in all of
+        // their timestamps when synchronized (though they should be very close). All delays are relative to the master
+        // camera's color camera. To deal with these complexities, we employ a fairly straightforward algorithm. Start
+        // by reading in two captures, then if the camera images were not taken at roughly the same time read a new one
+        // from the device that had the older capture until the timestamps roughly match.
 
-            if (!got_captures)
+        // The captures used in the loop are outside of it so that they can persist across loop iterations. This is
+        // necessary because each time this loop runs we'll only update the older capture.
+        k4a::capture master_capture;
+        k4a::capture sub_capture;
+        devices[0].get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+        devices[1].get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+
+        // Calibration loop
+        bool calibrated = false;
+        while (!calibrated)
+        {
+            if (master_capture && master_capture.get_color_image() && sub_capture && sub_capture.get_color_image())
+            {
+                k4a::image master_color_image = master_capture.get_color_image();
+                k4a::image sub_color_image = sub_capture.get_color_image();
+                std::chrono::microseconds sub_color_image_time = sub_color_image.get_device_timestamp();
+                std::chrono::microseconds master_color_image_time = master_color_image.get_device_timestamp();
+                // The subordinate's color image timestamp, ideally, is the master's color image timestamp plus the
+                // delay we configured between the master device color camera and subordinate device color camera
+                std::chrono::microseconds expected_sub_color_image_time =
+                    master_color_image_time + configurations[1].subordinate_delay_off_master_usec;
+                std::chrono::microseconds sub_color_image_time_error = sub_color_image_time - expected_sub_color_image_time;
+                if (sub_color_image_time_error < MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP) {
+                    // Example, where MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 1
+                    // time                    t=1  t=2  t=3
+                    // actual timestamp        x    .    .
+                    // expected timestamp      .    .    x
+                    // error: 1 - 3 = -2
+                    // the subordinate camera image timestamp was earlier than it is allowed to be. This means the subordinate is lagging and we need to update the subordinate to get the subordinate caught up
+                    cout << "Subordinate lagging..." << endl;
+                    devices[1].get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+                } else if (sub_color_image_time_error > MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP) {
+                    // Example, where MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 1
+                    // time                    t=1  t=2  t=3
+                    // actual timestamp        .    .    x
+                    // expected timestamp      x    .    .
+                    // error: 3 - 1 = 2
+                    // the subordinate camera image timestamp was later than it is allowed to be. This means the subordinate is ahead and we need to update the master to get the master caught up
+                    cout << "Master lagging..." << endl;
+                    devices[0].get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+
+                } else {
+                    // The images are sufficiently synchronized. Time to calibrate
+                    cout << "Master and subordinate synced image! Attempting to calibrate..." << endl;
+                }
+                // TODO if the device is properly synced, then the actual timestamps should happen within 160
+            }
+            else
             {
                 cout << "Didn't get the capture and depth image...trying again\n"; // TODO depth?
-                continue;
             }
 
             vector<cv::Mat> color_images;
@@ -413,11 +464,6 @@ int main()
             {
                 cout << f << " ";
             }
-            cout << endl;
-            cout << "Types" << endl;
-            cout << CV_32F << endl;
-            cout << sub_camera_matrix.type() << endl;
-            cout << master_camera_matrix.type() << endl;
             double error = cv::stereoCalibrate(chessboard_corners_3d_float,
                                                subordinate_corners_2d,
                                                master_corners_2d,
@@ -465,7 +511,7 @@ int main()
             cout << "Depth sub to color master t:" << endl;
             cout << t_depth_sub_to_color_master << endl;
 
-            break;
+            calibrated = false; // exit this loop
         }
 
         // Now let's get the images we need.
