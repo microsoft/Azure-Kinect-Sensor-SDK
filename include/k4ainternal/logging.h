@@ -25,69 +25,9 @@ extern "C" {
 #define FORCEINLINE inline __attribute__((always_inline))
 #endif
 #endif
-/** Handle to the logger device.
- *
- * Handles are created with \ref logger_create and closed
- * with \ref logger_destroy.
- * Invalid handles are set to 0.
- */
-K4A_DECLARE_HANDLE(logger_t);
 
-/** Default logging settings
- */
 #define K4A_ENABLE_LOG_TO_A_FILE "K4A_ENABLE_LOG_TO_A_FILE"
-#define K4A_ENABLE_LOG_TO_STDOUT "K4A_ENABLE_LOG_TO_STDOUT"
-#define K4A_LOG_LEVEL "K4A_LOG_LEVEL"
-#define K4A_LOG_FILE_NAME "k4a.log"
-#define K4A_LOG_FILE_50MB_MAX_SIZE (1048576 * 50)
-
 #define K4A_RECORD_ENABLE_LOG_TO_A_FILE "K4A_RECORD_ENABLE_LOG_TO_A_FILE"
-
-/** Logger configuration - allows logger to be used in seperate DLL's and
-    provide different ENV vars for processes that need to load both instances.
-    For example Azure Kinect SDK and potentially Azure Kinect playback.
- */
-typedef struct
-{
-    const char *env_var_log_to_a_file; // env var name for logging to a file
-    const char *env_var_log_to_stdout; // env var name for logging to stdout
-    const char *env_var_log_level;     // env var name for setting the logging level
-    const char *log_file;              // default log file name
-    size_t max_log_size;               // max log size before rolling over to a new file.
-} logger_config_t;
-
-/** Initialize logger_config_t to the default settings for Azure Kinect SDK
- */
-static inline void logger_config_init_default(logger_config_t *config)
-{
-    memset(config, 0, sizeof(logger_config_t));
-    config->env_var_log_to_a_file = K4A_ENABLE_LOG_TO_A_FILE;
-    config->env_var_log_to_stdout = K4A_ENABLE_LOG_TO_STDOUT;
-    config->env_var_log_level = K4A_LOG_LEVEL;
-    config->log_file = NULL;
-    config->max_log_size = K4A_LOG_FILE_50MB_MAX_SIZE;
-}
-
-/** Open a handle to the logger device.
- *
- * \param config [IN]
- *    A pointer to the logger configuration
- *
- * \param logger_handle [OUT]
- *    A pointer to write the opened logger device handle to
- *
- * \return K4A_RESULT_SUCCEEDED if the device was opened, otherwise an error code
- *
- * If successful, \ref logger_create will return a logger device handle in the logger
- * parameter.
- *
- * When done with the device, close the handle with \ref logger_destroy
- */
-k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle);
-
-/** Closes the logger module and free's it resources
- */
-void logger_destroy(logger_t logger_handle);
 
 /** true if the logger is initialized and going to a file.
  */
