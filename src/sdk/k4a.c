@@ -15,6 +15,7 @@
 #include <k4ainternal/calibration.h>
 #include <k4ainternal/capturesync.h>
 #include <k4ainternal/transformation.h>
+#include <k4ainternal/logging.h>
 #include <azure_c_shared_utility/tickcounter.h>
 
 // System dependencies

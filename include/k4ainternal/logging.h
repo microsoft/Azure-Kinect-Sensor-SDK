@@ -26,6 +26,12 @@ extern "C" {
 #endif
 #endif
 
+// Binaries including this module must define this variable, it is the ENV var that is used to determine if a log file
+// should be created on disk. If multiple instances of this logger were included in a single process, and logging to a
+// file is necessary, then they will need to log to separate file. This settings allows those modules to specify unique
+// file names to avoid everyone trying to use the same file, which SPDLOG does not support.
+extern char K4A_ENV_VAR_LOG_TO_A_FILE[];
+
 #define K4A_ENABLE_LOG_TO_A_FILE "K4A_ENABLE_LOG_TO_A_FILE"
 #define K4A_RECORD_ENABLE_LOG_TO_A_FILE "K4A_RECORD_ENABLE_LOG_TO_A_FILE"
 

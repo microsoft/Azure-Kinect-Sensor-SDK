@@ -45,16 +45,10 @@ extern "C" {
 #define LOG_FILE_MAX_FILES (3)
 #define LOG_FILE_EXTENSION ".log"
 
-// Binaries including this module must define this variable, it is the ENV var that is used to determine if a log file
-// should be created on disk. If multiple instances of this logger were included in a single process, and logging to a
-// file is necessary, then they will need to log to separate file. This settings allows those modules to specify unique
-// file names to avoid everyone trying to use the same file, which SPDLOG does not support.
-extern char K4A_ENV_VAR_LOG_TO_A_FILE[];
-
-const char K4A_ENABLE_LOG_TO_STDOUT[] = "K4A_ENABLE_LOG_TO_STDOUT";
-const char K4A_LOG_LEVEL[] = "K4A_LOG_LEVEL";
-const char K4A_LOG_FILE_NAME[] = "k4a.log";
-int K4A_LOG_FILE_50MB_MAX_SIZE = (1048576 * 50);
+static const char K4A_ENABLE_LOG_TO_STDOUT[] = "K4A_ENABLE_LOG_TO_STDOUT";
+static const char K4A_LOG_LEVEL[] = "K4A_LOG_LEVEL";
+static const char K4A_LOG_FILE_NAME[] = "k4a.log";
+static size_t K4A_LOG_FILE_50MB_MAX_SIZE = (1048576 * 50);
 
 typedef struct
 {
