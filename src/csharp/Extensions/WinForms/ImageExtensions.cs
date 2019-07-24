@@ -30,8 +30,7 @@ namespace Microsoft.Azure.Kinect.Sensor.WinForms
                             throw new AzureKinectException($"Pixel format {reference.Format} cannot be converted to a BitmapSource");
                     }
 
-                    using (var memoryOwner = image.GetMemory())
-                    using (var pin = memoryOwner.Memory.Pin())
+                    using (var pin = image.Memory.Pin())
                     {
                         return new Bitmap(image.WidthPixels,
                                         image.HeightPixels,

@@ -16,9 +16,9 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
             
-        <Image x:Name="colorImageViewPane" />
-        <Image x:Name="depthImageViewPane" Grid.Column="1"/>
+        <Image x:Name="inputColorImageViewPane" />
+        <Image x:Name="outputColorImageViewPane" Grid.Column="1"/>
 
-        <Label x:Name="fps" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1">0 FPS</Label>
+        <Label x:Name="fps" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1"></Label>
     </Grid>
 </Window>

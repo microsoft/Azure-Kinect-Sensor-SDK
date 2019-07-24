@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Azure.Kinect.Sensor;
 using Microsoft.Azure.Kinect.Sensor.WPF;
 
@@ -40,6 +42,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
 
                 // Allocate image buffers for us to manipulate
                 using (Image transformedDepth = new Image(ImageFormat.Depth16, colorWidth, colorHeight))
+                using (Image outputColorImage = new Image(ImageFormat.ColorBGRA32, colorWidth, colorHeight))
                 using (Transformation transform = device.GetCalibration().CreateTransformation())
                 {
                     while (true)
@@ -47,40 +50,61 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                         // Wait for a capture on a thread pool thread
                         using (Capture capture = await Task.Run(() => { return device.GetCapture(); }).ConfigureAwait(true))
                         {
-                            // Update the color image preview
-                            this.colorImageViewPane.Source = capture.Color.CreateBitmapSource();
-
-                            // Compute the depth preview on a thread pool thread
-                            await Task.Run(() =>
+                            // Create a BitmapSource for the unmodified color image.
+                            // Creating the BitmapSource is slow, so do it asynchronously on another thread
+                            Task<BitmapSource> createInputColorBitmapTask = Task.Run(() =>
                             {
-                                // Transform the depth image
+                                BitmapSource source = capture.Color.CreateBitmapSource();
+
+                                // Allow the bitmap to move threads
+                                source.Freeze();
+                                return source;
+                            });
+
+                            // Compute the colorized output bitmap on a thread pool thread
+                            Task<BitmapSource> createOutputColorBitmapTask = Task.Run(() =>
+                            {
+                                // Transform the depth image to the perspective of the color camera
                                 transform.DepthImageToColorCamera(capture, transformedDepth);
 
-                                using (var depthPixels = transformedDepth.GetPixels<ushort>())
-                                using (var colorPixels = capture.Color.GetPixels<BGRA>())
+                                // Get Span<T> references to the pixel buffers for fast pixel access.
+                                Span<ushort> depthBuffer = transformedDepth.GetPixels<ushort>().Span;
+                                Span<BGRA> colorBuffer = capture.Color.GetPixels<BGRA>().Span;
+                                Span<BGRA> outputColorBuffer = outputColorImage.GetPixels<BGRA>().Span;
+
+                                // Create an output color image with data from the depth image
+                                for (int i = 0; i < colorBuffer.Length; i++)
                                 {
+                                    // The output image will be the same as the input color image,
+                                    // but colorized with Red where there is no depth data, and Green
+                                    // where there is depth data at more than 1.5 meters
+                                    outputColorBuffer[i] = colorBuffer[i];
 
-                                    Span<ushort> depthBuffer = depthPixels.Memory.Span;
-                                    Span<BGRA> colorBuffer = colorPixels.Memory.Span;
-
-                                    // Modify the color image with data from the depth image
-                                    for (int i = 0; i < colorBuffer.Length; i++)
+                                    if (depthBuffer[i] == 0)
                                     {
-                                        if (depthBuffer[i] == 0)
-                                        {
-                                            colorBuffer[i].R = 255;
-                                        }
-                                        else if (depthBuffer[i] > 1500)
-                                        {
-                                            colorBuffer[i].G = 255;
-                                        }
+                                        outputColorBuffer[i].R = 255;
+                                    }
+                                    else if (depthBuffer[i] > 1500)
+                                    {
+                                        outputColorBuffer[i].G = 255;
                                     }
                                 }
 
-                            }).ConfigureAwait(true);
+                                BitmapSource source = outputColorImage.CreateBitmapSource();
 
+                                // Allow the bitmap to move threads
+                                source.Freeze();
 
-                            this.depthImageViewPane.Source = capture.Color.CreateBitmapSource();
+                                return source;
+                            });
+
+                            // Wait for both bitmaps to be ready and assign them.
+                            BitmapSource inputColorBitmap = await createInputColorBitmapTask.ConfigureAwait(true);
+                            BitmapSource outputColorBitmap = await createOutputColorBitmapTask.ConfigureAwait(true);
+
+                            this.inputColorImageViewPane.Source = inputColorBitmap;
+                            this.outputColorImageViewPane.Source = outputColorBitmap;
+
                             frameCount++;
 
                             TimeSpan timeSpan = DateTime.Now - start;

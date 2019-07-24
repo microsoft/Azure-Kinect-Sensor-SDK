@@ -23,6 +23,35 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
     }
 
+    internal class AzureKinectMemoryCast<TFrom, TTo> : MemoryManager<TTo>
+        where TFrom : unmanaged
+        where TTo : unmanaged
+    {
+        private Memory<TFrom> Source { get; }
+        public AzureKinectMemoryCast(Memory<TFrom> memory)
+        {
+            this.Source = memory;
+        }
+        public override Span<TTo> GetSpan()
+        {
+            return MemoryMarshal.Cast<TFrom, TTo>(this.Source.Span);
+        }
+
+        public override MemoryHandle Pin(int elementIndex = 0)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Unpin()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+        }
+    }
+
     class AzureKinectMemorytOwnerCast<TFrom, TTo> : MemoryManager<TTo>
         where TFrom : unmanaged
         where TTo : unmanaged

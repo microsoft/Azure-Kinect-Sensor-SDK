@@ -2,20 +2,22 @@
 // Licensed under the MIT License.
 using System;
 using System.Buffers;
+using System.ComponentModel;
 using System.Diagnostics.Tracing;
+using System.Dynamic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-    public class Image : IDisposable
+    public class Image : IMemoryOwner<byte>, IDisposable
     {
 
         Allocator Allocator = Allocator.Singleton;
 
 
-        public IMemoryOwner<PixelT> GetPixels<PixelT>()
+        public Memory<PixelT> GetPixels<PixelT>()
             where PixelT : unmanaged
         {
             if (this.StrideBytes != Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels)
@@ -23,19 +25,10 @@ namespace Microsoft.Azure.Kinect.Sensor
                 throw new AzureKinectException("Pixels not aligned to stride of each line");
             }
 
-            IMemoryOwner<byte> memory = GetMemory();
-            try
-            {
-                return new AzureKinectMemorytOwnerCast<byte, PixelT>(memory, 0, this.WidthPixels * this.HeightPixels * Marshal.SizeOf(typeof(PixelT)));
-            }
-            catch
-            {
-                memory.Dispose();
-                throw;
-            }
+            return new AzureKinectMemoryCast<byte, PixelT>(this.Memory).Memory;
         }
 
-        public IMemoryOwner<PixelT> GetPixels<PixelT>(int row)
+        public Memory<PixelT> GetPixels<PixelT>(int row)
             where PixelT : unmanaged
         {
             if (row > this.HeightPixels || row < 0)
@@ -43,21 +36,13 @@ namespace Microsoft.Azure.Kinect.Sensor
                 throw new ArgumentOutOfRangeException(nameof(row));
             }
 
-            if (this.StrideBytes < Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels)
+            int activeLineBytes = Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels;
+            if (this.StrideBytes < activeLineBytes)
             {
                 throw new AzureKinectException("The image stride is not large enough for pixels of this size");
             }
 
-            IMemoryOwner<byte> memory = GetMemory();
-            try
-            {
-                return new AzureKinectMemorytOwnerCast<byte, PixelT>(memory, row * this.StrideBytes, Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels);
-            }
-            catch
-            {
-                memory.Dispose();
-                throw;
-            }
+            return new AzureKinectMemoryCast<byte, PixelT>(this.Memory.Slice(row * this.StrideBytes, activeLineBytes)).Memory;
         }
 
         /// <summary>
@@ -163,10 +148,17 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        
+        
+        // The pointer to the underlying native memory
+        private IntPtr _Buffer = IntPtr.Zero;
 
+        // If we have made a managed copy of the native memory, this is the managed array
         private byte[] managedBufferCache = null;
 
-        private IntPtr _Buffer = IntPtr.Zero;
+        // If we have wrapped the native memory in a IMemoryOwner<T>, this is the memory owner\
+        private IMemoryOwner<byte> nativeBufferWrapper = null;
+
 
         /// <summary>
         /// Returns a native pointer to the underlying memory.
@@ -213,45 +205,68 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
         
 
-        public unsafe IMemoryOwner<byte> GetMemory()
+        public unsafe Memory<byte> Memory
         {
-            lock (this)
+            get
             {
-
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                if (managedBufferCache != null)
+                lock (this)
                 {
-                    return new AzureKinectArrayMemoryOwner<byte>(managedBufferCache, 0, (int)this.Size);
-                }
 
-                IntPtr bufferAddress = (IntPtr)this.Buffer;
+                    if (disposedValue)
+                        throw new ObjectDisposedException(nameof(Image));
 
-                IMemoryOwner<byte> memory = this.Allocator.GetMemory(bufferAddress, this.Size);
-                if (memory != null)
-                {
-                    return memory;
-                }
+                    // If we previously copied the native memory to a managed array, return that array's memory
+                    if (managedBufferCache != null)
+                    {
+                        return new Memory<byte>(managedBufferCache, 0, (int)this.Size);
+                    }
 
-                // The underlying buffer is not in managed memory
-                if (Allocator.CopyNativeBuffers)
-                {
-                    // Create a copy
-                    int bufferSize = checked((int)this.Size);
-                    this.managedBufferCache = Allocator.GetBufferCache((IntPtr)this.Buffer, bufferSize);
+                    // If we previously wrapped the native memory in a IMemoryOwner<T>, return that memory object
+                    if (nativeBufferWrapper != null)
+                    {
+                        return nativeBufferWrapper.Memory;
+                    }
 
-                    System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, this.managedBufferCache, 0, bufferSize);
+                    IntPtr bufferAddress = (IntPtr)this.Buffer;
 
-                    return new AzureKinectArrayMemoryOwner<byte>(managedBufferCache, 0, (int)this.Size);
-                }
-                else
-                {
-                    memory = new AzureKinectMemoryManager(this);
+                    // If the native buffer is within a memory block that the managed allocator provided,
+                    // return that memory.
+                    Memory<byte> memory = this.Allocator.GetMemory(bufferAddress, this.Size);
+                    if (!memory.IsEmpty)
+                    {
+                        return memory;
+                    }
 
-                    Allocator.Singleton.Hook(memory);
+                    // The underlying buffer is not in managed memory.
+                    // We can use one of two strategies to return a Memory<T>
+                    
+                    // If we use the CopyNativeBuffers method, we will allocate and then copy the native memory
+                    // to a managed array, ensuring memory-safe access to the contents of memory, at the expense of
+                    // a memcpy each time we transition the buffer from native to managed, or from managed to native.
 
-                    return memory;
+                    // If we don't copy the native buffers, we can construct a MemoryManager<T> that wraps that native
+                    // buffer. This has no memcpy cost, but exposes the possibilty of use after free bugs to consumers
+                    // of the library. This is therefore not enabled by default.
+                    if (this.Allocator.SafeCopyNativeBuffers)
+                    {
+                        // Create a copy
+                        int bufferSize = checked((int)this.Size);
+                        this.managedBufferCache = Allocator.GetBufferCache((IntPtr)this.Buffer, bufferSize);
+
+
+                        return new Memory<byte>(managedBufferCache, 0, (int)this.Size);
+                    }
+                    else
+                    {
+                        // Provide a Memory<T> object that wraps a native pointer
+                        // This is UNSAFE. Callers in safe code may access unowned native
+                        // memory if they use the Memory<T> or Span<T> after the Image has
+                        // been disposed.
+
+                        nativeBufferWrapper = new AzureKinectMemoryManager(this);
+
+                        return nativeBufferWrapper.Memory;
+                    }
                 }
             }
         }
@@ -525,9 +540,11 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     if (disposing)
                     {
-                        this.FlushMemory();
+                        //this.FlushMemory();
 
-                        //((IDisposable)this.memoryManager)?.Dispose();
+                        // If we have a native buffer wrapper, dispose it since we
+                        // are a wrapper for it's IMemoryOwner<T> interface
+                        this.nativeBufferWrapper?.Dispose();
 
                         // TODO: dispose managed state (managed objects).
                         Allocator.Singleton.Unhook(this);

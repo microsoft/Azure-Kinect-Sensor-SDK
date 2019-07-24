@@ -36,21 +36,19 @@ namespace Microsoft.Azure.Kinect.Sensor.WPF
 
                 unsafe
                 {
-                    using (var memoryOwner = reference.GetMemory())
+                    using (var pin = reference.Memory.Pin())
                     {
-                        using (var pin = memoryOwner.Memory.Pin())
-                        {
-                            return BitmapSource.Create(
-                                        reference.WidthPixels,
-                                        reference.HeightPixels,
-                                        dpiX,
-                                        dpiY,
-                                        pixelFormat,
-                                        /* palette: */ null,
-                                        (IntPtr)pin.Pointer,
-                                        checked((int)reference.Size),
-                                        reference.StrideBytes);
-                        }
+                        BitmapSource source = BitmapSource.Create(
+                                    reference.WidthPixels,
+                                    reference.HeightPixels,
+                                    dpiX,
+                                    dpiY,
+                                    pixelFormat,
+                                    /* palette: */ null,
+                                    (IntPtr)pin.Pointer,
+                                    checked((int)reference.Size),
+                                    reference.StrideBytes);
+                        return source;
                     }
                 }
             }
