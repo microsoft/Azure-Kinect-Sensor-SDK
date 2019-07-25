@@ -68,9 +68,18 @@ static void allocator_global_init(allocator_global_t *g_allocator)
 // This state is used to track the freeing of the allocation
 typedef struct _allocation_context_t
 {
-    allocation_source_t source;
-    k4a_memory_destroy_cb_t *free;
-    void *free_context;
+    union _allocator_context
+    {
+        struct _context
+        {
+            allocation_source_t source;
+            k4a_memory_destroy_cb_t *free;
+            void *free_context;
+        } context;
+
+        // Add 16 byte padding to keep original alignment of allocations for SSE
+        char padding[16];
+    } u;
 } allocation_context_t;
 
 K4A_DECLARE_GLOBAL(allocator_global_t, allocator_global_init);
@@ -181,9 +190,9 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size)
     // Store information about the allocation that we will need during free.
     allocation_context_t allocation_context;
 
-    allocation_context.source = source;
-    allocation_context.free = g_allocator->free;
-    allocation_context.free_context = user_context;
+    allocation_context.u.context.source = source;
+    allocation_context.u.context.free = g_allocator->free;
+    allocation_context.u.context.free_context = user_context;
 
     // Memcpy the context information to the header of the full buffer.
     // Don't cast the buffer directly since there is no alignment constraint
@@ -203,7 +212,7 @@ void allocator_free(void *buffer)
     allocation_context_t allocation_context;
     memcpy(&allocation_context, full_buffer, sizeof(allocation_context));
 
-    allocation_source_t source = allocation_context.source;
+    allocation_source_t source = allocation_context.u.context.source;
 
     RETURN_VALUE_IF_ARG(VOID_VALUE, source < ALLOCATION_SOURCE_USER || source > ALLOCATION_SOURCE_USB_IMU);
     RETURN_VALUE_IF_ARG(VOID_VALUE, buffer == NULL);
@@ -237,7 +246,7 @@ void allocator_free(void *buffer)
 
     DEC_REF_VAR(*ref);
 
-    allocation_context.free(full_buffer, allocation_context.free_context);
+    allocation_context.u.context.free(full_buffer, allocation_context.u.context.free_context);
     full_buffer = NULL;
 }
 
