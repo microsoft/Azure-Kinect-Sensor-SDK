@@ -68,6 +68,8 @@ static DLL_DIRECTORY_COOKIE add_current_module_to_search()
 
     fileName[0] = L'\0';
 
+    // This adds the directory of the current module (k4a.dll) to the loader's path.
+    // This will mimic how C# loads DLLs. The loader for C code only loads from the path of the current executable
     DLL_DIRECTORY_COOKIE dllDirectory = AddDllDirectory(path);
     if (dllDirectory == 0)
     {
