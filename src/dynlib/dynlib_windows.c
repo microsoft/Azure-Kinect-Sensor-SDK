@@ -37,6 +37,46 @@ static char *generate_file_name(const char *name, uint32_t major_ver, uint32_t m
     return versioned_file_name;
 }
 
+static DLL_DIRECTORY_COOKIE add_current_module_to_search()
+{
+    wchar_t path[MAX_PATH];
+    HMODULE hModule = NULL;
+
+    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCTSTR)add_current_module_to_search, &hModule) == 0)
+    {
+        LOG_WARNING("Failed to get current module (%d).", GetLastError());
+        return NULL;
+    }
+
+    if (GetModuleFileNameW(hModule, path, sizeof(path)) == 0)
+    {
+        LOG_WARNING("Failed to get current module file name (%d).", GetLastError());
+        return NULL;
+    }
+
+    // GetModuleFileName give the full path, but AddDllDirectory requires a directory path. Remove
+    // the filename portion of this path. This should only be running in the "K4A.dll" assembly,
+    // but verify this assumption before truncating the path. If this code is used from a different
+    // file, then this needs to be modified to search for the path separators.
+    size_t length = wcslen(path);
+    wchar_t *fileName = path + (length - 7);
+    if (fileName <= path || _wcsicmp(fileName, L"k4a.DLL") != 0)
+    {
+        LOG_WARNING("The file name of the current module is not expected.", 0);
+        return NULL;
+    }
+
+    fileName[0] = '\0';
+
+    DLL_DIRECTORY_COOKIE dllDirectory = AddDllDirectory(path);
+    if (dllDirectory == 0)
+    {
+        LOG_WARNING("Failed to add the directory to the DLL search path (%d).", GetLastError());
+    }
+
+    return dllDirectory;
+}
+
 k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_ver, dynlib_t *dynlib_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, name == NULL);
@@ -66,6 +106,8 @@ k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_
         return K4A_RESULT_FAILED;
     }
 
+    DLL_DIRECTORY_COOKIE dllDirectory = add_current_module_to_search();
+
     dynlib_context_t *dynlib = dynlib_t_create(dynlib_handle);
     k4a_result_t result = K4A_RESULT_FROM_BOOL(dynlib != NULL);
 
@@ -77,6 +119,14 @@ k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_
         if (K4A_FAILED(result))
         {
             LOG_ERROR("Failed to load DLL %s with error code: %u", versioned_name, GetLastError());
+        }
+    }
+
+    if (dllDirectory != 0)
+    {
+        if (RemoveDllDirectory(dllDirectory) == 0)
+        {
+            LOG_WARNING("Failed to remove the directory from the DLL search path (%d).", GetLastError());
         }
     }
 
