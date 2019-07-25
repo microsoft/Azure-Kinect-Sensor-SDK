@@ -96,7 +96,7 @@ K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *
                                                       void *message_cb_context,
                                                       k4a_log_level_t min_level);
 
-/** Sets the callback functions fot the SDK allocator
+/** Sets the callback functions for the SDK allocator
  *
  * \param allocate
  * The callback function to allocate memory. When the SDK requires memory allocation this callback will be
