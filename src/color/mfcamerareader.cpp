@@ -963,7 +963,8 @@ k4a_result_t CMFCameraReader::CreateImageCopy(CFrameContext *pFrameContext, k4a_
     size_t size = pFrameContext->GetFrameSize();
 
     k4a_result_t result;
-    result = TRACE_CALL(image_create(m_image_format, m_width_pixels, m_height_pixels, GetStride(), image));
+    result = TRACE_CALL(
+        image_create(m_image_format, m_width_pixels, m_height_pixels, GetStride(), ALLOCATION_SOURCE_COLOR, image));
 
     if (K4A_SUCCEEDED(result))
     {

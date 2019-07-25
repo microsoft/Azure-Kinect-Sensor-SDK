@@ -395,7 +395,7 @@ k4a_result_t k4a_image_create(k4a_image_format_t format,
                               int stride_bytes,
                               k4a_image_t *image_handle)
 {
-    return image_create(format, width_pixels, height_pixels, stride_bytes, image_handle);
+    return image_create(format, width_pixels, height_pixels, stride_bytes, ALLOCATION_SOURCE_USER, image_handle);
 }
 
 k4a_result_t k4a_image_create_from_buffer(k4a_image_format_t format,

@@ -1187,8 +1187,8 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
         }
 
         // Allocate K4A Color image
-        k4a_result_t result = K4A_RESULT_FROM_BOOL(
-            image_create(m_output_image_format, (int)m_width_pixels, (int)m_height_pixels, stride, &image));
+        k4a_result_t result = K4A_RESULT_FROM_BOOL(image_create(
+            m_output_image_format, (int)m_width_pixels, (int)m_height_pixels, stride, ALLOCATION_SOURCE_COLOR, &image));
 
         if (K4A_SUCCEEDED(result))
         {

@@ -159,6 +159,7 @@ k4a_result_t image_create(k4a_image_format_t format,
                           int width_pixels,
                           int height_pixels,
                           int stride_bytes,
+                          allocation_source_t source,
                           k4a_image_t *image_handle)
 {
     // User is special and only allowed to be used by the user through a public API.
@@ -173,7 +174,7 @@ k4a_result_t image_create(k4a_image_format_t format,
     size_t size = (size_t)height_pixels * (size_t)stride_bytes;
 
     *image_handle = NULL;
-    result = TRACE_CALL(image_create_empty_image(ALLOCATION_SOURCE_USER, size, image_handle));
+    result = TRACE_CALL(image_create_empty_image(source, size, image_handle));
 
     if (K4A_SUCCEEDED(result))
     {
