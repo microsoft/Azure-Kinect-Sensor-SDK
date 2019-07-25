@@ -126,7 +126,7 @@ k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_
         }
     }
 
-    if (dllDirectory != 0)
+    if (dllDirectory != NULL)
     {
         if (RemoveDllDirectory(dllDirectory) == 0)
         {
