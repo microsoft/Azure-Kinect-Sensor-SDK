@@ -10,6 +10,7 @@
 // System dependencies
 #include <windows.h>
 #include <stdio.h>
+#include <pathcch.h>
 
 #define TOSTRING(x) STRINGIFY(x)
 
@@ -40,6 +41,9 @@ static char *generate_file_name(const char *name, uint32_t major_ver, uint32_t m
 static DLL_DIRECTORY_COOKIE add_current_module_to_search()
 {
     wchar_t path[MAX_PATH];
+    //wchar_t drive[_MAX_DRIVE];
+    //wchar_t directory[_MAX_DIR];
+
     HMODULE hModule = NULL;
 
     if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCTSTR)add_current_module_to_search, &hModule) == 0)
@@ -54,19 +58,28 @@ static DLL_DIRECTORY_COOKIE add_current_module_to_search()
         return NULL;
     }
 
-    // GetModuleFileName give the full path, but AddDllDirectory requires a directory path. Remove
-    // the filename portion of this path. This should only be running in the "K4A.dll" assembly,
-    // but verify this assumption before truncating the path. If this code is used from a different
-    // file, then this needs to be modified to search for the path separators.
-    size_t length = wcslen(path);
-    wchar_t *fileName = path + (length - 7);
-    if (fileName <= path || _wcsicmp(fileName, L"k4a.DLL") != 0)
+    //// GetModuleFileName give the full path, but AddDllDirectory requires a directory path. Remove
+    //// the filename portion of this path. This should only be running in the "K4A.dll" assembly,
+    //// but verify this assumption before truncating the path. If this code is used from a different
+    //// file, then this needs to be modified to search for the path separators.
+    // size_t length = wcslen(path);
+    // wchar_t *fileName = path + (length - 7);
+    // if (fileName <= path || _wcsicmp(fileName, L"k4a.DLL") != 0)
+    //{
+    //    LOG_WARNING("The file name of the current module is not expected.", 0);
+    //    return NULL;
+    //}
+
+    // fileName[0] = L'\0';
+
+    if (PathCchRemoveFileSpec(path, sizeof(path)) != S_OK)
     {
-        LOG_WARNING("The file name of the current module is not expected.", 0);
+        LOG_WARNING("Failed to get current module file name (%d).", GetLastError());
         return NULL;
     }
 
-    fileName[0] = L'\0';
+    //_wsplitpath_s(path, drive, _MAX_DRIVE, directory, _MAX_DIR, NULL, 0, NULL, 0);
+    //_wmakepath_s(path, MAX_PATH, drive, directory, NULL, NULL);
 
     // This adds the directory of the current module (k4a.dll) to the loader's path.
     // This will mimic how C# loads DLLs. The loader for C code only loads from the path of the current executable
