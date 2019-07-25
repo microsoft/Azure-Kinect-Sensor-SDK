@@ -8,6 +8,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using Microsoft.Azure.Kinect.Sensor.WPF;
 
 namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer

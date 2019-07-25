@@ -44,12 +44,30 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// </summary>
         public bool SafeCopyNativeBuffers { get; set; } = true;
 
+
+        /// <summary>
+        /// Hook the native allocator and register an object for dispose during shutdown.
+        /// </summary>
+        /// <param name="disposable">Object to dispose before native hooks are disconnected.</param>
+        /// <remarks>
+        /// When the CLR shuts down, native callbacks in to the CLR result in an application crash. The allocator free method
+        /// is a native callback to the managed layer that is called whenever the hooked native API needs to free memory.
+        ///
+        /// To avoid this callback after the CLR shuts down, the native library must be completly cleaned up prior CLR shutdown.
+        ///
+        /// Any object that may hold references to the native library (and will therefore generate native to manged callbacks when it
+        /// gets cleaned up) should register with the Allocator.Hook method to ensure it is cleaned up in the correct order.
+        /// during shutdown.
+        /// </remarks>
         public void Hook(IDisposable disposable)
         {
             lock (this)
             {
+                // Track the object as one we may need to dispose during shutdown.
+                // Use a weak reference to allow the object to be garbage collected earliler if possible.
                 _ = this.disposables.Add(new WeakReference<IDisposable>(disposable));
 
+                // Only hook the native layer once
                 if (this.hooked)
                 {
                     return;
@@ -63,6 +81,8 @@ namespace Microsoft.Azure.Kinect.Sensor
                     AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(this.allocateDelegate, this.freeDelegate));
                 }
 
+                // Register for ProcessExit and DomainUnload to allow us to unhook the native layer before
+                // native to managed callbacks are no longer allowed.
                 AppDomain.CurrentDomain.DomainUnload += this.CurrentDomain_DomainUnload;
                 AppDomain.CurrentDomain.ProcessExit += this.CurrentDomain_DomainUnload;
 
@@ -70,10 +90,19 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <summary>
+        /// Unregister the object for disposal.
+        /// </summary>
+        /// <param name="disposable">Object to unregister.</param>
+        /// <remarks>
+        /// This does not unhook the native allocator, but only unregisters the object for
+        /// disposal.
+        /// </remarks>
         public void Unhook(IDisposable disposable)
         {
             lock (this)
             {
+                // Remove the object and clean up any dead weak references.
                 _ = this.disposables.RemoveWhere((r) =>
                       {
                           bool alive = r.TryGetTarget(out IDisposable target);
@@ -83,7 +112,23 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-        public Memory<byte> GetMemory(IntPtr address, long size)
+        /// <summary>
+        /// Get a Memory reference to the managed memory that was used by the hooked native
+        /// allocator.
+        /// </summary>
+        /// <param name="address">Native address of the memory.</param>
+        /// <param name="size">Size of the memory region.</param>
+        /// <returns>Reference to the memory, or an empty memory reference.</returns>
+        /// <remarks>
+        /// If the address originally came from a managed array that was provided to the native
+        /// API through the allocator hook, this function will return a Memory reference to the managed
+        /// memory. Since this is a reference to the managed memory and not the native pointer, it
+        /// is safe and not subject to use after free bugs.
+        ///
+        /// The address and size do not need to reference the exact pointer provided to the native layer
+        /// by the allocator, but can refer to any region in the allocated memory.
+        /// </remarks>
+        public Memory<byte> GetManagedAllocatedMemory(IntPtr address, long size)
         {
             lock (this)
             {
@@ -112,6 +157,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        // Find the allocation context who's address is closest but not
+        // greater than the search address
         private AllocationContext FindNearestContext(IntPtr address)
         {
             lock (this)
@@ -139,6 +186,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        // This function is called by the native layer to allocate memory
         private IntPtr AllocateFunction(int size, out IntPtr context)
         {
             byte[] buffer = this.pool.Rent(size);
@@ -161,6 +209,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             return allocationContext.BufferAddress;
         }
 
+        // This function is called by the native layer to free memory
         private void FreeFunction(IntPtr buffer, IntPtr context)
         {
             GCHandle contextPin = (GCHandle)context;
@@ -168,7 +217,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
             lock (this)
             {
-                System.Diagnostics.Debug.Assert(Object.ReferenceEquals(this.allocations[(long)buffer], allocationContext), "Allocation context does not match expected value");
+                System.Diagnostics.Debug.Assert(object.ReferenceEquals(this.allocations[(long)buffer], allocationContext), "Allocation context does not match expected value");
                 _ = this.allocations.Remove((long)buffer);
             }
 
@@ -177,12 +226,14 @@ namespace Microsoft.Azure.Kinect.Sensor
             contextPin.Free();
         }
 
+        // Called when the AppDomain is unloaded or the application exits
         private void CurrentDomain_DomainUnload(object sender, EventArgs e)
         {
             lock (this)
             {
                 System.Diagnostics.Debug.WriteLine($"Disposable count {this.disposables.Count} (Allocation Count {this.allocations.Count})");
 
+                // First dispose of all the registered objects
                 List<IDisposable> disposeList = new List<IDisposable>();
                 foreach (WeakReference<IDisposable> r in this.disposables)
                 {
@@ -200,9 +251,16 @@ namespace Microsoft.Azure.Kinect.Sensor
                     disposable.Dispose();
                 }
 
+                // If the allocation count is not zero, we will be called again with a free function
+                // if this happens after the CLR has entered shutdown, the CLR will generate an exception.
                 if (this.allocations.Count > 0)
                 {
                     throw new Exception("Not all native allocations have been freed before managed shutdown");
+                }
+
+                if (this.UseManagedAllocator)
+                {
+                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(null, null));
                 }
             }
         }
@@ -234,6 +292,15 @@ namespace Microsoft.Azure.Kinect.Sensor
             Marshal.Copy(nativeAddress, entry.ManagedBufferCache, 0, entry.UsedSize);
         }
 
+        /// <summary>
+        /// Get a managed array to cache the contents of a native buffer.
+        /// </summary>
+        /// <param name="nativeAddress">Native buffer to mirror.</param>
+        /// <param name="size">Size of the native memory.</param>
+        /// <returns>A managed array populated with the content of the native buffer.</returns>
+        /// <remarks>Multiple callers asking for the same address will get the same buffer.
+        /// When done with the buffer the caller must call <seealso cref="ReturnBufferCache(IntPtr)"/>.
+        /// </remarks>
         public byte[] GetBufferCache(IntPtr nativeAddress, int size)
         {
             BufferCacheEntry entry;
@@ -258,7 +325,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         ManagedBufferCache = this.pool.Rent(size),
                         UsedSize = size,
                         ReferenceCount = 1,
-                        Initialized = false
+                        Initialized = false,
                     };
 
                     this.bufferCache.Add(nativeAddress, entry);
@@ -277,6 +344,11 @@ namespace Microsoft.Azure.Kinect.Sensor
             return entry.ManagedBufferCache;
         }
 
+        /// <summary>
+        /// Return the buffer cache.
+        /// </summary>
+        /// <param name="nativeAddress">Address of the native buffer.</param>
+        /// <remarks>Must be called exactly once for each buffer provided by <see cref="GetBufferCache(IntPtr, int)"/>.</remarks>
         public void ReturnBufferCache(IntPtr nativeAddress)
         {
             lock (this)
@@ -286,7 +358,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (entry.ReferenceCount == 0)
                 {
                     this.pool.Return(entry.ManagedBufferCache);
-                    this.bufferCache.Remove(nativeAddress);
+                    _ = this.bufferCache.Remove(nativeAddress);
                 }
             }
         }

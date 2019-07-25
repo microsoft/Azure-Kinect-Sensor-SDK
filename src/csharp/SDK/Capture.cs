@@ -8,6 +8,8 @@ namespace Microsoft.Azure.Kinect.Sensor
     {
         internal Capture(NativeMethods.k4a_capture_t handle)
         {
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
             Allocator.Singleton.Hook(this);
 
             this.handle = handle;

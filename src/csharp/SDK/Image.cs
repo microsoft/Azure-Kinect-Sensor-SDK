@@ -13,47 +13,57 @@ namespace Microsoft.Azure.Kinect.Sensor
 {
     public class Image : IMemoryOwner<byte>, IDisposable
     {
+        readonly Allocator Allocator = Allocator.Singleton;
 
-        Allocator Allocator = Allocator.Singleton;
-
-
-        public Memory<PixelT> GetPixels<PixelT>()
-            where PixelT : unmanaged
+        /// <summary>
+        /// Gets the pixels of the image.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <remarks>If the image pixels are not in contiguous memory, this method will throw an exception.</remarks>
+        /// <returns>The contigous memory of the image pixels.</returns>
+        public Memory<TPixel> GetPixels<TPixel>()
+            where TPixel : unmanaged
         {
-            if (this.StrideBytes != Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels)
+            if (this.StrideBytes != Marshal.SizeOf(typeof(TPixel)) * this.WidthPixels)
             {
                 throw new AzureKinectException("Pixels not aligned to stride of each line");
             }
 
-            return new AzureKinectMemoryCast<byte, PixelT>(this.Memory).Memory;
+            return new AzureKinectMemoryCast<byte, TPixel>(this.Memory).Memory;
         }
 
-        public Memory<PixelT> GetPixels<PixelT>(int row)
-            where PixelT : unmanaged
+        /// <summary>
+        /// Gets the pixels of the image.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <param name="row">The row of pixels to get.</param>
+        /// <returns>The contigous memory of the image pixel row.</returns>
+        public Memory<TPixel> GetPixels<TPixel>(int row)
+            where TPixel : unmanaged
         {
             if (row > this.HeightPixels || row < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(row));
             }
 
-            int activeLineBytes = Marshal.SizeOf(typeof(PixelT)) * this.WidthPixels;
+            int activeLineBytes = Marshal.SizeOf(typeof(TPixel)) * this.WidthPixels;
             if (this.StrideBytes < activeLineBytes)
             {
                 throw new AzureKinectException("The image stride is not large enough for pixels of this size");
             }
 
-            return new AzureKinectMemoryCast<byte, PixelT>(this.Memory.Slice(row * this.StrideBytes, activeLineBytes)).Memory;
+            return new AzureKinectMemoryCast<byte, TPixel>(this.Memory.Slice(row * this.StrideBytes, activeLineBytes)).Memory;
         }
 
         /// <summary>
         /// Gets a pixel value in the image.
         /// </summary>
-        /// <typeparam name="PixelT">The type of the pixel.</typeparam>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
         /// <param name="row">The image row.</param>
         /// <param name="col">The image column.</param>
         /// <returns>The pixel value at the row and column.</returns>
-        public unsafe PixelT GetPixel<PixelT>(int row, int col)
-            where PixelT : unmanaged
+        public unsafe TPixel GetPixel<TPixel>(int row, int col)
+            where TPixel : unmanaged
         {
             if (row < 0 || row > this.HeightPixels)
             {
@@ -65,11 +75,18 @@ namespace Microsoft.Azure.Kinect.Sensor
                 throw new ArgumentOutOfRangeException(nameof(col));
             }
 
-            return *(PixelT*)((byte*)this.Buffer + (this.StrideBytes * row) + (col * sizeof(PixelT)));
+            return *(TPixel*)((byte*)this.Buffer + (this.StrideBytes * row) + (col * sizeof(TPixel)));
         }
 
-        public unsafe void SetPixel<PixelT>(int row, int col, PixelT pixel)
-            where PixelT : unmanaged
+        /// <summary>
+        /// Sets a pixel value in the image.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <param name="row">The image row.</param>
+        /// <param name="col">The image column.</param>
+        /// <param name="pixel">The value of the pixel.</param>
+        public unsafe void SetPixel<TPixel>(int row, int col, TPixel pixel)
+            where TPixel : unmanaged
         {
             if (row < 0 || row > this.HeightPixels)
             {
@@ -81,11 +98,13 @@ namespace Microsoft.Azure.Kinect.Sensor
                 throw new ArgumentOutOfRangeException(nameof(col));
             }
 
-            *(PixelT*)((byte*)this.Buffer + (this.StrideBytes * row) + (col * sizeof(PixelT))) = pixel;
+            *(TPixel*)((byte*)this.Buffer + (this.StrideBytes * row) + (col * sizeof(TPixel))) = pixel;
         }
 
         public Image(ImageFormat format, int width_pixels, int height_pixels, int stride_bytes)
         {
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
             Allocator.Singleton.Hook(this);
 
             AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
@@ -113,6 +132,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
             int stride_bytes = width_pixels * pixelSize;
 
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
             Allocator.Singleton.Hook(this);
 
             AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
@@ -124,6 +145,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         internal Image(NativeMethods.k4a_image_t handle)
         {
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
             Allocator.Singleton.Hook(this);
 
             this.handle = handle;
@@ -237,7 +260,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                     // If the native buffer is within a memory block that the managed allocator provided,
                     // return that memory.
-                    Memory<byte> memory = this.Allocator.GetMemory(bufferAddress, this.Size);
+                    Memory<byte> memory = this.Allocator.GetManagedAllocatedMemory(bufferAddress, this.Size);
                     if (!memory.IsEmpty)
                     {
                         return memory;
@@ -277,6 +300,9 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <summary>
+        /// Flush the managed cache of native memory to the native buffer.
+        /// </summary>
         internal void FlushMemory()
         {
             lock (this)
@@ -294,6 +320,9 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <summary>
+        /// Invalidate the managed cache of native memory by reading from the native buffer.
+        /// </summary>
         internal void InvalidateMemory()
         {
             lock (this)
@@ -305,6 +334,8 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     unsafe
                     {
+                        // We can't wait until a call to Image.Memory to do the copy since user code may already
+                        // have a reference to the managed buffer array.
                         System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, this.managedBufferCache, 0, checked((int)this.Size));
                     }
                 }

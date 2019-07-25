@@ -55,6 +55,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 using (Image depthReference = depth.Reference())
                 using (Image transformedReference = transformed.Reference())
                 {
+                    // Ensure changes made to the managed memory are visible to the native layer
                     depthReference.FlushMemory();
 
                     AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_color_camera(
@@ -63,6 +64,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         transformedReference.DangerousGetHandle()
                         ));
 
+                    // Copy the native memory back to managed memory if required
                     transformedReference.InvalidateMemory();
                 }
             }
@@ -108,6 +110,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 using (Image colorReference = color.Reference())
                 using (Image transformedReference = transformed.Reference())
                 {
+                    // Ensure changes made to the managed memory are visible to the native layer
                     depthReference.FlushMemory();
                     colorReference.FlushMemory();
 
@@ -117,6 +120,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         colorReference.DangerousGetHandle(),
                         transformedReference.DangerousGetHandle()));
 
+                    // Copy the native memory back to managed memory if required
                     transformedReference.InvalidateMemory();
                 }
             }
@@ -144,6 +148,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 using (Image depthReference = depth.Reference())
                 using (Image pointCloudReference = pointCloud.Reference())
                 {
+                    // Ensure changes made to the managed memory are visible to the native layer
                     depthReference.FlushMemory();
 
                     AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_point_cloud(
@@ -152,6 +157,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         camera,
                         pointCloudReference.DangerousGetHandle()));
 
+                    // Copy the native memory back to managed memory if required
                     pointCloudReference.InvalidateMemory();
                 }
             }
