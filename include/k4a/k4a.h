@@ -96,7 +96,6 @@ K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *
                                                       void *message_cb_context,
                                                       k4a_log_level_t min_level);
 
-
 /** Sets the callback functions fot the SDK allocator
  *
  * \param allocate
@@ -106,7 +105,7 @@ K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *
  * \param free
  * The callback function to free memory. The SDK will call this function when memory allocated b by \p allocate
  * is no longer needed.
-  *
+ *
  * \return ::K4A_RESULT_SUCCEEDED if the callback function was set or cleared successfully. ::K4A_RESULT_FAILED if an
  * error is encountered or the callback function has already been set.
  *

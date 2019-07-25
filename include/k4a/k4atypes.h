@@ -828,11 +828,12 @@ typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
  * Minimum size in bytes needed for the buffer.
  *
  * \param context
- * Output parameter for a context that will be provided in the subsequent call to the \ref k4a_memory_destroy_cb_t callback.
+ * Output parameter for a context that will be provided in the subsequent call to the \ref k4a_memory_destroy_cb_t
+ * callback.
  *
  * \return
  * A pointer to the newly allocated memory.
- * 
+ *
  * \remarks
  * A callback of this type is provided when there is an application defined allocator.
  *
@@ -843,8 +844,7 @@ typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
  * \endxmlonly
  *
  */
-typedef uint8_t* (k4a_memory_allocate_cb_t)(int size, void** context);
-
+typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
 
 /**
  *

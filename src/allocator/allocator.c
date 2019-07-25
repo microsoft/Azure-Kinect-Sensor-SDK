@@ -10,7 +10,6 @@
 #include <k4ainternal/rwlock.h>
 #include <azure_c_shared_utility/refcount.h>
 
-
 // System dependencies
 #include <stdlib.h>
 #include <string.h>
@@ -26,7 +25,6 @@ typedef enum
     IMAGE_TYPE_COUNT,
 } image_type_index_t;
 
-
 // Global properties of the allocator
 typedef struct
 {
@@ -34,19 +32,19 @@ typedef struct
 
     // Access to these function pointers may only occur
     // while holding lock
-    k4a_memory_allocate_cb_t* alloc;
-    k4a_memory_destroy_cb_t* free;
+    k4a_memory_allocate_cb_t *alloc;
+    k4a_memory_destroy_cb_t *free;
 } allocator_global_t;
 
 // This allocator implementation is used by default
-uint8_t* default_alloc(int size, void** context)
+uint8_t *default_alloc(int size, void **context)
 {
     *context = NULL;
-    return (uint8_t*)malloc(size);
+    return (uint8_t *)malloc(size);
 }
 
 // This is the free function for the default allocator
-void default_free(void* buffer, void* context)
+void default_free(void *buffer, void *context)
 {
     UNREFERENCED_PARAMETER(context);
     assert(context == NULL);
@@ -54,10 +52,10 @@ void default_free(void* buffer, void* context)
 }
 
 // This is a one time initialization of the global state for the allocator
-static void allocator_global_init(allocator_global_t* g_allocator)
+static void allocator_global_init(allocator_global_t *g_allocator)
 {
     rwlock_init(&g_allocator->lock);
-    
+
     g_allocator->alloc = default_alloc;
     g_allocator->free = default_free;
 }
@@ -67,8 +65,8 @@ static void allocator_global_init(allocator_global_t* g_allocator)
 typedef struct _allocation_context_t
 {
     allocation_source_t source;
-    k4a_memory_destroy_cb_t* free;
-    void* free_context;
+    k4a_memory_destroy_cb_t *free;
+    void *free_context;
 } allocation_context_t;
 
 K4A_DECLARE_GLOBAL(allocator_global_t, allocator_global_init);
@@ -121,7 +119,7 @@ k4a_result_t allocator_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memo
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, allocate == NULL && free != NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, allocate != NULL && free == NULL);
 
-    allocator_global_t* g_allocator = allocator_global_t_get();
+    allocator_global_t *g_allocator = allocator_global_t_get();
     rwlock_acquire_write(&g_allocator->lock);
 
     g_allocator->alloc = allocate ? allocate : default_alloc;
@@ -134,7 +132,7 @@ k4a_result_t allocator_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memo
 
 uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size)
 {
-    allocator_global_t* g_allocator = allocator_global_t_get();
+    allocator_global_t *g_allocator = allocator_global_t_get();
 
     RETURN_VALUE_IF_ARG(NULL, source < ALLOCATION_SOURCE_USER || source > ALLOCATION_SOURCE_USB_IMU);
     RETURN_VALUE_IF_ARG(NULL, alloc_size == 0);
@@ -171,25 +169,27 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size)
     INC_REF_VAR(*ref);
 
     rwlock_acquire_read(&g_allocator->lock);
-    
-    void* user_context;
-    
-    allocation_context_t* allocation_context = (allocation_context_t*)g_allocator->alloc((int)required_bytes, &user_context);
+
+    void *user_context;
+
+    allocation_context_t *allocation_context = (allocation_context_t *)g_allocator->alloc((int)required_bytes,
+                                                                                          &user_context);
 
     allocation_context->source = source;
     allocation_context->free = g_allocator->free;
     allocation_context->free_context = user_context;
-    
+
     rwlock_release_read(&g_allocator->lock);
 
-    uint8_t* buffer = (uint8_t*)allocation_context + sizeof(allocation_context_t);
-    
+    uint8_t *buffer = (uint8_t *)allocation_context + sizeof(allocation_context_t);
+
     return buffer;
 }
 
 void allocator_free(void *buffer)
 {
-    allocation_context_t* allocation_context = (allocation_context_t*)((uint8_t*)buffer - sizeof(allocation_context_t));
+    allocation_context_t *allocation_context = (allocation_context_t *)((uint8_t *)buffer -
+                                                                        sizeof(allocation_context_t));
     allocation_source_t source = allocation_context->source;
 
     RETURN_VALUE_IF_ARG(VOID_VALUE, source < ALLOCATION_SOURCE_USER || source > ALLOCATION_SOURCE_USB_IMU);

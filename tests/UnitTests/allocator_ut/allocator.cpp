@@ -150,7 +150,7 @@ TEST(allocator_ut, allocator_api_validation)
     ASSERT_EQ(allocator_test_for_leaks(), 0);
 }
 
-static void image_free_function(void* buffer, void* context)
+static void image_free_function(void *buffer, void *context)
 {
     (void)context;
     allocator_free(buffer);
@@ -305,8 +305,15 @@ TEST(allocator_ut, image_api_validation)
     {
         ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  image_create_from_buffer(
-                      K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+                  image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12,
+                                           10,
+                                           10,
+                                           1,
+                                           buffer,
+                                           IMAGE_SIZE,
+                                           image_free_function,
+                                           context,
+                                           &image));
 
         ASSERT_EQ((uint8_t *)NULL, image_get_buffer(NULL));
         ASSERT_EQ(buffer, image_get_buffer(image));
@@ -367,8 +374,15 @@ TEST(allocator_ut, image_api_validation)
     {
         ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  image_create_from_buffer(
-                      K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+                  image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12,
+                                           10,
+                                           10,
+                                           1,
+                                           buffer,
+                                           IMAGE_SIZE,
+                                           image_free_function,
+                                           context,
+                                           &image));
 
         image_inc_ref(NULL);
         image_inc_ref(NULL);
@@ -400,8 +414,15 @@ TEST(allocator_ut, image_api_validation)
 
         ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  image_create_from_buffer(
-                      K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+                  image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12,
+                                           10,
+                                           10,
+                                           1,
+                                           buffer,
+                                           IMAGE_SIZE,
+                                           image_free_function,
+                                           context,
+                                           &image));
 
         ASSERT_EQ(0, image_get_system_timestamp_nsec(image));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_apply_system_timestamp(image));

@@ -39,7 +39,7 @@ void global_init_once(k4a_init_once_t *init_once, k4a_init_once_function_t *init
 #define K4A_DECLARE_GLOBAL(_global_type_, _init_function_)                                                             \
     static k4a_init_once_t g_##_global_type_##_init_once = K4A_INIT_ONCE;                                              \
     static _global_type_ _##_global_type_##_private;                                                                   \
-    static void fn_##_global_type_##_init_function(void)                                                                   \
+    static void fn_##_global_type_##_init_function(void)                                                               \
     {                                                                                                                  \
         memset(&_##_global_type_##_private, 0, sizeof(_##_global_type_##_private));                                    \
         _init_function_(&_##_global_type_##_private);                                                                  \
@@ -47,7 +47,7 @@ void global_init_once(k4a_init_once_t *init_once, k4a_init_once_function_t *init
     }                                                                                                                  \
     static _global_type_ *_global_type_##_get()                                                                        \
     {                                                                                                                  \
-        global_init_once(&g_##_global_type_##_init_once, &fn_##_global_type_##_init_function);                          \
+        global_init_once(&g_##_global_type_##_init_once, &fn_##_global_type_##_init_function);                         \
         return &_##_global_type_##_private;                                                                            \
     }
 
