@@ -37,14 +37,18 @@ typedef struct
 } allocator_global_t;
 
 // This allocator implementation is used by default
-uint8_t *default_alloc(int size, void **context)
+static uint8_t *default_alloc(int size, void **context)
 {
     *context = NULL;
-    return (uint8_t *)malloc(size);
+    if (size < 0)
+    {
+        return NULL;
+    }
+    return (uint8_t *)malloc((size_t)size);
 }
 
 // This is the free function for the default allocator
-void default_free(void *buffer, void *context)
+static void default_free(void *buffer, void *context)
 {
     (void)context;
     assert(context == NULL);
@@ -172,25 +176,34 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size)
 
     void *user_context;
 
-    allocation_context_t *allocation_context = (allocation_context_t *)g_allocator->alloc((int)required_bytes,
-                                                                                          &user_context);
+    void *full_buffer = g_allocator->alloc((int)required_bytes, &user_context);
 
-    allocation_context->source = source;
-    allocation_context->free = g_allocator->free;
-    allocation_context->free_context = user_context;
+    // Store information about the allocation that we will need during free.
+    allocation_context_t allocation_context;
+
+    allocation_context.source = source;
+    allocation_context.free = g_allocator->free;
+    allocation_context.free_context = user_context;
+
+    // Memcpy the context information to the header of the full buffer.
+    // Don't cast the buffer directly since there is no alignment constraint
+    memcpy(full_buffer, &allocation_context, sizeof(allocation_context));
 
     rwlock_release_read(&g_allocator->lock);
 
-    uint8_t *buffer = (uint8_t *)allocation_context + sizeof(allocation_context_t);
+    // Provide the caller with the buffer after the allocation context header.
+    uint8_t *buffer = (uint8_t *)full_buffer + sizeof(allocation_context_t);
 
     return buffer;
 }
 
 void allocator_free(void *buffer)
 {
-    allocation_context_t *allocation_context = (allocation_context_t *)((uint8_t *)buffer -
-                                                                        sizeof(allocation_context_t));
-    allocation_source_t source = allocation_context->source;
+    void *full_buffer = (uint8_t *)buffer - sizeof(allocation_context_t);
+    allocation_context_t allocation_context;
+    memcpy(&allocation_context, full_buffer, sizeof(allocation_context));
+
+    allocation_source_t source = allocation_context.source;
 
     RETURN_VALUE_IF_ARG(VOID_VALUE, source < ALLOCATION_SOURCE_USER || source > ALLOCATION_SOURCE_USB_IMU);
     RETURN_VALUE_IF_ARG(VOID_VALUE, buffer == NULL);
@@ -224,8 +237,8 @@ void allocator_free(void *buffer)
 
     DEC_REF_VAR(*ref);
 
-    allocation_context->free(allocation_context, allocation_context->free_context);
-    allocation_context = NULL;
+    allocation_context.free(full_buffer, allocation_context.free_context);
+    full_buffer = NULL;
 }
 
 long allocator_test_for_leaks(void)
