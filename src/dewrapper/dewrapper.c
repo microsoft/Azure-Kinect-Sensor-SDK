@@ -110,7 +110,7 @@ static void free_shared_depth_image(void *buffer, void *context)
     // overall shared buffer
     (void)buffer;
 
-    shared_image_context_t *shared_context = (shared_image_context_t*)context;
+    shared_image_context_t *shared_context = (shared_image_context_t *)context;
 
     long count = DEC_REF_VAR(shared_context->ref);
 
@@ -231,8 +231,7 @@ static int depth_engine_thread(void *param)
 
             // Allocate 1 buffer for depth engine to write depth and IR images to
             assert(depth_engine_output_buffer_size != 0);
-            capture_byte_ptr = allocator_alloc(ALLOCATION_SOURCE_DEPTH,
-                                               depth_engine_output_buffer_size);
+            capture_byte_ptr = allocator_alloc(ALLOCATION_SOURCE_DEPTH, depth_engine_output_buffer_size);
             if (capture_byte_ptr == NULL)
             {
                 LOG_ERROR("Depth streaming callback failed to allocate output buffer", 0);

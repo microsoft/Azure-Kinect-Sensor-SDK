@@ -43,7 +43,6 @@ void allocator_initialize(void);
  */
 void allocator_deinitialize(void);
 
-
 /** Sets the callback functions fot the SDK allocator
  *
  * \param allocate
@@ -53,7 +52,7 @@ void allocator_deinitialize(void);
  * \param free
  * The callback function to free memory. The SDK will call this function when memory allocated b by \p allocate
  * is no longer needed.
-  *
+ *
  * \return ::K4A_RESULT_SUCCEEDED if the callback function was set or cleared successfully. ::K4A_RESULT_FAILED if an
  * error is encountered or the callback function has already been set.
  *
@@ -75,7 +74,6 @@ void allocator_deinitialize(void);
  * \endxmlonly
  */
 k4a_result_t allocator_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memory_destroy_cb_t free);
-
 
 /** Allocates memory from the allocator
  *
