@@ -1104,7 +1104,6 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
 
     if (m_streaming && frame)
     {
-        void *context = nullptr;
         k4a_image_t image = NULL;
         uint8_t *buffer = nullptr;
         size_t buffer_size = 0;
@@ -1187,40 +1186,25 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
             buffer_size = frame->data_bytes;
         }
 
-        // Allocate K4A Color buffer
-        buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, buffer_size, &context);
-        k4a_result_t result = K4A_RESULT_FROM_BOOL(buffer != NULL);
+        // Allocate K4A Color image
+        k4a_result_t result = K4A_RESULT_FROM_BOOL(
+            image_create(m_output_image_format, (int)m_width_pixels, (int)m_height_pixels, stride, &image));
 
         if (K4A_SUCCEEDED(result))
         {
             if (decodeMJPEG)
             {
                 // Decode MJPG into BRGA32
-                result = DecodeMJPEGtoBGRA32((uint8_t *)frame->data, frame->data_bytes, buffer, buffer_size);
+                result = DecodeMJPEGtoBGRA32((uint8_t *)frame->data,
+                                             frame->data_bytes,
+                                             image_get_buffer(image),
+                                             buffer_size);
             }
             else
             {
                 // Copy to K4A buffer
-                memcpy(buffer, frame->data, buffer_size);
+                memcpy(image_get_buffer(image), frame->data, buffer_size);
             }
-        }
-
-        if (K4A_SUCCEEDED(result))
-        {
-            result = TRACE_CALL(image_create_from_buffer(m_output_image_format,
-                                                         (int)m_width_pixels,
-                                                         (int)m_height_pixels,
-                                                         stride,
-                                                         buffer,
-                                                         buffer_size,
-                                                         allocator_free,
-                                                         context,
-                                                         &image));
-        }
-        else
-        {
-            // cleanup if there was an error
-            allocator_free(buffer, context);
         }
 
         k4a_capture_t capture = NULL;
