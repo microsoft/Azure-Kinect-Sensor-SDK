@@ -117,6 +117,8 @@ uint64_t new_unique_id();
 k4a_result_t
 populate_bitmap_info_header(BITMAPINFOHEADER *header, uint64_t width, uint64_t height, k4a_image_format_t format);
 
+bool validate_name_characters(const char *name);
+
 track_header_t *add_track(k4a_record_context_t *context,
                           const char *name,
                           track_type type,

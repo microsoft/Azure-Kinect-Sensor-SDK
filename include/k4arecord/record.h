@@ -24,8 +24,6 @@ extern "C" {
 
 /** Opens a new recording file for writing.
  *
- * The file will be created if it doesn't exist, or overwritten if an existing file is specified.
- *
  * \param path
  * Filesystem path for the new recording.
  *
@@ -39,6 +37,9 @@ extern "C" {
  * \param recording_handle
  * If successful, this contains a pointer to the new recording handle. Caller must call k4a_record_close()
  * when finished with recording.
+ *
+ * \remarks
+ * The file will be created if it doesn't exist, or overwritten if an existing file is specified.
  *
  * \remarks
  * Streaming does not need to be started on the device at the time this function is called, but when it is started
@@ -106,8 +107,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
 
 /** Adds the track header for recording IMU.
  *
- * The track needs to be added before the recording header is written.
- *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
@@ -116,6 +115,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * The track needs to be added before the recording header is written.
  *
  * \xmlonly
  * <requirements>
@@ -166,9 +168,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
 
 /** Adds custom video tracks to the recording.
  *
- * Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created automatically when the k4a_record_create()
- * API is called. This API can be used to add additional video tracks to save custom data.
- *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
@@ -197,6 +196,10 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
  *
  * \remarks
+ * Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created automatically when the k4a_record_create()
+ * API is called. This API can be used to add additional video tracks to save custom data.
+ *
+ * \remarks
  * Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
  *
  * \remarks
@@ -221,9 +224,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_video_track(const k4a_record
                                                                 const k4a_record_video_settings_t *track_settings);
 
 /** Adds custom subtitle tracks to the recording.
- *
- * Built-in subtitle tracks like the IMU track will be created automatically when the k4a_record_add_imu_track() API is
- * called. This API can be used to add additional subtitle tracks to save custom data.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
@@ -253,6 +253,10 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_video_track(const k4a_record
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
  *
  * \remarks
+ * Built-in subtitle tracks like the IMU track will be created automatically when the k4a_record_add_imu_track() API is
+ * called. This API can be used to add additional subtitle tracks to save custom data.
+ *
+ * \remarks
  * Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
  *
  * \remarks
@@ -279,8 +283,6 @@ k4a_record_add_custom_subtitle_track(const k4a_record_t recording_handle,
 
 /** Writes the recording header and metadata to file.
  *
- * This must be called before captures can be written.
- *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
@@ -289,6 +291,9 @@ k4a_record_add_custom_subtitle_track(const k4a_record_t recording_handle,
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * This must be called before captures or any track data can be written.
  *
  * \xmlonly
  * <requirements>
@@ -302,8 +307,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_header(k4a_record_t recording_han
 
 /** Writes a camera capture to file.
  *
- * Captures must be written in increasing order of timestamp, and the file's header must already be written.
- *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
@@ -315,6 +318,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_header(k4a_record_t recording_han
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * Captures must be written in increasing order of timestamp, and the file's header must already be written.
  *
  * \remarks
  * k4a_record_write_capture() will write all images in the capture to the corresponding tracks in the recording file.
@@ -332,10 +338,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_ha
 
 /** Writes an imu sample to file.
  *
- * Samples must be written in increasing order of timestamp, and the file's header must already be written.
- * When writing imu samples at the same time as captures, the samples should be within 1 second of the most recently
- * written capture.
- *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
@@ -347,6 +349,13 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_ha
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * Samples must be written in increasing order of timestamp, and the file's header must already be written.
+ *
+ * \remarks
+ * When writing imu samples at the same time as captures, the samples should be within 1 second of the most recently
+ * written capture.
  *
  * \xmlonly
  * <requirements>

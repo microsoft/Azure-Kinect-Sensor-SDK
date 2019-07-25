@@ -109,6 +109,25 @@ populate_bitmap_info_header(BITMAPINFOHEADER *header, uint64_t width, uint64_t h
     return K4A_RESULT_SUCCEEDED;
 }
 
+bool validate_name_characters(const char *name)
+{
+    const char *ch = name;
+    while (*ch != 0)
+    {
+        if (*ch == '-' || *ch == '_' || (*ch >= '0' && *ch <= '9') || (*ch >= 'A' && *ch <= 'Z'))
+        {
+            // Valid character
+            ch++;
+        }
+        else
+        {
+            LOG_ERROR("Names '%s' must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_': ", name);
+            return false;
+        }
+    }
+    return true;
+}
+
 track_header_t *add_track(k4a_record_context_t *context,
                           const char *name,
                           track_type type,
@@ -120,21 +139,7 @@ track_header_t *add_track(k4a_record_context_t *context,
     RETURN_VALUE_IF_ARG(NULL, name == NULL);
     RETURN_VALUE_IF_ARG(NULL, codec == NULL);
     RETURN_VALUE_IF_ARG(NULL, context->header_written);
-
-    const char *ch = name;
-    while (*ch != 0)
-    {
-        if (*ch == '-' || *ch == '_' || (*ch >= '0' && *ch <= '9') || (*ch >= 'A' && *ch <= 'Z'))
-        {
-            // Valid character
-            ch++;
-        }
-        else
-        {
-            LOG_ERROR("Track name '%s' must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.", name);
-            return NULL;
-        }
-    }
+    RETURN_VALUE_IF_ARG(NULL, !validate_name_characters(name));
 
     auto itr = context->tracks.find(name);
     if (itr != context->tracks.end())
@@ -552,21 +557,7 @@ KaxTag *
 add_tag(k4a_record_context_t *context, const char *name, const char *value, TagTargetType target, uint64_t target_uid)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
-
-    const char *ch = name;
-    while (*ch != 0)
-    {
-        if (*ch == '-' || *ch == '_' || (*ch >= '0' && *ch <= '9') || (*ch >= 'A' && *ch <= 'Z'))
-        {
-            // Valid character
-            ch++;
-        }
-        else
-        {
-            LOG_ERROR("Tag name '%s' must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.", name);
-            return NULL;
-        }
-    }
+    RETURN_VALUE_IF_ARG(NULL, !validate_name_characters(name));
 
     auto &tags = GetChild<KaxTags>(*context->file_segment);
     auto tag = new KaxTag();
