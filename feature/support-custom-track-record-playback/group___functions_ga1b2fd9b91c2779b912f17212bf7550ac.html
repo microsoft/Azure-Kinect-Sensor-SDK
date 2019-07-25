@@ -143,7 +143,6 @@ $(document).ready(function(){initNavTree('group___functions_ga1b2fd9b91c2779b912
 </div><div class="memdoc">
 
 <p>Adds custom video tracks to the recording. </p>
-<p>Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created automatically when the <a class="el" href="group___functions_gae14f4181e9688e710d1c80b215413831.html#gae14f4181e9688e710d1c80b215413831" title="Opens a new recording file for writing. ">k4a_record_create()</a> API is called. This API can be used to add additional video tracks to save custom data.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">recording_handle</td><td>The handle of a new recording, obtained by <a class="el" href="group___functions_gae14f4181e9688e710d1c80b215413831.html#gae14f4181e9688e710d1c80b215413831" title="Opens a new recording file for writing. ">k4a_record_create()</a>.</td></tr>
@@ -156,7 +155,9 @@ $(document).ready(function(){initNavTree('group___functions_ga1b2fd9b91c2779b912
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5.html#gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" title="The result was successful. ">K4A_RESULT_SUCCEEDED</a> is returned on success</dd></dl>
-<dl class="section remark"><dt>Remarks</dt><dd>Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.</dd>
+<dl class="section remark"><dt>Remarks</dt><dd>Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created automatically when the <a class="el" href="group___functions_gae14f4181e9688e710d1c80b215413831.html#gae14f4181e9688e710d1c80b215413831" title="Opens a new recording file for writing. ">k4a_record_create()</a> API is called. This API can be used to add additional video tracks to save custom data.</dd>
+<dd>
+Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.</dd>
 <dd>
 All tracks need to be added before the recording header is written.</dd>
 <dd>
