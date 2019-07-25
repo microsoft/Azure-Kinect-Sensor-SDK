@@ -701,12 +701,6 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
                     "The configured subordinate device delay from the master device cannot exceed one frame interval.",
                     0);
             }
-
-            if (config->subordinate_delay_off_master_usec < 0)
-            {
-                result = K4A_RESULT_FAILED;
-                LOG_ERROR("The configured subordinate device delay from the master device cannot be negative.", 0);
-            }
         }
 
         if (config->wired_sync_mode != K4A_WIRED_SYNC_MODE_SUBORDINATE &&
