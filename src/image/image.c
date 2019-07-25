@@ -107,7 +107,7 @@ k4a_result_t image_create_from_buffer(k4a_image_format_t format,
 
 static void image_default_free_function(void *buffer, void *context)
 {
-    UNREFERENCED_PARAMETER(context);
+    (void)context;
     allocator_free(buffer);
 }
 
