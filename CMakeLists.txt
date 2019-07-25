@@ -31,6 +31,10 @@ include(GitCommands)
 # Set the project version
 include(K4AProjectVersion)
 
+# Default to not embed an icon in resources
+set(K4A_USE_ICON 0)
+set(K4A_ICON_PATH ${CMAKE_CURRENT_LIST_DIR}/kinect-viewer.ico)
+
 set(PROJ_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(INCLUDE_DIR ${PROJ_DIR}/include)
 
@@ -59,10 +63,16 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZH:SHA_256")
 endif()
 
-# If using clang or GCC only linked shared libraries if needed
+# If using clang or GCC, only linked shared libraries if needed
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed")
+endif()
+
+# If using clang or GCC, be sure to include a build id
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id")
 endif()
 
 # Find all dependencies
@@ -212,10 +222,22 @@ set(TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR})
 
 # CMake doesn't set the target processor correctly for MSVC
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    if ("${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
+        set(K4A_BINARY_DIR_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+        set(K4A_BINARY_DIR_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    else()
+        set(K4A_BINARY_DIR_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
+        set(K4A_BINARY_DIR_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo)
+    endif()
+
     if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(TARGET_ARCH "amd64")
+        configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x64.props)
+        configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x64.xml)
     elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
         set(TARGET_ARCH "x86")
+        configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x86.props)
+        configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x86.xml)
     else()
         message(FATAL_ERROR "Unknown architecture with size of void* = ${CMAKE_SIZEOF_VOID_P}")
     endif()

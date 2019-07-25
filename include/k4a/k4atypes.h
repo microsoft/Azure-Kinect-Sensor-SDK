@@ -466,6 +466,14 @@ typedef enum
      * May be set to ::K4A_COLOR_CONTROL_MODE_AUTO or ::K4A_COLOR_CONTROL_MODE_MANUAL.
      *
      * \details
+     * The Azure Kinect supports a limited number of fixed expsore settings. When setting this, expect the exposure to
+     * be rounded up to the nearest setting. Exceptions are 1) The last value in the table is the upper limit, so a
+     * value larger than this will be overridden to the largest entry in the table. 2) The exposure time cannot be
+     * larger than the equivelent FPS. So expect 100ms exposure time to be reduced to 30ms or 33.33ms when the camera is
+     * started. The most recent copy of the table 'device_exposure_mapping' is in
+     * https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/src/color/color_priv.h
+     *
+     * \details
      * Exposure time is measured in microseconds.
      */
     K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE = 0,
@@ -587,7 +595,9 @@ typedef enum
 {
     K4A_WIRED_SYNC_MODE_STANDALONE, /**< Neither 'Sync In' or 'Sync Out' connections are used. */
     K4A_WIRED_SYNC_MODE_MASTER,     /**< The 'Sync Out' jack is enabled and synchronization data it driven out the
-                                       connected wire.*/
+                                       connected wire. While in master mode the color camera must be enabled as part of the
+                                       multi device sync signalling logic. Even if the color image is not needed, the color
+                                       camera must be running.*/
     K4A_WIRED_SYNC_MODE_SUBORDINATE /**< The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the
                                        next device in the chain. 'Sync Out' is a mirror of 'Sync In' for this mode.
                                      */
@@ -705,13 +715,19 @@ typedef enum
  *
  * The SDK can log data to the console, files, or to a custom handler.
  *
- * Environment Variables
+ * Environment Variables:
+ *
+ * K4A_ENABLE_LOG_TO_A_FILE / K4A_RECORD_ENABLE_LOG_TO_A_FILE
+ * Specifies the log file to save the log to. K4a.dll and k4arecord.dll can not log to the same file.
  *
  * K4A_ENABLE_LOG_TO_A_FILE =
+ * K4A_RECORD_ENABLE_LOG_TO_A_FILE =
  *    0    - completely disable logging to a file
  *    log\custom.log - log all messages to the path and file specified - must end in '.log' to
  *                     be considered a valid entry
- *    ** When enabled this takes precedence over the value of K4A_ENABLE_LOG_TO_STDOUT
+ *    NOTE 1: When enabled this takes precedence over the value of K4A_ENABLE_LOG_TO_STDOUT.
+ *    NOTE 2: This can not be set to the same value as K4A_RECORD_ENABLE_LOG_TO_A_FILE as they represent separate
+ *            logger instance that do not allowed shared access to the file being written to.
  *
  * K4A_ENABLE_LOG_TO_STDOUT =
  *    0    - disable logging to stdout

@@ -131,5 +131,5 @@ TEST_F(record_ut, new_cluster_out_of_order)
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }

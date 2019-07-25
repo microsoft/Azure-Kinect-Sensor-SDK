@@ -11,11 +11,10 @@
 
 // Library headers
 //
+#include <k4arecord/playback.hpp>
 
 // Project headers
 //
-#include "playback.hpp"
-
 #include "ik4adockcontrol.h"
 #include "k4adatasource.h"
 #include "k4aimugraphdatagenerator.h"
@@ -94,6 +93,7 @@ private:
 
     bool m_recordingHasColor = false;
     bool m_recordingHasDepth = false;
+    bool m_recordingHasIR = false;
 
     K4AWindowSet::ViewType m_viewType = K4AWindowSet::ViewType::Normal;
 

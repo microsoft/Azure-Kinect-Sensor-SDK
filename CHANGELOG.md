@@ -1,6 +1,6 @@
 ## Change Log
 
-### v1.2.0
+### v1.2.0 (not yet released)
 
 * Added new API's k4a_image_get_device_timestamp_usec(), k4a_image_get_system_timestamp_usec(), 
 k4a_image_set_device_timestamp_usec(), k4a_image_set_system_timestamp_usec(), and k4a_image_set_exposure_usec().
