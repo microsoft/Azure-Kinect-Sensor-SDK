@@ -1105,7 +1105,6 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
     if (m_streaming && frame)
     {
         k4a_image_t image = NULL;
-        uint8_t *buffer = nullptr;
         size_t buffer_size = 0;
         int stride = 0;
         uint64_t framePTS = 0;
