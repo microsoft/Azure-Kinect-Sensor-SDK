@@ -1,79 +1,54 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-    internal class LargeArrayPool : ArrayPool<byte>
-    {
-        private List<WeakReference> pool = new List<WeakReference>();
-
-        public override byte[] Rent(int minimumLength)
-        {
-            lock (this)
-            {
-                byte[] buffer;
-                foreach (var x in pool)
-                {
-                    if (x.IsAlive)
-                    {
-                        buffer = (byte[])x.Target;
-                        if (buffer.Length >= minimumLength)
-                        {
-                            pool.Remove(x);
-                            return buffer;
-                        }
-                    }                    
-                }
-
-                return new byte[minimumLength];
-            }
-        }
-
-        public override void Return(byte[] array, bool clearArray = false)
-        {
-            lock (this)
-            {
-                if (clearArray)
-                    throw new NotSupportedException();
-
-                this.pool.Add(new WeakReference(array));
-
-                int count = this.pool.RemoveAll((x) => !x.IsAlive);
-                if (count > 0)
-                {
-                    Console.WriteLine($"Removed {count} pool elements");
-                }
-            }
-        }
-    }
+    /// <summary>
+    /// Manages buffer allocation.
+    /// </summary>
     internal class Allocator
     {
-        private readonly SortedDictionary<long, AllocationContext> allocations = new SortedDictionary<long, AllocationContext>();
-
-        private NativeMethods.k4a_memory_allocate_cb_t allocateDelegate;
-        private NativeMethods.k4a_memory_destroy_cb_t freeDelegate;
-        private bool hooked;
-
-        public static Allocator Singleton { get; } = new Allocator();
-
-        private ArrayPool<byte> pool = new LargeArrayPool();
-
+        // Objects we are tracking for disposal prior to CLR shutdown
         private readonly HashSet<WeakReference<IDisposable>> disposables = new HashSet<WeakReference<IDisposable>>();
 
+        // Allocations made by the managed code for the native library
+        private readonly SortedDictionary<long, AllocationContext> allocations = new SortedDictionary<long, AllocationContext>();
+
+        // A recycleable large array pool to prevent unnecissary managed allocationsns and clearing of memory
+        private readonly ArrayPool<byte> pool = new LargeArrayPool();
+
+        // Managed buffers used as caches for the native memory.
+        private readonly Dictionary<IntPtr, BufferCacheEntry> bufferCache = new Dictionary<IntPtr, BufferCacheEntry>();
+
+        // Native delegates
+        private NativeMethods.k4a_memory_allocate_cb_t allocateDelegate;
+        private NativeMethods.k4a_memory_destroy_cb_t freeDelegate;
+
+        // Native allocator hook state
+        private bool hooked;
+
+        /// <summary>
+        /// Gets the Allocator.
+        /// </summary>
+        public static Allocator Singleton { get; } = new Allocator();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to have the native library use the managed allocator.
+        /// </summary>
         public bool UseManagedAllocator { get; set; } = true;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to make a safe copy of native buffers.
+        /// </summary>
         public bool SafeCopyNativeBuffers { get; set; } = true;
-        
+
         public void Hook(IDisposable disposable)
         {
             lock (this)
             {
-                this.disposables.Add(new WeakReference<IDisposable>(disposable));
+                _ = this.disposables.Add(new WeakReference<IDisposable>(disposable));
 
                 if (this.hooked)
                 {
@@ -83,7 +58,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 this.allocateDelegate = new NativeMethods.k4a_memory_allocate_cb_t(this.AllocateFunction);
                 this.freeDelegate = new NativeMethods.k4a_memory_destroy_cb_t(this.FreeFunction);
 
-                if (UseManagedAllocator)
+                if (this.UseManagedAllocator)
                 {
                     AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(this.allocateDelegate, this.freeDelegate));
                 }
@@ -101,8 +76,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
                 _ = this.disposables.RemoveWhere((r) =>
                       {
-                          IDisposable target;
-                          bool alive = r.TryGetTarget(out target);
+                          bool alive = r.TryGetTarget(out IDisposable target);
 
                           return !alive || target == disposable;
                       });
@@ -167,7 +141,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         private IntPtr AllocateFunction(int size, out IntPtr context)
         {
-            byte[] buffer = pool.Rent(size);
+            byte[] buffer = this.pool.Rent(size);
             AllocationContext allocationContext = new AllocationContext()
             {
                 Buffer = buffer,
@@ -194,12 +168,12 @@ namespace Microsoft.Azure.Kinect.Sensor
 
             lock (this)
             {
-                System.Diagnostics.Debug.Assert(object.ReferenceEquals(this.allocations[(long)buffer], allocationContext), "Allocation context does not match expected value");
-                this.allocations.Remove((long)buffer);
+                System.Diagnostics.Debug.Assert(Object.ReferenceEquals(this.allocations[(long)buffer], allocationContext), "Allocation context does not match expected value");
+                _ = this.allocations.Remove((long)buffer);
             }
 
             allocationContext.BufferPin.Free();
-            pool.Return(allocationContext.Buffer);
+            this.pool.Return(allocationContext.Buffer);
             contextPin.Free();
         }
 
@@ -207,23 +181,22 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             lock (this)
             {
-
-                System.Diagnostics.Debug.WriteLine($"Disposable count {disposables.Count} (Allocation Count {allocations.Count})");
+                System.Diagnostics.Debug.WriteLine($"Disposable count {this.disposables.Count} (Allocation Count {this.allocations.Count})");
 
                 List<IDisposable> disposeList = new List<IDisposable>();
-                foreach (var r in disposables)
+                foreach (WeakReference<IDisposable> r in this.disposables)
                 {
-                    IDisposable disposable;
-                    if (r.TryGetTarget(out disposable))
+                    if (r.TryGetTarget(out IDisposable disposable))
                     {
                         disposeList.Add(disposable);
                     }
                 }
-                disposables.Clear();
+
+                this.disposables.Clear();
 
                 foreach (IDisposable disposable in disposeList)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Disposed {disposable} ({disposable.GetType().FullName}) (Allocation Count {allocations.Count})");
+                    System.Diagnostics.Debug.WriteLine($"Disposed {disposable} ({disposable.GetType().FullName}) (Allocation Count {this.allocations.Count})");
                     disposable.Dispose();
                 }
 
@@ -247,18 +220,18 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         private class BufferCacheEntry
         {
-            public byte[] managedBufferCache { get; set; }
-            public int usedSize;
-            public int referenceCount;
-            public bool initialized;
+            public byte[] ManagedBufferCache { get; set; }
+
+            public int UsedSize { get; set; }
+
+            public int ReferenceCount { get; set; }
+
+            public bool Initialized { get; set; }
         }
 
-        private Dictionary<IntPtr, BufferCacheEntry> BufferCache = new Dictionary<IntPtr, BufferCacheEntry>();
-
-        
         private void PopulateEntry(IntPtr nativeAddress, BufferCacheEntry entry)
         {
-            Marshal.Copy(nativeAddress, entry.managedBufferCache, 0, entry.usedSize);
+            Marshal.Copy(nativeAddress, entry.ManagedBufferCache, 0, entry.UsedSize);
         }
 
         public byte[] GetBufferCache(IntPtr nativeAddress, int size)
@@ -267,58 +240,58 @@ namespace Microsoft.Azure.Kinect.Sensor
 
             lock (this)
             {
-                if (BufferCache.ContainsKey(nativeAddress))
+                if (this.bufferCache.ContainsKey(nativeAddress))
                 {
-                    entry = BufferCache[nativeAddress];
-                    entry.referenceCount++;
+                    entry = this.bufferCache[nativeAddress];
+                    entry.ReferenceCount++;
 
-                    if (entry.usedSize != size)
+                    if (entry.UsedSize != size)
                     {
                         throw new Exception("Multiple image buffers sharing the same address cannot have the same size");
                     }
-                    
+
                 }
                 else
                 {
                     entry = new BufferCacheEntry
                     {
-                        managedBufferCache = pool.Rent(size),
-                        usedSize = size,
-                        referenceCount = 1,
-                        initialized = false
+                        ManagedBufferCache = this.pool.Rent(size),
+                        UsedSize = size,
+                        ReferenceCount = 1,
+                        Initialized = false
                     };
 
-                    BufferCache.Add(nativeAddress, entry);
+                    this.bufferCache.Add(nativeAddress, entry);
                 }
             }
 
             lock (entry)
             {
-                if (!entry.initialized)
+                if (!entry.Initialized)
                 {
-                    PopulateEntry(nativeAddress, entry);
-                    entry.initialized = true;
+                    this.PopulateEntry(nativeAddress, entry);
+                    entry.Initialized = true;
                 }
             }
 
-            return entry.managedBufferCache;
+            return entry.ManagedBufferCache;
         }
 
         public void ReturnBufferCache(IntPtr nativeAddress)
         {
             lock (this)
             {
-                BufferCacheEntry entry = this.BufferCache[nativeAddress];
-                entry.referenceCount--;
-                if (entry.referenceCount == 0)
+                BufferCacheEntry entry = this.bufferCache[nativeAddress];
+                entry.ReferenceCount--;
+                if (entry.ReferenceCount == 0)
                 {
-                    pool.Return(entry.managedBufferCache);
-                    this.BufferCache.Remove(nativeAddress);
+                    this.pool.Return(entry.ManagedBufferCache);
+                    this.bufferCache.Remove(nativeAddress);
                 }
             }
         }
 
-        
+
     }
 
 
