@@ -105,7 +105,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             // Hook the native allocator and register this object.
             // .Dispose() will be called on this object when the allocator is shut down.
-            Allocator.Singleton.Hook(this);
+            Allocator.Singleton.RegisterForDisposal(this);
 
             AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
                 width_pixels,
@@ -134,7 +134,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
             // Hook the native allocator and register this object.
             // .Dispose() will be called on this object when the allocator is shut down.
-            Allocator.Singleton.Hook(this);
+            Allocator.Singleton.RegisterForDisposal(this);
 
             AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
                 width_pixels,
@@ -147,7 +147,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             // Hook the native allocator and register this object.
             // .Dispose() will be called on this object when the allocator is shut down.
-            Allocator.Singleton.Hook(this);
+            Allocator.Singleton.RegisterForDisposal(this);
 
             this.handle = handle;
         }
@@ -584,7 +584,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         this.nativeBufferWrapper?.Dispose();
 
                         // TODO: dispose managed state (managed objects).
-                        Allocator.Singleton.Unhook(this);
+                        Allocator.Singleton.UnregisterForDisposal(this);
 
                         handle.Close();
                         handle = null;

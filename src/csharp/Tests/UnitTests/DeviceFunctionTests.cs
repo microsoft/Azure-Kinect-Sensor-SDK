@@ -35,7 +35,8 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
         [SetUp]
         public void Setup()
         {
-
+            // Don't hook the native allocator
+            Microsoft.Azure.Kinect.Sensor.Allocator.Singleton.UseManagedAllocator = false;
         }
 
         // Helper function to implement basic open/close behavior

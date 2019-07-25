@@ -46,7 +46,7 @@ uint8_t *default_alloc(int size, void **context)
 // This is the free function for the default allocator
 void default_free(void *buffer, void *context)
 {
-    UNREFERENCED_PARAMETER(context);
+    (void)context;
     assert(context == NULL);
     free(buffer);
 }

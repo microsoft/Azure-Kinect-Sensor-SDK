@@ -10,7 +10,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             // Hook the native allocator and register this object.
             // .Dispose() will be called on this object when the allocator is shut down.
-            Allocator.Singleton.Hook(this);
+            Allocator.Singleton.RegisterForDisposal(this);
 
             this.handle = handle;
         }

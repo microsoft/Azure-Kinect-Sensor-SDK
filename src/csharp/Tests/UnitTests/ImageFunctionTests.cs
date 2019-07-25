@@ -33,6 +33,9 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
             // Force garbage collection
             System.GC.Collect(0, System.GCCollectionMode.Forced, true);
             System.GC.WaitForPendingFinalizers();
+
+            // Don't hook the native allocator
+            Microsoft.Azure.Kinect.Sensor.Allocator.Singleton.UseManagedAllocator = false;
         }
 
         // Helper function to implement basic create/release behavior
@@ -134,8 +137,6 @@ void k4a_image_release(k4a_image_t image_handle)
 
             CallCount count = NativeK4a.CountCalls();
 
-            //Span<short> span;
-
             Assert.AreEqual(0, count.Calls("k4a_image_create"));
             Assert.AreEqual(0, count.Calls("k4a_image_release"));
 
@@ -152,8 +153,6 @@ void k4a_image_release(k4a_image_t image_handle)
                 return i;
             });
 
-            //span = MemoryMarshal.Cast<byte, short>(((Image)image.Target).Memory.Span);
-
             // The reference to the Device object is no longer on the stack, and therefore is free to be garbage collected
             // At this point capture.IsAlive is likely to be true, but not garanteed to be
 
@@ -166,10 +165,7 @@ void k4a_image_release(k4a_image_t image_handle)
 
             // k4a_device_close should have been called automatically 
             Assert.AreEqual(1, count.Calls("k4a_image_create"));
-            Assert.AreEqual(1, count.Calls("k4a_image_reference"));
             Assert.AreEqual(count.Calls("k4a_image_reference") + 1, count.Calls("k4a_image_release"));
-
-            //Assert.AreEqual(5, span[5]);
         }
 
 
@@ -296,14 +292,6 @@ uint8_t* k4a_image_get_buffer(k4a_image_t image_handle)
                     Assert.AreEqual(0, shortSpan[0]);
                     Assert.AreEqual(1, shortSpan[1]);
                     image.Dispose();
-
-                    MemoryManager<byte> memoryManager;
-                    bool r = MemoryMarshal.TryGetMemoryManager<byte, MemoryManager<byte>>(memory, out memoryManager);
-
-                    Assert.IsTrue(r);
-                    ((IDisposable)memoryManager).Dispose();
-
-                    Assert.AreEqual(2, shortSpan[2], "Memory access invalid");
                 }
             }).Wait();
 
@@ -312,54 +300,5 @@ uint8_t* k4a_image_get_buffer(k4a_image_t image_handle)
         
             Assert.AreEqual(count.Calls("k4a_image_reference") + 1, count.Calls("k4a_image_release"), "References not zero");
         }
-
-
-        [Test]
-        public void ManagedAllocatorTest2()
-        {
-            SetImageStubImplementation();
-
-            CallCount count = NativeK4a.CountCalls();
-
-            Memory<byte> memory;
-            Span<ushort> pixels;
-            
-            Image image = new Image(ImageFormat.Custom, 640, 480, 640 * 2);
-
-            memory = image.Memory;
-
-            pixels = MemoryMarshal.Cast<byte, ushort>(memory.Span);
-
-            // Re-assign memory
-            // The optimizer seems to only sometimes release the reference on the memory local if it
-            // isn't used again
-            memory = new Memory<byte>(new byte[10]);
-
-            // Verify we can read the memory and it has been initialized to the known values
-            Assert.AreEqual(0, pixels[0]);
-            Assert.AreEqual(1, pixels[1]);
-            Assert.AreEqual(2, pixels[2]);
-
-            GC.Collect(0, GCCollectionMode.Forced, true, true);
-            GC.WaitForPendingFinalizers();
-
-            Debugger.Break();
-
-            // Verify that the image has no references
-            // The native memory is now free to be released
-            Assert.AreEqual(
-                count.Calls("k4a_image_reference") + count.Calls("k4a_image_create"),
-                count.Calls("k4a_image_release"), 
-                "References not zero");
-    
-            // Write to the native memory
-            // (We shouldn't be able to do this since the memory is freed)
-            pixels[0] = 99;
-                
-            Assert.AreNotEqual(99, pixels[0], "Managed code has modified freed memory!");
-        }
-
     }
-
-
 }

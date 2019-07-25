@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             // Hook the native allocator and register this object.
             // .Dispose() will be called on this object when the allocator is shut down.
-            Allocator.Singleton.Hook(this);
+            Allocator.Singleton.RegisterForDisposal(this);
 
             this.handle = handle;
         }
@@ -324,7 +324,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    Allocator.Singleton.Unhook(this);
+                    Allocator.Singleton.UnregisterForDisposal(this);
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

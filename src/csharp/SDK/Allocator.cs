@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+[assembly:InternalsVisibleTo("Microsoft.Azure.Kinect.Sensor.UnitTests")]
 namespace Microsoft.Azure.Kinect.Sensor
 {
     /// <summary>
@@ -23,21 +25,83 @@ namespace Microsoft.Azure.Kinect.Sensor
         private readonly Dictionary<IntPtr, BufferCacheEntry> bufferCache = new Dictionary<IntPtr, BufferCacheEntry>();
 
         // Native delegates
-        private NativeMethods.k4a_memory_allocate_cb_t allocateDelegate;
-        private NativeMethods.k4a_memory_destroy_cb_t freeDelegate;
+        private readonly NativeMethods.k4a_memory_allocate_cb_t allocateDelegate;
+        private readonly NativeMethods.k4a_memory_destroy_cb_t freeDelegate;
 
         // Native allocator hook state
-        private bool hooked;
+        private bool hooked = false;
 
         /// <summary>
         /// Gets the Allocator.
         /// </summary>
         public static Allocator Singleton { get; } = new Allocator();
 
+        private Allocator()
+        {
+            this.allocateDelegate = new NativeMethods.k4a_memory_allocate_cb_t(this.AllocateFunction);
+            this.freeDelegate = new NativeMethods.k4a_memory_destroy_cb_t(this.FreeFunction);
+
+            // Register for ProcessExit and DomainUnload to allow us to unhook the native layer before
+            // native to managed callbacks are no longer allowed.
+            AppDomain.CurrentDomain.DomainUnload += this.ApplicationExit;
+            AppDomain.CurrentDomain.ProcessExit += this.ApplicationExit;
+
+            // Default to the safe and performant configuration
+
+            // Use Managed Allocator will cause the native layer to allocate from managed byte[] arrays when possible
+            // these can then be safely referenced with a Memory<T> and exposed to user code. This should have fairly
+            // minimal performance impact, but provides strong memory safety.
+            this.UseManagedAllocator = true;
+
+            // When managed code needs to provide access to memory that didn't originate from the managed allocator
+            // the SafeCopyNativeBuffers options causes the managed code to make a safe cache copy of the native buffer
+            // in a managed byte[] array. This has a more significant performance impact, but generally is only needed for
+            // media foundation (color image) or potentially custom buffers. When set to true, the Memory<T> objects are safe
+            // copies of the native buffers. When set to false, the Memory<T> objects are direct pointers to the native buffers
+            // and can therefore cause native memory corruption if a Memory<T> (or Span<T>) is used after the Image is disposed 
+            // or garbage collected.
+            this.SafeCopyNativeBuffers = true;
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether to have the native library use the managed allocator.
         /// </summary>
-        public bool UseManagedAllocator { get; set; } = true;
+        public bool UseManagedAllocator
+        {
+            get
+            {
+                return this.hooked;
+            }
+
+            set
+            {
+                lock (this)
+                {
+                    if (value && !this.hooked)
+                    {
+                        try
+                        {
+                            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(this.allocateDelegate, this.freeDelegate));
+                            this.hooked = true;
+                        }
+                        catch (Exception)
+                        {
+                            // Don't fail if we can't set the allocator since this code path is called during the global type
+                            // initialization. A failure to set the allocator is also not fatal, but will only cause a performance
+                            // issue.
+                            System.Diagnostics.Debug.WriteLine("Unable to hook native allocator");
+                        }
+                    }
+                    
+                    if (!value && this.hooked)
+                    {
+                        // Disabling the hook once it has been enabled should not catch the exception
+                        AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(null, null));
+                        this.hooked = false;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether to make a safe copy of native buffers.
@@ -46,7 +110,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
 
         /// <summary>
-        /// Hook the native allocator and register an object for dispose during shutdown.
+        /// Register the object for disposal when the CLR shuts down.
         /// </summary>
         /// <param name="disposable">Object to dispose before native hooks are disconnected.</param>
         /// <remarks>
@@ -59,34 +123,13 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// gets cleaned up) should register with the Allocator.Hook method to ensure it is cleaned up in the correct order.
         /// during shutdown.
         /// </remarks>
-        public void Hook(IDisposable disposable)
+        public void RegisterForDisposal(IDisposable disposable)
         {
             lock (this)
             {
                 // Track the object as one we may need to dispose during shutdown.
                 // Use a weak reference to allow the object to be garbage collected earliler if possible.
                 _ = this.disposables.Add(new WeakReference<IDisposable>(disposable));
-
-                // Only hook the native layer once
-                if (this.hooked)
-                {
-                    return;
-                }
-
-                this.allocateDelegate = new NativeMethods.k4a_memory_allocate_cb_t(this.AllocateFunction);
-                this.freeDelegate = new NativeMethods.k4a_memory_destroy_cb_t(this.FreeFunction);
-
-                if (this.UseManagedAllocator)
-                {
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(this.allocateDelegate, this.freeDelegate));
-                }
-
-                // Register for ProcessExit and DomainUnload to allow us to unhook the native layer before
-                // native to managed callbacks are no longer allowed.
-                AppDomain.CurrentDomain.DomainUnload += this.CurrentDomain_DomainUnload;
-                AppDomain.CurrentDomain.ProcessExit += this.CurrentDomain_DomainUnload;
-
-                this.hooked = true;
             }
         }
 
@@ -98,7 +141,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// This does not unhook the native allocator, but only unregisters the object for
         /// disposal.
         /// </remarks>
-        public void Unhook(IDisposable disposable)
+        public void UnregisterForDisposal(IDisposable disposable)
         {
             lock (this)
             {
@@ -227,10 +270,13 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         // Called when the AppDomain is unloaded or the application exits
-        private void CurrentDomain_DomainUnload(object sender, EventArgs e)
+        private void ApplicationExit(object sender, EventArgs e)
         {
             lock (this)
             {
+                // Disable the managed allocator hook to ensure no new allocations
+                this.UseManagedAllocator = false;
+
                 System.Diagnostics.Debug.WriteLine($"Disposable count {this.disposables.Count} (Allocation Count {this.allocations.Count})");
 
                 // First dispose of all the registered objects
@@ -256,11 +302,6 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (this.allocations.Count > 0)
                 {
                     throw new Exception("Not all native allocations have been freed before managed shutdown");
-                }
-
-                if (this.UseManagedAllocator)
-                {
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(null, null));
                 }
             }
         }
