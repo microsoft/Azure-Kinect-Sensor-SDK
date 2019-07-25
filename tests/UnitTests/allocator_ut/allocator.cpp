@@ -182,42 +182,52 @@ TEST(allocator_ut, image_api_validation)
     {
         // Unsupported formats for this creation API.
         k4a_image_format_t bad_format = (k4a_image_format_t)99;
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, ALLOCATION_SOURCE_USER, &image));
 
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 0, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 1, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 1, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 0, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 1, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 1, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 0, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 1, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 1, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 0, ALLOCATION_SOURCE_USER, NULL));
 
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 0, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 0, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 1, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 1, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 0, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 1, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 1, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 0, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 1, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 1, ALLOCATION_SOURCE_USER, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 0, ALLOCATION_SOURCE_USER, NULL));
 
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, &image));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, ALLOCATION_SOURCE_USER, &image));
         image_dec_ref(image);
         ASSERT_EQ(allocator_test_for_leaks(), 0);
     }
