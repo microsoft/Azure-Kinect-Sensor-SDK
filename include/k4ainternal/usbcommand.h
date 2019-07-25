@@ -79,6 +79,10 @@ k4a_result_t usb_cmd_create(usb_command_device_type_t device_type,
 
 void usb_cmd_destroy(usbcmd_t usb_handle);
 
+//????
+// Read USB descriptor serial number
+k4a_buffer_result_t usb_cmd_get_serial_number(usbcmd_t usbcmd_handle, char *serial_number, size_t *serial_number_size);
+
 // Read command
 k4a_result_t usb_cmd_read(usbcmd_t usb_handle,
                           uint32_t cmd,

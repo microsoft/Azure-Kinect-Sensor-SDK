@@ -650,10 +650,14 @@ jobs:
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
         flattenFolders: true
 
-    - task: PowerShell@2
-      inputs:
-        targetType: 'filePath'
-        filePath: './scripts/Reset-Device.ps1'
+    #- task: PowerShell@2
+    #  inputs:
+    #    targetType: 'filePath'
+    #    filePath: './scripts/Reset-Device.ps1'
+    #  displayName: 'Reset K4A Device'
+
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -r'
+      workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
 
     - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
@@ -687,10 +691,14 @@ jobs:
           **/*FunctionalTests.dll
           !**/obj/**
 
-    - task: PowerShell@2
-      inputs:
-        targetType: 'filePath'
-        filePath: './scripts/Reset-Device.ps1'
+  #  - task: PowerShell@2
+  #    inputs:
+  #      targetType: 'filePath'
+  #      filePath: './scripts/Reset-Device.ps1'
+  #    displayName: 'Reset K4A Device'
+
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -r'
+      workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
 
 - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
@@ -805,9 +813,15 @@ jobs:
 
       # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
       # Wait a little bit so the device can enumerate, 3 seconds has seemed good.
-    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport && sleep 3'
-      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
+   # - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport && sleep 3'
+   #   workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
+   #   displayName: 'Reset K4A Device'
+
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
+      workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
+      env:
+        K4A_LOG_LEVEL: 'I'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
@@ -831,6 +845,13 @@ jobs:
       continueOnError: true
 
     # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport'
-      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
+#    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport'
+#      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
+#      displayName: 'Reset K4A Device'
+
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
+      workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
+      env:
+        K4A_LOG_LEVEL: 'I'
+

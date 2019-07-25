@@ -87,6 +87,12 @@ typedef struct _imu_payload_metadata_t
  */
 k4a_result_t colormcu_create(const guid_t *container_id, colormcu_t *colormcu_handle);
 
+//????
+k4a_result_t colormcu_create_by_index(uint32_t device_index, colormcu_t *colormcu_handle);
+
+//????
+k4a_buffer_result_t colormcu_get_serialnum(colormcu_t colormcu_handle, char *serial_number, size_t *serial_number_size);
+
 /** Closes the color mcu module and free's it resources
  * */
 void colormcu_destroy(colormcu_t colormcu_handle);
