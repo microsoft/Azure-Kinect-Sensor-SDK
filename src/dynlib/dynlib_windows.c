@@ -66,7 +66,7 @@ static DLL_DIRECTORY_COOKIE add_current_module_to_search()
         return NULL;
     }
 
-    fileName[0] = '\0';
+    fileName[0] = L'\0';
 
     DLL_DIRECTORY_COOKIE dllDirectory = AddDllDirectory(path);
     if (dllDirectory == 0)
@@ -113,7 +113,9 @@ k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_
 
     if (K4A_SUCCEEDED(result))
     {
-        dynlib->handle = LoadLibraryA(versioned_name);
+        dynlib->handle = LoadLibraryExA(versioned_name,
+                                        NULL,
+                                        LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_USER_DIRS);
         result = (dynlib->handle != NULL) ? K4A_RESULT_SUCCEEDED : K4A_RESULT_FAILED;
 
         if (K4A_FAILED(result))
