@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <chrono>
 
 #include <k4a/k4a.hpp>
 #include <opencv2/calib3d.hpp>
@@ -12,6 +13,13 @@
 using std::cout;
 using std::endl;
 using std::vector;
+
+// TODO now this is 10ms eventually, should be 50us TODO explain
+constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(10000); // 10 milliseconds
+
+constexpr size_t board_height = 8;       // TODO command line arg
+constexpr size_t board_width = 6;        // TODO command line arg
+constexpr float board_square_size = 33.; // TODO command line arg
 
 // ideally, we could generalize this to many OpenCV types
 cv::Mat k4a_color_to_opencv(const k4a::image &im)
@@ -141,10 +149,288 @@ vector<float> k4a_calibration_to_color_camera_dist_coeffs(const k4a::calibration
     return { i.k1, i.k2, i.p1, i.p2, i.k3, i.k4, i.k5, i.k6 };
 }
 
+// Blocks until we have synchronized captures stored in master_capture and sub_capture
+void get_synchronized_captures(k4a::device &master,
+                               k4a::device &sub,
+                               k4a_device_configuration_t &sub_config,
+                               k4a::capture &master_capture,
+                               k4a::capture &sub_capture,
+                               bool compare_sub_depth_instead_of_color = false)
+{
+    // Dealing with the synchronized cameras is complex. The Azure Kinect DK:
+    //      (a) does not guarantee calling get_capture() synchronously the images received will have
+    //      corresponding timestamps
+    //      (b) does not guarantee that the depth image and camera image from a single
+    //      camera's capture have the same timestamp (this delay can be changed but it will still only be
+    //      approximately the same)
+    // There are several reasons for all of this. Internally, devices keep a queue of a few of the captured images
+    // and serve those images as requested by get_capture(). However, images can also be dropped at any moment, and
+    // one device may have more images ready than another device at a given moment, et cetera.
+    //
+    // Also, the process of synchronizing is complex. The cameras are not guaranteed to exactly match in all of
+    // their timestamps when synchronized (though they should be very close). All delays are relative to the master
+    // camera's color camera. To deal with these complexities, we employ a fairly straightforward algorithm. Start
+    // by reading in two captures, then if the camera images were not taken at roughly the same time read a new one
+    // from the device that had the older capture until the timestamps roughly match.
+
+    // The captures used in the loop are outside of it so that they can persist across loop iterations. This is
+    // necessary because each time this loop runs we'll only update the older capture.
+    master.get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+    sub.get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+
+    bool have_synced_images = false;
+    while (!have_synced_images)
+    {
+        // TODO should these be references?
+        k4a::image master_color_image;
+        k4a::image sub_image;
+        if (master_capture)
+        {
+            master_color_image = master_capture.get_color_image();
+        }
+        if (sub_capture)
+        {
+            if (compare_sub_depth_instead_of_color)
+            {
+                sub_image = sub_capture.get_depth_image();
+            }
+            else
+            {
+                sub_image = sub_capture.get_color_image();
+            }
+        }
+        if (master_capture && sub_capture && master_color_image && sub_image)
+        {
+            std::chrono::microseconds sub_image_time = sub_image.get_device_timestamp();
+            std::chrono::microseconds master_color_image_time = master_color_image.get_device_timestamp();
+            // The subordinate's color image timestamp, ideally, is the master's color image timestamp plus the
+            // delay we configured between the master device color camera and subordinate device color camera
+            std::chrono::microseconds expected_sub_image_time = master_color_image_time + std::chrono::microseconds{
+                sub_config.subordinate_delay_off_master_usec
+            };
+            std::chrono::microseconds sub_image_time_error = sub_image_time - expected_sub_image_time;
+            // The time error's absolute value must be within the permissible range. So, for example, if
+            // MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 2, offsets of -2, -1, 0, 1, and -2 are
+            // permitted
+            if (sub_image_time_error < -MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP)
+            {
+                // Example, where MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 1
+                // time                    t=1  t=2  t=3
+                // actual timestamp        x    .    .
+                // expected timestamp      .    .    x
+                // error: 1 - 3 = -2, which is less than the worst-case-allowable offset of -1
+                // the subordinate camera image timestamp was earlier than it is allowed to be. This means the
+                // subordinate is lagging and we need to update the subordinate to get the subordinate caught up
+                cout << "Subordinate lagging...\n";
+                sub.get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+            }
+            else if (sub_image_time_error > MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP)
+            {
+                // Example, where MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 1
+                // time                    t=1  t=2  t=3
+                // actual timestamp        .    .    x
+                // expected timestamp      x    .    .
+                // error: 3 - 1 = 2, which is more than the worst-case-allowable offset of 1
+                // the subordinate camera image timestamp was later than it is allowed to be. This means the
+                // subordinate is ahead and we need to update the master to get the master caught up
+                cout << "Master lagging...\n";
+                master.get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+            }
+            else
+            {
+                // The captures are sufficiently synchronized. Exit the function.
+                cout << "Got synchronized images!\n";
+                have_synced_images = true;
+            }
+        }
+        else
+        {
+            // One of the captures or one of the images are bad, so just replace both. One could make this more
+            // sophisticated and try to only to only replace one of these captures, et cetera, to try to keep a good one
+            // but we'll keep things simple and just throw both away and try again.
+            master.get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+            sub.get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+        }
+    }
+}
+
+// Takes the images by value so we can change them when shown.
+bool find_chessboard_corners_helper(cv::Mat master_color_image,
+                                    cv::Mat sub_color_image,
+                                    const cv::Size &chessboard_pattern,
+                                    vector<cv::Point2f> &master_chessboard_corners,
+                                    vector<cv::Point2f> &sub_chessboard_corners)
+{
+    bool found_chessboard_master = cv::findChessboardCorners(master_color_image,
+                                                             chessboard_pattern,
+                                                             master_chessboard_corners);
+    bool found_chessboard_sub = cv::findChessboardCorners(sub_color_image, chessboard_pattern, sub_chessboard_corners);
+
+    // Cover the failure cases where chessboards were not found in one or both images.
+    if (!found_chessboard_master || !found_chessboard_sub)
+    {
+        if (found_chessboard_master)
+        {
+            cout << "Could not find the chessboard corners in the subordinate image. Trying again...\n";
+        }
+        // Likewise, if the chessboard was found in the subordinate image, it was not found in the
+        // master image.
+        else if (found_chessboard_sub)
+        {
+            cout << "Could not find the chessboard corners in the master image. Trying again...\n";
+        }
+        // The only remaining case is the corners were in neither image.
+        else
+        {
+            cout << "Could not find the chessboard corners in either image. Trying again...\n";
+        }
+        return false;
+    }
+    // Before we go on, there's a quick problem with calibration to address.
+    // Because the chessboard looks the same when rotated 180 degrees, it is possible that the
+    // chessboard corner finder may find the correct points, but in the wrong order.
+
+    // A visual:
+    //        Image 1                  Image 2
+    // .....................    .....................
+    // .....................    .....................
+    // .........xxxxx2......    .....xxxxx1..........
+    // .........xxxxxx......    .....xxxxxx..........
+    // .........xxxxxx......    .....xxxxxx..........
+    // .........1xxxxx......    .....2xxxxx..........
+    // .....................    .....................
+    // .....................    .....................
+
+    // The problem occurs when this case happens: the find_chessboard() function correctly
+    // identifies the points on the checkerboard (shown as 'x's) but the order of those points
+    // differs between images taken by the two cameras. Specifically, the first point in the list
+    // of points found for the first image (1) is the *last* point in the list of points found for
+    // the second image (2), though they correspond to the same physical point on the chessboard.
+
+    // To avoid this problem, we can make the assumption that both of the cameras will be oriented
+    // in a similar manner (e.g. turning one of the cameras upside down will break this assumption)
+    // and enforce that the vector between the first and last points found in pixel space (which
+    // will be at opposite ends of the chessboard) are pointing the same direction- so, the dot
+    // product of the two vectors is positive.
+
+    cv::Vec2f master_image_corners_vec = master_chessboard_corners.back() - master_chessboard_corners.front();
+    cv::Vec2f sub_image_corners_vec = sub_chessboard_corners.back() - sub_chessboard_corners.front();
+    if (master_image_corners_vec.dot(sub_image_corners_vec) <= 0.0)
+    {
+        std::reverse(sub_chessboard_corners.begin(), sub_chessboard_corners.end());
+    }
+
+    // Comment out this section to not show the calibration output
+    cv::drawChessboardCorners(master_color_image, chessboard_pattern, master_chessboard_corners, true);
+    cv::drawChessboardCorners(sub_color_image, chessboard_pattern, sub_chessboard_corners, true);
+    cv::imshow("Chessboard view from master camera", master_color_image);
+    cv::waitKey(500);
+    cv::imshow("Chessboard view from subordinate camera", sub_color_image);
+    cv::waitKey(500);
+
+    return true;
+}
+
+void stereo_calibration(const k4a::calibration &master_calib,
+                        const k4a::calibration &sub_calib,
+                        const vector<cv::Point2f> &master_chessboard_corners,
+                        const vector<cv::Point2f> &sub_chessboard_corners,
+                        const cv::Size &image_size,
+                        cv::Mat &R,
+                        cv::Vec3d &t)
+{
+    // We have points in each image that correspond to the corners that the findChessboardCorners
+    // function found. However, we still need the points in 3 dimensions that these points
+    // correspond to. Because we are ultimately only interested in find a transformation between two
+    // cameras, these points don't have to correspond to an external "origin" point. The only
+    // important thing is that the relative distances between points are accurate. As a result, we
+    // can simply make the first corresponding point (0, 0) and construct the remaining points based
+    // on that one. The order of points inserted into the vector here matches the ordering of
+    // findChessboardCorners. The units of these points are in millimeters, mostly because the depth
+    // provided by the depth cameras is also provided in millimeters, which makes for easy comparison.
+    vector<cv::Point3f> chessboard_corners_world;
+    for (size_t w = 0; w < board_width; ++w)
+    {
+        for (size_t h = 0; h < board_height; ++h)
+        {
+            chessboard_corners_world.emplace_back(cv::Point3f{ h * board_square_size, w * board_square_size, 0.0 });
+        }
+    }
+
+    // TODO stereoCalibrate vs PnP?
+
+    // Calibrating the cameras requires a lot of data. OpenCV's stereoCalibrate function requires:
+    // - a list of points in real 3d space that will be used to calibrate*
+    // - a corresponding list of pixel coordinates as seen by the first camera*
+    // - a corresponding list of pixel coordinates as seen by the second camera*
+    // - the camera matrix of the first camera
+    // - the distortion coefficients of the first camera
+    // - the camera matrix of the second camera
+    // - the distortion coefficients of the second camera
+    // - the size (in pixels) of the images
+    // - R: stereoCalibrate stores the rotation matrix from the first camera to the second here
+    // - t: stereoCalibrate stores the translation vector from the first camera to the second here
+    // - E: stereoCalibrate stores the essential matrix here (we don't use this)
+    // - F: stereoCalibrate stores the fundamental matrix here (we don't use this)
+    //
+    // * note: OpenCV's stereoCalibrate actually requires as input an array of arrays of points for
+    // these arguments, allowing a caller to provide multiple frames from the same camera with
+    // corresponding points. For example, if extremely high precision was required, many images
+    // could be taken with each camera, and findChessboardCorners applied to each of those images,
+    // and OpenCV can jointly solve for all of the pairs of corresponding images. However, to keep
+    // things simple, we use only one image from each device to calibrate.
+    // This is also why each of the vectors of corners is placed into another vector.
+    // A function in OpenCV's calibration function also requires that these points be F32 types, so
+    // we use those. However, OpenCV still provides doubles as output, strangely enough.
+    vector<vector<cv::Point3f>> chessboard_corners_world_nested_for_cv(1, chessboard_corners_world);
+    vector<vector<cv::Point2f>> master_corners_nested_for_cv(1, master_chessboard_corners);
+    vector<vector<cv::Point2f>> sub_corners_nested_for_cv(1, sub_chessboard_corners);
+
+    cv::Mat master_camera_matrix = k4a_calibration_to_color_camera_matrix(master_calib);
+    cv::Mat sub_camera_matrix = k4a_calibration_to_color_camera_matrix(sub_calib);
+    vector<float> master_dist_coeff = k4a_calibration_to_color_camera_dist_coeffs(master_calib);
+    vector<float> sub_dist_coeff = k4a_calibration_to_color_camera_dist_coeffs(sub_calib);
+
+    // Finally, we'll actually calibrate the cameras.
+    // Pass subordinate first, then master, because we want a transform from subordinate to master.
+    double error = cv::stereoCalibrate(chessboard_corners_world_nested_for_cv,
+                                       sub_corners_nested_for_cv,
+                                       master_corners_nested_for_cv,
+                                       sub_camera_matrix,
+                                       sub_dist_coeff,
+                                       master_camera_matrix,
+                                       master_dist_coeff,
+                                       image_size,
+                                       R, // output
+                                       t, // output
+                                       cv::noArray(),
+                                       cv::noArray(),
+                                       cv::CALIB_FIX_INTRINSIC | cv::CALIB_RATIONAL_MODEL);
+    cout << "Finished calibrating!\n";
+    cout << "Got error of " << error << "\n";
+}
+
 int main()
 {
     try
     {
+        // TODO find a home for this comment
+        // Note that many sections of the code avoid using std::endl in favor of using \n, because sections of code
+        // dedicated to interacting with both cameras can be sensitive to timing and flushing the buffer takes time.
+
+        // TODO is this comment necessary anymore?
+        // For calibration, we require an image containing the chessboard taken at the same time in both
+        // the master and the subordinate perspectives. Because we currently have synchronized images,
+        // we need to collect new captures from both devices: collecting only from one device would mean
+        // the images are not synchronized. However, at this point, simply getting a capture from both
+        // cameras does not guarantee that those captures are synchronized, even though they are
+        // acquired by calling get_capture on both devices immediately after having two synchronized
+        // images, because either device could drop a frame at any point. So, we will get two new
+        // images, finish up this loop iteration, then return to the beginning of the loop, which will
+        // keep running until two synchronized images are found and they are searched for the
+        // chessboard. At least one of the images did not contain the board. So, if the chessboard was
+        // found in the master image, it was not found in the subordinate image.
+
         // Require at least 2 cameras
         const size_t num_devices = k4a::device::get_installed_count();
         if (num_devices < 2)
@@ -163,9 +449,10 @@ int main()
         camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED;
         camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
         camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
-        camera_config.subordinate_delay_off_master_usec = 100; // TODO this should be the minumum delay allowed by spec.
-                                                               // Perhaps there should be a nod to how to handle series
-                                                               // of delays
+        camera_config.subordinate_delay_off_master_usec = 160; // Allowing at least 160 microseconds between depth
+                                                               // cameras should ensure they do not interfere with one
+                                                               // another. Perhaps there should be a nod to how to
+                                                               // handle series of delays
         camera_config.synchronized_images_only = false;        // only needs to be true for the master
         vector<k4a_device_configuration_t> configurations(num_devices, camera_config);
         // special case: the first config needs to be set to be the master
@@ -173,9 +460,6 @@ int main()
         configurations.front().subordinate_delay_off_master_usec = 0;
         configurations.front().color_resolution = K4A_COLOR_RESOLUTION_720P;
         configurations.front().synchronized_images_only = true;
-
-        // TODO now this is 10ms eventually, should be 50us
-        const std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP = 10ms; // yes, 10 milliseconds, converted into microseconds
 
         vector<k4a::calibration> calibrations;
         // fill the calibrations vector
@@ -207,7 +491,7 @@ int main()
         devices[0].start_cameras(&configurations[0]);
 
         // These will hold the rotation and translation we get from calibration
-        cv::Mat R_color_sub_to_color_master, E, F;
+        cv::Mat R_color_sub_to_color_master;
         cv::Vec3d t_color_sub_to_color_master;
         cv::Mat R_depth_sub_to_color_sub;
         cv::Vec3d t_depth_sub_to_color_sub;
@@ -216,334 +500,84 @@ int main()
         cv::Mat R_depth_sub_to_color_master;
         cv::Vec3d t_depth_sub_to_color_master;
 
-        // Dealing with the synchronized cameras is complex. The Azure Kinect DK:
-        //      (a) does not guarantee calling get_capture() synchronously the images received will have
-        //      corresponding timestamps
-        //      (b) does not guarantee that the depth image and camera image from a single
-        //      camera's capture have the same timestamp (this delay can be changed but it will still only be
-        //      approximately the same)
-        // There are several reasons for all of this. Internally, devices keep a queue of a few of the captured images
-        // and serve those images as requested by get_capture(). However, images can also be dropped at any moment, and
-        // one device may have more images ready than another device at a given moment, et cetera.
-        //
-        // Also, the process of synchronizing is complex. The cameras are not guaranteed to exactly match in all of
-        // their timestamps when synchronized (though they should be very close). All delays are relative to the master
-        // camera's color camera. To deal with these complexities, we employ a fairly straightforward algorithm. Start
-        // by reading in two captures, then if the camera images were not taken at roughly the same time read a new one
-        // from the device that had the older capture until the timestamps roughly match.
+        cout << R_color_sub_to_color_master << std::endl;
+        cout << t_color_sub_to_color_master << std::endl;
 
-        // The captures used in the loop are outside of it so that they can persist across loop iterations. This is
-        // necessary because each time this loop runs we'll only update the older capture.
-        k4a::capture master_capture;
-        k4a::capture sub_capture;
-        devices[0].get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
-        devices[1].get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
-
-        // Calibration loop
+        const k4a::calibration &sub_calib = devices.back().get_calibration(configurations.back().depth_mode,
+                                                                           configurations.back().color_resolution);
         bool calibrated = false;
         while (!calibrated)
         {
-            if (master_capture && master_capture.get_color_image() && sub_capture && sub_capture.get_color_image())
-            {
-                k4a::image master_color_image = master_capture.get_color_image();
-                k4a::image sub_color_image = sub_capture.get_color_image();
-                std::chrono::microseconds sub_color_image_time = sub_color_image.get_device_timestamp();
-                std::chrono::microseconds master_color_image_time = master_color_image.get_device_timestamp();
-                // The subordinate's color image timestamp, ideally, is the master's color image timestamp plus the
-                // delay we configured between the master device color camera and subordinate device color camera
-                std::chrono::microseconds expected_sub_color_image_time =
-                    master_color_image_time + configurations[1].subordinate_delay_off_master_usec;
-                std::chrono::microseconds sub_color_image_time_error = sub_color_image_time - expected_sub_color_image_time;
-                if (sub_color_image_time_error < MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP) {
-                    // Example, where MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 1
-                    // time                    t=1  t=2  t=3
-                    // actual timestamp        x    .    .
-                    // expected timestamp      .    .    x
-                    // error: 1 - 3 = -2
-                    // the subordinate camera image timestamp was earlier than it is allowed to be. This means the subordinate is lagging and we need to update the subordinate to get the subordinate caught up
-                    cout << "Subordinate lagging..." << endl;
-                    devices[1].get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
-                } else if (sub_color_image_time_error > MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP) {
-                    // Example, where MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 1
-                    // time                    t=1  t=2  t=3
-                    // actual timestamp        .    .    x
-                    // expected timestamp      x    .    .
-                    // error: 3 - 1 = 2
-                    // the subordinate camera image timestamp was later than it is allowed to be. This means the subordinate is ahead and we need to update the master to get the master caught up
-                    cout << "Master lagging..." << endl;
-                    devices[0].get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
-
-                } else {
-                    // The images are sufficiently synchronized. Time to calibrate
-                    cout << "Master and subordinate synced image! Attempting to calibrate..." << endl;
-                }
-                // TODO if the device is properly synced, then the actual timestamps should happen within 160
-            }
-            else
-            {
-                cout << "Didn't get the capture and depth image...trying again\n"; // TODO depth?
-            }
-
-            vector<cv::Mat> color_images;
-            color_images.reserve(devices.size());
-            for (const k4a::capture &cap : device_captures)
-            {
-                color_images.emplace_back(k4a_color_to_opencv(cap.get_color_image()));
-            }
-
-            // depths are present on both images. Time to calibrate.
-            size_t board_height = 8;
-            size_t board_width = 6;
-            float board_square_size = 33.; // mine was 33 millimeters TODO generalize
+            k4a::capture master_capture, sub_capture;
+            get_synchronized_captures(devices[0], devices[1], configurations[1], master_capture, sub_capture);
+            // get_color_image is guaranteed to work because get_synchronized_captures, used as above, checks to ensure
+            // that color images are present on both captures
+            k4a::image master_color_image = master_capture.get_color_image();
+            k4a::image sub_color_image = sub_capture.get_color_image();
+            // Differentiated from the k4a::image master_color_image with 'cv_' prefix
+            cv::Mat cv_master_color_image = k4a_color_to_opencv(master_color_image);
+            cv::Mat cv_sub_color_image = k4a_color_to_opencv(sub_color_image);
             cv::Size chessboard_pattern(board_height, board_width);
+            vector<cv::Point2f> master_chessboard_corners;
+            vector<cv::Point2f> sub_chessboard_corners;
 
-            // indexing: first by camera, then by frame, then by which corner
-            // TODO add more frames?
-            vector<vector<cv::Point2d>> one_initialized_frame(1);
-            vector<vector<vector<cv::Point2d>>> corners(devices.size(), one_initialized_frame);
-            bool found_chessboard = true;
-            for (size_t i = 0; i < color_images.size(); ++i)
+            bool ready_to_calibrate = find_chessboard_corners_helper(cv_master_color_image,
+                                                                     cv_sub_color_image,
+                                                                     chessboard_pattern,
+                                                                     master_chessboard_corners,
+                                                                     sub_chessboard_corners);
+
+            if (ready_to_calibrate)
             {
-                found_chessboard = found_chessboard &&
-                                   cv::findChessboardCorners(color_images[i],
-                                                             chessboard_pattern,
-                                                             corners[i][0],
-                                                             cv::CALIB_CB_ADAPTIVE_THRESH); // TODO
-                                                                                            // CV_CALIB_CB_FILTER_QUADS
-                found_chessboard = found_chessboard && !corners[i][0].empty();
-                // TODO get subpixel working
-                // if (found_chessboard)
-                // {
-                //     // Term criteria was taken from OpenCV's website
-                //     cv::cornerSubPix(color_images[i],
-                //                      corners[i],
-                //                      chessboard_pattern,
-                //                      cv::Size(-1, -1),
-                //                      cv::TermCriteria(cv::TermCriteria::EPS | cv::TermCriteria::COUNT, 30, 0.1));
-                // }
+                stereo_calibration(calibrations[0],
+                                   calibrations[1],
+                                   master_chessboard_corners,
+                                   sub_chessboard_corners,
+                                   cv_master_color_image.size(),
+                                   R_color_sub_to_color_master,
+                                   t_color_sub_to_color_master);
+                calibrated = true;
             }
-
-            if (!found_chessboard)
-            {
-                cout << "Couldn't find the chessboard corners...trying again\n";
-                continue;
-            }
-
-            // Because the chessboard looks the same when rotated 180 degrees, it is possible that the chessboard corner
-            // finder may find the correct points, but in the wrong order.
-
-            // A visual:
-            //        Image 1                  Image 2
-            // .....................    .....................
-            // .....................    .....................
-            // .........xxxxx2......    .....xxxxx1..........
-            // .........xxxxxx......    .....xxxxxx..........
-            // .........xxxxxx......    .....xxxxxx..........
-            // .........1xxxxx......    .....2xxxxx..........
-            // .....................    .....................
-            // .....................    .....................
-
-            // The problem occurs when this case happens: the find_chessboard() function correctly identifies the points
-            // on the checkerboard (shown as 'x's) but the order of those points differs between what is found in the
-            // two cameras. Specifically, the first point in the list of points found for the first image (1) is the
-            // *last* point in the list of points found for the second image (2), though they correspond to the same
-            // physical point on the chessboard.
-
-            // To avoid this problem, we can make the assumption that both of the cameras will be oriented in a similar
-            // manner (e.g. turning one of the cameras upside down will break this assumption) and enforce that the
-            // vector between the first and last points found in pixel space (which will be at opposite ends of the
-            // chessboard) are pointing the same direction- so, the dot product of the two vectors is positive.
-            // TODO if we start using multiple images to calibrate, need to think about that here
-            cv::Vec2d first_image_corners_vec = corners[0][0].back() - corners[0][0].front();
-            cout << first_image_corners_vec << endl;
-            cv::Vec2d second_image_corners_vec = corners[1][0].back() - corners[1][0].front();
-            cout << second_image_corners_vec << endl;
-            if (first_image_corners_vec[0] * second_image_corners_vec[0] +
-                    first_image_corners_vec[1] * second_image_corners_vec[1] <=
-                0.0)
-            {
-                std::reverse(corners[1][0].begin(), corners[1][0].end());
-            }
-
-            // TODO print out seeing the image
-            for (size_t i = 0; i < color_images.size(); ++i)
-            {
-                // For some bizarre reason, drawChessboardCorners doesn't like doubles.
-                vector<cv::Point2f> corners_float;
-                corners_float.reserve(corners[i][0].size());
-                for (const cv::Point2d &p : corners[i][0])
-                {
-                    corners_float.emplace_back(cv::Point2f{ static_cast<float>(p.x), static_cast<float>(p.y) });
-                }
-                cv::drawChessboardCorners(color_images[i], chessboard_pattern, corners_float, found_chessboard);
-                std::string title = std::string("Chessboard view from camera ") + std::to_string(i);
-                cv::imshow(title, color_images[i]);
-                // cv::setMouseCallback(title, onMouse);
-                cv::waitKey(500);
-            }
-
-            // now construct the points needed to calibrate
-            // indexed by frame, then by point index
-            // TODO support multiple frames
-            vector<vector<cv::Point3d>> chessboard_corners_3d(1); // start with 1 frame
-            // the points exist on a plane
-            cout << "Filling plane details!" << std::endl;
-            for (size_t w = 0; w < board_width; ++w)
-            {
-                for (size_t h = 0; h < board_height; ++h)
-                {
-                    chessboard_corners_3d[0].emplace_back(
-                        cv::Point3d{ h * board_square_size, w * board_square_size, 0.0 });
-                }
-            }
-
-            // this whole next section is only necessary because collectCalibrationData in OpenCV doesn't work with
-            // doubles
-            vector<vector<cv::Point3f>> chessboard_corners_3d_float(1); // ugh opencv
-            for (const cv::Point3d &p : chessboard_corners_3d[0])
-            {
-                chessboard_corners_3d_float[0].emplace_back(
-                    cv::Point3f{ static_cast<float>(p.x), static_cast<float>(p.y), static_cast<float>(p.z) });
-            }
-            vector<vector<vector<cv::Point2f>>> corners_float; // ugh opencv
-            for (const vector<vector<cv::Point2d>> &p_vec_vec : corners)
-            {
-                corners_float.emplace_back();        // make a vector for this camera's corners
-                corners_float.back().emplace_back(); // make a vector for this camera's corners with 1 frame
-                for (const cv::Point2d &p : p_vec_vec[0])
-                {
-                    corners_float.back()[0].emplace_back(
-                        cv::Point2f{ static_cast<float>(p.x), static_cast<float>(p.y) });
-                }
-            }
-
-            // We need camera matrices and distortion coefficients for each of the devices
-
-            // get a rotation and translation between the master and subordinate camera
-            cout << "Getting references!" << std::endl;
-            const vector<vector<cv::Point2f>> &master_corners_2d = corners_float.front();
-            const vector<vector<cv::Point2f>> &subordinate_corners_2d = corners_float.back();
-            const k4a::calibration &master_calib =
-                devices.front().get_calibration(configurations.front().depth_mode,
-                                                configurations.front().color_resolution);
-            const k4a::calibration &sub_calib = devices.back().get_calibration(configurations.back().depth_mode,
-                                                                               configurations.back().color_resolution);
-            cout << "Getting camera matrices!" << std::endl;
-            cv::Mat master_camera_matrix = k4a_calibration_to_color_camera_matrix(master_calib);
-            cv::Mat sub_camera_matrix = k4a_calibration_to_color_camera_matrix(sub_calib);
-            cout << "Getting camera dist coefficients!" << std::endl;
-            vector<float> master_dist_coeff = k4a_calibration_to_color_camera_dist_coeffs(master_calib);
-            vector<float> sub_dist_coeff = k4a_calibration_to_color_camera_dist_coeffs(sub_calib);
-
-            // TODO depth, not color!
-
-            cout << "Preparing to calibrate!" << std::endl;
-            for (size_t i = 0; i < master_corners_2d.front().size(); ++i)
-            {
-                cout << "Master point: ";
-                cout << master_corners_2d.front()[i] << endl;
-                cout << "Subordinate point: ";
-                cout << subordinate_corners_2d.front()[i] << endl;
-                cout << "3D point: ";
-                cout << chessboard_corners_3d_float.front()[i] << endl;
-            }
-            // cout << subordinate_corners_2d << std::endl;
-            // cout << master_corners_2d << std::endl;
-            // TODO is this ok actually
-            sub_camera_matrix.convertTo(sub_camera_matrix, CV_32F);
-            master_camera_matrix.convertTo(master_camera_matrix, CV_32F);
-            cout << "Camera matrices!" << endl;
-            cout << sub_camera_matrix << endl;
-            cout << master_camera_matrix << endl;
-            for (float f : sub_dist_coeff)
-            {
-                cout << f << " ";
-            }
-            cout << endl;
-            for (float f : master_dist_coeff)
-            {
-                cout << f << " ";
-            }
-            double error = cv::stereoCalibrate(chessboard_corners_3d_float,
-                                               subordinate_corners_2d,
-                                               master_corners_2d,
-                                               sub_camera_matrix,
-                                               sub_dist_coeff,
-                                               master_camera_matrix,
-                                               master_dist_coeff,
-                                               color_images[0].size(),
-                                               R_color_sub_to_color_master,
-                                               t_color_sub_to_color_master,
-                                               E,
-                                               F,
-                                               cv::CALIB_FIX_INTRINSIC | cv::CALIB_RATIONAL_MODEL);
-            cout << "Finished calibrating!" << std::endl;
-            cout << "Got error of " << error << endl;
-
-            cout << R_color_sub_to_color_master << std::endl;
-            cout << t_color_sub_to_color_master << std::endl;
-
-            // the goal: the extrinsics already have the rotation + translation for depth_sub -> color_sub
-            // and we have depth_color -> camera_color so let's combine them
-            k4a_calibration_to_depth_to_color_R_t(sub_calib, R_depth_sub_to_color_sub, t_depth_sub_to_color_sub);
-            cout << "Matrices obtained from camera" << endl;
-            cout << R_depth_sub_to_color_sub << endl;
-            cout << t_depth_sub_to_color_sub << endl;
-
-            // next, we're going to construct a homogeneous equivalent
-            cout << "Construct homog depth sub to color sub" << endl;
-            cv::Mat depth_sub_to_color_sub_h = construct_homogeneous(R_depth_sub_to_color_sub,
-                                                                     t_depth_sub_to_color_sub);
-            cout << depth_sub_to_color_sub_h << endl;
-            cout << "Construct homog color sub to color master" << endl;
-            cv::Mat color_sub_to_color_master_h = construct_homogeneous(R_color_sub_to_color_master,
-                                                                        t_color_sub_to_color_master);
-            cout << color_sub_to_color_master_h << endl;
-            cout << "Multiply" << endl;
-            cv::Mat depth_sub_to_color_master_h = depth_sub_to_color_sub_h * color_sub_to_color_master_h;
-            deconstruct_homogeneous(depth_sub_to_color_master_h,
-                                    R_depth_sub_to_color_master,
-                                    t_depth_sub_to_color_master);
-            cout << "Homogeneous transform depth sub to color master:" << endl;
-            cout << depth_sub_to_color_master_h << endl;
-            cout << "Depth sub to color master R:" << endl;
-            cout << R_depth_sub_to_color_master << endl;
-            cout << "Depth sub to color master t:" << endl;
-            cout << t_depth_sub_to_color_master << endl;
-
-            calibrated = false; // exit this loop
         }
 
-        // Now let's get the images we need.
+        // the goal: the extrinsics already have the rotation + translation for depth_sub -> color_sub
+        // and we have depth_color -> camera_color so let's combine them
+        k4a_calibration_to_depth_to_color_R_t(sub_calib, R_depth_sub_to_color_sub, t_depth_sub_to_color_sub);
+        cout << "Matrices obtained from camera" << endl;
+        cout << R_depth_sub_to_color_sub << endl;
+        cout << t_depth_sub_to_color_sub << endl;
+
+        // next, we're going to construct a homogeneous equivalent
+        cout << "Construct homog depth sub to color sub" << endl;
+        cv::Mat depth_sub_to_color_sub_h = construct_homogeneous(R_depth_sub_to_color_sub, t_depth_sub_to_color_sub);
+        cout << depth_sub_to_color_sub_h << endl;
+        cout << "Construct homog color sub to color master" << endl;
+        cout << R_color_sub_to_color_master << endl;
+        cout << t_color_sub_to_color_master << endl;
+        cv::Mat color_sub_to_color_master_h = construct_homogeneous(R_color_sub_to_color_master,
+                                                                    t_color_sub_to_color_master);
+        cout << color_sub_to_color_master_h << endl;
+        cout << "Multiply" << endl;
+        cv::Mat depth_sub_to_color_master_h = depth_sub_to_color_sub_h * color_sub_to_color_master_h;
+        deconstruct_homogeneous(depth_sub_to_color_master_h, R_depth_sub_to_color_master, t_depth_sub_to_color_master);
+        cout << "Homogeneous transform depth sub to color master:" << endl;
+        cout << depth_sub_to_color_master_h << endl;
+        cout << "Depth sub to color master R:" << endl;
+        cout << R_depth_sub_to_color_master << endl;
+        cout << "Depth sub to color master t:" << endl;
+        cout << t_depth_sub_to_color_master << endl;
 
         while (true)
         {
             vector<k4a::capture> device_captures(devices.size());
-            // first, go through and get a capture from each
-            for (size_t i = 0; i < devices.size(); ++i)
-            {
-                if (!devices[i].get_capture(&device_captures[i], std::chrono::milliseconds{ K4A_WAIT_INFINITE }))
-                {
-                    throw std::runtime_error("Getting a capture failed!");
-                }
-            }
-
-            // make sure all of the captures are valid
-            if (!std::all_of(device_captures.cbegin(), device_captures.cbegin(), [](const k4a::capture &c) {
-                    return c;
-                }))
-            {
-                cout << "Not all device captures were valid!\n";
-                continue;
-            }
+            get_synchronized_captures(devices[0],
+                                      devices[1],
+                                      configurations[1],
+                                      device_captures[0],
+                                      device_captures[1],
+                                      true);
 
             k4a::image master_color_image = device_captures[0].get_color_image();
-            if (!master_color_image)
-            {
-                cout << "Master doesn't have a color image!\n";
-                continue;
-            }
-
             // get depth images
             vector<k4a::image> depth_images;
             depth_images.reserve(devices.size());
