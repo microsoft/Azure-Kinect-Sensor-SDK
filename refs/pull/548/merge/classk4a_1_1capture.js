@@ -1,0 +1,25 @@
+var classk4a_1_1capture =
+[
+    [ "capture", "classk4a_1_1capture_a713dcb3e3539e8d08f30be67b23b6ea8.html#a713dcb3e3539e8d08f30be67b23b6ea8", null ],
+    [ "capture", "classk4a_1_1capture.html#a6da3c95c4331e4c25a8379f8e1feb97e", null ],
+    [ "capture", "classk4a_1_1capture.html#aa06ed4ed8711325935e906a0414c1009", null ],
+    [ "~capture", "classk4a_1_1capture.html#ac7fb8fe0e20dfb9f26bf4df813bde6fa", null ],
+    [ "create", "classk4a_1_1capture_a92b8f943cef424490692fc6e76bfe3ec.html#a92b8f943cef424490692fc6e76bfe3ec", null ],
+    [ "get_color_image", "classk4a_1_1capture_a885c87e3fdd40c567350bfece9c6969c.html#a885c87e3fdd40c567350bfece9c6969c", null ],
+    [ "get_depth_image", "classk4a_1_1capture_a36de50df5f36391e7ed606c0cb5607a2.html#a36de50df5f36391e7ed606c0cb5607a2", null ],
+    [ "get_ir_image", "classk4a_1_1capture_aa19b3af5fefbb2dc4dabd4a31c94d6fc.html#aa19b3af5fefbb2dc4dabd4a31c94d6fc", null ],
+    [ "get_temperature_c", "classk4a_1_1capture_a48bbcd6a4e69cf1c5574162d2d0f0d33.html#a48bbcd6a4e69cf1c5574162d2d0f0d33", null ],
+    [ "operator bool", "classk4a_1_1capture.html#a9b195bd62ed46c3138b88942ca8b6447", null ],
+    [ "operator!=", "classk4a_1_1capture.html#a34e5cc8621b5c782f79e8ad7a6d667b1", null ],
+    [ "operator!=", "classk4a_1_1capture.html#a1a5b1eac81bfd22a978f5c2ccbfc38a4", null ],
+    [ "operator=", "classk4a_1_1capture.html#acda82ae99269039a2671ec29c7f7fa55", null ],
+    [ "operator=", "classk4a_1_1capture.html#ad297433d44328b7b2a60a90bd2f80268", null ],
+    [ "operator=", "classk4a_1_1capture.html#a766690e9c9f045b552892971903bf578", null ],
+    [ "operator==", "classk4a_1_1capture.html#aa25047bfa3d41a3e350b93dbead41b58", null ],
+    [ "operator==", "classk4a_1_1capture.html#a650a8677ba836694aac75a22683f3d9d", null ],
+    [ "reset", "classk4a_1_1capture.html#aa922aa6bae17310b4d73464a2486be92", null ],
+    [ "set_color_image", "classk4a_1_1capture_ac97e202cb82abcbd95cf584045233d64.html#ac97e202cb82abcbd95cf584045233d64", null ],
+    [ "set_depth_image", "classk4a_1_1capture_a6136c6d7369ebccbee2a65ef4d800f9e.html#a6136c6d7369ebccbee2a65ef4d800f9e", null ],
+    [ "set_ir_image", "classk4a_1_1capture_aba19a0d0ff58f841223832422415c790.html#aba19a0d0ff58f841223832422415c790", null ],
+    [ "set_temperature_c", "classk4a_1_1capture_a462b292bdb1f7a525e461bc8a7d94510.html#a462b292bdb1f7a525e461bc8a7d94510", null ]
+];
