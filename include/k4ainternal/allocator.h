@@ -43,7 +43,7 @@ void allocator_initialize(void);
  */
 void allocator_deinitialize(void);
 
-/** Sets the callback functions fot the SDK allocator
+/** Sets the callback functions for the SDK allocator
  *
  * \param allocate
  * The callback function to allocate memory. When the SDK requires memory allocation this callback will be
