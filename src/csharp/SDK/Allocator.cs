@@ -120,7 +120,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// To avoid this callback after the CLR shuts down, the native library must be completly cleaned up prior CLR shutdown.
         ///
         /// Any object that may hold references to the native library (and will therefore generate native to manged callbacks when it
-        /// gets cleaned up) should register with the Allocator.Hook method to ensure it is cleaned up in the correct order.
+        /// gets cleaned up) should register with the RegisterForDisposal method to ensure it is cleaned up in the correct order.
         /// during shutdown.
         /// </remarks>
         public void RegisterForDisposal(IDisposable disposable)
