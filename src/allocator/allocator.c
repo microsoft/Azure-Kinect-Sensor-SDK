@@ -77,8 +77,8 @@ typedef struct _allocation_context_t
             void *free_context;
         } context;
 
-        // Add 16 byte padding to keep original alignment of allocations for SSE
-        char padding[16];
+        // Keep 16 byte alignment so that allocations may be used with SSE
+        char alignment[32];
     } u;
 } allocation_context_t;
 
