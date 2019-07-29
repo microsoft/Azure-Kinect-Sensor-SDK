@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,12 +18,23 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
     /// </summary>
     public partial class Form1 : Form
     {
+        private bool running = true;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Form1"/> class.
         /// </summary>
         public Form1()
         {
             this.InitializeComponent();
+            Logger.LogMessage += this.Logger_LogMessage;
+        }
+
+        private void Logger_LogMessage(object sender, DebugMessageEventArgs e)
+        {
+            if (e.LogLevel < LogLevel.Information)
+            {
+                Console.WriteLine("{0} [{1}] {2}@{3}: {4}", DateTime.Now, e.LogLevel, e.FileName, e.Line, e.Message);
+            }
         }
 
         private async void Form1_Load(object sender, EventArgs e)
@@ -37,7 +49,11 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                     SynchronizedImagesOnly = true,
                 });
 
-                while (true)
+                Stopwatch sw = new Stopwatch();
+                int frameCount = 0;
+                sw.Start();
+
+                while (this.running)
                 {
                     using (Capture capture = await Task.Run(() => device.GetCapture()).ConfigureAwait(true))
                     {
@@ -89,8 +105,20 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
 
                         this.Invalidate();
                     }
+
+                    if (++frameCount >= 30)
+                    {
+                        Console.WriteLine("{0}ms => {1} FPS", sw.Elapsed.TotalMilliseconds, frameCount / sw.Elapsed.TotalSeconds);
+                        sw.Restart();
+                        frameCount = 0;
+                    }
                 }
             }
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Logger.LogMessage -= this.Logger_LogMessage;
         }
     }
 }

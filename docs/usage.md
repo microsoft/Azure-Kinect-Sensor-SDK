@@ -19,6 +19,7 @@ The latest stable binaries are available for download as MSIs.
 
    Tag                                                                               | MSI
 -------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------
+  [v1.1.1](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.1) | [Azure Kinect SDK 1.1.1.msi](http://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/Azure%20Kinect%20SDK%201.1.1.msi)
   [v1.1.0](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.0) | [Azure Kinect SDK 1.1.0.msi](http://download.microsoft.com/download/E/B/D/EBDBB3C1-ED3F-4236-96D6-2BCB352F3710/Azure%20Kinect%20SDK%201.1.0.msi)
   [v1.0.2](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.0.2) | [Azure Kinect SDK 1.0.2.msi](http://download.microsoft.com/download/B/4/D/B4D26442-DDA5-40C2-9913-3B23AE84A806/Azure%20Kinect%20SDK%201.0.2.msi)
 
@@ -65,16 +66,16 @@ Each package contains different elements.
 ## Using tools
 
 The installer comes with a pre-built viewer application (k4aviewer.exe) which can be used to verify the
-functionality of your device and explore its capabilities. The installer puts a link to this in your start
-menu as Azure Kinect Viewer. Other command line tools, such as the recorder and firmware update utilites, are
-available in the installer tools directory.
+functionality of your device and explore its capabilities. The installer puts a link to this in your Start
+menu as Azure Kinect Viewer. Other command line tools; such as the recorder and firmware update utilities, are
+available in the installer 'tools' directory.
 
 ## Including the SDK in your project
 
 If you are including the Azure Kinect SDK in a C or C++ project, update your project to link to **k4a.lib** and
-add the incude path such that you can `#include <k4a/k4a.h>`. You also need to ensure that **k4a.dll** and **depthengine_1_0.dll** are in your path or in the same directory as your application.
+add the include path such that you can `#include <k4a/k4a.h>`. You also need to ensure that **k4a.dll** and **depthengine_1_0.dll** are in your path or in the same directory as your application.
 
-For recording and playback you will need to also reference **k4arecord.lib** and the headers in include/k4arecord, and have
+For recording and playback you will need to also reference **k4arecord.lib** and the headers in include/k4arecord and have
 **k4arecord.dll** in your path.
 
 ## Dependencies
@@ -113,13 +114,13 @@ all drivers.
 
 On Linux, once attached, the device should automatically enumerate and load
 all drivers. However, in order to use the Azure Kinect SDK with the device and without
-being root, you will need to setup udev rules. We have these rules checked
-into this repo under scripts/99-k4a.rules. To do so:
+being 'root', you will need to setup udev rules. We have these rules checked
+into this repo under 'scripts/99-k4a.rules'. To do so:
 
-* Copy scripts/99-k4a.rules into /etc/udev/rules.d/.
+* Copy 'scripts/99-k4a.rules' into '/etc/udev/rules.d/'.
 * Detach and reattach Azure Kinect devices if attached during this process.
 
-Once complete, the Azure Kinect camera is available without being root.
+Once complete, the Azure Kinect camera is available without being 'root'.
 
 ## API Documentation
 
