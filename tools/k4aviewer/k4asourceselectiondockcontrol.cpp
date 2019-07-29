@@ -13,11 +13,10 @@
 //
 #include "k4aimgui_all.h"
 #include <k4a/k4a.hpp>
+#include <k4arecord/playback.hpp>
 
 // Project headers
 //
-#include "playback.hpp"
-
 #include "filesystem17.h"
 #include "k4aaudiomanager.h"
 #include "k4aimguiextensions.h"

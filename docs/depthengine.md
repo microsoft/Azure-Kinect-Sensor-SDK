@@ -16,11 +16,18 @@ release to read data from a device.
 
 ### Windows
 
-If you have run the windows binary installer (see the Azure Kinect DK public documentation for details), you can get a copy of the depth engine from %Program Files%\Azure Kinect SDK\sdk\windows-desktop\amd64\release\bin\depthengine_<major>_<minor>.dll.
+If you have run the windows binary installer (see the Azure Kinect DK public
+documentation for details), you can get a copy of the depth engine from
+`%Program Files%\Azure Kinect
+SDK\sdk\windows-desktop\amd64\release\bin\depthengine_<major>_<minor>.dll`.
 
-The depth engine must be in your %PATH% or located next to k4a.dll for the SDK to decode
-frames from the Azure Kinect DK.
+The depth engine must be in your %PATH% or located next to k4a.dll for the SDK
+to decode frames from the Azure Kinect DK.
 
 ### Linux
 
-The depth engine binary is part of the libk4a<major>.<minor> package.
+The depth engine binary is part of the `libk4a<major>.<minor>` debian package.
+If you have installed the `libk4a<major>.<minor>` debian package,
+libdepthengine will be installed in your library path. If you have not (or can
+not) you can extract libdepthengine from the download debian package found
+[here](https://packages.microsoft.com/ubuntu/18.04/prod/pool/main/libk/).

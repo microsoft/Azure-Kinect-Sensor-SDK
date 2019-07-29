@@ -15,7 +15,7 @@
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/envvariable.h>
 
-#define TS_TO_MS(ts) ((long long)((ts) / 1000)) // TS convertion to milliseconds
+#define TS_TO_MS(ts) ((long long)((ts) / 1)) // TS convertion to milliseconds
 
 #define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
 
@@ -30,6 +30,7 @@ static bool g_no_startup_flush = false;
 static uint32_t g_subordinate_delay_off_master_usec = 0;
 static bool g_manual_exposure = false;
 static uint32_t g_exposure_setting = 0;
+static bool g_power_line_50_hz = false;
 
 using ::testing::ValuesIn;
 
@@ -241,14 +242,35 @@ TEST_P(throughput_perf, testTest)
 
     printf("Capturing %d frames for test: %s\n", g_capture_count, as.test_name);
 
+    {
+        int32_t power_line_setting = g_power_line_50_hz ? 1 : 2;
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
+                                               K4A_COLOR_CONTROL_MODE_MANUAL,
+                                               power_line_setting));
+        printf("Power line mode set to manual and %s.\n", power_line_setting == 1 ? "50Hz" : "60Hz");
+    }
+
     if (g_manual_exposure)
     {
+        k4a_color_control_mode_t read_mode;
+        int32_t read_exposure;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   k4a_device_set_color_control(m_device,
                                                K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                                                K4A_COLOR_CONTROL_MODE_MANUAL,
                                                (int32_t)g_exposure_setting));
-        printf("Manual Exposure: %d\n", g_exposure_setting);
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_get_color_control(m_device,
+                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               &read_mode,
+                                               &read_exposure));
+        printf(
+            "Setting exposure to manual mode, exposure target is: %d.   Actual mode is: %s.   Actual value is: %d.\n",
+            g_exposure_setting,
+            read_mode == K4A_COLOR_CONTROL_MODE_AUTO ? "auto" : "manual",
+            read_exposure);
     }
     else
     {
@@ -332,9 +354,11 @@ TEST_P(throughput_perf, testTest)
         k4a_capture_release(capture);
     }
 
-    printf("\n");
-    printf("       | TS [Delta TS]          | TS [Delta TS]          | TS [Delta TS]           | TS Delta (C&D)\n");
-    printf("===================================================================================================\n");
+    printf("All times in us\n");
+    printf("+---------------------------+-------------------+-------------------+--------+\n");
+    printf("|         Color Info        |     IR 16 Info    |   Depth16 Info    | TS Del |\n");
+    printf("|  TS [Delta TS][Exposure]  |   TS [Delta TS]   |   TS [Delta TS]   | (C-D)  |\n");
+    printf("+---------------------------+-------------------+-------------------+--------+\n");
 
     thread.enable_counting = true; // start counting IMU samples
     while (capture_count-- > 0)
@@ -351,7 +375,7 @@ TEST_P(throughput_perf, testTest)
         {
             k4a_image_t image;
 
-            printf("Capture:");
+            printf("|");
 
             // Probe for a color image
             image = k4a_capture_get_color_image(capture);
@@ -361,7 +385,10 @@ TEST_P(throughput_perf, testTest)
                 ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts, adjusted_max_ts);
                 static_assert(sizeof(ts) == 8, "this should not be wrong");
-                printf(" Color TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_color_ts));
+                printf(" %9lld[%6lld][%6lld]",
+                       TS_TO_MS(ts),
+                       TS_TO_MS(ts - last_color_ts),
+                       (long long int)k4a_image_get_exposure_usec(image));
 
                 // TS should increase
                 EXPECT_GT(ts, last_color_ts);
@@ -371,7 +398,7 @@ TEST_P(throughput_perf, testTest)
             }
             else
             {
-                printf(" Color None            ");
+                printf(" Color None               ");
             }
 
             // probe for a IR16 image
@@ -381,7 +408,7 @@ TEST_P(throughput_perf, testTest)
                 depth = true;
                 ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
-                printf(" | Ir16  TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
+                printf(" | %9lld[%6lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
 
                 // TS should increase
                 EXPECT_GT(ts, last_ir16_ts);
@@ -391,7 +418,7 @@ TEST_P(throughput_perf, testTest)
             }
             else
             {
-                printf(" | Ir16 None             ");
+                printf(" |                  ");
             }
 
             // Probe for a depth16 image
@@ -400,7 +427,7 @@ TEST_P(throughput_perf, testTest)
             {
                 ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
-                printf(" | Depth16 TS:%6lld[%4lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
+                printf(" | %9lld[%6lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
 
                 // TS should increase
                 EXPECT_GT(ts, last_depth16_ts);
@@ -410,7 +437,7 @@ TEST_P(throughput_perf, testTest)
             }
             else
             {
-                printf(" | Depth16 None           ");
+                printf(" |                  ");
             }
         }
         else if (wresult == K4A_WAIT_RESULT_TIMEOUT)
@@ -428,7 +455,7 @@ TEST_P(throughput_perf, testTest)
             both_count++;
 
             int64_t delta = (int64_t)(last_ir16_ts - last_color_ts);
-            printf(" | %" PRId64 "us\n", delta);
+            printf(" | %6" PRId64, delta);
 
             delta -= config.depth_delay_off_color_usec;
             if (delta < 0)
@@ -442,14 +469,16 @@ TEST_P(throughput_perf, testTest)
         }
         else if (depth)
         {
-            printf(" | ---us\n");
+            printf(" | ------");
             depth_count++;
         }
         else if (color)
         {
-            printf(" | ---us\n");
+            printf(" | ------");
             color_count++;
         }
+
+        printf(" |\n");
 
         EXPECT_NE(adjusted_max_ts, 0);
         if (last_ts == UINT64_MAX)
@@ -822,6 +851,16 @@ int main(int argc, char **argv)
             g_no_startup_flush = true;
             printf("g_no_startup_flush = true\n");
         }
+        else if (strcmp(argument, "--60hz") == 0)
+        {
+            g_power_line_50_hz = false;
+            printf("g_power_line_50_hz = false\n");
+        }
+        else if (strcmp(argument, "--50hz") == 0)
+        {
+            g_power_line_50_hz = true;
+            printf("g_power_line_50_hz = true\n");
+        }
         else if (strcmp(argument, "--index") == 0)
         {
             if (i + 1 <= argc)
@@ -922,6 +961,10 @@ int main(int argc, char **argv)
         printf("  --exposure <exposure in usec>\n");
         printf("      By default the test uses auto exposure. This will test with the manual exposure setting\n");
         printf("      that is passed in.\n");
+        printf("  --60hz\n");
+        printf("      <default> Sets the power line compensation frequency to 60Hz\n");
+        printf("  --50hz\n");
+        printf("      Sets the power line compensation frequency to 50Hz\n");
 
         return 1; // Indicates an error or warning
     }

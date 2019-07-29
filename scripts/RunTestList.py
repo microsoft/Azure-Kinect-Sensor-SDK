@@ -54,10 +54,10 @@ def main(argv):
             env["K4A_LOG_LEVEL"] = "I"
         if "K4A_ENABLE_LOG_TO_STDOUT" not in env.keys():
             env["K4A_ENABLE_LOG_TO_STDOUT"] = "1"
-        proc = subprocess.Popen([test] + gtestfullargs, stdout=sys.stdout, env=env)
-        proc.wait()
-        if (proc.returncode != 0):
-            exitcode = proc.returncode
+        returncode = subprocess.call([os.path.abspath(test)] + gtestfullargs, stdout=sys.stdout, env=env, cwd=args.bin)
+        # abspath is to avoid requiring './' on Linux
+        if (returncode != 0):
+            exitcode = returncode
 
     sys.exit(exitcode)
 

@@ -13,6 +13,8 @@ target_include_directories(k4a_logging PUBLIC
 target_link_libraries(k4a_logging PUBLIC 
     azure::aziotsharedutil
     spdlog::spdlog
+    k4ainternal::rwlock
+    k4ainternal::global
     )
 
 # Define alias for other targets to link against

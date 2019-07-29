@@ -53,6 +53,9 @@ private:
 
     k4a_result_t DecodeMJPEGtoBGRA32(uint8_t *in_buf, const size_t in_size, uint8_t *out_buf, const size_t out_size);
 
+    int32_t MapK4aExposureToLinux(int32_t K4aExposure);
+    int32_t MapLinuxExposureToK4a(int32_t LinuxExposure);
+
 private:
     // Lock
     std::mutex m_mutex;
@@ -62,6 +65,7 @@ private:
     uvc_device_t *m_pDevice = nullptr;
     uvc_device_handle_t *m_pDeviceHandle = nullptr;
     bool m_streaming = false;
+    bool m_using_60hz_power = true;
 
     // Image format cache
     uint32_t m_width_pixels;
