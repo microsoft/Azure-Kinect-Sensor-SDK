@@ -198,7 +198,7 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size)
 
     if (full_buffer == NULL)
     {
-        LOG_ERROR("User allocation function failed");
+        LOG_ERROR("User allocation function for %d bytes failed", required_bytes);
         return NULL;
     }
 
