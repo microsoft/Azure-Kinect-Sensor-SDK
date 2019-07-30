@@ -3,6 +3,7 @@ var BRANCHES = [
     "feature/csharp",
     "feature/publishdocs",
     "feature/support-custom-track-record-playback",
+    "feature/transformation-custom-image-support",
     "master",
     "refs/pull/413/merge",
     "refs/pull/469/merge",
