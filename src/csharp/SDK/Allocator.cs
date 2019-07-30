@@ -308,6 +308,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 // if this happens after the CLR has entered shutdown, the CLR will generate an exception.
                 if (this.allocations.Count > 0)
                 {
+                    // TODO: Update exception type
                     throw new Exception("Not all native allocations have been freed before managed shutdown");
                 }
             }
