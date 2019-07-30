@@ -286,6 +286,7 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_depth_mode_to_string in k4a.c if enum values are added.
 typedef enum
 {
     K4A_DEPTH_MODE_OFF = 0,        /**< Depth sensor will be turned off with this setting. */
@@ -304,6 +305,7 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_color_resolution_to_string in k4a.c if enum values are added.
 typedef enum
 {
     K4A_COLOR_RESOLUTION_OFF = 0, /**< Color camera will be turned off with this setting */
@@ -326,6 +328,7 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_image_format_to_string in k4a.c if enum values are added.
 typedef enum
 {
     /** Color image type MJPG.
@@ -426,13 +429,13 @@ typedef enum
  * This enumeration is used to select the desired frame rate to operate the cameras. The actual
  * frame rate may vary slightly due to dropped data, synchronization variation between devices,
  * clock accuracy, or if the camera exposure priority mode causes reduced frame rate.
- *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_fps_to_string in k4a.c if enum values are added.
 typedef enum
 {
     K4A_FRAMES_PER_SECOND_5 = 0, /**< 5 FPS */
