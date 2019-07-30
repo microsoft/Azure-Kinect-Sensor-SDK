@@ -20,7 +20,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             this.image = image.Reference();
 
             memoryPressure = image.Size;
-            //GC.AddMemoryPressure(memoryPressure);
         }
 
         long memoryPressure;
@@ -57,11 +56,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             Interlocked.Decrement(ref pinCount);
         }
 
-        ~AzureKinectMemoryManager()
-        {
-            Dispose(false);
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -79,10 +73,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         throw new Exception("Buffer disposed while pinned");
                     }
                 }
-                GC.SuppressFinalize(this);
             }
-
-            //GC.RemoveMemoryPressure(memoryPressure);
         }
     }
 }

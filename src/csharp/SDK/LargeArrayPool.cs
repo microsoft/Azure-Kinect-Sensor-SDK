@@ -43,10 +43,6 @@ namespace Microsoft.Azure.Kinect.Sensor
                 this.pool.Add(new WeakReference(array));
 
                 int count = this.pool.RemoveAll((x) => !x.IsAlive);
-                if (count > 0)
-                {
-                    Console.WriteLine($"Removed {count} pool elements");
-                }
             }
         }
     }

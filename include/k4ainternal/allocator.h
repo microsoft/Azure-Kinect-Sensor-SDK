@@ -65,6 +65,10 @@ void allocator_deinitialize(void);
  * called in the future. The SDK will always call the \p free function that was set at the time that the memory
  * was allocated.
  *
+ * \remarks
+ * Not all memory allocation by the SDK is performed by this allocate function. Small allocations or allocations
+ * from special pools may come from other sources.
+ *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
@@ -84,13 +88,26 @@ k4a_result_t allocator_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memo
  * size of the memory to allocate
  *
  * This call only cleans up the allocator handle.
- * This function should not be called until all outstanding \ref k4a_capture_t objects are freed.
- *
- * This function should return 0 to indicate the number of outstanding allocations. Consider this the
- * number of leaked allocations.
  */
 uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size);
+
+/** Returns a buffer to the allocator
+ *
+ * \param buffer
+ *
+ * \remarks
+ * This should only be called with a buffer allocated by allocator_alloc()
+ */
 void allocator_free(void *buffer);
+
+/** Verifies there are no outstanding allocations
+ *
+ * \remarks
+ * This function should return 0 to indicate the number of outstanding allocations. Consider this the
+ * number of leaked allocations.
+ *
+ * This function should not be called until all outstanding \ref k4a_capture_t objects are freed.
+ */
 long allocator_test_for_leaks(void);
 
 #ifdef __cplusplus

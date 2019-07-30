@@ -194,11 +194,17 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size)
     allocation_context.u.context.free = g_allocator->free;
     allocation_context.u.context.free_context = user_context;
 
+    rwlock_release_read(&g_allocator->lock);
+
+    if (full_buffer == NULL)
+    {
+        LOG_ERROR("User allocation function failed");
+        return NULL;
+    }
+
     // Memcpy the context information to the header of the full buffer.
     // Don't cast the buffer directly since there is no alignment constraint
     memcpy(full_buffer, &allocation_context, sizeof(allocation_context));
-
-    rwlock_release_read(&g_allocator->lock);
 
     // Provide the caller with the buffer after the allocation context header.
     uint8_t *buffer = (uint8_t *)full_buffer + sizeof(allocation_context_t);

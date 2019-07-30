@@ -118,6 +118,10 @@ K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *
  * called in the future. The SDK will always call the \p free function that was set at the time that the memory
  * was allocated.
  *
+ * \remarks
+ * Not all memory allocation by the SDK is performed by this allocate function. Small allocations or allocations
+ * from special pools may come from other sources.
+ *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
