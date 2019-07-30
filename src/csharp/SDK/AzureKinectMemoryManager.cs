@@ -32,7 +32,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     throw new ObjectDisposedException(nameof(AzureKinectMemoryManager));
                 }
-                return new Span<byte>(image.Buffer, checked((int)image.Size));
+                return new Span<byte>(image.GetUnsafeBuffer(), checked((int)image.Size));
             }
         }
 
@@ -47,7 +47,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(AzureKinectMemoryManager));
                 }
                 Interlocked.Increment(ref pinCount);
-                return new MemoryHandle(Unsafe.Add<byte>(image.Buffer, elementIndex), pinnable: this);
+                return new MemoryHandle(Unsafe.Add<byte>(image.GetUnsafeBuffer(), elementIndex), pinnable: this);
             }
         }
 
