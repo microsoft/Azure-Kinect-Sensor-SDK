@@ -13,8 +13,6 @@ namespace Microsoft.Azure.Kinect.Sensor
 {
     public class Image : IMemoryOwner<byte>, IDisposable
     {
-        readonly Allocator Allocator = Allocator.Singleton;
-
         /// <summary>
         /// Gets the pixels of the image.
         /// </summary>
@@ -162,8 +160,8 @@ namespace Microsoft.Azure.Kinect.Sensor
                 int bufferSize = checked((int)this.Size);
                 byte[] copy = new byte[bufferSize];
 
-                // If we are using a managed buffer copy, ensure the native memory is up to date
-                this.FlushMemory();
+                // If we are using a managed buffer copy, ensure the managed memory is up to date
+                this.InvalidateMemory();
 
                 System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, copy, 0, bufferSize);
 
@@ -260,7 +258,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                     // If the native buffer is within a memory block that the managed allocator provided,
                     // return that memory.
-                    Memory<byte> memory = this.Allocator.GetManagedAllocatedMemory(bufferAddress, this.Size);
+                    Memory<byte> memory = Allocator.Singleton.GetManagedAllocatedMemory(bufferAddress, this.Size);
                     if (!memory.IsEmpty)
                     {
                         return memory;
@@ -276,14 +274,14 @@ namespace Microsoft.Azure.Kinect.Sensor
                     // If we don't copy the native buffers, we can construct a MemoryManager<T> that wraps that native
                     // buffer. This has no memcpy cost, but exposes the possibilty of use after free bugs to consumers
                     // of the library. This is therefore not enabled by default.
-                    if (this.Allocator.SafeCopyNativeBuffers)
+                    if (Allocator.Singleton.SafeCopyNativeBuffers)
                     {
                         // Create a copy
                         int bufferSize = checked((int)this.Size);
-                        this.managedBufferCache = Allocator.GetBufferCache((IntPtr)this.Buffer, bufferSize);
+                        this.managedBufferCache = Allocator.Singleton.GetBufferCache((IntPtr)this.Buffer, bufferSize);
 
 
-                        return new Memory<byte>(managedBufferCache, 0, (int)this.Size);
+                        return new Memory<byte>(this.managedBufferCache, 0, (int)this.Size);
                     }
                     else
                     {
@@ -292,9 +290,9 @@ namespace Microsoft.Azure.Kinect.Sensor
                         // memory if they use the Memory<T> or Span<T> after the Image has
                         // been disposed.
 
-                        nativeBufferWrapper = new AzureKinectMemoryManager(this);
+                        this.nativeBufferWrapper = new AzureKinectMemoryManager(this);
 
-                        return nativeBufferWrapper.Memory;
+                        return this.nativeBufferWrapper.Memory;
                     }
                 }
             }
@@ -577,13 +575,10 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     if (disposing)
                     {
-                        //this.FlushMemory();
-
                         // If we have a native buffer wrapper, dispose it since we
                         // are a wrapper for it's IMemoryOwner<T> interface
                         this.nativeBufferWrapper?.Dispose();
 
-                        // TODO: dispose managed state (managed objects).
                         Allocator.Singleton.UnregisterForDisposal(this);
 
                         handle.Close();
@@ -594,7 +589,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     {
                         unsafe
                         {
-                            Allocator.ReturnBufferCache((IntPtr)this.Buffer);
+                            Allocator.Singleton.ReturnBufferCache((IntPtr)this.Buffer);
                         }
                         this.managedBufferCache = null;
                     }

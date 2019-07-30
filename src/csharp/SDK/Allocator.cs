@@ -38,6 +38,10 @@ namespace Microsoft.Azure.Kinect.Sensor
         // Native allocator hook state
         private bool hooked = false;
 
+        // This is set when the CLR is shutting down, causing an exception during
+        // any new object registrations.
+        private bool noMoreDisposalRegistrations = false;
+
         /// <summary>
         /// Gets the Allocator.
         /// </summary>
@@ -134,6 +138,11 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             lock (this)
             {
+                if (this.noMoreDisposalRegistrations)
+                {
+                    throw new InvalidOperationException("New objects may not be registered during shutdown.");
+                }
+
                 // Track the object as one we may need to dispose during shutdown.
                 // Use a weak reference to allow the object to be garbage collected earliler if possible.
                 _ = this.disposables.Add(new WeakReference<IDisposable>(disposable));
@@ -284,9 +293,16 @@ namespace Microsoft.Azure.Kinect.Sensor
                 // Disable the managed allocator hook to ensure no new allocations
                 this.UseManagedAllocator = false;
 
+                // Prevent more dispsal registrations while we are cleaning up
+                this.noMoreDisposalRegistrations = true;
+
                 System.Diagnostics.Debug.WriteLine($"Disposable count {this.disposables.Count} (Allocation Count {this.allocations.Count})");
 
                 // First dispose of all the registered objects
+
+                // Don't dispose of the objects during this loop since a
+                // side effect of disposing of an object may be the object unregistering itself
+                // and causing the collection to be modified.
                 List<IDisposable> disposeList = new List<IDisposable>();
                 foreach (WeakReference<IDisposable> r in this.disposables)
                 {
@@ -300,7 +316,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 foreach (IDisposable disposable in disposeList)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Disposed {disposable} ({disposable.GetType().FullName}) (Allocation Count {this.allocations.Count})");
+                    System.Diagnostics.Debug.WriteLine($"Disposed {disposable.GetType().FullName} (Allocation Count {this.allocations.Count})");
                     disposable.Dispose();
                 }
 
