@@ -931,7 +931,7 @@ typedef struct _k4a_device_configuration_t
  */
 typedef struct _k4a_calibration_extrinsics_t
 {
-    float rotation[9];    /**< 3x3 Rotation matrix, row major */
+    float rotation[9];    /**< 3x3 Rotation matrix stored in row major order */
     float translation[3]; /**< Translation vector, x,y,z (in millimeters) */
 } k4a_calibration_extrinsics_t;
 
