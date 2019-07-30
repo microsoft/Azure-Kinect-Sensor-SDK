@@ -271,7 +271,7 @@ uint8_t* k4a_image_get_buffer(k4a_image_t image_handle)
 
 
         [Test]
-        public void ManagedAllocatorTest()
+        public void ImageMemoryTest()
         {
             SetImageStubImplementation();
             
