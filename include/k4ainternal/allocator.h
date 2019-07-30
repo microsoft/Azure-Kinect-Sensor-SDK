@@ -94,6 +94,7 @@ uint8_t *allocator_alloc(allocation_source_t source, size_t alloc_size);
 /** Returns a buffer to the allocator
  *
  * \param buffer
+ * Buffer to free
  *
  * \remarks
  * This should only be called with a buffer allocated by allocator_alloc()
