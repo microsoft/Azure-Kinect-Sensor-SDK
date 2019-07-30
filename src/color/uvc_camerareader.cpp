@@ -1098,13 +1098,22 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
     return K4A_RESULT_SUCCEEDED;
 }
 
+// Callback function for when image objects are destroyed
+static void uvc_camerareader_free_allocation(void *buffer, void *context)
+{
+    (void)context;
+    allocator_free(buffer);
+}
+
 void UVCCameraReader::Callback(uvc_frame_t *frame)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
     if (m_streaming && frame)
     {
+        void *context = nullptr;
         k4a_image_t image = NULL;
+        uint8_t *buffer = nullptr;
         size_t buffer_size = 0;
         int stride = 0;
         uint64_t framePTS = 0;
@@ -1185,25 +1194,42 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
             buffer_size = frame->data_bytes;
         }
 
-        // Allocate K4A Color image
-        k4a_result_t result = K4A_RESULT_FROM_BOOL(image_create(
-            m_output_image_format, (int)m_width_pixels, (int)m_height_pixels, stride, ALLOCATION_SOURCE_COLOR, &image));
+        // Allocate K4A Color buffer
+        buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, buffer_size);
+        k4a_result_t result = K4A_RESULT_FROM_BOOL(buffer != NULL);
 
         if (K4A_SUCCEEDED(result))
         {
             if (decodeMJPEG)
             {
                 // Decode MJPG into BRGA32
-                result = DecodeMJPEGtoBGRA32((uint8_t *)frame->data,
-                                             frame->data_bytes,
-                                             image_get_buffer(image),
-                                             buffer_size);
+                result = DecodeMJPEGtoBGRA32((uint8_t *)frame->data, frame->data_bytes, buffer, buffer_size);
             }
             else
             {
                 // Copy to K4A buffer
-                memcpy(image_get_buffer(image), frame->data, buffer_size);
+                memcpy(buffer, frame->data, buffer_size);
             }
+        }
+
+        if (K4A_SUCCEEDED(result))
+        {
+            // The buffer size may be larger than the height * stride for some formats
+            // so we must use image_create_from_buffer rather than image_create
+            result = TRACE_CALL(image_create_from_buffer(m_output_image_format,
+                                                         (int)m_width_pixels,
+                                                         (int)m_height_pixels,
+                                                         stride,
+                                                         buffer,
+                                                         buffer_size,
+                                                         uvc_camerareader_free_allocation,
+                                                         context,
+                                                         &image));
+        }
+        else
+        {
+            // cleanup if there was an error
+            allocator_free(buffer);
         }
 
         k4a_capture_t capture = NULL;

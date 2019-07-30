@@ -957,19 +957,46 @@ k4a_result_t CMFCameraReader::CreateImage(CFrameContext *pFrameContext, k4a_imag
                                                image));
 }
 
+static void mfcamerareader_free_allocation(void *buffer, void *context)
+{
+    (void)context;
+    allocator_free(buffer);
+}
+
 k4a_result_t CMFCameraReader::CreateImageCopy(CFrameContext *pFrameContext, k4a_image_t *image)
 {
 
     size_t size = pFrameContext->GetFrameSize();
 
     k4a_result_t result;
-    result = TRACE_CALL(
-        image_create(m_image_format, m_width_pixels, m_height_pixels, GetStride(), ALLOCATION_SOURCE_COLOR, image));
+    uint8_t *buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, size);
+    result = K4A_RESULT_FROM_BOOL(buffer != NULL);
+
+    if (K4A_SUCCEEDED(result))
+    {
+        result = TRACE_CALL(image_create_from_buffer(m_image_format,
+                                                     m_width_pixels,
+                                                     m_height_pixels,
+                                                     GetStride(),
+                                                     buffer,
+                                                     size,
+                                                     mfcamerareader_free_allocation,
+                                                     NULL,
+                                                     image));
+    }
 
     if (K4A_SUCCEEDED(result))
     {
         assert(image_get_size(*image) == size);
         memcpy(image_get_buffer(*image), pFrameContext->GetBuffer(), size);
+    }
+    else
+    {
+        if (buffer != NULL)
+        {
+            allocator_free(buffer);
+            buffer = NULL;
+        }
     }
 
     return result;
