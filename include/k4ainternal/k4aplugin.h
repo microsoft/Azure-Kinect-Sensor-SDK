@@ -203,8 +203,10 @@ typedef struct k4a_transform_engine_context_t k4a_transform_engine_context_t;
  * \param output_frame2
  * Second output buffer passed back out to the user or null
  */
-typedef void(
-    __stdcall k4a_processing_complete_cb_t)(void *context, int status, void *output_frame, void *output_frame2);
+typedef void(__stdcall k4a_processing_complete_cb_t)(void *context,
+                                                     int status,
+                                                     void *output_frame,
+                                                     void *output_frame2);
 
 /** Function for creating and initializing the depth engine.
  *
@@ -369,7 +371,7 @@ typedef k4a_depth_engine_result_code_t(__stdcall *k4a_te_create_and_initialize_f
  * ::K4A_DEPTH_ENGINE_RESULT_SUCCEEDED on success, or the proper failure code on
  * failure
  */
-typedef k4a_depth_engine_result_code_t(__stdcall* k4a_te_process_frame_fn_t)(
+typedef k4a_depth_engine_result_code_t(__stdcall *k4a_te_process_frame_fn_t)(
     k4a_transform_engine_context_t *context,
     k4a_transform_engine_type_t type,
     k4a_transform_engine_interpolation_t interpolation,

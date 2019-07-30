@@ -125,13 +125,13 @@ static int transform_engine_thread(void *param)
                          tewrapper->type == K4A_TRANSFORM_ENGINE_TYPE_DEPTH_AUX16_TO_COLOR)
                 {
                     size_t transform_engine_output_buffer_size =
-                        deloader_transform_engine_get_output_frame_size(
-                            tewrapper->transform_engine, K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR);
+                        deloader_transform_engine_get_output_frame_size(tewrapper->transform_engine,
+                                                                        K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR);
                     if (tewrapper->transformed_image_size != transform_engine_output_buffer_size)
                     {
                         LOG_ERROR("Transform engine output buffer size not expected. Expect: %d, Actual: %d.",
-                            transform_engine_output_buffer_size,
-                            tewrapper->transformed_image_size);
+                                  transform_engine_output_buffer_size,
+                                  tewrapper->transformed_image_size);
                         result = K4A_RESULT_FAILED;
                     }
 
@@ -140,8 +140,8 @@ static int transform_engine_thread(void *param)
                     if (tewrapper->transformed_image2_size != transform_engine_output_buffer2_size)
                     {
                         LOG_ERROR("Transform engine output buffer 2 size not expected. Expect: %d, Actual: %d.",
-                            transform_engine_output_buffer2_size,
-                            tewrapper->transformed_image2_size);
+                                  transform_engine_output_buffer2_size,
+                                  tewrapper->transformed_image2_size);
                         result = K4A_RESULT_FAILED;
                     }
                 }

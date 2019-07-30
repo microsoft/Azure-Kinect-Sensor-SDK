@@ -846,10 +846,10 @@ public:
     }
 
     /** Transforms depth map and an custom image into the geometry of the color camera.
-    * Throws error on failure
-    *
-    * \sa k4a_transformation_custom_depth_image_to_color_camera
-    */
+     * Throws error on failure
+     *
+     * \sa k4a_transformation_custom_depth_image_to_color_camera
+     */
     void custom_depth_image_to_color_camera(const image &depth_image,
                                             const image &custom_image,
                                             image *transformed_depth_image,

@@ -1026,28 +1026,27 @@ k4a_result_t k4a_transformation_depth_image_to_color_camera(k4a_transformation_t
     uint8_t *transformed_depth_image_buffer = k4a_image_get_buffer(transformed_depth_image);
     uint8_t *transformed_custom_image_buffer = NULL;
 
-    return TRACE_CALL(transformation_custom_depth_image_to_color_camera(
-        transformation_handle,
-        depth_image_buffer,
-        &depth_image_descriptor,
-        custom_image_buffer,
-        &dummy_descriptor,
-        transformed_depth_image_buffer,
-        &transformed_depth_image_descriptor,
-        transformed_custom_image_buffer,
-        &dummy_descriptor,
-        K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,
-        0));
+    return TRACE_CALL(transformation_custom_depth_image_to_color_camera(transformation_handle,
+                                                                        depth_image_buffer,
+                                                                        &depth_image_descriptor,
+                                                                        custom_image_buffer,
+                                                                        &dummy_descriptor,
+                                                                        transformed_depth_image_buffer,
+                                                                        &transformed_depth_image_descriptor,
+                                                                        transformed_custom_image_buffer,
+                                                                        &dummy_descriptor,
+                                                                        K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,
+                                                                        0));
 }
 
-k4a_result_t k4a_transformation_custom_depth_image_to_color_camera(
-    k4a_transformation_t transformation_handle,
-    const k4a_image_t depth_image,
-    const k4a_image_t custom_image,
-    k4a_image_t transformed_depth_image,
-    k4a_image_t transformed_custom_image,
-    k4a_transformation_interpolation_type_t interpolation_type,
-    uint32_t invalid_custom_value)
+k4a_result_t
+k4a_transformation_custom_depth_image_to_color_camera(k4a_transformation_t transformation_handle,
+                                                      const k4a_image_t depth_image,
+                                                      const k4a_image_t custom_image,
+                                                      k4a_image_t transformed_depth_image,
+                                                      k4a_image_t transformed_custom_image,
+                                                      k4a_transformation_interpolation_type_t interpolation_type,
+                                                      uint32_t invalid_custom_value)
 {
     k4a_transformation_image_descriptor_t depth_image_descriptor = k4a_image_get_descriptor(depth_image);
     k4a_transformation_image_descriptor_t custom_image_descriptor = k4a_image_get_descriptor(custom_image);

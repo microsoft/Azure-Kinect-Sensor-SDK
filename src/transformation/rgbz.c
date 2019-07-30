@@ -70,8 +70,7 @@ static bool transformation_compare_image_descriptors(const k4a_transformation_im
 {
     if (descriptor1->width_pixels != descriptor2->width_pixels ||
         descriptor1->height_pixels != descriptor2->height_pixels ||
-        descriptor1->stride_bytes != descriptor2->stride_bytes ||
-        descriptor1->format != descriptor2->format)
+        descriptor1->stride_bytes != descriptor2->stride_bytes || descriptor1->format != descriptor2->format)
     {
         LOG_ERROR("Unexpected image descriptor. "
                   "Expected width_pixels: %d, height_pixels: %d, stride_bytes: %d, format: %d. "
@@ -255,8 +254,10 @@ static bool transformation_check_valid_correspondences(const k4a_correspondence_
     {
         num_invalid++;
         *valid_top_left = transformation_interpolate_correspondences(top_right, bottom_left);
-        *custom_top_left = transformation_interpolate_custom(
-            custom_top_right, custom_bottom_left, custom_bottom_right, use_linear_interpolation);
+        *custom_top_left = transformation_interpolate_custom(custom_top_right,
+                                                             custom_bottom_left,
+                                                             custom_bottom_right,
+                                                             use_linear_interpolation);
     }
     if (top_right->valid == 0)
     {
@@ -264,15 +265,19 @@ static bool transformation_check_valid_correspondences(const k4a_correspondence_
         *valid_top_right = *bottom_right;
         *valid_bottom_right = transformation_interpolate_correspondences(bottom_right, bottom_left);
         *custom_top_right = *custom_bottom_right;
-        *custom_bottom_right = transformation_interpolate_custom(
-            custom_bottom_right, custom_bottom_left, custom_bottom_left, use_linear_interpolation);
+        *custom_bottom_right = transformation_interpolate_custom(custom_bottom_right,
+                                                                 custom_bottom_left,
+                                                                 custom_bottom_left,
+                                                                 use_linear_interpolation);
     }
     if (bottom_right->valid == 0)
     {
         num_invalid++;
         *valid_bottom_right = transformation_interpolate_correspondences(top_right, bottom_left);
-        *custom_bottom_right = transformation_interpolate_custom(
-            custom_top_right, custom_bottom_left, custom_top_left, use_linear_interpolation);
+        *custom_bottom_right = transformation_interpolate_custom(custom_top_right,
+                                                                 custom_bottom_left,
+                                                                 custom_top_left,
+                                                                 use_linear_interpolation);
     }
     if (bottom_left->valid == 0)
     {
@@ -280,8 +285,10 @@ static bool transformation_check_valid_correspondences(const k4a_correspondence_
         *valid_bottom_left = *bottom_right;
         *valid_bottom_right = transformation_interpolate_correspondences(top_right, bottom_right);
         *custom_bottom_left = *custom_bottom_right;
-        *custom_bottom_right = transformation_interpolate_custom(
-            custom_top_right, custom_bottom_right, custom_top_right, use_linear_interpolation);
+        *custom_bottom_right = transformation_interpolate_custom(custom_top_right,
+                                                                 custom_bottom_right,
+                                                                 custom_top_right,
+                                                                 use_linear_interpolation);
     }
 
     // If two or more vertices are invalid then we can't create a valid triangle
@@ -360,19 +367,21 @@ static bool transformation_point_inside_triangle(const k4a_correspondence_t *val
 
         // Linear interpolatation of depth using area_top_left, area_intermediate, area_bottom_right
         *depth = (area_top_left * valid_bottom_right->depth + area_intermediate * valid_intermediate->depth +
-                  area_bottom_right * valid_top_left->depth) * sum_weights;
+                  area_bottom_right * valid_top_left->depth) *
+                 sum_weights;
 
         if (use_linear_interpolation)
         {
             *custom = (area_top_left * (float)custom_bottom_right + area_intermediate * (float)custom_intermediate +
-                area_bottom_right * (float)custom_top_left) * sum_weights;
+                       area_bottom_right * (float)custom_top_left) *
+                      sum_weights;
         }
         else
         {
             // Select custom based on highest weight (nearest neighbor)
             if (area_top_left > area_intermediate)
             {
-                *custom = area_top_left > area_bottom_right  ? (float)custom_bottom_right : (float)custom_top_left;
+                *custom = area_top_left > area_bottom_right ? (float)custom_bottom_right : (float)custom_top_left;
             }
             else
             {
@@ -520,8 +529,7 @@ static k4a_result_t transformation_depth_to_color(k4a_transformation_rgbz_contex
         }
     }
 
-    bool use_linear_interpolation =
-        context->interpolation_type == K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR;
+    bool use_linear_interpolation = context->interpolation_type == K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR;
 
     k4a_correspondence_t *vertex_row = (k4a_correspondence_t *)malloc(
         (size_t)context->depth_image.descriptor->width_pixels * sizeof(k4a_correspondence_t));
@@ -643,7 +651,7 @@ k4a_buffer_result_t transformation_custom_depth_image_to_color_camera_validate_p
     uint8_t *transformed_custom_image_data,
     k4a_transformation_image_descriptor_t *transformed_custom_image_descriptor)
 {
-    if (depth_image_descriptor == 0 || custom_image_descriptor == 0 || transformed_depth_image_descriptor == 0 || 
+    if (depth_image_descriptor == 0 || custom_image_descriptor == 0 || transformed_depth_image_descriptor == 0 ||
         transformed_custom_image_descriptor == 0)
     {
         return K4A_BUFFER_RESULT_FAILED;
@@ -710,7 +718,7 @@ k4a_buffer_result_t transformation_custom_depth_image_to_color_camera_validate_p
         transformation_init_image_descriptor(calibration->depth_camera_calibration.resolution_width,
                                              calibration->depth_camera_calibration.resolution_height,
                                              calibration->depth_camera_calibration.resolution_width *
-                                                custom_bytes_per_pixel,
+                                                 custom_bytes_per_pixel,
                                              custom_format);
 
     if (custom_image_data != 0 &&
@@ -1164,11 +1172,8 @@ transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_
         return K4A_BUFFER_RESULT_FAILED;
     }
 
-    k4a_transformation_image_descriptor_t expected_xyz_image_descriptor =
-        transformation_init_image_descriptor(xy_tables->width,
-                                             xy_tables->height,
-                                             xy_tables->width * 3 * (int)sizeof(int16_t),
-                                             xyz_image_descriptor->format);
+    k4a_transformation_image_descriptor_t expected_xyz_image_descriptor = transformation_init_image_descriptor(
+        xy_tables->width, xy_tables->height, xy_tables->width * 3 * (int)sizeof(int16_t), xyz_image_descriptor->format);
 
     if (xyz_image_data == 0 ||
         transformation_compare_image_descriptors(xyz_image_descriptor, &expected_xyz_image_descriptor) == false)
@@ -1193,11 +1198,8 @@ transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_
         return K4A_BUFFER_RESULT_FAILED;
     }
 
-    k4a_transformation_image_descriptor_t expected_depth_image_descriptor =
-        transformation_init_image_descriptor(xy_tables->width,
-                                             xy_tables->height,
-                                             xy_tables->width * (int)sizeof(uint16_t),
-                                             K4A_IMAGE_FORMAT_DEPTH16);
+    k4a_transformation_image_descriptor_t expected_depth_image_descriptor = transformation_init_image_descriptor(
+        xy_tables->width, xy_tables->height, xy_tables->width * (int)sizeof(uint16_t), K4A_IMAGE_FORMAT_DEPTH16);
 
     if (transformation_compare_image_descriptors(depth_image_descriptor, &expected_depth_image_descriptor) == false)
     {

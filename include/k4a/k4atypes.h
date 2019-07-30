@@ -410,25 +410,25 @@ typedef enum
     K4A_IMAGE_FORMAT_IR16,
 
     /** Single channel image type MONO8.
-    *
-    * \details
-    * Each pixel of MONO8 is a single channel one byte of unsigned data.
-    *
-    * \details
-    * Stride indicates the length of each line in bytes and should be used to determine the start location of each
-    * line of the image in memory.
-    */
+     *
+     * \details
+     * Each pixel of MONO8 is a single channel one byte of unsigned data.
+     *
+     * \details
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
+     */
     K4A_IMAGE_FORMAT_MONO8,
 
     /** Single channel image type MONO16.
-    *
-    * \details
-    * Each pixel of MONO16 is a single channel two bytes of little endian unsigned data.
-    *
-    * \details
-    * Stride indicates the length of each line in bytes and should be used to determine the start location of each
-    * line of the image in memory.
-    */
+     *
+     * \details
+     * Each pixel of MONO16 is a single channel two bytes of little endian unsigned data.
+     *
+     * \details
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
+     */
     K4A_IMAGE_FORMAT_MONO16,
 
     /** Custom image format.
@@ -443,16 +443,16 @@ typedef enum
 } k4a_image_format_t;
 
 /** Transformation interpolation type.
-*
-* \remarks
-* Interpolation type used with k4a_transformation_custom_depth_image_to_color_camera.
-*
-* \xmlonly
-* <requirements>
-*   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
-* </requirements>
-* \endxmlonly
-*/
+ *
+ * \remarks
+ * Interpolation type used with k4a_transformation_custom_depth_image_to_color_camera.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 typedef enum
 {
     K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST = 0, /**< Nearest neighbor interpolation */

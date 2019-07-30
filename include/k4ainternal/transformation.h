@@ -22,9 +22,9 @@ typedef struct _k4a_camera_calibration_mode_info_t
 
 typedef struct _k4a_transformation_image_descriptor_t
 {
-    int width_pixels;  // image width in pixels
-    int height_pixels; // image height in pixels
-    int stride_bytes;  // image stride in bytes
+    int width_pixels;          // image width in pixels
+    int height_pixels;         // image height in pixels
+    int stride_bytes;          // image stride in bytes
     k4a_image_format_t format; // image format
 } k4a_transformation_image_descriptor_t;
 
