@@ -61,7 +61,7 @@ static k4a_result_t transform_engine_start_helper(tewrapper_context_t *tewrapper
         LOG_ERROR("Transform engine create and initialize failed with error code: %d.", teresult);
         if (teresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_OPENGL_CONTEXT)
         {
-            LOG_ERROR("OpenGL context creation failed. You could try updating your graphics drivers.");
+            LOG_ERROR("OpenGL context creation failed. You could try updating your graphics drivers.", 0);
         }
     }
 
@@ -165,7 +165,7 @@ static int transform_engine_thread(void *param)
                 if (teresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_WAIT_PROCESSING_COMPLETE_FAILED ||
                     teresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_TIMEOUT)
                 {
-                    LOG_ERROR("Timeout during transform engine process frame. This could indicate GPU is hung.");
+                    LOG_ERROR("Timeout during transform engine process frame. This could indicate GPU is hung.", 0);
                     result = K4A_RESULT_FAILED;
                 }
                 else if (teresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)

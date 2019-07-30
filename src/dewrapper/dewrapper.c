@@ -154,7 +154,7 @@ static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
             LOG_ERROR("Depth engine create and initialize failed with error code: %d.", deresult);
             if (deresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_OPENGL_CONTEXT)
             {
-                LOG_ERROR("OpenGL context creation failed. You could try updating your graphics drivers.");
+                LOG_ERROR("OpenGL context creation failed. You could try updating your graphics drivers.", 0);
             }
         }
         result = K4A_RESULT_FROM_BOOL(deresult == K4A_DEPTH_ENGINE_RESULT_SUCCEEDED);
@@ -265,7 +265,7 @@ static int depth_engine_thread(void *param)
             if (deresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_WAIT_PROCESSING_COMPLETE_FAILED ||
                 deresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_TIMEOUT)
             {
-                LOG_ERROR("Timeout during depth engine process frame. This could indicate GPU is hung.");
+                LOG_ERROR("Timeout during depth engine process frame. This could indicate GPU is hung.", 0);
                 dropped = true;
                 result = K4A_RESULT_FAILED;
             }
