@@ -617,7 +617,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
                 {
                     Assert.AreEqual(0, count.Calls("k4a_device_get_capture"));
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
-                    using (Capture capture = device.GetCapture(2345))
+                    using (Capture capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345)))
                     {
                         Assert.AreEqual(1, count.Calls("k4a_device_get_capture"));
                         Assert.AreEqual(0, count.Calls("k4a_capture_release"));
@@ -636,7 +636,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
                     Assert.AreEqual(0, count.Calls("k4a_device_get_capture"));
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
 
-                    capture = device.GetCapture(2345);
+                    capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345));
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_capture"));
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
@@ -684,7 +684,7 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
 
                     Assert.Throws(typeof(System.TimeoutException), () =>
                     {
-                        using (Capture capture = device.GetCapture(2345))
+                        using (Capture capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345)))
                         {
 
                         }
@@ -736,7 +736,7 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
 
                     Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
-                        using (Capture capture = device.GetCapture(2345))
+                        using (Capture capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345)))
                         {
 
                         }
@@ -770,7 +770,7 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
 
                     Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
-                        using (Capture capture = device.GetCapture(2345))
+                        using (Capture capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345)))
                         {
 
                         }
@@ -969,7 +969,7 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
                 using (Device device = Device.Open(0))
                 {
                     Assert.AreEqual(0, count.Calls("k4a_device_get_imu_sample"));
-                    ImuSample sample = device.GetImuSample(2345);
+                    ImuSample sample = device.GetImuSample(System.TimeSpan.FromMilliseconds(2345));
 
                     Assert.AreEqual(0.123f, sample.Temperature);
 
@@ -988,7 +988,7 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
                     device.Dispose();
                     Assert.Throws(typeof(System.ObjectDisposedException), () =>
                     {
-                        device.GetImuSample(2345);
+                        device.GetImuSample(System.TimeSpan.FromMilliseconds(2345));
                     });
                 }
             }
@@ -1020,7 +1020,7 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
 
                     Assert.Throws(typeof(System.TimeoutException), () =>
                     {
-                        ImuSample sample = device.GetImuSample(2345);
+                        ImuSample sample = device.GetImuSample(System.TimeSpan.FromMilliseconds(2345));
                     });
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_imu_sample"));
@@ -1051,7 +1051,7 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
 
                     Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
-                        ImuSample sample = device.GetImuSample(2345);
+                        ImuSample sample = device.GetImuSample(System.TimeSpan.FromMilliseconds(2345));
                     });
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_imu_sample"));

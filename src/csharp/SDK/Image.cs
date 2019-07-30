@@ -2,12 +2,7 @@
 // Licensed under the MIT License.
 using System;
 using System.Buffers;
-using System.ComponentModel;
-using System.Diagnostics.Tracing;
-using System.Dynamic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {

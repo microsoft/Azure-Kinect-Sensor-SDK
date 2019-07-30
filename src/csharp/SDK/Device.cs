@@ -7,8 +7,22 @@ using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
+    /// <summary>
+    /// Represents an Azure Kinect device.
+    /// </summary>
     public class Device : IDisposable
     {
+        // Cache these valuses so we don't need to re-marshal them for each
+        // access since they are immutable.
+        private string serialNum = null;
+        private HardwareVersion version = null;
+
+        // The native handle to the device.
+        private NativeMethods.k4a_device_t handle;
+
+        // To detect redundant calls to Dispose
+        private bool disposedValue = false;
+
         private Device(NativeMethods.k4a_device_t handle)
         {
             // Hook the native allocator and register this object.
@@ -18,38 +32,29 @@ namespace Microsoft.Azure.Kinect.Sensor
             this.handle = handle;
         }
 
-        public static int GetInstalledCount()
-        {
-            return (int)NativeMethods.k4a_device_get_installed_count();
-        }
-
-        public static Device Open(int index = 0)
-        {
-            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_open((uint)index, out NativeMethods.k4a_device_t handle));
-            return new Device(handle);
-        }
-
-
-        private string serialNum = null;
-
+        /// <summary>
+        /// Gets the devices serial number.
+        /// </summary>
         public string SerialNum
         {
             get
             {
                 lock (this)
                 {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Device));
-
-                    if (serialNum != null)
+                    if (this.disposedValue)
                     {
-                        return serialNum;
+                        throw new ObjectDisposedException(nameof(Device));
+                    }
+
+                    if (this.serialNum != null)
+                    {
+                        return this.serialNum;
                     }
                     else
                     {
                         // Determine the required string size
                         UIntPtr size = new UIntPtr(0);
-                        if (NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL != NativeMethods.k4a_device_get_serialnum(handle, null, ref size))
+                        if (NativeMethods.k4a_device_get_serialnum(this.handle, null, ref size) != NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL)
                         {
                             throw new System.InvalidOperationException($"Unexpected internal state calling { nameof(NativeMethods.k4a_device_get_serialnum) }");
                         }
@@ -58,7 +63,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         StringBuilder serialno = new StringBuilder((int)size.ToUInt32());
 
                         // Get the serial number
-                        AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_serialnum(handle, serialno, ref size));
+                        AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_serialnum(this.handle, serialno, ref size));
 
                         this.serialNum = serialno.ToString();
 
@@ -68,64 +73,195 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <summary>
+        /// Gets the depth mode the device is currently set to.
+        /// </summary>
+        public DepthMode CurrentDepthMode { get; private set; } = DepthMode.Off;
+
+        /// <summary>
+        /// Gets the color resolution the device is currently set to.
+        /// </summary>
+        public ColorResolution CurrentColorResolution { get; private set; } = ColorResolution.Off;
+
+        /// <summary>
+        /// Gets a value indicating whether gets the Sync In jack is connected.
+        /// </summary>
+        public bool SyncInJackConnected
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (this.disposedValue)
+                    {
+                        throw new ObjectDisposedException(nameof(Device));
+                    }
+
+                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_sync_jack(
+                        this.handle,
+                        out bool sync_in,
+                        out bool sync_out));
+                    return sync_in;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether gets the Sync Out jack is connected.
+        /// </summary>
+        public bool SyncOutJackConnected
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (this.disposedValue)
+                    {
+                        throw new ObjectDisposedException(nameof(Device));
+                    }
+
+                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_sync_jack(
+                        this.handle,
+                        out bool sync_in,
+                        out bool sync_out));
+                    return sync_out;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the hardware version of the device.
+        /// </summary>
+        public HardwareVersion Version
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (this.disposedValue)
+                    {
+                        throw new ObjectDisposedException(nameof(Device));
+                    }
+
+                    if (this.version != null)
+                    {
+                        return this.version;
+                    }
+
+                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_version(
+                        this.handle,
+                        out NativeMethods.k4a_hardware_version_t nativeVersion));
+
+                    this.version = nativeVersion.ToHardwareVersion();
+                    return this.version;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of currently connected devices.
+        /// </summary>
+        /// <returns>The number of connected devices.</returns>
+        public static int GetInstalledCount()
+        {
+            return (int)NativeMethods.k4a_device_get_installed_count();
+        }
+
+        /// <summary>
+        /// Opens an Azure Kinect device.
+        /// </summary>
+        /// <param name="index">Index of the device to open if there are multiple connected.</param>
+        /// <returns>A Device object representing that device.</returns>
+        /// <remarks>The device will remain opened for exclusive access until the Device object is disposed.</remarks>
+        public static Device Open(int index = 0)
+        {
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_open((uint)index, out NativeMethods.k4a_device_t handle));
+            return new Device(handle);
+        }
+
+        /// <summary>
+        /// Gets the calibration of the device.
+        /// </summary>
+        /// <param name="depthMode">Depth mode for the calibration.</param>
+        /// <param name="colorResolution">Color camera resolution for the calibration.</param>
+        /// <returns>Calibration object.</returns>
         public Calibration GetCalibration(DepthMode depthMode, ColorResolution colorResolution)
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
+                }
 
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_calibration(handle, depthMode, colorResolution, out Calibration calibration));
+                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_calibration(this.handle, depthMode, colorResolution, out Calibration calibration));
                 return calibration;
             }
-
         }
 
-        public DepthMode CurrentDepthMode { get; private set; } = DepthMode.Off;
-        public ColorResolution CurrentColorResolution { get; private set; } = ColorResolution.Off;
-
+        /// <summary>
+        /// Gets the calibration of the device for the current operating mode.
+        /// </summary>
+        /// <returns>Calibration object.</returns>
         public Calibration GetCalibration()
         {
-            if (CurrentColorResolution == ColorResolution.Off && CurrentDepthMode == DepthMode.Off)
+            if (this.CurrentColorResolution == ColorResolution.Off && this.CurrentDepthMode == DepthMode.Off)
             {
                 throw new AzureKinectException("Cameras not started");
             }
 
-            return GetCalibration(CurrentDepthMode, CurrentColorResolution);
+            return this.GetCalibration(this.CurrentDepthMode, this.CurrentColorResolution);
         }
 
+        /// <summary>
+        /// Gets the device raw calibration data.
+        /// </summary>
+        /// <returns>The raw data can be stored offline for future use.</returns>
         public byte[] GetRawCalibration()
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
+                }
 
                 // Determine the required calibration size
                 UIntPtr size = new UIntPtr(0);
-                if (NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL != NativeMethods.k4a_device_get_raw_calibration(handle, null, ref size))
+                if (NativeMethods.k4a_device_get_raw_calibration(this.handle, null, ref size) != NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL)
                 {
-                    throw new AzureKinectException($"Unexpected result calling { nameof(NativeMethods.k4a_device_get_raw_calibration) }");
+                    throw new AzureKinectException($"Unexpected result calling {nameof(NativeMethods.k4a_device_get_raw_calibration)}");
                 }
 
                 // Allocate a string buffer
                 byte[] raw = new byte[size.ToUInt32()];
 
                 // Get the raw calibration
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_raw_calibration(handle, raw, ref size));
+                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_raw_calibration(this.handle, raw, ref size));
 
                 return raw;
             }
         }
 
-        public Capture GetCapture(int timeoutInMS = -1)
+        /// <summary>
+        /// Reads a sensor capture.
+        /// </summary>
+        /// <param name="timeout">Time to wait for a capture.</param>
+        /// <returns>A Capture object holding image data.</returns>
+        /// <remarks>Gets the next capture in the streamed sequence of captures from the camera. 
+        /// If a new capture is not currently available, this function will block until the timeout is reached. 
+        /// The SDK will buffer at least two captures worth of data before dropping the oldest capture. 
+        /// Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.</remarks>
+        public Capture GetCapture(TimeSpan timeout = default)
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
+                }
 
-                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_capture(handle, out NativeMethods.k4a_capture_t capture, timeoutInMS);
+                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_capture(this.handle, out NativeMethods.k4a_capture_t capture, (int)timeout.TotalMilliseconds);
 
                 if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
                 {
@@ -143,15 +279,23 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-        public ImuSample GetImuSample(int timeoutInMS = -1)
+        /// <summary>
+        /// Reads an IMU sample from the device.
+        /// </summary>
+        /// <param name="timeout">Time to wait for an IMU sample.</param>
+        /// <returns>The next unread IMU sample from the device.</returns>
+        /// <remarks>Gets the next sample in the streamed sequence of IMU samples from the device. If a new sample is not currently available, this function will block until the timeout is reached. The API will buffer at least two camera capture intervals worth of samples before dropping the oldest sample. Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.</remarks>
+        public ImuSample GetImuSample(TimeSpan timeout = default)
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
+                }
 
                 ImuSample sample = new ImuSample();
-                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_imu_sample(handle, sample, timeoutInMS);
+                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_imu_sample(this.handle, sample, (int)timeout.TotalMilliseconds);
 
                 if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
                 {
@@ -164,192 +308,166 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-
-        public Int32 GetColorControl(ColorControlCommand command)
+        /// <summary>
+        /// Get the Azure Kinect color sensor control value.
+        /// </summary>
+        /// <param name="command">Color sensor control command.</param>
+        /// <returns>The value of the color control option.</returns>
+        public int GetColorControl(ColorControlCommand command)
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
+                }
 
                 return this.GetColorControl(command, out ColorControlMode mode);
             }
         }
 
-        public Int32 GetColorControl(ColorControlCommand command, out ColorControlMode mode)
+        /// <summary>
+        /// Get the Azure Kinect color sensor control value.
+        /// </summary>
+        /// <param name="command">Color sensor control command.</param>
+        /// <param name="mode">The mode of the color control option.</param>
+        /// <returns>The value of the color control option.</returns>
+        public int GetColorControl(ColorControlCommand command, out ColorControlMode mode)
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
+                }
 
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_color_control(handle, command, out mode, out int value));
+                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_color_control(this.handle, command, out mode, out int value));
                 return value;
             }
         }
 
-        public void SetColorControl(ColorControlCommand command, ColorControlMode mode, Int32 value)
+        /// <summary>
+        /// Sets the Azure Kinect color sensor control value.
+        /// </summary>
+        /// <param name="command">Color sensor control command.</param>
+        /// <param name="mode">The mode of the color control option.</param>
+        /// <param name="value">The value of the color control option.</param>
+        public void SetColorControl(ColorControlCommand command, ColorControlMode mode, int value)
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
-
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_set_color_control(handle, command, mode, value));
-            }
-        }
-
-        public bool SyncInJackConnected
-        {
-            get
-            {
-                lock (this)
-                {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Device));
-
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_sync_jack(handle,
-                        out bool sync_in,
-                        out bool sync_out));
-                    return sync_in;
                 }
+
+                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_set_color_control(this.handle, command, mode, value));
             }
         }
 
-        public bool SyncOutJackConnected
-        {
-            get
-            {
-                lock (this)
-                {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Device));
-
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_sync_jack(handle,
-                        out bool sync_in,
-                        out bool sync_out));
-                    return sync_out;
-                }
-            }
-        }
-
-        // Cache the version information so we don't need to re-marshal it for each
-        // access since it is not allowed to change
-        private HardwareVersion version = null;
-
-        public HardwareVersion Version
-        {
-            get
-            {
-                lock (this)
-                {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Device));
-
-                    if (version != null)
-                        return version;
-
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_version(handle,
-                        out NativeMethods.k4a_hardware_version_t nativeVersion));
-
-                    version = nativeVersion.ToHardwareVersion();
-                    return version;
-                }
-            }
-        }
-
+        /// <summary>
+        /// Starts color and depth camera capture. 
+        /// </summary>
+        /// <param name="configuration">The configuration we want to run the device in.</param>
         public void StartCameras(DeviceConfiguration configuration)
         {
             if (configuration == null)
+            {
                 throw new ArgumentNullException(nameof(configuration));
+            }
 
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
+                }
 
                 NativeMethods.k4a_device_configuration_t nativeConfig = configuration.GetNativeConfiguration();
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_cameras(handle, ref nativeConfig));
+                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_cameras(this.handle, ref nativeConfig));
 
                 this.CurrentDepthMode = configuration.DepthMode;
                 this.CurrentColorResolution = configuration.ColorResolution;
             }
         }
 
+        /// <summary>
+        /// Stops the color and depth camera capture.
+        /// </summary>
         public void StopCameras()
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
+                }
 
-                NativeMethods.k4a_device_stop_cameras(handle);
+                NativeMethods.k4a_device_stop_cameras(this.handle);
 
                 this.CurrentDepthMode = DepthMode.Off;
                 this.CurrentColorResolution = ColorResolution.Off;
             }
         }
 
+        /// <summary>
+        /// Starts the IMU sample stream.
+        /// </summary>
         public void StartImu()
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Device));
+                }
 
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_imu(handle));
+                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_imu(this.handle));
             }
         }
 
+        /// <summary>
+        /// Stops the IMU sample stream.
+        /// </summary>
         public void StopImu()
         {
             lock (this)
             {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Device));
-
-                NativeMethods.k4a_device_stop_imu(handle);
-            }
-        }
-
-        private NativeMethods.k4a_device_t handle;
-
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
+                if (this.disposedValue)
                 {
-                    // TODO: dispose managed state (managed objects).
-                    Allocator.Singleton.UnregisterForDisposal(this);
+                    throw new ObjectDisposedException(nameof(Device));
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-                handle.Close();
-                handle = null;
-
-                disposedValue = true;
+                NativeMethods.k4a_device_stop_imu(this.handle);
             }
         }
 
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        ~Device() {
-          // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-          Dispose(false);
-        }
-
-        // This code added to correctly implement the disposable pattern.
+        /// <inheritdoc/>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
-        #endregion
+
+        /// <summary>
+        /// Handle the Dispose pattern.
+        /// </summary>
+        /// <param name="disposing">True if called by Dispose</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposedValue)
+            {
+                if (disposing)
+                {
+                    Allocator.Singleton.UnregisterForDisposal(this);
+
+                    this.handle.Close();
+                    this.handle = null;
+
+                    this.disposedValue = true;
+                }
+            }
+        }
     }
 }

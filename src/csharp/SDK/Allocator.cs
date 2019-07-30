@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly:InternalsVisibleTo("Microsoft.Azure.Kinect.Sensor.UnitTests")]
+
 namespace Microsoft.Azure.Kinect.Sensor
 {
     /// <summary>
@@ -42,11 +43,6 @@ namespace Microsoft.Azure.Kinect.Sensor
         // any new object registrations.
         private bool noMoreDisposalRegistrations = false;
 
-        /// <summary>
-        /// Gets the Allocator.
-        /// </summary>
-        public static Allocator Singleton { get; } = new Allocator();
-
         private Allocator()
         {
             this.allocateDelegate = new NativeMethods.k4a_memory_allocate_cb_t(this.AllocateFunction);
@@ -73,6 +69,11 @@ namespace Microsoft.Azure.Kinect.Sensor
             // or garbage collected.
             this.SafeCopyNativeBuffers = true;
         }
+
+        /// <summary>
+        /// Gets the Allocator.
+        /// </summary>
+        public static Allocator Singleton { get; } = new Allocator();
 
         /// <summary>
         /// Gets or sets a value indicating whether to have the native library use the managed allocator.
@@ -103,7 +104,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                             System.Diagnostics.Debug.WriteLine("Unable to hook native allocator");
                         }
                     }
-                    
+
                     if (!value && this.hooked)
                     {
                         // Disabling the hook once it has been enabled should not catch the exception
@@ -118,7 +119,6 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Gets or sets a value indicating whether to make a safe copy of native buffers.
         /// </summary>
         public bool SafeCopyNativeBuffers { get; set; } = true;
-
 
         /// <summary>
         /// Register the object for disposal when the CLR shuts down.
@@ -213,6 +213,79 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 // Return a reference to this memory
                 return new Memory<byte>(allocation.Buffer, checked((int)offset), checked((int)size));
+            }
+        }
+
+
+        
+        /// <summary>
+        /// Get a managed array to cache the contents of a native buffer.
+        /// </summary>
+        /// <param name="nativeAddress">Native buffer to mirror.</param>
+        /// <param name="size">Size of the native memory.</param>
+        /// <returns>A managed array populated with the content of the native buffer.</returns>
+        /// <remarks>Multiple callers asking for the same address will get the same buffer.
+        /// When done with the buffer the caller must call <seealso cref="ReturnBufferCache(IntPtr)"/>.
+        /// </remarks>
+        public byte[] GetBufferCache(IntPtr nativeAddress, int size)
+        {
+            BufferCacheEntry entry;
+
+            lock (this)
+            {
+                if (this.bufferCache.ContainsKey(nativeAddress))
+                {
+                    entry = this.bufferCache[nativeAddress];
+                    entry.ReferenceCount++;
+
+                    if (entry.UsedSize != size)
+                    {
+                        throw new Exception("Multiple image buffers sharing the same address cannot have the same size");
+                    }
+
+                }
+                else
+                {
+                    entry = new BufferCacheEntry
+                    {
+                        ManagedBufferCache = this.pool.Rent(size),
+                        UsedSize = size,
+                        ReferenceCount = 1,
+                        Initialized = false,
+                    };
+
+                    this.bufferCache.Add(nativeAddress, entry);
+                }
+            }
+
+            lock (entry)
+            {
+                if (!entry.Initialized)
+                {
+                    Marshal.Copy(nativeAddress, entry.ManagedBufferCache, 0, entry.UsedSize);
+                    entry.Initialized = true;
+                }
+            }
+
+            return entry.ManagedBufferCache;
+        }
+
+        /// <summary>
+        /// Return the buffer cache.
+        /// </summary>
+        /// <param name="nativeAddress">Address of the native buffer.</param>
+        /// <remarks>Must be called exactly once for each buffer provided by <see cref="GetBufferCache(IntPtr, int)"/>.</remarks>
+        public void ReturnBufferCache(IntPtr nativeAddress)
+        {
+            lock (this)
+            {
+                BufferCacheEntry entry = this.bufferCache[nativeAddress];
+                entry.ReferenceCount--;
+                if (entry.ReferenceCount == 0)
+                {
+                    this.pool.Return(entry.ManagedBufferCache);
+                    _ = this.bufferCache.Remove(nativeAddress);
+                }
             }
         }
 
@@ -351,84 +424,6 @@ namespace Microsoft.Azure.Kinect.Sensor
 
             public bool Initialized { get; set; }
         }
-
-        private void PopulateEntry(IntPtr nativeAddress, BufferCacheEntry entry)
-        {
-            Marshal.Copy(nativeAddress, entry.ManagedBufferCache, 0, entry.UsedSize);
-        }
-
-        /// <summary>
-        /// Get a managed array to cache the contents of a native buffer.
-        /// </summary>
-        /// <param name="nativeAddress">Native buffer to mirror.</param>
-        /// <param name="size">Size of the native memory.</param>
-        /// <returns>A managed array populated with the content of the native buffer.</returns>
-        /// <remarks>Multiple callers asking for the same address will get the same buffer.
-        /// When done with the buffer the caller must call <seealso cref="ReturnBufferCache(IntPtr)"/>.
-        /// </remarks>
-        public byte[] GetBufferCache(IntPtr nativeAddress, int size)
-        {
-            BufferCacheEntry entry;
-
-            lock (this)
-            {
-                if (this.bufferCache.ContainsKey(nativeAddress))
-                {
-                    entry = this.bufferCache[nativeAddress];
-                    entry.ReferenceCount++;
-
-                    if (entry.UsedSize != size)
-                    {
-                        throw new Exception("Multiple image buffers sharing the same address cannot have the same size");
-                    }
-
-                }
-                else
-                {
-                    entry = new BufferCacheEntry
-                    {
-                        ManagedBufferCache = this.pool.Rent(size),
-                        UsedSize = size,
-                        ReferenceCount = 1,
-                        Initialized = false,
-                    };
-
-                    this.bufferCache.Add(nativeAddress, entry);
-                }
-            }
-
-            lock (entry)
-            {
-                if (!entry.Initialized)
-                {
-                    this.PopulateEntry(nativeAddress, entry);
-                    entry.Initialized = true;
-                }
-            }
-
-            return entry.ManagedBufferCache;
-        }
-
-        /// <summary>
-        /// Return the buffer cache.
-        /// </summary>
-        /// <param name="nativeAddress">Address of the native buffer.</param>
-        /// <remarks>Must be called exactly once for each buffer provided by <see cref="GetBufferCache(IntPtr, int)"/>.</remarks>
-        public void ReturnBufferCache(IntPtr nativeAddress)
-        {
-            lock (this)
-            {
-                BufferCacheEntry entry = this.bufferCache[nativeAddress];
-                entry.ReferenceCount--;
-                if (entry.ReferenceCount == 0)
-                {
-                    this.pool.Return(entry.ManagedBufferCache);
-                    _ = this.bufferCache.Remove(nativeAddress);
-                }
-            }
-        }
-
-
     }
 
 
