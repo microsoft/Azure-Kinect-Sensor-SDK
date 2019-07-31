@@ -393,6 +393,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            depth_image_width_pixels,
                            depth_image_height_pixels,
                            depth_image_width_pixels * 1 * (int)sizeof(uint8_t),
+                           ALLOCATION_SOURCE_USER,
                            &custom_image8),
               K4A_WAIT_RESULT_SUCCEEDED);
 
@@ -401,6 +402,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            depth_image_width_pixels,
                            depth_image_height_pixels,
                            depth_image_width_pixels * 1 * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
                            &custom_image16),
               K4A_WAIT_RESULT_SUCCEEDED);
 
@@ -438,6 +440,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            color_image_width_pixels,
                            color_image_height_pixels,
                            color_image_width_pixels * 1 * (int)sizeof(uint8_t),
+                           ALLOCATION_SOURCE_USER,
                            &transformed_custom_image8),
               K4A_WAIT_RESULT_SUCCEEDED);
 
@@ -446,6 +449,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            color_image_width_pixels,
                            color_image_height_pixels,
                            color_image_width_pixels * 1 * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
                            &transformed_custom_image16),
               K4A_WAIT_RESULT_SUCCEEDED);
 
