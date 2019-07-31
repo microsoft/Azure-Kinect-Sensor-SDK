@@ -53,8 +53,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 int colorWidth = device.GetCalibration().color_camera_calibration.resolution_width;
                 int colorHeight = device.GetCalibration().color_camera_calibration.resolution_height;
 
-                DateTime start = DateTime.Now;
+                Stopwatch sw = new Stopwatch();
                 int frameCount = 0;
+                sw.Start();
 
                 // Allocate image buffers for us to manipulate
                 using (Image transformedDepth = new Image(ImageFormat.Depth16, colorWidth, colorHeight))
@@ -122,17 +123,15 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                             this.inputColorImageViewPane.Source = inputColorBitmap;
                             this.outputColorImageViewPane.Source = outputColorBitmap;
 
-                            frameCount++;
+                            ++frameCount;
 
-                            TimeSpan timeSpan = DateTime.Now - start;
-                            if (timeSpan > TimeSpan.FromSeconds(2))
+                            if (sw.Elapsed > TimeSpan.FromSeconds(2))
                             {
-                                double framesPerSecond = (double)frameCount / timeSpan.TotalSeconds;
-
+                                double framesPerSecond = (double)frameCount / sw.Elapsed.TotalSeconds;
                                 this.fps.Content = $"{framesPerSecond:F2} FPS";
 
                                 frameCount = 0;
-                                start = DateTime.Now;
+                                sw.Restart();
                             }
                         }
                     }

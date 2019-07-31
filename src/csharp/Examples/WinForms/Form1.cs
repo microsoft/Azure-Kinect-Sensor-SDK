@@ -104,11 +104,15 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                         this.Invalidate();
                     }
 
-                    if (++frameCount >= 30)
+                    ++frameCount;
+
+                    if (sw.Elapsed > TimeSpan.FromSeconds(2))
                     {
-                        Console.WriteLine("{0}ms => {1} FPS", sw.Elapsed.TotalMilliseconds, frameCount / sw.Elapsed.TotalSeconds);
-                        sw.Restart();
+                        double framesPerSecond = (double)frameCount / sw.Elapsed.TotalSeconds;
+                        this.fpsStatusLabel.Text = $"{framesPerSecond:F2} FPS";
+
                         frameCount = 0;
+                        sw.Restart();
                     }
                 }
             }
