@@ -74,8 +74,8 @@ var group___enumerations =
       [ "K4A_IMAGE_FORMAT_COLOR_BGRA32", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddbade43f3d12f5ce476be5be2b0e289d481", null ],
       [ "K4A_IMAGE_FORMAT_DEPTH16", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba5abd5fdff69181007ec79ed3087aa18e", null ],
       [ "K4A_IMAGE_FORMAT_IR16", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba39a56f94523816908dbb08994e33c37f", null ],
-      [ "K4A_IMAGE_FORMAT_MONO8", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddbadc2eba94805a29e83fb88b8f7aabff22", null ],
-      [ "K4A_IMAGE_FORMAT_MONO16", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba7ee8a7fb8a99d3741a02250dd062431e", null ],
+      [ "K4A_IMAGE_FORMAT_CUSTOM8", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba17dea221ecdfa136dea68f80e0397e15", null ],
+      [ "K4A_IMAGE_FORMAT_CUSTOM16", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba6f2ee5c37729f9196b0cf3d3028edc42", null ],
       [ "K4A_IMAGE_FORMAT_CUSTOM", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52", null ]
     ] ],
     [ "k4a_log_level_t", "group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6.html#ga84d8f9a665773fb4e75a2ac8160444c6", [

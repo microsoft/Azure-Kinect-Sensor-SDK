@@ -8,6 +8,5 @@ var searchData=
   ['convert_5f3d_5fto_5f2d',['convert_3d_to_2d',['../structk4a_1_1calibration_a74a6fef25540e9cdf18ed06ff1cfdc2e.html#a74a6fef25540e9cdf18ed06ff1cfdc2e',1,'k4a::calibration']]],
   ['convert_5f3d_5fto_5f3d',['convert_3d_to_3d',['../structk4a_1_1calibration_a44fbcadffdbef6fa2be0e076afcfb470.html#a44fbcadffdbef6fa2be0e076afcfb470',1,'k4a::calibration']]],
   ['create',['create',['../classk4a_1_1image_a7a92d9119d57b57039946f6f7220d9a9.html#a7a92d9119d57b57039946f6f7220d9a9',1,'k4a::image::create()'],['../classk4a_1_1capture_a92b8f943cef424490692fc6e76bfe3ec.html#a92b8f943cef424490692fc6e76bfe3ec',1,'k4a::capture::create()']]],
-  ['create_5ffrom_5fbuffer',['create_from_buffer',['../classk4a_1_1image_a2885ff39ce74f193d5fe9fd1e92072ce.html#a2885ff39ce74f193d5fe9fd1e92072ce',1,'k4a::image']]],
-  ['custom_5fdepth_5fimage_5fto_5fcolor_5fcamera',['custom_depth_image_to_color_camera',['../classk4a_1_1transformation_ae515b183e0c544dea37b967a4af9505e.html#ae515b183e0c544dea37b967a4af9505e',1,'k4a::transformation']]]
+  ['create_5ffrom_5fbuffer',['create_from_buffer',['../classk4a_1_1image_a2885ff39ce74f193d5fe9fd1e92072ce.html#a2885ff39ce74f193d5fe9fd1e92072ce',1,'k4a::image']]]
 ];
