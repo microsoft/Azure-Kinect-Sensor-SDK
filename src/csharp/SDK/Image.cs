@@ -443,31 +443,6 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Gets a copy of the buffer.
-        /// </summary>
-        /// <returns>A new copy of the image's buffer.</returns>
-        public unsafe byte[] GetBufferCopy()
-        {
-            lock (this)
-            {
-                if (this.disposedValue)
-                {
-                    throw new ObjectDisposedException(nameof(Image));
-                }
-
-                int bufferSize = checked((int)this.Size);
-                byte[] copy = new byte[bufferSize];
-
-                // If we are using a managed buffer copy, ensure the managed memory is up to date
-                this.InvalidateMemory();
-
-                System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.GetUnsafeBuffer(), copy, 0, bufferSize);
-
-                return copy;
-            }
-        }
-
-        /// <summary>
         /// Gets the pixels of the image.
         /// </summary>
         /// <typeparam name="TPixel">The type of the pixel.</typeparam>

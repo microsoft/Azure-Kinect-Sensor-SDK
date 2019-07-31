@@ -252,7 +252,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// If a new capture is not currently available, this function will block until the timeout is reached. 
         /// The SDK will buffer at least two captures worth of data before dropping the oldest capture. 
         /// Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.</remarks>
-        public Capture GetCapture(TimeSpan timeout = default)
+        public Capture GetCapture(TimeSpan timeout)
         {
             lock (this)
             {
@@ -280,11 +280,27 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
+        /// Reads a sensor capture.
+        /// </summary>
+        /// <returns>A Capture object holding image data.</returns>
+        /// <remarks>Gets the next capture in the streamed sequence of captures from the camera.
+        /// If a new capture is not currently available, this function will block until one is available.
+        /// The SDK will buffer at least two captures worth of data before dropping the oldest capture.
+        /// Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.</remarks>
+        public Capture GetCapture()
+        {
+            return this.GetCapture(TimeSpan.FromMilliseconds(-1));
+        }
+
+        /// <summary>
         /// Reads an IMU sample from the device.
         /// </summary>
         /// <param name="timeout">Time to wait for an IMU sample.</param>
         /// <returns>The next unread IMU sample from the device.</returns>
-        /// <remarks>Gets the next sample in the streamed sequence of IMU samples from the device. If a new sample is not currently available, this function will block until the timeout is reached. The API will buffer at least two camera capture intervals worth of samples before dropping the oldest sample. Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.</remarks>
+        /// <remarks>Gets the next sample in the streamed sequence of IMU samples from the device.
+        /// If a new sample is not currently available, this function will block until the timeout is reached.
+        /// The API will buffer at least two camera capture intervals worth of samples before dropping the oldest sample. Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.
+        /// </remarks>
         public ImuSample GetImuSample(TimeSpan timeout = default)
         {
             lock (this)
@@ -306,6 +322,19 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 return sample;
             }
+        }
+
+        /// <summary>
+        /// Reads an IMU sample from the device.
+        /// </summary>
+        /// <returns>The next unread IMU sample from the device.</returns>
+        /// <remarks>Gets the next sample in the streamed sequence of IMU samples from the device.
+        /// If a new sample is not currently available, this function will block until one is available.
+        /// The API will buffer at least two camera capture intervals worth of samples before dropping the oldest sample. Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.
+        /// </remarks>
+        public ImuSample GetImuSample()
+        {
+            return this.GetImuSample(TimeSpan.FromMilliseconds(-1));
         }
 
         /// <summary>
