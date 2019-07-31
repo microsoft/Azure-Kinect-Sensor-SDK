@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: k4a_calibration_extrinsics_t Struct Reference</title>
+<title>Azure Kinect Sensor SDK: k4a_memory_allocate_cb_t</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('structk4a__calibration__extrinsics__t.html','');});
+$(document).ready(function(){initNavTree('group___prototypes_ga5471d7b53e52a1c10569b2f17bb66b5d.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -83,43 +83,39 @@ $(document).ready(function(){initNavTree('structk4a__calibration__extrinsics__t.
 </iframe>
 </div>
 
-<div class="header">
-  <div class="summary">
-<a href="#pub-attribs">Data Fields</a>  </div>
-  <div class="headertitle">
-<div class="title">k4a_calibration_extrinsics_t Struct Reference<div class="ingroups"><a class="el" href="group__csdk.html">C Reference</a> &raquo; <a class="el" href="group___structures.html">Structures</a></div></div>  </div>
-</div><!--header-->
 <div class="contents">
+<a id="ga5471d7b53e52a1c10569b2f17bb66b5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5471d7b53e52a1c10569b2f17bb66b5d">&#9670;&nbsp;</a></span>k4a_memory_allocate_cb_t</h2>
 
-<p>Extrinsic calibration data.  
- <a href="structk4a__calibration__extrinsics__t.html#details">More...</a></p>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef uint8_t*() k4a_memory_allocate_cb_t(int size, void **context)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
-<p><code>#include &lt;<a class="el" href="k4atypes_8h_source.html">k4atypes.h</a>&gt;</code></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Data Fields</h2></td></tr>
-<tr class="memitem:a2227d500bc6f240628774be2503c20a7"><td class="memItemLeft" align="right" valign="top"><a id="a2227d500bc6f240628774be2503c20a7"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structk4a__calibration__extrinsics__t.html#a2227d500bc6f240628774be2503c20a7">rotation</a> [9]</td></tr>
-<tr class="memdesc:a2227d500bc6f240628774be2503c20a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">3x3 Rotation matrix stored in row major order <br /></td></tr>
-<tr class="separator:a2227d500bc6f240628774be2503c20a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9246edc779148b57fb90efa283e65fcf"><td class="memItemLeft" align="right" valign="top"><a id="a9246edc779148b57fb90efa283e65fcf"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structk4a__calibration__extrinsics__t.html#a9246edc779148b57fb90efa283e65fcf">translation</a> [3]</td></tr>
-<tr class="memdesc:a9246edc779148b57fb90efa283e65fcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Translation vector, x,y,z (in millimeters) <br /></td></tr>
-<tr class="separator:a9246edc779148b57fb90efa283e65fcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Extrinsic calibration data. </p>
-<dl class="section remark"><dt>Remarks</dt><dd>Extrinsic calibration defines the physical relationship between two separate devices.</dd></dl>
- </div><hr/>The documentation for this struct was generated from the following file:<ul>
-<li><a class="el" href="k4atypes_8h_source.html">k4atypes.h</a></li>
-</ul>
+<p>Callback function for a memory allocation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">size</td><td>Minimum size in bytes needed for the buffer.</td></tr>
+    <tr><td class="paramname">context</td><td>Output parameter for a context that will be provided in the subsequent call to the <a class="el" href="group___prototypes_ga1e290c645920c7674c6d36dcbb75909b.html#ga1e290c645920c7674c6d36dcbb75909b">k4a_memory_destroy_cb_t</a> callback.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A pointer to the newly allocated memory.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>A callback of this type is provided when there is an application defined allocator.</dd></dl>
+ 
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.14-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="structk4a__calibration__extrinsics__t.html">k4a_calibration_extrinsics_t</a></li>
+    <li class="navelem"><a class="el" href="group___prototypes.html">Callback Function prototypes</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.14 </li>
