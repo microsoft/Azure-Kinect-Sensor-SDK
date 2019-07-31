@@ -55,6 +55,18 @@ K4A_DECLARE_CONTEXT(k4a_device_t, k4a_context_t);
 #define DEPTH_CAPTURE (false)
 #define COLOR_CAPTURE (true)
 #define TRANSFORM_ENABLE_GPU_OPTIMIZATION (true)
+#define K4A_DEPTH_MODE_TO_STRING_CASE(depth_mode)                                                                      \
+    case depth_mode:                                                                                                   \
+        return #depth_mode
+#define K4A_COLOR_RESOLUTION_TO_STRING_CASE(color_resolution)                                                          \
+    case color_resolution:                                                                                             \
+        return #color_resolution
+#define K4A_IMAGE_FORMAT_TO_STRING_CASE(image_format)                                                                  \
+    case image_format:                                                                                                 \
+        return #image_format
+#define K4A_FPS_TO_STRING_CASE(fps)                                                                                    \
+    case fps:                                                                                                          \
+        return #fps
 
 uint32_t k4a_device_get_installed_count(void)
 {
@@ -504,175 +516,317 @@ void k4a_image_release(k4a_image_t image_handle)
     image_dec_ref(image_handle);
 }
 
+static const char *k4a_depth_mode_to_string(k4a_depth_mode_t depth_mode)
+{
+    switch (depth_mode)
+    {
+        K4A_DEPTH_MODE_TO_STRING_CASE(K4A_DEPTH_MODE_OFF);
+        K4A_DEPTH_MODE_TO_STRING_CASE(K4A_DEPTH_MODE_NFOV_2X2BINNED);
+        K4A_DEPTH_MODE_TO_STRING_CASE(K4A_DEPTH_MODE_NFOV_UNBINNED);
+        K4A_DEPTH_MODE_TO_STRING_CASE(K4A_DEPTH_MODE_WFOV_2X2BINNED);
+        K4A_DEPTH_MODE_TO_STRING_CASE(K4A_DEPTH_MODE_WFOV_UNBINNED);
+        K4A_DEPTH_MODE_TO_STRING_CASE(K4A_DEPTH_MODE_PASSIVE_IR);
+    }
+    return "Unexpected k4a_depth_mode_t value.";
+}
+
+static const char *k4a_color_resolution_to_string(k4a_color_resolution_t resolution)
+{
+    switch (resolution)
+    {
+        K4A_COLOR_RESOLUTION_TO_STRING_CASE(K4A_COLOR_RESOLUTION_OFF);
+        K4A_COLOR_RESOLUTION_TO_STRING_CASE(K4A_COLOR_RESOLUTION_720P);
+        K4A_COLOR_RESOLUTION_TO_STRING_CASE(K4A_COLOR_RESOLUTION_1080P);
+        K4A_COLOR_RESOLUTION_TO_STRING_CASE(K4A_COLOR_RESOLUTION_1440P);
+        K4A_COLOR_RESOLUTION_TO_STRING_CASE(K4A_COLOR_RESOLUTION_1536P);
+        K4A_COLOR_RESOLUTION_TO_STRING_CASE(K4A_COLOR_RESOLUTION_2160P);
+        K4A_COLOR_RESOLUTION_TO_STRING_CASE(K4A_COLOR_RESOLUTION_3072P);
+    }
+    return "Unexpected k4a_color_resolution_t value.";
+}
+
+static const char *k4a_image_format_to_string(k4a_image_format_t image_format)
+{
+    switch (image_format)
+    {
+        K4A_IMAGE_FORMAT_TO_STRING_CASE(K4A_IMAGE_FORMAT_COLOR_MJPG);
+        K4A_IMAGE_FORMAT_TO_STRING_CASE(K4A_IMAGE_FORMAT_COLOR_NV12);
+        K4A_IMAGE_FORMAT_TO_STRING_CASE(K4A_IMAGE_FORMAT_COLOR_YUY2);
+        K4A_IMAGE_FORMAT_TO_STRING_CASE(K4A_IMAGE_FORMAT_COLOR_BGRA32);
+        K4A_IMAGE_FORMAT_TO_STRING_CASE(K4A_IMAGE_FORMAT_DEPTH16);
+        K4A_IMAGE_FORMAT_TO_STRING_CASE(K4A_IMAGE_FORMAT_IR16);
+        K4A_IMAGE_FORMAT_TO_STRING_CASE(K4A_IMAGE_FORMAT_CUSTOM);
+    }
+    return "Unexpected k4a_image_format_t value.";
+}
+
+static const char *k4a_fps_to_string(k4a_fps_t fps)
+{
+    switch (fps)
+    {
+        K4A_FPS_TO_STRING_CASE(K4A_FRAMES_PER_SECOND_5);
+        K4A_FPS_TO_STRING_CASE(K4A_FRAMES_PER_SECOND_15);
+        K4A_FPS_TO_STRING_CASE(K4A_FRAMES_PER_SECOND_30);
+    }
+    return "Unexpected k4a_fps_t value.";
+}
+
 static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_device_configuration_t *config)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device == NULL);
-    k4a_result_t result;
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
     bool depth_enabled = false;
     bool color_enabled = false;
 
-    result = K4A_RESULT_FROM_BOOL(
-        config->color_format == K4A_IMAGE_FORMAT_COLOR_MJPG || config->color_format == K4A_IMAGE_FORMAT_COLOR_YUY2 ||
-        config->color_format == K4A_IMAGE_FORMAT_COLOR_NV12 || config->color_format == K4A_IMAGE_FORMAT_COLOR_BGRA32);
-    if (K4A_SUCCEEDED(result))
+    if (config->color_format != K4A_IMAGE_FORMAT_COLOR_MJPG && config->color_format != K4A_IMAGE_FORMAT_COLOR_YUY2 &&
+        config->color_format != K4A_IMAGE_FORMAT_COLOR_NV12 && config->color_format != K4A_IMAGE_FORMAT_COLOR_BGRA32)
     {
-        result = K4A_RESULT_FROM_BOOL(config->color_resolution >= K4A_COLOR_RESOLUTION_OFF &&
-                                      config->color_resolution <= K4A_COLOR_RESOLUTION_3072P);
-    }
-    if (K4A_SUCCEEDED(result))
-    {
-        result = K4A_RESULT_FROM_BOOL(config->depth_mode >= K4A_DEPTH_MODE_OFF &&
-                                      config->depth_mode <= K4A_DEPTH_MODE_PASSIVE_IR);
-    }
-    if (K4A_SUCCEEDED(result))
-    {
-        result = K4A_RESULT_FROM_BOOL(config->camera_fps == K4A_FRAMES_PER_SECOND_5 ||
-                                      config->camera_fps == K4A_FRAMES_PER_SECOND_15 ||
-                                      config->camera_fps == K4A_FRAMES_PER_SECOND_30);
-    }
-    if (K4A_SUCCEEDED(result))
-    {
-        result = K4A_RESULT_FROM_BOOL(config->wired_sync_mode >= K4A_WIRED_SYNC_MODE_STANDALONE &&
-                                      config->wired_sync_mode <= K4A_WIRED_SYNC_MODE_SUBORDINATE);
+        result = K4A_RESULT_FAILED;
+        LOG_ERROR("The configured color_format is not a valid k4a_color_format_t value.", 0);
     }
 
-    if (K4A_SUCCEEDED(result) && (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE ||
-                                  config->wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER))
+    if (K4A_SUCCEEDED(result))
     {
-        bool sync_in_cable_present;
-        bool sync_out_cable_present;
-        result = TRACE_CALL(
-            colormcu_get_external_sync_jack_state(device->colormcu, &sync_in_cable_present, &sync_out_cable_present));
-
-        if (K4A_SUCCEEDED(result) && config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
+        if (config->color_resolution < K4A_COLOR_RESOLUTION_OFF ||
+            config->color_resolution > K4A_COLOR_RESOLUTION_3072P)
         {
-            result = K4A_RESULT_FROM_BOOL(sync_in_cable_present == true);
+            result = K4A_RESULT_FAILED;
+            LOG_ERROR("The configured color_resolution is not a valid k4a_color_resolution_t value.", 0);
         }
-        if (K4A_SUCCEEDED(result) && config->wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER)
-        {
-            result = K4A_RESULT_FROM_BOOL(sync_out_cable_present == true);
+    }
 
-            if (K4A_SUCCEEDED(result) && config->color_resolution == K4A_COLOR_RESOLUTION_OFF)
+    if (K4A_SUCCEEDED(result))
+    {
+        if (config->depth_mode < K4A_DEPTH_MODE_OFF || config->depth_mode > K4A_DEPTH_MODE_PASSIVE_IR)
+        {
+            result = K4A_RESULT_FAILED;
+            LOG_ERROR("The configured depth_mode is not a valid k4a_depth_mode_t value.", 0);
+        }
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        if (config->camera_fps != K4A_FRAMES_PER_SECOND_5 && config->camera_fps != K4A_FRAMES_PER_SECOND_15 &&
+            config->camera_fps != K4A_FRAMES_PER_SECOND_30)
+        {
+            result = K4A_RESULT_FAILED;
+            LOG_ERROR("The configured camera_fps is not a valid k4a_fps_t value.", 0);
+        }
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        if (config->wired_sync_mode < K4A_WIRED_SYNC_MODE_STANDALONE ||
+            config->wired_sync_mode > K4A_WIRED_SYNC_MODE_SUBORDINATE)
+        {
+            result = K4A_RESULT_FAILED;
+            LOG_ERROR("The configured wired_sync_mode is not a valid k4a_wired_sync_mode_t value.", 0);
+        }
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE ||
+            config->wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER)
+        {
+            bool sync_in_cable_present;
+            bool sync_out_cable_present;
+
+            result = colormcu_get_external_sync_jack_state(device->colormcu,
+                                                           &sync_in_cable_present,
+                                                           &sync_out_cable_present);
+
+            if (K4A_SUCCEEDED(result))
             {
-                LOG_ERROR("Device wired_sync_mode is set to K4A_WIRED_SYNC_MODE_MASTER, so color camera must be used "
-                          "on master device. Color_resolution can not be set to K4A_COLOR_RESOLUTION_OFF.",
-                          0);
-                return K4A_RESULT_FAILED;
+                if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE && !sync_in_cable_present)
+                {
+                    result = K4A_RESULT_FAILED;
+                    LOG_ERROR("Failure to detect presence of sync in cable with wired sync mode "
+                              "K4A_WIRED_SYNC_MODE_SUBORDINATE.",
+                              0);
+                }
+
+                if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER)
+                {
+                    if (!sync_out_cable_present)
+                    {
+                        result = K4A_RESULT_FAILED;
+                        LOG_ERROR("Failure to detect presence of sync out cable with wired sync mode "
+                                  "K4A_WIRED_SYNC_MODE_MASTER.",
+                                  0);
+                    }
+
+                    if (config->color_resolution == K4A_COLOR_RESOLUTION_OFF)
+                    {
+                        result = K4A_RESULT_FAILED;
+                        LOG_ERROR(
+                            "Device wired_sync_mode is set to K4A_WIRED_SYNC_MODE_MASTER, so color camera must be used "
+                            "on master device. Color_resolution can not be set to K4A_COLOR_RESOLUTION_OFF.",
+                            0);
+                    }
+                }
             }
         }
     }
 
-    if (K4A_SUCCEEDED(result) && config->subordinate_delay_off_master_usec != 0)
+    if (K4A_SUCCEEDED(result))
     {
-        if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
+        if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE &&
+            config->subordinate_delay_off_master_usec != 0)
         {
             uint32_t fps_in_usec = 1000000 / k4a_convert_fps_to_uint(config->camera_fps);
-            result = K4A_RESULT_FROM_BOOL(config->subordinate_delay_off_master_usec < fps_in_usec);
+            if (config->subordinate_delay_off_master_usec > fps_in_usec)
+            {
+                result = K4A_RESULT_FAILED;
+                LOG_ERROR(
+                    "The configured subordinate device delay from the master device cannot exceed one frame interval.",
+                    0);
+            }
+        }
+
+        if (config->wired_sync_mode != K4A_WIRED_SYNC_MODE_SUBORDINATE &&
+            config->subordinate_delay_off_master_usec != 0)
+        {
+            result = K4A_RESULT_FAILED;
+            LOG_ERROR("When wired_sync_mode is K4A_WIRED_SYNC_MODE_STANDALONE or K4A_WIRED_SYNC_MODE_MASTER, the "
+                      "subordinate_delay_off_master_usec must be 0.",
+                      0);
+        }
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        if (config->depth_mode != K4A_DEPTH_MODE_OFF)
+        {
+            depth_enabled = true;
+        }
+
+        if (config->color_resolution != K4A_COLOR_RESOLUTION_OFF)
+        {
+            color_enabled = true;
+        }
+
+        if (depth_enabled && color_enabled)
+        {
+            int64_t fps = 1000000 / k4a_convert_fps_to_uint(config->camera_fps);
+            if (config->depth_delay_off_color_usec < -fps || config->depth_delay_off_color_usec > fps)
+            {
+                result = K4A_RESULT_FAILED;
+                LOG_ERROR("The configured depth_delay_off_color_usec must be within +/- one frame interval.", 0);
+            }
+        }
+        else if (!depth_enabled && !color_enabled)
+        {
+            result = K4A_RESULT_FAILED;
+            LOG_ERROR("Neither depth camera nor color camera are enabled in the configuration, at least one needs to "
+                      "be enabled.",
+                      0);
         }
         else
         {
-            result = K4A_RESULT_FROM_BOOL(config->subordinate_delay_off_master_usec == 0);
-        }
-    }
-
-    if (config->depth_mode != K4A_DEPTH_MODE_OFF)
-    {
-        depth_enabled = true;
-    }
-
-    if (config->color_resolution != K4A_COLOR_RESOLUTION_OFF)
-    {
-        color_enabled = true;
-    }
-
-    if (depth_enabled && color_enabled)
-    {
-        if (K4A_SUCCEEDED(result))
-        {
-            int64_t fps = 1000000 / k4a_convert_fps_to_uint(config->camera_fps);
-            result = K4A_RESULT_FROM_BOOL((config->depth_delay_off_color_usec >= -fps) &&
-                                          (config->depth_delay_off_color_usec <= fps));
-        }
-    }
-    else
-    {
-        if (K4A_SUCCEEDED(result))
-        {
-            result = K4A_RESULT_FROM_BOOL(config->depth_delay_off_color_usec == 0);
-        }
-
-        if (K4A_SUCCEEDED(result))
-        {
-            result = K4A_RESULT_FROM_BOOL(config->synchronized_images_only == false);
-        }
-    }
-
-    if (K4A_SUCCEEDED(result) && depth_enabled)
-    {
-        struct _depth_configuration
-        {
-            k4a_depth_mode_t mode;
-            k4a_fps_t max_fps;
-        } supported_depth_configs[] = {
-            { K4A_DEPTH_MODE_NFOV_2X2BINNED, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_DEPTH_MODE_NFOV_UNBINNED, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_DEPTH_MODE_WFOV_2X2BINNED, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_DEPTH_MODE_WFOV_UNBINNED, K4A_FRAMES_PER_SECOND_15 },
-            { K4A_DEPTH_MODE_PASSIVE_IR, K4A_FRAMES_PER_SECOND_30 },
-        };
-
-        bool depth_fps_and_mode_supported = false;
-        for (unsigned int x = 0; x < COUNTOF(supported_depth_configs); x++)
-        {
-            if (supported_depth_configs[x].mode == config->depth_mode &&
-                supported_depth_configs[x].max_fps >= config->camera_fps)
+            if (config->depth_delay_off_color_usec != 0)
             {
-                depth_fps_and_mode_supported = true;
-                break;
+                result = K4A_RESULT_FAILED;
+                LOG_ERROR("If depth_delay_off_color_usec is not 0, both depth camera and color camera must be enabled.",
+                          0);
+            }
+
+            if (config->synchronized_images_only)
+            {
+                result = K4A_RESULT_FAILED;
+                LOG_ERROR(
+                    "To enable synchronized_images_only, both depth camera and color camera must also be enabled.", 0);
             }
         }
-        result = K4A_RESULT_FROM_BOOL(depth_fps_and_mode_supported == true);
     }
 
-    if (K4A_SUCCEEDED(result) && color_enabled)
+    if (K4A_SUCCEEDED(result))
     {
-        struct _color_configuration
+        if (depth_enabled)
         {
-            k4a_color_resolution_t res;
-            k4a_image_format_t format;
-            k4a_fps_t max_fps;
-        } supported_color_configs[] = {
-            { K4A_COLOR_RESOLUTION_2160P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_1440P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_1080P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_720P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_720P, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_720P, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_3072P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_15 },
-            { K4A_COLOR_RESOLUTION_1536P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_2160P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_1440P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_1080P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_720P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
-            { K4A_COLOR_RESOLUTION_3072P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_15 },
-            { K4A_COLOR_RESOLUTION_1536P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
-        };
-
-        bool color_fps_and_res_and_format_supported = false;
-        for (unsigned int x = 0; x < COUNTOF(supported_color_configs); x++)
-        {
-            if (supported_color_configs[x].res == config->color_resolution &&
-                supported_color_configs[x].max_fps >= config->camera_fps &&
-                supported_color_configs[x].format == config->color_format)
+            struct _depth_configuration
             {
-                color_fps_and_res_and_format_supported = true;
-                break;
+                k4a_depth_mode_t mode;
+                k4a_fps_t max_fps;
+            } supported_depth_configs[] = {
+                { K4A_DEPTH_MODE_NFOV_2X2BINNED, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_DEPTH_MODE_NFOV_UNBINNED, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_DEPTH_MODE_WFOV_2X2BINNED, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_DEPTH_MODE_WFOV_UNBINNED, K4A_FRAMES_PER_SECOND_15 },
+                { K4A_DEPTH_MODE_PASSIVE_IR, K4A_FRAMES_PER_SECOND_30 },
+            };
+
+            bool depth_fps_and_mode_supported = false;
+            for (unsigned int x = 0; x < COUNTOF(supported_depth_configs); x++)
+            {
+                if (supported_depth_configs[x].mode == config->depth_mode &&
+                    supported_depth_configs[x].max_fps >= config->camera_fps)
+                {
+                    depth_fps_and_mode_supported = true;
+                    break;
+                }
+            }
+
+            if (!depth_fps_and_mode_supported)
+            {
+                result = K4A_RESULT_FAILED;
+                LOG_ERROR("The configured depth_mode %s does not support the configured camera_fps %s.",
+                          k4a_depth_mode_to_string(config->depth_mode),
+                          k4a_fps_to_string(config->camera_fps));
             }
         }
-        result = K4A_RESULT_FROM_BOOL(color_fps_and_res_and_format_supported == true);
     }
 
+    if (K4A_SUCCEEDED(result))
+    {
+        if (color_enabled)
+        {
+            struct _color_configuration
+            {
+                k4a_color_resolution_t res;
+                k4a_image_format_t format;
+                k4a_fps_t max_fps;
+            } supported_color_configs[] = {
+                { K4A_COLOR_RESOLUTION_2160P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_1440P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_1080P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_720P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_720P, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_720P, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_3072P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_15 },
+                { K4A_COLOR_RESOLUTION_1536P, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_2160P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_1440P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_1080P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_720P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
+                { K4A_COLOR_RESOLUTION_3072P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_15 },
+                { K4A_COLOR_RESOLUTION_1536P, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_FRAMES_PER_SECOND_30 },
+            };
+
+            bool color_fps_and_res_and_format_supported = false;
+            for (unsigned int x = 0; x < COUNTOF(supported_color_configs); x++)
+            {
+                if (supported_color_configs[x].res == config->color_resolution &&
+                    supported_color_configs[x].max_fps >= config->camera_fps &&
+                    supported_color_configs[x].format == config->color_format)
+                {
+                    color_fps_and_res_and_format_supported = true;
+                    break;
+                }
+            }
+
+            if (!color_fps_and_res_and_format_supported)
+            {
+                result = K4A_RESULT_FAILED;
+                LOG_ERROR("The combination of color_resolution at %s, color_format at %s, and camera_fps at %s is not "
+                          "supported.",
+                          k4a_color_resolution_to_string(config->color_resolution),
+                          k4a_image_format_to_string(config->color_format),
+                          k4a_fps_to_string(config->camera_fps));
+            }
+        }
+    }
     return result;
 }
 

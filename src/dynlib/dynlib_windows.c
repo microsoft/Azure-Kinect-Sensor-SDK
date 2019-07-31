@@ -10,6 +10,7 @@
 // System dependencies
 #include <windows.h>
 #include <stdio.h>
+#include <pathcch.h>
 
 #define TOSTRING(x) STRINGIFY(x)
 
@@ -35,6 +36,42 @@ static char *generate_file_name(const char *name, uint32_t major_ver, uint32_t m
     snprintf(versioned_file_name, max_buffer_size, "%s_%u_%u", name, major_ver, minor_ver);
 
     return versioned_file_name;
+}
+
+static DLL_DIRECTORY_COOKIE add_current_module_to_search()
+{
+    wchar_t path[MAX_PATH];
+    HMODULE hModule = NULL;
+
+    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCTSTR)add_current_module_to_search, &hModule) == 0)
+    {
+        LOG_WARNING("Failed to get current module (%d).", GetLastError());
+        return NULL;
+    }
+
+    if (GetModuleFileNameW(hModule, path, _countof(path)) == 0)
+    {
+        LOG_WARNING("Failed to get current module file name (%d).", GetLastError());
+        return NULL;
+    }
+
+    HRESULT result = PathCchRemoveFileSpec(path, _countof(path));
+    if (result != S_OK)
+    {
+        LOG_WARNING("Failed to remove the file name from the path (%d).", result);
+        return NULL;
+    }
+
+    // This adds the directory of the current module (k4a.dll) to the loader's path.
+    // The loader for C code only loads from the path of the current executable, not the current
+    // module. By adding the current module path, this will mimic how C# and Linux loads DLLs.
+    DLL_DIRECTORY_COOKIE dllDirectory = AddDllDirectory(path);
+    if (dllDirectory == 0)
+    {
+        LOG_WARNING("Failed to add the directory to the DLL search path (%d).", GetLastError());
+    }
+
+    return dllDirectory;
 }
 
 k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_ver, dynlib_t *dynlib_handle)
@@ -66,17 +103,29 @@ k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_
         return K4A_RESULT_FAILED;
     }
 
+    DLL_DIRECTORY_COOKIE dllDirectory = add_current_module_to_search();
+
     dynlib_context_t *dynlib = dynlib_t_create(dynlib_handle);
     k4a_result_t result = K4A_RESULT_FROM_BOOL(dynlib != NULL);
 
     if (K4A_SUCCEEDED(result))
     {
-        dynlib->handle = LoadLibraryA(versioned_name);
+        dynlib->handle = LoadLibraryExA(versioned_name,
+                                        NULL,
+                                        LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_USER_DIRS);
         result = (dynlib->handle != NULL) ? K4A_RESULT_SUCCEEDED : K4A_RESULT_FAILED;
 
         if (K4A_FAILED(result))
         {
             LOG_ERROR("Failed to load DLL %s with error code: %u", versioned_name, GetLastError());
+        }
+    }
+
+    if (dllDirectory != NULL)
+    {
+        if (RemoveDllDirectory(dllDirectory) == 0)
+        {
+            LOG_WARNING("Failed to remove the directory from the DLL search path (%d).", GetLastError());
         }
     }
 
