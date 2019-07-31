@@ -13,12 +13,9 @@ namespace Microsoft.Azure.Kinect.Sensor
         // "Public" Images are instances available outside this class via properties.
         // "Private" Images are instances held within this class to ensure they can't be disposed when
         // this class still needs access to their data.
-        private Image cachedPublicColor;
-        private Image cachedPrivateColor;
-        private Image cachedPublicDepth;
-        private Image cachedPrivateDepth;
-        private Image cachedPublicIR;
-        private Image cachedPrivateIR;
+        private Image cachedColor;
+        private Image cachedDepth;
+        private Image cachedIR;
 
         private NativeMethods.k4a_capture_t handle;
 
@@ -68,14 +65,14 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             get
             {
-                this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_color_image, ref this.cachedPublicColor, ref this.cachedPrivateColor);
+                this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_color_image, ref this.cachedColor);
 
-                return this.cachedPublicColor;
+                return this.cachedColor;
             }
 
             set
             {
-                this.SetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_set_color_image, ref this.cachedPublicColor, ref this.cachedPrivateColor, value);
+                this.SetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_set_color_image, ref this.cachedColor, value);
             }
         }
 
@@ -95,16 +92,17 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             get
             {
-                this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_depth_image, ref this.cachedPublicDepth, ref this.cachedPrivateDepth);
+                this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_depth_image, ref this.cachedDepth);
 
-                return this.cachedPublicDepth;
+                return this.cachedDepth;
             }
 
             set
             {
-                this.SetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_set_depth_image, ref this.cachedPublicDepth, ref this.cachedPrivateDepth, value);
+                this.SetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_set_depth_image, ref this.cachedDepth, value);
             }
         }
+
 
         /// <summary>
         /// Gets or sets the IR image of this capture.
@@ -122,14 +120,14 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             get
             {
-                this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_ir_image, ref this.cachedPublicIR, ref this.cachedPrivateIR);
+                this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_ir_image, ref this.cachedIR);
 
-                return this.cachedPublicIR;
+                return this.cachedIR;
             }
 
             set
             {
-                this.SetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_set_ir_image, ref this.cachedPublicIR, ref this.cachedPrivateIR, value);
+                this.SetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_set_ir_image, ref this.cachedIR, value);
             }
         }
 
@@ -221,19 +219,13 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
                 if (!this.disposedValue)
                 {
-                    this.cachedPrivateColor?.Dispose();
-                    this.cachedPublicColor?.Dispose();
-                    this.cachedPrivateDepth?.Dispose();
-                    this.cachedPublicDepth?.Dispose();
-                    this.cachedPrivateIR?.Dispose();
-                    this.cachedPublicIR?.Dispose();
+                    this.cachedColor?.Dispose();
+                    this.cachedDepth?.Dispose();
+                    this.cachedIR?.Dispose();
 
-                    this.cachedPrivateColor = null;
-                    this.cachedPublicColor = null;
-                    this.cachedPrivateDepth = null;
-                    this.cachedPublicDepth = null;
-                    this.cachedPrivateIR = null;
-                    this.cachedPublicIR = null;
+                    this.cachedColor = null;
+                    this.cachedDepth = null;
+                    this.cachedIR = null;
 
                     this.handle.Close();
                     this.handle = null;
@@ -249,17 +241,16 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Retrieves a native image handle from the native API.
         /// </summary>
         /// <param name="nativeMethod">Native method to retrieve the image.</param>
-        /// <param name="publicImage">A cached instance of the Image that we return to callers. (Callers may dispose this image).</param>
-        /// <param name="privateImage">A cached instance of the Image we retain within the Capture class. (It cannot be Disposed outside of our control).</param>
+        /// <param name="cachedImage">A cached instance of the Image that we return to callers. (Callers may dispose this image, although they shouldn't).</param>
         /// <remarks>
         /// If this is the first time calling the property, we construct a new wrapper.
         /// If the handle is for an Image we have already constructed a wrapper for, we return the existing wrapper.
-        /// If the handle is for a different Image, or if the wrapper has already been disposed, we construct a new wrapper and dispose the old one.
+        /// If the handle is for a different Image, we construct a new wrapper and dispose the old one.
+        /// If existing wrapper has been disposed, we throw an exception.
         /// </remarks>
         private void GetImageWrapperAndDisposePrevious(
             Func<NativeMethods.k4a_capture_t, NativeMethods.k4a_image_t> nativeMethod,
-            ref Image publicImage,
-            ref Image privateImage)
+            ref Image cachedImage)
         {
             // Lock must be held to ensure the Image in cache is not replaced while we are inspecting it
             // It is still possible for that Image to be accessed or Disposed while this lock is held
@@ -268,12 +259,6 @@ namespace Microsoft.Azure.Kinect.Sensor
                 if (this.disposedValue)
                 {
                     throw new ObjectDisposedException(nameof(Capture));
-                }
-
-                if ((publicImage != null && privateImage == null) ||
-                    (publicImage == null && privateImage != null))
-                {
-                    throw new ArgumentException("public and private images should either both or neither be null.");
                 }
 
                 // Get the image object from the native SDK
@@ -285,30 +270,33 @@ namespace Microsoft.Azure.Kinect.Sensor
                 try
                 {
                     // If this Capture previously had an image
-                    if (privateImage != null)
+                    if (cachedImage != null)
                     {
                         // Get the native pointer
                         IntPtr imageHandleValue = nativeImageHandle.DangerousGetHandle();
 
-                        // Get the handle value from the privateImage. This image can only be disposed in the
-                        // current lock, so the reference is still valid.
-                        if (privateImage.DangerousGetHandle().DangerousGetHandle() != imageHandleValue)
+                        // Get the handle value from the cached image. If it has been disposed, this
+                        // will throw an exception, which will be passed to the caller.
+
+                        // Take an extra reference on the cachedImage to ensure it doesn't get disposed
+                        // after getting the IntPtr from the handle.
+                        using (Image reference = cachedImage.Reference())
                         {
-                            // The image has changed, invalidate the current image and construct new wrappers
-                            privateImage.Dispose();
-                            privateImage = null;
-                            publicImage.Dispose();
-                            publicImage = null;
+                            if (reference.DangerousGetHandle().DangerousGetHandle() != imageHandleValue)
+                            {
+                                // The image has changed, invalidate the current image and construct new wrappers
+                                cachedImage.Dispose();
+                                cachedImage = null;
+                            }
                         }
                     }
 
-                    if (privateImage == null && !nativeImageHandle.IsInvalid)
+                    if (cachedImage == null && !nativeImageHandle.IsInvalid)
                     {
                         // Construct a new wrapper and return it
                         // The native function may have returned
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                        privateImage = new Image(nativeImageHandle);
-                        publicImage = privateImage.Reference();
+                        cachedImage = new Image(nativeImageHandle);
 #pragma warning restore CA2000 // Dispose objects before losing scope
 
                         // Since we have wrapped image, it is now owned by Image and we should no longer close it
@@ -328,8 +316,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         private void SetImageWrapperAndDisposePrevious(
             Action<NativeMethods.k4a_capture_t, NativeMethods.k4a_image_t> nativeMethod,
-            ref Image publicImage,
-            ref Image privateImage,
+            ref Image cachedImage,
             Image value)
         {
             lock (this)
@@ -342,17 +329,20 @@ namespace Microsoft.Azure.Kinect.Sensor
                 // If the assignment is a new managed wrapper we need
                 // to release the reference to the old wrapper.
                 // If it is the same object though, we should not dispose it.
-                if (publicImage != null && !object.ReferenceEquals(
-                    publicImage, value))
+                if (cachedImage != null && !object.ReferenceEquals(
+                    cachedImage, value))
                 {
-                    publicImage.Dispose();
-                    privateImage.Dispose();
+                    cachedImage.Dispose();
                 }
 
-                publicImage = value;
-                privateImage = value?.Reference();
+                cachedImage = value;
 
-                nativeMethod(this.handle, privateImage.DangerousGetHandle());
+                // Take an extra reference on the image to ensure it isn't disposed
+                // prior while we hafve the handle.
+                using (Image reference = cachedImage.Reference())
+                {
+                    nativeMethod(this.handle, cachedImage.DangerousGetHandle());
+                }
             }
         }
     }
