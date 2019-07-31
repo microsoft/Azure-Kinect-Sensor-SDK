@@ -19,14 +19,14 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-        public ArrayImage<ushort> DepthImageToColorCamera(Capture capture)
+        public Image DepthImageToColorCamera(Capture capture)
         {
             return DepthImageToColorCamera(capture.Depth);
         }
 
-        public ArrayImage<ushort> DepthImageToColorCamera(Image depth)
+        public Image DepthImageToColorCamera(Image depth)
         {
-            ArrayImage<ushort> image = new ArrayImage<ushort>(ImageFormat.Depth16,
+            Image image = new Image(ImageFormat.Depth16,
                 calibration.color_camera_calibration.resolution_width,
                 calibration.color_camera_calibration.resolution_height)
             {
@@ -55,23 +55,29 @@ namespace Microsoft.Azure.Kinect.Sensor
                 using (Image depthReference = depth.Reference())
                 using (Image transformedReference = transformed.Reference())
                 {
+                    // Ensure changes made to the managed memory are visible to the native layer
+                    depthReference.FlushMemory();
+
                     AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_color_camera(
                         handle,
                         depthReference.DangerousGetHandle(),
                         transformedReference.DangerousGetHandle()
                         ));
+
+                    // Copy the native memory back to managed memory if required
+                    transformedReference.InvalidateMemory();
                 }
             }
         }
 
-        public ArrayImage<BGRA> ColorImageToDepthCamera(Capture capture)
+        public Image ColorImageToDepthCamera(Capture capture)
         {
             return ColorImageToDepthCamera(capture.Depth, capture.Color);
         }
 
-        public ArrayImage<BGRA> ColorImageToDepthCamera(Image depth, Image color)
+        public Image ColorImageToDepthCamera(Image depth, Image color)
         {
-            ArrayImage<BGRA> transformed = new ArrayImage<BGRA>(ImageFormat.ColorBGRA32,
+            Image transformed = new Image(ImageFormat.ColorBGRA32,
                 calibration.depth_camera_calibration.resolution_width,
                 calibration.depth_camera_calibration.resolution_height)
             {
@@ -80,7 +86,6 @@ namespace Microsoft.Azure.Kinect.Sensor
                 Timestamp = color.Timestamp,
                 WhiteBalance = color.WhiteBalance
             };
-
             
             ColorImageToDepthCamera(depth, color, transformed);
 
@@ -105,18 +110,25 @@ namespace Microsoft.Azure.Kinect.Sensor
                 using (Image colorReference = color.Reference())
                 using (Image transformedReference = transformed.Reference())
                 {
+                    // Ensure changes made to the managed memory are visible to the native layer
+                    depthReference.FlushMemory();
+                    colorReference.FlushMemory();
+
                     AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_color_image_to_depth_camera(
                         handle,
                         depthReference.DangerousGetHandle(),
                         colorReference.DangerousGetHandle(),
                         transformedReference.DangerousGetHandle()));
+
+                    // Copy the native memory back to managed memory if required
+                    transformedReference.InvalidateMemory();
                 }
             }
         }
 
-        public ArrayImage<Short3> DepthImageToPointCloud(Image depth, Calibration.DeviceType camera = Calibration.DeviceType.Depth)
+        public Image DepthImageToPointCloud(Image depth, Calibration.DeviceType camera = Calibration.DeviceType.Depth)
         {
-            ArrayImage<Short3> pointCloud = new ArrayImage<Short3>(ImageFormat.Custom, 
+            Image pointCloud = new Image(ImageFormat.Custom, 
                 depth.WidthPixels, depth.HeightPixels);
 
             DepthImageToPointCloud(depth, pointCloud, camera);
@@ -136,11 +148,17 @@ namespace Microsoft.Azure.Kinect.Sensor
                 using (Image depthReference = depth.Reference())
                 using (Image pointCloudReference = pointCloud.Reference())
                 {
+                    // Ensure changes made to the managed memory are visible to the native layer
+                    depthReference.FlushMemory();
+
                     AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_point_cloud(
                         handle,
                         depthReference.DangerousGetHandle(),
                         camera,
                         pointCloudReference.DangerousGetHandle()));
+
+                    // Copy the native memory back to managed memory if required
+                    pointCloudReference.InvalidateMemory();
                 }
             }
         }

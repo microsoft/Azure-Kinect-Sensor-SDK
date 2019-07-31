@@ -66,9 +66,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                             // TODO: Lock the Bitmap and access the bytes directly?
                             ////BitmapData d = depthVisualization.LockBits(new Rectangle(0, 0, depthVisualization.Width, depthVisualization.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-                            ushort[] depthValues = new ushort[capture.Depth.WidthPixels * capture.Depth.HeightPixels];
+                            ushort[] depthValues = capture.Depth.GetPixels<ushort>().ToArray();
 
-                            capture.Depth.CopyTo(depthValues, 0, 0, depthValues.Length);
                             for (int y = 0; y < capture.Depth.HeightPixels; y++)
                             {
                                 for (int x = 0; x < capture.Depth.WidthPixels; x++)

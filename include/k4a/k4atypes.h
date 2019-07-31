@@ -286,6 +286,7 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_depth_mode_to_string in k4a.c if enum values are added.
 typedef enum
 {
     K4A_DEPTH_MODE_OFF = 0,        /**< Depth sensor will be turned off with this setting. */
@@ -304,6 +305,7 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_color_resolution_to_string in k4a.c if enum values are added.
 typedef enum
 {
     K4A_COLOR_RESOLUTION_OFF = 0, /**< Color camera will be turned off with this setting */
@@ -326,6 +328,7 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_image_format_to_string in k4a.c if enum values are added.
 typedef enum
 {
     /** Color image type MJPG.
@@ -465,13 +468,13 @@ typedef enum
  * This enumeration is used to select the desired frame rate to operate the cameras. The actual
  * frame rate may vary slightly due to dropped data, synchronization variation between devices,
  * clock accuracy, or if the camera exposure priority mode causes reduced frame rate.
- *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_fps_to_string in k4a.c if enum values are added.
 typedef enum
 {
     K4A_FRAMES_PER_SECOND_5 = 0, /**< 5 FPS */
@@ -861,6 +864,30 @@ typedef void(k4a_logging_message_cb_t)(void *context,
  */
 typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
 
+/** Callback function for a memory allocation.
+ *
+ * \param size
+ * Minimum size in bytes needed for the buffer.
+ *
+ * \param context
+ * Output parameter for a context that will be provided in the subsequent call to the \ref k4a_memory_destroy_cb_t
+ * callback.
+ *
+ * \return
+ * A pointer to the newly allocated memory.
+ *
+ * \remarks
+ * A callback of this type is provided when there is an application defined allocator.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ *
+ */
+typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
+
 /**
  *
  * @}
@@ -970,8 +997,8 @@ typedef struct _k4a_device_configuration_t
  */
 typedef struct _k4a_calibration_extrinsics_t
 {
-    float rotation[9];    /**< Rotation matrix*/
-    float translation[3]; /**< Translation vector*/
+    float rotation[9];    /**< 3x3 Rotation matrix stored in row major order */
+    float translation[3]; /**< Translation vector, x,y,z (in millimeters) */
 } k4a_calibration_extrinsics_t;
 
 /** Camera intrinsic calibration data.

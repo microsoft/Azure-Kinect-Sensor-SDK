@@ -319,7 +319,12 @@ TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
     int width = m_calibration.depth_camera_calibration.resolution_width;
     int height = m_calibration.depth_camera_calibration.resolution_height;
     k4a_image_t depth_image = NULL;
-    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_DEPTH16, width, height, width * (int)sizeof(uint16_t), &depth_image),
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_DEPTH16,
+                           width,
+                           height,
+                           width * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
+                           &depth_image),
               K4A_RESULT_SUCCEEDED);
     ASSERT_NE(depth_image, (k4a_image_t)NULL);
     k4a_transformation_image_descriptor_t depth_image_descriptor = image_get_descriptor(depth_image);
@@ -331,7 +336,12 @@ TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
     }
 
     k4a_image_t xyz_image = NULL;
-    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM, width, height, width * 3 * (int)sizeof(int16_t), &xyz_image),
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM,
+                           width,
+                           height,
+                           width * 3 * (int)sizeof(int16_t),
+                           ALLOCATION_SOURCE_USER,
+                           &xyz_image),
               K4A_RESULT_SUCCEEDED);
     ASSERT_NE(xyz_image, (k4a_image_t)NULL);
     k4a_transformation_image_descriptor_t xyz_image_descriptor = image_get_descriptor(xyz_image);
@@ -374,6 +384,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            depth_image_width_pixels,
                            depth_image_height_pixels,
                            depth_image_width_pixels * 1 * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
                            &depth_image),
               K4A_WAIT_RESULT_SUCCEEDED);
 
@@ -400,6 +411,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            color_image_width_pixels,
                            color_image_height_pixels,
                            color_image_width_pixels * 4 * (int)sizeof(uint8_t),
+                           ALLOCATION_SOURCE_USER,
                            &color_image),
               K4A_WAIT_RESULT_SUCCEEDED);
 
@@ -408,6 +420,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            depth_image_width_pixels,
                            depth_image_height_pixels,
                            depth_image_width_pixels * 4 * (int)sizeof(uint8_t),
+                           ALLOCATION_SOURCE_USER,
                            &transformed_color_image),
               K4A_WAIT_RESULT_SUCCEEDED);
 
@@ -416,6 +429,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            color_image_width_pixels,
                            color_image_height_pixels,
                            color_image_width_pixels * 1 * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
                            &transformed_depth_image),
               K4A_WAIT_RESULT_SUCCEEDED);
 
@@ -440,6 +454,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            depth_image_width_pixels,
                            depth_image_height_pixels,
                            depth_image_width_pixels * 3 * (int)sizeof(int16_t),
+                           ALLOCATION_SOURCE_USER,
                            &xyz_depth_image),
               K4A_RESULT_SUCCEEDED);
 
@@ -448,6 +463,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            color_image_width_pixels,
                            color_image_height_pixels,
                            color_image_width_pixels * 3 * (int)sizeof(int16_t),
+                           ALLOCATION_SOURCE_USER,
                            &xyz_color_image),
               K4A_RESULT_SUCCEEDED);
 

@@ -64,14 +64,24 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
             }
 
+            private k4a_image_t(k4a_image_t original) : base(true)
+            {
+                NativeMethods.k4a_image_reference(original.handle);
+                this.handle = original.handle;
+            }
+
             public k4a_image_t DuplicateReference()
             {
+                return new k4a_image_t(this);
+                /*
                 k4a_image_t duplicate = new k4a_image_t();
 
-                NativeMethods.k4a_image_reference(handle);
+                
                 duplicate.handle = this.handle;
                 return duplicate;
+                */
             }
+
             protected override bool ReleaseHandle()
             {
                 NativeMethods.k4a_image_release(handle);
@@ -188,6 +198,13 @@ namespace Microsoft.Azure.Kinect.Sensor
         #endregion
 
         #region Functions
+
+        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_set_allocator(
+            k4a_memory_allocate_cb_t allocate,
+            k4a_memory_destroy_cb_t free
+        );
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
@@ -311,9 +328,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
         public static extern void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float temperature_c);
-
-
-
+               
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
         public static extern void k4a_capture_reference(IntPtr capture_handle);
@@ -330,6 +345,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             int stride_bytes,
             out k4a_image_t image_handle);
 
+        public delegate IntPtr k4a_memory_allocate_cb_t(int size, out IntPtr context);
         public delegate void k4a_memory_destroy_cb_t(IntPtr buffer, IntPtr context);
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]

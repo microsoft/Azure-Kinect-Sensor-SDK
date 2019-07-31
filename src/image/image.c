@@ -105,6 +105,12 @@ k4a_result_t image_create_from_buffer(k4a_image_format_t format,
     return result;
 }
 
+static void image_default_free_function(void *buffer, void *context)
+{
+    (void)context;
+    allocator_free(buffer);
+}
+
 static k4a_result_t image_create_empty_image(allocation_source_t source, size_t size, k4a_image_t *image_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, image_handle == NULL);
@@ -113,21 +119,20 @@ static k4a_result_t image_create_empty_image(allocation_source_t source, size_t 
 
     k4a_result_t result;
     image_context_t *image = NULL;
-    void *alloc_context = NULL;
 
     result = K4A_RESULT_FROM_BOOL((image = k4a_image_t_create(image_handle)) != NULL);
 
     if (K4A_SUCCEEDED(result))
     {
-        result = K4A_RESULT_FROM_BOOL((image->buffer = allocator_alloc(source, size, &alloc_context)) != NULL);
+        result = K4A_RESULT_FROM_BOOL((image->buffer = allocator_alloc(source, size)) != NULL);
     }
 
     if (K4A_SUCCEEDED(result))
     {
         image->ref_count = 1;
         image->buffer_size = size;
-        image->memory_free_cb = allocator_free;
-        image->memory_free_cb_context = alloc_context;
+        image->memory_free_cb = image_default_free_function;
+        image->memory_free_cb_context = NULL;
         image->lock = Lock_Init();
         result = K4A_RESULT_FROM_BOOL(image->lock != NULL);
     }
@@ -154,6 +159,7 @@ k4a_result_t image_create(k4a_image_format_t format,
                           int width_pixels,
                           int height_pixels,
                           int stride_bytes,
+                          allocation_source_t source,
                           k4a_image_t *image_handle)
 {
     // User is special and only allowed to be used by the user through a public API.
@@ -168,7 +174,7 @@ k4a_result_t image_create(k4a_image_format_t format,
     size_t size = (size_t)height_pixels * (size_t)stride_bytes;
 
     *image_handle = NULL;
-    result = TRACE_CALL(image_create_empty_image(ALLOCATION_SOURCE_USER, size, image_handle));
+    result = TRACE_CALL(image_create_empty_image(source, size, image_handle));
 
     if (K4A_SUCCEEDED(result))
     {
