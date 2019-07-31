@@ -412,27 +412,27 @@ typedef enum
      */
     K4A_IMAGE_FORMAT_IR16,
 
-    /** Single channel image type MONO8.
+    /** Single channel image type CUSTOM8.
      *
      * \details
-     * Each pixel of MONO8 is a single channel one byte of unsigned data.
+     * Each pixel of CUSTOM8 is a single channel one byte of unsigned data.
      *
      * \details
      * Stride indicates the length of each line in bytes and should be used to determine the start location of each
      * line of the image in memory.
      */
-    K4A_IMAGE_FORMAT_MONO8,
+    K4A_IMAGE_FORMAT_CUSTOM8,
 
-    /** Single channel image type MONO16.
+    /** Single channel image type CUSTOM16.
      *
      * \details
-     * Each pixel of MONO16 is a single channel two bytes of little endian unsigned data.
+     * Each pixel of CUSTOM16 is a single channel two bytes of little endian unsigned data.
      *
      * \details
      * Stride indicates the length of each line in bytes and should be used to determine the start location of each
      * line of the image in memory.
      */
-    K4A_IMAGE_FORMAT_MONO16,
+    K4A_IMAGE_FORMAT_CUSTOM16,
 
     /** Custom image format.
      *
@@ -448,7 +448,7 @@ typedef enum
 /** Transformation interpolation type.
  *
  * \remarks
- * Interpolation type used with k4a_transformation_custom_depth_image_to_color_camera.
+ * Interpolation type used with k4a_transformation_depth_image_to_color_camera_custom.
  *
  * \xmlonly
  * <requirements>

@@ -468,7 +468,7 @@ void transformation_destroy(k4a_transformation_t transformation_handle)
     k4a_transformation_t_destroy(transformation_handle);
 }
 
-k4a_result_t transformation_custom_depth_image_to_color_camera(
+k4a_result_t transformation_depth_image_to_color_camera_custom(
     k4a_transformation_t transformation_handle,
     const uint8_t *depth_image_data,
     const k4a_transformation_image_descriptor_t *depth_image_descriptor,
@@ -493,7 +493,7 @@ k4a_result_t transformation_custom_depth_image_to_color_camera(
     if (transformation_context->enable_gpu_optimization)
     {
         if (K4A_BUFFER_RESULT_SUCCEEDED !=
-            TRACE_BUFFER_CALL(transformation_custom_depth_image_to_color_camera_validate_parameters(
+            TRACE_BUFFER_CALL(transformation_depth_image_to_color_camera_validate_parameters(
                 &transformation_context->calibration,
                 &transformation_context->depth_camera_xy_tables,
                 depth_image_data,
@@ -518,13 +518,13 @@ k4a_result_t transformation_custom_depth_image_to_color_camera(
                                                         transformed_custom_image_descriptor->height_pixels);
 
         k4a_transform_engine_type_t transform_type = K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR;
-        if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_MONO8)
+        if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_CUSTOM8)
         {
-            transform_type = K4A_TRANSFORM_ENGINE_TYPE_DEPTH_AUX8_TO_COLOR;
+            transform_type = K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM8_TO_COLOR;
         }
-        else if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_MONO16)
+        else if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_CUSTOM16)
         {
-            transform_type = K4A_TRANSFORM_ENGINE_TYPE_DEPTH_AUX16_TO_COLOR;
+            transform_type = K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM16_TO_COLOR;
         }
 
         k4a_transform_engine_interpolation_t interpolation;
@@ -561,19 +561,20 @@ k4a_result_t transformation_custom_depth_image_to_color_camera(
     }
     else
     {
-        if (K4A_BUFFER_RESULT_SUCCEEDED != TRACE_BUFFER_CALL(transformation_custom_depth_image_to_color_camera_internal(
-                                               &transformation_context->calibration,
-                                               &transformation_context->depth_camera_xy_tables,
-                                               depth_image_data,
-                                               depth_image_descriptor,
-                                               custom_image_data,
-                                               custom_image_descriptor,
-                                               transformed_depth_image_data,
-                                               transformed_depth_image_descriptor,
-                                               transformed_custom_image_data,
-                                               transformed_custom_image_descriptor,
-                                               interpolation_type,
-                                               invalid_custom_value)))
+        if (K4A_BUFFER_RESULT_SUCCEEDED !=
+            TRACE_BUFFER_CALL(
+                transformation_depth_image_to_color_camera_internal(&transformation_context->calibration,
+                                                                    &transformation_context->depth_camera_xy_tables,
+                                                                    depth_image_data,
+                                                                    depth_image_descriptor,
+                                                                    custom_image_data,
+                                                                    custom_image_descriptor,
+                                                                    transformed_depth_image_data,
+                                                                    transformed_depth_image_descriptor,
+                                                                    transformed_custom_image_data,
+                                                                    transformed_custom_image_descriptor,
+                                                                    interpolation_type,
+                                                                    invalid_custom_value)))
         {
             return K4A_RESULT_FAILED;
         }

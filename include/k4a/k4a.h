@@ -2055,13 +2055,16 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_color_camera(k4a_trans
  * \p depth_image and \p transformed_depth_image must be of format ::K4A_IMAGE_FORMAT_DEPTH16.
  *
  * \remarks
- * \p custom_image and \p transformed_custom_image must be of format ::K4A_IMAGE_FORMAT_MONO8 or
- * ::K4A_IMAGE_FORMAT_MONO16.
+ * \p custom_image and \p transformed_custom_image must be of format ::K4A_IMAGE_FORMAT_CUSTOM8 or
+ * ::K4A_IMAGE_FORMAT_CUSTOM16.
  *
  * \remarks
- * \p transformed_depth_image and \p transformed_custom _image must have a width and height matching the width and
+ * \p transformed_depth_image and \p transformed_custom_image must have a width and height matching the width and
  * height of the color camera in the mode specified by the \ref k4a_calibration_t used to create the
  * \p transformation_handle with k4a_transformation_create().
+ *
+ * \remarks
+ * \p custom_image must have a width and height matching the width and height of \p depth_image.
  *
  * \remarks
  * The contents \p transformed_depth_image will be filled with the depth values derived from \p depth_image in the color
@@ -2095,7 +2098,7 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_color_camera(k4a_trans
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t
-k4a_transformation_custom_depth_image_to_color_camera(k4a_transformation_t transformation_handle,
+k4a_transformation_depth_image_to_color_camera_custom(k4a_transformation_t transformation_handle,
                                                       const k4a_image_t depth_image,
                                                       const k4a_image_t custom_image,
                                                       k4a_image_t transformed_depth_image,

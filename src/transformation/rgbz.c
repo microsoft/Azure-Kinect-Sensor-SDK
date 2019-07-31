@@ -639,7 +639,7 @@ static k4a_result_t transformation_depth_to_color(k4a_transformation_rgbz_contex
     return K4A_RESULT_SUCCEEDED;
 }
 
-k4a_buffer_result_t transformation_custom_depth_image_to_color_camera_validate_parameters(
+k4a_buffer_result_t transformation_depth_image_to_color_camera_validate_parameters(
     const k4a_calibration_t *calibration,
     const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
     const uint8_t *depth_image_data,
@@ -707,11 +707,11 @@ k4a_buffer_result_t transformation_custom_depth_image_to_color_camera_validate_p
     }
 
     int custom_bytes_per_pixel = 1;
-    k4a_image_format_t custom_format = K4A_IMAGE_FORMAT_MONO8;
-    if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_MONO16)
+    k4a_image_format_t custom_format = K4A_IMAGE_FORMAT_CUSTOM8;
+    if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_CUSTOM16)
     {
         custom_bytes_per_pixel = 2;
-        custom_format = K4A_IMAGE_FORMAT_MONO16;
+        custom_format = K4A_IMAGE_FORMAT_CUSTOM16;
     }
 
     k4a_transformation_image_descriptor_t expected_custom_image_descriptor =
@@ -760,7 +760,7 @@ k4a_buffer_result_t transformation_custom_depth_image_to_color_camera_validate_p
     return K4A_BUFFER_RESULT_SUCCEEDED;
 }
 
-k4a_buffer_result_t transformation_custom_depth_image_to_color_camera_internal(
+k4a_buffer_result_t transformation_depth_image_to_color_camera_internal(
     const k4a_calibration_t *calibration,
     const k4a_transformation_xy_tables_t *xy_tables_depth_camera,
     const uint8_t *depth_image_data,
@@ -776,16 +776,16 @@ k4a_buffer_result_t transformation_custom_depth_image_to_color_camera_internal(
 {
     if (K4A_BUFFER_RESULT_SUCCEEDED !=
         TRACE_BUFFER_CALL(
-            transformation_custom_depth_image_to_color_camera_validate_parameters(calibration,
-                                                                                  xy_tables_depth_camera,
-                                                                                  depth_image_data,
-                                                                                  depth_image_descriptor,
-                                                                                  custom_image_data,
-                                                                                  custom_image_descriptor,
-                                                                                  transformed_depth_image_data,
-                                                                                  transformed_depth_image_descriptor,
-                                                                                  transformed_custom_image_data,
-                                                                                  transformed_custom_image_descriptor)))
+            transformation_depth_image_to_color_camera_validate_parameters(calibration,
+                                                                           xy_tables_depth_camera,
+                                                                           depth_image_data,
+                                                                           depth_image_descriptor,
+                                                                           custom_image_data,
+                                                                           custom_image_descriptor,
+                                                                           transformed_depth_image_data,
+                                                                           transformed_depth_image_descriptor,
+                                                                           transformed_custom_image_data,
+                                                                           transformed_custom_image_descriptor)))
     {
         return K4A_BUFFER_RESULT_FAILED;
     }
@@ -808,11 +808,11 @@ k4a_buffer_result_t transformation_custom_depth_image_to_color_camera_internal(
 
     context.enable_custom8 = false;
     context.enable_custom16 = false;
-    if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_MONO8)
+    if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_CUSTOM8)
     {
         context.enable_custom8 = true;
     }
-    else if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_MONO16)
+    else if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_CUSTOM16)
     {
         context.enable_custom16 = true;
     }

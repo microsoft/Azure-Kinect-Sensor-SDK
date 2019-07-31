@@ -61,7 +61,7 @@ static k4a_result_t transform_engine_start_helper(tewrapper_context_t *tewrapper
         LOG_ERROR("Transform engine create and initialize failed with error code: %d.", teresult);
         if (teresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_OPENGL_CONTEXT)
         {
-            LOG_ERROR("OpenGL context creation failed. You could try updating your graphics drivers.", 0);
+            LOG_ERROR("OpenGL 4.4 context creation failed. You could try updating your graphics drivers.", 0);
         }
     }
 
@@ -121,8 +121,8 @@ static int transform_engine_thread(void *param)
                         result = K4A_RESULT_FAILED;
                     }
                 }
-                else if (tewrapper->type == K4A_TRANSFORM_ENGINE_TYPE_DEPTH_AUX8_TO_COLOR ||
-                         tewrapper->type == K4A_TRANSFORM_ENGINE_TYPE_DEPTH_AUX16_TO_COLOR)
+                else if (tewrapper->type == K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM8_TO_COLOR ||
+                         tewrapper->type == K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM16_TO_COLOR)
                 {
                     size_t transform_engine_output_buffer_size =
                         deloader_transform_engine_get_output_frame_size(tewrapper->transform_engine,
@@ -165,7 +165,9 @@ static int transform_engine_thread(void *param)
                 if (teresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_WAIT_PROCESSING_COMPLETE_FAILED ||
                     teresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_TIMEOUT)
                 {
-                    LOG_ERROR("Timeout during transform engine process frame. This could indicate GPU is hung.", 0);
+                    LOG_ERROR("Timeout during depth engine process frame.", 0);
+                    LOG_ERROR("SDK should be restarted since it looks like GPU has encountered an unrecoverable error.",
+                              0);
                     result = K4A_RESULT_FAILED;
                 }
                 else if (teresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)

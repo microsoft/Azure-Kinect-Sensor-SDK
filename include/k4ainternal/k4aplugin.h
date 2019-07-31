@@ -87,10 +87,10 @@ typedef enum
  */
 typedef enum
 {
-    K4A_TRANSFORM_ENGINE_TYPE_COLOR_TO_DEPTH = 0,   /**< Transforms color image into the geometry of the depth camera */
-    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR,       /**< Transforms depth image into the geometry of the color camera */
-    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_AUX8_TO_COLOR,  /**< Transforms depth + 8 bit aux into the color camera geometry */
-    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_AUX16_TO_COLOR, /**< Transforms depth + 16 bit aux into the color camera geometry */
+    K4A_TRANSFORM_ENGINE_TYPE_COLOR_TO_DEPTH = 0,      /**< Transforms color image into the geometry of depth camera */
+    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR,          /**< Transforms depth image into the geometry of color camera */
+    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM8_TO_COLOR,  /**< Transforms depth + 8 bit custom data into color camera */
+    K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM16_TO_COLOR, /**< Transforms depth + 16 bit custom data into color camera */
 } k4a_transform_engine_type_t;
 
 /** Transform Engine interpolation type

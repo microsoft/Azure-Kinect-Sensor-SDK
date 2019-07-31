@@ -845,19 +845,19 @@ public:
         }
     }
 
-    /** Transforms depth map and an custom image into the geometry of the color camera.
+    /** Transforms depth map and a custom image into the geometry of the color camera.
      * Throws error on failure
      *
-     * \sa k4a_transformation_custom_depth_image_to_color_camera
+     * \sa k4a_transformation_depth_image_to_color_camera_custom
      */
-    void custom_depth_image_to_color_camera(const image &depth_image,
+    void depth_image_to_color_camera_custom(const image &depth_image,
                                             const image &custom_image,
                                             image *transformed_depth_image,
                                             image *transformed_custom_image,
                                             k4a_transformation_interpolation_type_t interpolation_type,
                                             uint32_t invalid_custom_value) const
     {
-        k4a_result_t result = k4a_transformation_custom_depth_image_to_color_camera(m_handle,
+        k4a_result_t result = k4a_transformation_depth_image_to_color_camera_custom(m_handle,
                                                                                     depth_image.handle(),
                                                                                     custom_image.handle(),
                                                                                     transformed_depth_image->handle(),
