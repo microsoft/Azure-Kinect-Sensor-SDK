@@ -624,7 +624,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     unsafe
                     {
-                        System.Runtime.InteropServices.Marshal.Copy(this.managedBufferCache, 0, (IntPtr)this.GetUnsafeBuffer(), (int)this.Size);
+                        System.Runtime.InteropServices.Marshal.Copy(this.managedBufferCache, 0, (IntPtr)this.GetUnsafeBuffer(), checked((int)this.Size));
                     }
                 }
             }

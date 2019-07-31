@@ -301,7 +301,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// If a new sample is not currently available, this function will block until the timeout is reached.
         /// The API will buffer at least two camera capture intervals worth of samples before dropping the oldest sample. Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.
         /// </remarks>
-        public ImuSample GetImuSample(TimeSpan timeout = default)
+        public ImuSample GetImuSample(TimeSpan timeout)
         {
             lock (this)
             {
