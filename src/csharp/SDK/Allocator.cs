@@ -1,17 +1,16 @@
 //------------------------------------------------------------------------------
-// 
+// <copyright file="Allocator.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// 
+// </copyright>
 //------------------------------------------------------------------------------
-
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly:InternalsVisibleTo("Microsoft.Azure.Kinect.Sensor.UnitTests")]
+[assembly: InternalsVisibleTo("Microsoft.Azure.Kinect.Sensor.UnitTests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100f54d726c53826f259c2372d3fe68e1a122f58989796aa52500b930ff33cb0e57431b25a780b0d55c45470c8835f7a335425ef6706f9dbcf7046fe6f479d723a51f6c2c9630d986b5cadb47094d5fd6c64cb144736af739fc071cb53c1296d27e38ee99a2ac2329ed141e645b4669b32568a71607c8f7e986418825f2d37c48cf")]
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -26,7 +25,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         // Allocations made by the managed code for the native library
         private readonly SortedDictionary<long, AllocationContext> allocations = new SortedDictionary<long, AllocationContext>();
 
-        // A recycleable large array pool to prevent unnecissary managed allocationsns and clearing of memory
+        // A recyclable large array pool to prevent unnecessary managed allocations and clearing of memory
         private readonly ArrayPool<byte> pool = new LargeArrayPool();
 
         // Managed buffers used as caches for the native memory.
@@ -216,8 +215,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-
-        
         /// <summary>
         /// Get a managed array to cache the contents of a native buffer.
         /// </summary>
