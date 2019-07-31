@@ -104,7 +104,7 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
     // The user may set the callback,  clear the callback, or set the callback to the
     // same value it was previously. It is a failure to change the callback
     // from an existing registration.
-    if (g_context->user_callback == NULL || message_cb == NULL || g_context->user_callback == message_cb)
+    if (g_context->user_callback == nullptr || message_cb == nullptr || g_context->user_callback == message_cb)
     {
         // Store the user log level
         g_context->user_log_level = min_level;
@@ -142,26 +142,18 @@ static void logger_init_once(logger_global_context_t *global)
 
     if (enable_file_logging && enable_file_logging[0] != '\0')
     {
-        const char *log_file = nullptr;
-        if (enable_file_logging == NULL || enable_file_logging[0] == '\0')
-        {
-            log_file = K4A_LOG_FILE_NAME;
-        }
-        else if (enable_file_logging[0] != '0')
-        {
-            // enable_file_logging is valid see if its a file path
-            log_file = K4A_LOG_FILE_NAME;
-            uint32_t extension_sz = sizeof(LOG_FILE_EXTENSION);
+        // enable_file_logging is valid see if its a file path
+        const char *log_file = K4A_LOG_FILE_NAME;
+        uint32_t extension_sz = sizeof(LOG_FILE_EXTENSION);
 
-            // If enable_file_logging ends in .log then we use it as a path and or file name, else we use the default
-            uint32_t path_length = (uint32_t)strlen(enable_file_logging) + 1;
-            if (path_length > extension_sz)
+        // If enable_file_logging ends in .log then we use it as a path and or file name, else we use the default
+        uint32_t path_length = (uint32_t)strlen(enable_file_logging) + 1;
+        if (path_length > extension_sz)
+        {
+            const char *extension = enable_file_logging + (char)(path_length - extension_sz);
+            if (strncmp(extension, LOG_FILE_EXTENSION, extension_sz) == 0)
             {
-                const char *extension = enable_file_logging + (char)(path_length - extension_sz);
-                if (strncmp(extension, LOG_FILE_EXTENSION, extension_sz) == 0)
-                {
-                    log_file = enable_file_logging;
-                }
+                log_file = enable_file_logging;
             }
         }
 
@@ -187,7 +179,7 @@ static void logger_init_once(logger_global_context_t *global)
     }
 
     // log to stdout if enabled via ENV var AND if file logging is not enabled.
-    if (K4A_SUCCEEDED(result) && (global->env_logger == NULL))
+    if (K4A_SUCCEEDED(result) && (global->env_logger == nullptr))
     {
         bool enable_stdout_logger = false;
 
@@ -196,11 +188,12 @@ static void logger_init_once(logger_global_context_t *global)
         {
             enable_stdout_logger = true;
         }
-        else if (global->user_callback == NULL)
+        else if (global->user_callback == nullptr)
         {
             // Default with user_callback disabled is use stdout logging unless specifically disabled
-            if (global->user_callback == NULL && (enable_stdout_logging == NULL || enable_stdout_logging[0] == '\0' ||
-                                                  (enable_stdout_logging && enable_stdout_logging[0] != '0')))
+            if (global->user_callback == nullptr &&
+                (enable_stdout_logging == nullptr || enable_stdout_logging[0] == '\0' ||
+                 (enable_stdout_logging && enable_stdout_logging[0] != '0')))
             {
                 enable_stdout_logger = true;
             }
@@ -264,7 +257,7 @@ void logger_deinit(void)
 
     rwlock_acquire_write(&g_context->lock);
 
-    g_context->env_logger = NULL;
+    g_context->env_logger = nullptr;
 
     rwlock_release_write(&g_context->lock);
 }

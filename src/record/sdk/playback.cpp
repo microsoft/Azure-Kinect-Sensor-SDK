@@ -8,15 +8,10 @@
 #include <k4a/k4a.h>
 #include <k4arecord/playback.h>
 #include <k4ainternal/matroska_read.h>
-#include <k4ainternal/logging.h>
 #include <k4ainternal/common.h>
 
 using namespace k4arecord;
 using namespace LIBMATROSKA_NAMESPACE;
-
-extern "C" {
-char K4A_ENV_VAR_LOG_TO_A_FILE[] = K4A_RECORD_ENABLE_LOG_TO_A_FILE;
-}
 
 k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle)
 {
