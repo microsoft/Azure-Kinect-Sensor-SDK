@@ -49,10 +49,8 @@ typedef struct _dewrapper_context_t
 
 typedef struct _shared_image_context_t
 {
-    LOCK_HANDLE lock;
+    // Overall shared buffer
     uint8_t *buffer;
-    image_destroy_cb_t *memory_free_cb;
-    void *memory_free_cb_context;
     volatile long ref;
 } shared_image_context_t;
 
@@ -108,15 +106,17 @@ static void free_shared_depth_image(void *buffer, void *context)
     RETURN_VALUE_IF_ARG(VOID_VALUE, buffer == NULL);
     RETURN_VALUE_IF_ARG(VOID_VALUE, context == NULL);
 
+    // The buffer being passed in may be the beginning or the middle of the
+    // overall shared buffer
     (void)buffer;
 
-    shared_image_context_t *shared_context = context;
+    shared_image_context_t *shared_context = (shared_image_context_t *)context;
 
     long count = DEC_REF_VAR(shared_context->ref);
 
     if (count == 0)
     {
-        shared_context->memory_free_cb(shared_context->buffer, shared_context->memory_free_cb_context);
+        allocator_free(shared_context->buffer);
         free(context);
     }
 }
@@ -210,7 +210,6 @@ static int depth_engine_thread(void *param)
         shared_image_context_t *shared_image_context = NULL;
         uint8_t *raw_image_buffer = NULL;
         size_t raw_image_buffer_size = 0;
-        void *allocator_context = NULL;
         bool dropped = false;
 
         k4a_wait_result_t wresult = queue_pop(dewrapper->queue, K4A_WAIT_INFINITE, &capture_raw);
@@ -232,9 +231,7 @@ static int depth_engine_thread(void *param)
 
             // Allocate 1 buffer for depth engine to write depth and IR images to
             assert(depth_engine_output_buffer_size != 0);
-            capture_byte_ptr = allocator_alloc(ALLOCATION_SOURCE_DEPTH,
-                                               depth_engine_output_buffer_size,
-                                               &allocator_context);
+            capture_byte_ptr = allocator_alloc(ALLOCATION_SOURCE_DEPTH, depth_engine_output_buffer_size);
             if (capture_byte_ptr == NULL)
             {
                 LOG_ERROR("Depth streaming callback failed to allocate output buffer", 0);
@@ -286,8 +283,6 @@ static int depth_engine_thread(void *param)
 
         if (K4A_SUCCEEDED(result))
         {
-            shared_image_context->memory_free_cb = allocator_free;
-            shared_image_context->memory_free_cb_context = allocator_context;
             shared_image_context->ref = 0;
             shared_image_context->buffer = capture_byte_ptr;
 
@@ -386,7 +381,7 @@ static int depth_engine_thread(void *param)
 
         if (capture_byte_ptr && cleanup_capture_byte_ptr)
         {
-            allocator_free(capture_byte_ptr, allocator_context);
+            allocator_free(capture_byte_ptr);
         }
 
         if (dropped)

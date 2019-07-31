@@ -53,6 +53,7 @@ used with CPP and destroy being used with C, or vise-vesa, the types get c or cp
     static inline _internal_context_type_ *_public_handle_name_##_create(_public_handle_name_ *handle)                 \
     {                                                                                                                  \
         PUB_HANDLE_TYPE(_public_handle_name_) * pContextWrapper;                                                       \
+        *handle = NULL;                                                                                                \
         pContextWrapper = ALLOCATE(PUB_HANDLE_TYPE(_public_handle_name_));                                             \
         if (pContextWrapper == NULL)                                                                                   \
         {                                                                                                              \

@@ -825,6 +825,30 @@ typedef void(k4a_logging_message_cb_t)(void *context,
  */
 typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
 
+/** Callback function for a memory allocation.
+ *
+ * \param size
+ * Minimum size in bytes needed for the buffer.
+ *
+ * \param context
+ * Output parameter for a context that will be provided in the subsequent call to the \ref k4a_memory_destroy_cb_t
+ * callback.
+ *
+ * \return
+ * A pointer to the newly allocated memory.
+ *
+ * \remarks
+ * A callback of this type is provided when there is an application defined allocator.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ *
+ */
+typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
+
 /**
  *
  * @}

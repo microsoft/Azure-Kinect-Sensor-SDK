@@ -81,6 +81,11 @@ k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *message_cb,
     return logger_register_message_callback(message_cb, message_cb_context, min_level);
 }
 
+k4a_result_t k4a_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memory_destroy_cb_t free)
+{
+    return allocator_set_allocator(allocate, free);
+}
+
 depth_cb_streaming_capture_t depth_capture_ready;
 color_cb_streaming_capture_t color_capture_ready;
 
@@ -270,7 +275,6 @@ void k4a_device_close(k4a_device_t device_handle)
     }
     k4a_device_t_destroy(device_handle);
     allocator_deinitialize();
-    assert(allocator_test_for_leaks() == 0);
 }
 
 k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,
@@ -403,7 +407,7 @@ k4a_result_t k4a_image_create(k4a_image_format_t format,
                               int stride_bytes,
                               k4a_image_t *image_handle)
 {
-    return image_create(format, width_pixels, height_pixels, stride_bytes, image_handle);
+    return image_create(format, width_pixels, height_pixels, stride_bytes, ALLOCATION_SOURCE_USER, image_handle);
 }
 
 k4a_result_t k4a_image_create_from_buffer(k4a_image_format_t format,

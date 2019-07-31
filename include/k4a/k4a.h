@@ -48,10 +48,10 @@ extern "C" {
  */
 K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
 
-/** Sets and clears the callback function to recieve debug messages from the Azure Kinect device.
+/** Sets and clears the callback function to receive debug messages from the Azure Kinect device.
  *
  * \param message_cb
- * The callback function to recieve messages from. Set to NULL to unregister the callback function.
+ * The callback function to receive messages from. Set to NULL to unregister the callback function.
  *
  * \param message_cb_context
  * The callback functions context.
@@ -95,6 +95,42 @@ K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
 K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *message_cb,
                                                       void *message_cb_context,
                                                       k4a_log_level_t min_level);
+
+/** Sets the callback functions for the SDK allocator
+ *
+ * \param allocate
+ * The callback function to allocate memory. When the SDK requires memory allocation this callback will be
+ * called and the application can provide a buffer and a context.
+ *
+ * \param free
+ * The callback function to free memory. The SDK will call this function when memory allocated by \p allocate
+ * is no longer needed.
+ *
+ * \return ::K4A_RESULT_SUCCEEDED if the callback function was set or cleared successfully. ::K4A_RESULT_FAILED if an
+ * error is encountered or the callback function has already been set.
+ *
+ * \remarks
+ * Call this function to hook memory allocation by the SDK. Calling with both \p allocate and \p free as NULL will
+ * clear the hook and reset to the default allocator.
+ *
+ * \remarks
+ * If this function is called after memory has been allocated, the previous version of \p free function may still be
+ * called in the future. The SDK will always call the \p free function that was set at the time that the memory
+ * was allocated.
+ *
+ * \remarks
+ * Not all memory allocation by the SDK is performed by this allocate function. Small allocations or allocations
+ * from special pools may come from other sources.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memory_destroy_cb_t free);
 
 /** Open an Azure Kinect device.
  *

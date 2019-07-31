@@ -1098,6 +1098,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
     return K4A_RESULT_SUCCEEDED;
 }
 
+// Callback function for when image objects are destroyed
+static void uvc_camerareader_free_allocation(void *buffer, void *context)
+{
+    (void)context;
+    allocator_free(buffer);
+}
+
 void UVCCameraReader::Callback(uvc_frame_t *frame)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -1188,7 +1195,7 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
         }
 
         // Allocate K4A Color buffer
-        buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, buffer_size, &context);
+        buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, buffer_size);
         k4a_result_t result = K4A_RESULT_FROM_BOOL(buffer != NULL);
 
         if (K4A_SUCCEEDED(result))
@@ -1207,20 +1214,22 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
 
         if (K4A_SUCCEEDED(result))
         {
+            // The buffer size may be larger than the height * stride for some formats
+            // so we must use image_create_from_buffer rather than image_create
             result = TRACE_CALL(image_create_from_buffer(m_output_image_format,
                                                          (int)m_width_pixels,
                                                          (int)m_height_pixels,
                                                          stride,
                                                          buffer,
                                                          buffer_size,
-                                                         allocator_free,
+                                                         uvc_camerareader_free_allocation,
                                                          context,
                                                          &image));
         }
         else
         {
             // cleanup if there was an error
-            allocator_free(buffer, context);
+            allocator_free(buffer);
         }
 
         k4a_capture_t capture = NULL;
