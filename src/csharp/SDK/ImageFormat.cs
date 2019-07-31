@@ -12,6 +12,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         ColorBGRA32,
         Depth16,
         IR16,
+        Mono8,
+        Mono16,
         Custom
     }
 }
