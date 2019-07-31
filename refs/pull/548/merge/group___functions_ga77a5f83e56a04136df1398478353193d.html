@@ -116,10 +116,10 @@ $(document).ready(function(){initNavTree('group___functions_ga77a5f83e56a04136df
       </table>
 </div><div class="memdoc">
 
-<p>Sets and clears the callback function to recieve debug messages from the Azure Kinect device. </p>
+<p>Sets and clears the callback function to receive debug messages from the Azure Kinect device. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">message_cb</td><td>The callback function to recieve messages from. Set to NULL to unregister the callback function.</td></tr>
+    <tr><td class="paramname">message_cb</td><td>The callback function to receive messages from. Set to NULL to unregister the callback function.</td></tr>
     <tr><td class="paramname">message_cb_context</td><td>The callback functions context.</td></tr>
     <tr><td class="paramname">min_level</td><td>The least critical error the user wants to be notified about.</td></tr>
   </table>
@@ -132,7 +132,7 @@ Clearing the callback function will block until all pending calls to the callbac
 <dd>
 To update <code>min_level</code>, <code>k4a_set_debug_message_handler</code> can be called with the same value <code>message_cb</code> and by specifying a new <code>min_level</code>.</dd>
 <dd>
-Logging provided via this API is independent of the logging controlled by the environmental variable controls <code>K4A_ENABLE_LOG_TO_STDOUT</code>, <code>K4A_ENABLE_LOG_TO_A_FILE</code>, and <code>K4A_LOG_LEVEL</code>. However there is a slight change in default behavior when using this function. By default, when <code><a class="el" href="group___functions_ga77a5f83e56a04136df1398478353193d.html#ga77a5f83e56a04136df1398478353193d" title="Sets and clears the callback function to recieve debug messages from the Azure Kinect device...">k4a_set_debug_message_handler()</a></code> has not been used to register a message callback, the default for environmental variable controls is to send debug messages as if K4A_ENABLE_LOG_TO_STDOUT=1 were set. If <code>k4a_set_debug_message_handler</code> registers a callback function before <a class="el" href="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113.html#ga3d4eb5dfbf4d576d4978b66ea419f113" title="Open an Azure Kinect device. ">k4a_device_open()</a> is called, then the default for environmental controls is as if K4A_ENABLE_LOG_TO_STDOUT=0 was specified. Physically specifying the environmental control will override the default.</dd></dl>
+Logging provided via this API is independent of the logging controlled by the environmental variable controls <code>K4A_ENABLE_LOG_TO_STDOUT</code>, <code>K4A_ENABLE_LOG_TO_A_FILE</code>, and <code>K4A_LOG_LEVEL</code>. However there is a slight change in default behavior when using this function. By default, when <code><a class="el" href="group___functions_ga77a5f83e56a04136df1398478353193d.html#ga77a5f83e56a04136df1398478353193d" title="Sets and clears the callback function to receive debug messages from the Azure Kinect device...">k4a_set_debug_message_handler()</a></code> has not been used to register a message callback, the default for environmental variable controls is to send debug messages as if K4A_ENABLE_LOG_TO_STDOUT=1 were set. If <code>k4a_set_debug_message_handler</code> registers a callback function before <a class="el" href="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113.html#ga3d4eb5dfbf4d576d4978b66ea419f113" title="Open an Azure Kinect device. ">k4a_device_open()</a> is called, then the default for environmental controls is as if K4A_ENABLE_LOG_TO_STDOUT=0 was specified. Physically specifying the environmental control will override the default.</dd></dl>
 <p><code>min_level</code>  
 </div>
 </div>
