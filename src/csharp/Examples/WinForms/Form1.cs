@@ -16,10 +16,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
     /// <summary>
     /// The main form for the Azure Kinect Sensor SDK WinForms example.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1501:Avoid excessive inheritance", Justification = "This is the accepted WinForms pattern.")]
     public partial class Form1 : Form
     {
-        private bool running = true;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Form1"/> class.
         /// </summary>
@@ -53,7 +52,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                 int frameCount = 0;
                 sw.Start();
 
-                while (this.running)
+                while (true)
                 {
                     using (Capture capture = await Task.Run(() => device.GetCapture()).ConfigureAwait(true))
                     {
