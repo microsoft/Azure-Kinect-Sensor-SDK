@@ -10,6 +10,8 @@ variables:
   value: '1.6.102075014'
 - name: 'windows_firmware_version'
   value: '1.6.102075014'
+- name: 'PackageVersion'
+  value: '1.2.0-alpha.7'
 
 trigger:
   batch: false
@@ -575,21 +577,65 @@ jobs:
         artifactName: 'amd64-windows-msvc-RelWithDebInfo'
         parallelizationLimit: 8
 
-    - powershell: |
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug\depthengine_1_0.dll"
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release\depthengine_1_0.dll"
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug\depthengine_1_0.dll"
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release\depthengine_1_0.dll"
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\firmware"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin"
-      displayName: 'Download Resources'
+    - task: NuGetToolInstaller@0
+      inputs:
+        versionSpec: '>=5.1.0' 
+
+    - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2  #NugetCommand@2
+      displayName: "Get Azure Kinect NuGet Package"
+      inputs: 
+        command: custom 
+        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(PackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
 
     - task: CopyFiles@2
-      displayName: "Copy DepthEnginePlugin into bin folder"
+      displayName: "Copy DepthEngine into amd64/debug artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/amd64/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/debug"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into amd64/release artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/amd64/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into x86/debug artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/x86/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/x86/debug"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into x86/release artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/x86/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/x86/release"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy AzureKinectDK_Fw_$(firmware_version).bin artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/firmware/"
+        contents: "AzureKinectDK_Fw_$(firmware_version).bin"
+        targetFolder: "$(System.ArtifactsDirectory)/firmware"
+        flattenFolders: true
+
+    # we don't want to test other binaries in the NuGet package, so delete it.
+    - task: DeleteFiles@1
+      displayName: "Delete Microsoft.Azure.Kinect.Sensor NuGet Package"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir"
+        contents: '\*'
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into bin folder"
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
         contents: "depthengine*.dll"
@@ -597,7 +643,7 @@ jobs:
         flattenFolders: true
 
     - task: CopyFiles@2
-      displayName: "Copy DepthEnginePlugin into C# functional tests folder"
+      displayName: "Copy DepthEngine into C# functional tests folder"
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
         contents: "depthengine*.dll"
@@ -671,21 +717,57 @@ jobs:
       inputs:
         artifactName: 'x86_64-linux-clang-RelWithDebInfo'
         parallelizationLimit: 8
-
-
-    - task: CmdLine@2
-      displayName: 'Download Azure Kinect Firmware'
+        
+    - task: NuGetToolInstaller@0
       inputs:
-        script: curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin --create-dirs
-                
-    - task: CmdLine@2
-      displayName: 'Download DepthEngine Plugin'
+        versionSpec: '>=5.1.0' 
+
+    # The account on the NUC does not currently give this user permission to install, so we have done so manually.
+    # This captures the dependency NuGet has in this environment. We locally ran 'apt-get install mono-complete'
+    #- script: 'apt-get install mono'
+    #  workingDirectory: '$(System.ArtifactsDirectory)'
+    #  displayName: "Ensure Mono is installed"
+
+    - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2  #NugetCommand@2
+      displayName: "Get Azure Kinect NuGet Package"
+      inputs: 
+        command: custom 
+        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(PackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
+
+    - script: 'ls -alR'
+      workingDirectory: '$(System.ArtifactsDirectory)/NugetOutputDir'
+      displayName: "Temp List files"
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into amd64/debug artifacts folder"
       inputs:
-        script: |
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/debug/libdepthengine.so.1.0$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug/libdepthengine.so.1.0 --create-dirs
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/debug/libdepthengine.so$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug/libdepthengine.so --create-dirs
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/release/libdepthengine.so.1.0$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/libdepthengine.so.1.0 --create-dirs
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/release/libdepthengine.so$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/libdepthengine.so --create-dirs
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/linux/lib/native/x64/release/"
+        contents: "libdepthengine*"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into amd64/release artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/linux/lib/native/x64/release/"
+        contents: "libdepthengine*"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy AzureKinectDK_Fw_$(firmware_version).bin artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/firmware/"
+        contents: "AzureKinectDK_Fw_$(firmware_version).bin"
+        targetFolder: "$(System.ArtifactsDirectory)/firmware"
+        flattenFolders: true
+
+    # we don't want to test other binaries in the NuGet package, so delete it.
+    - task: DeleteFiles@1
+      displayName: "Delete Microsoft.Azure.Kinect.Sensor NuGet Package"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir"
+        contents: '\*'
 
     - task: CmdLine@2
       displayName: 'Download findconnectedport'
