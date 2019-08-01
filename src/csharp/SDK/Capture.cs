@@ -213,7 +213,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             lock (this)
             {
-                if (!this.disposedValue)
+                if (!this.disposedValue && disposing)
                 {
                     this.cachedColor?.Dispose();
                     this.cachedDepth?.Dispose();
