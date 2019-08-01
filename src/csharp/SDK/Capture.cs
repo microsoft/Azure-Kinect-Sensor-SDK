@@ -17,6 +17,15 @@ namespace Microsoft.Azure.Kinect.Sensor
         private Image cachedDepth;
         private Image cachedIR;
 
+        internal Capture(NativeMethods.k4a_capture_t handle)
+        {
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
+            Allocator.Singleton.RegisterForDisposal(this);
+
+            this.handle = handle;
+        }
+
         private NativeMethods.k4a_capture_t handle;
 
         private bool disposedValue = false; // To detect redundant calls
@@ -34,19 +43,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             // Hook the native allocator and register this object.
             // .Dispose() will be called on this object when the allocator is shut down.
             Allocator.Singleton.RegisterForDisposal(this);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Capture"/> class.
-        /// </summary>
-        /// <param name="handle">Native handle. The new class takes ownership.</param>
-        internal Capture(NativeMethods.k4a_capture_t handle)
-        {
-            // Hook the native allocator and register this object.
-            // .Dispose() will be called on this object when the allocator is shut down.
-            Allocator.Singleton.RegisterForDisposal(this);
-
-            this.handle = handle;
         }
 
         /// <summary>

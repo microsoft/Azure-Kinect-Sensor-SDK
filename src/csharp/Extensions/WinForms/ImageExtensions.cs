@@ -32,11 +32,12 @@ namespace Microsoft.Azure.Kinect.Sensor.WinForms
 
                     using (var pin = image.Memory.Pin())
                     {
-                        return new Bitmap(image.WidthPixels,
-                                        image.HeightPixels,
-                                        image.StrideBytes,
-                                        System.Drawing.Imaging.PixelFormat.Format32bppArgb,
-                                        (IntPtr)pin.Pointer);
+                        return new Bitmap(
+                            image.WidthPixels,
+                            image.HeightPixels,
+                            image.StrideBytes,
+                            System.Drawing.Imaging.PixelFormat.Format32bppArgb,
+                            (IntPtr)pin.Pointer);
                     }
                 }
             }

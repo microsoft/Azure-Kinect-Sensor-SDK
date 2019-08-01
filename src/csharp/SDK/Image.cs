@@ -562,6 +562,34 @@ namespace Microsoft.Azure.Kinect.Sensor
             GC.SuppressFinalize(this);
         }
 
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            Image other = obj as Image;
+            if (other == null)
+            {
+                return false;
+            }
+
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Image));
+                }
+
+                // Take a reference on the other image to safely access its handle
+                using (Image reference = other.Reference())
+                {
+                    IntPtr myHandleValue = this.handle.DangerousGetHandle();
+                    IntPtr otherHandleValue = reference.DangerousGetHandle().DangerousGetHandle();
+
+                    // If both images represent the same native handle, consider them equal
+                    return myHandleValue == otherHandleValue;
+                }
+            }
+        }
+
         /// <summary>
         /// Gets a native pointer to the underlying memory.
         /// </summary>
