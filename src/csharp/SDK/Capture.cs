@@ -206,6 +206,52 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
+        /// Gets the native handle.
+        /// </summary>
+        /// <returns>The native handle that is wrapped by this capture.</returns>
+        /// <remarks>The function is dangerous because there is no guarantee that the
+        /// handle will not be disposed once it is retrieved. This should only be called
+        /// by code that can ensure that the Capture object will not be disposed on another
+        /// thread.</remarks>
+        internal NativeMethods.k4a_capture_t DangerousGetHandle()
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Capture));
+                }
+
+                return this.handle;
+            }
+        }
+
+        /// <summary>
+        /// Checks two captures to determine if they represent the same native capture object.
+        /// </summary>
+        /// <param name="other">Another Capture to compare against.</param>
+        /// <returns>true if the Captures represent the same native k4a_capture_t.</returns>
+        internal bool NativeEquals(Capture other)
+        {
+            lock (this)
+            {
+                lock (other)
+                {
+                    if (this.disposedValue || other.disposedValue)
+                    {
+                        return false;
+                    }
+
+                    IntPtr myHandleValue = this.handle.DangerousGetHandle();
+                    IntPtr otherHandleValue = other.handle.DangerousGetHandle();
+
+                    // If both images represent the same native handle, consider them equal
+                    return myHandleValue == otherHandleValue;
+                }
+            }
+        }
+
+        /// <summary>
         /// Handle the disposing of the object.
         /// </summary>
         /// <param name="disposing">true when called by Dispose(), false when called by the finalizer.</param>

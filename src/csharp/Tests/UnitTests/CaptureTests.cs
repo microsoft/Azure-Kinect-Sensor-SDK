@@ -160,6 +160,125 @@ void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float value)
             }
         }
 
+
+        /// <summary>
+        /// Verify that methods throw ObjectDisposedException after the Capture is disposed
+        /// </summary>
+        [Test]
+        public void DisposeBehavior()
+        {
+            this.SetOpenCloseImplementation();
+            this.SetCaptureReleaseImplementation();
+
+            Capture c = new Capture();
+            c.Dispose();
+
+            // Verify disposed behavior
+            _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+            {
+                c.Color = null;
+            });
+
+            _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+            {
+                Image image = c.Color;
+            });
+
+            _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+            {
+                _ = c.Reference();
+            });
+
+            _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+            {
+                _ = c.DangerousGetHandle();
+            });
+        }
+
+        /// <summary>
+        /// Verify the Equals operator.
+        /// </summary>
+        [Test]
+        public void EqualsBehavior()
+        {
+            this.SetOpenCloseImplementation();
+            this.SetCaptureReleaseImplementation();
+
+            // Mock an implementation that allows for multiple captures
+            this.nativeK4a.SetImplementation(@"
+
+#include <malloc.h>
+
+typedef struct 
+{
+    int refcount;
+} mock_capture_t;
+
+k4a_result_t k4a_capture_create(k4a_capture_t* capture_handle)
+{
+    mock_capture_t* capture = (mock_capture_t*)malloc(sizeof(mock_capture_t));
+    capture->refcount = 1;
+    *capture_handle = (k4a_capture_t)capture;
+    return K4A_RESULT_SUCCEEDED;
+}
+
+void k4a_capture_reference(k4a_capture_t capture_handle)
+{
+    STUB_ASSERT(capture_handle != NULL);
+    mock_capture_t* capture = (mock_capture_t*)capture_handle;
+    capture->refcount++;
+}
+
+void k4a_capture_release(k4a_capture_t capture_handle)
+{
+    STUB_ASSERT(capture_handle != NULL);
+    mock_capture_t* capture = (mock_capture_t*)capture_handle;
+    capture->refcount--;
+    
+    STUB_ASSERT(capture->refcount >= 0);
+}
+");
+
+            Capture c1 = new Capture();
+            Capture c2 = new Capture();
+            Capture c1_ref = c1.Reference();
+            Capture c2_ref = c2.Reference();
+
+            // Verify the IntPtr values directly
+            IntPtr c1_native = c1.DangerousGetHandle().DangerousGetHandle();
+            IntPtr c1_ref_native = c1_ref.DangerousGetHandle().DangerousGetHandle();
+            IntPtr c2_native = c2.DangerousGetHandle().DangerousGetHandle();
+            IntPtr c2_ref_native = c2_ref.DangerousGetHandle().DangerousGetHandle();
+
+            Assert.AreNotEqual(c1_native, c2_native);
+            Assert.AreEqual(c1_native, c1_ref_native);
+            Assert.AreEqual(c2_ref_native, c2_ref_native);
+
+            // References to each other should be equal
+            Assert.IsTrue(c1.NativeEquals(c1_ref));
+            Assert.IsTrue(c2.NativeEquals(c2_ref));
+
+            // All others are not
+            Assert.IsFalse(c1.NativeEquals(c2));
+            Assert.IsFalse(c1_ref.NativeEquals(c2_ref));
+            Assert.IsFalse(c1.NativeEquals(c2_ref));
+            Assert.IsFalse(c2_ref.NativeEquals(c1));
+
+            // Verify post dispose behavior
+            c1.Dispose();
+            Assert.IsFalse(c1.NativeEquals(c1_ref));
+
+            _ = Assert.Throws(typeof(ObjectDisposedException), () =>
+            {
+                _ = c1.DangerousGetHandle();
+            });
+
+            c1.Dispose();
+            c2.Dispose();
+            c1_ref.Dispose();
+            c2_ref.Dispose();
+        }
+
         /// <summary>
         /// Validate the logic behind the Image properties of the capture.
         /// </summary>
@@ -219,18 +338,23 @@ void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image_t image)
             {
                 using (Capture captureReference = c.Reference())
                 {
+                    // Verify we have two capture objects that represent the same
+                    // native object
+                    Assert.IsTrue(c.NativeEquals(captureReference));
+                    Assert.AreNotSame(c, captureReference);
+
                     Image image1 = new Image(ImageFormat.ColorBGRA32, 10, 10);
                     Image image1_reference = image1.Reference();
                     Image image2 = new Image(ImageFormat.ColorBGRA32, 10, 10);
                     Image image2_reference = image2.Reference();
 
-                    Assert.AreNotEqual(image1, image2);
+                    Assert.IsFalse(image1.NativeEquals(image2));
                     Assert.AreNotSame(image1, image2);
 
                     // Verify our images represent the same native object, but are not the same managed wrapper
-                    Assert.AreEqual(image1, image1_reference);
+                    Assert.IsTrue(image1.NativeEquals(image1_reference));
                     Assert.AreNotSame(image1, image1_reference);
-                    Assert.AreEqual(image2, image2_reference);
+                    Assert.IsTrue(image2.NativeEquals(image2_reference));
                     Assert.AreNotSame(image2, image2_reference);
 
                     Assert.IsNull(c.Color);
@@ -239,14 +363,14 @@ void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image_t image)
                     c.Color = image1;
 
                     // both captures should refer to the same image
-                    Assert.AreEqual(image1, c.Color);
-                    Assert.AreNotEqual(image2, c.Color);
-                    Assert.AreEqual(image1, captureReference.Color);
-                    Assert.AreNotEqual(image2, captureReference.Color);
+                    Assert.IsTrue(image1.NativeEquals(c.Color));
+                    Assert.IsFalse(image2.NativeEquals(c.Color));
+                    Assert.IsTrue(image1.NativeEquals(captureReference.Color));
+                    Assert.IsFalse(image2.NativeEquals(captureReference.Color));
 
                     // The reference should have its own wrapper that represents
                     // the same native image
-                    Assert.AreEqual(c.Color, captureReference.Color);
+                    Assert.IsTrue(c.Color.NativeEquals(captureReference.Color));
                     Assert.AreNotSame(c.Color, captureReference.Color);
 
                     c.Color = image2;
@@ -258,12 +382,12 @@ void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image_t image)
                         });
 
                     // Verify that the capture is now referring to image2.
-                    Assert.AreEqual(image2, c.Color);
+                    Assert.IsTrue(image2.NativeEquals(c.Color));
                     Assert.AreSame(image2, c.Color);
 
                     // Verify that the reference to the capture also is updated to the same new image
-                    Assert.AreNotEqual(image1_reference, captureReference.Color);
-                    Assert.AreEqual(image2, captureReference.Color);
+                    Assert.IsFalse(image1_reference.NativeEquals(captureReference.Color));
+                    Assert.IsTrue(image2.NativeEquals(captureReference.Color));
 
                     // The second capture will have its own wrapper
                     Assert.AreNotSame(image2, captureReference.Color);
@@ -274,24 +398,6 @@ void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image_t image)
 
                     Assert.AreSame(image2, c.Depth);
                     Assert.AreSame(image2, c.IR);
-
-                    c.Dispose();
-
-                    // Verify disposed behavior
-                    _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
-                    {
-                        c.Color = new Image(ImageFormat.ColorBGRA32, 10, 10);
-                    });
-
-                    _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
-                    {
-                        Image image = c.Color;
-                    });
-
-                    _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
-                    {
-                        _ = c.Reference();
-                    });
                 }
             }
         }
@@ -391,10 +497,9 @@ void k4a_image_release(k4a_image_t image_handle)
 
     image->refcount--;
 
-    if (image->refcount == 0)
-    {
-        //free(image);
-    }
+    // Refcounts will go below zero since the mock doesn't properly
+    // implement the references that k4a_capture_get_*_image should add.
+    // STUB_ASSERT(image->refcount >= 0);
 }
 
 ");

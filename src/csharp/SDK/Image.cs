@@ -686,7 +686,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Gets the native handle.
         /// </summary>
         /// <returns>The native handle that is wrapped by this image.</returns>
-        /// <remarks>The function is dangerous because there is no garnatee that the
+        /// <remarks>The function is dangerous because there is no guarantee that the
         /// handle will not be disposed once it is retrieved. This should only be called
         /// by code that can ensure that the Image object will not be disposed on another
         /// thread.</remarks>
@@ -700,6 +700,31 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
 
                 return this.handle;
+            }
+        }
+
+        /// <summary>
+        /// Checks two Images to determine if they represent the same native image object.
+        /// </summary>
+        /// <param name="other">Another Image to compare against.</param>
+        /// <returns>true if the Images represent the same native k4a_image_t.</returns>
+        internal bool NativeEquals(Image other)
+        {
+            lock (this)
+            {
+                lock (other)
+                {
+                    if (this.disposedValue || other.disposedValue)
+                    {
+                        return false;
+                    }
+
+                    IntPtr myHandleValue = this.handle.DangerousGetHandle();
+                    IntPtr otherHandleValue = other.handle.DangerousGetHandle();
+
+                    // If both images represent the same native handle, consider them equal
+                    return myHandleValue == otherHandleValue;
+                }
             }
         }
 
