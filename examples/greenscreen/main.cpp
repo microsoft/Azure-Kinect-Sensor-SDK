@@ -19,6 +19,8 @@ constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TI
 constexpr uint32_t MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC = 160; // Allowing at least 160 microseconds between
                                                                       // depth cameras should ensure they do not
                                                                       // interfere with one another.
+constexpr int32_t COLOR_EXPOSURE_USEC = 8000;
+constexpr int32_t POWERLINE_60HZ = 2;
 
 constexpr size_t board_height = 8;       // TODO command line arg
 constexpr size_t board_width = 6;        // TODO command line arg
@@ -240,7 +242,7 @@ void get_synchronized_captures(k4a::device &master,
             cout << "master depth to master color: "
                  << master_capture.get_color_image().get_device_timestamp().count() -
                         master_capture.get_depth_image().get_device_timestamp().count()
-                 << " master color to sub color: "
+                 << " master color to sub depth: "
                  << sub_capture.get_depth_image().get_device_timestamp().count() -
                         master_capture.get_color_image().get_device_timestamp().count()
                  << endl;
@@ -512,14 +514,70 @@ k4a_device_configuration_t get_sub_config_green_screen()
     return camera_config;
 }
 
+std::tuple<cv::Mat, cv::Vec3d> calibrate_devices(k4a::device &master,
+                                                 k4a::device &subordinate,
+                                                 k4a_device_configuration_t &master_calibration_config,
+                                                 k4a_device_configuration_t &sub_calibration_config)
+{
+    k4a::calibration master_calibration = master.get_calibration(master_calibration_config.depth_mode,
+                                                                 master_calibration_config.color_resolution);
+    k4a::calibration sub_calibration = subordinate.get_calibration(sub_calibration_config.depth_mode,
+                                                                   sub_calibration_config.color_resolution);
+    cv::Mat R;
+    cv::Vec3d t;
+    bool calibrated = false;
+    while (!calibrated)
+    {
+        k4a::capture master_capture, sub_capture;
+        get_synchronized_captures(master, subordinate, sub_calibration_config, master_capture, sub_capture);
+        // get_color_image is guaranteed to be non-null because we use get_synchronized_captures for color
+        // (get_synchronized_captures also offers a flag to use depth for the subordinate camera instead of
+        // color).
+        k4a::image master_color_image = master_capture.get_color_image();
+        k4a::image sub_color_image = sub_capture.get_color_image();
+        cv::Mat cv_master_color_image = k4a_color_to_opencv(master_color_image);
+        cv::Mat cv_sub_color_image = k4a_color_to_opencv(sub_color_image);
+        cv::Size chessboard_pattern(board_height, board_width);
+        vector<cv::Point2f> master_chessboard_corners;
+        vector<cv::Point2f> sub_chessboard_corners;
+
+        bool ready_to_calibrate = find_chessboard_corners_helper(cv_master_color_image,
+                                                                 cv_sub_color_image,
+                                                                 chessboard_pattern,
+                                                                 master_chessboard_corners,
+                                                                 sub_chessboard_corners);
+
+        if (ready_to_calibrate)
+        {
+            stereo_calibration(master_calibration,
+                               sub_calibration,
+                               master_chessboard_corners,
+                               sub_chessboard_corners,
+                               cv_master_color_image.size(),
+                               R,
+                               t);
+            calibrated = true;
+        }
+    }
+    return std::make_tuple(R, t);
+}
+
+std::tuple<cv::Mat, cv::Vec3d>
+compose_calibration_transforms(const cv::Mat &R_1, const cv::Vec3d &t_1, const cv::Mat &R_2, const cv::Vec3d &t_2)
+{
+    cv::Mat H_1 = construct_homogeneous(R_1, t_1);
+    cv::Mat H_2 = construct_homogeneous(R_2, t_2);
+    cv::Mat H_3 = H_1 * H_2;
+    cv::Mat R_3;
+    cv::Vec3d t_3;
+    deconstruct_homogeneous(H_3, R_3, t_3);
+    return std::make_tuple(R_3, t_3);
+}
+
 int main()
 {
     try
     {
-        // TODO find a home for this comment
-        // Note that many sections of the code avoid using std::endl in favor of using \n, because sections of code
-        // dedicated to interacting with both cameras can be sensitive to timing and flushing the buffer takes time.
-
         // Require 2 cameras
         const int num_devices = k4a::device::get_installed_count();
         if (num_devices != 2)
@@ -552,70 +610,36 @@ int main()
             throw std::runtime_error("Subordinate camera does not have the sync in port connected!");
         }
 
-        // TODO explain
-        master.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, K4A_COLOR_CONTROL_MODE_MANUAL, 8000);
-        subordinate.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE, K4A_COLOR_CONTROL_MODE_MANUAL, 8000);
-        master.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, 2);
-        subordinate.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, 2);
+        // If you want to synchronized cameras, you very likely want to manually set both their exposures
+        master.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                 K4A_COLOR_CONTROL_MODE_MANUAL,
+                                 COLOR_EXPOSURE_USEC);
+        subordinate.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                      K4A_COLOR_CONTROL_MODE_MANUAL,
+                                      COLOR_EXPOSURE_USEC);
+        // This setting compensates for the flicker of lights due to the frequency of AC power in your region. If you
+        // are in an area with 50 Hz power, this may need to be updated (check the docs for k4a_color_control_command_t)
+        master.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, POWERLINE_60HZ);
+        subordinate.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
+                                      K4A_COLOR_CONTROL_MODE_MANUAL,
+                                      POWERLINE_60HZ);
+
+        // Construct the calibrations that these types will use
+        k4a_device_configuration_t master_calibration_config = get_master_config_calibration();
+        k4a_device_configuration_t sub_calibration_config = get_sub_config_calibration();
+
+        // now it's time to start the cameras. Start the subordinate first, because it needs to be ready to receive
+        // commands when the master starts up
+        subordinate.start_cameras(&sub_calibration_config);
+        master.start_cameras(&master_calibration_config);
 
         // These will hold the rotation and translation we get from calibration
         cv::Mat R_color_sub_to_color_master;
         cv::Vec3d t_color_sub_to_color_master;
-        cv::Mat R_depth_sub_to_color_sub;
-        cv::Vec3d t_depth_sub_to_color_sub;
 
-        // These will hold the rotation and translation we get by composing internal and calibrated transforms
-        cv::Mat R_depth_sub_to_color_master;
-        cv::Vec3d t_depth_sub_to_color_master;
-
-        {
-            k4a_device_configuration_t master_calibration_config = get_master_config_calibration();
-            k4a_device_configuration_t sub_calibration_config = get_sub_config_calibration();
-
-            k4a::calibration master_calibration = master.get_calibration(master_calibration_config.depth_mode,
-                                                                         master_calibration_config.color_resolution);
-            k4a::calibration sub_calibration = subordinate.get_calibration(sub_calibration_config.depth_mode,
-                                                                           sub_calibration_config.color_resolution);
-            // now it's time to start the cameras. Start the subordinate first, because it needs to be ready to receive
-            // commands when the master starts up
-            subordinate.start_cameras(&sub_calibration_config);
-            master.start_cameras(&master_calibration_config);
-
-            bool calibrated = false;
-            while (!calibrated)
-            {
-                k4a::capture master_capture, sub_capture;
-                get_synchronized_captures(master, subordinate, sub_calibration_config, master_capture, sub_capture);
-                // get_color_image is guaranteed to be non-null because we use get_synchronized_captures for color
-                // (get_synchronized_captures also offers a flag to use depth for the subordinate camera instead of
-                // color).
-                k4a::image master_color_image = master_capture.get_color_image();
-                k4a::image sub_color_image = sub_capture.get_color_image();
-                cv::Mat cv_master_color_image = k4a_color_to_opencv(master_color_image);
-                cv::Mat cv_sub_color_image = k4a_color_to_opencv(sub_color_image);
-                cv::Size chessboard_pattern(board_height, board_width);
-                vector<cv::Point2f> master_chessboard_corners;
-                vector<cv::Point2f> sub_chessboard_corners;
-
-                bool ready_to_calibrate = find_chessboard_corners_helper(cv_master_color_image,
-                                                                         cv_sub_color_image,
-                                                                         chessboard_pattern,
-                                                                         master_chessboard_corners,
-                                                                         sub_chessboard_corners);
-
-                if (ready_to_calibrate)
-                {
-                    stereo_calibration(master_calibration,
-                                       sub_calibration,
-                                       master_chessboard_corners,
-                                       sub_chessboard_corners,
-                                       cv_master_color_image.size(),
-                                       R_color_sub_to_color_master,
-                                       t_color_sub_to_color_master);
-                    calibrated = true;
-                }
-            }
-        }
+        // This wraps all the calibration details
+        std::tie(R_color_sub_to_color_master, t_color_sub_to_color_master) =
+            calibrate_devices(master, subordinate, master_calibration_config, sub_calibration_config);
 
         master.stop_cameras();
         subordinate.stop_cameras();
@@ -624,39 +648,27 @@ int main()
         k4a_device_configuration_t sub_config = get_sub_config_green_screen();
         k4a::calibration master_calibration = master.get_calibration(master_config.depth_mode,
                                                                      master_config.color_resolution);
-        // TODO currently passing the master's color resolution in, because the subordinate camera will have color off
-        // and a valid color resolution is required to get meaningful values here.
         k4a::calibration sub_calibration = subordinate.get_calibration(sub_config.depth_mode,
-                                                                       master_config.color_resolution);
+                                                                       sub_config.color_resolution);
         // Next, we'll want to extend this a bit. By calibrating, we have a transformation from the subordinate color
-        // camera perspective to the master color camera perspective. We have the transformation from subordinate depth
+        // camera perspectivr to the master color camera perspective. We have the transformation from subordinate depth
+
         // to subordinate color (it's stored in extrinsics in the calibration type and we'll get it with
         // k4a_calibration_to_depth_to_color_R_t(). Next, we will combine these transformations to create a
         // transformation from subordinate depth to master color.
-        k4a_calibration_to_depth_to_color_R_t(sub_calibration, R_depth_sub_to_color_sub, t_depth_sub_to_color_sub);
-        cout << "Matrices obtained from depth camera" << endl;
-        cout << R_depth_sub_to_color_sub << endl;
-        cout << t_depth_sub_to_color_sub << endl;
+        cv::Mat R_depth_sub_to_color_sub;
+        cv::Vec3d t_depth_sub_to_color_sub;
 
-        // next, we're going to construct a homogeneous equivalent
-        cout << "Construct homog depth sub to color sub" << endl;
-        cv::Mat depth_sub_to_color_sub_h = construct_homogeneous(R_depth_sub_to_color_sub, t_depth_sub_to_color_sub);
-        cout << depth_sub_to_color_sub_h << endl;
-        cout << "Construct homog color sub to color master" << endl;
-        cout << R_color_sub_to_color_master << endl;
-        cout << t_color_sub_to_color_master << endl;
-        cv::Mat color_sub_to_color_master_h = construct_homogeneous(R_color_sub_to_color_master,
-                                                                    t_color_sub_to_color_master);
-        cout << color_sub_to_color_master_h << endl;
-        cout << "Multiply" << endl;
-        cv::Mat depth_sub_to_color_master_h = depth_sub_to_color_sub_h * color_sub_to_color_master_h;
-        deconstruct_homogeneous(depth_sub_to_color_master_h, R_depth_sub_to_color_master, t_depth_sub_to_color_master);
-        cout << "Homogeneous transform depth sub to color master:" << endl;
-        cout << depth_sub_to_color_master_h << endl;
-        cout << "Depth sub to color master R:" << endl;
-        cout << R_depth_sub_to_color_master << endl;
-        cout << "Depth sub to color master t:" << endl;
-        cout << t_depth_sub_to_color_master << endl;
+        k4a_calibration_to_depth_to_color_R_t(sub_calibration, R_depth_sub_to_color_sub, t_depth_sub_to_color_sub);
+
+        // Now let's compose the depth sub -> color sub, color sub -> color master into depth sub -> color master
+        cv::Mat R_depth_sub_to_color_master;
+        cv::Vec3d t_depth_sub_to_color_master;
+        std::tie(R_depth_sub_to_color_master,
+                 t_depth_sub_to_color_master) = compose_calibration_transforms(R_depth_sub_to_color_sub,
+                                                                               t_depth_sub_to_color_sub,
+                                                                               R_color_sub_to_color_master,
+                                                                               t_color_sub_to_color_master);
 
         // Now, we're going to set up the transformations. DO THIS OUTSIDE OF YOUR MAIN LOOP!
         // Constructing transformations does a lot of preemptive work to make the transform as fast as possible.
@@ -723,36 +735,14 @@ int main()
                                                                               static_cast<int>(sizeof(uint16_t)));
             sub_depth_to_master_color.depth_image_to_color_camera(sub_depth_image, &k4a_sub_depth_in_master_color);
             cv::Mat opencv_sub_depth_in_master_color = k4a_depth_to_opencv(k4a_sub_depth_in_master_color);
-
-            // cv::Mat normalized_opencv_sub_depth_in_sub_color;
-            // cv::Mat normalized_opencv_master_depth_in_master_color;
             cv::Mat normalized_opencv_sub_depth_in_master_color;
-            // cv::normalize(opencv_sub_depth_in_sub_color,
-            //               normalized_opencv_sub_depth_in_sub_color,
-            //               0,
-            //               256,
-            //               cv::NORM_MINMAX);
-            // cv::normalize(opencv_master_depth_in_master_color,
-            //               normalized_opencv_master_depth_in_master_color,
-            //               0,
-            //               256,
-            //               cv::NORM_MINMAX);
             cv::normalize(opencv_sub_depth_in_master_color,
                           normalized_opencv_sub_depth_in_master_color,
                           0,
                           256,
                           cv::NORM_MINMAX);
-            // cv::Mat grayscale_opencv_sub_depth_in_sub_color;
-            // cv::Mat grayscale_opencv_master_depth_in_master_color;
             cv::Mat grayscale_opencv_sub_depth_in_master_color;
-            // normalized_opencv_sub_depth_in_sub_color.convertTo(grayscale_opencv_sub_depth_in_sub_color, CV_32FC3);
-            // normalized_opencv_master_depth_in_master_color.convertTo(grayscale_opencv_master_depth_in_master_color,
-            //                                                          CV_32FC3);
             normalized_opencv_sub_depth_in_master_color.convertTo(grayscale_opencv_sub_depth_in_master_color, CV_32FC3);
-            // cv::imshow("Master depth in master color", grayscale_opencv_master_depth_in_master_color);
-            // cv::waitKey(500);
-            // cv::imshow("Subordinate depth in subordinate color", grayscale_opencv_sub_depth_in_sub_color);
-            // cv::waitKey(500);
             cv::imshow("Subordinate depth in master color", grayscale_opencv_sub_depth_in_master_color);
             cv::waitKey(1);
 
@@ -773,7 +763,6 @@ int main()
                             opencv_master_depth_in_master_color < THRESHOLD,
                             master_valid_mask);
             cv::Mat sub_valid_mask;
-            // cout << opencv_sub_depth_in_master_color << endl;
             cv::bitwise_and(opencv_sub_depth_in_master_color != 0,
                             opencv_sub_depth_in_master_color < THRESHOLD,
                             sub_valid_mask);
