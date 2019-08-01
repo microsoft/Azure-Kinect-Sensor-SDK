@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: Data Fields</title>
+<title>Azure Kinect Sensor SDK: k4a::transformation::depth_image_to_color_camera_custom</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('functions_d.html','');});
+$(document).ready(function(){initNavTree('classk4a_1_1transformation_a81ead7ffe1c9540a2f91c364a749827d.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,55 +84,77 @@ $(document).ready(function(){initNavTree('functions_d.html','');});
 </div>
 
 <div class="contents">
-<div class="textblock">Here is a list of all documented struct and union fields with links to the struct/union documentation for each field:</div>
+<a id="a81ead7ffe1c9540a2f91c364a749827d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81ead7ffe1c9540a2f91c364a749827d">&#9670;&nbsp;</a></span>depth_image_to_color_camera_custom()</h2>
 
-<h3><a id="index_d"></a>- d -</h3><ul>
-<li>depth
-: <a class="el" href="structk4a__hardware__version__t_a0a633007ba808514d59a8b710a11db04.html#a0a633007ba808514d59a8b710a11db04">k4a_hardware_version_t</a>
-</li>
-<li>depth_camera_calibration
-: <a class="el" href="structk4a__calibration__t_afb9c6f1ed401107b0f65a7fa6a5af910.html#afb9c6f1ed401107b0f65a7fa6a5af910">k4a_calibration_t</a>
-</li>
-<li>depth_delay_off_color_usec
-: <a class="el" href="structk4a__device__configuration__t_a65f787c15d6b0a75119c2179054b5db4.html#a65f787c15d6b0a75119c2179054b5db4">k4a_device_configuration_t</a>
-, <a class="el" href="structk4a__record__configuration__t_a26d517a14ee493076a73071146013236.html#a26d517a14ee493076a73071146013236">k4a_record_configuration_t</a>
-</li>
-<li>depth_image_to_color_camera()
-: <a class="el" href="classk4a_1_1transformation_a84d7583dff4ba83f9ed162233f860418.html#a84d7583dff4ba83f9ed162233f860418">k4a::transformation</a>
-</li>
-<li>depth_image_to_color_camera_custom()
-: <a class="el" href="classk4a_1_1transformation_a81ead7ffe1c9540a2f91c364a749827d.html#a81ead7ffe1c9540a2f91c364a749827d">k4a::transformation</a>
-</li>
-<li>depth_image_to_point_cloud()
-: <a class="el" href="classk4a_1_1transformation_aca376c8cca0f1157c3632b4f4c1a59ab.html#aca376c8cca0f1157c3632b4f4c1a59ab">k4a::transformation</a>
-</li>
-<li>depth_mode
-: <a class="el" href="structk4a__calibration__t_a98e7d85dcebecdd414e31ace481906d7.html#a98e7d85dcebecdd414e31ace481906d7">k4a_calibration_t</a>
-, <a class="el" href="structk4a__device__configuration__t_ac7f603b8b5eb8b5ee58eab5c36edae41.html#ac7f603b8b5eb8b5ee58eab5c36edae41">k4a_device_configuration_t</a>
-, <a class="el" href="structk4a__record__configuration__t_ad1b3d454570052af8ab8ad4330c8d21e.html#ad1b3d454570052af8ab8ad4330c8d21e">k4a_record_configuration_t</a>
-</li>
-<li>depth_sensor
-: <a class="el" href="structk4a__hardware__version__t_a5d9d2e5e0f093d7b74f483c381c06534.html#a5d9d2e5e0f093d7b74f483c381c06534">k4a_hardware_version_t</a>
-</li>
-<li>depth_track_enabled
-: <a class="el" href="structk4a__record__configuration__t_ac54348dbe76dcca7760958c444188c93.html#ac54348dbe76dcca7760958c444188c93">k4a_record_configuration_t</a>
-</li>
-<li>destroy()
-: <a class="el" href="classk4a_1_1transformation.html#a0f938b04a6a4b3d6b15df85ec3dc0422">k4a::transformation</a>
-</li>
-<li>device()
-: <a class="el" href="classk4a_1_1device_a060093e3ad034aaeb05ea9dc69958a58.html#a060093e3ad034aaeb05ea9dc69958a58">k4a::device</a>
-</li>
-<li>disable_streaming_indicator
-: <a class="el" href="structk4a__device__configuration__t_a1fcc00f1a70f9cc28caeac306ba61253.html#a1fcc00f1a70f9cc28caeac306ba61253">k4a_device_configuration_t</a>
-</li>
-</ul>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void k4a::transformation::depth_image_to_color_camera_custom </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classk4a_1_1image.html">image</a> &amp;&#160;</td>
+          <td class="paramname"><em>depth_image</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classk4a_1_1image.html">image</a> &amp;&#160;</td>
+          <td class="paramname"><em>custom_image</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classk4a_1_1image.html">image</a> *&#160;</td>
+          <td class="paramname"><em>transformed_depth_image</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classk4a_1_1image.html">image</a> *&#160;</td>
+          <td class="paramname"><em>transformed_custom_image</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee.html#ga06f55e23e1d260b069e89e4a9cd6f4ee">k4a_transformation_interpolation_type_t</a>&#160;</td>
+          <td class="paramname"><em>interpolation_type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>invalid_custom_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Transforms depth map and a custom image into the geometry of the color camera. </p>
+<p>Throws error on failure</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___functions_gac00dd00e7612a86382e3d0a130f276bb.html#gac00dd00e7612a86382e3d0a130f276bb" title="Transforms depth map and a custom image into the geometry of the color camera. ">k4a_transformation_depth_image_to_color_camera_custom</a> </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.14-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><b>k4a</b></li><li class="navelem"><a class="el" href="classk4a_1_1transformation.html">transformation</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.14 </li>

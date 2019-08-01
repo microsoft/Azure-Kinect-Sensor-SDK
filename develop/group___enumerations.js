@@ -74,6 +74,8 @@ var group___enumerations =
       [ "K4A_IMAGE_FORMAT_COLOR_BGRA32", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddbade43f3d12f5ce476be5be2b0e289d481", null ],
       [ "K4A_IMAGE_FORMAT_DEPTH16", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba5abd5fdff69181007ec79ed3087aa18e", null ],
       [ "K4A_IMAGE_FORMAT_IR16", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba39a56f94523816908dbb08994e33c37f", null ],
+      [ "K4A_IMAGE_FORMAT_CUSTOM8", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba17dea221ecdfa136dea68f80e0397e15", null ],
+      [ "K4A_IMAGE_FORMAT_CUSTOM16", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba6f2ee5c37729f9196b0cf3d3028edc42", null ],
       [ "K4A_IMAGE_FORMAT_CUSTOM", "group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52", null ]
     ] ],
     [ "k4a_log_level_t", "group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6.html#ga84d8f9a665773fb4e75a2ac8160444c6", [
@@ -96,6 +98,10 @@ var group___enumerations =
       [ "K4A_STREAM_RESULT_SUCCEEDED", "group___enumerations_ga98e341882dbb97d4a456bac3ede2554c.html#gga98e341882dbb97d4a456bac3ede2554ca552ad60caf114c67b2f90a1b5cf13446", null ],
       [ "K4A_STREAM_RESULT_FAILED", "group___enumerations_ga98e341882dbb97d4a456bac3ede2554c.html#gga98e341882dbb97d4a456bac3ede2554cae58782200e41a1751266b352ffdfdfe8", null ],
       [ "K4A_STREAM_RESULT_EOF", "group___enumerations_ga98e341882dbb97d4a456bac3ede2554c.html#gga98e341882dbb97d4a456bac3ede2554ca40d9e4704b4de68e1067e5d17454a41b", null ]
+    ] ],
+    [ "k4a_transformation_interpolation_type_t", "group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee.html#ga06f55e23e1d260b069e89e4a9cd6f4ee", [
+      [ "K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST", "group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee.html#gga06f55e23e1d260b069e89e4a9cd6f4eea9b7517e41898a208566db614bcf26cc5", null ],
+      [ "K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR", "group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee.html#gga06f55e23e1d260b069e89e4a9cd6f4eeac91cb5f01c87411e2980d109a7a36e56", null ]
     ] ],
     [ "k4a_wait_result_t", "group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee.html#ga44c7c0c1cfba7c879e9e2da1a869e4ee", [
       [ "K4A_WAIT_RESULT_SUCCEEDED", "group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee.html#gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca", null ],

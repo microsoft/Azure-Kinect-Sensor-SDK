@@ -7,6 +7,7 @@ var classk4a_1_1transformation =
     [ "~transformation", "classk4a_1_1transformation.html#aa729a5f572e994705c0b1fbfaf791ee6", null ],
     [ "color_image_to_depth_camera", "classk4a_1_1transformation_ae25f1d6159f91bda04e9026959f94b15.html#ae25f1d6159f91bda04e9026959f94b15", null ],
     [ "depth_image_to_color_camera", "classk4a_1_1transformation_a84d7583dff4ba83f9ed162233f860418.html#a84d7583dff4ba83f9ed162233f860418", null ],
+    [ "depth_image_to_color_camera_custom", "classk4a_1_1transformation_a81ead7ffe1c9540a2f91c364a749827d.html#a81ead7ffe1c9540a2f91c364a749827d", null ],
     [ "depth_image_to_point_cloud", "classk4a_1_1transformation_aca376c8cca0f1157c3632b4f4c1a59ab.html#aca376c8cca0f1157c3632b4f4c1a59ab", null ],
     [ "destroy", "classk4a_1_1transformation.html#a0f938b04a6a4b3d6b15df85ec3dc0422", null ],
     [ "operator=", "classk4a_1_1transformation.html#a2ae48e0963e332805b28b2d8659081b5", null ],
