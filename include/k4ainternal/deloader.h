@@ -42,14 +42,19 @@ k4a_depth_engine_result_code_t deloader_transform_engine_create_and_initialize(k
                                                                                k4a_processing_complete_cb_t *callback,
                                                                                void *callback_context);
 
-k4a_depth_engine_result_code_t deloader_transform_engine_process_frame(k4a_transform_engine_context_t *context,
-                                                                       k4a_transform_engine_type_t type,
-                                                                       const void *depth_frame,
-                                                                       size_t depth_frame_size,
-                                                                       const void *color_frame,
-                                                                       size_t color_frame_size,
-                                                                       void *output_frame,
-                                                                       size_t output_frame_size);
+k4a_depth_engine_result_code_t
+deloader_transform_engine_process_frame(k4a_transform_engine_context_t *context,
+                                        k4a_transform_engine_type_t type,
+                                        const void *depth_frame,
+                                        size_t depth_frame_size,
+                                        const void *frame2,
+                                        size_t frame2_size,
+                                        void *output_frame,
+                                        size_t output_frame_size,
+                                        void *output_frame2,
+                                        size_t output_frame2_size,
+                                        k4a_transform_engine_interpolation_t interpolation,
+                                        uint32_t invalid_value);
 
 size_t deloader_transform_engine_get_output_frame_size(k4a_transform_engine_context_t *context,
                                                        k4a_transform_engine_type_t type);

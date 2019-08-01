@@ -152,6 +152,10 @@ static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
         if (deresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
         {
             LOG_ERROR("Depth engine create and initialize failed with error code: %d.", deresult);
+            if (deresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_OPENGL_CONTEXT)
+            {
+                LOG_ERROR("OpenGL 4.4 context creation failed. You could try updating your graphics drivers.", 0);
+            }
         }
         result = K4A_RESULT_FROM_BOOL(deresult == K4A_DEPTH_ENGINE_RESULT_SUCCEEDED);
     }
@@ -255,7 +259,15 @@ static int depth_engine_thread(void *param)
                                                     &outputCaptureInfo,
                                                     NULL);
             tickcounter_get_current_ms(dewrapper->tick, &stop_time);
-            if (deresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
+            if (deresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_WAIT_PROCESSING_COMPLETE_FAILED ||
+                deresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_TIMEOUT)
+            {
+                LOG_ERROR("Timeout during depth engine process frame.", 0);
+                LOG_ERROR("SDK should be restarted since it looks like GPU has encountered an unrecoverable error.", 0);
+                dropped = true;
+                result = K4A_RESULT_FAILED;
+            }
+            else if (deresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
             {
                 LOG_ERROR("Depth engine process frame failed with error code: %d.", deresult);
                 result = K4A_RESULT_FAILED;
