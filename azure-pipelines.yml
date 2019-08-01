@@ -11,7 +11,7 @@ variables:
 - name: 'windows_firmware_version'
   value: '1.6.102075014'
 - name: 'PackageVersion'
-  value: '1.2.0-alpha.7'
+  value: '1.2.0-alpha.10'
 
 trigger:
   batch: false
@@ -273,11 +273,11 @@ jobs:
   - powershell: |
       if ("$(BuildGenerator)" -eq "Ninja")
       {
-        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_2_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_2_0.dll" "Placeholder file, please download real depth engine." }
       }
       elseif ("$(BuildGenerator)" -like "Visual Studio *")
       {
-        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_1_0.dll" "Placeholder file, please download real depth engine." }
+        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_2_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_2_0.dll" "Placeholder file, please download real depth engine." }
       }
       else
       {

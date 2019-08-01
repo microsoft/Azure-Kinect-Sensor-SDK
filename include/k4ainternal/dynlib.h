@@ -58,8 +58,8 @@ K4A_DECLARE_HANDLE(dynlib_t);
  * This function only supports relative path libraries. If you try to load an
  * explicit path this will fail.
  *
- * For example: dynlib_create("depthengine", 1, 0, &handle) will search for
- * depthengine_1_0.dll on Windows and libdepthengine.so.1.0 on Linux
+ * For example: dynlib_create("depthengine", 2, 0, &handle) will search for
+ * depthengine_2_0.dll on Windows and libdepthengine.so.2.0 on Linux
  *
  * \return K4A_RESULT_SUCCEEDED if the library was loaded, K4A_RESULT_FAILED
  * otherwise
