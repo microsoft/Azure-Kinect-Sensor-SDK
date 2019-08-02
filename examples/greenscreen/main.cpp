@@ -103,10 +103,10 @@ std::tuple<cv::Mat, cv::Vec3d> deconstruct_homogeneous(const cv::Mat &H)
     return std::make_tuple(R, t);
 }
 
-void k4a_calibration_to_depth_to_color_R_t(const k4a::calibration &cal, cv::Mat &R, cv::Vec3d &t)
+std::tuple<cv::Mat, cv::Vec3d> k4a_calibration_to_depth_to_color_R_t(const k4a::calibration &cal)
 {
     const k4a_calibration_extrinsics_t &ex = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
-    R = cv::Mat(3, 3, CV_64F);
+    cv::Mat R = cv::Mat(3, 3, CV_64F);
     for (int i = 0; i < 3; ++i)
     {
         for (int j = 0; j < 3; ++j)
@@ -114,7 +114,8 @@ void k4a_calibration_to_depth_to_color_R_t(const k4a::calibration &cal, cv::Mat 
             R.at<double>(i, j) = ex.rotation[i * 3 + j];
         }
     }
-    t = cv::Vec3d(ex.translation[0], ex.translation[1], ex.translation[2]);
+    cv::Vec3d t = cv::Vec3d(ex.translation[0], ex.translation[1], ex.translation[2]);
+    return std::make_tuple(R, t);
 }
 
 void set_k4a_calibration_depth_to_color_from_R_t(k4a::calibration &cal, const cv::Mat &R, const cv::Vec3d &t)
@@ -593,7 +594,8 @@ int main()
     // Get the transformation from subordinate depth to subordinate color using its calibration object
     cv::Mat R_depth_sub_to_color_sub;
     cv::Vec3d t_depth_sub_to_color_sub;
-    k4a_calibration_to_depth_to_color_R_t(sub_calibration, R_depth_sub_to_color_sub, t_depth_sub_to_color_sub);
+    std::tie(R_depth_sub_to_color_sub,
+             t_depth_sub_to_color_sub) = k4a_calibration_to_depth_to_color_R_t(sub_calibration);
 
     // We now have the subordinate depth to subordinate color transform. We also have the transformation from the
     // subordinate color perspective to the master color perspective from the calibration earlier. Now let's compose
