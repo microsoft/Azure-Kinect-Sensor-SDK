@@ -237,7 +237,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                     if (entry.UsedSize != size)
                     {
-                        throw new AzureKinectAllocatorException("Multiple image buffers sharing the same address cannot have the same size");
+                        throw new AzureKinectException("Multiple image buffers sharing the same address cannot have the same size");
                     }
 
                 }
@@ -394,7 +394,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 // if this happens after the CLR has entered shutdown, the CLR will generate an exception.
                 if (this.allocations.Count > 0)
                 {
-                    throw new AzureKinectAllocatorException("Not all native allocations have been freed before managed shutdown");
+                    throw new AzureKinectException("Not all native allocations have been freed before managed shutdown");
                 }
             }
         }

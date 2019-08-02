@@ -7,7 +7,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Azure.Kinect.Sensor.Exceptions
+namespace Microsoft.Azure.Kinect.Sensor
 {
     /// <summary>
     /// Represents errors that occur when opening a device with the Azure Kinect Sensor SDK.

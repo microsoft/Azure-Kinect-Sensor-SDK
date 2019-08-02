@@ -81,7 +81,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                     if (this.pinCount != 0)
                     {
-                        throw new AzureKinectAllocatorException("Buffer disposed while pinned");
+                        throw new AzureKinectException("Buffer disposed while pinned");
                     }
                 }
             }

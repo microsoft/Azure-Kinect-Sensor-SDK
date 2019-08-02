@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 [assembly: CLSCompliant(true)]
@@ -175,7 +176,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <remarks>The device will remain opened for exclusive access until the Device object is disposed.</remarks>
         public static Device Open(int index = 0)
         {
-            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_open((uint)index, out NativeMethods.k4a_device_t handle));
+            AzureKinectOpenDeviceException.ThrowIfNotSuccess(NativeMethods.k4a_device_open((uint)index, out NativeMethods.k4a_device_t handle));
             return new Device(handle);
         }
 
@@ -272,7 +273,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 if (capture.IsInvalid)
                 {
-                    throw new Microsoft.Azure.Kinect.Sensor.AzureKinectException("k4a_device_get_capture did not return a valid capture handle");
+                    throw new AzureKinectException("k4a_device_get_capture did not return a valid capture handle");
                 }
 
                 return new Capture(capture);
@@ -413,7 +414,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
 
                 NativeMethods.k4a_device_configuration_t nativeConfig = configuration.GetNativeConfiguration();
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_cameras(this.handle, ref nativeConfig));
+                AzureKinectStartCamerasException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_cameras(this.handle, ref nativeConfig));
 
                 this.CurrentDepthMode = configuration.DepthMode;
                 this.CurrentColorResolution = configuration.ColorResolution;
@@ -451,7 +452,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_imu(this.handle));
+                AzureKinectStartImuException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_imu(this.handle));
             }
         }
 

@@ -136,12 +136,12 @@ void k4a_device_close(k4a_device_t device_handle)
 
 ");
 
-            _ = Assert.Throws(typeof(AzureKinectException), () =>
-              {
-                  using (Device.Open(5))
-                  {
-                  }
-              });
+            _ = Assert.Throws(typeof(AzureKinectOpenDeviceException), () =>
+            {
+                using (Device.Open(5))
+                {
+                }
+            });
         }
 
         private WeakReference CreateWithWeakReference<T>(System.Func<T> factory)
@@ -1339,7 +1339,6 @@ k4a_result_t k4a_device_start_cameras(
     STUB_ASSERT(config->subordinate_delay_off_master_usec == 500000);
     STUB_ASSERT(config->disable_streaming_indicator == true);
     
-
     return K4A_RESULT_SUCCEEDED;
 }
 ");
@@ -1366,6 +1365,51 @@ k4a_result_t k4a_device_start_cameras(
                     {
                         device.StartCameras(config);
                     });
+                }
+            }
+        }
+
+        [Test]
+        public void DeviceStartCamerasFailure()
+        {
+            SetOpenCloseImplementation();
+
+            NativeK4a.SetImplementation(@"
+k4a_result_t k4a_device_start_cameras(
+    k4a_device_t device_handle,
+    const k4a_device_configuration_t * config
+)
+{
+    STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
+    STUB_ASSERT(config != NULL);
+
+    return K4A_RESULT_FAILED;
+}
+");
+            {
+                CallCount count = NativeK4a.CountCalls();
+                using (Device device = Device.Open(0))
+                {
+                    DeviceConfiguration config = new DeviceConfiguration
+                    {
+                        ColorFormat = ImageFormat.ColorBGRA32,
+                        ColorResolution = ColorResolution.r1080p,
+                        DepthMode = DepthMode.PassiveIR,
+                        CameraFPS = FPS.fps15,
+                        SynchronizedImagesOnly = true,
+                        DepthDelayOffColor = System.TimeSpan.FromSeconds(-1),
+                        WiredSyncMode = WiredSyncMode.Master,
+                        SuboridinateDelayOffMaster = System.TimeSpan.FromMilliseconds(500),
+                        DisableStreamingIndicator = true
+                    };
+
+                    Assert.Throws(typeof(AzureKinectStartCamerasException), () =>
+                    {
+                        device.StartCameras(config);
+                    });
+
+                    Assert.AreEqual(1, count.Calls("k4a_device_start_cameras"));
+                    Assert.AreEqual(0, count.Calls("k4a_device_stop_cameras"));
                 }
             }
         }
@@ -1424,7 +1468,7 @@ k4a_result_t k4a_device_start_imu(
 
                     device.Dispose();
 
-                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    Assert.Throws(typeof(ObjectDisposedException), () =>
                     {
                         device.StartImu();
                     });
@@ -1451,7 +1495,7 @@ k4a_result_t k4a_device_start_imu(
                 CallCount count = NativeK4a.CountCalls();
                 using (Device device = Device.Open(0))
                 {
-                    Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
+                    Assert.Throws(typeof(AzureKinectStartImuException), () =>
                     {
                         device.StartImu();
                     });
