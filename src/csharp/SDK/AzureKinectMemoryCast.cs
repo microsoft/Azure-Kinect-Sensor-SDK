@@ -20,26 +20,36 @@ namespace Microsoft.Azure.Kinect.Sensor
         where TFrom : unmanaged
         where TTo : unmanaged
     {
-        private Memory<TFrom> Source { get; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AzureKinectMemoryCast{TFrom, TTo}"/> class.
+        /// </summary>
+        /// <param name="memory">Memory object to cast.</param>
         public AzureKinectMemoryCast(Memory<TFrom> memory)
         {
             this.Source = memory;
         }
+
+        private Memory<TFrom> Source { get; }
+
+        /// <inheritdoc/>
         public override Span<TTo> GetSpan()
         {
             return MemoryMarshal.Cast<TFrom, TTo>(this.Source.Span);
         }
 
+        /// <inheritdoc/>
         public override MemoryHandle Pin(int elementIndex = 0)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public override void Unpin()
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
         }

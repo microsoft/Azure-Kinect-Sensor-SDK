@@ -5,10 +5,20 @@ using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
+    /// <summary>
+    /// An array pool implementation for large arrays.
+    /// </summary>
+    /// <remarks>
+    /// This ArrayPool allocates and re-uses large arrays to reduce the overhead of
+    /// zero-ing out the buffers and allocating from the managed heap.
+    ///
+    /// Unused arrays are held by weak references and may be garbage collected.
+    /// </remarks>
     internal class LargeArrayPool : ArrayPool<byte>
     {
         private readonly List<WeakReference> pool = new List<WeakReference>();
 
+        /// <inheritdoc/>
         public override byte[] Rent(int minimumLength)
         {
             lock (this)
@@ -31,6 +41,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <inheritdoc/>
         public override void Return(byte[] array, bool clearArray = false)
         {
             lock (this)

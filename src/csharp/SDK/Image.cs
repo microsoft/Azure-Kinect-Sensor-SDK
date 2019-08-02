@@ -70,7 +70,11 @@ namespace Microsoft.Azure.Kinect.Sensor
                     break;
                 case ImageFormat.Depth16:
                 case ImageFormat.IR16:
+                case ImageFormat.Custom16:
                     pixelSize = 2;
+                    break;
+                case ImageFormat.Custom8:
+                    pixelSize = 1;
                     break;
                 default:
                     throw new AzureKinectException($"Unable to allocate array for format {format}");

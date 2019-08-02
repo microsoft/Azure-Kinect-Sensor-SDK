@@ -3,11 +3,25 @@
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
+    /// <summary>
+    /// Firmware signature type.
+    /// </summary>
     [Native.NativeReference("k4a_firmware_signature_t")]
     public enum FirmwareSignature
     {
+        /// <summary>
+        /// Microsoft signed firmware.
+        /// </summary>
         Msft,
+
+        /// <summary>
+        /// Test signed firmware.
+        /// </summary>
         Test,
-        NotSigned
+
+        /// <summary>
+        /// Unsigned firmware.
+        /// </summary>
+        NotSigned,
     }
 }
