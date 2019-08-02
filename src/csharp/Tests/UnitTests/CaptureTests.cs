@@ -72,7 +72,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
 
             System.WeakReference capture = this.CreateWithWeakReference(() =>
             {
-                Capture c = Capture.Create();
+                Capture c = new Capture();
 
                 // The reference should still exist and we should have not seen close called
                 Assert.AreEqual(1, count.Calls("k4a_capture_create"));
@@ -124,7 +124,7 @@ void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float value)
 
             CallCount count = this.nativeK4a.CountCalls();
 
-            using (Capture c = Capture.Create())
+            using (Capture c = new Capture())
             {
                 // Temperature values should not be cached, so every access should call the
                 // native layer
@@ -334,7 +334,7 @@ void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image_t image)
             {
             }
 
-            using (Capture c = Capture.Create())
+            using (Capture c = new Capture())
             {
                 using (Capture captureReference = c.Reference())
                 {

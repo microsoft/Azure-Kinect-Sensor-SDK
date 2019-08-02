@@ -10,9 +10,8 @@ namespace Microsoft.Azure.Kinect.Sensor
     public class Capture : IDisposable
     {
         // Image caches
-        // "Public" Images are instances available outside this class via properties.
-        // "Private" Images are instances held within this class to ensure they can't be disposed when
-        // this class still needs access to their data.
+        // These are the managed wrappers for the native images.
+        // They are owned by this class and must be disposed when the capture is disposed.
         private Image cachedColor;
         private Image cachedDepth;
         private Image cachedIR;
@@ -128,10 +127,10 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Gets or sets the device temperature of the capture.
+        /// Gets or sets the device temperature at the time of the capture.
         /// </summary>
         /// <remarks>
-        /// Temperature is represented in degrees Celcius.
+        /// Temperature is represented in degrees Celsius.
         /// </remarks>
         public float Temperature
         {
@@ -160,18 +159,6 @@ namespace Microsoft.Azure.Kinect.Sensor
                     NativeMethods.k4a_capture_set_temperature_c(this.handle, value);
                 }
             }
-        }
-
-        /// <summary>
-        /// Creates a new capture.
-        /// </summary>
-        /// <returns>A new Capture instance.</returns>
-        public static Capture Create()
-        {
-            AzureKinectException.ThrowIfNotSuccess(
-                NativeMethods.k4a_capture_create(out NativeMethods.k4a_capture_t handle));
-
-            return new Capture(handle);
         }
 
         /// <summary>
