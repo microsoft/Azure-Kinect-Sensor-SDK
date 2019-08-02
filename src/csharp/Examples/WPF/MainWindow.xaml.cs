@@ -64,6 +64,13 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
 
                     while (this.running)
                     {
+                        if (!Environment.Is64BitProcess)
+                        {
+                            // In 32-bit the BitmapSource memory runs out quickly and we can hit OutOfMemoryException.
+                            // Force garbage collection in each loop iteration to keep memory in check.
+                            GC.Collect();
+                        }
+
                         // Wait for a capture on a thread pool thread
                         using (Capture capture = await Task.Run(() => { return device.GetCapture(); }).ConfigureAwait(true))
                         {
