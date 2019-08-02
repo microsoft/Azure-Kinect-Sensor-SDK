@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <getopt.h>
 
 #include <k4a/k4a.hpp>
 #include <opencv2/calib3d.hpp>
@@ -19,12 +20,6 @@ constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TI
 constexpr uint32_t MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC = 160; // Allowing at least 160 microseconds between
                                                                       // depth cameras should ensure they do not
                                                                       // interfere with one another.
-constexpr int32_t COLOR_EXPOSURE_USEC = 8000;
-constexpr int32_t POWERLINE_60HZ = 2;
-
-constexpr size_t board_height = 8;       // TODO command line arg
-constexpr size_t board_width = 6;        // TODO command line arg
-constexpr float board_square_size = 33.; // TODO command line arg
 
 // ideally, we could generalize this to many OpenCV types
 cv::Mat k4a_color_to_opencv(const k4a::image &im)
@@ -319,7 +314,9 @@ std::tuple<cv::Mat, cv::Vec3d> stereo_calibration(const k4a::calibration &master
                                                   const k4a::calibration &sub_calib,
                                                   const vector<cv::Point2f> &master_chessboard_corners,
                                                   const vector<cv::Point2f> &sub_chessboard_corners,
-                                                  const cv::Size &image_size)
+                                                  const cv::Size &image_size,
+                                                  const cv::Size &chessboard_pattern,
+                                                  float chessboard_square_length)
 {
     // We have points in each image that correspond to the corners that the findChessboardCorners function found.
     // However, we still need the points in 3 dimensions that these points correspond to. Because we are ultimately only
@@ -330,11 +327,12 @@ std::tuple<cv::Mat, cv::Vec3d> stereo_calibration(const k4a::calibration &master
     // points are in millimeters, mostly because the depth provided by the depth cameras is also provided in
     // millimeters, which makes for easy comparison.
     vector<cv::Point3f> chessboard_corners_world;
-    for (size_t w = 0; w < board_width; ++w)
+    for (int h = 0; h < chessboard_pattern.height; ++h)
     {
-        for (size_t h = 0; h < board_height; ++h)
+        for (int w = 0; w < chessboard_pattern.width; ++w)
         {
-            chessboard_corners_world.emplace_back(cv::Point3f{ h * board_square_size, w * board_square_size, 0.0 });
+            chessboard_corners_world.emplace_back(
+                cv::Point3f{ w * chessboard_square_length, h * chessboard_square_length, 0.0 });
         }
     }
 
@@ -450,7 +448,9 @@ k4a_device_configuration_t get_sub_config_green_screen()
 std::tuple<cv::Mat, cv::Vec3d> calibrate_devices(k4a::device &master,
                                                  k4a::device &subordinate,
                                                  k4a_device_configuration_t &master_calibration_config,
-                                                 k4a_device_configuration_t &sub_calibration_config)
+                                                 k4a_device_configuration_t &sub_calibration_config,
+                                                 const cv::Size &chessboard_pattern,
+                                                 float chessboard_square_length)
 {
     k4a::calibration master_calibration = master.get_calibration(master_calibration_config.depth_mode,
                                                                  master_calibration_config.color_resolution);
@@ -469,7 +469,6 @@ std::tuple<cv::Mat, cv::Vec3d> calibrate_devices(k4a::device &master,
         k4a::image sub_color_image = sub_capture.get_color_image();
         cv::Mat cv_master_color_image = k4a_color_to_opencv(master_color_image);
         cv::Mat cv_sub_color_image = k4a_color_to_opencv(sub_color_image);
-        cv::Size chessboard_pattern(board_height, board_width);
         vector<cv::Point2f> master_chessboard_corners;
         vector<cv::Point2f> sub_chessboard_corners;
 
@@ -485,7 +484,9 @@ std::tuple<cv::Mat, cv::Vec3d> calibrate_devices(k4a::device &master,
                                                 sub_calibration,
                                                 master_chessboard_corners,
                                                 sub_chessboard_corners,
-                                                cv_master_color_image.size());
+                                                cv_master_color_image.size(),
+                                                chessboard_pattern,
+                                                chessboard_square_length);
             calibrated = true;
         }
     }
@@ -512,8 +513,65 @@ k4a::image create_depth_image_like(const k4a::image &im)
                               im.get_width_pixels() * static_cast<int>(sizeof(uint16_t)));
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    float chessboard_square_length = 0.; // Must be set
+    int32_t color_exposure_usec = 8000;  // somewhat reasonable default exposure time
+    int32_t powerline_freq = 2;          // default to a 60 Hz powerline
+    cv::Size chessboard_pattern(0, 0);   // height, width. Both need to be set.
+
+    static struct option long_options[] = { { "board-height", required_argument, 0, 'h' },
+                                            { "board-width", required_argument, 0, 'w' },
+                                            { "board-square-length", required_argument, 0, 's' },
+                                            { "powerline-frequency", required_argument, 0, 'f' },
+                                            { "color-exposure", required_argument, 0, 'e' },
+                                            { 0, 0, 0, 0 } };
+    int option_index = 0;
+    int input_opt = 0;
+    while ((input_opt = getopt_long(argc, argv, "h:w:s:f:e:", long_options, &option_index)) != -1)
+    {
+        switch (input_opt)
+        {
+        case 'h':
+            chessboard_pattern.height = std::stoi(optarg);
+            break;
+        case 'w':
+            chessboard_pattern.width = std::stoi(optarg);
+            break;
+        case 's':
+            chessboard_square_length = std::stof(optarg);
+            break;
+        case 'f':
+            powerline_freq = std::stoi(optarg);
+            break;
+        case 'e':
+            color_exposure_usec = std::stoi(optarg);
+            break;
+        case '?':
+            throw std::runtime_error("Incorrect arguments");
+            break;
+        default:
+            throw std::runtime_error(std::string("getopt returned unexpected character code, ") +
+                                     std::to_string(input_opt));
+        }
+    }
+
+    if (chessboard_pattern.height == 0)
+    {
+        throw std::runtime_error("Chessboard height is not properly set! Use -h");
+    }
+    if (chessboard_pattern.width == 0)
+    {
+        throw std::runtime_error("Chessboard height is not properly set! Use -w");
+    }
+    if (chessboard_square_length == 0.)
+    {
+        throw std::runtime_error("Chessboard square size is not properly set! Use -s");
+    }
+
+    cout << "Chessboard height: " << chessboard_pattern.height << ". Chessboard width: " << chessboard_pattern.width
+         << ". Chessboard square length: " << chessboard_square_length << endl;
+
     // Require 2 cameras
     const int num_devices = k4a::device::get_installed_count();
     if (num_devices != 2)
@@ -522,7 +580,7 @@ int main()
     }
     // Find out which device is the master and which is the subordinate. We'll assume that the master camera is the
     // first one with a cable in its sync out port.
-    k4a::device master = k4a::device::open(0); // Choose the 0-index device; if it's not the master, we'll swap it
+    k4a::device master = k4a::device::open(0); // Assume device 0 is the master; if it's not the master, we'll swap it
     k4a::device subordinate = k4a::device::open(1);
 
     if (master.is_sync_out_connected())
@@ -548,15 +606,15 @@ int main()
     // If you want to synchronize cameras, you need to manually set both their exposures
     master.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                              K4A_COLOR_CONTROL_MODE_MANUAL,
-                             COLOR_EXPOSURE_USEC);
+                             color_exposure_usec);
     subordinate.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                                   K4A_COLOR_CONTROL_MODE_MANUAL,
-                                  COLOR_EXPOSURE_USEC);
+                                  color_exposure_usec);
 
     // This setting compensates for the flicker of lights due to the frequency of AC power in your region. If you are in
     // an area with 50 Hz power, this may need to be updated (check the docs for k4a_color_control_command_t)
-    master.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, POWERLINE_60HZ);
-    subordinate.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, POWERLINE_60HZ);
+    master.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, powerline_freq);
+    subordinate.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, powerline_freq);
 
     // Construct the calibrations that these types will use
     k4a_device_configuration_t master_calibration_config = get_master_config_calibration();
@@ -572,8 +630,12 @@ int main()
     cv::Vec3d t_color_sub_to_color_master;
 
     // This wraps all the calibration details
-    std::tie(R_color_sub_to_color_master, t_color_sub_to_color_master) =
-        calibrate_devices(master, subordinate, master_calibration_config, sub_calibration_config);
+    std::tie(R_color_sub_to_color_master, t_color_sub_to_color_master) = calibrate_devices(master,
+                                                                                           subordinate,
+                                                                                           master_calibration_config,
+                                                                                           sub_calibration_config,
+                                                                                           chessboard_pattern,
+                                                                                           chessboard_square_length);
 
     // End calibration
     master.stop_cameras();
