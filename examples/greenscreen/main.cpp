@@ -44,19 +44,6 @@ cv::Mat k4a_depth_to_opencv(const k4a::image &im)
                    im.get_stride_bytes());
 }
 
-// TODO this doesn't actually work that well and I'm not sure whether it will be useful.
-cv::Mat k4a_ir_to_opencv(const k4a::image &im)
-{
-    // TODO the docs really need an explanation of K4A_IMAGE_FORMAT_IR16 that clearly explains what it is
-    cout << im.get_height_pixels() << std::endl;
-    cout << im.get_width_pixels() << std::endl;
-    cv::Mat normalized(im.get_height_pixels(), im.get_width_pixels(), CV_16UC1);
-    cv::Mat result(im.get_height_pixels(), im.get_width_pixels(), CV_8UC1);
-    cv::normalize(k4a_depth_to_opencv(im), normalized, 1, 0, cv::NORM_MINMAX);
-    normalized.convertTo(result, CV_8UC1);
-    return result;
-}
-
 cv::Mat k4a_calibration_to_color_camera_matrix(const k4a::calibration &cal)
 {
     const k4a_calibration_intrinsic_parameters_t::_param &i = cal.color_camera_calibration.intrinsics.parameters.param;
