@@ -135,12 +135,13 @@ void k4a_device_close(k4a_device_t device_handle)
 }}
 
 ");
-            Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
-            {
-                using (Device.Open(5))
-                {
-                }
-            });
+
+            _ = Assert.Throws(typeof(AzureKinectException), () =>
+              {
+                  using (Device.Open(5))
+                  {
+                  }
+              });
         }
 
         private WeakReference CreateWithWeakReference<T>(System.Func<T> factory)
