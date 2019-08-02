@@ -141,12 +141,10 @@ vector<float> k4a_calibration_to_color_camera_dist_coeffs(const k4a::calibration
 }
 
 // Blocks until we have synchronized captures stored in master_capture and sub_capture
-void get_synchronized_captures(k4a::device &master,
-                               k4a::device &subordinate,
-                               k4a_device_configuration_t &sub_config,
-                               k4a::capture &master_capture,
-                               k4a::capture &sub_capture,
-                               bool compare_sub_depth_instead_of_color = false)
+std::tuple<k4a::capture, k4a::capture> get_synchronized_captures(k4a::device &master,
+                                                                 k4a::device &subordinate,
+                                                                 k4a_device_configuration_t &sub_config,
+                                                                 bool compare_sub_depth_instead_of_color = false)
 {
     // Dealing with the synchronized cameras is complex. The Azure Kinect DK:
     //      (a) does not guarantee exactly equal timestamps between depth and color or between cameras (delays can be
@@ -165,6 +163,7 @@ void get_synchronized_captures(k4a::device &master,
 
     // The captures used in the loop are outside of it so that they can persist across loop iterations. This is
     // necessary because each time this loop runs we'll only update the older capture.
+    k4a::capture master_capture, sub_capture;
     bool master_success = master.get_capture(&master_capture, std::chrono::milliseconds{ 5000 }); // 5 sec timeout
     bool sub_success = subordinate.get_capture(&sub_capture, std::chrono::milliseconds{ 5000 });  // 5 sec timeout
     if (!master_success || !sub_success)
@@ -241,6 +240,7 @@ void get_synchronized_captures(k4a::device &master,
             subordinate.get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
         }
     }
+    return std::make_tuple(master_capture, sub_capture);
 }
 
 // Takes the images by value so we can change them when shown.
@@ -468,7 +468,7 @@ std::tuple<cv::Mat, cv::Vec3d> calibrate_devices(k4a::device &master,
     while (!calibrated)
     {
         k4a::capture master_capture, sub_capture;
-        get_synchronized_captures(master, subordinate, sub_calibration_config, master_capture, sub_capture);
+        std::tie(master_capture, sub_capture) = get_synchronized_captures(master, subordinate, sub_calibration_config);
         // get_color_image is guaranteed to be non-null because we use get_synchronized_captures for color
         // (get_synchronized_captures also offers a flag to use depth for the subordinate camera instead of
         // color).
@@ -630,12 +630,11 @@ int main()
     {
         k4a::capture master_capture;
         k4a::capture sub_capture;
-        get_synchronized_captures(master,
-                                  subordinate,
-                                  sub_config,
-                                  master_capture,
-                                  sub_capture,
-                                  true); // This is to get the depth image for the subordinate, not the color
+        std::tie(master_capture, sub_capture) = get_synchronized_captures(master,
+                                                                          subordinate,
+                                                                          sub_config,
+                                                                          true); // This is to get the depth image for
+                                                                                 // the subordinate, not the color
 
         k4a::image master_color_image = master_capture.get_color_image();
         k4a::image master_depth_image = master_capture.get_depth_image();
