@@ -31,7 +31,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Gets or sets the desired frame rate for the color and depth cameras.
         /// </summary>
-        public FPS CameraFPS { get; set; } = FPS.fps30;
+        public FPS CameraFPS { get; set; } = FPS.FPS30;
 
         /// <summary>
         /// Gets or sets a value indicating whether to only return synchrnoized depth and color images.

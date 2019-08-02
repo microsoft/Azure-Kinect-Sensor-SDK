@@ -16,15 +16,6 @@ namespace Microsoft.Azure.Kinect.Sensor
         private Image cachedDepth;
         private Image cachedIR;
 
-        internal Capture(NativeMethods.k4a_capture_t handle)
-        {
-            // Hook the native allocator and register this object.
-            // .Dispose() will be called on this object when the allocator is shut down.
-            Allocator.Singleton.RegisterForDisposal(this);
-
-            this.handle = handle;
-        }
-
         private NativeMethods.k4a_capture_t handle;
 
         private bool disposedValue = false; // To detect redundant calls
@@ -42,6 +33,19 @@ namespace Microsoft.Azure.Kinect.Sensor
             // Hook the native allocator and register this object.
             // .Dispose() will be called on this object when the allocator is shut down.
             Allocator.Singleton.RegisterForDisposal(this);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Capture"/> class.
+        /// </summary>
+        /// <param name="handle">Native handle of the Capture.</param>
+        internal Capture(NativeMethods.k4a_capture_t handle)
+        {
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
+            Allocator.Singleton.RegisterForDisposal(this);
+
+            this.handle = handle;
         }
 
         /// <summary>
@@ -343,6 +347,16 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <summary>
+        /// Sets the image wrapper provided to a property.
+        /// </summary>
+        /// <param name="nativeMethod">Native set method.</param>
+        /// <param name="cachedImage">Refrence to the cached image wrapper used by this class.</param>
+        /// <param name="value">Value to assign the image wrapper to.</param>
+        /// <remarks>
+        /// This function takes ownership of the wrapper and stores it in the class. If there was
+        /// a previous wrapper owned by the class, this function will dispose it.
+        /// </remarks>
         private void SetImageWrapperAndDisposePrevious(
             Action<NativeMethods.k4a_capture_t, NativeMethods.k4a_image_t> nativeMethod,
             ref Image cachedImage,

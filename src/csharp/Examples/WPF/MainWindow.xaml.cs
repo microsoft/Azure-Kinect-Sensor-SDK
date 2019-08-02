@@ -44,10 +44,10 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorResolution = ColorResolution.r1440p,
+                    ColorResolution = ColorResolution.R1440p,
                     DepthMode = DepthMode.WFOV_2x2Binned,
                     SynchronizedImagesOnly = true,
-                    CameraFPS = FPS.fps30,
+                    CameraFPS = FPS.FPS30,
                 });
 
                 int colorWidth = device.GetCalibration().color_camera_calibration.resolution_width;
