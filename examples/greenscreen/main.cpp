@@ -124,7 +124,6 @@ void k4a_calibration_to_depth_to_color_R_t(const k4a::calibration &cal, cv::Mat 
     {
         for (int j = 0; j < 3; ++j)
         {
-            // TODO is it row-major or column-major?
             R.at<double>(i, j) = ex.rotation[i * 3 + j];
         }
     }
@@ -138,7 +137,6 @@ void set_k4a_calibration_depth_to_color_from_R_t(k4a::calibration &cal, const cv
     {
         for (int j = 0; j < 3; ++j)
         {
-            // TODO is it row-major or column-major?
             ex.rotation[i * 3 + j] = static_cast<float>(R.at<double>(i, j));
         }
     }
@@ -163,11 +161,10 @@ void get_synchronized_captures(k4a::device &master,
                                bool compare_sub_depth_instead_of_color = false)
 {
     // Dealing with the synchronized cameras is complex. The Azure Kinect DK:
-    //      (a) does not guarantee calling get_capture() synchronously the images received will have TODO
-    //      identical timestamps as ones received from another device
-    //      (b) does not guarantee that the depth image and camera image from a single
-    //      camera's capture have the same timestamp (this delay can be changed but it will still only be
-    //      approximately the same)
+    //      (a) does not guarantee exactly equal timestamps between depth and color or between cameras (delays can be
+    //          configured but timestamps will only be approximately the same)
+    //      (b) does not guarantee that, if the two most recent images were synchronized, that calling get_capture just
+    //          once on each camera will still be synchronized.
     // There are several reasons for all of this. Internally, devices keep a queue of a few of the captured images
     // and serve those images as requested by get_capture(). However, images can also be dropped at any moment, and
     // one device may have more images ready than another device at a given moment, et cetera.
@@ -180,16 +177,14 @@ void get_synchronized_captures(k4a::device &master,
 
     // The captures used in the loop are outside of it so that they can persist across loop iterations. This is
     // necessary because each time this loop runs we'll only update the older capture.
-    bool master_success = master.get_capture(&master_capture, std::chrono::milliseconds{ 5000 });
-    bool sub_success = subordinate.get_capture(&sub_capture, std::chrono::milliseconds{ 5000 });
+    bool master_success = master.get_capture(&master_capture, std::chrono::milliseconds{ 5000 }); // 5 sec timeout
+    bool sub_success = subordinate.get_capture(&sub_capture, std::chrono::milliseconds{ 5000 });  // 5 sec timeout
     if (!master_success || !sub_success)
     {
         throw std::runtime_error("Getting a capture timed out!");
     }
 
     bool have_synced_images = false;
-    static std::chrono::microseconds last_master_depth = std::chrono::microseconds(0);
-    static std::chrono::microseconds last_sub_depth = std::chrono::microseconds(0);
     while (!have_synced_images)
     {
         k4a::image master_color_image = master_capture.get_color_image();
@@ -201,51 +196,6 @@ void get_synchronized_captures(k4a::device &master,
         else
         {
             sub_image = sub_capture.get_color_image();
-        }
-        // Debugging code left in in case this part is giving you trouble
-        cout << "master: " << master_color_image.get_device_timestamp().count() << " ";
-        if (master_capture.get_depth_image())
-        {
-            // cout << master_capture.get_depth_image().get_device_timestamp().count() - last_master_depth.count() << "
-            // ";
-            cout << master_capture.get_depth_image().get_device_timestamp().count() << " ";
-            last_master_depth = master_capture.get_depth_image().get_device_timestamp();
-        }
-        else
-        {
-            cout << "----------"
-                 << " ";
-        }
-        cout << "sub: ";
-        if (sub_capture.get_color_image())
-        {
-            cout << sub_capture.get_color_image().get_device_timestamp().count() << " ";
-        }
-        else
-        {
-            cout << "----------"
-                 << " ";
-        }
-        if (sub_capture.get_depth_image())
-        {
-            // cout << sub_capture.get_depth_image().get_device_timestamp().count() - last_sub_depth.count() << "\n";
-            cout << sub_capture.get_depth_image().get_device_timestamp().count() << "\n";
-            last_sub_depth = sub_capture.get_depth_image().get_device_timestamp();
-        }
-        else
-        {
-            cout << "----------"
-                 << "\n";
-        }
-        if (master_capture.get_color_image() && master_capture.get_depth_image() && sub_capture.get_depth_image())
-        {
-            cout << "master depth to master color: "
-                 << master_capture.get_color_image().get_device_timestamp().count() -
-                        master_capture.get_depth_image().get_device_timestamp().count()
-                 << " master color to sub depth: "
-                 << sub_capture.get_depth_image().get_device_timestamp().count() -
-                        master_capture.get_color_image().get_device_timestamp().count()
-                 << endl;
         }
 
         if (master_color_image && sub_image)
@@ -289,7 +239,6 @@ void get_synchronized_captures(k4a::device &master,
             else
             {
                 // The captures are sufficiently synchronized. Exit the function.
-                cout << "Got synchronized images!\n";
                 have_synced_images = true;
             }
         }
@@ -298,6 +247,7 @@ void get_synchronized_captures(k4a::device &master,
             // One of the captures or one of the images are bad, so just replace both. One could make this more
             // sophisticated and try to only to only replace one of these captures, et cetera, to try to keep a good one
             // but we'll keep things simple and just throw both away and try again.
+            // If this is happening, it's likely the cameras are improperly configured and frames aren't synchronized
             cout << "One of the images was bad!\n";
             master.get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
             subordinate.get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
@@ -382,13 +332,11 @@ bool find_chessboard_corners_helper(cv::Mat master_color_image,
     return true;
 }
 
-void stereo_calibration(const k4a::calibration &master_calib,
-                        const k4a::calibration &sub_calib,
-                        const vector<cv::Point2f> &master_chessboard_corners,
-                        const vector<cv::Point2f> &sub_chessboard_corners,
-                        const cv::Size &image_size,
-                        cv::Mat &R,
-                        cv::Vec3d &t)
+std::tuple<cv::Mat, cv::Vec3d> stereo_calibration(const k4a::calibration &master_calib,
+                                                  const k4a::calibration &sub_calib,
+                                                  const vector<cv::Point2f> &master_chessboard_corners,
+                                                  const vector<cv::Point2f> &sub_chessboard_corners,
+                                                  const cv::Size &image_size)
 {
     // We have points in each image that correspond to the corners that the findChessboardCorners
     // function found. However, we still need the points in 3 dimensions that these points
@@ -442,6 +390,8 @@ void stereo_calibration(const k4a::calibration &master_calib,
 
     // Finally, we'll actually calibrate the cameras.
     // Pass subordinate first, then master, because we want a transform from subordinate to master.
+    cv::Mat R;
+    cv::Vec3d t;
     double error = cv::stereoCalibrate(chessboard_corners_world_nested_for_cv,
                                        sub_corners_nested_for_cv,
                                        master_corners_nested_for_cv,
@@ -457,6 +407,7 @@ void stereo_calibration(const k4a::calibration &master_calib,
                                        cv::CALIB_FIX_INTRINSIC | cv::CALIB_RATIONAL_MODEL | cv::CALIB_CB_FAST_CHECK);
     cout << "Finished calibrating!\n";
     cout << "Got error of " << error << "\n";
+    return std::make_tuple(R, t);
 }
 
 // The following few functions provide the configurations that should be used for each camera in each case.
@@ -549,13 +500,11 @@ std::tuple<cv::Mat, cv::Vec3d> calibrate_devices(k4a::device &master,
 
         if (ready_to_calibrate)
         {
-            stereo_calibration(master_calibration,
-                               sub_calibration,
-                               master_chessboard_corners,
-                               sub_chessboard_corners,
-                               cv_master_color_image.size(),
-                               R,
-                               t);
+            std::tie(R, t) = stereo_calibration(master_calibration,
+                                                sub_calibration,
+                                                master_chessboard_corners,
+                                                sub_chessboard_corners,
+                                                cv_master_color_image.size());
             calibrated = true;
         }
     }
@@ -622,6 +571,7 @@ int main()
     subordinate.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                                   K4A_COLOR_CONTROL_MODE_MANUAL,
                                   COLOR_EXPOSURE_USEC);
+
     // This setting compensates for the flicker of lights due to the frequency of AC power in your region. If you
     // are in an area with 50 Hz power, this may need to be updated (check the docs for k4a_color_control_command_t)
     master.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, POWERLINE_60HZ);
