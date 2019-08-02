@@ -9,21 +9,30 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-    
-    
-    class AzureKinectMemoryManager : MemoryManager<byte>
+    /// <summary>
+    /// Manages the native memory allocated by the Azure Kinect SDK.
+    /// </summary>
+    internal class AzureKinectMemoryManager : MemoryManager<byte>
     {
         private Image image;
+        readonly long memoryPressure;
+        private int pinCount = 0;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AzureKinectMemoryManager"/> class.
+        /// </summary>
+        /// <param name="image">Image with native memory.</param>
+        /// <remarks>
+        /// Constructs a new MemoryManager representing the native memory backing an Image.
+        /// </remarks>
         internal AzureKinectMemoryManager(Image image)
         {
             this.image = image.Reference();
 
-            memoryPressure = image.Size;
+            this.memoryPressure = image.Size;
         }
 
-        long memoryPressure;
-
+        /// <inheritdoc/>
         public unsafe override Span<byte> GetSpan()
         {
             lock (this)
@@ -36,39 +45,41 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-        private int pinCount = 0;
-
+        /// <inheritdoc/>
         public unsafe override MemoryHandle Pin(int elementIndex = 0)
         {
             lock (this)
             {
-                if (image == null)
+                if (this.image == null)
                 {
                     throw new ObjectDisposedException(nameof(AzureKinectMemoryManager));
                 }
-                Interlocked.Increment(ref pinCount);
-                return new MemoryHandle(Unsafe.Add<byte>(image.GetUnsafeBuffer(), elementIndex), pinnable: this);
+
+                Interlocked.Increment(ref this.pinCount);
+                return new MemoryHandle(Unsafe.Add<byte>(this.image.GetUnsafeBuffer(), elementIndex), pinnable: this);
             }
         }
 
+        /// <inheritdoc/>
         public override void Unpin()
         {
-            Interlocked.Decrement(ref pinCount);
+            Interlocked.Decrement(ref this.pinCount);
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 lock (this)
                 {
-                    if (image != null)
+                    if (this.image != null)
                     {
-                        image.Dispose();
-                        image = null;
+                        this.image.Dispose();
+                        this.image = null;
                     }
 
-                    if (pinCount != 0)
+                    if (this.pinCount != 0)
                     {
                         throw new Exception("Buffer disposed while pinned");
                     }
