@@ -92,7 +92,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
                     }
                     else
                     {
-                        throw new Exception($"Header declares a function not found in module exports. Function \"{info.Declaration}\" was not found in exports.");
+                        throw new AzureKinectStubGeneratorException($"Header declares a function not found in module exports. Function \"{info.Declaration}\" was not found in exports.");
                     }
                 }
             }

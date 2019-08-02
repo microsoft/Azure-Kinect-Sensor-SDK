@@ -1,5 +1,10 @@
+//------------------------------------------------------------------------------
+// <copyright file="DeviceFunctionTests.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using Microsoft.Azure.Kinect.Sensor.Test.StubGenerator;
 using NUnit.Framework;
 
@@ -138,7 +143,7 @@ void k4a_device_close(k4a_device_t device_handle)
             });
         }
 
-        private System.WeakReference CreateWithWeakReference<T>(System.Func<T> factory)
+        private WeakReference CreateWithWeakReference<T>(System.Func<T> factory)
         {
             return new System.WeakReference(factory());
         }
@@ -227,10 +232,9 @@ k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle,
 
 
                 device.Dispose();
-                Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                Assert.Throws(typeof(ObjectDisposedException), () =>
                 {
                     _ = device.SerialNum;
-
                 });
 
             }
@@ -267,7 +271,7 @@ k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle,
             //Validate that we get exceptions from the second call to k4a_device_get_serialnum
             using (Device device = Device.Open(0))
             {
-                Assert.Throws<Microsoft.Azure.Kinect.Sensor.AzureKinectException>(() =>
+                _ = Assert.Throws<AzureKinectException>(() =>
                 {
                     Assert.AreEqual("1234", device.SerialNum);
                 });
@@ -294,10 +298,10 @@ k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle,
 }
 ");
 
-            //Validate that we get exceptions from the first call to k4a_device_get_serialnum
+            // Validate that we get exceptions from the first call to k4a_device_get_serialnum
             using (Device device = Device.Open(0))
             {
-                Assert.Throws<System.InvalidOperationException>(() =>
+                Assert.Throws<InvalidOperationException>(() =>
                 {
                     string sn = device.SerialNum;
                 });
@@ -349,7 +353,7 @@ k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle,
 
                 device.Dispose();
 
-                Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                Assert.Throws(typeof(ObjectDisposedException), () =>
                 {
                     device.GetRawCalibration();
                 });
@@ -551,7 +555,7 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
 
                 device.Dispose();
 
-                Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                Assert.Throws(typeof(ObjectDisposedException), () =>
                     {
                         device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.R1440p);
                     });
@@ -580,7 +584,7 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
 ");
             using (Device device = Device.Open(0))
             {
-                Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
+                Assert.Throws(typeof(AzureKinectException), () =>
                     {
                         Calibration calibration = device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.R1440p);
                     });
@@ -642,7 +646,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
 
                     device.Dispose();
-                    Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                    Assert.Throws(typeof(ObjectDisposedException), () =>
                     {
                         device.GetCapture();
                     });
@@ -651,11 +655,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
                 capture.Dispose();
                 Assert.AreEqual(1, count.Calls("k4a_device_get_capture"));
                 Assert.AreEqual(1, count.Calls("k4a_capture_release"));
-
             }
-
-
-
         }
 
         [Test]

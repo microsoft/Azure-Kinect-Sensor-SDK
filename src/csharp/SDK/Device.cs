@@ -56,7 +56,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         UIntPtr size = new UIntPtr(0);
                         if (NativeMethods.k4a_device_get_serialnum(this.handle, null, ref size) != NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL)
                         {
-                            throw new System.InvalidOperationException($"Unexpected internal state calling { nameof(NativeMethods.k4a_device_get_serialnum) }");
+                            throw new InvalidOperationException($"Unexpected internal state calling {nameof(NativeMethods.k4a_device_get_serialnum)}");
                         }
 
                         // Allocate a string buffer

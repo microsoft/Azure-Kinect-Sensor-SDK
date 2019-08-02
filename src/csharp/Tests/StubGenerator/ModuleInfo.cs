@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
 {
@@ -13,15 +15,17 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
             this.Exports = exports;
         }
 
+        public string[] Exports { get; }
+
         public static ModuleInfo Analyze(string path, CompilerOptions options = null)
         {
             options = options ?? CompilerOptions.GetDefault();
 
             List<string> exports = new List<string>();
 
-            if (!System.IO.File.Exists(path))
+            if (!File.Exists(path))
             {
-                throw new System.IO.FileNotFoundException("Failed to analyze module, file not found.", path);
+                throw new FileNotFoundException("Failed to analyze module, file not found.", path);
             }
 
             if (!options.TempPath.Exists)
@@ -29,7 +33,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
                 options.TempPath.Create();
             }
 
-            var regex = new System.Text.RegularExpressions.Regex(@"^\s+\d+\s+[\dA-Fa-f]+\s+[0-9A-Fa-f]{8}\s+([^\s]*).*?$", System.Text.RegularExpressions.RegexOptions.Multiline);
+            Regex regex = new Regex(@"^\s+\d+\s+[\dA-Fa-f]+\s+[0-9A-Fa-f]{8}\s+([^\s]*).*?$", System.Text.RegularExpressions.RegexOptions.Multiline);
+
             // Start the compiler process
             ProcessStartInfo startInfo = new ProcessStartInfo(options.LinkerPath.FullName)
             {
@@ -37,8 +42,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
                 WorkingDirectory = options.TempPath.FullName,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                RedirectStandardInput = true
+                RedirectStandardInput = true,
             };
+
             try
             {
                 using (Process link = Process.Start(startInfo))
@@ -49,29 +55,23 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
 
                     if (link.ExitCode != 0)
                     {
-                        throw new Exception("Link /dump failed");
+                        throw new AzureKinectStubGeneratorException("Link /dump failed");
                     }
 
-                    foreach (System.Text.RegularExpressions.Match m in regex.Matches(output))
+                    foreach (Match m in regex.Matches(output))
                     {
                         string functionName = m.Groups[1].Value;
 
                         exports.Add(functionName);
-
-
                     }
-
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(ex, "exception info");
-                throw new InvalidOperationException("Failed to analyze module", ex);
+                throw new AzureKinectStubGeneratorException("Failed to analyze module", ex);
             }
 
             return new ModuleInfo(exports.ToArray());
         }
-
-        public string[] Exports { get; }
     }
 }
