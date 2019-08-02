@@ -81,7 +81,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
                 return c;
             });
 
-            // The reference to the Device object is no longer on the stack, and therefore is free to be garbage collected
+            // The reference to the Capture object is no longer on the stack, and therefore is free to be garbage collected
             // At this point capture.IsAlive is likely to be true, but not garanteed to be
 
             // Force garbage collection
