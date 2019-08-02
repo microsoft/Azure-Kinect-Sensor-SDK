@@ -92,16 +92,15 @@ cv::Mat construct_homogeneous(const cv::Mat &R, const cv::Vec3d &t)
     return homog_matrix;
 }
 
-void deconstruct_homogeneous(const cv::Mat &H, cv::Mat &R, cv::Vec3d &t)
+std::tuple<cv::Mat, cv::Vec3d> deconstruct_homogeneous(const cv::Mat &H)
 {
+    cv::Mat R = cv::Mat::zeros(cv::Size(3, 3), CV_64F);
+    cv::Vec3d t;
     if (H.size() != cv::Size(4, 4) || H.at<double>(3, 0) != 0 || H.at<double>(3, 1) != 0 || H.at<double>(3, 2) != 0 ||
         H.at<double>(3, 3) != 1)
     {
-        cout << "Please use a valid homogeneous matrix." << endl;
-        exit(1);
+        throw std::runtime_error("Please use a valid homogeneous matrix.");
     }
-    R = cv::Mat::zeros(cv::Size(3, 3), CV_64F);
-    t[0] = t[1] = t[2] = 0;
 
     for (int i = 0; i < R.rows; ++i)
     {
@@ -114,6 +113,7 @@ void deconstruct_homogeneous(const cv::Mat &H, cv::Mat &R, cv::Vec3d &t)
     {
         t[i] = H.at<double>(i, 3);
     }
+    return std::make_tuple(R, t);
 }
 
 void k4a_calibration_to_depth_to_color_R_t(const k4a::calibration &cal, cv::Mat &R, cv::Vec3d &t)
@@ -519,7 +519,7 @@ compose_calibration_transforms(const cv::Mat &R_1, const cv::Vec3d &t_1, const c
     cv::Mat H_3 = H_1 * H_2;
     cv::Mat R_3;
     cv::Vec3d t_3;
-    deconstruct_homogeneous(H_3, R_3, t_3);
+    std::tie(R_3, t_3) = deconstruct_homogeneous(H_3);
     return std::make_tuple(R_3, t_3);
 }
 
