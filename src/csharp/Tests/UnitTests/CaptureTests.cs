@@ -47,7 +47,6 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
         [Test]
         public void CaptureGarbageCollection()
         {
-            this.SetOpenCloseImplementation();
             this.nativeK4a.SetImplementation(@"
 
 k4a_result_t k4a_capture_create(k4a_capture_t* capture_handle)
@@ -101,7 +100,6 @@ void k4a_capture_release(k4a_capture_t capture_handle)
         [Test]
         public void Temperature()
         {
-            this.SetOpenCloseImplementation();
             this.SetCaptureReleaseImplementation();
 
             this.nativeK4a.SetImplementation(@"
@@ -167,7 +165,6 @@ void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float value)
         [Test]
         public void DisposeBehavior()
         {
-            this.SetOpenCloseImplementation();
             this.SetCaptureReleaseImplementation();
 
             Capture c = new Capture();
@@ -201,7 +198,6 @@ void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float value)
         [Test]
         public void EqualsBehavior()
         {
-            this.SetOpenCloseImplementation();
             this.SetCaptureReleaseImplementation();
 
             // Mock an implementation that allows for multiple captures
@@ -252,7 +248,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
 
             Assert.AreNotEqual(c1_native, c2_native);
             Assert.AreEqual(c1_native, c1_ref_native);
-            Assert.AreEqual(c2_ref_native, c2_ref_native);
+            Assert.AreEqual(c2_native, c2_ref_native);
 
             // References to each other should be equal
             Assert.IsTrue(c1.NativeEquals(c1_ref));
@@ -285,7 +281,6 @@ void k4a_capture_release(k4a_capture_t capture_handle)
         [Test]
         public void ImageProperties()
         {
-            this.SetOpenCloseImplementation();
             this.SetCaptureReleaseImplementation();
             this.SetImageMockImplementation();
 
@@ -405,28 +400,6 @@ void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image_t image)
         private System.WeakReference CreateWithWeakReference<T>(System.Func<T> factory)
         {
             return new System.WeakReference(factory());
-        }
-
-        // Helper function to implement basic open/close behavior
-        private void SetOpenCloseImplementation()
-        {
-            this.nativeK4a.SetImplementation(@"
-
-k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
-{{
-    STUB_ASSERT(index == 0);
-    STUB_ASSERT(device_handle != NULL);
-
-    // Assign back a fake value
-    *device_handle = (k4a_device_t)0x1234ABCD; 
-
-    return K4A_RESULT_SUCCEEDED;
-}}
-
-void k4a_device_close(k4a_device_t device_handle)
-{{
-    STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
-}}");
         }
 
         // Helper to create basic capture create/release implementation

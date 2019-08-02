@@ -60,7 +60,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             get
             {
-                this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_color_image, ref this.cachedColor);
+                this.UpdateImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_color_image, ref this.cachedColor);
 
                 return this.cachedColor;
             }
@@ -87,7 +87,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             get
             {
-                this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_depth_image, ref this.cachedDepth);
+                this.UpdateImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_depth_image, ref this.cachedDepth);
 
                 return this.cachedDepth;
             }
@@ -115,7 +115,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             get
             {
-                this.GetImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_ir_image, ref this.cachedIR);
+                this.UpdateImageWrapperAndDisposePrevious(NativeMethods.k4a_capture_get_ir_image, ref this.cachedIR);
 
                 return this.cachedIR;
             }
@@ -277,7 +277,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// If the handle is for a different Image, we construct a new wrapper and dispose the old one.
         /// If existing wrapper has been disposed, we throw an exception.
         /// </remarks>
-        private void GetImageWrapperAndDisposePrevious(
+        private void UpdateImageWrapperAndDisposePrevious(
             Func<NativeMethods.k4a_capture_t, NativeMethods.k4a_image_t> nativeMethod,
             ref Image cachedImage)
         {
