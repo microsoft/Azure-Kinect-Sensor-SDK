@@ -15,11 +15,11 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-// TODO explain
+// This is the maximum difference between when we expected an image's timestamp to be and when it actually occurred.
 constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(50);
-constexpr uint32_t MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC = 160; // Allowing at least 160 microseconds between
-                                                                      // depth cameras should ensure they do not
-                                                                      // interfere with one another.
+
+// Allowing at least 160 microseconds between depth cameras should ensure they do not interfere with one another.
+constexpr uint32_t MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC = 160;
 
 // ideally, we could generalize this to many OpenCV types
 cv::Mat k4a_color_to_opencv(const k4a::image &im)
