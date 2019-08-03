@@ -53,8 +53,18 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     if (++tracerRefCount == 1)
                     {
-                        // Only allow one event callback to be subscribe to prevent duplicate messages.
-                        Logger.LogMessage += Logger_LogMessage;
+                        try
+                        {
+                            // Only allow one event callback to be subscribe to prevent duplicate messages.
+                            Logger.LogMessage += Logger_LogMessage;
+                        }
+                        catch (Exception)
+                        {
+                            // Clear out the ref count if this fails.
+                            --tracerRefCount;
+                            --threadRefCount;
+                            throw;
+                        }
                     }
                 }
             }
@@ -67,7 +77,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Gets all of the messages that have occurred on this thread since the tracing began.
         /// </summary>
-        public ICollection<string> LogMessages
+        public IList<string> LogMessages
         {
             get
             {

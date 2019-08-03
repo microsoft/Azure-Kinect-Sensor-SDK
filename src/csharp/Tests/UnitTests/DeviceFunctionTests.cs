@@ -49,8 +49,18 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
         {
             NativeK4a.SetImplementation(@"
 
+k4a_result_t k4a_set_debug_message_handler(
+    k4a_logging_message_cb_t *message_cb,
+    void *message_cb_context,
+    k4a_log_level_t min_level)
+{
+    STUB_ASSERT(message_cb != NULL);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
-{{
+{
     STUB_ASSERT(index == 0);
     STUB_ASSERT(device_handle != NULL);
 
@@ -58,12 +68,12 @@ k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
     *device_handle = (k4a_device_t)0x1234ABCD; 
 
     return K4A_RESULT_SUCCEEDED;
-}}
+}
 
 void k4a_device_close(k4a_device_t device_handle)
-{{
+{
     STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
-}}");
+}");
         }
 
         [Test]

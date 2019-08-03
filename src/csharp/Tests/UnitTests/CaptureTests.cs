@@ -64,6 +64,16 @@ void k4a_capture_release(k4a_capture_t capture_handle)
     STUB_ASSERT(capture_handle == (k4a_capture_t)0x0C001234);
 }
 
+k4a_result_t k4a_set_debug_message_handler(
+    k4a_logging_message_cb_t *message_cb,
+    void *message_cb_context,
+    k4a_log_level_t min_level)
+{
+    STUB_ASSERT(message_cb != NULL);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 ");
 
             CallCount count = this.nativeK4a.CountCalls();
@@ -235,6 +245,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
     
     STUB_ASSERT(capture->refcount >= 0);
 }
+
 ");
 
             Capture c1 = new Capture();
@@ -432,6 +443,17 @@ void k4a_capture_release(k4a_capture_t capture_handle)
     STUB_ASSERT(capture_handle == (k4a_capture_t)0x0C001234);
     captureRefCount--;
 }
+
+k4a_result_t k4a_set_debug_message_handler(
+    k4a_logging_message_cb_t *message_cb,
+    void *message_cb_context,
+    k4a_log_level_t min_level)
+{
+    STUB_ASSERT(message_cb != NULL);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 ");
         }
 

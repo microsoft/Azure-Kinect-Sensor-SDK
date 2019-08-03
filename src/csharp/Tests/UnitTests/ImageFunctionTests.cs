@@ -120,8 +120,15 @@ void k4a_image_release(k4a_image_t image_handle)
     }
 }
 
+k4a_result_t k4a_set_debug_message_handler(
+    k4a_logging_message_cb_t *message_cb,
+    void *message_cb_context,
+    k4a_log_level_t min_level)
+{
+    STUB_ASSERT(message_cb != NULL);
 
-");
+    return K4A_RESULT_SUCCEEDED;
+}");
         }
 
         private System.WeakReference CreateWithWeakReference<T>(System.Func<T> factory)

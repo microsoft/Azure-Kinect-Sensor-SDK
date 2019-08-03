@@ -109,7 +109,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             /// <param name="logMessages">
             /// The log messages that were generated while the function ran.
             /// </param>
-            public NativeCallResults(T result, ICollection<string> logMessages)
+            public NativeCallResults(T result, IList<string> logMessages)
             {
                 this.Result = result;
                 this.LogMessages = logMessages;
@@ -123,7 +123,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             /// <summary>
             /// Gets the log messages that were generated while the function ran.
             /// </summary>
-            public ICollection<string> LogMessages { get; }
+            public IList<string> LogMessages { get; }
         }
     }
 }

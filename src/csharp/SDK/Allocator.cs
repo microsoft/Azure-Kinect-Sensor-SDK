@@ -127,7 +127,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// When the CLR shuts down, native callbacks in to the CLR result in an application crash. The allocator free method
         /// is a native callback to the managed layer that is called whenever the hooked native API needs to free memory.
         ///
-        /// To avoid this callback after the CLR shuts down, the native library must be completly cleaned up prior CLR shutdown.
+        /// To avoid this callback after the CLR shuts down, the native library must be completely cleaned up prior CLR shutdown.
         ///
         /// Any object that may hold references to the native library (and will therefore generate native to manged callbacks when it
         /// gets cleaned up) should register with the RegisterForDisposal method to ensure it is cleaned up in the correct order.
@@ -143,7 +143,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
 
                 // Track the object as one we may need to dispose during shutdown.
-                // Use a weak reference to allow the object to be garbage collected earliler if possible.
+                // Use a weak reference to allow the object to be garbage collected earlier if possible.
                 _ = this.disposables.Add(new WeakReference<IDisposable>(disposable));
             }
         }
@@ -363,7 +363,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 // Disable the managed allocator hook to ensure no new allocations
                 this.UseManagedAllocator = false;
 
-                // Prevent more dispsal registrations while we are cleaning up
+                // Prevent more disposal registrations while we are cleaning up
                 this.noMoreDisposalRegistrations = true;
 
                 System.Diagnostics.Debug.WriteLine($"Disposable count {this.disposables.Count} (Allocation Count {this.allocations.Count})");
