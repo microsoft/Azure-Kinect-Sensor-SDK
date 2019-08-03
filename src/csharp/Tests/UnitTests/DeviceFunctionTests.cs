@@ -1393,9 +1393,9 @@ k4a_result_t k4a_device_start_cameras(
                     DeviceConfiguration config = new DeviceConfiguration
                     {
                         ColorFormat = ImageFormat.ColorBGRA32,
-                        ColorResolution = ColorResolution.r1080p,
+                        ColorResolution = ColorResolution.R1080p,
                         DepthMode = DepthMode.PassiveIR,
-                        CameraFPS = FPS.fps15,
+                        CameraFPS = FPS.FPS15,
                         SynchronizedImagesOnly = true,
                         DepthDelayOffColor = System.TimeSpan.FromSeconds(-1),
                         WiredSyncMode = WiredSyncMode.Master,

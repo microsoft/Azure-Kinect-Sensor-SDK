@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="Image.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Buffers;
 using System.Runtime.InteropServices;
@@ -47,7 +51,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             // .Dispose() will be called on this object when the allocator is shut down.
             Allocator.Singleton.RegisterForDisposal(this);
 
-            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
+            AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_image_create(
+                format,
                 widthPixels,
                 heightPixels,
                 strideBytes,
@@ -87,7 +92,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             Allocator.Singleton.RegisterForDisposal(this);
 
 #pragma warning disable CA2000 // Dispose objects before losing scope
-            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(
+            AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_image_create(
                 format,
                 widthPixels,
                 heightPixels,
@@ -99,7 +104,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Initializes a new instance of the <see cref="Image"/> class.
         /// </summary>
-        /// <param name="handle">Handle to initialize the image from</param>
+        /// <param name="handle">Handle to initialize the image from.</param>
         /// <remarks>The handle will be owned by the new image.</remarks>
         internal Image(NativeMethods.k4a_image_t handle)
         {
@@ -127,7 +132,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
                 lock (this)
                 {
-
                     if (this.disposedValue)
                     {
                         throw new ObjectDisposedException(nameof(Image));
@@ -163,7 +167,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     // a memcpy each time we transition the buffer from native to managed, or from managed to native.
 
                     // If we don't copy the native buffers, we can construct a MemoryManager<T> that wraps that native
-                    // buffer. This has no memcpy cost, but exposes the possibilty of use after free bugs to consumers
+                    // buffer. This has no memcpy cost, but exposes the possibility of use after free bugs to consumers
                     // of the library. This is therefore not enabled by default.
                     if (Allocator.Singleton.SafeCopyNativeBuffers)
                     {
@@ -329,7 +333,6 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             get
             {
-
                 if (this.bufferSize >= 0)
                 {
                     return this.bufferSize;
@@ -350,7 +353,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Gets or sets the image timestamp in the device's clock.
+        /// Gets or sets the image time-stamp in the device's clock.
         /// </summary>
         public TimeSpan Timestamp
         {
@@ -451,7 +454,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// </summary>
         /// <typeparam name="TPixel">The type of the pixel.</typeparam>
         /// <remarks>If the image pixels are not in contiguous memory, this method will throw an exception.</remarks>
-        /// <returns>The contigous memory of the image pixels.</returns>
+        /// <returns>The contiguous memory of the image pixels.</returns>
         public Memory<TPixel> GetPixels<TPixel>()
             where TPixel : unmanaged
         {
@@ -468,7 +471,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// </summary>
         /// <typeparam name="TPixel">The type of the pixel.</typeparam>
         /// <param name="row">The row of pixels to get.</param>
-        /// <returns>The contigous memory of the image pixel row.</returns>
+        /// <returns>The contiguous memory of the image pixel row.</returns>
         public Memory<TPixel> GetPixels<TPixel>(int row)
             where TPixel : unmanaged
         {
@@ -551,7 +554,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
 #pragma warning disable CA2000 // Dispose objects before losing scope
 
-                // The new image takes owenership of the duplicated handle.
+                // The new image takes ownership of the duplicated handle.
                 return new Image(this.handle.DuplicateReference());
 #pragma warning restore CA2000 // Dispose objects before losing scope
             }
@@ -576,7 +579,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// caller ensures the Image is not Disposed or garbage collected while this pointer is
         /// in use, since it may become invalid when the Image is disposed or finalized.
         ///
-        /// If this method needs to be used in a context where the caller cannot garantee that the
+        /// If this method needs to be used in a context where the caller cannot guarantee that the
         /// Image will be disposed by another thread, the caller can call <see cref="Reference"/>
         /// to create a duplicate reference to the Image which can be disposed separately.
         ///
@@ -726,7 +729,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         this.handle = null;
                     }
 
-                    // Return the buffer during finalization to ensure tha the pool
+                    // Return the buffer during finalization to ensure that the pool
                     // can clean up its references. If the Image was garbage collected, the pool
                     // will continue to hold a reference.
                     if (this.managedBufferCache != null)

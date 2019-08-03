@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="Transformation.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 
 namespace Microsoft.Azure.Kinect.Sensor
@@ -127,7 +131,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     // Ensure changes made to the managed memory are visible to the native layer
                     depthReference.FlushMemory();
 
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_color_camera(
+                    AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_transformation_depth_image_to_color_camera(
                         this.handle,
                         depthReference.DangerousGetHandle(),
                         transformedReference.DangerousGetHandle()));
@@ -255,7 +259,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     depthReference.FlushMemory();
                     colorReference.FlushMemory();
 
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_color_image_to_depth_camera(
+                    AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_transformation_color_image_to_depth_camera(
                         this.handle,
                         depthReference.DangerousGetHandle(),
                         colorReference.DangerousGetHandle(),
@@ -273,7 +277,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <param name="depth">The depth map to generate the point cloud from.</param>
         /// <param name="camera">The perspective the depth map is from.</param>
         /// <remarks>
-        /// If the depth map is from the original depth perspecive, <paramref name="camera"/> should be Depth. If it has
+        /// If the depth map is from the original depth perspective, <paramref name="camera"/> should be Depth. If it has
         /// been transformed to the color camera perspective, <paramref name="camera"/> should be Color.
         ///
         /// The returned image will be of format Custom. Each pixel will be an XYZ set of 16 bit values,
@@ -305,7 +309,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <param name="pointCloud">The image to store the output point cloud.</param>
         /// <param name="camera">The perspective the depth map is from.</param>
         /// <remarks>
-        /// If the depth map is from the original depth perspecive, <paramref name="camera"/> should be Depth. If it has
+        /// If the depth map is from the original depth perspective, <paramref name="camera"/> should be Depth. If it has
         /// been transformed to the color camera perspective, <paramref name="camera"/> should be Color.
         ///
         /// The <paramref name="pointCloud"/> image must be of format Custom. Each pixel will be an XYZ set of 16 bit values,
@@ -338,7 +342,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     // Ensure changes made to the managed memory are visible to the native layer
                     depthReference.FlushMemory();
 
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_transformation_depth_image_to_point_cloud(
+                    AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_transformation_depth_image_to_point_cloud(
                         this.handle,
                         depthReference.DangerousGetHandle(),
                         camera,

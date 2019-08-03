@@ -92,7 +92,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     {
                         try
                         {
-                            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(this.allocateDelegate, this.freeDelegate));
+                            AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_set_allocator(this.allocateDelegate, this.freeDelegate));
                             this.hooked = true;
                         }
                         catch (Exception)
@@ -107,7 +107,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     if (!value && this.hooked)
                     {
                         // Disabling the hook once it has been enabled should not catch the exception
-                        AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(null, null));
+                        AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_set_allocator(null, null));
                         this.hooked = false;
                     }
                 }

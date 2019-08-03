@@ -1,7 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="Device.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 [assembly: CLSCompliant(true)]
@@ -64,7 +67,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         StringBuilder serialno = new StringBuilder((int)size.ToUInt32());
 
                         // Get the serial number
-                        AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_serialnum(this.handle, serialno, ref size));
+                        AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_serialnum(this.handle, serialno, ref size));
 
                         this.serialNum = serialno.ToString();
 
@@ -98,10 +101,13 @@ namespace Microsoft.Azure.Kinect.Sensor
                         throw new ObjectDisposedException(nameof(Device));
                     }
 
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_sync_jack(
+                    bool sync_in = default;
+                    bool sync_out = default;
+                    AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_sync_jack(
                         this.handle,
-                        out bool sync_in,
-                        out bool sync_out));
+                        out sync_in,
+                        out sync_out));
+
                     return sync_in;
                 }
             }
@@ -121,10 +127,13 @@ namespace Microsoft.Azure.Kinect.Sensor
                         throw new ObjectDisposedException(nameof(Device));
                     }
 
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_sync_jack(
+                    bool sync_in = default;
+                    bool sync_out = default;
+                    AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_sync_jack(
                         this.handle,
-                        out bool sync_in,
-                        out bool sync_out));
+                        out sync_in,
+                        out sync_out));
+
                     return sync_out;
                 }
             }
@@ -149,9 +158,10 @@ namespace Microsoft.Azure.Kinect.Sensor
                         return this.version;
                     }
 
-                    AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_version(
+                    NativeMethods.k4a_hardware_version_t nativeVersion = default;
+                    AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_version(
                         this.handle,
-                        out NativeMethods.k4a_hardware_version_t nativeVersion));
+                        out nativeVersion));
 
                     this.version = nativeVersion.ToHardwareVersion();
                     return this.version;
@@ -176,7 +186,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <remarks>The device will remain opened for exclusive access until the Device object is disposed.</remarks>
         public static Device Open(int index = 0)
         {
-            AzureKinectOpenDeviceException.ThrowIfNotSuccess(NativeMethods.k4a_device_open((uint)index, out NativeMethods.k4a_device_t handle));
+            NativeMethods.k4a_device_t handle = default;
+            AzureKinectOpenDeviceException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_open((uint)index, out handle));
             return new Device(handle);
         }
 
@@ -195,7 +206,8 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_calibration(this.handle, depthMode, colorResolution, out Calibration calibration));
+                Calibration calibration = default;
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_calibration(this.handle, depthMode, colorResolution, out calibration));
                 return calibration;
             }
         }
@@ -238,7 +250,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 byte[] raw = new byte[size.ToUInt32()];
 
                 // Get the raw calibration
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_raw_calibration(this.handle, raw, ref size));
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_raw_calibration(this.handle, raw, ref size));
 
                 return raw;
             }
@@ -262,21 +274,24 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_capture(this.handle, out NativeMethods.k4a_capture_t capture, (int)timeout.TotalMilliseconds);
-
-                if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
+                using (LoggingTracer tracer = new LoggingTracer())
                 {
-                    throw new TimeoutException("Timed out waiting for capture");
+                    NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_capture(this.handle, out NativeMethods.k4a_capture_t capture, (int)timeout.TotalMilliseconds);
+
+                    if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
+                    {
+                        throw new TimeoutException("Timed out waiting for capture");
+                    }
+
+                    AzureKinectException.ThrowIfNotSuccess(tracer, result);
+
+                    if (capture.IsInvalid)
+                    {
+                        throw new AzureKinectException("k4a_device_get_capture did not return a valid capture handle");
+                    }
+
+                    return new Capture(capture);
                 }
-
-                AzureKinectException.ThrowIfNotSuccess(result);
-
-                if (capture.IsInvalid)
-                {
-                    throw new AzureKinectException("k4a_device_get_capture did not return a valid capture handle");
-                }
-
-                return new Capture(capture);
             }
         }
 
@@ -311,17 +326,20 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                ImuSample sample = new ImuSample();
-                NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_imu_sample(this.handle, sample, (int)timeout.TotalMilliseconds);
-
-                if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
+                using (LoggingTracer tracer = new LoggingTracer())
                 {
-                    throw new TimeoutException("Timed out waiting for imu sample");
+                    ImuSample sample = new ImuSample();
+                    NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_imu_sample(this.handle, sample, (int)timeout.TotalMilliseconds);
+
+                    if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
+                    {
+                        throw new TimeoutException("Timed out waiting for imu sample");
+                    }
+
+                    AzureKinectException.ThrowIfNotSuccess(tracer, result);
+
+                    return sample;
                 }
-
-                AzureKinectException.ThrowIfNotSuccess(result);
-
-                return sample;
             }
         }
 
@@ -371,8 +389,11 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_get_color_control(this.handle, command, out mode, out int value));
-                return value;
+                using (LoggingTracer tracer = new LoggingTracer())
+                {
+                    AzureKinectException.ThrowIfNotSuccess(tracer, NativeMethods.k4a_device_get_color_control(this.handle, command, out mode, out int value));
+                    return value;
+                }
             }
         }
 
@@ -391,7 +412,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_device_set_color_control(this.handle, command, mode, value));
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_set_color_control(this.handle, command, mode, value));
             }
         }
 
@@ -414,7 +435,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
 
                 NativeMethods.k4a_device_configuration_t nativeConfig = configuration.GetNativeConfiguration();
-                AzureKinectStartCamerasException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_cameras(this.handle, ref nativeConfig));
+                AzureKinectStartCamerasException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_start_cameras(this.handle, ref nativeConfig));
 
                 this.CurrentDepthMode = configuration.DepthMode;
                 this.CurrentColorResolution = configuration.ColorResolution;
@@ -452,7 +473,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                AzureKinectStartImuException.ThrowIfNotSuccess(NativeMethods.k4a_device_start_imu(this.handle));
+                AzureKinectStartImuException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_start_imu(this.handle));
             }
         }
 
