@@ -5,6 +5,8 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Azure.Kinect.Sensor.Test.StubGenerator;
 using NUnit.Framework;
 
@@ -117,6 +119,45 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
                 Assert.AreEqual(1, tracer.LogMessages.Count);
                 Assert.IsTrue(tracer.LogMessages[0].EndsWith("[Warning] File@1234: Message", StringComparison.Ordinal));
             }
+        }
+
+        /// <summary>
+        /// Tests that verify that multiple threads can create logging tracers and that they get
+        /// only the calls for their thread and that the lifetime of the tracer on other threads
+        /// don't impact other threads.
+        /// </summary>
+        [Test]
+        public void LoggingTracerMultiThreaded()
+        {
+            this.SetMessageHandlerImplementation();
+
+            Task threadA = Task.Run(() => ThreadProc(1, 50));
+            Task threadB = Task.Run(() => ThreadProc(10, 10));
+            Task threadC = Task.Run(() => ThreadProc(11, 9));
+
+            threadA.Wait();
+            threadB.Wait();
+            threadC.Wait();
+        }
+
+        private static void ThreadProc(int delay, int count)
+        {
+            // Make sure that there are calls and times that a thread exists where the tracer isn't active.
+            Assert.AreEqual(0, Device.GetInstalledCount());
+            Thread.Sleep(delay);
+
+            using (LoggingTracer tracer = new LoggingTracer())
+            {
+                for (int i = 0; i < count; ++i)
+                {
+                    Assert.AreEqual(0, Device.GetInstalledCount());
+                    Thread.Sleep(delay);
+                }
+
+                Assert.AreEqual(count, tracer.LogMessages.Count);
+            }
+
+            Assert.AreEqual(0, Device.GetInstalledCount());
         }
 
         /// <summary>
