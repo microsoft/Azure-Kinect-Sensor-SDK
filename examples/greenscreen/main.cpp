@@ -186,9 +186,9 @@ std::tuple<k4a::capture, k4a::capture> get_synchronized_captures(k4a::device &ma
             std::chrono::microseconds master_color_image_time = master_color_image.get_device_timestamp();
             // The subordinate's color image timestamp, ideally, is the master's color image timestamp plus the delay we
             // configured between the master device color camera and subordinate device color camera
-            std::chrono::microseconds expected_sub_image_time = master_color_image_time + std::chrono::microseconds{
-                sub_config.subordinate_delay_off_master_usec
-            };
+            std::chrono::microseconds expected_sub_image_time =
+                master_color_image_time + std::chrono::microseconds{ sub_config.subordinate_delay_off_master_usec } +
+                std::chrono::microseconds{ sub_config.depth_delay_off_color_usec };
             std::chrono::microseconds sub_image_time_error = sub_image_time - expected_sub_image_time;
             // The time error's absolute value must be within the permissible range. So, for example, if
             // MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 2, offsets of -2, -1, 0, 1, and -2 are permitted
@@ -440,7 +440,7 @@ k4a_device_configuration_t get_sub_config_green_screen()
     // Only account for half of the delay here. The other half comes from the master depth camera capturing before the
     // master color camera.
     camera_config.subordinate_delay_off_master_usec = MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2;
-    camera_config.depth_delay_off_color_usec = 0; // TODO TEST this- ignored, or, more likely, ruins everything
+    camera_config.depth_delay_off_color_usec = 0;
     camera_config.synchronized_images_only = true;
     return camera_config;
 }
