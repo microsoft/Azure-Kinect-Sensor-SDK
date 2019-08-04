@@ -35,7 +35,8 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
         [SetUp]
         public void Setup()
         {
-
+            // Don't hook the native allocator
+            Microsoft.Azure.Kinect.Sensor.Allocator.Singleton.UseManagedAllocator = false;
         }
 
         // Helper function to implement basic open/close behavior
@@ -475,12 +476,12 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
             CallCount count = NativeK4a.CountCalls();
             using (Device device = Device.Open(0))
             {
-                Calibration calibration = device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.r1440p);
+                Calibration calibration = device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.R1440p);
 
                 Assert.AreEqual(1, count.Calls("k4a_device_get_calibration"));
 
                 Assert.AreEqual(DepthMode.NFOV_Unbinned, calibration.depth_mode);
-                Assert.AreEqual(ColorResolution.r1440p, calibration.color_resolution);
+                Assert.AreEqual(ColorResolution.R1440p, calibration.color_resolution);
 
                 for (int i = 0; i < 9; i++)
                 {
@@ -533,7 +534,7 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
 
                 device.StartCameras(new DeviceConfiguration
                 {
-                    ColorResolution = ColorResolution.r1440p,
+                    ColorResolution = ColorResolution.R1440p,
                     DepthMode = DepthMode.NFOV_Unbinned
                 });
 
@@ -552,7 +553,7 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
 
                 Assert.Throws(typeof(System.ObjectDisposedException), () =>
                     {
-                        device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.r1440p);
+                        device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.R1440p);
                     });
 
             }
@@ -581,7 +582,7 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
             {
                 Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
-                        Calibration calibration = device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.r1440p);
+                        Calibration calibration = device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.R1440p);
                     });
 
             }
@@ -616,7 +617,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
                 {
                     Assert.AreEqual(0, count.Calls("k4a_device_get_capture"));
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
-                    using (Capture capture = device.GetCapture(2345))
+                    using (Capture capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345)))
                     {
                         Assert.AreEqual(1, count.Calls("k4a_device_get_capture"));
                         Assert.AreEqual(0, count.Calls("k4a_capture_release"));
@@ -635,7 +636,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
                     Assert.AreEqual(0, count.Calls("k4a_device_get_capture"));
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
 
-                    capture = device.GetCapture(2345);
+                    capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345));
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_capture"));
                     Assert.AreEqual(0, count.Calls("k4a_capture_release"));
@@ -683,7 +684,7 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
 
                     Assert.Throws(typeof(System.TimeoutException), () =>
                     {
-                        using (Capture capture = device.GetCapture(2345))
+                        using (Capture capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345)))
                         {
 
                         }
@@ -735,7 +736,7 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
 
                     Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
-                        using (Capture capture = device.GetCapture(2345))
+                        using (Capture capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345)))
                         {
 
                         }
@@ -769,7 +770,7 @@ k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle, k4a_capture
 
                     Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
-                        using (Capture capture = device.GetCapture(2345))
+                        using (Capture capture = device.GetCapture(System.TimeSpan.FromMilliseconds(2345)))
                         {
 
                         }
@@ -968,7 +969,7 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
                 using (Device device = Device.Open(0))
                 {
                     Assert.AreEqual(0, count.Calls("k4a_device_get_imu_sample"));
-                    ImuSample sample = device.GetImuSample(2345);
+                    ImuSample sample = device.GetImuSample(System.TimeSpan.FromMilliseconds(2345));
 
                     Assert.AreEqual(0.123f, sample.Temperature);
 
@@ -987,7 +988,7 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
                     device.Dispose();
                     Assert.Throws(typeof(System.ObjectDisposedException), () =>
                     {
-                        device.GetImuSample(2345);
+                        device.GetImuSample(System.TimeSpan.FromMilliseconds(2345));
                     });
                 }
             }
@@ -1019,7 +1020,7 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
 
                     Assert.Throws(typeof(System.TimeoutException), () =>
                     {
-                        ImuSample sample = device.GetImuSample(2345);
+                        ImuSample sample = device.GetImuSample(System.TimeSpan.FromMilliseconds(2345));
                     });
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_imu_sample"));
@@ -1050,7 +1051,7 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
 
                     Assert.Throws(typeof(Microsoft.Azure.Kinect.Sensor.AzureKinectException), () =>
                     {
-                        ImuSample sample = device.GetImuSample(2345);
+                        ImuSample sample = device.GetImuSample(System.TimeSpan.FromMilliseconds(2345));
                     });
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_imu_sample"));
@@ -1344,9 +1345,9 @@ k4a_result_t k4a_device_start_cameras(
                     DeviceConfiguration config = new DeviceConfiguration
                     {
                         ColorFormat = ImageFormat.ColorBGRA32,
-                        ColorResolution = ColorResolution.r1080p,
+                        ColorResolution = ColorResolution.R1080p,
                         DepthMode = DepthMode.PassiveIR,
-                        CameraFPS = FPS.fps15,
+                        CameraFPS = FPS.FPS15,
                         SynchronizedImagesOnly = true,
                         DepthDelayOffColor = System.TimeSpan.FromSeconds(-1),
                         WiredSyncMode = WiredSyncMode.Master,

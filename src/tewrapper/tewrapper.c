@@ -34,10 +34,14 @@ typedef struct _tewrapper_context_t
     k4a_transform_engine_type_t type;
     const void *depth_image_data;
     size_t depth_image_size;
-    const void *color_image_data;
-    size_t color_image_size;
+    const void *image2_data;
+    size_t image2_size;
     void *transformed_image_data;
     size_t transformed_image_size;
+    void *transformed_image2_data;
+    size_t transformed_image2_size;
+    k4a_transform_engine_interpolation_t interpolation;
+    uint32_t invalid_value;
 
 } tewrapper_context_t;
 
@@ -55,6 +59,10 @@ static k4a_result_t transform_engine_start_helper(tewrapper_context_t *tewrapper
     if (teresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
     {
         LOG_ERROR("Transform engine create and initialize failed with error code: %d.", teresult);
+        if (teresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_OPENGL_CONTEXT)
+        {
+            LOG_ERROR("OpenGL 4.4 context creation failed. You could try updating your graphics drivers.", 0);
+        }
     }
 
     return K4A_RESULT_FROM_BOOL(teresult == K4A_DEPTH_ENGINE_RESULT_SUCCEEDED);
@@ -100,14 +108,42 @@ static int transform_engine_thread(void *param)
         {
             if (K4A_SUCCEEDED(result))
             {
-                size_t transform_engine_output_buffer_size =
-                    deloader_transform_engine_get_output_frame_size(tewrapper->transform_engine, tewrapper->type);
-                if (tewrapper->transformed_image_size != transform_engine_output_buffer_size)
+                if (tewrapper->type == K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR ||
+                    tewrapper->type == K4A_TRANSFORM_ENGINE_TYPE_COLOR_TO_DEPTH)
                 {
-                    LOG_ERROR("Transform engine output buffer size not expected. Expect: %d, Actual: %d. Type: %s",
-                              transform_engine_output_buffer_size,
-                              tewrapper->transformed_image_size);
-                    result = K4A_RESULT_FAILED;
+                    size_t transform_engine_output_buffer_size =
+                        deloader_transform_engine_get_output_frame_size(tewrapper->transform_engine, tewrapper->type);
+                    if (tewrapper->transformed_image_size != transform_engine_output_buffer_size)
+                    {
+                        LOG_ERROR("Transform engine output buffer size not expected. Expect: %d, Actual: %d.",
+                                  transform_engine_output_buffer_size,
+                                  tewrapper->transformed_image_size);
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+                else if (tewrapper->type == K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM8_TO_COLOR ||
+                         tewrapper->type == K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM16_TO_COLOR)
+                {
+                    size_t transform_engine_output_buffer_size =
+                        deloader_transform_engine_get_output_frame_size(tewrapper->transform_engine,
+                                                                        K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR);
+                    if (tewrapper->transformed_image_size != transform_engine_output_buffer_size)
+                    {
+                        LOG_ERROR("Transform engine output buffer size not expected. Expect: %d, Actual: %d.",
+                                  transform_engine_output_buffer_size,
+                                  tewrapper->transformed_image_size);
+                        result = K4A_RESULT_FAILED;
+                    }
+
+                    size_t transform_engine_output_buffer2_size =
+                        deloader_transform_engine_get_output_frame_size(tewrapper->transform_engine, tewrapper->type);
+                    if (tewrapper->transformed_image2_size != transform_engine_output_buffer2_size)
+                    {
+                        LOG_ERROR("Transform engine output buffer 2 size not expected. Expect: %d, Actual: %d.",
+                                  transform_engine_output_buffer2_size,
+                                  tewrapper->transformed_image2_size);
+                        result = K4A_RESULT_FAILED;
+                    }
                 }
             }
 
@@ -118,11 +154,23 @@ static int transform_engine_thread(void *param)
                                                             tewrapper->type,
                                                             tewrapper->depth_image_data,
                                                             tewrapper->depth_image_size,
-                                                            tewrapper->color_image_data,
-                                                            tewrapper->color_image_size,
+                                                            tewrapper->image2_data,
+                                                            tewrapper->image2_size,
                                                             tewrapper->transformed_image_data,
-                                                            tewrapper->transformed_image_size);
-                if (teresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
+                                                            tewrapper->transformed_image_size,
+                                                            tewrapper->transformed_image2_data,
+                                                            tewrapper->transformed_image2_size,
+                                                            tewrapper->interpolation,
+                                                            tewrapper->invalid_value);
+                if (teresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_WAIT_PROCESSING_COMPLETE_FAILED ||
+                    teresult == K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_GPU_TIMEOUT)
+                {
+                    LOG_ERROR("Timeout during depth engine process frame.", 0);
+                    LOG_ERROR("SDK should be restarted since it looks like GPU has encountered an unrecoverable error.",
+                              0);
+                    result = K4A_RESULT_FAILED;
+                }
+                else if (teresult != K4A_DEPTH_ENGINE_RESULT_SUCCEEDED)
                 {
                     LOG_ERROR("Transform engine process frame failed with error code: %d.", teresult);
                     result = K4A_RESULT_FAILED;
@@ -146,10 +194,14 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
                                      k4a_transform_engine_type_t type,
                                      const void *depth_image_data,
                                      size_t depth_image_size,
-                                     const void *color_image_data,
-                                     size_t color_image_size,
+                                     const void *image2_data,
+                                     size_t image2_size,
                                      void *transformed_image_data,
-                                     size_t transformed_image_size)
+                                     size_t transformed_image_size,
+                                     void *transformed_image2_data,
+                                     size_t transformed_image2_size,
+                                     k4a_transform_engine_interpolation_t interpolation,
+                                     uint32_t invalid_value)
 {
     tewrapper_context_t *tewrapper = tewrapper_t_get_context(tewrapper_handle);
 
@@ -173,10 +225,14 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
         tewrapper->type = type;
         tewrapper->depth_image_data = depth_image_data;
         tewrapper->depth_image_size = depth_image_size;
-        tewrapper->color_image_data = color_image_data;
-        tewrapper->color_image_size = color_image_size;
+        tewrapper->image2_data = image2_data;
+        tewrapper->image2_size = image2_size;
         tewrapper->transformed_image_data = transformed_image_data;
         tewrapper->transformed_image_size = transformed_image_size;
+        tewrapper->transformed_image2_data = transformed_image2_data;
+        tewrapper->transformed_image2_size = transformed_image2_size;
+        tewrapper->interpolation = interpolation;
+        tewrapper->invalid_value = invalid_value;
         Condition_Post(tewrapper->worker_condition);
 
         // Waiting the transform engine thread to finish processing

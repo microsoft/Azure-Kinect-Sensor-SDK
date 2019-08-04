@@ -18,9 +18,16 @@ void Stub_SetErrorFunction(RaiseError *pfnErrorHandler)
 
 inline void Stub_Assert(char *szFile, int line, bool expressionValue, char *expression)
 {
-    if (!expressionValue && g_ErrorHandler)
+    if (!expressionValue)
     {
-        g_ErrorHandler(szFile, line, expression);
+        if (g_ErrorHandler)
+        {
+            g_ErrorHandler(szFile, line, expression);
+        }
+        else
+        {
+            throw 0;
+        }
     }
 }
 

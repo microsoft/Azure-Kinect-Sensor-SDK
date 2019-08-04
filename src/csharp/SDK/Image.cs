@@ -1,21 +1,66 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Buffers;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-
-    public class ArrayImage<T> : Image where T : unmanaged
+    /// <summary>
+    /// An Azure Kinect Image referencing its buffer and metadata.
+    /// </summary>
+    public class Image : IMemoryOwner<byte>, IDisposable
     {
+        // The pointer to the underlying native memory
+        private IntPtr buffer = IntPtr.Zero;
 
-        private class CallbackContext
+        // If we have made a managed copy of the native memory, this is the managed array
+        private byte[] managedBufferCache = null;
+
+        // If we have wrapped the native memory in a IMemoryOwner<T>, this is the memory owner
+        private IMemoryOwner<byte> nativeBufferWrapper = null;
+
+        // The native handle to the image
+        private NativeMethods.k4a_image_t handle;
+
+        // Immutable properties of the image
+        // These are retrieved from the native code once, and then stored in the managed layer.
+        private ImageFormat? format = null;
+        private int heightPixels = -1;
+        private int widthPixels = -1;
+        private int strideBytes = -1;
+        private long bufferSize = -1;
+
+        // To detect redundant calls to Dispose
+        private bool disposedValue = false;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Image"/> class.
+        /// </summary>
+        /// <param name="format">The pixel format of the image. Must be a format with a constant pixel size.</param>
+        /// <param name="widthPixels">Width of the image in pixels.</param>
+        /// <param name="heightPixels">Height of the image in pixels.</param>
+        /// <param name="strideBytes">Stride of the image in bytes. Must be as large as the width times the size of a pixel.</param>
+        public Image(ImageFormat format, int widthPixels, int heightPixels, int strideBytes)
         {
-            public GCHandle BufferPin { get; set; }
-            public NativeMethods.k4a_memory_destroy_cb_t CallbackDelegate { get; set; }
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
+            Allocator.Singleton.RegisterForDisposal(this);
+
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
+                widthPixels,
+                heightPixels,
+                strideBytes,
+                out this.handle));
         }
 
-        private static NativeMethods.k4a_image_t CreateHandle(ImageFormat format, int width_pixels, int height_pixels, out T[] data)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Image"/> class.
+        /// </summary>
+        /// <param name="format">The pixel format of the image. Must be a format with a constant pixel size.</param>
+        /// <param name="widthPixels">Width of the image in pixels.</param>
+        /// <param name="heightPixels">Height of the image in pixels.</param>
+        public Image(ImageFormat format, int widthPixels, int heightPixels)
         {
             int pixelSize;
             switch (format)
@@ -25,590 +70,678 @@ namespace Microsoft.Azure.Kinect.Sensor
                     break;
                 case ImageFormat.Depth16:
                 case ImageFormat.IR16:
+                case ImageFormat.Custom16:
                     pixelSize = 2;
                     break;
+                case ImageFormat.Custom8:
+                    pixelSize = 1;
+                    break;
                 default:
-                    throw new AzureKinectException($"Unable to allocate {typeof(T).Name} array for format {format}");
+                    throw new AzureKinectException($"Unable to allocate array for format {format}");
             }
 
-            int stride_bytes = pixelSize * width_pixels;
+            int stride_bytes = widthPixels * pixelSize;
 
-            if (stride_bytes % Marshal.SizeOf(typeof(T)) != 0)
-            {
-                throw new AzureKinectException($"{typeof(T).Name} does not fit evenly on a line of {width_pixels} pixels of type {format}");
-            }
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
+            Allocator.Singleton.RegisterForDisposal(this);
 
-            // Allocate the buffer
-            data = new T[height_pixels * stride_bytes / Marshal.SizeOf(typeof(T))];
-
-            CallbackContext context = new CallbackContext()
-            {
-                BufferPin = GCHandle.Alloc(data, GCHandleType.Pinned),
-                CallbackDelegate = new NativeMethods.k4a_memory_destroy_cb_t(MemoryDestroyCallback)
-            };
-
-            GCHandle ContextPin = GCHandle.Alloc(context);
-            try
-            {
-                int size = height_pixels * stride_bytes;
-                AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create_from_buffer(format,
-                    width_pixels,
-                    height_pixels,
-                    stride_bytes,
-                    context.BufferPin.AddrOfPinnedObject(),
-                    (UIntPtr)size,
-                    context.CallbackDelegate,
-                    (IntPtr)ContextPin,
-                    out NativeMethods.k4a_image_t handle
-                    ));
-
-                return handle;
-            }
-            catch
-            {
-                context?.BufferPin.Free();
-                ContextPin.Free();
-                
-                throw;
-            }
-        }
-
-
-        public ArrayImage(ImageFormat format, int width_pixels, int height_pixels) :
-            base(CreateHandle(format, width_pixels, height_pixels, out T[] data))
-        {
-            Buffer = data;
-        }
-
-        public T[] Buffer { get; private set; }
-
-        private static void MemoryDestroyCallback(IntPtr buffer, IntPtr context)
-        {
-            GCHandle contextPin = (GCHandle)context;
-            CallbackContext ctx = (CallbackContext)contextPin.Target;
-            ctx.BufferPin.Free();
-            contextPin.Free();
-        }
-    }
-
-    public class Image : IDisposable
-    {
-        public Image(ImageFormat format, int width_pixels, int height_pixels, int stride_bytes)
-        {
-            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(format,
-                width_pixels,
-                height_pixels,
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_image_create(
+                format,
+                widthPixels,
+                heightPixels,
                 stride_bytes,
-                out this.handle));
+                image_handle: out this.handle));
+#pragma warning restore CA2000 // Dispose objects before losing scope
         }
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Image"/> class.
+        /// </summary>
+        /// <param name="handle">Handle to initialize the image from</param>
+        /// <remarks>The handle will be owned by the new image.</remarks>
         internal Image(NativeMethods.k4a_image_t handle)
         {
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
+            Allocator.Singleton.RegisterForDisposal(this);
+
             this.handle = handle;
         }
 
-        
-
-        public unsafe byte[] GetBufferCopy()
+        /// <summary>
+        /// Finalizes an instance of the <see cref="Image"/> class.
+        /// </summary>
+        ~Image()
         {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                byte[] copy = new byte[this.Size];
-                System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, copy, 0, checked((int)this.Size));
-                return copy;
-            }
+            this.Dispose(false);
         }
 
-        public void CopyBytesTo(byte[] destination, int destinationOffset, int sourceOffset, int count)
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                if (destination == null)
-                    throw new ArgumentNullException(nameof(destination));
-                if (destinationOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(destinationOffset));
-                if (sourceOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(sourceOffset));
-                if (count < 0)
-                    throw new ArgumentOutOfRangeException(nameof(count));
-                if (destination.Length < checked(destinationOffset + count))
-                    throw new ArgumentException("Destination buffer not long enough", nameof(destination));
-                if (this.Size < checked((long)(sourceOffset + count)))
-                    throw new ArgumentException("Source buffer not long enough");
-
-                unsafe
-                {
-                    System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.Buffer, destination, destinationOffset, count);
-                }
-            }
-        }
-
-        public void CopyTo<T>(T[] destination, int destinationOffset, int sourceOffsetElements, int countElements) where T : unmanaged
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                unsafe
-                {
-                    int elementSize = sizeof(T);
-
-                    if (destination == null)
-                        throw new ArgumentNullException(nameof(destination));
-                    if (destinationOffset < 0)
-                        throw new ArgumentOutOfRangeException(nameof(destinationOffset));
-                    if (sourceOffsetElements < 0)
-                        throw new ArgumentOutOfRangeException(nameof(sourceOffsetElements));
-                    if (countElements < 0)
-                        throw new ArgumentOutOfRangeException(nameof(countElements));
-                    if (destination.Length < checked(destinationOffset + countElements))
-                        throw new ArgumentException("Destination buffer not long enough", nameof(destination));
-                    if (this.Size < checked((long)((sourceOffsetElements + countElements) * elementSize))) 
-                        throw new ArgumentException("Source buffer not long enough");
-
-                    fixed(T* destinationPointer = &destination[destinationOffset])
-                    {
-                        this.CopyBytesTo(destinationPointer, 
-                            (destination.Length - destinationOffset) * elementSize, 
-                            0, sourceOffsetElements * elementSize, 
-                            countElements * elementSize);
-                    }
-
-                    //System.Runtime.InteropServices.Marshal.Copy(UnmanagedBufferPointer, destination, destinationOffset, count);
-                }
-            }
-        }
-
-        public void CopyBytesTo(Image destination, int destinationOffset, int sourceOffset, int count)
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                // Take a new reference on the destinaion image to ensure that if the destinaion object
-                // is disposed by another thread, the underlying native memory cannot be freed
-                using (Image referenceDestination= destination.Reference())
-                {
-                    unsafe
-                    {
-                        void* destinationPointer = referenceDestination.Buffer;
-
-                        this.CopyBytesTo(
-                            destinationPointer,
-                            checked((int)referenceDestination.Size),
-                            destinationOffset,
-                            sourceOffset,
-                            count);
-                    }
-                }
-            }
-        }
-
-        public void CopyBytesFrom(byte[] source, int sourceOffset, int destinationOffset, int count)
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                if (source == null)
-                    throw new ArgumentNullException(nameof(source));
-                if (sourceOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(sourceOffset));
-                if (destinationOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(destinationOffset));
-                if (count < 0)
-                    throw new ArgumentOutOfRangeException(nameof(count));
-                if (source.Length < checked(sourceOffset + count))
-                    throw new ArgumentException("Source buffer not long enough", nameof(source));
-                if (this.Size < checked((long)(destinationOffset + count)))
-                    throw new ArgumentException("Destination buffer not long enough");
-
-                unsafe
-                {
-                    System.Runtime.InteropServices.Marshal.Copy(source, sourceOffset, (IntPtr)this.Buffer, count);
-                }
-            }
-        }
-
-        public void CopyBytesFrom(Image source, int sourceOffset, int destinationOffset, int count)
-        {
-            lock (this)
-            {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                // Take a new reference on the source Image to ensure that if the source object
-                // is disposed by another thread, the underlying native memory cannot be freed
-                using (Image sourceReference = source.Reference())
-                {
-                    unsafe
-                    {
-                        void* sourcePointer = sourceReference.Buffer;
-
-                        this.CopyBytesFrom(
-                            sourcePointer,
-                            checked((int)sourceReference.Size),
-                            sourceOffset,
-                            destinationOffset,
-                            count);
-                    }
-                }
-            }
-        }
-
-        private IntPtr _Buffer = IntPtr.Zero;
-
-        
-        public unsafe void* Buffer
+        /// <summary>
+        /// Gets the Memory containing the image data.
+        /// </summary>
+        public unsafe Memory<byte> Memory
         {
             get
             {
-                if (_Buffer != IntPtr.Zero)
-                {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Image));
-
-                    return (void*)_Buffer;
-                }
-
                 lock (this)
                 {
-                    if (disposedValue)
-                        throw new ObjectDisposedException(nameof(Image));
 
-                    _Buffer = NativeMethods.k4a_image_get_buffer(handle);
-                    if (_Buffer == IntPtr.Zero)
+                    if (this.disposedValue)
                     {
-                        throw new AzureKinectException("Image has NULL buffer");
+                        throw new ObjectDisposedException(nameof(Image));
                     }
 
-                    return (void*)_Buffer;
+                    // If we previously copied the native memory to a managed array, return that array's memory
+                    if (this.managedBufferCache != null)
+                    {
+                        return new Memory<byte>(this.managedBufferCache, 0, (int)this.Size);
+                    }
+
+                    // If we previously wrapped the native memory in a IMemoryOwner<T>, return that memory object
+                    if (this.nativeBufferWrapper != null)
+                    {
+                        return this.nativeBufferWrapper.Memory;
+                    }
+
+                    IntPtr bufferAddress = (IntPtr)this.GetUnsafeBuffer();
+
+                    // If the native buffer is within a memory block that the managed allocator provided,
+                    // return that memory.
+                    Memory<byte> memory = Allocator.Singleton.GetManagedAllocatedMemory(bufferAddress, this.Size);
+                    if (!memory.IsEmpty)
+                    {
+                        return memory;
+                    }
+
+                    // The underlying buffer is not in managed memory.
+                    // We can use one of two strategies to return a Memory<T>
+
+                    // If we use the CopyNativeBuffers method, we will allocate and then copy the native memory
+                    // to a managed array, ensuring memory-safe access to the contents of memory, at the expense of
+                    // a memcpy each time we transition the buffer from native to managed, or from managed to native.
+
+                    // If we don't copy the native buffers, we can construct a MemoryManager<T> that wraps that native
+                    // buffer. This has no memcpy cost, but exposes the possibilty of use after free bugs to consumers
+                    // of the library. This is therefore not enabled by default.
+                    if (Allocator.Singleton.SafeCopyNativeBuffers)
+                    {
+                        // Create a copy
+                        int bufferSize = checked((int)this.Size);
+                        this.managedBufferCache = Allocator.Singleton.GetBufferCache((IntPtr)this.GetUnsafeBuffer(), bufferSize);
+
+                        return new Memory<byte>(this.managedBufferCache, 0, (int)this.Size);
+                    }
+                    else
+                    {
+                        // Provide a Memory<T> object that wraps a native pointer
+                        // This is UNSAFE. Callers in safe code may access unowned native
+                        // memory if they use the Memory<T> or Span<T> after the Image has
+                        // been disposed.
+                        this.nativeBufferWrapper = new AzureKinectMemoryManager(this);
+
+                        return this.nativeBufferWrapper.Memory;
+                    }
                 }
             }
         }
 
-        protected unsafe void CopyBytesTo(void* destination, int destinationLength, int destinationOffset, int sourceOffset, int count)
-        {
-            lock (this)
-            {
-                // We don't need to check to see if we are disposed since the call to UnmanagedBufferPointer will 
-                // perform that check
-
-                if (destination == null)
-                    throw new ArgumentNullException(nameof(destination));
-                if (destinationOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(destination));
-                if (sourceOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(sourceOffset));
-                if (count < 0)
-                    throw new ArgumentOutOfRangeException(nameof(count));
-                if (destinationLength < checked(destinationOffset + count))
-                    throw new ArgumentException("Destination buffer not long enough", nameof(destination));
-                if (this.Size < checked((long)(sourceOffset + count)))
-                    throw new ArgumentException("Source buffer not long enough");
-
-                System.Buffer.MemoryCopy(this.Buffer, destination, destinationLength, count);
-            }
-        }
-
-        protected unsafe void CopyBytesFrom(void* source, int sourceLength, int sourceOffset, int destinationOffset, int count)
-        {
-            lock (this)
-            {
-                // We don't need to check to see if we are disposed since the call to this.UnsafeBufferPointer will 
-                // perform that check
-
-                if (source == null)
-                    throw new ArgumentNullException(nameof(source));
-                if (sourceOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(sourceOffset));
-                if (destinationOffset < 0)
-                    throw new ArgumentOutOfRangeException(nameof(destinationOffset));
-                if (count < 0)
-                    throw new ArgumentOutOfRangeException(nameof(count));
-                if (sourceLength < checked(sourceOffset + count))
-                    throw new ArgumentException("Source buffer not long enough", nameof(source));
-                if (this.Size < checked((long)(destinationOffset + count)))
-                    throw new ArgumentException("Destination buffer not long enough");
-
-                unsafe
-                {
-                    System.Buffer.MemoryCopy((void*)source, (void*)this.Buffer, this.Size, (long)count);
-                }
-            }
-        }
-
+        /// <summary>
+        /// Gets or sets the image exposure time.
+        /// </summary>
         public TimeSpan Exposure
         {
             get
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    ulong exposure = NativeMethods.k4a_image_get_exposure_usec(handle);
+                    ulong exposure = NativeMethods.k4a_image_get_exposure_usec(this.handle);
                     return TimeSpan.FromTicks(checked((long)exposure) * 10);
                 }
             }
+
             set
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    NativeMethods.k4a_image_set_exposure_time_usec(handle, checked((ulong)value.Ticks / 10));
+                    NativeMethods.k4a_image_set_exposure_time_usec(this.handle, checked((ulong)value.Ticks / 10));
                 }
             }
         }
 
-        private ImageFormat? _Format = null;
-
+        /// <summary>
+        /// Gets the image pixel format.
+        /// </summary>
         public ImageFormat Format
         {
             get
             {
-                if (_Format.HasValue) return _Format.Value;
+                if (this.format.HasValue)
+                {
+                    return this.format.Value;
+                }
 
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    _Format = NativeMethods.k4a_image_get_format(handle);
-                    return _Format.Value;
+                    this.format = NativeMethods.k4a_image_get_format(this.handle);
+                    return this.format.Value;
                 }
             }
         }
 
-
-        private int _HeightPixels = -1;
-
+        /// <summary>
+        /// Gets the image height in pixels.
+        /// </summary>
         public int HeightPixels
         {
             get
             {
-                if (_HeightPixels >= 0) return _HeightPixels;
+                if (this.heightPixels >= 0)
+                {
+                    return this.heightPixels;
+                }
 
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    _HeightPixels = NativeMethods.k4a_image_get_height_pixels(handle);
-                    return _HeightPixels;
+                    this.heightPixels = NativeMethods.k4a_image_get_height_pixels(this.handle);
+                    return this.heightPixels;
                 }
             }
         }
 
-        private int _WidthPixels = -1;
+        /// <summary>
+        /// Gets the image width in pixels.
+        /// </summary>
         public int WidthPixels
         {
             get
             {
-                if (_WidthPixels >= 0) return _WidthPixels;
+                if (this.widthPixels >= 0)
+                {
+                    return this.widthPixels;
+                }
 
                 lock (this)
                 {
-                    
-
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    _WidthPixels = NativeMethods.k4a_image_get_width_pixels(handle);
-                    return _WidthPixels;
+                    this.widthPixels = NativeMethods.k4a_image_get_width_pixels(this.handle);
+                    return this.widthPixels;
                 }
             }
         }
 
-        private int _StrideBytes = -1;
-
+        /// <summary>
+        /// Gets the image stride in bytes.
+        /// </summary>
         public int StrideBytes
         {
             get
             {
 
-                if (_StrideBytes >= 0) return _StrideBytes;
+                if (this.strideBytes >= 0)
+                {
+                    return this.strideBytes;
+                }
 
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    _StrideBytes = NativeMethods.k4a_image_get_stride_bytes(handle);
+                    this.strideBytes = NativeMethods.k4a_image_get_stride_bytes(this.handle);
 
-                    return _StrideBytes;
+                    return this.strideBytes;
                 }
             }
         }
 
-        private long _Size = -1;
-
+        /// <summary>
+        /// Gets the image buffer size in bytes.
+        /// </summary>
         public long Size
         {
             get
             {
 
-                if (_Size >= 0) return _Size;
+                if (this.bufferSize >= 0)
+                {
+                    return this.bufferSize;
+                }
 
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    _Size = checked((long)NativeMethods.k4a_image_get_size(handle).ToUInt64());
+                    this.bufferSize = checked((long)NativeMethods.k4a_image_get_size(this.handle).ToUInt64());
 
-                    return _Size;
+                    return this.bufferSize;
                 }
             }
         }
 
+        /// <summary>
+        /// Gets or sets the image timestamp in the device's clock.
+        /// </summary>
         public TimeSpan Timestamp
         {
             get
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    ulong timestamp = NativeMethods.k4a_image_get_timestamp_usec(handle);
+                    ulong timestamp = NativeMethods.k4a_image_get_timestamp_usec(this.handle);
                     return TimeSpan.FromTicks(checked((long)timestamp) * 10);
                 }
             }
+
             set
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    NativeMethods.k4a_image_set_timestamp_usec(handle, checked((ulong)value.Ticks / 10));
+                    NativeMethods.k4a_image_set_timestamp_usec(this.handle, checked((ulong)value.Ticks / 10));
                 }
             }
         }
 
+        /// <summary>
+        /// Gets or sets the ISO speed.
+        /// </summary>
         public int ISOSpeed
         {
             get
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    return checked((int)NativeMethods.k4a_image_get_iso_speed(handle));
+                    return checked((int)NativeMethods.k4a_image_get_iso_speed(this.handle));
                 }
             }
+
             set
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    NativeMethods.k4a_image_set_iso_speed(handle, checked((uint)value));
+                    NativeMethods.k4a_image_set_iso_speed(this.handle, checked((uint)value));
                 }
             }
         }
 
-
+        /// <summary>
+        /// Gets or sets the white balance.
+        /// </summary>
         public int WhiteBalance
         {
             get
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    return checked((int)NativeMethods.k4a_image_get_white_balance(handle));
+                    return checked((int)NativeMethods.k4a_image_get_white_balance(this.handle));
                 }
             }
+
             set
             {
                 lock (this)
                 {
-                    if (disposedValue)
+                    if (this.disposedValue)
+                    {
                         throw new ObjectDisposedException(nameof(Image));
+                    }
 
-                    NativeMethods.k4a_image_set_white_balance(handle, checked((uint)value));
+                    NativeMethods.k4a_image_set_white_balance(this.handle, checked((uint)value));
                 }
             }
         }
 
-        private NativeMethods.k4a_image_t handle;
-
-        internal NativeMethods.k4a_image_t DangerousGetHandle()
+        /// <summary>
+        /// Gets the pixels of the image.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <remarks>If the image pixels are not in contiguous memory, this method will throw an exception.</remarks>
+        /// <returns>The contigous memory of the image pixels.</returns>
+        public Memory<TPixel> GetPixels<TPixel>()
+            where TPixel : unmanaged
         {
-            lock (this)
+            if (this.StrideBytes != Marshal.SizeOf(typeof(TPixel)) * this.WidthPixels)
             {
-                if (disposedValue)
-                    throw new ObjectDisposedException(nameof(Image));
-
-                return handle;
+                throw new AzureKinectException("Pixels not aligned to stride of each line");
             }
+
+            return new AzureKinectMemoryCast<byte, TPixel>(this.Memory).Memory;
         }
 
+        /// <summary>
+        /// Gets the pixels of the image.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <param name="row">The row of pixels to get.</param>
+        /// <returns>The contigous memory of the image pixel row.</returns>
+        public Memory<TPixel> GetPixels<TPixel>(int row)
+            where TPixel : unmanaged
+        {
+            if (row > this.HeightPixels || row < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(row));
+            }
+
+            int activeLineBytes = Marshal.SizeOf(typeof(TPixel)) * this.WidthPixels;
+            if (this.StrideBytes < activeLineBytes)
+            {
+                throw new AzureKinectException("The image stride is not large enough for pixels of this size");
+            }
+
+            return new AzureKinectMemoryCast<byte, TPixel>(this.Memory.Slice(row * this.StrideBytes, activeLineBytes)).Memory;
+        }
+
+        /// <summary>
+        /// Gets a pixel value in the image.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <param name="row">The image row.</param>
+        /// <param name="col">The image column.</param>
+        /// <returns>The pixel value at the row and column.</returns>
+        public unsafe TPixel GetPixel<TPixel>(int row, int col)
+            where TPixel : unmanaged
+        {
+            if (row < 0 || row > this.HeightPixels)
+            {
+                throw new ArgumentOutOfRangeException(nameof(row));
+            }
+
+            if (col < 0 || col > this.WidthPixels)
+            {
+                throw new ArgumentOutOfRangeException(nameof(col));
+            }
+
+            return *(TPixel*)((byte*)this.GetUnsafeBuffer() + (this.StrideBytes * row) + (col * sizeof(TPixel)));
+        }
+
+        /// <summary>
+        /// Sets a pixel value in the image.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <param name="row">The image row.</param>
+        /// <param name="col">The image column.</param>
+        /// <param name="pixel">The value of the pixel.</param>
+        public unsafe void SetPixel<TPixel>(int row, int col, TPixel pixel)
+            where TPixel : unmanaged
+        {
+            if (row < 0 || row > this.HeightPixels)
+            {
+                throw new ArgumentOutOfRangeException(nameof(row));
+            }
+
+            if (col < 0 || col > this.WidthPixels)
+            {
+                throw new ArgumentOutOfRangeException(nameof(col));
+            }
+
+            *(TPixel*)((byte*)this.GetUnsafeBuffer() + (this.StrideBytes * row) + (col * sizeof(TPixel))) = pixel;
+        }
+
+        /// <summary>
+        /// Creates a duplicate reference to the same Image.
+        /// </summary>
+        /// <returns>A new Image object representing the same data.</returns>
+        /// <remarks>Creating a reference to the same image does not copy the image, but
+        /// creates two managed objects representing the same image data. Each object
+        /// must be independently disposed. The lifetime of the underlying image data
+        /// will be equal or greater than all of the referenced image objects.</remarks>
         public Image Reference()
         {
             lock (this)
             {
-                if (disposedValue)
+                if (this.disposedValue)
+                {
                     throw new ObjectDisposedException(nameof(Image));
+                }
 
-                return new Image(handle.DuplicateReference());
+#pragma warning disable CA2000 // Dispose objects before losing scope
+
+                // The new image takes owenership of the duplicated handle.
+                return new Image(this.handle.DuplicateReference());
+#pragma warning restore CA2000 // Dispose objects before losing scope
             }
         }
 
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            this.Dispose(true);
 
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Gets a native pointer to the underlying memory.
+        /// </summary>
+        /// <remarks>
+        /// This property may only be accessed by unsafe code.
+        ///
+        /// This returns an unsafe pointer to the image's memory. It is important that the
+        /// caller ensures the Image is not Disposed or garbage collected while this pointer is
+        /// in use, since it may become invalid when the Image is disposed or finalized.
+        ///
+        /// If this method needs to be used in a context where the caller cannot garantee that the
+        /// Image will be disposed by another thread, the caller can call <see cref="Reference"/>
+        /// to create a duplicate reference to the Image which can be disposed separately.
+        ///
+        /// For safe buffer access <see cref="Memory"/>.
+        /// </remarks>
+        /// <returns>A pointer to the native buffer.</returns>
+        internal unsafe void* GetUnsafeBuffer()
+        {
+            if (this.buffer != IntPtr.Zero)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Image));
+                }
+
+                return (void*)this.buffer;
+            }
+
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Image));
+                }
+
+                this.buffer = NativeMethods.k4a_image_get_buffer(this.handle);
+                if (this.buffer == IntPtr.Zero)
+                {
+                    throw new AzureKinectException("Image has NULL buffer");
+                }
+
+                return (void*)this.buffer;
+            }
+        }
+
+        /// <summary>
+        /// Flush the managed cache of native memory to the native buffer.
+        /// </summary>
+        internal void FlushMemory()
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Image));
+                }
+
+                if (this.managedBufferCache != null)
+                {
+                    unsafe
+                    {
+                        System.Runtime.InteropServices.Marshal.Copy(this.managedBufferCache, 0, (IntPtr)this.GetUnsafeBuffer(), checked((int)this.Size));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Invalidate the managed cache of native memory by reading from the native buffer.
+        /// </summary>
+        internal void InvalidateMemory()
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Image));
+                }
+
+                if (this.managedBufferCache != null)
+                {
+                    unsafe
+                    {
+                        // We can't wait until a call to Image.Memory to do the copy since user code may already
+                        // have a reference to the managed buffer array.
+                        System.Runtime.InteropServices.Marshal.Copy((IntPtr)this.GetUnsafeBuffer(), this.managedBufferCache, 0, checked((int)this.Size));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the native handle.
+        /// </summary>
+        /// <returns>The native handle that is wrapped by this image.</returns>
+        /// <remarks>The function is dangerous because there is no guarantee that the
+        /// handle will not be disposed once it is retrieved. This should only be called
+        /// by code that can ensure that the Image object will not be disposed on another
+        /// thread.</remarks>
+        internal NativeMethods.k4a_image_t DangerousGetHandle()
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Image));
+                }
+
+                return this.handle;
+            }
+        }
+
+        /// <summary>
+        /// Checks two Images to determine if they represent the same native image object.
+        /// </summary>
+        /// <param name="other">Another Image to compare against.</param>
+        /// <returns>true if the Images represent the same native k4a_image_t.</returns>
+        internal bool NativeEquals(Image other)
+        {
+            lock (this)
+            {
+                lock (other)
+                {
+                    if (this.disposedValue || other.disposedValue)
+                    {
+                        return false;
+                    }
+
+                    IntPtr myHandleValue = this.handle.DangerousGetHandle();
+                    IntPtr otherHandleValue = other.handle.DangerousGetHandle();
+
+                    // If both images represent the same native handle, consider them equal
+                    return myHandleValue == otherHandleValue;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Disposes the resources held by the image.
+        /// </summary>
+        /// <param name="disposing">True if called by IDisposable.Disppose, false when called by a finalizer.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!this.disposedValue)
             {
                 lock (this)
                 {
                     if (disposing)
                     {
-                        // TODO: dispose managed state (managed objects).
+                        // If we have a native buffer wrapper, dispose it since we
+                        // are a wrapper for it's IMemoryOwner<T> interface
+                        this.nativeBufferWrapper?.Dispose();
+
+                        Allocator.Singleton.UnregisterForDisposal(this);
+
+                        this.handle.Close();
+                        this.handle = null;
                     }
 
-                    handle.Close();
-                    handle = null;
+                    // Return the buffer during finalization to ensure tha the pool
+                    // can clean up its references. If the Image was garbage collected, the pool
+                    // will continue to hold a reference.
+                    if (this.managedBufferCache != null)
+                    {
+                        unsafe
+                        {
+                            Allocator.Singleton.ReturnBufferCache((IntPtr)this.GetUnsafeBuffer());
+                        }
 
-                    disposedValue = true;
+                        this.managedBufferCache = null;
+                    }
+
+                    this.disposedValue = true;
                 }
             }
         }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~Image()
-        // {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
-        }
-        #endregion
     }
 }

@@ -16,10 +16,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
     /// <summary>
     /// The main form for the Azure Kinect Sensor SDK WinForms example.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Maintainability", "CA1501:Avoid excessive inheritance", Justification = "This is the accepted WinForms pattern.")]
     public partial class Form1 : Form
     {
-        private bool running = true;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Form1"/> class.
         /// </summary>
@@ -44,7 +43,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorResolution = ColorResolution.r1080p,
+                    ColorResolution = ColorResolution.R1080p,
                     DepthMode = DepthMode.NFOV_2x2Binned,
                     SynchronizedImagesOnly = true,
                 });
@@ -53,7 +52,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                 int frameCount = 0;
                 sw.Start();
 
-                while (this.running)
+                while (true)
                 {
                     using (Capture capture = await Task.Run(() => device.GetCapture()).ConfigureAwait(true))
                     {
@@ -66,9 +65,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                             // TODO: Lock the Bitmap and access the bytes directly?
                             ////BitmapData d = depthVisualization.LockBits(new Rectangle(0, 0, depthVisualization.Width, depthVisualization.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-                            ushort[] depthValues = new ushort[capture.Depth.WidthPixels * capture.Depth.HeightPixels];
+                            ushort[] depthValues = capture.Depth.GetPixels<ushort>().ToArray();
 
-                            capture.Depth.CopyTo(depthValues, 0, 0, depthValues.Length);
                             for (int y = 0; y < capture.Depth.HeightPixels; y++)
                             {
                                 for (int x = 0; x < capture.Depth.WidthPixels; x++)
