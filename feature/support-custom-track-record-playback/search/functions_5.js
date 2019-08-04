@@ -95,10 +95,12 @@ var searchData=
   ['k4a_5frecord_5fwrite_5fcustom_5ftrack_5fdata',['k4a_record_write_custom_track_data',['../group___functions_gab15dcfc0fd01ce419591b6981fecbf23.html#gab15dcfc0fd01ce419591b6981fecbf23',1,'k4a_record_t']]],
   ['k4a_5frecord_5fwrite_5fheader',['k4a_record_write_header',['../group___functions_ga063074a0335233f21f095c9e55eddfd8.html#ga063074a0335233f21f095c9e55eddfd8',1,'k4a_record_t']]],
   ['k4a_5frecord_5fwrite_5fimu_5fsample',['k4a_record_write_imu_sample',['../group___functions_gafd0f1474a676b5a5955d2e0fe1e89b65.html#gafd0f1474a676b5a5955d2e0fe1e89b65',1,'k4a_record_t']]],
+  ['k4a_5fset_5fallocator',['k4a_set_allocator',['../group___functions_ga1d09216c8ee1a878f3e8b6045979adc1.html#ga1d09216c8ee1a878f3e8b6045979adc1',1,'k4a.h']]],
   ['k4a_5fset_5fdebug_5fmessage_5fhandler',['k4a_set_debug_message_handler',['../group___functions_ga77a5f83e56a04136df1398478353193d.html#ga77a5f83e56a04136df1398478353193d',1,'k4a.h']]],
   ['k4a_5ftransformation_5fcolor_5fimage_5fto_5fdepth_5fcamera',['k4a_transformation_color_image_to_depth_camera',['../group___functions_gaf3a941f07bb0185cd7a72699a648fc29.html#gaf3a941f07bb0185cd7a72699a648fc29',1,'k4a_transformation_t']]],
   ['k4a_5ftransformation_5fcreate',['k4a_transformation_create',['../group___functions_ga853a1a5b6d521bbdf523a69e890c4f10.html#ga853a1a5b6d521bbdf523a69e890c4f10',1,'k4a_calibration_t']]],
   ['k4a_5ftransformation_5fdepth_5fimage_5fto_5fcolor_5fcamera',['k4a_transformation_depth_image_to_color_camera',['../group___functions_gafacffb5f781a9c2df30d4a16241cd514.html#gafacffb5f781a9c2df30d4a16241cd514',1,'k4a_transformation_t']]],
+  ['k4a_5ftransformation_5fdepth_5fimage_5fto_5fcolor_5fcamera_5fcustom',['k4a_transformation_depth_image_to_color_camera_custom',['../group___functions_gac00dd00e7612a86382e3d0a130f276bb.html#gac00dd00e7612a86382e3d0a130f276bb',1,'k4a_transformation_t']]],
   ['k4a_5ftransformation_5fdepth_5fimage_5fto_5fpoint_5fcloud',['k4a_transformation_depth_image_to_point_cloud',['../group___functions_ga7385eb4beb9d8892e8a88cf4feb3be70.html#ga7385eb4beb9d8892e8a88cf4feb3be70',1,'k4a_transformation_t']]],
   ['k4a_5ftransformation_5fdestroy',['k4a_transformation_destroy',['../group___functions_ga7d3ecaae66f26c1a89da9042b1bc6d44.html#ga7d3ecaae66f26c1a89da9042b1bc6d44',1,'k4a_transformation_t']]]
 ];
