@@ -128,7 +128,7 @@ the C# Build and Test systems to find the needed components. Therefore, you need
 configuration and build before loading the C# solution.
 
 1. Build the project with the configuration for the k4a.dll you want to build against. (e.g. x64 RelWithDebInfo)
-2. Open the [k4a.sln](../src/csharp/k4a.sln) solution
+2. Open the [K4a.sln](../src/csharp/K4a.sln) solution
 3. Build C# from within Visual Studio
 
 **NOTE:** Running a configure step again, such as opening the folder in Visual Studio, will overwrite the settings and can break the C# build.
