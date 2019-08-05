@@ -88,7 +88,8 @@ var group___enumerations =
     ] ],
     [ "k4a_playback_seek_origin_t", "group___enumerations_ga5db77f089bc13529fce3cc41f4f3fe7c.html#ga5db77f089bc13529fce3cc41f4f3fe7c", [
       [ "K4A_PLAYBACK_SEEK_BEGIN", "group___enumerations_ga5db77f089bc13529fce3cc41f4f3fe7c.html#gga5db77f089bc13529fce3cc41f4f3fe7ca0aab778efae4a08223b27edba8fec274", null ],
-      [ "K4A_PLAYBACK_SEEK_END", "group___enumerations_ga5db77f089bc13529fce3cc41f4f3fe7c.html#gga5db77f089bc13529fce3cc41f4f3fe7ca6f676c0e4d2698020807f511d3074312", null ]
+      [ "K4A_PLAYBACK_SEEK_END", "group___enumerations_ga5db77f089bc13529fce3cc41f4f3fe7c.html#gga5db77f089bc13529fce3cc41f4f3fe7ca6f676c0e4d2698020807f511d3074312", null ],
+      [ "K4A_PLAYBACK_SEEK_DEVICE_TIME", "group___enumerations_ga5db77f089bc13529fce3cc41f4f3fe7c.html#gga5db77f089bc13529fce3cc41f4f3fe7ca566c9d59a93f1e10fcb3530a0c83e903", null ]
     ] ],
     [ "k4a_result_t", "group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5.html#ga4b419a99aa2220b076a4520dc2afd1e5", [
       [ "K4A_RESULT_SUCCEEDED", "group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5.html#gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3", null ],

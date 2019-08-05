@@ -149,7 +149,7 @@ $(document).ready(function(){initNavTree('group___functions_ga859554581bb97a620f
 </dl>
 <dl class="section remark"><dt>Remarks</dt><dd>This function is used to create images of formats that have consistent stride. The function is not suitable for compressed formats that may not be represented by the same number of bytes per line.</dd>
 <dd>
-The function will allocate an image buffer of size <code>height_pixels</code> * <code>stride_bytes</code>.</dd>
+For most image formats, the function will allocate an image buffer of size <code>height_pixels</code> * <code>stride_bytes</code>. Buffers <a class="el" href="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddbaf334f6c32b6b44d1f5df02a349f05288" title="Color image type NV12. ">K4A_IMAGE_FORMAT_COLOR_NV12</a> format will allocate an additional <code>height_pixels</code> / 2 set of lines (each of <code>stride_bytes</code>). This function cannot be used to allocate <a class="el" href="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb.html#ggabd9688eb20d5cb878fd22d36de882ddbaae172e7eecc6f4adfc318c789e49aaf9" title="Color image type MJPG. ">K4A_IMAGE_FORMAT_COLOR_MJPG</a> buffers.</dd>
 <dd>
 To create an image object without the API allocating memory, or to represent an image that has a non-deterministic stride, use <a class="el" href="group___functions_gaf84f2a271bcf6afae429bbccd47071b3.html#gaf84f2a271bcf6afae429bbccd47071b3" title="Create an image from a pre-allocated buffer. ">k4a_image_create_from_buffer()</a>.</dd>
 <dd>

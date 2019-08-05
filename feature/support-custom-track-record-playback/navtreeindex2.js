@@ -1,5 +1,8 @@
 var NAVTREEINDEX2 =
 {
+"structk4a__float3__t_1_1__xyz_a8d0daad684174757630f64ce84f142b4.html#a8d0daad684174757630f64ce84f142b4":[2,1,5,9,0,1],
+"structk4a__float3__t_1_1__xyz_ac48d96dc75aa3a2a59386fcfd08474de.html#ac48d96dc75aa3a2a59386fcfd08474de":[2,1,5,9,0,2],
+"structk4a__hardware__version__t.html":[2,1,5,7],
 "structk4a__hardware__version__t_a0a633007ba808514d59a8b710a11db04.html#a0a633007ba808514d59a8b710a11db04":[2,1,5,7,1],
 "structk4a__hardware__version__t_a10847af1b6b417da36507e380bc5404c.html#a10847af1b6b417da36507e380bc5404c":[2,1,5,7,4],
 "structk4a__hardware__version__t_a1fee646cb54b74f2c257ee528322f4b4.html#a1fee646cb54b74f2c257ee528322f4b4":[2,1,5,7,5],

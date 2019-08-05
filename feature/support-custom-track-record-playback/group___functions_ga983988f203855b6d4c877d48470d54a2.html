@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: Data Fields - Functions</title>
+<title>Azure Kinect Sensor SDK: k4a_playback_t::k4a_playback_get_last_timestamp_usec</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('functions_func.html','');});
+$(document).ready(function(){initNavTree('group___functions_ga983988f203855b6d4c877d48470d54a2.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,45 +84,50 @@ $(document).ready(function(){initNavTree('functions_func.html','');});
 </div>
 
 <div class="contents">
-&#160;
+<a id="ga983988f203855b6d4c877d48470d54a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga983988f203855b6d4c877d48470d54a2">&#9670;&nbsp;</a></span>k4a_playback_get_last_timestamp_usec()</h2>
 
-<h3><a id="index_c"></a>- c -</h3><ul>
-<li>capture()
-: <a class="el" href="classk4a_1_1capture_a713dcb3e3539e8d08f30be67b23b6ea8.html#a713dcb3e3539e8d08f30be67b23b6ea8">k4a::capture</a>
-</li>
-<li>close()
-: <a class="el" href="classk4a_1_1device_a1060f1cee688cbb125d112259b7b0739.html#a1060f1cee688cbb125d112259b7b0739">k4a::device</a>
-, <a class="el" href="classk4a_1_1playback_a88c998625e37754fb8b1bdf0340bd122.html#a88c998625e37754fb8b1bdf0340bd122">k4a::playback</a>
-</li>
-<li>color_image_to_depth_camera()
-: <a class="el" href="classk4a_1_1transformation_ae25f1d6159f91bda04e9026959f94b15.html#ae25f1d6159f91bda04e9026959f94b15">k4a::transformation</a>
-</li>
-<li>convert_2d_to_2d()
-: <a class="el" href="structk4a_1_1calibration_afd343e2419c2a3437559aa90fcf2a4f0.html#afd343e2419c2a3437559aa90fcf2a4f0">k4a::calibration</a>
-</li>
-<li>convert_2d_to_3d()
-: <a class="el" href="structk4a_1_1calibration_a84577df64d47642d0b8f1fee11b21a96.html#a84577df64d47642d0b8f1fee11b21a96">k4a::calibration</a>
-</li>
-<li>convert_3d_to_2d()
-: <a class="el" href="structk4a_1_1calibration_a74a6fef25540e9cdf18ed06ff1cfdc2e.html#a74a6fef25540e9cdf18ed06ff1cfdc2e">k4a::calibration</a>
-</li>
-<li>convert_3d_to_3d()
-: <a class="el" href="structk4a_1_1calibration_a44fbcadffdbef6fa2be0e076afcfb470.html#a44fbcadffdbef6fa2be0e076afcfb470">k4a::calibration</a>
-</li>
-<li>create()
-: <a class="el" href="classk4a_1_1capture_a92b8f943cef424490692fc6e76bfe3ec.html#a92b8f943cef424490692fc6e76bfe3ec">k4a::capture</a>
-, <a class="el" href="classk4a_1_1image_a7a92d9119d57b57039946f6f7220d9a9.html#a7a92d9119d57b57039946f6f7220d9a9">k4a::image</a>
-</li>
-<li>create_from_buffer()
-: <a class="el" href="classk4a_1_1image_a2885ff39ce74f193d5fe9fd1e92072ce.html#a2885ff39ce74f193d5fe9fd1e92072ce">k4a::image</a>
-</li>
-</ul>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">K4ARECORD_DEPRECATED_EXPORT uint64_t k4a_playback_get_last_timestamp_usec </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structk4a__playback__t.html">k4a_playback_t</a>&#160;</td>
+          <td class="paramname"><em>playback_handle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">related</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the last timestamp in a recording, relative to the start of the recording. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">playback_handle</td><td>Handle obtained by <a class="el" href="group___functions_gacb254ac941b2ab3c202ca68f4537f368.html#gacb254ac941b2ab3c202ca68f4537f368" title="Opens an existing recording file for reading. ">k4a_playback_open()</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The file timestamp of the last capture image or IMU sample in microseconds.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>This function returns a file timestamp, not an absolute device timestamp, meaning it is relative to the start of the recording. This function is equivalent to the length of the recording.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000004">Deprecated:</a></b></dt><dd>Deprecated starting in 1.2.0. Please use <a class="el" href="group___functions_ga7275ade6a338c92ffc55c9ae313eac51.html#ga7275ade6a338c92ffc55c9ae313eac51" title="Returns the length of the recording in microseconds. ">k4a_playback_get_recording_length_usec()</a>.</dd></dl>
+ 
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.14-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><a class="el" href="structk4a__playback__t.html">k4a_playback_t</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.14 </li>
