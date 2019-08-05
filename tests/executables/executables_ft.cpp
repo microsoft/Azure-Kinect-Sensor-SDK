@@ -47,6 +47,7 @@ static int run_and_record_executable(std::string shell_command_path, std::string
     FILE *process_stream = POPEN(formatted_command.c_str(), "r");
     if (!process_stream)
     {
+        printf("process_stream is NULL\n");
         return EXIT_FAILURE; // if popen fails, it returns null, which is an error
     }
     return PCLOSE(process_stream);

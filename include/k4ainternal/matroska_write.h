@@ -33,7 +33,6 @@ typedef struct _k4a_record_context_t
 {
     const char *file_path;
     std::unique_ptr<IOCallback> ebml_file;
-    logger_t logger_handle;
 
     uint64_t timecode_scale;
     uint32_t camera_fps;
