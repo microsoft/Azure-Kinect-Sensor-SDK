@@ -338,14 +338,14 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     if (origin == K4A_PLAYBACK_SEEK_END)
     {
         uint64_t offset_ns = (uint64_t)(-offset_usec * 1000);
-        if (offset_ns > context->last_timestamp_ns)
+        if (offset_ns > context->last_file_timestamp_ns)
         {
             // If the target timestamp is negative, clamp to 0 so we don't underflow.
             target_time_ns = 0;
         }
         else
         {
-            target_time_ns = context->last_timestamp_ns + 1 - offset_ns;
+            target_time_ns = context->last_file_timestamp_ns + 1 - offset_ns;
         }
     }
     else
@@ -379,7 +379,7 @@ uint64_t k4a_playback_get_recording_length_usec(k4a_playback_t playback_handle)
 
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(0, context == NULL);
-    return context->last_timestamp_ns / 1000;
+    return context->last_file_timestamp_ns / 1000;
 }
 
 uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle)
@@ -388,7 +388,7 @@ uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle)
 
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(0, context == NULL);
-    return context->last_timestamp_ns / 1000;
+    return context->last_file_timestamp_ns / 1000;
 }
 
 void k4a_playback_close(const k4a_playback_t playback_handle)

@@ -229,7 +229,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     RETURN_IF_ERROR(populate_cluster_cache(context));
 
     // Find the last timestamp in the file
-    context->last_timestamp_ns = 0;
+    context->last_file_timestamp_ns = 0;
     cluster_info_t *cluster_info = find_cluster(context, UINT64_MAX);
     if (cluster_info == NULL)
     {
@@ -251,9 +251,9 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         {
             simple_block->SetParent(*last_cluster);
             uint64_t block_timestamp_ns = simple_block->GlobalTimecode();
-            if (block_timestamp_ns > context->last_timestamp_ns)
+            if (block_timestamp_ns > context->last_file_timestamp_ns)
             {
-                context->last_timestamp_ns = block_timestamp_ns;
+                context->last_file_timestamp_ns = block_timestamp_ns;
             }
         }
         else if (check_element_type(e, &block_group))
@@ -281,13 +281,13 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
                     block_timestamp_ns += block_duration_ns - 1;
                 }
             }
-            if (block_timestamp_ns > context->last_timestamp_ns)
+            if (block_timestamp_ns > context->last_file_timestamp_ns)
             {
-                context->last_timestamp_ns = block_timestamp_ns;
+                context->last_file_timestamp_ns = block_timestamp_ns;
             }
         }
     }
-    LOG_TRACE("Found last timestamp: %llu", context->last_timestamp_ns);
+    LOG_TRACE("Found last file timestamp: %llu", context->last_file_timestamp_ns);
 
     return K4A_RESULT_SUCCEEDED;
 }
