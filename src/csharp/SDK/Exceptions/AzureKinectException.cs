@@ -98,14 +98,9 @@ namespace Microsoft.Azure.Kinect.Sensor
             using (LoggingTracer tracer = new LoggingTracer())
             {
                 T result = function();
-                AzureKinectException ex = NativeCaller.EndCall(tracer, result, (r) =>
+                if (!AzureKinectException.IsSuccess(result))
                 {
-                    return new AzureKinectException($"result = {r.Result}", r.LogMessages);
-                });
-
-                if (ex != null)
-                {
-                    throw ex;
+                    throw new AzureKinectException($"result = {result}", tracer.LogMessages);
                 }
             }
         }
@@ -120,15 +115,65 @@ namespace Microsoft.Azure.Kinect.Sensor
         internal static void ThrowIfNotSuccess<T>(LoggingTracer tracer, T result)
             where T : System.Enum
         {
-            AzureKinectException ex = NativeCaller.EndCall(tracer, result, (r) =>
+            if (!AzureKinectException.IsSuccess(result))
             {
-                return new AzureKinectException($"result = {r.Result}", r.LogMessages);
-            });
-
-            if (ex != null)
-            {
-                throw ex;
+                throw new AzureKinectException($"result = {result}", tracer.LogMessages);
             }
+        }
+
+        /// <summary>
+        /// Determines if the result is a success result.
+        /// </summary>
+        /// <typeparam name="T">The type of result.</typeparam>
+        /// <param name="result">The result to check if it is a success.</param>
+        /// <returns><c>True</c> if the result is a success;otherwise <c>false</c>.</returns>
+        internal static bool IsSuccess<T>(T result)
+            where T : Enum
+        {
+            switch (result)
+            {
+                case NativeMethods.k4a_result_t k4a_result:
+                    return IsSuccess(k4a_result);
+
+                case NativeMethods.k4a_wait_result_t k4a_result:
+                    return IsSuccess(k4a_result);
+
+                case NativeMethods.k4a_buffer_result_t k4a_result:
+                    return IsSuccess(k4a_result);
+
+                default:
+                    throw new ArgumentException("Result is not of a recognized result type.", nameof(result));
+            }
+        }
+
+        /// <summary>
+        /// Determines if the <see cref="NativeMethods.k4a_result_t"/> is a success.
+        /// </summary>
+        /// <param name="result">The result to check if it is a success.</param>
+        /// <returns><c>True</c> if the result is a success;otherwise <c>false</c>.</returns>
+        internal static bool IsSuccess(NativeMethods.k4a_result_t result)
+        {
+            return result == NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED;
+        }
+
+        /// <summary>
+        /// Determines if the <see cref="NativeMethods.k4a_wait_result_t"/> is a success.
+        /// </summary>
+        /// <param name="result">The result to check if it is a success.</param>
+        /// <returns><c>True</c> if the result is a success;otherwise <c>false</c>.</returns>
+        internal static bool IsSuccess(NativeMethods.k4a_wait_result_t result)
+        {
+            return result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_SUCCEEDED;
+        }
+
+        /// <summary>
+        /// Determines if the <see cref="NativeMethods.k4a_buffer_result_t"/> is a success.
+        /// </summary>
+        /// <param name="result">The result to check if it is a success.</param>
+        /// <returns><c>True</c> if the result is a success;otherwise <c>false</c>.</returns>
+        internal static bool IsSuccess(NativeMethods.k4a_buffer_result_t result)
+        {
+            return result == NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_SUCCEEDED;
         }
     }
 }

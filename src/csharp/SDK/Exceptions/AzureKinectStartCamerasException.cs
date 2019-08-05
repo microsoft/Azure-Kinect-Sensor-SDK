@@ -92,14 +92,9 @@ namespace Microsoft.Azure.Kinect.Sensor
             using (LoggingTracer tracer = new LoggingTracer())
             {
                 T result = function();
-                AzureKinectException ex = NativeCaller.EndCall(tracer, result, (r) =>
+                if (!AzureKinectException.IsSuccess(result))
                 {
-                    return new AzureKinectStartCamerasException($"result = {r.Result}", r.LogMessages);
-                });
-
-                if (ex != null)
-                {
-                    throw ex;
+                    throw new AzureKinectStartCamerasException($"result = {result}", tracer.LogMessages);
                 }
             }
         }
@@ -114,14 +109,9 @@ namespace Microsoft.Azure.Kinect.Sensor
         internal static void ThrowIfNotSuccess<T>(LoggingTracer tracer, T result)
             where T : System.Enum
         {
-            AzureKinectException ex = NativeCaller.EndCall(tracer, result, (r) =>
+            if (!AzureKinectException.IsSuccess(result))
             {
-                return new AzureKinectStartCamerasException($"result = {r.Result}", r.LogMessages);
-            });
-
-            if (ex != null)
-            {
-                throw ex;
+                throw new AzureKinectStartCamerasException($"result = {result}", tracer.LogMessages);
             }
         }
     }
