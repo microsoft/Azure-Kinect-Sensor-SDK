@@ -604,7 +604,9 @@ K4A_EXPORT float k4a_capture_get_temperature_c(k4a_capture_t capture_handle);
  * compressed formats that may not be represented by the same number of bytes per line.
  *
  * \remarks
- * The function will allocate an image buffer of size \p height_pixels * \p stride_bytes.
+ * For most image formats, the function will allocate an image buffer of size \p height_pixels * \p stride_bytes.
+ * Buffers #K4A_IMAGE_FORMAT_COLOR_NV12 format will allocate an additional \p height_pixels / 2 set of lines (each of \p
+ * stride_bytes). This function cannot be used to allocate #K4A_IMAGE_FORMAT_COLOR_MJPG buffers.
  *
  * \remarks
  * To create an image object without the API allocating memory, or to represent an image that has a non-deterministic
