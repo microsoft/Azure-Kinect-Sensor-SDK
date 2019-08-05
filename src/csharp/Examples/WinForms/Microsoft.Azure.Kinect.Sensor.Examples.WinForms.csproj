@@ -92,7 +92,9 @@
     <Compile Include="..\..\VersionInfo.cs">
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
-    <Compile Include="Form1.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
@@ -146,8 +148,8 @@
       <Link>k4a.pdb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="$(K4aBinaryDirectory)\depthengine_*.dll">
-      <Link>%(Filename)%(Extension)</Link>
+    <Content Include="$(K4aBinaryDirectory)\depthengine_2_0.dll">
+      <Link>depthengine_2_0.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
