@@ -1750,7 +1750,9 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
                                                          &free_vector_buffer,
                                                          buffer,
                                                          image_out));
-        k4a_image_set_device_timestamp_usec(*image_out, in_block->timestamp_ns / 1000);
+        uint64_t device_timestamp_usec = in_block->timestamp_ns / 1000 +
+                                         (uint64_t)context->record_config.start_timestamp_offset_usec;
+        k4a_image_set_device_timestamp_usec(*image_out, device_timestamp_usec);
     }
 
     if (K4A_FAILED(result) && buffer != NULL)
@@ -2041,6 +2043,11 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
             else
             {
                 // The timestamp we're looking for is within the found block.
+                // IMU timestamps within the sample buffer are device timestamps, not relative to start of file.
+                // The seek timestamp needs to be converted to a device timestamp when comparing.
+                uint64_t seek_device_timestamp_ns = context->seek_timestamp_ns +
+                                                    ((uint64_t)context->record_config.start_timestamp_offset_usec *
+                                                     1000);
                 context->imu_sample_index = -1;
                 for (size_t i = 0; i < sample_count; i++)
                 {
@@ -2051,7 +2058,7 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
                         *imu_sample = { 0 };
                         return K4A_STREAM_RESULT_FAILED;
                     }
-                    else if (sample->acc_timestamp_ns >= context->seek_timestamp_ns)
+                    else if (sample->acc_timestamp_ns >= seek_device_timestamp_ns)
                     {
                         context->imu_sample_index = next ? (int)i : (int)i - 1;
                         break;

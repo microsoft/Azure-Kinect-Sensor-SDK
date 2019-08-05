@@ -415,18 +415,19 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playbac
                                                           int64_t offset_usec,
                                                           k4a_playback_seek_origin_t origin);
 
-/** Gets the last timestamp in a recording.
+/** Returns the length of the recording in microseconds.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
  *
  * \returns
- * The timestamp of the last capture image or IMU sample in microseconds.
+ * The recording length, calculated as the difference between the first and last timestamp in the file.
  *
  * \relates k4a_playback_t
  *
  * \remarks
- * Recordings start at timestamp 0, and end at the timestamp returned by k4a_playback_get_last_timestamp_usec().
+ * The recording length may be longer than an individual track if, for example, the IMU continues to run after the last
+ * color image is recorded.
  *
  * \xmlonly
  * <requirements>
@@ -436,7 +437,34 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playbac
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle);
+K4ARECORD_EXPORT uint64_t k4a_playback_get_recording_length_usec(k4a_playback_t playback_handle);
+
+/** Gets the last timestamp in a recording, relative to the start of the recording.
+ *
+ * \param playback_handle
+ * Handle obtained by k4a_playback_open().
+ *
+ * \returns
+ * The file timestamp of the last capture image or IMU sample in microseconds.
+ *
+ * \relates k4a_playback_t
+ *
+ * \remarks
+ * This function returns a file timestamp, not an absolute device timestamp, meaning it is relative to the start of the
+ * recording. This function is equivalent to the length of the recording.
+ *
+ * \deprecated
+ * Deprecated starting in 1.2.0. Please use k4a_playback_get_recording_length_usec().
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_DEPRECATED_EXPORT uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle);
 
 /** Closes a recording playback handle.
  *

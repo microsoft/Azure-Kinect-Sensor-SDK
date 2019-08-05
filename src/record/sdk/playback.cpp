@@ -313,7 +313,16 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->segment == nullptr);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin != K4A_PLAYBACK_SEEK_BEGIN && origin != K4A_PLAYBACK_SEEK_END);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
+                        origin != K4A_PLAYBACK_SEEK_BEGIN && origin != K4A_PLAYBACK_SEEK_END &&
+                            origin != K4A_PLAYBACK_SEEK_DEVICE_TIME);
+
+    // If seeking to a device timestamp, calculate the offset relative to the start of file.
+    if (origin == K4A_PLAYBACK_SEEK_DEVICE_TIME)
+    {
+        origin = K4A_PLAYBACK_SEEK_BEGIN;
+        offset_usec -= (int64_t)context->record_config.start_timestamp_offset_usec;
+    }
 
     // Clamp the offset timestamp so the seek direction is correct reletive to the specified origin.
     if (origin == K4A_PLAYBACK_SEEK_BEGIN && offset_usec < 0)
@@ -362,6 +371,15 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     reset_seek_pointers(context, target_time_ns);
 
     return K4A_RESULT_SUCCEEDED;
+}
+
+uint64_t k4a_playback_get_recording_length_usec(k4a_playback_t playback_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_t, playback_handle);
+
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(0, context == NULL);
+    return context->last_timestamp_ns / 1000;
 }
 
 uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle)
