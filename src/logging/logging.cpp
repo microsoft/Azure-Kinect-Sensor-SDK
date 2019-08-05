@@ -13,6 +13,7 @@
 
 // System dependencies
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 // External dependencies
@@ -32,19 +33,22 @@ extern "C" {
 #endif
 
 //
-// This logger implements two different loggers, that have different lifespans.
+// This logger implements two different loggers
 // 1) A streaming callback function can deliver debug messages to a registered callback function.
-// 2) This module and therefore k4a.dll is capable of independently logging to a file or STDOUT through the use of
+// 2) This module and therefore consumers are capable of independently logging to a file or STDOUT through the use of
 // environment variables defined in k4atypes.h
 //
 
-// This is the context for built in logger that uses env variable to the users logger.
-typedef struct _logger_context_t
-{
-    std::shared_ptr<spdlog::logger> logger;
-} logger_context_t;
+#define K4A_LOGGER "k4a_logger"
 
-K4A_DECLARE_CONTEXT(logger_t, logger_context_t);
+// NOTE, if a sub directory for the log is used, then it needs to be created prior to attempting to create the file
+#define LOG_FILE_MAX_FILES (3)
+#define LOG_FILE_EXTENSION ".log"
+
+static const char K4A_ENABLE_LOG_TO_STDOUT[] = "K4A_ENABLE_LOG_TO_STDOUT";
+static const char K4A_LOG_LEVEL[] = "K4A_LOG_LEVEL";
+static const char K4A_LOG_FILE_NAME[] = "k4a.log";
+static size_t K4A_LOG_FILE_50MB_MAX_SIZE = (1048576 * 50);
 
 typedef struct
 {
@@ -59,28 +63,27 @@ typedef struct
     std::shared_ptr<spdlog::logger> env_logger;
     bool env_logger_is_file_based;
     k4a_log_level_t env_log_level;
-    int env_logger_count;
 } logger_global_context_t;
 
-// This function runs once to initialize the global context for the logger
-static void logger_init_function(logger_global_context_t *global)
-{
-    // All other members are initialized to zero
-    rwlock_init(&global->lock);
-
-    global->env_log_level = K4A_LOG_LEVEL_OFF;
-    global->user_log_level = K4A_LOG_LEVEL_OFF;
-}
+static void logger_init_once(logger_global_context_t *global);
+static void logger_deinit();
 
 // Creates a function called logger_global_context_t_get() which returns the initialized
 // singleton global
-K4A_DECLARE_GLOBAL(logger_global_context_t, logger_init_function);
+K4A_DECLARE_GLOBAL(logger_global_context_t, logger_init_once);
 
-#define K4A_LOGGER "k4a_logger"
-
-// NOTE, if a sub directory for the log is used, then it needs to be created prior to attempting to create the file
-#define LOG_FILE_MAX_FILES (3)
-#define LOG_FILE_EXTENSION ".log"
+// To deal with destroying the singleton we create a static class and use the destructor to tear down the object.
+// For now this is separate from K4A_DECLARE_GLOBAL as it is C-based and can be reused in the SDK.
+class logger_global_destroy
+{
+public:
+    logger_global_destroy() {}
+    ~logger_global_destroy()
+    {
+        logger_deinit();
+    }
+};
+static logger_global_destroy destroy_loggger_on_binary_unload;
 
 k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_cb,
                                               void *message_cb_context,
@@ -101,7 +104,7 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
     // The user may set the callback,  clear the callback, or set the callback to the
     // same value it was previously. It is a failure to change the callback
     // from an existing registration.
-    if (g_context->user_callback == NULL || message_cb == NULL || g_context->user_callback == message_cb)
+    if (g_context->user_callback == nullptr || message_cb == nullptr || g_context->user_callback == message_cb)
     {
         // Store the user log level
         g_context->user_log_level = min_level;
@@ -119,16 +122,13 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
     return result;
 }
 
-k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
+static void logger_init_once(logger_global_context_t *global)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, logger_handle == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config->max_log_size == 0);
+    // All other members are initialized to zero
+    rwlock_init(&global->lock);
 
-    logger_context_t *context = logger_t_create(logger_handle);
-    logger_global_context_t *g_context = logger_global_context_t_get();
-
-    rwlock_acquire_write(&g_context->lock);
+    global->env_log_level = K4A_LOG_LEVEL_OFF;
+    global->user_log_level = K4A_LOG_LEVEL_OFF;
 
     const char *enable_file_logging = nullptr;
     const char *enable_stdout_logging = nullptr;
@@ -136,51 +136,24 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     // environment_get_variable will return null or "\0" if the env var is not set - depends on the OS.
-    if (config->env_var_log_to_a_file)
-    {
-        enable_file_logging = environment_get_variable(config->env_var_log_to_a_file);
-    }
-    if (config->env_var_log_to_stdout)
-    {
-        enable_stdout_logging = environment_get_variable(config->env_var_log_to_stdout);
-    }
-    if (config->env_var_log_level)
-    {
-        logging_level = environment_get_variable(config->env_var_log_level);
-    }
-
-    if (g_context->env_logger)
-    {
-        // Reuse the configured logger settings in the event we have more than 1 active handle at a time
-        context->logger = g_context->env_logger;
-        g_context->env_logger_count++;
-
-        rwlock_release_write(&g_context->lock);
-        return K4A_RESULT_SUCCEEDED;
-    }
+    enable_file_logging = environment_get_variable(K4A_ENV_VAR_LOG_TO_A_FILE);
+    enable_stdout_logging = environment_get_variable(K4A_ENABLE_LOG_TO_STDOUT);
+    logging_level = environment_get_variable(K4A_LOG_LEVEL);
 
     if (enable_file_logging && enable_file_logging[0] != '\0')
     {
-        const char *log_file = nullptr;
-        if (enable_file_logging == NULL || enable_file_logging[0] == '\0')
-        {
-            log_file = config->log_file;
-        }
-        else if (enable_file_logging[0] != '0')
-        {
-            // enable_file_logging is valid see if its a file path
-            log_file = config->log_file;
-            uint32_t extension_sz = sizeof(LOG_FILE_EXTENSION);
+        // enable_file_logging is valid see if its a file path
+        const char *log_file = K4A_LOG_FILE_NAME;
+        uint32_t extension_sz = sizeof(LOG_FILE_EXTENSION);
 
-            // If enable_file_logging ends in .log then we use it as a path and or file name, else we use the default
-            uint32_t path_length = (uint32_t)strlen(enable_file_logging) + 1;
-            if (path_length > extension_sz)
+        // If enable_file_logging ends in .log then we use it as a path and or file name, else we use the default
+        uint32_t path_length = (uint32_t)strlen(enable_file_logging) + 1;
+        if (path_length > extension_sz)
+        {
+            const char *extension = enable_file_logging + (char)(path_length - extension_sz);
+            if (strncmp(extension, LOG_FILE_EXTENSION, extension_sz) == 0)
             {
-                const char *extension = enable_file_logging + (char)(path_length - extension_sz);
-                if (strncmp(extension, LOG_FILE_EXTENSION, extension_sz) == 0)
-                {
-                    log_file = enable_file_logging;
-                }
+                log_file = enable_file_logging;
             }
         }
 
@@ -189,25 +162,24 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
             try
             {
                 // Create a file rotating logger with 50mb size max and 3 rotated files
-                g_context->env_logger =
-                    spdlog::rotating_logger_mt(K4A_LOGGER, log_file, config->max_log_size, LOG_FILE_MAX_FILES);
+                global->env_logger =
+                    spdlog::rotating_logger_mt(K4A_LOGGER, log_file, K4A_LOG_FILE_50MB_MAX_SIZE, LOG_FILE_MAX_FILES);
 
                 spdlog::set_pattern("%v");
-                g_context->env_logger->info("\n\nNew logging session started\n");
-                g_context->env_logger_is_file_based = true;
+                global->env_logger->info("\n\nNew logging session started\n");
+                global->env_logger_is_file_based = true;
             }
             catch (...)
             {
                 // Probably trying to use a file that is already opened by another instance.
-                g_context->env_logger = nullptr;
-                printf("ERROR: Unable to open log file \"%s\".\n", log_file);
-                result = K4A_RESULT_FAILED;
+                global->env_logger = nullptr;
+                printf("ERROR: Logger unable to open log file \"%s\".\n", log_file);
             }
         }
     }
 
     // log to stdout if enabled via ENV var AND if file logging is not enabled.
-    if (K4A_SUCCEEDED(result) && (g_context->env_logger == NULL))
+    if (K4A_SUCCEEDED(result) && (global->env_logger == nullptr))
     {
         bool enable_stdout_logger = false;
 
@@ -216,11 +188,11 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
         {
             enable_stdout_logger = true;
         }
-        else if (g_context->user_callback == NULL)
+        else if (global->user_callback == nullptr)
         {
             // Default with user_callback disabled is use stdout logging unless specifically disabled
-            if (g_context->user_callback == NULL &&
-                (enable_stdout_logging == NULL || enable_stdout_logging[0] == '\0' ||
+            if (global->user_callback == nullptr &&
+                (enable_stdout_logging == nullptr || enable_stdout_logging[0] == '\0' ||
                  (enable_stdout_logging && enable_stdout_logging[0] != '0')))
             {
                 enable_stdout_logger = true;
@@ -230,15 +202,13 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
         if (enable_stdout_logger)
         {
             // Unable to turn on color logging due to bug with CTest https://gitlab.kitware.com/cmake/cmake/issues/17620
-            g_context->env_logger = spdlog::stdout_logger_mt(K4A_LOGGER);
+            global->env_logger = spdlog::stdout_logger_mt(K4A_LOGGER);
         }
     }
 
-    if (K4A_SUCCEEDED(result) && (g_context->env_logger))
+    if (K4A_SUCCEEDED(result) && (global->env_logger))
     {
-        context->logger = g_context->env_logger;
-        g_context->env_logger_count++;
-        g_context->env_log_level = K4A_LOG_LEVEL_ERROR;
+        global->env_log_level = K4A_LOG_LEVEL_ERROR;
 
         //[2018-08-27 10:44:23.218] [level] [threadID] <message>
         // https://github.com/gabime/spdlog/wiki/3.-Custom-formatting
@@ -253,66 +223,43 @@ k4a_result_t logger_create(logger_config_t *config, logger_t *logger_handle)
             if (logging_level[0] == 't' || logging_level[0] == 'T')
             {
                 // capture a severity of trace or higher
-                g_context->env_log_level = K4A_LOG_LEVEL_TRACE;
+                global->env_log_level = K4A_LOG_LEVEL_TRACE;
             }
             else if (logging_level[0] == 'i' || logging_level[0] == 'I')
             {
                 // capture a severity of info or higher
-                g_context->env_log_level = K4A_LOG_LEVEL_INFO;
+                global->env_log_level = K4A_LOG_LEVEL_INFO;
             }
             else if (logging_level[0] == 'w' || logging_level[0] == 'W')
             {
                 // capture a severity of warning or higher
-                g_context->env_log_level = K4A_LOG_LEVEL_WARNING;
+                global->env_log_level = K4A_LOG_LEVEL_WARNING;
             }
             else if (logging_level[0] == 'e' || logging_level[0] == 'E')
             {
                 // capture a severity of error or higher
-                g_context->env_log_level = K4A_LOG_LEVEL_ERROR;
+                global->env_log_level = K4A_LOG_LEVEL_ERROR;
             }
             else if (logging_level[0] == 'c' || logging_level[0] == 'C')
             {
                 // capture a severity of error or higher
-                g_context->env_log_level = K4A_LOG_LEVEL_CRITICAL;
+                global->env_log_level = K4A_LOG_LEVEL_CRITICAL;
             }
         }
 
-        g_context->env_logger->flush_on(spdlog::level::warn);
+        global->env_logger->flush_on(spdlog::level::warn);
     }
-
-    rwlock_release_write(&g_context->lock);
-
-    return result;
 }
 
-void logger_destroy(logger_t logger_handle)
+void logger_deinit(void)
 {
-    RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, logger_t, logger_handle);
-
-    logger_context_t *context = logger_t_get_context(logger_handle);
     logger_global_context_t *g_context = logger_global_context_t_get();
 
     rwlock_acquire_write(&g_context->lock);
 
-    g_context->env_logger_count--;
-
-    // Destroy the logger
-    if (g_context->env_logger_count == 0)
-    {
-        bool drop_logger = g_context->env_logger != NULL;
-        g_context->env_logger = NULL;
-        if (drop_logger)
-        {
-            spdlog::drop(K4A_LOGGER);
-        }
-        g_context->env_logger_is_file_based = false;
-        g_context->env_log_level = K4A_LOG_LEVEL_OFF;
-    }
-    context->logger = nullptr;
+    g_context->env_logger = nullptr;
 
     rwlock_release_write(&g_context->lock);
-
-    logger_t_destroy(logger_handle);
 }
 
 #if defined(__GNUC__) || defined(__clang__)

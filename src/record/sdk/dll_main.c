@@ -3,10 +3,13 @@
 #include <process.h>
 #include <crtdbg.h>
 #endif
+#include <k4ainternal/logging.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+char K4A_ENV_VAR_LOG_TO_A_FILE[] = K4A_RECORD_ENABLE_LOG_TO_A_FILE;
 
 #if _WIN32
 #if K4A_ENABLE_LEAK_DETECTION
