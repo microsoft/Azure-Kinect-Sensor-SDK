@@ -344,39 +344,16 @@ Transformation stereo_calibration(const k4a::calibration &master_calib,
     return tr;
 }
 
-// The following few functions provide the configurations that should be used for each camera in each case.
+// The following functions provide the configurations that should be used for each camera.
 // NOTE: Both cameras must have the same configuration (framerate, resolution, color and depth modes TODO what exactly
 // needs to be the same
-k4a_device_configuration_t get_master_config_calibration()
+k4a_device_configuration_t get_master_config()
 {
     k4a_device_configuration_t camera_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
     camera_config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    camera_config.depth_mode = K4A_DEPTH_MODE_OFF; // no need for depth during calibration
-    camera_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
-    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
-    camera_config.subordinate_delay_off_master_usec = 0; // Must be zero- this device is the master, so delay is 0.
-    camera_config.depth_delay_off_color_usec = 0;
-    camera_config.synchronized_images_only = false;
-    return camera_config;
-}
-
-k4a_device_configuration_t get_sub_config_calibration()
-{
-    k4a_device_configuration_t camera_config = get_master_config_calibration();
-    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
-    // Note that subordinate_delay_off_master_usec is still 0, because we want the master camera and subordinate camera
-    // to calibrate with pictures that were taken at the same time.
-    return camera_config;
-}
-
-k4a_device_configuration_t get_master_config_green_screen()
-{
-    k4a_device_configuration_t camera_config = get_master_config_calibration();
-    camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED; // need to have depth to green screen
-    camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;     // 15 FPS is the max for the wide field of view mode. The
-                                                             // device can go up to 30 FPS with the narrow field of view
-                                                             // mode
+    camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED; // no need for depth during calibration
+    camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
     camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
     camera_config.subordinate_delay_off_master_usec = 0; // Must be zero- this device is the master, so delay is 0.
     // Let half of the time needed for the depth cameras to not interfere with one another pass here (the other half is
@@ -386,15 +363,15 @@ k4a_device_configuration_t get_master_config_green_screen()
     return camera_config;
 }
 
-k4a_device_configuration_t get_sub_config_green_screen()
+k4a_device_configuration_t get_sub_config()
 {
-    k4a_device_configuration_t camera_config = get_master_config_green_screen();
-    // The color camera must be running for synchronization to work
+    k4a_device_configuration_t camera_config = get_master_config();
+    // The color camera must be running for synchronization to work, even though we don't really use it
     camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
+    camera_config.subordinate_delay_off_master_usec = 0; // sync up the color cameras to help calibration
     // Only account for half of the delay here. The other half comes from the master depth camera capturing before the
     // master color camera.
-    camera_config.subordinate_delay_off_master_usec = MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2;
-    camera_config.depth_delay_off_color_usec = 0;
+    camera_config.depth_delay_off_color_usec = MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2;
     camera_config.synchronized_images_only = true;
     return camera_config;
 }
@@ -559,28 +536,19 @@ int main(int argc, char **argv)
     subordinate.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, powerline_freq);
 
     // Construct the calibrations that these types will use
-    k4a_device_configuration_t master_calibration_config = get_master_config_calibration();
-    k4a_device_configuration_t sub_calibration_config = get_sub_config_calibration();
+    k4a_device_configuration_t master_config = get_master_config();
+    k4a_device_configuration_t sub_config = get_sub_config();
 
     // now it's time to start the cameras. Start the subordinate first, because it needs to be ready to receive commands
     // when the master starts up.
-    subordinate.start_cameras(&sub_calibration_config);
-    master.start_cameras(&master_calibration_config);
+    subordinate.start_cameras(&sub_config);
+    master.start_cameras(&master_config);
 
     // This wraps all the calibration details
-    Transformation tr_color_sub_to_color_master = calibrate_devices(master,
-                                                                    subordinate,
-                                                                    master_calibration_config,
-                                                                    sub_calibration_config,
-                                                                    chessboard_pattern,
-                                                                    chessboard_square_length);
+    Transformation tr_color_sub_to_color_master =
+        calibrate_devices(master, subordinate, master_config, sub_config, chessboard_pattern, chessboard_square_length);
 
     // End calibration
-    master.stop_cameras();
-    subordinate.stop_cameras();
-
-    k4a_device_configuration_t master_config = get_master_config_green_screen();
-    k4a_device_configuration_t sub_config = get_sub_config_green_screen();
     k4a::calibration master_calibration = master.get_calibration(master_config.depth_mode,
                                                                  master_config.color_resolution);
     k4a::calibration sub_calibration = subordinate.get_calibration(sub_config.depth_mode, sub_config.color_resolution);
@@ -602,11 +570,6 @@ int main(int argc, char **argv)
     // the master color camera
     set_calibration_depth_to_color_from_transformation(sub_calibration, tr_depth_sub_to_color_master);
     k4a::transformation sub_depth_to_master_color(sub_calibration);
-
-    // Re-start the cameras with the new configurations to get new configurations with the green screen configs
-    // don't forget that subordinate still needs to go first
-    subordinate.start_cameras(&sub_config);
-    master.start_cameras(&master_config);
 
     while (true)
     {
