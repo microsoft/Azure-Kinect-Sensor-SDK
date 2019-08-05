@@ -15,6 +15,8 @@ using std::cout;
 using std::endl;
 using std::vector;
 
+#include "transformation.h"
+
 // This is the maximum difference between when we expected an image's timestamp to be and when it actually occurred.
 constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(50);
 
@@ -39,97 +41,50 @@ cv::Mat k4a_depth_to_opencv(const k4a::image &im)
                    im.get_stride_bytes());
 }
 
-cv::Mat k4a_calibration_to_color_camera_matrix(const k4a::calibration &cal)
+cv::Matx33f calibration_to_color_camera_matrix(const k4a::calibration &cal)
 {
     const k4a_calibration_intrinsic_parameters_t::_param &i = cal.color_camera_calibration.intrinsics.parameters.param;
-    cv::Mat camera_matrix = cv::Mat::zeros(3, 3, CV_32F);
-    camera_matrix.at<float>(0, 0) = i.fx;
-    camera_matrix.at<float>(1, 1) = i.fx;
-    camera_matrix.at<float>(0, 2) = i.cx;
-    camera_matrix.at<float>(1, 2) = i.cy;
-    camera_matrix.at<float>(2, 2) = 1;
+    cv::Matx33f camera_matrix = cv::Matx33f::zeros();
+    camera_matrix(0, 0) = i.fx;
+    camera_matrix(1, 1) = i.fx;
+    camera_matrix(0, 2) = i.cx;
+    camera_matrix(1, 2) = i.cy;
+    camera_matrix(2, 2) = 1;
     return camera_matrix;
 }
 
-cv::Mat construct_homogeneous(const cv::Mat &R, const cv::Vec3d &t)
-{
-    if (R.type() != CV_64F)
-    {
-        cout << "Must be 64F" << endl;
-        exit(1);
-    }
-    cv::Mat homog_matrix = cv::Mat::zeros(cv::Size(4, 4), CV_64F);
-    for (int i = 0; i < R.rows; ++i)
-    {
-        for (int j = 0; j < R.cols; ++j)
-        {
-            homog_matrix.at<double>(i, j) = R.at<double>(i, j);
-        }
-    }
-    for (int i = 0; i < t.channels; ++i)
-    {
-        homog_matrix.at<double>(i, 3) = t[i];
-    }
-    homog_matrix.at<double>(3, 3) = 1;
-    return homog_matrix;
-}
-
-std::tuple<cv::Mat, cv::Vec3d> deconstruct_homogeneous(const cv::Mat &H)
-{
-    cv::Mat R = cv::Mat::zeros(cv::Size(3, 3), CV_64F);
-    cv::Vec3d t;
-    if (H.size() != cv::Size(4, 4) || H.at<double>(3, 0) != 0 || H.at<double>(3, 1) != 0 || H.at<double>(3, 2) != 0 ||
-        H.at<double>(3, 3) != 1)
-    {
-        throw std::runtime_error("Please use a valid homogeneous matrix.");
-    }
-
-    for (int i = 0; i < R.rows; ++i)
-    {
-        for (int j = 0; j < R.cols; ++j)
-        {
-            R.at<double>(i, j) = H.at<double>(i, j);
-        }
-    }
-    for (size_t i = 0; i < t.channels; ++i)
-    {
-        t[i] = H.at<double>(i, 3);
-    }
-    return std::make_tuple(R, t);
-}
-
-std::tuple<cv::Mat, cv::Vec3d> k4a_calibration_to_depth_to_color_R_t(const k4a::calibration &cal)
+Transformation calibration_to_depth_to_color_transformation(const k4a::calibration &cal)
 {
     const k4a_calibration_extrinsics_t &ex = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
-    cv::Mat R = cv::Mat(3, 3, CV_64F);
+    Transformation tr;
     for (int i = 0; i < 3; ++i)
     {
         for (int j = 0; j < 3; ++j)
         {
-            R.at<double>(i, j) = ex.rotation[i * 3 + j];
+            tr.R(i, j) = ex.rotation[i * 3 + j];
         }
     }
-    cv::Vec3d t = cv::Vec3d(ex.translation[0], ex.translation[1], ex.translation[2]);
-    return std::make_tuple(R, t);
+    tr.t = cv::Vec3d(ex.translation[0], ex.translation[1], ex.translation[2]);
+    return tr;
 }
 
-void set_k4a_calibration_depth_to_color_from_R_t(k4a::calibration &cal, const cv::Mat &R, const cv::Vec3d &t)
+void set_calibration_depth_to_color_from_transformation(k4a::calibration &cal, const Transformation &tr)
 {
     k4a_calibration_extrinsics_t &ex = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
     for (int i = 0; i < 3; ++i)
     {
         for (int j = 0; j < 3; ++j)
         {
-            ex.rotation[i * 3 + j] = static_cast<float>(R.at<double>(i, j));
+            ex.rotation[i * 3 + j] = static_cast<float>(tr.R(i, j));
         }
     }
     for (int i = 0; i < 3; ++i)
     {
-        ex.translation[i] = static_cast<float>(t[i]);
+        ex.translation[i] = static_cast<float>(tr.t[i]);
     }
 }
 
-vector<float> k4a_calibration_to_color_camera_dist_coeffs(const k4a::calibration &cal)
+vector<float> calibration_to_color_camera_dist_coeffs(const k4a::calibration &cal)
 {
     const k4a_calibration_intrinsic_parameters_t::_param &i = cal.color_camera_calibration.intrinsics.parameters.param;
     return { i.k1, i.k2, i.p1, i.p2, i.k3, i.k4, i.k5, i.k6 };
@@ -310,13 +265,13 @@ bool find_chessboard_corners_helper(cv::Mat master_color_image,
     return true;
 }
 
-std::tuple<cv::Mat, cv::Vec3d> stereo_calibration(const k4a::calibration &master_calib,
-                                                  const k4a::calibration &sub_calib,
-                                                  const vector<cv::Point2f> &master_chessboard_corners,
-                                                  const vector<cv::Point2f> &sub_chessboard_corners,
-                                                  const cv::Size &image_size,
-                                                  const cv::Size &chessboard_pattern,
-                                                  float chessboard_square_length)
+Transformation stereo_calibration(const k4a::calibration &master_calib,
+                                  const k4a::calibration &sub_calib,
+                                  const vector<cv::Point2f> &master_chessboard_corners,
+                                  const vector<cv::Point2f> &sub_chessboard_corners,
+                                  const cv::Size &image_size,
+                                  const cv::Size &chessboard_pattern,
+                                  float chessboard_square_length)
 {
     // We have points in each image that correspond to the corners that the findChessboardCorners function found.
     // However, we still need the points in 3 dimensions that these points correspond to. Because we are ultimately only
@@ -363,15 +318,14 @@ std::tuple<cv::Mat, cv::Vec3d> stereo_calibration(const k4a::calibration &master
     vector<vector<cv::Point2f>> master_corners_nested_for_cv(1, master_chessboard_corners);
     vector<vector<cv::Point2f>> sub_corners_nested_for_cv(1, sub_chessboard_corners);
 
-    cv::Mat master_camera_matrix = k4a_calibration_to_color_camera_matrix(master_calib);
-    cv::Mat sub_camera_matrix = k4a_calibration_to_color_camera_matrix(sub_calib);
-    vector<float> master_dist_coeff = k4a_calibration_to_color_camera_dist_coeffs(master_calib);
-    vector<float> sub_dist_coeff = k4a_calibration_to_color_camera_dist_coeffs(sub_calib);
+    cv::Matx33f master_camera_matrix = calibration_to_color_camera_matrix(master_calib);
+    cv::Matx33f sub_camera_matrix = calibration_to_color_camera_matrix(sub_calib);
+    vector<float> master_dist_coeff = calibration_to_color_camera_dist_coeffs(master_calib);
+    vector<float> sub_dist_coeff = calibration_to_color_camera_dist_coeffs(sub_calib);
 
     // Finally, we'll actually calibrate the cameras.
     // Pass subordinate first, then master, because we want a transform from subordinate to master.
-    cv::Mat R;
-    cv::Vec3d t;
+    Transformation tr;
     double error = cv::stereoCalibrate(chessboard_corners_world_nested_for_cv,
                                        sub_corners_nested_for_cv,
                                        master_corners_nested_for_cv,
@@ -380,14 +334,14 @@ std::tuple<cv::Mat, cv::Vec3d> stereo_calibration(const k4a::calibration &master
                                        master_camera_matrix,
                                        master_dist_coeff,
                                        image_size,
-                                       R, // output
-                                       t, // output
+                                       tr.R, // output
+                                       tr.t, // output
                                        cv::noArray(),
                                        cv::noArray(),
                                        cv::CALIB_FIX_INTRINSIC | cv::CALIB_RATIONAL_MODEL | cv::CALIB_CB_FAST_CHECK);
     cout << "Finished calibrating!\n";
     cout << "Got error of " << error << "\n";
-    return std::make_tuple(R, t);
+    return tr;
 }
 
 // The following few functions provide the configurations that should be used for each camera in each case.
@@ -445,21 +399,18 @@ k4a_device_configuration_t get_sub_config_green_screen()
     return camera_config;
 }
 
-std::tuple<cv::Mat, cv::Vec3d> calibrate_devices(k4a::device &master,
-                                                 k4a::device &subordinate,
-                                                 k4a_device_configuration_t &master_calibration_config,
-                                                 k4a_device_configuration_t &sub_calibration_config,
-                                                 const cv::Size &chessboard_pattern,
-                                                 float chessboard_square_length)
+Transformation calibrate_devices(k4a::device &master,
+                                 k4a::device &subordinate,
+                                 k4a_device_configuration_t &master_calibration_config,
+                                 k4a_device_configuration_t &sub_calibration_config,
+                                 const cv::Size &chessboard_pattern,
+                                 float chessboard_square_length)
 {
     k4a::calibration master_calibration = master.get_calibration(master_calibration_config.depth_mode,
                                                                  master_calibration_config.color_resolution);
     k4a::calibration sub_calibration = subordinate.get_calibration(sub_calibration_config.depth_mode,
                                                                    sub_calibration_config.color_resolution);
-    cv::Mat R;
-    cv::Vec3d t;
-    bool calibrated = false;
-    while (!calibrated)
+    while (true)
     {
         k4a::capture master_capture, sub_capture;
         std::tie(master_capture, sub_capture) = get_synchronized_captures(master, subordinate, sub_calibration_config);
@@ -480,29 +431,15 @@ std::tuple<cv::Mat, cv::Vec3d> calibrate_devices(k4a::device &master,
 
         if (ready_to_calibrate)
         {
-            std::tie(R, t) = stereo_calibration(master_calibration,
-                                                sub_calibration,
-                                                master_chessboard_corners,
-                                                sub_chessboard_corners,
-                                                cv_master_color_image.size(),
-                                                chessboard_pattern,
-                                                chessboard_square_length);
-            calibrated = true;
+            return stereo_calibration(master_calibration,
+                                      sub_calibration,
+                                      master_chessboard_corners,
+                                      sub_chessboard_corners,
+                                      cv_master_color_image.size(),
+                                      chessboard_pattern,
+                                      chessboard_square_length);
         }
     }
-    return std::make_tuple(R, t);
-}
-
-std::tuple<cv::Mat, cv::Vec3d>
-compose_calibration_transforms(const cv::Mat &R_1, const cv::Vec3d &t_1, const cv::Mat &R_2, const cv::Vec3d &t_2)
-{
-    cv::Mat H_1 = construct_homogeneous(R_1, t_1);
-    cv::Mat H_2 = construct_homogeneous(R_2, t_2);
-    cv::Mat H_3 = H_1 * H_2;
-    cv::Mat R_3;
-    cv::Vec3d t_3;
-    std::tie(R_3, t_3) = deconstruct_homogeneous(H_3);
-    return std::make_tuple(R_3, t_3);
 }
 
 k4a::image create_depth_image_like(const k4a::image &im)
@@ -630,17 +567,13 @@ int main(int argc, char **argv)
     subordinate.start_cameras(&sub_calibration_config);
     master.start_cameras(&master_calibration_config);
 
-    // These will hold the rotation and translation we get from calibration
-    cv::Mat R_color_sub_to_color_master;
-    cv::Vec3d t_color_sub_to_color_master;
-
     // This wraps all the calibration details
-    std::tie(R_color_sub_to_color_master, t_color_sub_to_color_master) = calibrate_devices(master,
-                                                                                           subordinate,
-                                                                                           master_calibration_config,
-                                                                                           sub_calibration_config,
-                                                                                           chessboard_pattern,
-                                                                                           chessboard_square_length);
+    Transformation tr_color_sub_to_color_master = calibrate_devices(master,
+                                                                    subordinate,
+                                                                    master_calibration_config,
+                                                                    sub_calibration_config,
+                                                                    chessboard_pattern,
+                                                                    chessboard_square_length);
 
     // End calibration
     master.stop_cameras();
@@ -652,21 +585,12 @@ int main(int argc, char **argv)
                                                                  master_config.color_resolution);
     k4a::calibration sub_calibration = subordinate.get_calibration(sub_config.depth_mode, sub_config.color_resolution);
     // Get the transformation from subordinate depth to subordinate color using its calibration object
-    cv::Mat R_depth_sub_to_color_sub;
-    cv::Vec3d t_depth_sub_to_color_sub;
-    std::tie(R_depth_sub_to_color_sub,
-             t_depth_sub_to_color_sub) = k4a_calibration_to_depth_to_color_R_t(sub_calibration);
+    Transformation tr_depth_sub_to_color_sub = calibration_to_depth_to_color_transformation(sub_calibration);
 
     // We now have the subordinate depth to subordinate color transform. We also have the transformation from the
     // subordinate color perspective to the master color perspective from the calibration earlier. Now let's compose the
     // depth sub -> color sub, color sub -> color master into depth sub -> color master
-    cv::Mat R_depth_sub_to_color_master;
-    cv::Vec3d t_depth_sub_to_color_master;
-    std::tie(R_depth_sub_to_color_master,
-             t_depth_sub_to_color_master) = compose_calibration_transforms(R_depth_sub_to_color_sub,
-                                                                           t_depth_sub_to_color_sub,
-                                                                           R_color_sub_to_color_master,
-                                                                           t_color_sub_to_color_master);
+    Transformation tr_depth_sub_to_color_master = tr_depth_sub_to_color_sub.compose_with(tr_color_sub_to_color_master);
 
     // Now, we're going to set up the transformations. DO THIS OUTSIDE OF YOUR MAIN LOOP! Constructing transformations
     // does a lot of preemptive work to make the transform as fast as possible.
@@ -676,9 +600,7 @@ int main(int argc, char **argv)
     // Now it's time to get clever. We're going to update the existing calibration extrinsics on getting from the sub
     // depth camera to the sub color camera, overwriting it with the transformation to get from the sub depth camera to
     // the master color camera
-    set_k4a_calibration_depth_to_color_from_R_t(sub_calibration,
-                                                R_depth_sub_to_color_master,
-                                                t_depth_sub_to_color_master);
+    set_calibration_depth_to_color_from_transformation(sub_calibration, tr_depth_sub_to_color_master);
     k4a::transformation sub_depth_to_master_color(sub_calibration);
 
     // Re-start the cameras with the new configurations to get new configurations with the green screen configs
