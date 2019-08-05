@@ -393,6 +393,8 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
  *
  * \remarks
  * Custom track data must be written in increasing order of timestamp, and the file's header must already be written.
+ * When writing custom track data at the same time as captures or IMU data, the custom data should be within 1 second of
+ * the most recently written timestamp.
  *
  * \xmlonly
  * <requirements>
