@@ -16,6 +16,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     {
         private static readonly NativeMethods.k4a_logging_message_cb_t DebugMessageHandler = OnDebugMessage;
         private static EventHandler<DebugMessageEventArgs> logMessageHandlers;
+        private static bool isInitialized;
 
         /// <summary>
         /// Occurs when the Azure Kinect Sensor SDK delivers a debug message.
@@ -24,7 +25,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             add
             {
-                if (!Initialized)
+                if (!Logger.isInitialized)
                 {
                     Logger.Initialize();
                 }
@@ -39,18 +40,13 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Gets a value indicating whether the <see cref="Logger"/> class has been initialized and connected to the Azure Kinect Sensor SDK.
-        /// </summary>
-        public static bool Initialized { get; private set; }
-
-        /// <summary>
         /// Initializes the <see cref="Logger"/> class to begin receiving messages from the Azure Kinect Sensor SDK.
         /// </summary>
         public static void Initialize()
         {
             lock (DebugMessageHandler)
             {
-                if (Logger.Initialized)
+                if (Logger.isInitialized)
                 {
                     return;
                 }
@@ -63,7 +59,34 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new AzureKinectException("Failed to set the Debug Message Handler");
                 }
 
-                Logger.Initialized = true;
+                Logger.isInitialized = true;
+            }
+        }
+
+        /// <summary>
+        /// Resets the logger to an uninitialized state. This is used in the Unit Tests to ensure that the
+        /// initialization is run during the unit tests.
+        /// </summary>
+        internal static void Reset()
+        {
+            lock (DebugMessageHandler)
+            {
+                if (!Logger.isInitialized)
+                {
+                    return;
+                }
+
+                AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_Exit;
+                AppDomain.CurrentDomain.DomainUnload -= CurrentDomain_Exit;
+
+                // TODO: This won't work as Raise Error has an invalid pointer.
+                ////NativeMethods.k4a_result_t result = NativeMethods.k4a_set_debug_message_handler(null, IntPtr.Zero, LogLevel.Trace);
+                ////if (result != NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED)
+                ////{
+                ////    throw new AzureKinectException("Failed to set the Debug Message Handler");
+                ////}
+
+                Logger.isInitialized = false;
             }
         }
 

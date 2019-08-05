@@ -17,9 +17,11 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
     /// features of the C# wrapper for the Azure Kinect SDK.
     /// </summary>
     [TestFixture]
-    public class LoggingTests
+    public class LoggingTests : IDisposable
     {
         private readonly StubbedModule nativeK4a;
+
+        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoggingTests"/> class.
@@ -45,6 +47,10 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
         {
             // Don't hook the native allocator
             Microsoft.Azure.Kinect.Sensor.Allocator.Singleton.UseManagedAllocator = false;
+
+            // Clear the logger initialization state to make sure we re-register the logger
+            // for each test.
+            Logger.Reset();
         }
 
         /// <summary>
@@ -138,6 +144,32 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
             threadA.Wait();
             threadB.Wait();
             threadC.Wait();
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>True</c> to release both managed and unmanaged resources; <c>False</c> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    Logger.Reset();
+                }
+
+                this.disposed = true;
+            }
         }
 
         private static void ThreadProc(int delay, int count)
