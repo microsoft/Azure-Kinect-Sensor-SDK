@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('group___functions_gab15dcfc0fd01ce419591b6981fecbf23.html','');});
+$(document).ready(function(){initNavTree('group___functions_gafe2237d54289840ca36b698b8716cfda.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,8 +84,8 @@ $(document).ready(function(){initNavTree('group___functions_gab15dcfc0fd01ce4195
 </div>
 
 <div class="contents">
-<a id="gab15dcfc0fd01ce419591b6981fecbf23"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gab15dcfc0fd01ce419591b6981fecbf23">&#9670;&nbsp;</a></span>k4a_record_write_custom_track_data()</h2>
+<a id="gafe2237d54289840ca36b698b8716cfda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafe2237d54289840ca36b698b8716cfda">&#9670;&nbsp;</a></span>k4a_record_write_custom_track_data()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -109,7 +109,7 @@ $(document).ready(function(){initNavTree('group___functions_gab15dcfc0fd01ce4195
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint64_t&#160;</td>
-          <td class="paramname"><em>timestamp_usec</em>, </td>
+          <td class="paramname"><em>device_timestamp_usec</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -141,7 +141,7 @@ $(document).ready(function(){initNavTree('group___functions_gab15dcfc0fd01ce4195
   <table class="params">
     <tr><td class="paramname">recording_handle</td><td>The handle of a new recording, obtained by <a class="el" href="group___functions_gae14f4181e9688e710d1c80b215413831.html#gae14f4181e9688e710d1c80b215413831" title="Opens a new recording file for writing. ">k4a_record_create()</a>.</td></tr>
     <tr><td class="paramname">track_name</td><td>The name of the custom track that the data is going to be written to.</td></tr>
-    <tr><td class="paramname">timestamp_usec</td><td>The timestamp in microseconds for the custom track data.</td></tr>
+    <tr><td class="paramname">device_timestamp_usec</td><td>The timestamp in microseconds for the custom track data. This timestamp should be in the same time domain as the device timestamp used for recording.</td></tr>
     <tr><td class="paramname">custom_data</td><td>The buffer of custom track data.</td></tr>
     <tr><td class="paramname">custom_data_size</td><td>The size of the custom track data buffer.</td></tr>
   </table>

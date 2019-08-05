@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: k4a_playback_data_block_t::k4a_playback_data_block_get_timestamp_usec</title>
+<title>Azure Kinect Sensor SDK: k4a_playback_data_block_t::k4a_playback_data_block_get_device_timestamp_usec</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('group___functions_gaa4fab38d8f1de16bc8b59613e56ee9aa.html','');});
+$(document).ready(function(){initNavTree('group___functions_ga2a272128c5b15f2132da0bd7cf884494.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,8 +84,8 @@ $(document).ready(function(){initNavTree('group___functions_gaa4fab38d8f1de16bc8
 </div>
 
 <div class="contents">
-<a id="gaa4fab38d8f1de16bc8b59613e56ee9aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaa4fab38d8f1de16bc8b59613e56ee9aa">&#9670;&nbsp;</a></span>k4a_playback_data_block_get_timestamp_usec()</h2>
+<a id="ga2a272128c5b15f2132da0bd7cf884494"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2a272128c5b15f2132da0bd7cf884494">&#9670;&nbsp;</a></span>k4a_playback_data_block_get_device_timestamp_usec()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -94,7 +94,7 @@ $(document).ready(function(){initNavTree('group___functions_gaa4fab38d8f1de16bc8
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint64_t k4a_playback_data_block_get_timestamp_usec </td>
+          <td class="memname">uint64_t k4a_playback_data_block_get_device_timestamp_usec </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structk4a__playback__data__block__t.html">k4a_playback_data_block_t</a>&#160;</td>
           <td class="paramname"><em>data_block_handle</em></td><td>)</td>
@@ -108,14 +108,14 @@ $(document).ready(function(){initNavTree('group___functions_gaa4fab38d8f1de16bc8
 </table>
 </div><div class="memdoc">
 
-<p>Get the timestamp of a data block in microseconds. </p>
+<p>Get the device timestamp of a data block in microseconds. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">data_block_handle</td><td>Handle obtained by <a class="el" href="group___functions_ga2bca9aea2bcfa318f2625f059d4ed807.html#ga2bca9aea2bcfa318f2625f059d4ed807" title="Read the next data block for a particular track. ">k4a_playback_get_next_data_block()</a> or <a class="el" href="group___functions_ga47a2aaa8c429054691e4513a76a3ffac.html#ga47a2aaa8c429054691e4513a76a3ffac" title="Read the previous data block for a particular track. ">k4a_playback_get_previous_data_block()</a>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns the timestamp of the data block. If the <code>data_block_handle</code> is invalid this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning of a recording.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns the device timestamp of the data block. If the <code>data_block_handle</code> is invalid this function will return 0. It is also possible for 0 to be a valid timestamp originating from when a device was first powered on.</dd></dl>
  
 </div>
 </div>
