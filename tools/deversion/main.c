@@ -5,6 +5,10 @@
 
 #include <k4ainternal/k4aplugin.h>
 #include <k4ainternal/dynlib.h>
+#include <k4ainternal/logging.h>
+
+// dynlib includes the logger
+char K4A_ENV_VAR_LOG_TO_A_FILE[] = K4A_ENABLE_LOG_TO_A_FILE;
 
 static void print_usage()
 {
