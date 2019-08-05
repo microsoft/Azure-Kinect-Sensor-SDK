@@ -51,8 +51,7 @@ static void print_capture_info(recording_t *file)
     {
         if (images[i] != NULL)
         {
-            uint64_t timestamp = k4a_image_get_device_timestamp_usec(images[i]) +
-                                 (uint64_t)file->record_config.start_timestamp_offset_usec;
+            uint64_t timestamp = k4a_image_get_device_timestamp_usec(images[i]);
             printf("  %7ju usec", timestamp);
             k4a_image_release(images[i]);
             images[i] = NULL;
@@ -162,11 +161,7 @@ int main(int argc, char **argv)
             {
                 if (files[i].capture != NULL)
                 {
-                    // All recording files start at timestamp 0, however the first timestamp off the camera is usually
-                    // non-zero. We need to add the recording "start offset" back to the recording timestamp to recover
-                    // the original timestamp from the device, and synchronize the files.
-                    uint64_t timestamp = first_capture_timestamp(files[i].capture) +
-                                         files[i].record_config.start_timestamp_offset_usec;
+                    uint64_t timestamp = first_capture_timestamp(files[i].capture);
                     if (timestamp < min_timestamp)
                     {
                         min_timestamp = timestamp;

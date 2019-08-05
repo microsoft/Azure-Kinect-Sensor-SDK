@@ -121,7 +121,7 @@ typedef struct _k4a_playback_context_t
     uint64_t attachments_offset;
     uint64_t tags_offset;
 
-    uint64_t last_timestamp_ns;
+    uint64_t last_file_timestamp_ns; // Relative to start of file.
 
     // Stats
     uint64_t seek_count, load_count, cache_hits;

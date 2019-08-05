@@ -110,6 +110,28 @@ TEST_F(playback_perf, test_open)
         }
     }
 
+    if (config.imu_track_enabled)
+    {
+        k4a_imu_sample_t imu_sample = { 0 };
+        k4a_stream_result_t playback_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_NE(playback_result, K4A_STREAM_RESULT_FAILED);
+        if (playback_result == K4A_STREAM_RESULT_EOF)
+        {
+            std::cout << "No IMU data in recording." << std::endl;
+        }
+        else
+        {
+            std::cout << std::endl;
+            std::cout << "First IMU sample:" << std::endl;
+            std::cout << "    Accel Timestamp: " << imu_sample.acc_timestamp_usec << " usec" << std::endl;
+            std::cout << "    Accel Data: (" << imu_sample.acc_sample.xyz.x << ", " << imu_sample.acc_sample.xyz.y
+                      << ", " << imu_sample.acc_sample.xyz.z << ")" << std::endl;
+            std::cout << "    Gyro Timestamp: " << imu_sample.gyro_timestamp_usec << " usec" << std::endl;
+            std::cout << "    Gyro Data: (" << imu_sample.gyro_sample.xyz.x << ", " << imu_sample.gyro_sample.xyz.y
+                      << ", " << imu_sample.gyro_sample.xyz.z << ")" << std::endl;
+        }
+    }
+
     k4a_playback_close(handle);
 }
 
