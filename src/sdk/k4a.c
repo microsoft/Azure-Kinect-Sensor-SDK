@@ -6,7 +6,6 @@
 
 // Dependent libraries
 #include <k4ainternal/common.h>
-#include <k4ainternal/logging.h>
 #include <k4ainternal/capture.h>
 #include <k4ainternal/depth.h>
 #include <k4ainternal/imu.h>
@@ -16,6 +15,7 @@
 #include <k4ainternal/calibration.h>
 #include <k4ainternal/capturesync.h>
 #include <k4ainternal/transformation.h>
+#include <k4ainternal/logging.h>
 #include <azure_c_shared_utility/tickcounter.h>
 
 // System dependencies
@@ -28,9 +28,10 @@
 extern "C" {
 #endif
 
+char K4A_ENV_VAR_LOG_TO_A_FILE[] = K4A_ENABLE_LOG_TO_A_FILE;
+
 typedef struct _k4a_context_t
 {
-    logger_t logger_handle;
     TICK_COUNTER_HANDLE tick_handle;
 
     calibration_t calibration;
@@ -109,7 +110,6 @@ k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device_handle == NULL);
     k4a_context_t *device = NULL;
-    logger_t logger_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     k4a_device_t handle = NULL;
     const guid_t *container_id = NULL;
@@ -118,21 +118,8 @@ k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle)
 
     allocator_initialize();
 
-    // Instantiate the logger as early as possible
-    logger_config_t logger_config;
-    logger_config_init_default(&logger_config);
-    result = TRACE_CALL(logger_create(&logger_config, &logger_handle));
-
-    if (K4A_SUCCEEDED(result))
-    {
-        device = k4a_device_t_create(&handle);
-        result = K4A_RESULT_FROM_BOOL(device != NULL);
-    }
-
-    if (K4A_SUCCEEDED(result))
-    {
-        device->logger_handle = logger_handle;
-    }
+    device = k4a_device_t_create(&handle);
+    result = K4A_RESULT_FROM_BOOL(device != NULL);
 
     if (K4A_SUCCEEDED(result))
     {
@@ -268,11 +255,6 @@ void k4a_device_close(k4a_device_t device_handle)
         device->tick_handle = NULL;
     }
 
-    // After this destroy, logging will no longer happen.
-    if (device->logger_handle)
-    {
-        logger_destroy(device->logger_handle);
-    }
     k4a_device_t_destroy(device_handle);
     allocator_deinitialize();
 }
