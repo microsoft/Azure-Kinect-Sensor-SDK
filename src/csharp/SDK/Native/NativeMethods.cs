@@ -210,13 +210,6 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_set_allocator(
-            k4a_memory_allocate_cb_t allocate,
-            k4a_memory_destroy_cb_t free
-        );
-
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
-        [NativeReference]
         public static extern k4a_result_t k4a_calibration_2d_to_2d(
             [In] ref Calibration calibration,
             ref Vector2 source_point2d,
