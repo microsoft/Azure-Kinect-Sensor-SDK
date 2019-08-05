@@ -114,7 +114,7 @@ include/k4arecord/playback.h                                   | :white_check_ma
 include/k4arecord/record.h                                     | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 include/k4arecord/types.h                                      | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 linux-ubuntu/x64/release/libdepthengine.so \*                  |                    |                    | :white_check_mark: |                    |
-linux-ubuntu/x64/release/libdepthengine.so.1.0 \*              |                    |                    | :white_check_mark: |                    |
+linux-ubuntu/x64/release/libdepthengine.so.2.0 \*              |                    |                    | :white_check_mark: |                    |
 linux-ubuntu/x64/release/libk4a.so (symlink)                   |                    |                    |                    | :white_check_mark: |
 linux-ubuntu/x64/release/libk4a.so.1.1 (symlink)               |                    |                    | :white_check_mark: |                   |
 linux-ubuntu/x64/release/libk4a.so.1.1.0                       |                    |                    | :white_check_mark: |                    |
@@ -128,7 +128,7 @@ netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.deps.json  | :two:          
 netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.dll        | :two:              | :two:              |                    |                    |
 netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.pdb        | :two:              | :two:              |                    |                    |
 netstandard2.0/AnyCpu/release/Microsoft.AzureKinect.xml        | :two:              | :two:              |                    |                    |
-windows-desktop/amd64/release/depthengine_1_0.dll \*           | :white_check_mark: | :white_check_mark: |                    |                    |
+windows-desktop/amd64/release/depthengine_2_0.dll \*           | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/amd64/release/k4a.dll                          | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/amd64/release/k4a.lib                          | :white_check_mark: | :white_check_mark: |                    |                    |
 windows-desktop/amd64/release/k4a.pdb                          | :white_check_mark: | :white_check_mark: |                    |                    |

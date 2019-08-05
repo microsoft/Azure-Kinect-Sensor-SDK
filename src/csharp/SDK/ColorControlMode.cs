@@ -3,10 +3,20 @@
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
+    /// <summary>
+    /// Color sensor control mode. 
+    /// </summary>
     [Native.NativeReference("k4a_color_control_mode_t")]
     public enum ColorControlMode
     {
+        /// <summary>
+        /// Set the associated <see cref="ColorControlCommand"/> to Auto.
+        /// </summary>
         Auto = 0,
-        Manual
+
+        /// <summary>
+        /// Set the associated <see cref="ColorControlCommand"/> to Manual.
+        /// </summary>
+        Manual,
     }
 }
