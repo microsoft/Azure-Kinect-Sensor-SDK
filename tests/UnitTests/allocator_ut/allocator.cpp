@@ -201,12 +201,12 @@ TEST(allocator_ut, image_api_validation)
         //   Minimum stride
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 10, ALLOCATION_SOURCE_USER, &image));
-        ASSERT_EQ(10 * 10 * 3 / 2, image_get_size(image));
+        ASSERT_EQ(10 * 10 * 3 / 2, (int)image_get_size(image));
         image_dec_ref(image);
         //   Extra stride
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 11, ALLOCATION_SOURCE_USER, &image));
-        ASSERT_EQ(10 * 11 * 3 / 2, image_get_size(image));
+        ASSERT_EQ(10 * 11 * 3 / 2, (int)image_get_size(image));
         image_dec_ref(image);
         //   Insufficient stride
         ASSERT_EQ(K4A_RESULT_FAILED,
@@ -222,12 +222,12 @@ TEST(allocator_ut, image_api_validation)
         //   Minimum stride
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 10, 20, ALLOCATION_SOURCE_USER, &image));
-        ASSERT_EQ(/* lines * stride*/ 10 * 20, image_get_size(image));
+        ASSERT_EQ(/* lines * stride*/ 10 * 20, (int)image_get_size(image));
         image_dec_ref(image);
         //   Extra stride
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 10, 22, ALLOCATION_SOURCE_USER, &image));
-        ASSERT_EQ(/* lines * stride*/ 10 * 22, image_get_size(image));
+        ASSERT_EQ(/* lines * stride*/ 10 * 22, (int)image_get_size(image));
         image_dec_ref(image);
         //   Insufficient stride
         ASSERT_EQ(K4A_RESULT_FAILED,
@@ -235,7 +235,7 @@ TEST(allocator_ut, image_api_validation)
         //   Odd number of rows
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 11, 20, ALLOCATION_SOURCE_USER, &image));
-        ASSERT_EQ(/* lines * stride*/ 11 * 20, image_get_size(image));
+        ASSERT_EQ(/* lines * stride*/ 11 * 20, (int)image_get_size(image));
         image_dec_ref(image);
         //   Odd number of columns
         ASSERT_EQ(K4A_RESULT_FAILED,
@@ -245,7 +245,7 @@ TEST(allocator_ut, image_api_validation)
         //   Minimum stride
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32, 10, 10, 40, ALLOCATION_SOURCE_USER, &image));
-        ASSERT_EQ(/* lines * stride*/ 10 * 40, image_get_size(image));
+        ASSERT_EQ(/* lines * stride*/ 10 * 40, (int)image_get_size(image));
         image_dec_ref(image);
         //   Insufficient stride
         ASSERT_EQ(K4A_RESULT_FAILED,
@@ -259,7 +259,7 @@ TEST(allocator_ut, image_api_validation)
         //   Minimum stride
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   image_create(K4A_IMAGE_FORMAT_DEPTH16, 10, 10, 20, ALLOCATION_SOURCE_USER, &image));
-        ASSERT_EQ(10 * 10 * 2, image_get_size(image));
+        ASSERT_EQ(10 * 10 * 2, (int)image_get_size(image));
         image_dec_ref(image);
         //   Insufficient stride
         ASSERT_EQ(K4A_RESULT_FAILED,
@@ -269,16 +269,16 @@ TEST(allocator_ut, image_api_validation)
         //   Minimum stride
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 10, 10, ALLOCATION_SOURCE_USER, &image));
-        ASSERT_EQ(10 * 10, image_get_size(image));
+        ASSERT_EQ(10 * 10, (int)image_get_size(image));
         image_dec_ref(image);
         //   Insufficient stride
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 10, 9, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 10, 9, ALLOCATION_SOURCE_USER, &image));
 
         // Height of zero
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 0, 10, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 0, 10, ALLOCATION_SOURCE_USER, &image));
 
         // Width of zero
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_CUSTOM8, 0, 10, 10, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 0, 10, 10, ALLOCATION_SOURCE_USER, &image));
 
         ASSERT_EQ(allocator_test_for_leaks(), 0);
     }
