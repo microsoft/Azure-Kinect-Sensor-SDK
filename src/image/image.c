@@ -171,10 +171,130 @@ k4a_result_t image_create(k4a_image_format_t format,
 
     image_context_t *image = NULL;
     k4a_result_t result;
-    size_t size = (size_t)height_pixels * (size_t)stride_bytes;
+    size_t size = 0;
 
-    *image_handle = NULL;
-    result = TRACE_CALL(image_create_empty_image(source, size, image_handle));
+    switch (format)
+    {
+        case K4A_IMAGE_FORMAT_COLOR_MJPG:
+            {
+                LOG_ERROR("K4A_IMAGE_FORMAT_COLOR_MJPG does not have a constant stride. Buffer size cannot be calculated.", 0);
+                result = K4A_RESULT_FAILED;
+                break;
+            }
+
+        case K4A_IMAGE_FORMAT_COLOR_NV12:
+            {
+                if (height_pixels % 2 != 0)
+                {
+                    LOG_ERROR("NV12 requires an even number of lines. Height %d is invalid.", height_pixels);
+                    result = K4A_RESULT_FAILED;
+                }
+                else if (width_pixels % 2 != 0)
+                {
+                    LOG_ERROR("NV12 requires an even number of pixels per line. Width of %d is invalid.", width_pixels);
+                    result = K4A_RESULT_FAILED;
+                }
+                else if (stride_bytes < 1 * width_pixels)
+                {
+                    LOG_ERROR("Insufficient stride (%d bytes) to represent image width (%d pixels).", stride_bytes, width_pixels);
+                    result = K4A_RESULT_FAILED;
+                }
+                else
+                {
+                    // Calculate correct size for NV12 (extra color lines follow Y samples)
+                    size = 3 * (size_t)height_pixels * (size_t)stride_bytes / 2;
+                    result = K4A_RESULT_SUCCEEDED;
+                }
+                break;
+            }
+        
+        // 1 Byte per pixel
+        case K4A_IMAGE_FORMAT_CUSTOM8:
+            {
+                if (stride_bytes < 1 * width_pixels)
+                {
+                    LOG_ERROR("Insufficient stride (%d bytes) to represent image width (%d pixels).", stride_bytes, width_pixels);
+                    result = K4A_RESULT_FAILED;
+                }
+                else
+                {
+                    size = (size_t)height_pixels * (size_t)stride_bytes;
+                    result = K4A_RESULT_SUCCEEDED;
+                }
+                break;
+            }
+
+        // 2 Bytes per pixel
+        case K4A_IMAGE_FORMAT_DEPTH16:
+        case K4A_IMAGE_FORMAT_IR16:
+        case K4A_IMAGE_FORMAT_CUSTOM16:
+            {
+                if (stride_bytes < 2 * width_pixels)
+                {
+                    LOG_ERROR("Insufficient stride (%d bytes) to represent image width (%d pixels).", stride_bytes, width_pixels);
+                    result = K4A_RESULT_FAILED;
+                }
+                else
+                {
+                    size = (size_t)height_pixels * (size_t)stride_bytes;
+                    result = K4A_RESULT_SUCCEEDED;
+                }
+                break;
+            }
+
+        // 2 Bytes per pixel
+        case K4A_IMAGE_FORMAT_COLOR_YUY2:
+            {
+                if (width_pixels % 2 != 0)
+                {
+                    LOG_ERROR("YUY2 requires an even number of pixels per line. Width of %d is invalid.", width_pixels);
+                    result = K4A_RESULT_FAILED;
+                }
+                else if (stride_bytes < 2 * width_pixels)
+                {
+                    LOG_ERROR("Insufficient stride (%d bytes) to represent image width (%d pixels).", stride_bytes, width_pixels);
+                    result = K4A_RESULT_FAILED;
+                }
+                else
+                {
+                    size = (size_t)height_pixels * (size_t)stride_bytes;
+                    result = K4A_RESULT_SUCCEEDED;
+                }
+                break;
+            }
+
+        // 4 Bytes per pixel
+        case K4A_IMAGE_FORMAT_COLOR_BGRA32:
+            {
+                if (stride_bytes < 4 * width_pixels)
+                {
+                    LOG_ERROR("Insufficient stride (%d bytes) to represent image width (%d pixels).", stride_bytes, width_pixels);
+                    result = K4A_RESULT_FAILED;
+                }
+                else
+                {
+                    size = (size_t)height_pixels * (size_t)stride_bytes;
+                    result = K4A_RESULT_SUCCEEDED;
+                }
+                break;
+            }
+
+        // Unknown
+        case K4A_IMAGE_FORMAT_CUSTOM:
+        default:
+            {
+                size = (size_t)height_pixels * (size_t)stride_bytes;
+                result = K4A_RESULT_SUCCEEDED;
+                break;
+            }
+
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        *image_handle = NULL;
+        result = TRACE_CALL(image_create_empty_image(source, size, image_handle));
+    }
 
     if (K4A_SUCCEEDED(result))
     {
