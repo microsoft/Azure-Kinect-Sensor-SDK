@@ -525,10 +525,12 @@ int main(int argc, char **argv)
                                             { "board-square-length", required_argument, 0, 's' },
                                             { "powerline-frequency", required_argument, 0, 'f' },
                                             { "color-exposure", required_argument, 0, 'e' },
+                                            { "depth-threshold", required_argument, 0, 't' },
                                             { 0, 0, 0, 0 } };
     int option_index = 0;
     int input_opt = 0;
-    while ((input_opt = getopt_long(argc, argv, "h:w:s:f:e:", long_options, &option_index)) != -1)
+    uint16_t depth_threshold = 1000; // default to 1 meter
+    while ((input_opt = getopt_long(argc, argv, "h:w:s:f:e:t:", long_options, &option_index)) != -1)
     {
         switch (input_opt)
         {
@@ -546,6 +548,9 @@ int main(int argc, char **argv)
             break;
         case 'e':
             color_exposure_usec = std::stoi(optarg);
+            break;
+        case 't':
+            depth_threshold = std::stoi(optarg);
             break;
         case '?':
             throw std::runtime_error("Incorrect arguments");
@@ -734,17 +739,16 @@ int main(int argc, char **argv)
                              CV_32FC3,
                              cv::Scalar(0, 0, 0));
 
-        const uint16_t THRESHOLD = 1200; // TODO what should this be
         cv::Mat master_image_float;
         master_opencv_color_image.convertTo(master_image_float, CV_32F);
         master_image_float = master_image_float / 255.0;
         cv::Mat master_valid_mask;
         cv::bitwise_and(opencv_master_depth_in_master_color != 0,
-                        opencv_master_depth_in_master_color < THRESHOLD,
+                        opencv_master_depth_in_master_color < depth_threshold,
                         master_valid_mask);
         cv::Mat sub_valid_mask;
         cv::bitwise_and(opencv_sub_depth_in_master_color != 0,
-                        opencv_sub_depth_in_master_color < THRESHOLD,
+                        opencv_sub_depth_in_master_color < depth_threshold,
                         sub_valid_mask);
         cv::Mat output = master_image_float;
         // cv::add(output, cv::Scalar(0, .75, 0), output, ~sub_valid_mask);
