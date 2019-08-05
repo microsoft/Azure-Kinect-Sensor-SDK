@@ -2263,7 +2263,8 @@ k4a_stream_result_t get_data_block(k4a_playback_context_t *context,
     DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(
         (unsigned int)track_reader->current_block->sub_index);
 
-    data_block_context->timestamp_usec = estimate_block_timestamp_ns(track_reader->current_block) / 1000;
+    data_block_context->device_timestamp_usec = estimate_block_timestamp_ns(track_reader->current_block) / 1000 +
+                                                context->record_config.start_timestamp_offset_usec;
     data_block_context->data_block.assign(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
 
     return K4A_STREAM_RESULT_SUCCEEDED;

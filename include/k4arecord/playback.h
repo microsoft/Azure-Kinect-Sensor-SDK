@@ -701,14 +701,14 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_pl
                                                                           const char *track_name,
                                                                           k4a_playback_data_block_t *data_block_handle);
 
-/** Get the timestamp of a data block in microseconds.
+/** Get the device timestamp of a data block in microseconds.
  *
  * \param data_block_handle
  * Handle obtained by k4a_playback_get_next_data_block() or k4a_playback_get_previous_data_block().
  *
  * \returns
- * Returns the timestamp of the data block. If the \p data_block_handle is invalid this function will return 0.
- * It is also possible for 0 to be a valid timestamp originating from the beginning of a recording.
+ * Returns the device timestamp of the data block. If the \p data_block_handle is invalid this function will return 0.
+ * It is also possible for 0 to be a valid timestamp originating from when a device was first powered on.
  *
  * \relates k4a_playback_data_block_t
  *
@@ -720,7 +720,8 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_pl
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playback_data_block_t data_block_handle);
+K4ARECORD_EXPORT uint64_t
+k4a_playback_data_block_get_device_timestamp_usec(k4a_playback_data_block_t data_block_handle);
 
 /** Get the buffer size of a data block.
  *

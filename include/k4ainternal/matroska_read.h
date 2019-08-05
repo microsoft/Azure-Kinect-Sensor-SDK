@@ -144,7 +144,7 @@ K4A_DECLARE_CONTEXT(k4a_playback_t, k4a_playback_context_t);
 
 typedef struct _k4a_playback_data_block_context_t
 {
-    uint64_t timestamp_usec;
+    uint64_t device_timestamp_usec;
     std::vector<uint8_t> data_block;
 } k4a_playback_data_block_context_t;
 

@@ -391,7 +391,7 @@ void CustomTrackRecordings::SetUp()
 
     ASSERT_EQ(k4a_record_write_header(handle), K4A_RESULT_SUCCEEDED);
 
-    uint64_t timestamp_usec = 0;
+    uint64_t timestamp_usec = 1000000;
     for (size_t i = 0; i < test_frame_count; i++)
     {
         // Write Depth + IR tracks with custom data

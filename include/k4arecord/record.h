@@ -375,8 +375,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
  * \param track_name
  * The name of the custom track that the data is going to be written to.
  *
- * \param timestamp_usec
- * The timestamp in microseconds for the custom track data.
+ * \param device_timestamp_usec
+ * The timestamp in microseconds for the custom track data. This timestamp should be in the same time domain as the
+ * device timestamp used for recording.
  *
  * \param custom_data
  * The buffer of custom track data.
@@ -403,7 +404,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
                                                                  const char *track_name,
-                                                                 uint64_t timestamp_usec,
+                                                                 uint64_t device_timestamp_usec,
                                                                  uint8_t *custom_data,
                                                                  size_t custom_data_size);
 

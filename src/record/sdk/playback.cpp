@@ -536,12 +536,12 @@ k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback
     return get_data_block(context, track_reader, data_block_handle, false);
 }
 
-uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playback_data_block_t data_block_handle)
+uint64_t k4a_playback_data_block_get_device_timestamp_usec(k4a_playback_data_block_t data_block_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_data_block_t, data_block_handle);
     k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_get_context(data_block_handle);
     RETURN_VALUE_IF_ARG(0, data_block_context == NULL);
-    return data_block_context->timestamp_usec;
+    return data_block_context->device_timestamp_usec;
 }
 
 size_t k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_block_handle)
