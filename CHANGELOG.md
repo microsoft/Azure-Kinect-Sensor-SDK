@@ -3,12 +3,14 @@
 ### v1.2.0 (not yet released)
 
 * CSharp support added.
+* Depth Engine breaking changes to 2.0, SDK now relies on this new version.
 * Firmware updates for better USB compatibility.
 * Added new API's k4a_image_get_device_timestamp_usec(), k4a_image_get_system_timestamp_usec(), 
 k4a_image_set_device_timestamp_usec(), k4a_image_set_system_timestamp_usec(), and k4a_image_set_exposure_usec().
 * Deprecated API's k4a_image_get_timestamp_usec(), k4a_image_set_timestamp_usec(), and k4a_image_set_exposure_time_usec().
 * Added new transformation API k4a_transformation_depth_image_to_color_camera_custom().
 * Fixed color exposure get & set API's.
+* The C++ API for playback was made public.
 
 ### v1.1.0
 
