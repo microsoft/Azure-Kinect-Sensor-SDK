@@ -173,6 +173,8 @@ k4a_result_t image_create(k4a_image_format_t format,
     k4a_result_t result;
     size_t size = 0;
 
+    *image_handle = NULL;
+
     switch (format)
     {
         case K4A_IMAGE_FORMAT_COLOR_MJPG:
@@ -292,7 +294,6 @@ k4a_result_t image_create(k4a_image_format_t format,
 
     if (K4A_SUCCEEDED(result))
     {
-        *image_handle = NULL;
         result = TRACE_CALL(image_create_empty_image(source, size, image_handle));
     }
 
@@ -308,7 +309,7 @@ k4a_result_t image_create(k4a_image_format_t format,
         image->stride_bytes = stride_bytes;
     }
 
-    if (K4A_FAILED(result) && image_handle)
+    if (K4A_FAILED(result) && *image_handle)
     {
         image_dec_ref(*image_handle);
         *image_handle = NULL;
