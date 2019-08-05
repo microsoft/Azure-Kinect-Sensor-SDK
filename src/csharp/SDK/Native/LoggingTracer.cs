@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -15,63 +16,19 @@ namespace Microsoft.Azure.Kinect.Sensor
     /// </summary>
     internal class LoggingTracer : IDisposable
     {
-        /// <summary>
-        /// Object for synchronizing access to the global tracer reference count and the event handler.
-        /// </summary>
-        private static readonly object SyncRoot = new object();
-
-        /// <summary>
-        /// The reference count for the total number of threads that are currently tracing logging messages.
-        /// </summary>
-        private static int tracerRefCount = 0;
-
-        /// <summary>
-        /// The number of references to the tracer for the current thread.
-        /// </summary>
-        [ThreadStatic]
-        private static int threadRefCount = 0;
-
-        /// <summary>
-        /// The messages that were generated on the current thread while a tracer is active.
-        /// </summary>
-        [ThreadStatic]
-        private static List<string> messages = null;
+        private readonly int threadId;
 
         private bool disposed;
+        private List<string> messages;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoggingTracer"/> class.
         /// </summary>
         public LoggingTracer()
         {
-            if (threadRefCount == 0)
-            {
-                ++threadRefCount;
-                messages = new List<string>();
-
-                lock (SyncRoot)
-                {
-                    if (++tracerRefCount == 1)
-                    {
-                        try
-                        {
-                            // Only allow one event callback to be subscribe to prevent duplicate messages.
-                            Logger.LogMessage += Logger_LogMessage;
-                        }
-                        catch (Exception)
-                        {
-                            // Clear out the ref count if this fails.
-                            --tracerRefCount;
-                            --threadRefCount;
-                            throw;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("There is already a logging tracer on this thread.");
-            }
+            this.messages = new List<string>();
+            this.threadId = Thread.CurrentThread.ManagedThreadId;
+            Logger.LogMessage += this.Logger_LogMessage;
         }
 
         /// <summary>
@@ -86,7 +43,12 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(LoggingTracer));
                 }
 
-                return messages?.ToArray();
+                if (this.threadId != Thread.CurrentThread.ManagedThreadId)
+                {
+                    throw new InvalidOperationException("LoggingTracer should only be access from the thread it was created on.");
+                }
+
+                return this.messages?.ToArray();
             }
         }
 
@@ -109,34 +71,25 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
                 if (disposing)
                 {
-                    if (--threadRefCount == 0)
-                    {
-                        lock (SyncRoot)
-                        {
-                            if (--tracerRefCount == 0)
-                            {
-                                Logger.LogMessage -= Logger_LogMessage;
-                            }
-                        }
+                    Logger.LogMessage -= this.Logger_LogMessage;
 
-                        // There are no longer any tracers on this thread. Clear the message list to allow the memory to be freed.
-                        messages = null;
-                    }
+                    // There are no longer any tracers on this thread. Clear the message list to allow the memory to be freed.
+                    this.messages = null;
                 }
 
                 this.disposed = true;
             }
         }
 
-        private static void Logger_LogMessage(object sender, DebugMessageEventArgs e)
+        private void Logger_LogMessage(object sender, DebugMessageEventArgs e)
         {
-            if (threadRefCount == 0)
+            if (this.threadId != Thread.CurrentThread.ManagedThreadId)
             {
-                // There are no active tracers on the current thread, ignore the message.
+                // The log messages aren't coming from this thread. Ignore them.
                 return;
             }
 
-            messages.Add($"{DateTime.Now} [{e.LogLevel}] {e.FileName}@{e.Line}: {e.Message}");
+            this.messages.Add($"{DateTime.Now} [{e.LogLevel}] {e.FileName}@{e.Line}: {e.Message}");
         }
     }
 }

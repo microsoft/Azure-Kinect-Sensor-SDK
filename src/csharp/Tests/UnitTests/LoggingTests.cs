@@ -114,14 +114,12 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
             // Make sure that we can instantiate another logging tracer.
             using (LoggingTracer tracer = new LoggingTracer())
             {
-                _ = Assert.Throws(typeof(InvalidOperationException), () =>
+                using (LoggingTracer tracer2 = new LoggingTracer())
                 {
-                    using (LoggingTracer trace = new LoggingTracer())
-                    {
-                    }
-                });
+                    Assert.AreEqual(0, Device.GetInstalledCount());
+                    Assert.AreEqual(1, tracer2.LogMessages.Count);
+                }
 
-                Assert.AreEqual(0, Device.GetInstalledCount());
                 Assert.AreEqual(1, tracer.LogMessages.Count);
                 Assert.IsTrue(tracer.LogMessages[0].EndsWith("[Warning] File@1234: Message", StringComparison.Ordinal));
             }
