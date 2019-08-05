@@ -691,6 +691,13 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
     k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
 
+    if (!context->imu_track)
+    {
+        LOG_ERROR("The IMU track needs to be added with k4a_record_add_imu_track() before IMU samples can be written.",
+                  0);
+        return K4A_RESULT_FAILED;
+    }
+
     if (!context->header_written)
     {
         LOG_ERROR("The recording header needs to be written before any imu samples.", 0);

@@ -218,6 +218,51 @@ void SampleRecordings::SetUp()
 
         k4a_record_close(handle);
     }
+    { // Create a recording file with a start offset and all tracks enabled
+        k4a_record_t handle = NULL;
+        k4a_result_t result = k4a_record_create("record_test_offset.mkv", NULL, record_config_full, &handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        result = k4a_record_add_imu_track(handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        result = k4a_record_write_header(handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        uint64_t timestamps[3] = { 1000000, 1000000, 1000000 };
+        uint64_t imu_timestamp = 1001150;
+        uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_delay.camera_fps);
+        k4a_capture_t capture = NULL;
+        for (size_t i = 0; i < test_frame_count; i++)
+        {
+            capture = create_test_capture(timestamps,
+                                          record_config_delay.color_format,
+                                          record_config_delay.color_resolution,
+                                          record_config_delay.depth_mode);
+            result = k4a_record_write_capture(handle, capture);
+            ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+            k4a_capture_release(capture);
+
+            timestamps[0] += timestamp_delta;
+            timestamps[1] += timestamp_delta;
+            timestamps[2] += timestamp_delta;
+
+            while (imu_timestamp < timestamps[0])
+            {
+                k4a_imu_sample_t imu_sample = create_test_imu_sample(imu_timestamp);
+                result = k4a_record_write_imu_sample(handle, imu_sample);
+                ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+                // Write IMU samples at ~1000 samples per second (this is an arbitrary rate for testing)
+                imu_timestamp += 1000; // 1ms
+            }
+        }
+
+        result = k4a_record_flush(handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        k4a_record_close(handle);
+    }
     { // Create a recording file with only the color camera enabled
         k4a_record_t handle = NULL;
         k4a_result_t result = k4a_record_create("record_test_color_only.mkv", NULL, record_config_color_only, &handle);
@@ -271,6 +316,7 @@ void SampleRecordings::TearDown()
     ASSERT_EQ(std::remove("record_test_delay.mkv"), 0);
     ASSERT_EQ(std::remove("record_test_skips.mkv"), 0);
     ASSERT_EQ(std::remove("record_test_sub.mkv"), 0);
+    ASSERT_EQ(std::remove("record_test_offset.mkv"), 0);
     ASSERT_EQ(std::remove("record_test_color_only.mkv"), 0);
     ASSERT_EQ(std::remove("record_test_depth_only.mkv"), 0);
 }
