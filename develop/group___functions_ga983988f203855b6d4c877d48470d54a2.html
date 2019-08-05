@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: Deprecated List</title>
+<title>Azure Kinect Sensor SDK: k4a_playback_t::k4a_playback_get_last_timestamp_usec</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('deprecated.html','');});
+$(document).ready(function(){initNavTree('group___functions_ga983988f203855b6d4c877d48470d54a2.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -83,27 +83,51 @@ $(document).ready(function(){initNavTree('deprecated.html','');});
 </iframe>
 </div>
 
-<div class="header">
-  <div class="headertitle">
-<div class="title">Deprecated List </div>  </div>
-</div><!--header-->
 <div class="contents">
-<div class="textblock"><dl class="reflist">
-<dt><a class="anchor" id="_deprecated000001"></a>Global <a class="el" href="group___functions_ga5a0940fb8ecf418eb3a388412bd08643.html#ga5a0940fb8ecf418eb3a388412bd08643">k4a_image_get_timestamp_usec</a>  </dt>
-<dd>Deprecated starting in 1.2.0. Please use <a class="el" href="group___functions_ga318e115976ac441b513f6cf3c102a655.html#ga318e115976ac441b513f6cf3c102a655" title="Get the image&#39;s device timestamp in microseconds. ">k4a_image_get_device_timestamp_usec()</a>. </dd>
-<dt><a class="anchor" id="_deprecated000003"></a>Global <a class="el" href="group___functions_ga29954cc87d1fabc8651155f7baff5c9f.html#ga29954cc87d1fabc8651155f7baff5c9f">k4a_image_set_exposure_time_usec</a>  </dt>
-<dd>Deprecated starting in 1.2.0. Please use <a class="el" href="group___functions_ga617dac1d4664f8f4ead3013c1739ebb0.html#ga617dac1d4664f8f4ead3013c1739ebb0" title="Set the exposure time, in microseconds, of the image. ">k4a_image_set_exposure_usec()</a>. </dd>
-<dt><a class="anchor" id="_deprecated000002"></a>Global <a class="el" href="group___functions_ga276298132ac76f56bf2c8b7589e38d63.html#ga276298132ac76f56bf2c8b7589e38d63">k4a_image_set_timestamp_usec</a>  </dt>
-<dd>Deprecated starting in 1.2.0. Please use <a class="el" href="group___functions_gacc2c4bf42956687a101937b77f8dfa21.html#gacc2c4bf42956687a101937b77f8dfa21" title="Set the device time stamp, in microseconds, of the image. ">k4a_image_set_device_timestamp_usec()</a>. </dd>
-<dt><a class="anchor" id="_deprecated000004"></a>Global <a class="el" href="group___functions_ga983988f203855b6d4c877d48470d54a2.html#ga983988f203855b6d4c877d48470d54a2">k4a_playback_get_last_timestamp_usec</a>  </dt>
-<dd>Deprecated starting in 1.2.0. Please use <a class="el" href="group___functions_ga7275ade6a338c92ffc55c9ae313eac51.html#ga7275ade6a338c92ffc55c9ae313eac51" title="Returns the length of the recording in microseconds. ">k4a_playback_get_recording_length_usec()</a>.</dd>
+<a id="ga983988f203855b6d4c877d48470d54a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga983988f203855b6d4c877d48470d54a2">&#9670;&nbsp;</a></span>k4a_playback_get_last_timestamp_usec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">K4ARECORD_DEPRECATED_EXPORT uint64_t k4a_playback_get_last_timestamp_usec </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structk4a__playback__t.html">k4a_playback_t</a>&#160;</td>
+          <td class="paramname"><em>playback_handle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">related</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the last timestamp in a recording, relative to the start of the recording. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">playback_handle</td><td>Handle obtained by <a class="el" href="group___functions_gacb254ac941b2ab3c202ca68f4537f368.html#gacb254ac941b2ab3c202ca68f4537f368" title="Opens an existing recording file for reading. ">k4a_playback_open()</a>.</td></tr>
+  </table>
+  </dd>
 </dl>
-</div></div><!-- contents -->
+<dl class="section return"><dt>Returns</dt><dd>The file timestamp of the last capture image or IMU sample in microseconds.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>This function returns a file timestamp, not an absolute device timestamp, meaning it is relative to the start of the recording. This function is equivalent to the length of the recording.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000004">Deprecated:</a></b></dt><dd>Deprecated starting in 1.2.0. Please use <a class="el" href="group___functions_ga7275ade6a338c92ffc55c9ae313eac51.html#ga7275ade6a338c92ffc55c9ae313eac51" title="Returns the length of the recording in microseconds. ">k4a_playback_get_recording_length_usec()</a>.</dd></dl>
+ 
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.14-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><a class="el" href="structk4a__playback__t.html">k4a_playback_t</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.14 </li>

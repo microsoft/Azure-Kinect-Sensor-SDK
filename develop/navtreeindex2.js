@@ -1,5 +1,8 @@
 var NAVTREEINDEX2 =
 {
+"structk4a__version__t.html":[2,1,5,6],
+"structk4a__version__t_a52626a80e919cac31d837efa3d01abfb.html#a52626a80e919cac31d837efa3d01abfb":[2,1,5,6,2],
+"structk4a__version__t_a9f3ec6a118f81533c7748b9080f68acf.html#a9f3ec6a118f81533c7748b9080f68acf":[2,1,5,6,0],
 "structk4a__version__t_aba947b238819496adc41888de36df6e1.html#aba947b238819496adc41888de36df6e1":[2,1,5,6,1],
 "unionk4a__calibration__intrinsic__parameters__t.html":[2,1,5,2],
 "unionk4a__calibration__intrinsic__parameters__t.html#a9d3f4b9a3ddc6f91074dea019fbcaa78":[2,1,5,2,1],
