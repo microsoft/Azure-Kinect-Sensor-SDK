@@ -376,16 +376,21 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * Handle obtained by k4a_playback_open().
  *
  * \param offset_usec
- * The timestamp offset to seek to relative to \p origin
+ * The timestamp offset to seek to, relative to \p origin
  *
  * \param origin
- * Specifies if the seek operation should be done relative to the beginning or end of the recording.
+ * Specifies how the given timestamp should be interpreted. Seek can be done relative to the beginning or end of the
+ * recording, or using an absolute device timestamp.
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if the seek operation was successful, or ::K4A_RESULT_FAILED if an error occured. The current
  * seek position is left unchanged if a failure is returned.
  *
  * \relates k4a_playback_t
+ *
+ * \remarks
+ * The first device timestamp in a recording is usually non-zero. The recording file starts at the device timestamp
+ * defined by start_timestamp_offset_usec, which is accessible via k4a_playback_get_record_configuration().
  *
  * \remarks
  * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return the first capture
