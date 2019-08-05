@@ -148,7 +148,7 @@ $(document).ready(function(){initNavTree('group___functions_gafe2237d54289840ca3
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5.html#gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" title="The result was successful. ">K4A_RESULT_SUCCEEDED</a> is returned on success</dd></dl>
-<dl class="section remark"><dt>Remarks</dt><dd>Custom track data must be written in increasing order of timestamp, and the file's header must already be written.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Custom track data must be written in increasing order of timestamp, and the file's header must already be written. When writing custom track data at the same time as captures or IMU data, the custom data should be within 1 second of the most recently written timestamp.</dd></dl>
  
 </div>
 </div>
