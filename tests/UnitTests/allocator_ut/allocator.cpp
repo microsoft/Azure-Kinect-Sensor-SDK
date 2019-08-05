@@ -272,13 +272,16 @@ TEST(allocator_ut, image_api_validation)
         ASSERT_EQ(10 * 10, (int)image_get_size(image));
         image_dec_ref(image);
         //   Insufficient stride
-        ASSERT_EQ(K4A_RESULT_FAILED, (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 10, 9, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 10, 9, ALLOCATION_SOURCE_USER, &image));
 
         // Height of zero
-        ASSERT_EQ(K4A_RESULT_FAILED, (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 0, 10, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 0, 10, ALLOCATION_SOURCE_USER, &image));
 
         // Width of zero
-        ASSERT_EQ(K4A_RESULT_FAILED, (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 0, 10, 10, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 0, 10, 10, ALLOCATION_SOURCE_USER, &image));
 
         ASSERT_EQ(allocator_test_for_leaks(), 0);
     }
