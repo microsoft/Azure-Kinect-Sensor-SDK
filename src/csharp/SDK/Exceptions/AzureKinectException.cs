@@ -74,7 +74,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <param name="logMessages">
         /// The log messages that happened during the function call that generated this error.
         /// </param>
-        protected AzureKinectException(string message, ICollection<string> logMessages)
+        protected AzureKinectException(string message, ICollection<LogMessage> logMessages)
             : base(message)
         {
             this.LogMessages = logMessages;
@@ -84,7 +84,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Gets the log messages that happened during the function call that generated this
         /// error.
         /// </summary>
-        public ICollection<string> LogMessages { get; }
+        public ICollection<LogMessage> LogMessages { get; }
 
         /// <summary>
         /// Throws an <see cref="AzureKinectException"/> if the result of the function is not

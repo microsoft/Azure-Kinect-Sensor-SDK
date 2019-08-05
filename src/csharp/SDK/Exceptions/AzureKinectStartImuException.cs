@@ -75,7 +75,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <param name="logMessages">
         /// The log messages that happened during the function call that generated this error.
         /// </param>
-        protected AzureKinectStartImuException(string message, ICollection<string> logMessages)
+        protected AzureKinectStartImuException(string message, ICollection<LogMessage> logMessages)
             : base(message, logMessages)
         {
         }

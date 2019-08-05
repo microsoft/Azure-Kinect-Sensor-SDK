@@ -15,13 +15,13 @@ namespace Microsoft.Azure.Kinect.Sensor
     public static class Logger
     {
         private static readonly NativeMethods.k4a_logging_message_cb_t DebugMessageHandler = OnDebugMessage;
-        private static EventHandler<DebugMessageEventArgs> logMessageHandlers;
+        private static Action<LogMessage> logMessageHandlers;
         private static bool isInitialized;
 
         /// <summary>
         /// Occurs when the Azure Kinect Sensor SDK delivers a debug message.
         /// </summary>
-        public static event EventHandler<DebugMessageEventArgs> LogMessage
+        public static event Action<LogMessage> LogMessage
         {
             add
             {
@@ -92,12 +92,12 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         private static void OnDebugMessage(IntPtr context, LogLevel level, string file, int line, string message)
         {
-            DebugMessageEventArgs data = new DebugMessageEventArgs() { LogLevel = level, FileName = file, Line = line, Message = message };
+            LogMessage data = new LogMessage(DateTime.Now, level, file, line, message);
 
-            EventHandler<DebugMessageEventArgs> eventhandler = logMessageHandlers;
+            Action<LogMessage> eventhandler = logMessageHandlers;
             if (eventhandler != null)
             {
-                eventhandler(null, data);
+                eventhandler(data);
             }
         }
 

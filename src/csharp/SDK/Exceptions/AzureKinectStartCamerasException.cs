@@ -75,7 +75,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <param name="logMessages">
         /// The log messages that happened during the function call that generated this error.
         /// </param>
-        protected AzureKinectStartCamerasException(string message, ICollection<string> logMessages)
+        protected AzureKinectStartCamerasException(string message, ICollection<LogMessage> logMessages)
             : base(message, logMessages)
         {
         }

@@ -19,14 +19,14 @@ namespace Microsoft.Azure.Kinect.Sensor
         private readonly int threadId;
 
         private bool disposed;
-        private List<string> messages;
+        private List<LogMessage> messages;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoggingTracer"/> class.
         /// </summary>
         public LoggingTracer()
         {
-            this.messages = new List<string>();
+            this.messages = new List<LogMessage>();
             this.threadId = Thread.CurrentThread.ManagedThreadId;
             Logger.LogMessage += this.Logger_LogMessage;
         }
@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Gets all of the messages that have occurred on this thread since the tracing began.
         /// </summary>
-        public IList<string> LogMessages
+        public IList<LogMessage> LogMessages
         {
             get
             {
@@ -81,7 +81,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-        private void Logger_LogMessage(object sender, DebugMessageEventArgs e)
+        private void Logger_LogMessage(LogMessage logMessage)
         {
             if (this.threadId != Thread.CurrentThread.ManagedThreadId)
             {
@@ -89,7 +89,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 return;
             }
 
-            this.messages.Add($"{DateTime.Now} [{e.LogLevel}] {e.FileName}@{e.Line}: {e.Message}");
+            this.messages.Add(logMessage);
         }
     }
 }

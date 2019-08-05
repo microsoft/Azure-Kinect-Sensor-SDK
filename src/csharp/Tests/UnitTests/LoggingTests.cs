@@ -63,14 +63,13 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
             int calledCount = 0;
             this.SetMessageHandlerImplementation();
 
-            void EventHandler(object s, DebugMessageEventArgs e)
+            void EventHandler(LogMessage l)
             {
                 ++calledCount;
-                Assert.IsNull(s);
-                Assert.AreEqual(LogLevel.Warning, e.LogLevel);
-                Assert.AreEqual("File", e.FileName);
-                Assert.AreEqual(1234, e.Line);
-                Assert.AreEqual("Message", e.Message);
+                Assert.AreEqual(LogLevel.Warning, l.LogLevel);
+                Assert.AreEqual("File", l.FileName);
+                Assert.AreEqual(1234, l.Line);
+                Assert.AreEqual("Message", l.Message);
             }
 
             try
@@ -105,7 +104,11 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
             {
                 Assert.AreEqual(0, Device.GetInstalledCount());
                 Assert.AreEqual(1, tracer.LogMessages.Count);
-                Assert.IsTrue(tracer.LogMessages[0].EndsWith("[Warning] File@1234: Message", StringComparison.Ordinal));
+
+                Assert.AreEqual(LogLevel.Warning, tracer.LogMessages[0].LogLevel);
+                Assert.AreEqual("File", tracer.LogMessages[0].FileName);
+                Assert.AreEqual(1234, tracer.LogMessages[0].Line);
+                Assert.AreEqual("Message", tracer.LogMessages[0].Message);
             }
 
             // Make sure logging getting called without a logging tracer doesn't cause a failure.
@@ -121,7 +124,10 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
                 }
 
                 Assert.AreEqual(1, tracer.LogMessages.Count);
-                Assert.IsTrue(tracer.LogMessages[0].EndsWith("[Warning] File@1234: Message", StringComparison.Ordinal));
+                Assert.AreEqual(LogLevel.Warning, tracer.LogMessages[0].LogLevel);
+                Assert.AreEqual("File", tracer.LogMessages[0].FileName);
+                Assert.AreEqual(1234, tracer.LogMessages[0].Line);
+                Assert.AreEqual("Message", tracer.LogMessages[0].Message);
             }
         }
 
