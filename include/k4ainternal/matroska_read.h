@@ -84,8 +84,6 @@ typedef struct _k4a_playback_context_t
     std::mutex io_lock; // Locks access to ebml_file
     bool file_closing;
 
-    logger_t logger_handle;
-
     uint64_t timecode_scale;
     k4a_record_configuration_t record_config;
     k4a_image_format_t color_format_conversion;
