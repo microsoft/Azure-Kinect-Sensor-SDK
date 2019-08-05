@@ -212,8 +212,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             [In] ref Calibration calibration,
             ref Vector2 source_point2d,
             float source_depth,
-            Calibration.DeviceType source_camera,
-            Calibration.DeviceType target_camera,
+            CalibrationDeviceType source_camera,
+            CalibrationDeviceType target_camera,
             out Vector2 target_point2d,
             out bool valid);
 
@@ -223,8 +223,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             [In] ref Calibration calibration,
             ref Vector2 source_point2d,
             float source_depth,
-            Calibration.DeviceType source_camera,
-            Calibration.DeviceType target_camera,
+            CalibrationDeviceType source_camera,
+            CalibrationDeviceType target_camera,
             out Vector3 target_point3d,
             out bool valid);
 
@@ -233,8 +233,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         public static extern k4a_result_t k4a_calibration_3d_to_2d(
             [In] ref Calibration calibration,
             ref Vector3 source_point3d,
-            Calibration.DeviceType source_camera,
-            Calibration.DeviceType target_camera,
+            CalibrationDeviceType source_camera,
+            CalibrationDeviceType target_camera,
             out Vector2 target_point2d,
             out bool valid);
 
@@ -243,8 +243,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         public static extern k4a_result_t k4a_calibration_3d_to_3d(
             [In] ref Calibration calibration,
             ref Vector3 source_point3d,
-            Calibration.DeviceType source_camera,
-            Calibration.DeviceType target_camera,
+            CalibrationDeviceType source_camera,
+            CalibrationDeviceType target_camera,
             out Vector3 target_point3d);
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
@@ -285,7 +285,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public static extern k4a_result_t k4a_transformation_depth_image_to_point_cloud(
                 k4a_transformation_t transformation_handle,
                 k4a_image_t depth_image,
-                Calibration.DeviceType camera,
+                CalibrationDeviceType camera,
                 k4a_image_t xyz_image);
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]

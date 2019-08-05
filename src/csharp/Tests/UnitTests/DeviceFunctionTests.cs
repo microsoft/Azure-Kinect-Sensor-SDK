@@ -493,7 +493,7 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
                 }
 
                 Assert.AreEqual(81, calibration.depth_camera_calibration.intrinsics.parameter_count);
-                Assert.AreEqual(Calibration.ModelType.BrownConrady, calibration.depth_camera_calibration.intrinsics.type);
+                Assert.AreEqual(CalibrationModelType.BrownConrady, calibration.depth_camera_calibration.intrinsics.type);
 
                 for (int i = 0; i < calibration.depth_camera_calibration.intrinsics.parameters.Length; i++)
                 {

@@ -280,7 +280,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// therefore its stride must is 2(bytes) * 3(x,y,z) * width of the <paramref name="depth"/> image in pixels.
         /// </remarks>
         /// <returns>A point cloud image.</returns>
-        public Image DepthImageToPointCloud(Image depth, Calibration.DeviceType camera = Calibration.DeviceType.Depth)
+        public Image DepthImageToPointCloud(Image depth, CalibrationDeviceType camera = CalibrationDeviceType.Depth)
         {
             if (depth == null)
             {
@@ -311,7 +311,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// The <paramref name="pointCloud"/> image must be of format Custom. Each pixel will be an XYZ set of 16 bit values,
         /// therefore its stride must be 2(bytes) * 3(x,y,z) * width of the <paramref name="depth"/> image in pixels.
         /// </remarks>
-        public void DepthImageToPointCloud(Image depth, Image pointCloud, Calibration.DeviceType camera = Calibration.DeviceType.Depth)
+        public void DepthImageToPointCloud(Image depth, Image pointCloud, CalibrationDeviceType camera = CalibrationDeviceType.Depth)
         {
             if (depth == null)
             {
