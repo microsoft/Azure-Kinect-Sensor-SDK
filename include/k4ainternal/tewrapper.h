@@ -30,10 +30,14 @@ k4a_result_t tewrapper_process_frame(tewrapper_t tewrapper_handle,
                                      k4a_transform_engine_type_t type,
                                      const void *depth_image_data,
                                      size_t depth_image_size,
-                                     const void *color_image_data,
-                                     size_t color_image_size,
+                                     const void *image2_data,
+                                     size_t image2_size,
                                      void *transformed_image_data,
-                                     size_t transformed_image_size);
+                                     size_t transformed_image_size,
+                                     void *transformed_image2_data,
+                                     size_t transformed_image2_size,
+                                     k4a_transform_engine_interpolation_t interpolation,
+                                     uint32_t invalid_value);
 
 #ifdef __cplusplus
 }

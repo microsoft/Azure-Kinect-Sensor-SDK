@@ -126,7 +126,7 @@ PointCloudVisualizationResult K4APointCloudVisualizer::SetColorizationStrategy(C
     GLenum xyTableStatus = GL_NO_ERROR;
     if (m_colorizationStrategy == ColorizationStrategy::Color)
     {
-        m_transformedDepthImage = k4a::image::create(K4A_IMAGE_FORMAT_CUSTOM,
+        m_transformedDepthImage = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16,
                                                      m_calibrationData.color_camera_calibration.resolution_width,
                                                      m_calibrationData.color_camera_calibration.resolution_height,
                                                      m_calibrationData.color_camera_calibration.resolution_width *

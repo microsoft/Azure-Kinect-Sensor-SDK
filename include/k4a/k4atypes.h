@@ -412,6 +412,28 @@ typedef enum
      */
     K4A_IMAGE_FORMAT_IR16,
 
+    /** Single channel image type CUSTOM8.
+     *
+     * \details
+     * Each pixel of CUSTOM8 is a single channel one byte of unsigned data.
+     *
+     * \details
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
+     */
+    K4A_IMAGE_FORMAT_CUSTOM8,
+
+    /** Single channel image type CUSTOM16.
+     *
+     * \details
+     * Each pixel of CUSTOM16 is a single channel two bytes of little endian unsigned data.
+     *
+     * \details
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
+     */
+    K4A_IMAGE_FORMAT_CUSTOM16,
+
     /** Custom image format.
      *
      * \details
@@ -422,6 +444,23 @@ typedef enum
      */
     K4A_IMAGE_FORMAT_CUSTOM,
 } k4a_image_format_t;
+
+/** Transformation interpolation type.
+ *
+ * \remarks
+ * Interpolation type used with k4a_transformation_depth_image_to_color_camera_custom.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef enum
+{
+    K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST = 0, /**< Nearest neighbor interpolation */
+    K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,      /**< Linear interpolation */
+} k4a_transformation_interpolation_type_t;
 
 /** Color and depth sensor frame rate.
  *
@@ -824,6 +863,30 @@ typedef void(k4a_logging_message_cb_t)(void *context,
  *
  */
 typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
+
+/** Callback function for a memory allocation.
+ *
+ * \param size
+ * Minimum size in bytes needed for the buffer.
+ *
+ * \param context
+ * Output parameter for a context that will be provided in the subsequent call to the \ref k4a_memory_destroy_cb_t
+ * callback.
+ *
+ * \return
+ * A pointer to the newly allocated memory.
+ *
+ * \remarks
+ * A callback of this type is provided when there is an application defined allocator.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ *
+ */
+typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
 
 /**
  *
