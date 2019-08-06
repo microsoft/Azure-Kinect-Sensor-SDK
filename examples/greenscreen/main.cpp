@@ -22,7 +22,7 @@ using std::vector;
 constexpr uint32_t MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC = 160;
 
 // ideally, we could generalize this to many OpenCV types
-cv::Mat k4a_color_to_opencv(const k4a::image &im)
+cv::Mat color_to_opencv(const k4a::image &im)
 {
     // TODO this only handles mjpg
     cv::Mat raw_data(1, im.get_size(), CV_8UC1, (void *)im.get_buffer());
@@ -30,7 +30,7 @@ cv::Mat k4a_color_to_opencv(const k4a::image &im)
     return decoded;
 }
 
-cv::Mat k4a_depth_to_opencv(const k4a::image &im)
+cv::Mat depth_to_opencv(const k4a::image &im)
 {
     return cv::Mat(im.get_height_pixels(),
                    im.get_width_pixels(),
@@ -291,8 +291,8 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
         // (get_synchronized_captures also offers a flag to use depth for the subordinate camera instead of color).
         k4a::image master_color_image = master_capture.get_color_image();
         k4a::image sub_color_image = sub_capture.get_color_image();
-        cv::Mat cv_master_color_image = k4a_color_to_opencv(master_color_image);
-        cv::Mat cv_sub_color_image = k4a_color_to_opencv(sub_color_image);
+        cv::Mat cv_master_color_image = color_to_opencv(master_color_image);
+        cv::Mat cv_sub_color_image = color_to_opencv(sub_color_image);
         vector<cv::Point2f> master_chessboard_corners;
         vector<cv::Point2f> sub_chessboard_corners;
 
@@ -436,62 +436,49 @@ int main(int argc, char **argv)
         vector<k4a::capture> captures = capturer.get_synchronized_captures(configs,
                                                                            true); // This is to get the depth image for
                                                                                   // the subordinate, not the color
-        k4a::capture &master_capture = captures[0];
-        k4a::capture &sub_capture = captures[1];
-
-        k4a::image master_color_image = master_capture.get_color_image();
-        k4a::image master_depth_image = master_capture.get_depth_image();
-        k4a::image sub_depth_image = sub_capture.get_depth_image();
+        k4a::image master_color_image = captures[0].get_color_image();
+        k4a::image master_depth_image = captures[0].get_depth_image();
+        k4a::image sub_depth_image = captures[1].get_depth_image();
 
         // let's greenscreen out things that are far away.
         // first: let's get the master depth image into the color camera space
-        // create a copy with the same parameters
-        k4a::image k4a_master_depth_in_master_color = create_depth_image_like(master_color_image);
+        k4a::image master_depth_in_master_color = create_depth_image_like(master_color_image);
+        master_depth_to_master_color.depth_image_to_color_camera(master_depth_image, &master_depth_in_master_color);
+        cv::Mat cv_master_depth_in_master_color = depth_to_opencv(master_depth_in_master_color);
 
-        master_depth_to_master_color.depth_image_to_color_camera(master_depth_image, &k4a_master_depth_in_master_color);
+        // Get the depth image in the master color perspective
+        k4a::image sub_depth_in_master_color = create_depth_image_like(master_color_image);
+        sub_depth_to_master_color.depth_image_to_color_camera(sub_depth_image, &sub_depth_in_master_color);
+        cv::Mat cv_sub_depth_in_master_color = depth_to_opencv(sub_depth_in_master_color);
 
-        // now, create an OpenCV version of the depth matrix for easy usage
-        cv::Mat opencv_master_depth_in_master_color = k4a_depth_to_opencv(k4a_master_depth_in_master_color);
+        // cv::Mat normalized_opencv_sub_depth_in_master_color;
+        // cv::normalize(opencv_sub_depth_in_master_color,
+        //               normalized_opencv_sub_depth_in_master_color,
+        //               0,
+        //               256,
+        //               cv::NORM_MINMAX);
+        // cv::Mat grayscale_opencv_sub_depth_in_master_color;
+        // normalized_opencv_sub_depth_in_master_color.convertTo(grayscale_opencv_sub_depth_in_master_color, CV_32FC3);
+        // cv::imshow("Subordinate depth in master color", grayscale_opencv_sub_depth_in_master_color);
+        // cv::waitKey(1);
 
-        // Finally, it's time to create the image for the depth image in the master color perspective
-        k4a::image k4a_sub_depth_in_master_color = create_depth_image_like(master_color_image);
-        sub_depth_to_master_color.depth_image_to_color_camera(sub_depth_image, &k4a_sub_depth_in_master_color);
-
-        cv::Mat opencv_sub_depth_in_master_color = k4a_depth_to_opencv(k4a_sub_depth_in_master_color);
-        cv::Mat normalized_opencv_sub_depth_in_master_color;
-        cv::normalize(opencv_sub_depth_in_master_color,
-                      normalized_opencv_sub_depth_in_master_color,
-                      0,
-                      256,
-                      cv::NORM_MINMAX);
-        cv::Mat grayscale_opencv_sub_depth_in_master_color;
-        normalized_opencv_sub_depth_in_master_color.convertTo(grayscale_opencv_sub_depth_in_master_color, CV_32FC3);
-        cv::imshow("Subordinate depth in master color", grayscale_opencv_sub_depth_in_master_color);
-        cv::waitKey(1);
-
-        cv::Mat master_opencv_color_image = k4a_color_to_opencv(master_color_image);
+        cv::Mat cv_master_color_image = color_to_opencv(master_color_image);
 
         // create the image that will be be used as output
-        cv::Mat output_image(master_opencv_color_image.rows,
-                             master_opencv_color_image.cols,
-                             CV_32FC3,
-                             cv::Scalar(0, 0, 0));
+        cv::Mat output_image(cv_master_color_image.rows, cv_master_color_image.cols, CV_8UC3, cv::Scalar(0, 0, 0));
 
-        cv::Mat master_image_float;
-        master_opencv_color_image.convertTo(master_image_float, CV_32F);
-        master_image_float = master_image_float / 255.0;
         cv::Mat master_valid_mask;
-        cv::bitwise_and(opencv_master_depth_in_master_color != 0,
-                        opencv_master_depth_in_master_color < depth_threshold,
+        cv::bitwise_and(cv_master_depth_in_master_color != 0,
+                        cv_master_depth_in_master_color < depth_threshold,
                         master_valid_mask);
         cv::Mat sub_valid_mask;
-        cv::bitwise_and(opencv_sub_depth_in_master_color != 0,
-                        opencv_sub_depth_in_master_color < depth_threshold,
+        cv::bitwise_and(cv_sub_depth_in_master_color != 0,
+                        cv_sub_depth_in_master_color < depth_threshold,
                         sub_valid_mask);
-        cv::Mat output = master_image_float;
+        cv::Mat output = cv_master_color_image;
         // cv::add(output, cv::Scalar(0, .75, 0), output, ~sub_valid_mask);
         // cv::add(output, cv::Scalar(0, 0, .75), output, ~master_valid_mask);
-        cv::add(output, cv::Scalar(0, 0, .75), output, ~sub_valid_mask & ~master_valid_mask);
+        cv::add(output, cv::Scalar(0, 0, 100), output, ~sub_valid_mask & ~master_valid_mask);
         cv::imshow("Greenscreened", output);
         cv::waitKey(1);
     }
