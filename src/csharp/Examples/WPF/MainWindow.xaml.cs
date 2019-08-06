@@ -29,11 +29,11 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
             Logger.LogMessage += this.Logger_LogMessage;
         }
 
-        private void Logger_LogMessage(object sender, DebugMessageEventArgs e)
+        private void Logger_LogMessage(LogMessage logMessage)
         {
-            if (e.LogLevel < LogLevel.Information)
+            if (logMessage.LogLevel < LogLevel.Information)
             {
-                Console.WriteLine("{0} [{1}] {2}@{3}: {4}", DateTime.Now, e.LogLevel, e.FileName, e.Line, e.Message);
+                Console.WriteLine("{0} [{1}] {2}@{3}: {4}", logMessage.Time, logMessage.LogLevel, logMessage.FileName, logMessage.Line, logMessage.Message);
             }
         }
 
@@ -53,8 +53,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 int colorWidth = device.GetCalibration().color_camera_calibration.resolution_width;
                 int colorHeight = device.GetCalibration().color_camera_calibration.resolution_height;
 
-                DateTime start = DateTime.Now;
+                Stopwatch sw = new Stopwatch();
                 int frameCount = 0;
+                sw.Start();
 
                 // Allocate image buffers for us to manipulate
                 using (Image transformedDepth = new Image(ImageFormat.Depth16, colorWidth, colorHeight))
@@ -129,17 +130,15 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                             this.inputColorImageViewPane.Source = inputColorBitmap;
                             this.outputColorImageViewPane.Source = outputColorBitmap;
 
-                            frameCount++;
+                            ++frameCount;
 
-                            TimeSpan timeSpan = DateTime.Now - start;
-                            if (timeSpan > TimeSpan.FromSeconds(2))
+                            if (sw.Elapsed > TimeSpan.FromSeconds(2))
                             {
-                                double framesPerSecond = (double)frameCount / timeSpan.TotalSeconds;
-
+                                double framesPerSecond = (double)frameCount / sw.Elapsed.TotalSeconds;
                                 this.fps.Content = $"{framesPerSecond:F2} FPS";
 
                                 frameCount = 0;
-                                start = DateTime.Now;
+                                sw.Restart();
                             }
                         }
                     }

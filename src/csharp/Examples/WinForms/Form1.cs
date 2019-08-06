@@ -28,11 +28,11 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
             Logger.LogMessage += this.Logger_LogMessage;
         }
 
-        private void Logger_LogMessage(object sender, DebugMessageEventArgs e)
+        private void Logger_LogMessage(LogMessage logMessage)
         {
-            if (e.LogLevel < LogLevel.Information)
+            if (logMessage.LogLevel < LogLevel.Information)
             {
-                Console.WriteLine("{0} [{1}] {2}@{3}: {4}", DateTime.Now, e.LogLevel, e.FileName, e.Line, e.Message);
+                Console.WriteLine("{0} [{1}] {2}@{3}: {4}", logMessage.Time, logMessage.LogLevel, logMessage.FileName, logMessage.Line, logMessage.Message);
             }
         }
 
@@ -104,11 +104,15 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                         this.Invalidate();
                     }
 
-                    if (++frameCount >= 30)
+                    ++frameCount;
+
+                    if (sw.Elapsed > TimeSpan.FromSeconds(2))
                     {
-                        Console.WriteLine("{0}ms => {1} FPS", sw.Elapsed.TotalMilliseconds, frameCount / sw.Elapsed.TotalSeconds);
-                        sw.Restart();
+                        double framesPerSecond = (double)frameCount / sw.Elapsed.TotalSeconds;
+                        this.fpsStatusLabel.Text = $"{framesPerSecond:F2} FPS";
+
                         frameCount = 0;
+                        sw.Restart();
                     }
                 }
             }

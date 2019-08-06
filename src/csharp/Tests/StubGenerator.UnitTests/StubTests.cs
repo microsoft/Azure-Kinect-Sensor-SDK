@@ -140,7 +140,7 @@ void k4a_device_close(k4a_device_t device_handle)
         [Test]
         public void STUB_FAIL()
         {
-            k4a.SetImplementation(@"
+            this.k4a.SetImplementation(@"
 
 uint32_t k4a_device_get_installed_count()
 {
@@ -152,35 +152,30 @@ uint32_t k4a_device_get_installed_count()
             {
                 TestNativeMethods.k4a_device_get_installed_count();
             });
-
         }
 
         [Test]
         public void NoExports()
         {
-            Assert.Throws(typeof(Exception), () =>
-            {
-                k4a.SetImplementation(@"
-
+            _ = Assert.Throws(typeof(AzureKinectStubGeneratorException), () =>
+              {
+                  this.k4a.SetImplementation(@"
 uint32_t this_function_is_not_an_export()
 {
     return 12;
 }");
-            });
+              });
         }
 
         [Test]
         public void CompilationError()
         {
-            Assert.Throws(typeof(Exception), () =>
-            {
-                k4a.SetImplementation(@"
-
+            _ = Assert.Throws(typeof(AzureKinectStubGeneratorException), () =>
+              {
+                  this.k4a.SetImplementation(@"
 ThisWillFailToCompile;
-
 ");
-            });
+              });
         }
-
     }
 }

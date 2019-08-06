@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="Capture.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 
 namespace Microsoft.Azure.Kinect.Sensor
@@ -25,10 +29,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// </summary>
         public Capture()
         {
-#pragma warning disable CA2000 // Dispose objects before losing scope
-            AzureKinectException.ThrowIfNotSuccess(
-                NativeMethods.k4a_capture_create(out this.handle));
-#pragma warning restore CA2000 // Dispose objects before losing scope
+            AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_capture_create(out this.handle));
 
             // Hook the native allocator and register this object.
             // .Dispose() will be called on this object when the allocator is shut down.
@@ -351,7 +352,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Sets the image wrapper provided to a property.
         /// </summary>
         /// <param name="nativeMethod">Native set method.</param>
-        /// <param name="cachedImage">Refrence to the cached image wrapper used by this class.</param>
+        /// <param name="cachedImage">Reference to the cached image wrapper used by this class.</param>
         /// <param name="value">Value to assign the image wrapper to.</param>
         /// <remarks>
         /// This function takes ownership of the wrapper and stores it in the class. If there was
@@ -381,7 +382,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 cachedImage = value;
 
                 // Take an extra reference on the image to ensure it isn't disposed
-                // prior while we hafve the handle.
+                // prior while we have the handle.
                 using (Image reference = cachedImage.Reference())
                 {
                     nativeMethod(this.handle, cachedImage.DangerousGetHandle());

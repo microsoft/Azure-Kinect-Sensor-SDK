@@ -14,43 +14,47 @@ namespace Microsoft.Azure.Kinect.Sensor
     /// </summary>
     public static class Logger
     {
+        private static readonly object SyncRoot = new object();
         private static readonly NativeMethods.k4a_logging_message_cb_t DebugMessageHandler = OnDebugMessage;
-        private static EventHandler<DebugMessageEventArgs> logMessageHandlers;
+        private static bool isInitialized;
+
+        private static event Action<LogMessage> LogMessageHandlers;
 
         /// <summary>
         /// Occurs when the Azure Kinect Sensor SDK delivers a debug message.
         /// </summary>
-        public static event EventHandler<DebugMessageEventArgs> LogMessage
+        public static event Action<LogMessage> LogMessage
         {
             add
             {
-                if (!Initialized)
+                lock (SyncRoot)
                 {
-                    Logger.Initialize();
-                }
+                    if (!Logger.isInitialized)
+                    {
+                        Logger.Initialize();
+                    }
 
-                logMessageHandlers += value;
+                    LogMessageHandlers += value;
+                }
             }
 
             remove
             {
-                logMessageHandlers -= value;
+                lock (SyncRoot)
+                {
+                    LogMessageHandlers -= value;
+                }
             }
         }
-
-        /// <summary>
-        /// Gets a value indicating whether the <see cref="Logger"/> class has been initialized and connected to the Azure Kinect Sensor SDK.
-        /// </summary>
-        public static bool Initialized { get; private set; }
 
         /// <summary>
         /// Initializes the <see cref="Logger"/> class to begin receiving messages from the Azure Kinect Sensor SDK.
         /// </summary>
         public static void Initialize()
         {
-            lock (DebugMessageHandler)
+            lock (SyncRoot)
             {
-                if (Logger.Initialized)
+                if (Logger.isInitialized)
                 {
                     return;
                 }
@@ -63,18 +67,45 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new AzureKinectException("Failed to set the Debug Message Handler");
                 }
 
-                Logger.Initialized = true;
+                Logger.isInitialized = true;
+            }
+        }
+
+        /// <summary>
+        /// Resets the logger to an uninitialized state. This is used in the Unit Tests to ensure that the
+        /// initialization is run during the unit tests.
+        /// </summary>
+        internal static void Reset()
+        {
+            lock (SyncRoot)
+            {
+                if (!Logger.isInitialized)
+                {
+                    return;
+                }
+
+                AppDomain.CurrentDomain.ProcessExit -= CurrentDomain_Exit;
+                AppDomain.CurrentDomain.DomainUnload -= CurrentDomain_Exit;
+
+                // TODO: This won't work as Raise Error has an invalid pointer.
+                ////NativeMethods.k4a_result_t result = NativeMethods.k4a_set_debug_message_handler(null, IntPtr.Zero, LogLevel.Trace);
+                ////if (result != NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED)
+                ////{
+                ////    throw new AzureKinectException("Failed to set the Debug Message Handler");
+                ////}
+
+                Logger.isInitialized = false;
             }
         }
 
         private static void OnDebugMessage(IntPtr context, LogLevel level, string file, int line, string message)
         {
-            DebugMessageEventArgs data = new DebugMessageEventArgs() { LogLevel = level, FileName = file, Line = line, Message = message };
+            LogMessage data = new LogMessage(DateTime.Now, level, file, line, message);
 
-            EventHandler<DebugMessageEventArgs> eventhandler = logMessageHandlers;
+            Action<LogMessage> eventhandler = LogMessageHandlers;
             if (eventhandler != null)
             {
-                eventhandler(null, data);
+                eventhandler(data);
             }
         }
 
