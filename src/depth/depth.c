@@ -22,10 +22,14 @@ extern "C" {
 
 #define DEPTH_CALIBRATION_DATA_SIZE 2000000
 
-static k4a_version_t g_min_fw_version_rgb = { 1, 5, 92 };             // 1.5.92
-static k4a_version_t g_min_fw_version_depth = { 1, 5, 66 };           // 1.5.66
-static k4a_version_t g_min_fw_version_audio = { 1, 5, 14 };           // 1.5.14
-static k4a_version_t g_min_fw_version_depth_config = { 5006, 27, 0 }; // 5006.27 (iteration is not used, set to zero)
+static k4a_version_t g_min_fw_version_rgb = { 1, 5, 92 };                  // 1.5.92
+static k4a_version_t g_min_fw_version_depth = { 1, 5, 66 };                // 1.5.66
+static k4a_version_t g_min_fw_version_audio = { 1, 5, 14 };                // 1.5.14
+static k4a_version_t g_min_fw_version_depth_config = { 5006, 27, 0 };      // 5006.27 (iteration is not used, set to 0)
+static k4a_version_t g_suggested_fw_version_rgb = { 1, 6, 102 };           // 1.6.102
+static k4a_version_t g_suggested_fw_version_depth = { 1, 6, 75 };          // 1.6.75
+static k4a_version_t g_suggested_fw_version_audio = { 1, 6, 14 };          // 1.6.14
+static k4a_version_t g_suggested_fw_version_depth_config = { 6109, 7, 0 }; // 6109.7 (iteration is not used, set to 0)
 
 #define MINOR_VERSION_OFFSET_1 100 // Some variants of development FW offset minor version with 100
 #define MINOR_VERSION_OFFSET_2 200 // Some variants of development FW offset minor version with 200
@@ -53,9 +57,12 @@ depthmcu_stream_cb_t depth_capture_available;
 
 static void log_device_info(depth_context_t *depth);
 static void depth_stop_internal(depth_t depth_handle, bool quiet);
-bool is_fw_version_compatable(const char *fw_type, k4a_version_t *fw_version, k4a_version_t *fw_min_version);
+bool is_fw_version_compatable(const char *fw_type,
+                              k4a_version_t *fw_version,
+                              k4a_version_t *fw_min_version,
+                              bool error);
 
-bool is_fw_version_compatable(const char *fw_type, k4a_version_t *fw_version, k4a_version_t *fw_min_version)
+bool is_fw_version_compatable(const char *fw_type, k4a_version_t *fw_version, k4a_version_t *fw_min_version, bool error)
 {
     typedef enum
     {
@@ -111,14 +118,28 @@ bool is_fw_version_compatable(const char *fw_type, k4a_version_t *fw_version, k4
 
     if (fw != FW_OK)
     {
-        LOG_ERROR("ERROR Firmware version for %s is %d.%d.%d is not current enough. Use %d.%d.%d or newer.",
-                  fw_type,
-                  fw_version->major,
-                  fw_version->minor,
-                  fw_version->iteration,
-                  fw_min_version->major,
-                  fw_min_version->minor,
-                  fw_min_version->iteration);
+        if (error)
+        {
+            LOG_ERROR("Firmware version for %s is %d.%d.%d is not current enough. Use %d.%d.%d or newer.",
+                      fw_type,
+                      fw_version->major,
+                      fw_version->minor,
+                      fw_version->iteration,
+                      fw_min_version->major,
+                      fw_min_version->minor,
+                      fw_min_version->iteration);
+        }
+        else
+        {
+            LOG_WARNING("Firmware version for %s is %d.%d.%d. Consider upgrading to %d.%d.%d or newer.",
+                        fw_type,
+                        fw_version->major,
+                        fw_version->minor,
+                        fw_version->iteration,
+                        fw_min_version->major,
+                        fw_min_version->minor,
+                        fw_min_version->iteration);
+        }
     }
     return (fw == FW_OK);
 }
@@ -162,14 +183,28 @@ k4a_result_t depth_create(depthmcu_t depthmcu,
         log_device_info(depth);
 
 #ifndef K4A_MTE_VERSION
-        if (!is_fw_version_compatable("RGB", &depth->version.rgb, &g_min_fw_version_rgb) ||
-            !is_fw_version_compatable("Depth", &depth->version.depth, &g_min_fw_version_depth) ||
-            !is_fw_version_compatable("Audio", &depth->version.audio, &g_min_fw_version_audio) ||
-            !is_fw_version_compatable("Depth Config", &depth->version.depth_sensor, &g_min_fw_version_depth_config))
+        if (!is_fw_version_compatable("RGB", &depth->version.rgb, &g_min_fw_version_rgb, true) ||
+            !is_fw_version_compatable("Depth", &depth->version.depth, &g_min_fw_version_depth, true) ||
+            !is_fw_version_compatable("Audio", &depth->version.audio, &g_min_fw_version_audio, true) ||
+            !is_fw_version_compatable("Depth Config",
+                                      &depth->version.depth_sensor,
+                                      &g_min_fw_version_depth_config,
+                                      true))
         {
             result = K4A_RESULT_FAILED;
         }
 #endif
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        is_fw_version_compatable("RGB", &depth->version.rgb, &g_suggested_fw_version_rgb, false);
+        is_fw_version_compatable("Depth", &depth->version.depth, &g_suggested_fw_version_depth, false);
+        is_fw_version_compatable("Audio", &depth->version.audio, &g_suggested_fw_version_audio, false);
+        is_fw_version_compatable("Depth Config",
+                                 &depth->version.depth_sensor,
+                                 &g_suggested_fw_version_depth_config,
+                                 false);
     }
 
     if (K4A_SUCCEEDED(result))
