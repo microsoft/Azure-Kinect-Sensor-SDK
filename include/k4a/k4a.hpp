@@ -771,7 +771,9 @@ public:
      *
      * \sa k4a_transformation_create
      */
-    transformation(const k4a_calibration_t &calibration) noexcept : m_handle(k4a_transformation_create(&calibration)) {}
+    transformation(const k4a_calibration_t &calibration) noexcept : m_handle(k4a_transformation_create(&calibration)),
+                                                                    m_color_calibration(calibration.color_camera_calibration),
+                                                                    m_depth_calibration(calibration.depth_camera_calibration) {}
 
     /** Creates a transformation from a k4a_transformation_t
      * Takes ownership of the handle, i.e. you should not call
@@ -782,7 +784,9 @@ public:
 
     /** Moves another tranformation into a new transformation
      */
-    transformation(transformation &&other) noexcept : m_handle(other.m_handle)
+    transformation(transformation &&other) noexcept : m_handle(other.m_handle),
+                                                      m_color_calibration(other.m_color_calibration),
+                                                      m_depth_calibration(other.m_depth_calibration)
     {
         other.m_handle = nullptr;
     }
@@ -802,6 +806,8 @@ public:
         {
             destroy();
             m_handle = other.m_handle;
+            m_color_calibration = other.m_color_calibration;
+            m_depth_calibration = other.m_depth_calibration;
             other.m_handle = nullptr;
         }
 
@@ -836,6 +842,14 @@ public:
      */
     void depth_image_to_color_camera(const image &depth_image, image *transformed_depth_image) const
     {
+        if (transformed_depth_image)
+        {
+            *transformed_depth_image = image::create(K4A_IMAGE_FORMAT_DEPTH16,
+                                                     m_color_calibration.resolution_width,
+                                                     m_color_calibration.resolution_height,
+                                                     m_color_calibration.resolution_width * static_cast<int32_t>(sizeof(uint16_t)));
+        }
+
         k4a_result_t result = k4a_transformation_depth_image_to_color_camera(m_handle,
                                                                              depth_image.handle(),
                                                                              transformed_depth_image->handle());
@@ -857,6 +871,22 @@ public:
                                             k4a_transformation_interpolation_type_t interpolation_type,
                                             uint32_t invalid_custom_value) const
     {
+        if (transformed_depth_image)
+        {
+            *transformed_depth_image = image::create(K4A_IMAGE_FORMAT_DEPTH16,
+                                                     m_color_calibration.resolution_width,
+                                                     m_color_calibration.resolution_height,
+                                                     m_color_calibration.resolution_width * static_cast<int32_t>(sizeof(uint16_t)));
+        }
+
+        if (transformed_custom_image)
+        {
+            *transformed_custom_image = image::create(K4A_IMAGE_FORMAT_CUSTOM,
+                                                      m_color_calibration.resolution_width,
+                                                      m_color_calibration.resolution_height,
+                                                      m_color_calibration.resolution_width * 3 * static_cast<int32_t>(sizeof(int16_t)));
+        }
+
         k4a_result_t result = k4a_transformation_depth_image_to_color_camera_custom(m_handle,
                                                                                     depth_image.handle(),
                                                                                     custom_image.handle(),
@@ -879,6 +909,14 @@ public:
                                      const image &color_image,
                                      image *transformed_color_image) const
     {
+        if (transformed_color_image)
+        {
+            *transformed_color_image = image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                                                     m_depth_calibration.resolution_width,
+                                                     m_depth_calibration.resolution_height,
+                                                     m_depth_calibration.resolution_width * 4 * static_cast<int32_t>(sizeof(uint8_t)));
+        }
+
         k4a_result_t result = k4a_transformation_color_image_to_depth_camera(m_handle,
                                                                              depth_image.handle(),
                                                                              color_image.handle(),
@@ -896,6 +934,14 @@ public:
      */
     void depth_image_to_point_cloud(const image &depth_image, k4a_calibration_type_t camera, image *xyz_image) const
     {
+        if (xyz_image)
+        {
+            *xyz_image = image::create(K4A_IMAGE_FORMAT_CUSTOM,
+                                       m_depth_calibration.resolution_width,
+                                       m_depth_calibration.resolution_height,
+                                       m_depth_calibration.resolution_width * 3 * static_cast<int32_t>(sizeof(int16_t)));
+        }
+
         k4a_result_t result =
             k4a_transformation_depth_image_to_point_cloud(m_handle, depth_image.handle(), camera, xyz_image->handle());
         if (K4A_RESULT_SUCCEEDED != result)
@@ -906,6 +952,8 @@ public:
 
 private:
     k4a_transformation_t m_handle;
+    k4a_calibration_camera_t m_color_calibration;
+    k4a_calibration_camera_t m_depth_calibration;
 };
 
 /** \class device k4a.hpp <k4a/k4a.hpp>
