@@ -859,6 +859,18 @@ public:
         }
     }
 
+    /** Transforms the depth map into the geometry of the color camera.
+     * Throws error on failure
+     *
+     * \sa k4a_transformation_depth_image_to_color_camera
+     */
+    image depth_image_to_color_camera(const image &depth_image) const
+    {
+        image transformed_depth_image;
+        depth_image_to_color_camera(depth_image, &transformed_depth_image);
+        return transformed_depth_image;
+    }
+
     /** Transforms depth map and a custom image into the geometry of the color camera.
      * Throws error on failure
      *
@@ -900,6 +912,27 @@ public:
         }
     }
 
+    /** Transforms depth map and a custom image into the geometry of the color camera.
+     * Throws error on failure
+     *
+     * \sa k4a_transformation_depth_image_to_color_camera_custom
+     */
+    std::pair<image, image> depth_image_to_color_camera_custom(const image &depth_image,
+                                                        const image &custom_image,
+                                                        k4a_transformation_interpolation_type_t interpolation_type,
+                                                        uint32_t invalid_custom_value) const
+    {
+        image transformed_depth_image;
+        image transformed_custom_image;
+        depth_image_to_color_camera_custom(depth_image,
+                                           custom_image,
+                                           &transformed_depth_image,
+                                           &transformed_custom_image,
+                                           interpolation_type,
+                                           invalid_custom_value);
+        return {transformed_depth_image, transformed_custom_image};
+    }
+
     /** Transforms the color image into the geometry of the depth camera.
      * Throws error on failure
      *
@@ -927,6 +960,19 @@ public:
         }
     }
 
+    /** Transforms the color image into the geometry of the depth camera.
+     * Throws error on failure
+     *
+     * \sa k4a_transformation_color_image_to_depth_camera
+     */
+    image color_image_to_depth_camera(const image &depth_image,
+                                      const image &color_image) const
+    {
+        image transformed_color_image;
+        color_image_to_depth_camera(depth_image, color_image, &transformed_color_image);
+        return transformed_color_image;
+    }
+
     /** Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding 3d points.
      * Throws error on failure.
      *
@@ -948,6 +994,18 @@ public:
         {
             throw error("Failed to transform depth image to point cloud!");
         }
+    }
+
+    /** Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding 3d points.
+     * Throws error on failure.
+     *
+     * \sa k4a_transformation_depth_image_to_point_cloud
+     */
+    image depth_image_to_point_cloud(const image &depth_image, k4a_calibration_type_t camera) const
+    {
+        image xyz_image;
+        depth_image_to_point_cloud(depth_image, camera, &xyz_image);
+        return xyz_image;
     }
 
 private:
