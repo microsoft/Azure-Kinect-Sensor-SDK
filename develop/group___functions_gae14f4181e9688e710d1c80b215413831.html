@@ -131,7 +131,6 @@ $(document).ready(function(){initNavTree('group___functions_gae14f4181e9688e710d
 </div><div class="memdoc">
 
 <p>Opens a new recording file for writing. </p>
-<p>The file will be created if it doesn't exist, or overwritten if an existing file is specified.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">path</td><td>Filesystem path for the new recording.</td></tr>
@@ -141,7 +140,9 @@ $(document).ready(function(){initNavTree('group___functions_gae14f4181e9688e710d
   </table>
   </dd>
 </dl>
-<dl class="section remark"><dt>Remarks</dt><dd>Streaming does not need to be started on the device at the time this function is called, but when it is started it should be started with the same configuration provided in <code>device_config</code>.</dd>
+<dl class="section remark"><dt>Remarks</dt><dd>The file will be created if it doesn't exist, or overwritten if an existing file is specified.</dd>
+<dd>
+Streaming does not need to be started on the device at the time this function is called, but when it is started it should be started with the same configuration provided in <code>device_config</code>.</dd>
 <dd>
 Subsequent calls to <a class="el" href="group___functions_ga8e8a4dbef3bd35bc5446a00862e94115.html#ga8e8a4dbef3bd35bc5446a00862e94115" title="Writes a camera capture to file. ">k4a_record_write_capture()</a> will need to have images in the resolution and format defined in <code>device_config</code>.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5.html#gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" title="The result was successful. ">K4A_RESULT_SUCCEEDED</a> is returned on success</dd></dl>

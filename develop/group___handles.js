@@ -66,12 +66,16 @@ var group___handles =
       [ "k4a_transformation_destroy", "group___functions_ga7d3ecaae66f26c1a89da9042b1bc6d44.html#ga7d3ecaae66f26c1a89da9042b1bc6d44", null ]
     ] ],
     [ "k4a_record_t", "structk4a__record__t.html", [
+      [ "k4a_record_add_attachment", "group___functions_ga02f14e59ed4d1c0d63d6da670720507c.html#ga02f14e59ed4d1c0d63d6da670720507c", null ],
+      [ "k4a_record_add_custom_subtitle_track", "group___functions_ga24b180c59707e35ca6357ce32e3f3cf5.html#ga24b180c59707e35ca6357ce32e3f3cf5", null ],
+      [ "k4a_record_add_custom_video_track", "group___functions_ga1b2fd9b91c2779b912f17212bf7550ac.html#ga1b2fd9b91c2779b912f17212bf7550ac", null ],
       [ "k4a_record_add_imu_track", "group___functions_ga720027bb4341fd5f9402600f0d33d89a.html#ga720027bb4341fd5f9402600f0d33d89a", null ],
       [ "k4a_record_add_tag", "group___functions_gade803d146fee7474a26dea8bf531f954.html#gade803d146fee7474a26dea8bf531f954", null ],
       [ "k4a_record_close", "group___functions_ga2b0ea303a2ee413fb88c408205ca0fc5.html#ga2b0ea303a2ee413fb88c408205ca0fc5", null ],
       [ "k4a_record_create", "group___functions_gae14f4181e9688e710d1c80b215413831.html#gae14f4181e9688e710d1c80b215413831", null ],
       [ "k4a_record_flush", "group___functions_ga0bde5bca082fa031306510af169f2fd1.html#ga0bde5bca082fa031306510af169f2fd1", null ],
       [ "k4a_record_write_capture", "group___functions_ga8e8a4dbef3bd35bc5446a00862e94115.html#ga8e8a4dbef3bd35bc5446a00862e94115", null ],
+      [ "k4a_record_write_custom_track_data", "group___functions_gafe2237d54289840ca36b698b8716cfda.html#gafe2237d54289840ca36b698b8716cfda", null ],
       [ "k4a_record_write_header", "group___functions_ga063074a0335233f21f095c9e55eddfd8.html#ga063074a0335233f21f095c9e55eddfd8", null ],
       [ "k4a_record_write_imu_sample", "group___functions_gafd0f1474a676b5a5955d2e0fe1e89b65.html#gafd0f1474a676b5a5955d2e0fe1e89b65", null ]
     ] ],
@@ -80,8 +84,10 @@ var group___handles =
       [ "k4a_playback_get_calibration", "group___functions_ga343a129cd5dcff66788c737938e754b7.html#ga343a129cd5dcff66788c737938e754b7", null ],
       [ "k4a_playback_get_last_timestamp_usec", "group___functions_ga983988f203855b6d4c877d48470d54a2.html#ga983988f203855b6d4c877d48470d54a2", null ],
       [ "k4a_playback_get_next_capture", "group___functions_ga32cc6cc2703ab0b113084bd58c731834.html#ga32cc6cc2703ab0b113084bd58c731834", null ],
+      [ "k4a_playback_get_next_data_block", "group___functions_ga2bca9aea2bcfa318f2625f059d4ed807.html#ga2bca9aea2bcfa318f2625f059d4ed807", null ],
       [ "k4a_playback_get_next_imu_sample", "group___functions_ga95ebfacc8f175e1cd8a4ed425b4e5582.html#ga95ebfacc8f175e1cd8a4ed425b4e5582", null ],
       [ "k4a_playback_get_previous_capture", "group___functions_ga54732e3aa0717e1ca4eb76ee385e878c.html#ga54732e3aa0717e1ca4eb76ee385e878c", null ],
+      [ "k4a_playback_get_previous_data_block", "group___functions_ga47a2aaa8c429054691e4513a76a3ffac.html#ga47a2aaa8c429054691e4513a76a3ffac", null ],
       [ "k4a_playback_get_previous_imu_sample", "group___functions_ga6a4fbb959d7f17009799b6e3d6f59fe2.html#ga6a4fbb959d7f17009799b6e3d6f59fe2", null ],
       [ "k4a_playback_get_raw_calibration", "group___functions_ga0acd3c66402aa3b58199a43b0d717cf2.html#ga0acd3c66402aa3b58199a43b0d717cf2", null ],
       [ "k4a_playback_get_record_configuration", "group___functions_gaab54a85c1f1e98d170d009042b449255.html#gaab54a85c1f1e98d170d009042b449255", null ],
@@ -90,5 +96,11 @@ var group___handles =
       [ "k4a_playback_open", "group___functions_gacb254ac941b2ab3c202ca68f4537f368.html#gacb254ac941b2ab3c202ca68f4537f368", null ],
       [ "k4a_playback_seek_timestamp", "group___functions_gaea748994a121543bd77f90417cf428f6.html#gaea748994a121543bd77f90417cf428f6", null ],
       [ "k4a_playback_set_color_conversion", "group___functions_ga664d0bb89dd5cc83deb63cec3eb74f76.html#ga664d0bb89dd5cc83deb63cec3eb74f76", null ]
+    ] ],
+    [ "k4a_playback_data_block_t", "structk4a__playback__data__block__t.html", [
+      [ "k4a_playback_data_block_get_buffer", "group___functions_ga32000c9d4176abf1c28f04cd3ee2423d.html#ga32000c9d4176abf1c28f04cd3ee2423d", null ],
+      [ "k4a_playback_data_block_get_buffer_size", "group___functions_ga6815c2fc6ba002d281c05da348f54708.html#ga6815c2fc6ba002d281c05da348f54708", null ],
+      [ "k4a_playback_data_block_get_device_timestamp_usec", "group___functions_ga2a272128c5b15f2132da0bd7cf884494.html#ga2a272128c5b15f2132da0bd7cf884494", null ],
+      [ "k4a_playback_data_block_release", "group___functions_gadd485580daed3b8e0213118f56e5e0c0.html#gadd485580daed3b8e0213118f56e5e0c0", null ]
     ] ]
 ];

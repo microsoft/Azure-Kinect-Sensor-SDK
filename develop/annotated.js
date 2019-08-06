@@ -22,9 +22,12 @@ var annotated =
     [ "k4a_hardware_version_t", "structk4a__hardware__version__t.html", "structk4a__hardware__version__t" ],
     [ "k4a_image_t", "structk4a__image__t.html", "structk4a__image__t" ],
     [ "k4a_imu_sample_t", "structk4a__imu__sample__t.html", "structk4a__imu__sample__t" ],
+    [ "k4a_playback_data_block_t", "structk4a__playback__data__block__t.html", "structk4a__playback__data__block__t" ],
     [ "k4a_playback_t", "structk4a__playback__t.html", "structk4a__playback__t" ],
     [ "k4a_record_configuration_t", "structk4a__record__configuration__t.html", "structk4a__record__configuration__t" ],
+    [ "k4a_record_subtitle_settings_t", "structk4a__record__subtitle__settings__t.html", "structk4a__record__subtitle__settings__t" ],
     [ "k4a_record_t", "structk4a__record__t.html", "structk4a__record__t" ],
+    [ "k4a_record_video_settings_t", "structk4a__record__video__settings__t.html", "structk4a__record__video__settings__t" ],
     [ "k4a_transformation_t", "structk4a__transformation__t.html", "structk4a__transformation__t" ],
     [ "k4a_version_t", "structk4a__version__t.html", "structk4a__version__t" ]
 ];

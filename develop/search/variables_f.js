@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['x',['x',['../structk4a__float2__t_1_1__xy.html#a045e7ea3933e7c0b2c21b3b362f9e9b0',1,'k4a_float2_t::_xy::x()'],['../structk4a__float3__t_1_1__xyz_a21c7d10afe5ba22922607083c9fc6625.html#a21c7d10afe5ba22922607083c9fc6625',1,'k4a_float3_t::_xyz::x()']]],
-  ['xy',['xy',['../unionk4a__float2__t.html#a4044bba9282bed25a1bed77ef450a0cb',1,'k4a_float2_t']]],
-  ['xyz',['xyz',['../unionk4a__float3__t_a1fa79b1f856e808a6d15225f600a0996.html#a1fa79b1f856e808a6d15225f600a0996',1,'k4a_float3_t']]]
+  ['width',['width',['../structk4a__record__video__settings__t.html#a1bb98cba5ef359198eb3a54e6fa66954',1,'k4a_record_video_settings_t']]],
+  ['wired_5fsync_5fmode',['wired_sync_mode',['../structk4a__device__configuration__t_ab2b227f0d1ae58e8d59ff89fd27504b3.html#ab2b227f0d1ae58e8d59ff89fd27504b3',1,'k4a_device_configuration_t::wired_sync_mode()'],['../structk4a__record__configuration__t.html#ae304ee1fd5d29f61fb8717d9fb3d6bd1',1,'k4a_record_configuration_t::wired_sync_mode()']]]
 ];

@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['p1',['p1',['../structk4a__calibration__intrinsic__parameters__t_1_1__param.html#a0967d84ba1f4ce82b47bfa2fa13a8360',1,'k4a_calibration_intrinsic_parameters_t::_param']]],
-  ['p2',['p2',['../structk4a__calibration__intrinsic__parameters__t_1_1__param.html#a80718603ed70e762dfe9aa01eccbcc6b',1,'k4a_calibration_intrinsic_parameters_t::_param']]],
-  ['param',['param',['../unionk4a__calibration__intrinsic__parameters__t.html#a9d3f4b9a3ddc6f91074dea019fbcaa78',1,'k4a_calibration_intrinsic_parameters_t']]],
-  ['parameter_5fcount',['parameter_count',['../structk4a__calibration__intrinsics__t.html#a2e0654444a6d350ce3e5e19ffdb3c7f6',1,'k4a_calibration_intrinsics_t']]],
-  ['parameters',['parameters',['../structk4a__calibration__intrinsics__t.html#a0b48309440647746ea36015cd618bbba',1,'k4a_calibration_intrinsics_t']]]
+  ['major',['major',['../structk4a__version__t_aba947b238819496adc41888de36df6e1.html#aba947b238819496adc41888de36df6e1',1,'k4a_version_t']]],
+  ['metric_5fradius',['metric_radius',['../structk4a__calibration__intrinsic__parameters__t_1_1__param.html#a91b39ee152b891ae79641ad8e6137adb',1,'k4a_calibration_intrinsic_parameters_t::_param::metric_radius()'],['../structk4a__calibration__camera__t_ac9ba89cf72b237cb8ce7cdcbaca0c6a5.html#ac9ba89cf72b237cb8ce7cdcbaca0c6a5',1,'k4a_calibration_camera_t::metric_radius()']]],
+  ['minor',['minor',['../structk4a__version__t_a52626a80e919cac31d837efa3d01abfb.html#a52626a80e919cac31d837efa3d01abfb',1,'k4a_version_t']]]
 ];

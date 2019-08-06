@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['imu_5ftrack_5fenabled',['imu_track_enabled',['../structk4a__record__configuration__t_a5745ac8b1dd557c6504c53c64533ed12.html#a5745ac8b1dd557c6504c53c64533ed12',1,'k4a_record_configuration_t']]],
-  ['intrinsics',['intrinsics',['../structk4a__calibration__camera__t_a0c2ddd100f986b0a5a604abaf67e8e44.html#a0c2ddd100f986b0a5a604abaf67e8e44',1,'k4a_calibration_camera_t']]],
-  ['ir_5ftrack_5fenabled',['ir_track_enabled',['../structk4a__record__configuration__t_ad2612d1ad9582d25fd1332b4fed3937d.html#ad2612d1ad9582d25fd1332b4fed3937d',1,'k4a_record_configuration_t']]],
-  ['iteration',['iteration',['../structk4a__version__t_a9f3ec6a118f81533c7748b9080f68acf.html#a9f3ec6a118f81533c7748b9080f68acf',1,'k4a_version_t']]]
+  ['height',['height',['../structk4a__record__video__settings__t.html#abd4c12123e81ac48040a250e7bac0176',1,'k4a_record_video_settings_t']]],
+  ['high_5ffreq_5fdata',['high_freq_data',['../structk4a__record__subtitle__settings__t_ae243262f48420a66b1917822f1f06761.html#ae243262f48420a66b1917822f1f06761',1,'k4a_record_subtitle_settings_t']]]
 ];

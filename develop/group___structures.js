@@ -110,5 +110,13 @@ var group___structures =
       [ "start_timestamp_offset_usec", "structk4a__record__configuration__t_a9566f1dc53e148f8e7170ba85f16a136.html#a9566f1dc53e148f8e7170ba85f16a136", null ],
       [ "subordinate_delay_off_master_usec", "structk4a__record__configuration__t_ad23e44c69765adb71c8ff602b25a9f1d.html#ad23e44c69765adb71c8ff602b25a9f1d", null ],
       [ "wired_sync_mode", "structk4a__record__configuration__t.html#ae304ee1fd5d29f61fb8717d9fb3d6bd1", null ]
+    ] ],
+    [ "k4a_record_video_settings_t", "structk4a__record__video__settings__t.html", [
+      [ "frame_rate", "structk4a__record__video__settings__t.html#a7b40b07cebe856518ee708e9edb767bd", null ],
+      [ "height", "structk4a__record__video__settings__t.html#abd4c12123e81ac48040a250e7bac0176", null ],
+      [ "width", "structk4a__record__video__settings__t.html#a1bb98cba5ef359198eb3a54e6fa66954", null ]
+    ] ],
+    [ "k4a_record_subtitle_settings_t", "structk4a__record__subtitle__settings__t.html", [
+      [ "high_freq_data", "structk4a__record__subtitle__settings__t_ae243262f48420a66b1917822f1f06761.html#ae243262f48420a66b1917822f1f06761", null ]
     ] ]
 ];
