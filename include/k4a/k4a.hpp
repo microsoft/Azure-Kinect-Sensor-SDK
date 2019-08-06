@@ -773,8 +773,10 @@ public:
      */
     transformation(const k4a_calibration_t &calibration) noexcept :
         m_handle(k4a_transformation_create(&calibration)),
-        m_color_calibration(calibration.color_camera_calibration),
-        m_depth_calibration(calibration.depth_camera_calibration)
+        m_color_resolution({ calibration.color_camera_calibration.resolution_width,
+                             calibration.color_camera_calibration.resolution_height }),
+        m_depth_resolution({ calibration.depth_camera_calibration.resolution_width,
+                             calibration.depth_camera_calibration.resolution_height })
     {
     }
 
@@ -789,8 +791,8 @@ public:
      */
     transformation(transformation &&other) noexcept :
         m_handle(other.m_handle),
-        m_color_calibration(other.m_color_calibration),
-        m_depth_calibration(other.m_depth_calibration)
+        m_color_resolution(other.m_color_resolution),
+        m_depth_resolution(other.m_depth_resolution)
     {
         other.m_handle = nullptr;
     }
@@ -810,8 +812,8 @@ public:
         {
             destroy();
             m_handle = other.m_handle;
-            m_color_calibration = other.m_color_calibration;
-            m_depth_calibration = other.m_depth_calibration;
+            m_color_resolution = other.m_color_resolution;
+            m_depth_resolution = other.m_depth_resolution;
             other.m_handle = nullptr;
         }
 
@@ -865,9 +867,9 @@ public:
     image depth_image_to_color_camera(const image &depth_image) const
     {
         image transformed_depth_image = image::create(K4A_IMAGE_FORMAT_DEPTH16,
-                                                      m_color_calibration.resolution_width,
-                                                      m_color_calibration.resolution_height,
-                                                      m_color_calibration.resolution_width *
+                                                      m_color_resolution.width,
+                                                      m_color_resolution.height,
+                                                      m_color_resolution.width *
                                                           static_cast<int32_t>(sizeof(uint16_t)));
         depth_image_to_color_camera(depth_image, &transformed_depth_image);
         return transformed_depth_image;
@@ -912,14 +914,14 @@ public:
                                        uint32_t invalid_custom_value) const
     {
         image transformed_depth_image = image::create(K4A_IMAGE_FORMAT_DEPTH16,
-                                                      m_color_calibration.resolution_width,
-                                                      m_color_calibration.resolution_height,
-                                                      m_color_calibration.resolution_width *
+                                                      m_color_resolution.width,
+                                                      m_color_resolution.height,
+                                                      m_color_resolution.width *
                                                           static_cast<int32_t>(sizeof(uint16_t)));
         image transformed_custom_image = image::create(K4A_IMAGE_FORMAT_CUSTOM,
-                                                       m_color_calibration.resolution_width,
-                                                       m_color_calibration.resolution_height,
-                                                       m_color_calibration.resolution_width * 3 *
+                                                       m_color_resolution.width,
+                                                       m_color_resolution.height,
+                                                       m_color_resolution.width * 3 *
                                                            static_cast<int32_t>(sizeof(int16_t)));
         depth_image_to_color_camera_custom(depth_image,
                                            custom_image,
@@ -959,9 +961,9 @@ public:
     image color_image_to_depth_camera(const image &depth_image, const image &color_image) const
     {
         image transformed_color_image = image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                      m_depth_calibration.resolution_width,
-                                                      m_depth_calibration.resolution_height,
-                                                      m_depth_calibration.resolution_width * 4 *
+                                                      m_depth_resolution.width,
+                                                      m_depth_resolution.height,
+                                                      m_depth_resolution.width * 4 *
                                                           static_cast<int32_t>(sizeof(uint8_t)));
         color_image_to_depth_camera(depth_image, color_image, &transformed_color_image);
         return transformed_color_image;
@@ -992,18 +994,22 @@ public:
     image depth_image_to_point_cloud(const image &depth_image, k4a_calibration_type_t camera) const
     {
         image xyz_image = image::create(K4A_IMAGE_FORMAT_CUSTOM,
-                                        m_depth_calibration.resolution_width,
-                                        m_depth_calibration.resolution_height,
-                                        m_depth_calibration.resolution_width * 3 *
-                                            static_cast<int32_t>(sizeof(int16_t)));
+                                        m_depth_resolution.width,
+                                        m_depth_resolution.height,
+                                        m_depth_resolution.width * 3 * static_cast<int32_t>(sizeof(int16_t)));
         depth_image_to_point_cloud(depth_image, camera, &xyz_image);
         return xyz_image;
     }
 
 private:
     k4a_transformation_t m_handle;
-    k4a_calibration_camera_t m_color_calibration;
-    k4a_calibration_camera_t m_depth_calibration;
+    struct resolution
+    {
+        int32_t width;
+        int32_t height;
+    };
+    resolution m_color_resolution;
+    resolution m_depth_resolution;
 };
 
 /** \class device k4a.hpp <k4a/k4a.hpp>
