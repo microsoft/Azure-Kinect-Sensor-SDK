@@ -843,6 +843,7 @@ public:
      * Throws error on failure
      *
      * \sa k4a_transformation_depth_image_to_color_camera
+     * Transforms the output in to the existing caller provided \p transformed_depth_image.
      */
     void depth_image_to_color_camera(const image &depth_image, image *transformed_depth_image) const
     {
