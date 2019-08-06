@@ -994,9 +994,9 @@ public:
     image depth_image_to_point_cloud(const image &depth_image, k4a_calibration_type_t camera) const
     {
         image xyz_image = image::create(K4A_IMAGE_FORMAT_CUSTOM,
-                                        m_depth_resolution.width,
-                                        m_depth_resolution.height,
-                                        m_depth_resolution.width * 3 * static_cast<int32_t>(sizeof(int16_t)));
+                                        depth_image.get_width_pixels(),
+                                        depth_image.get_height_pixels(),
+                                        depth_image.get_width_pixels() * 3 * static_cast<int32_t>(sizeof(int16_t)));
         depth_image_to_point_cloud(depth_image, camera, &xyz_image);
         return xyz_image;
     }
