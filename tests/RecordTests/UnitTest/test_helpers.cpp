@@ -293,3 +293,44 @@ bool validate_null_imu_sample(k4a_imu_sample_t &imu_sample)
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
+
+std::vector<uint8_t> create_test_custom_track_block(uint64_t timestamp_us)
+{
+    std::srand(static_cast<uint32_t>(timestamp_us));
+
+    uint32_t item_count = static_cast<uint32_t>(std::rand()) % 100;
+    std::vector<uint8_t> data(sizeof(custom_track_test_data) + sizeof(uint32_t) * item_count);
+    custom_track_test_data *test_data = reinterpret_cast<custom_track_test_data *>(data.data());
+    uint32_t *test_items = reinterpret_cast<uint32_t *>(data.data() + sizeof(custom_track_test_data));
+
+    test_data->timestamp_us = timestamp_us;
+    test_data->item_count = item_count;
+    for (uint32_t i = 0; i < item_count; i++)
+    {
+        test_items[i] = i;
+    }
+
+    return data;
+}
+
+bool validate_custom_track_block(const uint8_t *block, size_t block_size, uint64_t timestamp_us)
+{
+    std::srand(static_cast<uint32_t>(timestamp_us));
+    uint32_t expected_item_count = static_cast<uint32_t>(std::rand()) % 100;
+
+    EXIT_IF_FALSE(block_size >= sizeof(custom_track_test_data));
+
+    const custom_track_test_data *test_data = reinterpret_cast<const custom_track_test_data *>(block);
+    const uint32_t *test_items = reinterpret_cast<const uint32_t *>(block + sizeof(custom_track_test_data));
+    VALIDATE_PARAMETER(test_data->timestamp_us, timestamp_us);
+    VALIDATE_PARAMETER(test_data->item_count, expected_item_count);
+
+    VALIDATE_PARAMETER(block_size, sizeof(custom_track_test_data) + sizeof(uint32_t) * expected_item_count);
+
+    for (uint32_t i = 0; i < expected_item_count; i++)
+    {
+        VALIDATE_PARAMETER(test_items[i], i);
+    }
+
+    return true;
+}
