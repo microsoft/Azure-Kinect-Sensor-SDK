@@ -288,11 +288,11 @@ public:
 
     /** Get the last valid timestamp in the recording
      *
-     * \sa k4a_playback_get_last_timestamp_usec
+     * \sa k4a_playback_get_recording_length_usec
      */
-    std::chrono::microseconds get_last_timestamp() const noexcept
+    std::chrono::microseconds get_recording_length() const noexcept
     {
-        return std::chrono::microseconds(k4a_playback_get_last_timestamp_usec(m_handle));
+        return std::chrono::microseconds(k4a_playback_get_recording_length_usec(m_handle));
     }
 
     /** Set the image format that color captures will be converted to. By default the conversion format will be the same

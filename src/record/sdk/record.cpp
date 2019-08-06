@@ -22,24 +22,13 @@ k4a_result_t k4a_record_create(const char *path,
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, path == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, recording_handle == NULL);
     k4a_record_context_t *context = NULL;
-    logger_t logger_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    // Instantiate the logger as early as possible
-    logger_config_t logger_config;
-    logger_config_init_default(&logger_config);
-    logger_config.env_var_log_to_a_file = K4A_RECORD_ENABLE_LOG_TO_A_FILE;
-    result = TRACE_CALL(logger_create(&logger_config, &logger_handle));
+    context = k4a_record_t_create(recording_handle);
+    result = K4A_RESULT_FROM_BOOL(context != NULL);
 
     if (K4A_SUCCEEDED(result))
     {
-        context = k4a_record_t_create(recording_handle);
-        result = K4A_RESULT_FROM_BOOL(context != NULL);
-    }
-
-    if (K4A_SUCCEEDED(result))
-    {
-        context->logger_handle = logger_handle;
         context->file_path = path;
 
         try
@@ -340,10 +329,6 @@ k4a_result_t k4a_record_create(const char *path,
             }
         }
 
-        if (logger_handle)
-        {
-            logger_destroy(logger_handle);
-        }
         k4a_record_t_destroy(*recording_handle);
         *recording_handle = NULL;
     }
@@ -558,6 +543,13 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
     k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
 
+    if (!context->imu_track)
+    {
+        LOG_ERROR("The IMU track needs to be added with k4a_record_add_imu_track() before IMU samples can be written.",
+                  0);
+        return K4A_RESULT_FAILED;
+    }
+
     if (!context->header_written)
     {
         LOG_ERROR("The recording header needs to be written before any imu samples.", 0);
@@ -740,12 +732,6 @@ void k4a_record_close(const k4a_record_t recording_handle)
         catch (std::ios_base::failure &e)
         {
             LOG_ERROR("Failed to close recording '%s': %s", context->file_path, e.what());
-        }
-
-        // After this destroy, logging will no longer happen.
-        if (context->logger_handle)
-        {
-            logger_destroy(context->logger_handle);
         }
     }
     k4a_record_t_destroy(recording_handle);

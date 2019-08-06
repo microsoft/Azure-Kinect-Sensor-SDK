@@ -8,7 +8,6 @@
 #include <k4a/k4a.h>
 #include <k4arecord/playback.h>
 #include <k4ainternal/matroska_read.h>
-#include <k4ainternal/logging.h>
 #include <k4ainternal/common.h>
 
 using namespace k4arecord;
@@ -19,24 +18,13 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, path == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, playback_handle == NULL);
     k4a_playback_context_t *context = NULL;
-    logger_t logger_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    // Instantiate the logger as early as possible
-    logger_config_t logger_config;
-    logger_config_init_default(&logger_config);
-    logger_config.env_var_log_to_a_file = K4A_RECORD_ENABLE_LOG_TO_A_FILE;
-    result = TRACE_CALL(logger_create(&logger_config, &logger_handle));
+    context = k4a_playback_t_create(playback_handle);
+    result = K4A_RESULT_FROM_BOOL(context != NULL);
 
     if (K4A_SUCCEEDED(result))
     {
-        context = k4a_playback_t_create(playback_handle);
-        result = K4A_RESULT_FROM_BOOL(context != NULL);
-    }
-
-    if (K4A_SUCCEEDED(result))
-    {
-        context->logger_handle = logger_handle;
         context->file_path = path;
         context->file_closing = false;
 
@@ -95,10 +83,6 @@ k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle
             }
         }
 
-        if (logger_handle)
-        {
-            logger_destroy(logger_handle);
-        }
         k4a_playback_t_destroy(*playback_handle);
         *playback_handle = NULL;
     }
@@ -313,7 +297,16 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->segment == nullptr);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, origin != K4A_PLAYBACK_SEEK_BEGIN && origin != K4A_PLAYBACK_SEEK_END);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
+                        origin != K4A_PLAYBACK_SEEK_BEGIN && origin != K4A_PLAYBACK_SEEK_END &&
+                            origin != K4A_PLAYBACK_SEEK_DEVICE_TIME);
+
+    // If seeking to a device timestamp, calculate the offset relative to the start of file.
+    if (origin == K4A_PLAYBACK_SEEK_DEVICE_TIME)
+    {
+        origin = K4A_PLAYBACK_SEEK_BEGIN;
+        offset_usec -= (int64_t)context->record_config.start_timestamp_offset_usec;
+    }
 
     // Clamp the offset timestamp so the seek direction is correct reletive to the specified origin.
     if (origin == K4A_PLAYBACK_SEEK_BEGIN && offset_usec < 0)
@@ -329,14 +322,14 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     if (origin == K4A_PLAYBACK_SEEK_END)
     {
         uint64_t offset_ns = (uint64_t)(-offset_usec * 1000);
-        if (offset_ns > context->last_timestamp_ns)
+        if (offset_ns > context->last_file_timestamp_ns)
         {
             // If the target timestamp is negative, clamp to 0 so we don't underflow.
             target_time_ns = 0;
         }
         else
         {
-            target_time_ns = context->last_timestamp_ns + 1 - offset_ns;
+            target_time_ns = context->last_file_timestamp_ns + 1 - offset_ns;
         }
     }
     else
@@ -364,13 +357,22 @@ k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
     return K4A_RESULT_SUCCEEDED;
 }
 
+uint64_t k4a_playback_get_recording_length_usec(k4a_playback_t playback_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_t, playback_handle);
+
+    k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
+    RETURN_VALUE_IF_ARG(0, context == NULL);
+    return context->last_file_timestamp_ns / 1000;
+}
+
 uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(0, k4a_playback_t, playback_handle);
 
     k4a_playback_context_t *context = k4a_playback_t_get_context(playback_handle);
     RETURN_VALUE_IF_ARG(0, context == NULL);
-    return context->last_timestamp_ns / 1000;
+    return context->last_file_timestamp_ns / 1000;
 }
 
 void k4a_playback_close(const k4a_playback_t playback_handle)
@@ -405,12 +407,6 @@ void k4a_playback_close(const k4a_playback_t playback_handle)
         }
 
         context->io_lock.unlock();
-
-        // After this destroy, logging will no longer happen.
-        if (context->logger_handle)
-        {
-            logger_destroy(context->logger_handle);
-        }
     }
     k4a_playback_t_destroy(playback_handle);
 }

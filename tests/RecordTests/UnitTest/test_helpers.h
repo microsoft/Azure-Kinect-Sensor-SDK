@@ -24,6 +24,13 @@ static const char *const fps_names[] = { "K4A_FRAMES_PER_SECOND_5",
                                          "K4A_FRAMES_PER_SECOND_15",
                                          "K4A_FRAMES_PER_SECOND_30" };
 
+// Testing values
+static const uint32_t test_depth_width = 640;
+static const uint32_t test_depth_height = 576;
+static const uint32_t test_camera_fps = 30;
+static const uint32_t test_timestamp_delta_usec = 33333;
+static const size_t test_frame_count = 100;
+
 k4a_capture_t create_test_capture(uint64_t timestamp_us[3],
                                   k4a_image_format_t color_format,
                                   k4a_color_resolution_t resolution,
@@ -33,6 +40,7 @@ bool validate_test_capture(k4a_capture_t capture,
                            k4a_image_format_t color_format,
                            k4a_color_resolution_t resolution,
                            k4a_depth_mode_t mode);
+
 k4a_image_t
 create_test_image(uint64_t timestamp_us, k4a_image_format_t format, uint32_t width, uint32_t height, uint32_t stride);
 bool validate_test_image(k4a_image_t image,
@@ -41,6 +49,7 @@ bool validate_test_image(k4a_image_t image,
                          uint32_t width,
                          uint32_t height,
                          uint32_t stride);
+
 k4a_imu_sample_t create_test_imu_sample(uint64_t timestamp_us);
 bool validate_imu_sample(k4a_imu_sample_t &imu_sample, uint64_t timestamp_us);
 bool validate_null_imu_sample(k4a_imu_sample_t &imu_sample);

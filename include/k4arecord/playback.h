@@ -376,16 +376,21 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * Handle obtained by k4a_playback_open().
  *
  * \param offset_usec
- * The timestamp offset to seek to relative to \p origin
+ * The timestamp offset to seek to, relative to \p origin
  *
  * \param origin
- * Specifies if the seek operation should be done relative to the beginning or end of the recording.
+ * Specifies how the given timestamp should be interpreted. Seek can be done relative to the beginning or end of the
+ * recording, or using an absolute device timestamp.
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if the seek operation was successful, or ::K4A_RESULT_FAILED if an error occured. The current
  * seek position is left unchanged if a failure is returned.
  *
  * \relates k4a_playback_t
+ *
+ * \remarks
+ * The first device timestamp in a recording is usually non-zero. The recording file starts at the device timestamp
+ * defined by start_timestamp_offset_usec, which is accessible via k4a_playback_get_record_configuration().
  *
  * \remarks
  * The first call to k4a_playback_get_next_capture() after k4a_playback_seek_timestamp() will return the first capture
@@ -415,18 +420,19 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playbac
                                                           int64_t offset_usec,
                                                           k4a_playback_seek_origin_t origin);
 
-/** Gets the last timestamp in a recording.
+/** Returns the length of the recording in microseconds.
  *
  * \param playback_handle
  * Handle obtained by k4a_playback_open().
  *
  * \returns
- * The timestamp of the last capture image or IMU sample in microseconds.
+ * The recording length, calculated as the difference between the first and last timestamp in the file.
  *
  * \relates k4a_playback_t
  *
  * \remarks
- * Recordings start at timestamp 0, and end at the timestamp returned by k4a_playback_get_last_timestamp_usec().
+ * The recording length may be longer than an individual track if, for example, the IMU continues to run after the last
+ * color image is recorded.
  *
  * \xmlonly
  * <requirements>
@@ -436,7 +442,34 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playbac
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle);
+K4ARECORD_EXPORT uint64_t k4a_playback_get_recording_length_usec(k4a_playback_t playback_handle);
+
+/** Gets the last timestamp in a recording, relative to the start of the recording.
+ *
+ * \param playback_handle
+ * Handle obtained by k4a_playback_open().
+ *
+ * \returns
+ * The file timestamp of the last capture image or IMU sample in microseconds.
+ *
+ * \relates k4a_playback_t
+ *
+ * \remarks
+ * This function returns a file timestamp, not an absolute device timestamp, meaning it is relative to the start of the
+ * recording. This function is equivalent to the length of the recording.
+ *
+ * \deprecated
+ * Deprecated starting in 1.2.0. Please use k4a_playback_get_recording_length_usec().
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">playback.h (include k4arecord/playback.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_DEPRECATED_EXPORT uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle);
 
 /** Closes a recording playback handle.
  *

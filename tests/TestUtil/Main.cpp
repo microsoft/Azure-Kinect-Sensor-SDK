@@ -8,6 +8,7 @@
 #include <k4a/k4a.h>
 #include "UsbCmd.h"
 #include "k4aCmd.h"
+#include <k4ainternal/logging.h>
 
 #include "Main.h"
 //**************Symbolic Constant Macros (defines)  *************
@@ -18,6 +19,11 @@
 //************ Declarations (Statics and globals) ***************
 static k4a_device_t k4a_handle[MAX_SUPPORTED_DEVICES];
 static uint8_t opened_count = 0;
+
+extern "C" {
+// dynlib includes the logger
+char K4A_ENV_VAR_LOG_TO_A_FILE[] = K4A_ENABLE_LOG_TO_A_FILE;
+}
 
 //******************* Function Prototypes ***********************
 

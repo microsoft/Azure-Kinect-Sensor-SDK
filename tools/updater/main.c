@@ -36,6 +36,8 @@
 #define EXIT_FAILED -1 // general failure
 #define EXIT_USAGE 64  // The arguments were incorrect
 
+char K4A_ENV_VAR_LOG_TO_A_FILE[] = K4A_ENABLE_LOG_TO_A_FILE;
+
 typedef enum
 {
     K4A_FIRMWARE_COMMAND_UNKNOWN = 0,
@@ -1106,17 +1108,7 @@ int main(int argc, char **argv)
 {
     updater_command_info_t command_info;
     memset(&command_info, 0, sizeof(updater_command_info_t));
-    logger_t logger_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
-
-    // Instantiate the logger as early as possible
-    logger_config_t logger_config;
-    logger_config_init_default(&logger_config);
-    result = logger_create(&logger_config, &logger_handle);
-    if (!K4A_SUCCEEDED(result))
-    {
-        printf("ERROR: Failed to initialize the logger!\n");
-    }
 
     printf(" == Azure Kinect DK Firmware Tool == \n");
 
@@ -1164,11 +1156,6 @@ int main(int argc, char **argv)
     {
         free(command_info.device_serial_number);
         command_info.device_serial_number = NULL;
-    }
-
-    if (logger_handle)
-    {
-        logger_destroy(logger_handle);
     }
 
     if (!K4A_SUCCEEDED(result))

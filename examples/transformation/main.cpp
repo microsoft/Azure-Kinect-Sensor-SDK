@@ -273,7 +273,7 @@ static int playback(char *input_path, int timestamp = 1000, std::string output_f
     }
     printf("Seeking to timestamp: %d/%d (ms)\n",
            timestamp,
-           (int)(k4a_playback_get_last_timestamp_usec(playback) / 1000));
+           (int)(k4a_playback_get_recording_length_usec(playback) / 1000));
 
     stream_result = k4a_playback_get_next_capture(playback, &capture);
     if (stream_result != K4A_STREAM_RESULT_SUCCEEDED || capture == NULL)

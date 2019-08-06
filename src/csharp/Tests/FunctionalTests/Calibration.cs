@@ -22,10 +22,10 @@ namespace WrapperTests
             Assert.AreEqual(depthHeight, cal.depth_camera_calibration.resolution_height);
             Assert.AreEqual(colorWidth, cal.color_camera_calibration.resolution_width);
             Assert.AreEqual(colorHeight, cal.color_camera_calibration.resolution_height);
-            Assert.IsTrue(cal.depth_camera_calibration.intrinsics.type == Calibration.ModelType.Rational6KT ||
-                cal.depth_camera_calibration.intrinsics.type == Calibration.ModelType.BrownConrady);
-            Assert.IsTrue(cal.color_camera_calibration.intrinsics.type == Calibration.ModelType.Rational6KT ||
-                cal.color_camera_calibration.intrinsics.type == Calibration.ModelType.BrownConrady);
+            Assert.IsTrue(cal.depth_camera_calibration.intrinsics.type == CalibrationModelType.Rational6KT ||
+                cal.depth_camera_calibration.intrinsics.type == CalibrationModelType.BrownConrady);
+            Assert.IsTrue(cal.color_camera_calibration.intrinsics.type == CalibrationModelType.Rational6KT ||
+                cal.color_camera_calibration.intrinsics.type == CalibrationModelType.BrownConrady);
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace WrapperTests
                 Calibration cal = Calibration.GetFromRaw(raw, DepthMode.WFOV_2x2Binned, ColorResolution.R1080p);
 
                 Vector2 source = new Vector2(0, 0);
-                Vector2? result = cal.TransformTo2D(source, 1.0f, Calibration.DeviceType.Color, Calibration.DeviceType.Depth);
+                Vector2? result = cal.TransformTo2D(source, 1.0f, CalibrationDeviceType.Color, CalibrationDeviceType.Depth);
 
             }
         }
