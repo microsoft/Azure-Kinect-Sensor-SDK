@@ -467,19 +467,20 @@ int main(int argc, char **argv)
         // create the image that will be be used as output
         cv::Mat output_image(cv_master_color_image.rows, cv_master_color_image.cols, CV_8UC3, cv::Scalar(0, 0, 0));
 
-        cv::Mat master_valid_mask;
-        cv::bitwise_and(cv_master_depth_in_master_color != 0,
-                        cv_master_depth_in_master_color < depth_threshold,
-                        master_valid_mask);
-        cv::Mat sub_valid_mask;
-        cv::bitwise_and(cv_sub_depth_in_master_color != 0,
-                        cv_sub_depth_in_master_color < depth_threshold,
-                        sub_valid_mask);
+        // Now it's time to actually construct the greenscreen. Where the depth is 0, the camera doesn't know how far
+        // away the object is because it didn't get a response at that point. That's where we'll try to fill in the gaps
+        // with the other camera.
+        cv::Mat master_valid_mask = cv_master_depth_in_master_color != 0;
+        cv::Mat sub_valid_mask = cv_sub_depth_in_master_color != 0;
+        cv::Mat within_threshold_range = (master_valid_mask & (cv_master_depth_in_master_color < depth_threshold)) |
+                                         (~master_valid_mask & sub_valid_mask &
+                                          (cv_sub_depth_in_master_color < depth_threshold));
         cv::Mat output = cv_master_color_image;
-        // cv::add(output, cv::Scalar(0, .75, 0), output, ~sub_valid_mask);
-        // cv::add(output, cv::Scalar(0, 0, .75), output, ~master_valid_mask);
-        cv::add(output, cv::Scalar(0, 0, 100), output, ~sub_valid_mask & ~master_valid_mask);
-        cv::imshow("Greenscreened", output);
+        // cv::add(output, cv::Scalar(0, 100, 0), output, ~sub_valid_mask);
+        // cv::add(output, cv::Scalar(0, 0, 100), output, ~master_valid_mask);
+        // cv::add(output, cv::Scalar(0, 100, 0), output, ~(cv_master_depth_in_master_color < depth_threshold));
+        cv::add(output, cv::Scalar(0, 100, 0), output, ~within_threshold_range);
+        cv::imshow("Green Screen", output);
         cv::waitKey(1);
     }
 }
