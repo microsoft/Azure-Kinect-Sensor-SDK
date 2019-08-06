@@ -310,7 +310,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                ImuSample sample = new ImuSample();
+                NativeMethods.k4a_imu_sample_t sample = new NativeMethods.k4a_imu_sample_t();
                 NativeMethods.k4a_wait_result_t result = NativeMethods.k4a_device_get_imu_sample(this.handle, sample, (int)timeout.TotalMilliseconds);
 
                 if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
@@ -320,7 +320,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 AzureKinectException.ThrowIfNotSuccess(result);
 
-                return sample;
+                return sample.ToImuSample();
             }
         }
 
