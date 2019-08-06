@@ -927,7 +927,7 @@ public:
                                            &transformed_custom_image,
                                            interpolation_type,
                                            invalid_custom_value);
-        return { transformed_depth_image, transformed_custom_image };
+        return { std::move(transformed_depth_image), std::move(transformed_custom_image) };
     }
 
     /** Transforms the color image into the geometry of the depth camera.
