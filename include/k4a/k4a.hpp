@@ -869,6 +869,7 @@ public:
      * Throws error on failure
      *
      * \sa k4a_transformation_depth_image_to_color_camera
+     * Creates a new image with the output.
      */
     image depth_image_to_color_camera(const image &depth_image) const
     {
