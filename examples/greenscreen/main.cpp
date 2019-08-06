@@ -16,9 +16,7 @@ using std::endl;
 using std::vector;
 
 #include "transformation.h"
-
-// This is the maximum difference between when we expected an image's timestamp to be and when it actually occurred.
-constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(50);
+#include "MultiDeviceCapturer.h"
 
 // Allowing at least 160 microseconds between depth cameras should ensure they do not interfere with one another.
 constexpr uint32_t MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC = 160;
@@ -88,107 +86,6 @@ vector<float> calibration_to_color_camera_dist_coeffs(const k4a::calibration &ca
 {
     const k4a_calibration_intrinsic_parameters_t::_param &i = cal.color_camera_calibration.intrinsics.parameters.param;
     return { i.k1, i.k2, i.p1, i.p2, i.k3, i.k4, i.k5, i.k6 };
-}
-
-// Blocks until we have synchronized captures stored in master_capture and sub_capture
-std::tuple<k4a::capture, k4a::capture> get_synchronized_captures(k4a::device &master,
-                                                                 k4a::device &subordinate,
-                                                                 k4a_device_configuration_t &sub_config,
-                                                                 bool compare_sub_depth_instead_of_color = false)
-{
-    // Dealing with the synchronized cameras is complex. The Azure Kinect DK:
-    //      (a) does not guarantee exactly equal timestamps between depth and color or between cameras (delays can be
-    //          configured but timestamps will only be approximately the same)
-    //      (b) does not guarantee that, if the two most recent images were synchronized, that calling get_capture just
-    //          once on each camera will still be synchronized.
-    // There are several reasons for all of this. Internally, devices keep a queue of a few of the captured images and
-    // serve those images as requested by get_capture(). However, images can also be dropped at any moment, and one
-    // device may have more images ready than another device at a given moment, et cetera.
-    //
-    // Also, the process of synchronizing is complex. The cameras are not guaranteed to exactly match in all of their
-    // timestamps when synchronized (though they should be very close). All delays are relative to the master camera's
-    // color camera. To deal with these complexities, we employ a fairly straightforward algorithm. Start by reading in
-    // two captures, then if the camera images were not taken at roughly the same time read a new one from the device
-    // that had the older capture until the timestamps roughly match.
-
-    // The captures used in the loop are outside of it so that they can persist across loop iterations. This is
-    // necessary because each time this loop runs we'll only update the older capture.
-    k4a::capture master_capture, sub_capture;
-    bool master_success = master.get_capture(&master_capture, std::chrono::milliseconds{ 5000 }); // 5 sec timeout
-    bool sub_success = subordinate.get_capture(&sub_capture, std::chrono::milliseconds{ 5000 });  // 5 sec timeout
-    if (!master_success || !sub_success)
-    {
-        throw std::runtime_error("Getting a capture timed out!");
-    }
-
-    bool have_synced_images = false;
-    while (!have_synced_images)
-    {
-        k4a::image master_color_image = master_capture.get_color_image();
-        k4a::image sub_image;
-        if (compare_sub_depth_instead_of_color)
-        {
-            sub_image = sub_capture.get_depth_image();
-        }
-        else
-        {
-            sub_image = sub_capture.get_color_image();
-        }
-
-        if (master_color_image && sub_image)
-        {
-            std::chrono::microseconds sub_image_time = sub_image.get_device_timestamp();
-            std::chrono::microseconds master_color_image_time = master_color_image.get_device_timestamp();
-            // The subordinate's color image timestamp, ideally, is the master's color image timestamp plus the delay we
-            // configured between the master device color camera and subordinate device color camera
-            std::chrono::microseconds expected_sub_image_time =
-                master_color_image_time + std::chrono::microseconds{ sub_config.subordinate_delay_off_master_usec } +
-                std::chrono::microseconds{ sub_config.depth_delay_off_color_usec };
-            std::chrono::microseconds sub_image_time_error = sub_image_time - expected_sub_image_time;
-            // The time error's absolute value must be within the permissible range. So, for example, if
-            // MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 2, offsets of -2, -1, 0, 1, and -2 are permitted
-            if (sub_image_time_error < -MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP)
-            {
-                // Example, where MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 1
-                // time                    t=1  t=2  t=3
-                // actual timestamp        x    .    .
-                // expected timestamp      .    .    x
-                // error: 1 - 3 = -2, which is less than the worst-case-allowable offset of -1
-                // the subordinate camera image timestamp was earlier than it is allowed to be. This means the
-                // subordinate is lagging and we need to update the subordinate to get the subordinate caught up
-                cout << "Subordinate lagging...\n";
-                subordinate.get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
-            }
-            else if (sub_image_time_error > MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP)
-            {
-                // Example, where MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 1
-                // time                    t=1  t=2  t=3
-                // actual timestamp        .    .    x
-                // expected timestamp      x    .    .
-                // error: 3 - 1 = 2, which is more than the worst-case-allowable offset of 1
-                // the subordinate camera image timestamp was later than it is allowed to be. This means the subordinate
-                // is ahead and we need to update the master to get the master caught up
-                cout << "Master lagging...\n";
-                master.get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
-            }
-            else
-            {
-                // The captures are sufficiently synchronized. Exit the function.
-                have_synced_images = true;
-            }
-        }
-        else
-        {
-            // One of the captures or one of the images are bad, so just replace both. One could make this more
-            // sophisticated and try to only to only replace one of these captures, et cetera, to try to keep a good one
-            // but we'll keep things simple and just throw both away and try again.
-            // If this is happening, it's likely the cameras are improperly configured and frames aren't synchronized
-            cout << "One of the images was bad!\n";
-            master.get_capture(&master_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
-            subordinate.get_capture(&sub_capture, std::chrono::milliseconds{ K4A_WAIT_INFINITE });
-        }
-    }
-    return std::make_tuple(master_capture, sub_capture);
 }
 
 // Takes the images by value so we can change them when shown.
@@ -376,21 +273,20 @@ k4a_device_configuration_t get_sub_config()
     return camera_config;
 }
 
-Transformation calibrate_devices(k4a::device &master,
-                                 k4a::device &subordinate,
-                                 k4a_device_configuration_t &master_calibration_config,
-                                 k4a_device_configuration_t &sub_calibration_config,
+Transformation calibrate_devices(MultiDeviceCapturer &capturer,
+                                 vector<k4a_device_configuration_t> &configs,
                                  const cv::Size &chessboard_pattern,
                                  float chessboard_square_length)
 {
-    k4a::calibration master_calibration = master.get_calibration(master_calibration_config.depth_mode,
-                                                                 master_calibration_config.color_resolution);
-    k4a::calibration sub_calibration = subordinate.get_calibration(sub_calibration_config.depth_mode,
-                                                                   sub_calibration_config.color_resolution);
+    k4a::calibration master_calibration = capturer.devices[0].get_calibration(configs[0].depth_mode,
+                                                                              configs[0].color_resolution);
+    k4a::calibration sub_calibration = capturer.devices[1].get_calibration(configs[1].depth_mode,
+                                                                           configs[1].color_resolution);
     while (true)
     {
-        k4a::capture master_capture, sub_capture;
-        std::tie(master_capture, sub_capture) = get_synchronized_captures(master, subordinate, sub_calibration_config);
+        vector<k4a::capture> captures = capturer.get_synchronized_captures(configs);
+        k4a::capture &master_capture = captures[0];
+        k4a::capture &sub_capture = captures[1];
         // get_color_image is guaranteed to be non-null because we use get_synchronized_captures for color
         // (get_synchronized_captures also offers a flag to use depth for the subordinate camera instead of color).
         k4a::image master_color_image = master_capture.get_color_image();
@@ -499,59 +395,25 @@ int main(int argc, char **argv)
     }
     // Find out which device is the master and which is the subordinate. We'll assume that the master camera is the
     // first one with a cable in its sync out port.
-    k4a::device master = k4a::device::open(0); // Assume device 0 is the master; if it's not the master, we'll swap it
-    k4a::device subordinate = k4a::device::open(1);
-
-    if (master.is_sync_out_connected())
-    {
-        // The first device has sync out connected (it can send commands), so it's the master. No need to swap.
-    }
-    else if (subordinate.is_sync_out_connected())
-    {
-        // The second device has its sync out connected, so it's actually the master. We need to swap.
-        std::swap(master, subordinate);
-    }
-    else
-    {
-        // Neither device has sync out connected!
-        throw std::runtime_error("Neither camera has the sync out port connected, so neither device can be master!");
-    }
-    // make sure that subordinate has sync in connected
-    if (!subordinate.is_sync_in_connected())
-    {
-        throw std::runtime_error("Subordinate camera does not have the sync in port connected!");
-    }
-
-    // If you want to synchronize cameras, you need to manually set both their exposures
-    master.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-                             K4A_COLOR_CONTROL_MODE_MANUAL,
-                             color_exposure_usec);
-    subordinate.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-                                  K4A_COLOR_CONTROL_MODE_MANUAL,
-                                  color_exposure_usec);
-
-    // This setting compensates for the flicker of lights due to the frequency of AC power in your region. If you are in
-    // an area with 50 Hz power, this may need to be updated (check the docs for k4a_color_control_command_t)
-    master.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, powerline_freq);
-    subordinate.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY, K4A_COLOR_CONTROL_MODE_MANUAL, powerline_freq);
+    vector<int> device_indices{ 0, 1 };
+    MultiDeviceCapturer capturer(device_indices, color_exposure_usec, powerline_freq);
 
     // Construct the calibrations that these types will use
-    k4a_device_configuration_t master_config = get_master_config();
-    k4a_device_configuration_t sub_config = get_sub_config();
+    vector<k4a_device_configuration_t> configs{ get_master_config(), get_sub_config() };
+    k4a_device_configuration_t &master_config = configs.front();
+    k4a_device_configuration_t &sub_config = configs.back();
 
-    // now it's time to start the cameras. Start the subordinate first, because it needs to be ready to receive commands
-    // when the master starts up.
-    subordinate.start_cameras(&sub_config);
-    master.start_cameras(&master_config);
+    capturer.start_devices(configs);
 
     // This wraps all the calibration details
     Transformation tr_color_sub_to_color_master =
-        calibrate_devices(master, subordinate, master_config, sub_config, chessboard_pattern, chessboard_square_length);
+        calibrate_devices(capturer, configs, chessboard_pattern, chessboard_square_length);
 
     // End calibration
-    k4a::calibration master_calibration = master.get_calibration(master_config.depth_mode,
-                                                                 master_config.color_resolution);
-    k4a::calibration sub_calibration = subordinate.get_calibration(sub_config.depth_mode, sub_config.color_resolution);
+    k4a::calibration master_calibration = capturer.devices[0].get_calibration(master_config.depth_mode,
+                                                                              master_config.color_resolution);
+    k4a::calibration sub_calibration = capturer.devices[1].get_calibration(sub_config.depth_mode,
+                                                                           sub_config.color_resolution);
     // Get the transformation from subordinate depth to subordinate color using its calibration object
     Transformation tr_depth_sub_to_color_sub = calibration_to_depth_to_color_transformation(sub_calibration);
 
@@ -563,23 +425,19 @@ int main(int argc, char **argv)
     // Now, we're going to set up the transformations. DO THIS OUTSIDE OF YOUR MAIN LOOP! Constructing transformations
     // does a lot of preemptive work to make the transform as fast as possible.
     k4a::transformation master_depth_to_master_color(master_calibration);
-    k4a::transformation sub_depth_to_sub_color(sub_calibration);
 
-    // Now it's time to get clever. We're going to update the existing calibration extrinsics on getting from the sub
-    // depth camera to the sub color camera, overwriting it with the transformation to get from the sub depth camera to
-    // the master color camera
+    // We're going to update the existing calibration extrinsics on getting from the sub depth camera to the sub color
+    // camera, overwriting it with the transformation to get from the sub depth camera to the master color camera
     set_calibration_depth_to_color_from_transformation(sub_calibration, tr_depth_sub_to_color_master);
     k4a::transformation sub_depth_to_master_color(sub_calibration);
 
     while (true)
     {
-        k4a::capture master_capture;
-        k4a::capture sub_capture;
-        std::tie(master_capture, sub_capture) = get_synchronized_captures(master,
-                                                                          subordinate,
-                                                                          sub_config,
-                                                                          true); // This is to get the depth image for
-                                                                                 // the subordinate, not the color
+        vector<k4a::capture> captures = capturer.get_synchronized_captures(configs,
+                                                                           true); // This is to get the depth image for
+                                                                                  // the subordinate, not the color
+        k4a::capture &master_capture = captures[0];
+        k4a::capture &sub_capture = captures[1];
 
         k4a::image master_color_image = master_capture.get_color_image();
         k4a::image master_depth_image = master_capture.get_depth_image();
@@ -594,11 +452,6 @@ int main(int argc, char **argv)
 
         // now, create an OpenCV version of the depth matrix for easy usage
         cv::Mat opencv_master_depth_in_master_color = k4a_depth_to_opencv(k4a_master_depth_in_master_color);
-
-        // now let's get the subordinate depth image into the subordinate color space
-        k4a::image k4a_sub_depth_in_sub_color = create_depth_image_like(master_color_image);
-        sub_depth_to_sub_color.depth_image_to_color_camera(sub_depth_image, &k4a_sub_depth_in_sub_color);
-        cv::Mat opencv_sub_depth_in_sub_color = k4a_depth_to_opencv(k4a_sub_depth_in_sub_color);
 
         // Finally, it's time to create the image for the depth image in the master color perspective
         k4a::image k4a_sub_depth_in_master_color = create_depth_image_like(master_color_image);
