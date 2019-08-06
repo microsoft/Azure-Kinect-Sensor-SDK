@@ -771,9 +771,12 @@ public:
      *
      * \sa k4a_transformation_create
      */
-    transformation(const k4a_calibration_t &calibration) noexcept : m_handle(k4a_transformation_create(&calibration)),
-                                                                    m_color_calibration(calibration.color_camera_calibration),
-                                                                    m_depth_calibration(calibration.depth_camera_calibration) {}
+    transformation(const k4a_calibration_t &calibration) noexcept :
+        m_handle(k4a_transformation_create(&calibration)),
+        m_color_calibration(calibration.color_camera_calibration),
+        m_depth_calibration(calibration.depth_camera_calibration)
+    {
+    }
 
     /** Creates a transformation from a k4a_transformation_t
      * Takes ownership of the handle, i.e. you should not call
@@ -784,9 +787,10 @@ public:
 
     /** Moves another tranformation into a new transformation
      */
-    transformation(transformation &&other) noexcept : m_handle(other.m_handle),
-                                                      m_color_calibration(other.m_color_calibration),
-                                                      m_depth_calibration(other.m_depth_calibration)
+    transformation(transformation &&other) noexcept :
+        m_handle(other.m_handle),
+        m_color_calibration(other.m_color_calibration),
+        m_depth_calibration(other.m_depth_calibration)
     {
         other.m_handle = nullptr;
     }
@@ -847,7 +851,8 @@ public:
             *transformed_depth_image = image::create(K4A_IMAGE_FORMAT_DEPTH16,
                                                      m_color_calibration.resolution_width,
                                                      m_color_calibration.resolution_height,
-                                                     m_color_calibration.resolution_width * static_cast<int32_t>(sizeof(uint16_t)));
+                                                     m_color_calibration.resolution_width *
+                                                         static_cast<int32_t>(sizeof(uint16_t)));
         }
 
         k4a_result_t result = k4a_transformation_depth_image_to_color_camera(m_handle,
@@ -888,7 +893,8 @@ public:
             *transformed_depth_image = image::create(K4A_IMAGE_FORMAT_DEPTH16,
                                                      m_color_calibration.resolution_width,
                                                      m_color_calibration.resolution_height,
-                                                     m_color_calibration.resolution_width * static_cast<int32_t>(sizeof(uint16_t)));
+                                                     m_color_calibration.resolution_width *
+                                                         static_cast<int32_t>(sizeof(uint16_t)));
         }
 
         if (transformed_custom_image)
@@ -896,7 +902,8 @@ public:
             *transformed_custom_image = image::create(K4A_IMAGE_FORMAT_CUSTOM,
                                                       m_color_calibration.resolution_width,
                                                       m_color_calibration.resolution_height,
-                                                      m_color_calibration.resolution_width * 3 * static_cast<int32_t>(sizeof(int16_t)));
+                                                      m_color_calibration.resolution_width * 3 *
+                                                          static_cast<int32_t>(sizeof(int16_t)));
         }
 
         k4a_result_t result = k4a_transformation_depth_image_to_color_camera_custom(m_handle,
@@ -917,10 +924,11 @@ public:
      *
      * \sa k4a_transformation_depth_image_to_color_camera_custom
      */
-    std::pair<image, image> depth_image_to_color_camera_custom(const image &depth_image,
-                                                        const image &custom_image,
-                                                        k4a_transformation_interpolation_type_t interpolation_type,
-                                                        uint32_t invalid_custom_value) const
+    std::pair<image, image>
+    depth_image_to_color_camera_custom(const image &depth_image,
+                                       const image &custom_image,
+                                       k4a_transformation_interpolation_type_t interpolation_type,
+                                       uint32_t invalid_custom_value) const
     {
         image transformed_depth_image;
         image transformed_custom_image;
@@ -930,7 +938,7 @@ public:
                                            &transformed_custom_image,
                                            interpolation_type,
                                            invalid_custom_value);
-        return {transformed_depth_image, transformed_custom_image};
+        return { transformed_depth_image, transformed_custom_image };
     }
 
     /** Transforms the color image into the geometry of the depth camera.
@@ -947,7 +955,8 @@ public:
             *transformed_color_image = image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                      m_depth_calibration.resolution_width,
                                                      m_depth_calibration.resolution_height,
-                                                     m_depth_calibration.resolution_width * 4 * static_cast<int32_t>(sizeof(uint8_t)));
+                                                     m_depth_calibration.resolution_width * 4 *
+                                                         static_cast<int32_t>(sizeof(uint8_t)));
         }
 
         k4a_result_t result = k4a_transformation_color_image_to_depth_camera(m_handle,
@@ -965,8 +974,7 @@ public:
      *
      * \sa k4a_transformation_color_image_to_depth_camera
      */
-    image color_image_to_depth_camera(const image &depth_image,
-                                      const image &color_image) const
+    image color_image_to_depth_camera(const image &depth_image, const image &color_image) const
     {
         image transformed_color_image;
         color_image_to_depth_camera(depth_image, color_image, &transformed_color_image);
@@ -985,7 +993,8 @@ public:
             *xyz_image = image::create(K4A_IMAGE_FORMAT_CUSTOM,
                                        m_depth_calibration.resolution_width,
                                        m_depth_calibration.resolution_height,
-                                       m_depth_calibration.resolution_width * 3 * static_cast<int32_t>(sizeof(int16_t)));
+                                       m_depth_calibration.resolution_width * 3 *
+                                           static_cast<int32_t>(sizeof(int16_t)));
         }
 
         k4a_result_t result =
