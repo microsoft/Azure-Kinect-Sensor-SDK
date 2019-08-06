@@ -178,7 +178,7 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
 
         private static void ThreadProc(int delay, int count)
         {
-            // Make sure that there are calls and times that a thread exists where the tracer isn't active.
+            // Make sure that there are calls at times that a thread exists where the tracer isn't active.
             Assert.AreEqual(0, Device.GetInstalledCount());
             Thread.Sleep(delay);
 

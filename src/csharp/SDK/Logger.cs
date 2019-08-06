@@ -14,9 +14,11 @@ namespace Microsoft.Azure.Kinect.Sensor
     /// </summary>
     public static class Logger
     {
+        private static readonly object SyncRoot = new object();
         private static readonly NativeMethods.k4a_logging_message_cb_t DebugMessageHandler = OnDebugMessage;
-        private static Action<LogMessage> logMessageHandlers;
         private static bool isInitialized;
+
+        private static event Action<LogMessage> LogMessageHandlers;
 
         /// <summary>
         /// Occurs when the Azure Kinect Sensor SDK delivers a debug message.
@@ -25,17 +27,23 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             add
             {
-                if (!Logger.isInitialized)
+                lock (SyncRoot)
                 {
-                    Logger.Initialize();
-                }
+                    if (!Logger.isInitialized)
+                    {
+                        Logger.Initialize();
+                    }
 
-                logMessageHandlers += value;
+                    LogMessageHandlers += value;
+                }
             }
 
             remove
             {
-                logMessageHandlers -= value;
+                lock (SyncRoot)
+                {
+                    LogMessageHandlers -= value;
+                }
             }
         }
 
@@ -44,7 +52,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// </summary>
         public static void Initialize()
         {
-            lock (DebugMessageHandler)
+            lock (SyncRoot)
             {
                 if (Logger.isInitialized)
                 {
@@ -69,7 +77,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// </summary>
         internal static void Reset()
         {
-            lock (DebugMessageHandler)
+            lock (SyncRoot)
             {
                 if (!Logger.isInitialized)
                 {
@@ -94,7 +102,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             LogMessage data = new LogMessage(DateTime.Now, level, file, line, message);
 
-            Action<LogMessage> eventhandler = logMessageHandlers;
+            Action<LogMessage> eventhandler = LogMessageHandlers;
             if (eventhandler != null)
             {
                 eventhandler(data);
