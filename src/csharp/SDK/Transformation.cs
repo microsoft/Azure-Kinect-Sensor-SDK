@@ -60,8 +60,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
             Image image = new Image(
                 ImageFormat.Depth16,
-                this.calibration.color_camera_calibration.resolution_width,
-                this.calibration.color_camera_calibration.resolution_height)
+                this.calibration.ColorCameraCalibration.ResolutionWidth,
+                this.calibration.ColorCameraCalibration.ResolutionHeight)
             {
                 Timestamp = depth.Timestamp,
             };
@@ -177,8 +177,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
             Image transformed = new Image(
                 ImageFormat.ColorBGRA32,
-                this.calibration.depth_camera_calibration.resolution_width,
-                this.calibration.depth_camera_calibration.resolution_height)
+                this.calibration.DepthCameraCalibration.ResolutionWidth,
+                this.calibration.DepthCameraCalibration.ResolutionHeight)
             {
                 Exposure = color.Exposure,
                 ISOSpeed = color.ISOSpeed,

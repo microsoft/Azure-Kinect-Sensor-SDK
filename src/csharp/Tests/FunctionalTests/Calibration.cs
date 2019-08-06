@@ -16,16 +16,16 @@ namespace WrapperTests
             int depthWidth, int depthHeight,
             int colorWidth, int colorHeight)
         {
-            Assert.AreEqual(depthMode, cal.depth_mode);
-            Assert.AreEqual(colorResolution, cal.color_resolution);
-            Assert.AreEqual(depthWidth, cal.depth_camera_calibration.resolution_width);
-            Assert.AreEqual(depthHeight, cal.depth_camera_calibration.resolution_height);
-            Assert.AreEqual(colorWidth, cal.color_camera_calibration.resolution_width);
-            Assert.AreEqual(colorHeight, cal.color_camera_calibration.resolution_height);
-            Assert.IsTrue(cal.depth_camera_calibration.intrinsics.type == CalibrationModelType.Rational6KT ||
-                cal.depth_camera_calibration.intrinsics.type == CalibrationModelType.BrownConrady);
-            Assert.IsTrue(cal.color_camera_calibration.intrinsics.type == CalibrationModelType.Rational6KT ||
-                cal.color_camera_calibration.intrinsics.type == CalibrationModelType.BrownConrady);
+            Assert.AreEqual(depthMode, cal.DepthMode);
+            Assert.AreEqual(colorResolution, cal.ColorResolution);
+            Assert.AreEqual(depthWidth, cal.DepthCameraCalibration.ResolutionWidth);
+            Assert.AreEqual(depthHeight, cal.DepthCameraCalibration.ResolutionHeight);
+            Assert.AreEqual(colorWidth, cal.ColorCameraCalibration.ResolutionWidth);
+            Assert.AreEqual(colorHeight, cal.ColorCameraCalibration.ResolutionHeight);
+            Assert.IsTrue(cal.DepthCameraCalibration.Intrinsics.Type == CalibrationModelType.Rational6KT ||
+                cal.DepthCameraCalibration.Intrinsics.Type == CalibrationModelType.BrownConrady);
+            Assert.IsTrue(cal.ColorCameraCalibration.Intrinsics.Type == CalibrationModelType.Rational6KT ||
+                cal.ColorCameraCalibration.Intrinsics.Type == CalibrationModelType.BrownConrady);
         }
 
         [Test]
