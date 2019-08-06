@@ -325,7 +325,7 @@ k4a::image create_depth_image_like(const k4a::image &im)
 
 int main(int argc, char **argv)
 {
-    float chessboard_square_length = 0.; // Must be set
+    float chessboard_square_length = 0.; // Must be included in the input params
     int32_t color_exposure_usec = 8000;  // somewhat reasonable default exposure time
     int32_t powerline_freq = 2;          // default to a 60 Hz powerline
     cv::Size chessboard_pattern(0, 0);   // height, width. Both need to be set.
@@ -393,23 +393,23 @@ int main(int argc, char **argv)
     {
         throw std::runtime_error("Exactly 2 cameras are required!");
     }
-    // Find out which device is the master and which is the subordinate. We'll assume that the master camera is the
-    // first one with a cable in its sync out port.
+
+    // Set up a MultiDeviceCapturer to handle getting many synchronous captures
     vector<int> device_indices{ 0, 1 };
     MultiDeviceCapturer capturer(device_indices, color_exposure_usec, powerline_freq);
 
-    // Construct the calibrations that these types will use
+    // Create configurations. Note that the master MUST be first, and the order of indices in device_indices is not
+    // necessarily preserved because the device_indices may not have ordered according to master and subordinate
     vector<k4a_device_configuration_t> configs{ get_master_config(), get_sub_config() };
     k4a_device_configuration_t &master_config = configs.front();
     k4a_device_configuration_t &sub_config = configs.back();
 
     capturer.start_devices(configs);
 
-    // This wraps all the calibration details
+    // This wraps all the device-to-device details
     Transformation tr_color_sub_to_color_master =
         calibrate_devices(capturer, configs, chessboard_pattern, chessboard_square_length);
 
-    // End calibration
     k4a::calibration master_calibration = capturer.devices[0].get_calibration(master_config.depth_mode,
                                                                               master_config.color_resolution);
     k4a::calibration sub_calibration = capturer.devices[1].get_calibration(sub_config.depth_mode,
