@@ -16,6 +16,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
     internal class NativeMethods
     {
+        private const CallingConvention k4aCallingConvention = CallingConvention.Cdecl;
+
         // These types are used internally by the interop dll for marshaling purposes and are not exposed
         // over the public surface of the managed dll.
 
@@ -222,14 +224,14 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         #region Functions
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_set_allocator(
             k4a_memory_allocate_cb_t allocate,
             k4a_memory_destroy_cb_t free
         );
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_2d_to_2d(
             [In] ref Calibration calibration,
@@ -240,7 +242,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             out Vector2 target_point2d,
             out bool valid);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_2d_to_3d(
             [In] ref Calibration calibration,
@@ -251,7 +253,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             out Vector3 target_point3d,
             out bool valid);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_3d_to_2d(
             [In] ref Calibration calibration,
@@ -261,7 +263,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             out Vector2 target_point2d,
             out bool valid);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_3d_to_3d(
             [In] ref Calibration calibration,
@@ -270,7 +272,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             CalibrationDeviceType target_camera,
             out Vector3 target_point3d);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_calibration_get_from_raw(
             byte[] raw_calibration,
@@ -279,23 +281,23 @@ namespace Microsoft.Azure.Kinect.Sensor
             ColorResolution color_resolution,
             out Calibration calibration);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_transformation_t k4a_transformation_create([In] ref Calibration calibration);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_transformation_destroy(IntPtr transformation_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_transformation_depth_image_to_color_camera(
             k4a_transformation_t transformation_handle,
             k4a_image_t depth_image,
             k4a_image_t transformed_depth_image);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_transformation_color_image_to_depth_camera(
             k4a_transformation_t transformation_handle,
@@ -303,7 +305,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             k4a_image_t color_image,
             k4a_image_t transformed_color_image);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_transformation_depth_image_to_point_cloud(
                 k4a_transformation_t transformation_handle,
@@ -311,56 +313,55 @@ namespace Microsoft.Azure.Kinect.Sensor
                 CalibrationDeviceType camera,
                 k4a_image_t xyz_image);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_device_close(IntPtr device_handle);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_capture_create(out k4a_capture_t capture_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_image_t k4a_capture_get_color_image(k4a_capture_t capture_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_image_t k4a_capture_get_depth_image(k4a_capture_t capture_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_image_t k4a_capture_get_ir_image(k4a_capture_t capture_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern float k4a_capture_get_temperature_c(k4a_capture_t capture_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_capture_set_color_image(k4a_capture_t capture_handle, k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_capture_set_depth_image(k4a_capture_t capture_handle, k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float temperature_c);
-               
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_capture_reference(IntPtr capture_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_capture_release(IntPtr capture_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_image_create(ImageFormat format,
             int width_pixels,
@@ -368,10 +369,13 @@ namespace Microsoft.Azure.Kinect.Sensor
             int stride_bytes,
             out k4a_image_t image_handle);
 
+        [UnmanagedFunctionPointer(k4aCallingConvention)]
         public delegate IntPtr k4a_memory_allocate_cb_t(int size, out IntPtr context);
+
+        [UnmanagedFunctionPointer(k4aCallingConvention)]
         public delegate void k4a_memory_destroy_cb_t(IntPtr buffer, IntPtr context);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_image_create_from_buffer(
             ImageFormat format,
@@ -385,19 +389,19 @@ namespace Microsoft.Azure.Kinect.Sensor
             out k4a_image_t image_handle
         );
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_image_reference(IntPtr image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_image_release(IntPtr image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern UInt32 k4a_device_get_installed_count();
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_device_get_calibration(
             k4a_device_t device_handle,
@@ -406,120 +410,120 @@ namespace Microsoft.Azure.Kinect.Sensor
             out Calibration calibration);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_wait_result_t k4a_device_get_capture(
             k4a_device_t device_handle,
             out k4a_capture_t capture_handle,
             Int32 timeout_in_ms);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_wait_result_t k4a_device_get_imu_sample(
             k4a_device_t device_handle,
             [Out] k4a_imu_sample_t imu_sample,
             Int32 timeout_in_ms);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_device_get_sync_jack(
             k4a_device_t device_handle,
             out bool sync_in_jack_connected,
             out bool sync_out_jack_connected);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_device_get_version(
             k4a_device_t device_handle,
             out k4a_hardware_version_t version);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle, [Out] byte[] data, ref UIntPtr data_size);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_device_set_color_control(k4a_device_t device_handle, ColorControlCommand command, ColorControlMode mode, Int32 value);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle, ColorControlCommand command, out ColorControlMode mode, out Int32 value);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, [In] ref k4a_device_configuration_t config);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_device_stop_cameras(k4a_device_t device_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_device_start_imu(k4a_device_t device_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_device_stop_imu(k4a_device_t device_handle);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_device_open(UInt32 index, out k4a_device_t device_handle);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
         [NativeReference]
         public static extern k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle, StringBuilder serial_number, ref UIntPtr data_size);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern UInt64 k4a_image_get_exposure_usec(k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_image_set_exposure_time_usec(k4a_image_t image_handle, UInt64 value);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern ImageFormat k4a_image_get_format(k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern int k4a_image_get_height_pixels(k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern int k4a_image_get_width_pixels(k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern int k4a_image_get_stride_bytes(k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern UIntPtr k4a_image_get_size(k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern UInt32 k4a_image_get_iso_speed(k4a_image_t image_handle);
 
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_image_set_iso_speed(k4a_image_t image_handle, UInt32 value);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern UInt32 k4a_image_get_white_balance(k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_image_set_white_balance(k4a_image_t image_handle, UInt32 value);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern UInt64 k4a_image_get_device_timestamp_usec(k4a_image_t image_handle);
 
@@ -531,17 +535,18 @@ namespace Microsoft.Azure.Kinect.Sensor
         [NativeReference]
         public static extern UInt64 k4a_image_get_system_timestamp_nsec(k4a_image_t image_handle);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_image_set_system_timestamp_nsec(k4a_image_t image_handle, UInt64 value);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern IntPtr k4a_image_get_buffer(k4a_image_t image_handle);
 
+        [UnmanagedFunctionPointer(k4aCallingConvention)]
         public delegate void k4a_logging_message_cb_t(IntPtr context, LogLevel level, [MarshalAs(UnmanagedType.LPStr)] string file, int line, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_set_debug_message_handler(
             k4a_logging_message_cb_t message_cb,

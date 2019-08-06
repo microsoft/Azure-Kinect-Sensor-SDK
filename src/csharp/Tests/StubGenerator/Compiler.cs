@@ -1,6 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="Compiler.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-using System;
+// </copyright>
+//------------------------------------------------------------------------------
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -97,7 +100,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
 
                     if (cl.ExitCode != 0)
                     {
-                        throw new Exception("Compilation failed: " + output);
+                        throw new AzureKinectStubGeneratorException("Compilation failed: " + output);
                     }
                 }
             }
@@ -105,7 +108,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
             {
                 if ((uint)ex.ErrorCode == 0x80004005)
                 {
-                    throw new Exception($"Could not find compiler \"{options.CompilerPath}\". Ensure you are running in a developer environment.");
+                    throw new AzureKinectStubGeneratorException($"Could not find compiler \"{options.CompilerPath}\". Ensure you are running in a developer environment.", ex);
                 }
                 else
                 {

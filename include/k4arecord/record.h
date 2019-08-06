@@ -24,8 +24,6 @@ extern "C" {
 
 /** Opens a new recording file for writing.
  *
- * The file will be created if it doesn't exist, or overwritten if an existing file is specified.
- *
  * \param path
  * Filesystem path for the new recording.
  *
@@ -39,6 +37,9 @@ extern "C" {
  * \param recording_handle
  * If successful, this contains a pointer to the new recording handle. Caller must call k4a_record_close()
  * when finished with recording.
+ *
+ * \remarks
+ * The file will be created if it doesn't exist, or overwritten if an existing file is specified.
  *
  * \remarks
  * Streaming does not need to be started on the device at the time this function is called, but when it is started
@@ -67,7 +68,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_create(const char *path,
                                                 const k4a_device_configuration_t device_config,
                                                 k4a_record_t *recording_handle);
 
-/** Adds a tag to the recording. All tags need to be added before the recording header is written.
+/** Adds a tag to the recording.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
@@ -88,6 +89,12 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_create(const char *path,
  * Tags are global to a file, and should store data related to the entire recording, such as camera configuration or
  * recording location.
  *
+ * \remarks
+ * Tag names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
+ *
+ * \remarks
+ * All tags need to be added before the recording header is written.
+ *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
@@ -100,8 +107,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
 
 /** Adds the track header for recording IMU.
  *
- * The track needs to be added before the recording header is written.
- *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
@@ -110,6 +115,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * The track needs to be added before the recording header is written.
  *
  * \xmlonly
  * <requirements>
@@ -121,9 +129,159 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_handle);
 
-/** Writes the recording header and metadata to file.
+/** Adds an attachment to the recording.
  *
- * This must be called before captures can be written.
+ * \param recording_handle
+ * The handle of a new recording, obtained by k4a_record_create().
+ *
+ * \param attachment_name
+ * The name of the attachment to be stored in the recording file. This name should be a valid filename with an
+ * extension.
+ *
+ * \param buffer
+ * The attachment data buffer.
+ *
+ * \param buffer_size
+ * The size of the attachment data buffer.
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * All attachments need to be added before the recording header is written.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recording_handle,
+                                                        const char *attachment_name,
+                                                        const uint8_t *buffer,
+                                                        size_t buffer_size);
+
+/** Adds custom video tracks to the recording.
+ *
+ * \param recording_handle
+ * The handle of a new recording, obtained by k4a_record_create().
+ *
+ * \param track_name
+ * The name of the custom video track to be added.
+ *
+ * \param codec_id
+ * A UTF8 null terminated string containing the codec ID of the track. Some of the existing formats are listed here:
+ * https://www.matroska.org/technical/specs/codecid/index.html. The codec ID can also be custom defined by the user.
+ * Video codec ID's should start with 'V_'.
+ *
+ * \param codec_context
+ * The codec context is a codec-specific buffer that contains any required codec metadata that is only known to the
+ * codec. It is mapped to the matroska 'CodecPrivate' element.
+ *
+ * \param codec_context_size
+ * The size of the codec context buffer.
+ *
+ * \param track_settings
+ * Additional metadata for the video track such as resolution and framerate.
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created automatically when the k4a_record_create()
+ * API is called. This API can be used to add additional video tracks to save custom data.
+ *
+ * \remarks
+ * Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
+ *
+ * \remarks
+ * All tracks need to be added before the recording header is written.
+ *
+ * \remarks
+ * Call k4a_record_write_custom_track_data() with the same track_name to write data to this track.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_video_track(const k4a_record_t recording_handle,
+                                                                const char *track_name,
+                                                                const char *codec_id,
+                                                                const uint8_t *codec_context,
+                                                                size_t codec_context_size,
+                                                                const k4a_record_video_settings_t *track_settings);
+
+/** Adds custom subtitle tracks to the recording.
+ *
+ * \param recording_handle
+ * The handle of a new recording, obtained by k4a_record_create().
+ *
+ * \param track_name
+ * The name of the custom subtitle track to be added.
+ *
+ * \param codec_id
+ * A UTF8 null terminated string containing the codec ID of the track. Some of the existing formats are listed here:
+ * https://www.matroska.org/technical/specs/codecid/index.html. The codec ID can also be custom defined by the user.
+ * Subtitle codec ID's should start with 'S_'.
+ *
+ * \param codec_context
+ * The codec context is a codec-specific buffer that contains any required codec metadata that is only known to the
+ * codec. It is mapped to the matroska 'CodecPrivate' element.
+ *
+ * \param codec_context_size
+ * The size of the codec context buffer.
+ *
+ * \param track_settings
+ * Additional metadata for the subtitle track. If NULL, the default settings will be used.
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * Built-in subtitle tracks like the IMU track will be created automatically when the k4a_record_add_imu_track() API is
+ * called. This API can be used to add additional subtitle tracks to save custom data.
+ *
+ * \remarks
+ * Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
+ *
+ * \remarks
+ * All tracks need to be added before the recording header is written.
+ *
+ * \remarks
+ * Call k4a_record_write_custom_track_data() with the same track_name to write data to this track.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t
+k4a_record_add_custom_subtitle_track(const k4a_record_t recording_handle,
+                                     const char *track_name,
+                                     const char *codec_id,
+                                     const uint8_t *codec_context,
+                                     size_t codec_context_size,
+                                     const k4a_record_subtitle_settings_t *track_settings);
+
+/** Writes the recording header and metadata to file.
  *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
@@ -133,6 +291,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_ha
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * This must be called before captures or any track data can be written.
  *
  * \xmlonly
  * <requirements>
@@ -146,8 +307,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_header(k4a_record_t recording_han
 
 /** Writes a camera capture to file.
  *
- * Captures must be written in increasing order of timestamp, and the file's header must already be written.
- *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
@@ -159,6 +318,9 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_header(k4a_record_t recording_han
  * \relates k4a_record_t
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * Captures must be written in increasing order of timestamp, and the file's header must already be written.
  *
  * \remarks
  * k4a_record_write_capture() will write all images in the capture to the corresponding tracks in the recording file.
@@ -176,10 +338,6 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_ha
 
 /** Writes an imu sample to file.
  *
- * Samples must be written in increasing order of timestamp, and the file's header must already be written.
- * When writing imu samples at the same time as captures, the samples should be within 1 second of the most recently
- * written capture.
- *
  * \param recording_handle
  * The handle of a new recording, obtained by k4a_record_create().
  *
@@ -192,6 +350,13 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_ha
  *
  * \returns ::K4A_RESULT_SUCCEEDED is returned on success
  *
+ * \remarks
+ * Samples must be written in increasing order of timestamp, and the file's header must already be written.
+ *
+ * \remarks
+ * When writing imu samples at the same time as captures, the samples should be within 1 second of the most recently
+ * written capture.
+ *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
@@ -201,6 +366,49 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_ha
  * \endxmlonly
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording_handle, k4a_imu_sample_t imu_sample);
+
+/** Writes data for a custom track to file.
+ *
+ * \param recording_handle
+ * The handle of a new recording, obtained by k4a_record_create().
+ *
+ * \param track_name
+ * The name of the custom track that the data is going to be written to.
+ *
+ * \param device_timestamp_usec
+ * The timestamp in microseconds for the custom track data. This timestamp should be in the same time domain as the
+ * device timestamp used for recording.
+ *
+ * \param custom_data
+ * The buffer of custom track data.
+ *
+ * \param custom_data_size
+ * The size of the custom track data buffer.
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success
+ *
+ * \remarks
+ * Custom track data must be written in increasing order of timestamp, and the file's header must already be written.
+ * When writing custom track data at the same time as captures or IMU data, the custom data should be within 1 second of
+ * the most recently written timestamp.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
+                                                                 const char *track_name,
+                                                                 uint64_t device_timestamp_usec,
+                                                                 uint8_t *custom_data,
+                                                                 size_t custom_data_size);
 
 /** Flushes all pending recording data to disk.
  *

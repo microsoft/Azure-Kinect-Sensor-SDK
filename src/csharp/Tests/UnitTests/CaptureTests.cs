@@ -1,8 +1,12 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="CaptureTests.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using Microsoft.Azure.Kinect.Sensor.Test.StubGenerator;
 using NUnit.Framework;
-using System;
 
 namespace Microsoft.Azure.Kinect.Sensor.UnitTests
 {
@@ -39,8 +43,6 @@ namespace Microsoft.Azure.Kinect.Sensor.UnitTests
             Microsoft.Azure.Kinect.Sensor.Allocator.Singleton.UseManagedAllocator = false;
         }
 
-
-
         /// <summary>
         /// Validate that garbage collection closes all references to the capture.
         /// </summary>
@@ -62,6 +64,16 @@ void k4a_capture_release(k4a_capture_t capture_handle)
     STUB_ASSERT(capture_handle == (k4a_capture_t)0x0C001234);
 }
 
+k4a_result_t k4a_set_debug_message_handler(
+    k4a_logging_message_cb_t *message_cb,
+    void *message_cb_context,
+    k4a_log_level_t min_level)
+{
+    STUB_ASSERT(message_cb != NULL);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 ");
 
             CallCount count = this.nativeK4a.CountCalls();
@@ -69,7 +81,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
             Assert.AreEqual(0, count.Calls("k4a_capture_create"));
             Assert.AreEqual(0, count.Calls("k4a_capture_release"));
 
-            System.WeakReference capture = this.CreateWithWeakReference(() =>
+            WeakReference capture = this.CreateWithWeakReference(() =>
             {
                 Capture c = new Capture();
 
@@ -81,11 +93,11 @@ void k4a_capture_release(k4a_capture_t capture_handle)
             });
 
             // The reference to the Capture object is no longer on the stack, and therefore is free to be garbage collected
-            // At this point capture.IsAlive is likely to be true, but not garanteed to be
+            // At this point capture.IsAlive is likely to be true, but not guaranteed to be
 
             // Force garbage collection
-            System.GC.Collect(0, System.GCCollectionMode.Forced, true);
-            System.GC.WaitForPendingFinalizers();
+            GC.Collect(0, GCCollectionMode.Forced, true);
+            GC.WaitForPendingFinalizers();
 
             Assert.AreEqual(false, capture.IsAlive);
 
@@ -137,7 +149,7 @@ void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float value)
                 c.Temperature = 3.5f;
                 Assert.AreEqual(1, count.Calls("k4a_capture_set_temperature_c"));
 
-                // Verify the write is being marshalled correctly
+                // Verify the write is being marshaled correctly
                 _ = Assert.Throws(typeof(NativeFailureException), () =>
                   {
                       c.Temperature = 4.0f;
@@ -146,12 +158,12 @@ void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float value)
                 c.Dispose();
 
                 // Verify disposed behavior
-                _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                _ = Assert.Throws(typeof(ObjectDisposedException), () =>
                   {
                       c.Temperature = 4.0f;
                   });
 
-                _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+                _ = Assert.Throws(typeof(ObjectDisposedException), () =>
                   {
                       float x = c.Temperature;
                   });
@@ -171,22 +183,22 @@ void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float value)
             c.Dispose();
 
             // Verify disposed behavior
-            _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+            _ = Assert.Throws(typeof(ObjectDisposedException), () =>
             {
                 c.Color = null;
             });
 
-            _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+            _ = Assert.Throws(typeof(ObjectDisposedException), () =>
             {
                 Image image = c.Color;
             });
 
-            _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+            _ = Assert.Throws(typeof(ObjectDisposedException), () =>
             {
                 _ = c.Reference();
             });
 
-            _ = Assert.Throws(typeof(System.ObjectDisposedException), () =>
+            _ = Assert.Throws(typeof(ObjectDisposedException), () =>
             {
                 _ = c.DangerousGetHandle();
             });
@@ -233,6 +245,7 @@ void k4a_capture_release(k4a_capture_t capture_handle)
     
     STUB_ASSERT(capture->refcount >= 0);
 }
+
 ");
 
             Capture c1 = new Capture();
@@ -397,9 +410,9 @@ void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image_t image)
             }
         }
 
-        private System.WeakReference CreateWithWeakReference<T>(System.Func<T> factory)
+        private WeakReference CreateWithWeakReference<T>(Func<T> factory)
         {
-            return new System.WeakReference(factory());
+            return new WeakReference(factory());
         }
 
         // Helper to create basic capture create/release implementation
@@ -430,6 +443,17 @@ void k4a_capture_release(k4a_capture_t capture_handle)
     STUB_ASSERT(capture_handle == (k4a_capture_t)0x0C001234);
     captureRefCount--;
 }
+
+k4a_result_t k4a_set_debug_message_handler(
+    k4a_logging_message_cb_t *message_cb,
+    void *message_cb_context,
+    k4a_log_level_t min_level)
+{
+    STUB_ASSERT(message_cb != NULL);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 ");
         }
 

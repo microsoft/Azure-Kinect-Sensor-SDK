@@ -92,7 +92,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     {
                         try
                         {
-                            AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(this.allocateDelegate, this.freeDelegate));
+                            AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_set_allocator(this.allocateDelegate, this.freeDelegate));
                             this.hooked = true;
                         }
                         catch (Exception)
@@ -107,7 +107,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     if (!value && this.hooked)
                     {
                         // Disabling the hook once it has been enabled should not catch the exception
-                        AzureKinectException.ThrowIfNotSuccess(NativeMethods.k4a_set_allocator(null, null));
+                        AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_set_allocator(null, null));
                         this.hooked = false;
                     }
                 }
@@ -127,7 +127,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// When the CLR shuts down, native callbacks in to the CLR result in an application crash. The allocator free method
         /// is a native callback to the managed layer that is called whenever the hooked native API needs to free memory.
         ///
-        /// To avoid this callback after the CLR shuts down, the native library must be completly cleaned up prior CLR shutdown.
+        /// To avoid this callback after the CLR shuts down, the native library must be completely cleaned up prior CLR shutdown.
         ///
         /// Any object that may hold references to the native library (and will therefore generate native to manged callbacks when it
         /// gets cleaned up) should register with the RegisterForDisposal method to ensure it is cleaned up in the correct order.
@@ -143,7 +143,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
 
                 // Track the object as one we may need to dispose during shutdown.
-                // Use a weak reference to allow the object to be garbage collected earliler if possible.
+                // Use a weak reference to allow the object to be garbage collected earlier if possible.
                 _ = this.disposables.Add(new WeakReference<IDisposable>(disposable));
             }
         }
@@ -237,7 +237,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                     if (entry.UsedSize != size)
                     {
-                        throw new Exception("Multiple image buffers sharing the same address cannot have the same size");
+                        throw new AzureKinectException("Multiple image buffers sharing the same address cannot have the same size");
                     }
 
                 }
@@ -363,7 +363,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 // Disable the managed allocator hook to ensure no new allocations
                 this.UseManagedAllocator = false;
 
-                // Prevent more dispsal registrations while we are cleaning up
+                // Prevent more disposal registrations while we are cleaning up
                 this.noMoreDisposalRegistrations = true;
 
                 System.Diagnostics.Debug.WriteLine($"Disposable count {this.disposables.Count} (Allocation Count {this.allocations.Count})");
@@ -394,8 +394,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 // if this happens after the CLR has entered shutdown, the CLR will generate an exception.
                 if (this.allocations.Count > 0)
                 {
-                    // TODO: Update exception type
-                    throw new Exception("Not all native allocations have been freed before managed shutdown");
+                    throw new AzureKinectException("Not all native allocations have been freed before managed shutdown");
                 }
             }
         }
