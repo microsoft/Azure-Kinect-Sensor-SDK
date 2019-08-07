@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using Microsoft.Azure.Kinect.Sensor;
 using Microsoft.Azure.Kinect.Sensor.WPF;
 
 namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
@@ -50,8 +51,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                     CameraFPS = FPS.FPS30,
                 });
 
-                int colorWidth = device.GetCalibration().color_camera_calibration.resolution_width;
-                int colorHeight = device.GetCalibration().color_camera_calibration.resolution_height;
+                int colorWidth = device.GetCalibration().ColorCameraCalibration.ResolutionWidth;
+                int colorHeight = device.GetCalibration().ColorCameraCalibration.ResolutionHeight;
 
                 Stopwatch sw = new Stopwatch();
                 int frameCount = 0;
