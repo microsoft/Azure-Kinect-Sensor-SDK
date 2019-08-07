@@ -64,7 +64,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             // in a managed byte[] array. This has a more significant performance impact, but generally is only needed for
             // media foundation (color image) or potentially custom buffers. When set to true, the Memory<T> objects are safe
             // copies of the native buffers. When set to false, the Memory<T> objects are direct pointers to the native buffers
-            // and can therefore cause native memory corruption if a Memory<T> (or Span<T>) is used after the Image is disposed 
+            // and can therefore cause native memory corruption if a Memory<T> (or Span<T>) is used after the Image is disposed
             // or garbage collected.
             this.SafeCopyNativeBuffers = true;
         }
@@ -79,10 +79,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// </summary>
         public bool UseManagedAllocator
         {
-            get
-            {
-                return this.hooked;
-            }
+            get => this.hooked;
 
             set
             {
@@ -239,7 +236,6 @@ namespace Microsoft.Azure.Kinect.Sensor
                     {
                         throw new AzureKinectException("Multiple image buffers sharing the same address cannot have the same size");
                     }
-
                 }
                 else
                 {
@@ -421,6 +417,4 @@ namespace Microsoft.Azure.Kinect.Sensor
             public bool Initialized { get; set; }
         }
     }
-
-
 }

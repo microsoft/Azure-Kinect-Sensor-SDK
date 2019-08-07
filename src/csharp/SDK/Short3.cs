@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="Short3.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Runtime.InteropServices;
 
@@ -12,7 +16,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     public struct Short3 : IEquatable<Short3>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Short3"/> struct.
+        /// Initializes a new instance of the <see cref="Short3"/> structure.
         /// </summary>
         /// <param name="x">X value of the vector.</param>
         /// <param name="y">Y value of the vector.</param>

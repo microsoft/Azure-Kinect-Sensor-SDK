@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="ImuSample.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -14,7 +18,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     public class ImuSample
     {
         /// <summary>
-        /// Gets or sets temperature reading of this sample (Celcius).
+        /// Gets or sets temperature reading of this sample (Celsius).
         /// </summary>
         public float Temperature { get; set; }
 
@@ -24,7 +28,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Vector3 AccelerometerSample { get; set; }
 
         /// <summary>
-        /// Gets or sets timestamp of the accerometer.
+        /// Gets or sets time-stamp of the accelerometer.
         /// </summary>
         public TimeSpan AccelerometerTimestamp { get; set; }
 
@@ -34,7 +38,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Vector3 GyroSample { get; set; }
 
         /// <summary>
-        /// Gets or sets timestamp of the gyroscope.
+        /// Gets or sets time-stamp of the gyroscope.
         /// </summary>
         public TimeSpan GyroTimestamp { get; set; }
     }

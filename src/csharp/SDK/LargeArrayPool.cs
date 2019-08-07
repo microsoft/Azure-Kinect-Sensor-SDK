@@ -1,7 +1,12 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="LargeArrayPool.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -10,7 +15,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     /// </summary>
     /// <remarks>
     /// This ArrayPool allocates and re-uses large arrays to reduce the overhead of
-    /// zero-ing out the buffers and allocating from the managed heap.
+    /// zeroing out the buffers and allocating from the managed heap.
     ///
     /// Unused arrays are held by weak references and may be garbage collected.
     /// </remarks>

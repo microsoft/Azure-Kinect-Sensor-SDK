@@ -1,8 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="DepthMode.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-using System;
-using System.Collections.Generic;
-using System.Text;
+// </copyright>
+//------------------------------------------------------------------------------
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -44,7 +45,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         WFOV_Unbinned,
 
         /// <summary>
-        /// Passive IR only iscaptured at 1024x1024.
+        /// Passive IR only is captured at 1024x1024.
         /// </summary>
         PassiveIR,
 #pragma warning restore CA1707 // Identifiers should not contain underscores

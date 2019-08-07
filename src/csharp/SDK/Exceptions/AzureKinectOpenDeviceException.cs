@@ -105,7 +105,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <param name="tracer">The tracer is that is capturing logging messages.</param>
         /// <param name="result">The result native function to call.</param>
         /// <typeparam name="T">The type of result to expect from the function call.</typeparam>
-        internal static void ThrowIfNotSuccess<T>(LoggingTracer tracer, T result)
+        internal static new void ThrowIfNotSuccess<T>(LoggingTracer tracer, T result)
             where T : System.Enum
         {
             if (!AzureKinectException.IsSuccess(result))

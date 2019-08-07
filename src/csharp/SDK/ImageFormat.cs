@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="ImageFormat.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -64,7 +68,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Depth image type DEPTH16.
         /// </summary>
         /// <remarks>
-        /// Each pixel of DEPTH16 data is two bytes of little endian unsigned depth data. The unit of the data
+        /// Each pixel of DEPTH16 data is two bytes of little-endian unsigned depth data. The unit of the data
         /// is in millimeters from the origin of the camera.
         ///
         /// Stride indicates the length of each line in bytes and should be used to determine the start location
@@ -76,7 +80,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Image type IR16.
         /// </summary>
         /// <remarks>
-        /// Each pixel of IR16 data is two bytes of little endian unsigned depth data. The value of the data
+        /// Each pixel of IR16 data is two bytes of little-endian unsigned depth data. The value of the data
         /// represents brightness.
         ///
         /// This format represents infrared light and is captured by the depth camera. Stride indicates the
@@ -100,9 +104,9 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Single channel image type CUSTOM16.
         /// </summary>
         /// <remarks>
-        /// Each pixel of CUSTOM16 is a single channel two bytes of little endian unsigned data.
+        /// Each pixel of CUSTOM16 is a single channel two bytes of little-endian unsigned data.
         ///
-        /// Stride indicates the length of each line in bytes and should be used to determine the start 
+        /// Stride indicates the length of each line in bytes and should be used to determine the start
         /// location of each line of the image in memory.
         /// </remarks>
         Custom16,
@@ -113,7 +117,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <remarks>
         /// Used in conjunction with user created images or images packing non-standard data.
         ///
-        /// See the originator of the custom formatted image for information on how to interpret the data. 
+        /// See the originator of the custom formatted image for information on how to interpret the data.
         /// </remarks>
         Custom,
     }

@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Azure.Kinect.Sensor
 {
     /// <summary>
-    /// An Azure Kinect Image referencing its buffer and metadata.
+    /// An Azure Kinect Image referencing its buffer and meta-data.
     /// </summary>
     public class Image : IMemoryOwner<byte>, IDisposable
     {
@@ -308,7 +308,6 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             get
             {
-
                 if (this.strideBytes >= 0)
                 {
                     return this.strideBytes;
@@ -603,7 +602,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <inheritdoc/>
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            // Do not change this code. Put cleanup code in Dispose(disposing) below.
             this.Dispose(true);
 
             GC.SuppressFinalize(this);
@@ -750,7 +749,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Disposes the resources held by the image.
         /// </summary>
-        /// <param name="disposing">True if called by IDisposable.Disppose, false when called by a finalizer.</param>
+        /// <param name="disposing"><c>True</c> to release both managed and unmanaged resources; <c>False</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposedValue)

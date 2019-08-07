@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="DeviceConfiguration.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 
 namespace Microsoft.Azure.Kinect.Sensor
@@ -12,7 +16,6 @@ namespace Microsoft.Azure.Kinect.Sensor
     /// </remarks>
     public class DeviceConfiguration
     {
-        
         /// <summary>
         /// Gets or sets the image format to capture with the color camera.
         /// </summary>
@@ -34,10 +37,10 @@ namespace Microsoft.Azure.Kinect.Sensor
         public FPS CameraFPS { get; set; } = FPS.FPS30;
 
         /// <summary>
-        /// Gets or sets a value indicating whether to only return synchrnoized depth and color images.
+        /// Gets or sets a value indicating whether to only return synchronized depth and color images.
         /// </summary>
         /// <remarks>
-        /// If this is false, when color or depth images are dropped, the other corrisponding image will be dropped too.
+        /// If this is false, when color or depth images are dropped, the other corresponding image will be dropped too.
         /// </remarks>
         public bool SynchronizedImagesOnly { get; set; } = false;
 
@@ -52,7 +55,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public WiredSyncMode WiredSyncMode { get; set; } = WiredSyncMode.Standalone;
 
         /// <summary>
-        /// Gets or sets the external synchrnoization timining.
+        /// Gets or sets the external synchronization timing.
         /// </summary>
         public TimeSpan SuboridinateDelayOffMaster { get; set; } = TimeSpan.Zero;
 
@@ -61,9 +64,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// </summary>
         public bool DisableStreamingIndicator { get; set; } = false;
 
-
         /// <summary>
-        /// Get the equivilant native configuration structure.
+        /// Get the equivalent native configuration structure.
         /// </summary>
         /// <returns>A k4a_device_configuration_t.</returns>
         internal NativeMethods.k4a_device_configuration_t GetNativeConfiguration()
