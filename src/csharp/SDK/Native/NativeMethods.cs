@@ -13,106 +13,27 @@ using Microsoft.Azure.Kinect.Sensor.Native;
 namespace Microsoft.Azure.Kinect.Sensor
 {
 #pragma warning disable IDE1006 // Naming Styles
-
-    internal class NativeMethods
+#pragma warning disable SA1600 // Elements should be documented
+#pragma warning disable SA1602 // Enumeration items should be documented
+    internal static class NativeMethods
     {
         private const CallingConvention k4aCallingConvention = CallingConvention.Cdecl;
 
-        // These types are used internally by the interop dll for marshaling purposes and are not exposed
-        // over the public surface of the managed dll.
+        [UnmanagedFunctionPointer(k4aCallingConvention)]
+        public delegate IntPtr k4a_memory_allocate_cb_t(int size, out IntPtr context);
 
-        #region Handle Types
+        [UnmanagedFunctionPointer(k4aCallingConvention)]
+        public delegate void k4a_memory_destroy_cb_t(IntPtr buffer, IntPtr context);
 
-        public class k4a_device_t : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
-        {
-            private k4a_device_t() : base(true)
-            {
-            }
+        [UnmanagedFunctionPointer(k4aCallingConvention)]
+        public delegate void k4a_logging_message_cb_t(IntPtr context, LogLevel level, [MarshalAs(UnmanagedType.LPStr)] string file, int line, [MarshalAs(UnmanagedType.LPStr)] string message);
 
-            protected override bool ReleaseHandle()
-            {
-                NativeMethods.k4a_device_close(handle);
-                return true;
-            }
-        }
-
-        public class k4a_capture_t : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
-        {
-            private k4a_capture_t() : base(true)
-            {
-            }
-
-            public k4a_capture_t DuplicateReference()
-            {
-                k4a_capture_t duplicate = new k4a_capture_t();
-
-                NativeMethods.k4a_capture_reference(handle);
-
-                duplicate.handle = this.handle;
-                return duplicate;
-
-            }
-
-            protected override bool ReleaseHandle()
-            {
-                NativeMethods.k4a_capture_release(handle);
-                return true;
-            }
-        }
-
-        public class k4a_image_t : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
-        {
-            private k4a_image_t() : base(true)
-            {
-            }
-
-            private k4a_image_t(k4a_image_t original) : base(true)
-            {
-                NativeMethods.k4a_image_reference(original.handle);
-                this.handle = original.handle;
-            }
-
-            public k4a_image_t DuplicateReference()
-            {
-                return new k4a_image_t(this);
-                /*
-                k4a_image_t duplicate = new k4a_image_t();
-
-                
-                duplicate.handle = this.handle;
-                return duplicate;
-                */
-            }
-
-            protected override bool ReleaseHandle()
-            {
-                NativeMethods.k4a_image_release(handle);
-                return true;
-            }
-        }
-
-        public class k4a_transformation_t : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
-        {
-            private k4a_transformation_t() : base(true)
-            {
-            }
-
-            protected override bool ReleaseHandle()
-            {
-                NativeMethods.k4a_transformation_destroy(handle);
-                return true;
-            }
-        }
-
-        #endregion
-
-        #region Enumerations
         [NativeReference]
         public enum k4a_buffer_result_t
         {
             K4A_BUFFER_RESULT_SUCCEEDED = 0,
             K4A_BUFFER_RESULT_FAILED,
-            K4A_BUFFER_RESULT_TOO_SMALL
+            K4A_BUFFER_RESULT_TOO_SMALL,
         }
 
         [NativeReference]
@@ -120,7 +41,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             K4A_WAIT_RESULT_SUCCEEDED = 0,
             K4A_WAIT_RESULT_FAILED,
-            K4A_WAIT_RESULT_TIMEOUT
+            K4A_WAIT_RESULT_TIMEOUT,
         }
 
         [NativeReference]
@@ -135,101 +56,14 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             K4A_STREAM_RESULT_SUCCEEDED = 0,
             K4A_STREAM_RESULT_FAILED,
-            K4A_STREAM_RESULT_EOF
+            K4A_STREAM_RESULT_EOF,
         }
-
-        #endregion
-
-        #region Structures
-
-        [NativeReference]
-        [StructLayout(LayoutKind.Sequential)]
-        public struct k4a_version_t
-        {
-            public int major;
-            public int minor;
-            public int revision;
-
-            public Version ToVersion()
-            {
-                return new Version(major, minor, revision);
-            }
-        }
-
-        [NativeReference]
-        [StructLayout(LayoutKind.Sequential)]
-        public struct k4a_hardware_version_t
-        {
-            public k4a_version_t rgb;
-            public k4a_version_t depth;
-            public k4a_version_t audio;
-            public k4a_version_t depth_sensor;
-            public FirmwareBuild firmware_build;
-            public FirmwareSignature firmware_signature;
-
-            public HardwareVersion ToHardwareVersion()
-            {
-                return new HardwareVersion
-                {
-                    RGB = this.rgb.ToVersion(),
-                    Depth = this.depth.ToVersion(),
-                    Audio = this.audio.ToVersion(),
-                    DepthSensor = this.depth_sensor.ToVersion(),
-                    FirmwareBuild = this.firmware_build,
-                    FirmwareSignature = this.firmware_signature
-                };
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        [Native.NativeReference("k4a_imu_sample_t")]
-        public class k4a_imu_sample_t
-        {
-            public float temperature { get; set; }
-            public Vector3 acc_sample { get; set; }
-            public UInt64 acc_timestamp_usec { get; set; }
-            public Vector3 gyro_sample { get; set; }
-            public UInt64 gyro_timestamp_usec { get; set; }
-
-            public ImuSample ToImuSample()
-            {
-                return new ImuSample
-                {
-                    Temperature = temperature,
-                    AccelerometerSample = acc_sample,
-                    AccelerometerTimestamp = TimeSpan.FromTicks(checked((long)acc_timestamp_usec) * 10),
-                    GyroSample = gyro_sample,
-                    GyroTimestamp = TimeSpan.FromTicks(checked((long)gyro_timestamp_usec) * 10)
-                };
-            }
-        }
-
-        [NativeReference]
-        [StructLayout(LayoutKind.Sequential)]
-        public struct k4a_device_configuration_t
-        {
-            public ImageFormat color_format;
-            public ColorResolution color_resolution;
-            public DepthMode depth_mode;
-            public FPS camera_fps;
-            public bool synchronized_images_only;
-            public int depth_delay_off_color_usec;
-            public WiredSyncMode wired_sync_mode;
-            public uint subordinate_delay_off_master_usec;
-            public bool disable_streaming_indicator;
-        }
-
-
-        #endregion
-
-        #region Functions
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_set_allocator(
             k4a_memory_allocate_cb_t allocate,
-            k4a_memory_destroy_cb_t free
-        );
+            k4a_memory_destroy_cb_t free);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -285,10 +119,9 @@ namespace Microsoft.Azure.Kinect.Sensor
         [NativeReference]
         public static extern k4a_transformation_t k4a_transformation_create([In] ref Calibration calibration);
 
-
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_transformation_destroy(IntPtr transformation_handle);
+        public static extern void k4a_transformation_destroy(IntPtr transformation_handle);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -316,7 +149,6 @@ namespace Microsoft.Azure.Kinect.Sensor
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_device_close(IntPtr device_handle);
-
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -353,6 +185,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float temperature_c);
+
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4a_capture_reference(IntPtr capture_handle);
@@ -363,17 +196,12 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_image_create(ImageFormat format,
+        public static extern k4a_result_t k4a_image_create(
+            ImageFormat format,
             int width_pixels,
             int height_pixels,
             int stride_bytes,
             out k4a_image_t image_handle);
-
-        [UnmanagedFunctionPointer(k4aCallingConvention)]
-        public delegate IntPtr k4a_memory_allocate_cb_t(int size, out IntPtr context);
-
-        [UnmanagedFunctionPointer(k4aCallingConvention)]
-        public delegate void k4a_memory_destroy_cb_t(IntPtr buffer, IntPtr context);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -386,8 +214,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             UIntPtr buffer_size,
             k4a_memory_destroy_cb_t buffer_release_cb,
             IntPtr buffer_release_cb_context,
-            out k4a_image_t image_handle
-        );
+            out k4a_image_t image_handle);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -399,7 +226,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern UInt32 k4a_device_get_installed_count();
+        public static extern uint k4a_device_get_installed_count();
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -409,20 +236,19 @@ namespace Microsoft.Azure.Kinect.Sensor
             ColorResolution color_resolution,
             out Calibration calibration);
 
-
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_wait_result_t k4a_device_get_capture(
             k4a_device_t device_handle,
             out k4a_capture_t capture_handle,
-            Int32 timeout_in_ms);
+            int timeout_in_ms);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_wait_result_t k4a_device_get_imu_sample(
             k4a_device_t device_handle,
             [Out] k4a_imu_sample_t imu_sample,
-            Int32 timeout_in_ms);
+            int timeout_in_ms);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -443,12 +269,11 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_set_color_control(k4a_device_t device_handle, ColorControlCommand command, ColorControlMode mode, Int32 value);
+        public static extern k4a_result_t k4a_device_set_color_control(k4a_device_t device_handle, ColorControlCommand command, ColorControlMode mode, int value);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle, ColorControlCommand command, out ColorControlMode mode, out Int32 value);
-
+        public static extern k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle, ColorControlCommand command, out ColorControlMode mode, out int value);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -466,25 +291,21 @@ namespace Microsoft.Azure.Kinect.Sensor
         [NativeReference]
         public static extern void k4a_device_stop_imu(k4a_device_t device_handle);
 
-
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_open(UInt32 index, out k4a_device_t device_handle);
-
+        public static extern k4a_result_t k4a_device_open(uint index, out k4a_device_t device_handle);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
         [NativeReference]
         public static extern k4a_buffer_result_t k4a_device_get_serialnum(k4a_device_t device_handle, StringBuilder serial_number, ref UIntPtr data_size);
 
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern ulong k4a_image_get_exposure_usec(k4a_image_t image_handle);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern UInt64 k4a_image_get_exposure_usec(k4a_image_t image_handle);
-
-        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
-        [NativeReference]
-        public static extern void k4a_image_set_exposure_time_usec(k4a_image_t image_handle, UInt64 value);
-
+        public static extern void k4a_image_set_exposure_time_usec(k4a_image_t image_handle, ulong value);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -508,43 +329,39 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern UInt32 k4a_image_get_iso_speed(k4a_image_t image_handle);
-
-
-        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
-        [NativeReference]
-        public static extern void k4a_image_set_iso_speed(k4a_image_t image_handle, UInt32 value);
+        public static extern uint k4a_image_get_iso_speed(k4a_image_t image_handle);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern UInt32 k4a_image_get_white_balance(k4a_image_t image_handle);
+        public static extern void k4a_image_set_iso_speed(k4a_image_t image_handle, uint value);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern void k4a_image_set_white_balance(k4a_image_t image_handle, UInt32 value);
+        public static extern uint k4a_image_get_white_balance(k4a_image_t image_handle);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern UInt64 k4a_image_get_device_timestamp_usec(k4a_image_t image_handle);
+        public static extern void k4a_image_set_white_balance(k4a_image_t image_handle, uint value);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern ulong k4a_image_get_device_timestamp_usec(k4a_image_t image_handle);
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
-        public static extern void k4a_image_set_device_timestamp_usec(k4a_image_t image_handle, UInt64 value);
+        public static extern void k4a_image_set_device_timestamp_usec(k4a_image_t image_handle, ulong value);
 
         [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
         [NativeReference]
-        public static extern UInt64 k4a_image_get_system_timestamp_nsec(k4a_image_t image_handle);
+        public static extern ulong k4a_image_get_system_timestamp_nsec(k4a_image_t image_handle);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern void k4a_image_set_system_timestamp_nsec(k4a_image_t image_handle, UInt64 value);
+        public static extern void k4a_image_set_system_timestamp_nsec(k4a_image_t image_handle, ulong value);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern IntPtr k4a_image_get_buffer(k4a_image_t image_handle);
-
-        [UnmanagedFunctionPointer(k4aCallingConvention)]
-        public delegate void k4a_logging_message_cb_t(IntPtr context, LogLevel level, [MarshalAs(UnmanagedType.LPStr)] string file, int line, [MarshalAs(UnmanagedType.LPStr)] string message);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -553,8 +370,166 @@ namespace Microsoft.Azure.Kinect.Sensor
             IntPtr message_cb_context,
             LogLevel min_level);
 
-        #endregion
+        [NativeReference]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct k4a_version_t
+        {
+            public int major;
+            public int minor;
+            public int revision;
 
+            public Version ToVersion()
+            {
+                return new Version(this.major, this.minor, this.revision);
+            }
+        }
+
+        [NativeReference]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct k4a_hardware_version_t
+        {
+            public k4a_version_t rgb;
+            public k4a_version_t depth;
+            public k4a_version_t audio;
+            public k4a_version_t depth_sensor;
+            public FirmwareBuild firmware_build;
+            public FirmwareSignature firmware_signature;
+
+            public HardwareVersion ToHardwareVersion()
+            {
+                return new HardwareVersion
+                {
+                    RGB = this.rgb.ToVersion(),
+                    Depth = this.depth.ToVersion(),
+                    Audio = this.audio.ToVersion(),
+                    DepthSensor = this.depth_sensor.ToVersion(),
+                    FirmwareBuild = this.firmware_build,
+                    FirmwareSignature = this.firmware_signature,
+                };
+            }
+        }
+
+        [NativeReference]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct k4a_device_configuration_t
+        {
+            public ImageFormat color_format;
+            public ColorResolution color_resolution;
+            public DepthMode depth_mode;
+            public FPS camera_fps;
+            public bool synchronized_images_only;
+            public int depth_delay_off_color_usec;
+            public WiredSyncMode wired_sync_mode;
+            public uint subordinate_delay_off_master_usec;
+            public bool disable_streaming_indicator;
+        }
+
+        public class k4a_device_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
+        {
+            private k4a_device_t()
+                : base(true)
+            {
+            }
+
+            protected override bool ReleaseHandle()
+            {
+                NativeMethods.k4a_device_close(this.handle);
+                return true;
+            }
+        }
+
+        public class k4a_capture_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
+        {
+            private k4a_capture_t()
+                : base(true)
+            {
+            }
+
+            public k4a_capture_t DuplicateReference()
+            {
+                k4a_capture_t duplicate = new k4a_capture_t();
+
+                k4a_capture_reference(this.handle);
+
+                duplicate.handle = this.handle;
+                return duplicate;
+            }
+
+            protected override bool ReleaseHandle()
+            {
+                k4a_capture_release(this.handle);
+                return true;
+            }
+        }
+
+        public class k4a_image_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
+        {
+            private k4a_image_t()
+                : base(true)
+            {
+            }
+
+            private k4a_image_t(k4a_image_t original)
+                : base(true)
+            {
+                k4a_image_reference(original.handle);
+                this.handle = original.handle;
+            }
+
+            public k4a_image_t DuplicateReference()
+            {
+                return new k4a_image_t(this);
+            }
+
+            protected override bool ReleaseHandle()
+            {
+                k4a_image_release(this.handle);
+                return true;
+            }
+        }
+
+        public class k4a_transformation_t : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
+        {
+            private k4a_transformation_t()
+                : base(true)
+            {
+            }
+
+            protected override bool ReleaseHandle()
+            {
+                k4a_transformation_destroy(this.handle);
+                return true;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        [Native.NativeReference("k4a_imu_sample_t")]
+        public class k4a_imu_sample_t
+        {
+            public float temperature { get; set; }
+
+            public Vector3 acc_sample { get; set; }
+
+            public ulong acc_timestamp_usec { get; set; }
+
+            public Vector3 gyro_sample { get; set; }
+
+            public ulong gyro_timestamp_usec { get; set; }
+
+            public ImuSample ToImuSample()
+            {
+                return new ImuSample
+                {
+                    Temperature = this.temperature,
+                    AccelerometerSample = this.acc_sample,
+                    AccelerometerTimestamp = TimeSpan.FromTicks(checked((long)this.acc_timestamp_usec) * 10),
+                    GyroSample = this.gyro_sample,
+                    GyroTimestamp = TimeSpan.FromTicks(checked((long)this.gyro_timestamp_usec) * 10),
+                };
+            }
+        }
     }
+#pragma warning restore SA1602 // Enumeration items should be documented
+#pragma warning restore SA1600 // Elements should be documented
 #pragma warning restore IDE1006 // Naming Styles
 }
