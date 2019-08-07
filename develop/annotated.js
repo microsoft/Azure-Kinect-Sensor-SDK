@@ -9,6 +9,7 @@ var annotated =
       [ "playback", "classk4a_1_1playback.html", "classk4a_1_1playback" ],
       [ "transformation", "classk4a_1_1transformation.html", "classk4a_1_1transformation" ]
     ] ],
+    [ "Microsoft", "namespace_microsoft.html", "namespace_microsoft" ],
     [ "k4a_calibration_camera_t", "structk4a__calibration__camera__t.html", "structk4a__calibration__camera__t" ],
     [ "k4a_calibration_extrinsics_t", "structk4a__calibration__extrinsics__t.html", "structk4a__calibration__extrinsics__t" ],
     [ "k4a_calibration_intrinsic_parameters_t", "unionk4a__calibration__intrinsic__parameters__t.html", "unionk4a__calibration__intrinsic__parameters__t" ],
