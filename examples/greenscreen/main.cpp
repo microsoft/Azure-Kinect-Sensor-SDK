@@ -461,17 +461,6 @@ int main(int argc, char **argv)
         sub_depth_to_master_color.depth_image_to_color_camera(sub_depth_image, &sub_depth_in_master_color);
         cv::Mat cv_sub_depth_in_master_color = depth_to_opencv(sub_depth_in_master_color);
 
-        // cv::Mat normalized_opencv_sub_depth_in_master_color;
-        // cv::normalize(opencv_sub_depth_in_master_color,
-        //               normalized_opencv_sub_depth_in_master_color,
-        //               0,
-        //               256,
-        //               cv::NORM_MINMAX);
-        // cv::Mat grayscale_opencv_sub_depth_in_master_color;
-        // normalized_opencv_sub_depth_in_master_color.convertTo(grayscale_opencv_sub_depth_in_master_color, CV_32FC3);
-        // cv::imshow("Subordinate depth in master color", grayscale_opencv_sub_depth_in_master_color);
-        // cv::waitKey(1);
-
         cv::Mat cv_master_color_image = color_to_opencv(master_color_image);
 
         // create the image that will be be used as output
@@ -486,9 +475,6 @@ int main(int argc, char **argv)
                                          (~master_valid_mask & sub_valid_mask &
                                           (cv_sub_depth_in_master_color < depth_threshold));
         cv::Mat output = cv_master_color_image;
-        // cv::add(output, cv::Scalar(0, 100, 0), output, ~sub_valid_mask);
-        // cv::add(output, cv::Scalar(0, 0, 100), output, ~master_valid_mask);
-        // cv::add(output, cv::Scalar(0, 100, 0), output, ~(cv_master_depth_in_master_color < depth_threshold));
         cv::add(output, cv::Scalar(0, 100, 0), output, ~within_threshold_range);
         cv::imshow("Green Screen", output);
         cv::waitKey(1);

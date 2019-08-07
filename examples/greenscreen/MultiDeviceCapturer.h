@@ -9,7 +9,7 @@ constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TI
 
 struct MultiDeviceCapturer
 {
-    // Set up all the devices. Note that the index order isn't necessarily preserved, because we try to find master
+    // Set up all the devices. Note that the index order isn't necessarily preserved, because we might swap with master
     MultiDeviceCapturer(const vector<int> &device_indices, int32_t color_exposure_usec, int32_t powerline_freq)
     {
         bool master_found = false;
@@ -51,7 +51,7 @@ struct MultiDeviceCapturer
         {
             throw std::runtime_error("Size of configurations not the same as size of devices!");
         }
-        // Start by starting all of the subordinate devices
+        // Start by starting all of the subordinate devices. They must be started before the master!
         for (size_t i = 1; i < devices.size(); ++i)
         {
             devices[i].start_cameras(&configs[i]);
@@ -173,6 +173,5 @@ struct MultiDeviceCapturer
     }
 
     // Once the constuctor finishes, devices[0] will always be the master
-    // Needs to be public
     std::vector<k4a::device> devices;
 };
