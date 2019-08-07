@@ -918,11 +918,11 @@ public:
                                                       m_color_resolution.height,
                                                       m_color_resolution.width *
                                                           static_cast<int32_t>(sizeof(uint16_t)));
-        image transformed_custom_image = image::create(K4A_IMAGE_FORMAT_CUSTOM,
+        image transformed_custom_image = image::create(custom_image.get_format(),
                                                        m_color_resolution.width,
                                                        m_color_resolution.height,
-                                                       m_color_resolution.width * 3 *
-                                                           static_cast<int32_t>(sizeof(int16_t)));
+                                                       m_color_resolution.width * (custom_image.get_stride_bytes() /
+                                                                                   custom_image.get_width_pixels()));
         depth_image_to_color_camera_custom(depth_image,
                                            custom_image,
                                            &transformed_depth_image,
