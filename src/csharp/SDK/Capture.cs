@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -61,6 +62,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         ///
         /// To get an instance of an Image that lives longer than the capture, call Image.Reference().
         /// </remarks>
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "SetImageWrapperAndDisposePrevious uses null to clear the stored image.")]
         public Image Color
         {
             get
@@ -88,6 +90,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         ///
         /// To get an instance of an Image that lives longer than the capture, call Image.Reference().
         /// </remarks>
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "SetImageWrapperAndDisposePrevious uses null to clear the stored image.")]
         public Image Depth
         {
             get
@@ -103,7 +106,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
-
         /// <summary>
         /// Gets or sets the IR image of this capture.
         /// </summary>
@@ -116,6 +118,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         ///
         /// To get an instance of an Image that lives longer than the capture, call Image.Reference().
         /// </remarks>
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "SetImageWrapperAndDisposePrevious uses null to clear the stored image.")]
         public Image IR
         {
             get

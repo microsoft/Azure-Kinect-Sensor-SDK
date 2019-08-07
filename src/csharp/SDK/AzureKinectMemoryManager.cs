@@ -1,11 +1,13 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectMemoryManager.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -15,7 +17,6 @@ namespace Microsoft.Azure.Kinect.Sensor
     internal class AzureKinectMemoryManager : MemoryManager<byte>
     {
         private Image image;
-        readonly long memoryPressure;
         private int pinCount = 0;
 
         /// <summary>
@@ -28,8 +29,6 @@ namespace Microsoft.Azure.Kinect.Sensor
         internal AzureKinectMemoryManager(Image image)
         {
             this.image = image.Reference();
-
-            this.memoryPressure = image.Size;
         }
 
         /// <inheritdoc/>
@@ -37,11 +36,12 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             lock (this)
             {
-                if (image == null)
+                if (this.image == null)
                 {
                     throw new ObjectDisposedException(nameof(AzureKinectMemoryManager));
                 }
-                return new Span<byte>(image.GetUnsafeBuffer(), checked((int)image.Size));
+
+                return new Span<byte>(this.image.GetUnsafeBuffer(), checked((int)this.image.Size));
             }
         }
 
@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(AzureKinectMemoryManager));
                 }
 
-                Interlocked.Increment(ref this.pinCount);
+                _ = Interlocked.Increment(ref this.pinCount);
                 return new MemoryHandle(Unsafe.Add<byte>(this.image.GetUnsafeBuffer(), elementIndex), pinnable: this);
             }
         }
@@ -63,7 +63,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <inheritdoc/>
         public override void Unpin()
         {
-            Interlocked.Decrement(ref this.pinCount);
+            _ = Interlocked.Decrement(ref this.pinCount);
         }
 
         /// <inheritdoc/>

@@ -7,8 +7,6 @@
 using System;
 using System.Text;
 
-[assembly: CLSCompliant(true)]
-
 namespace Microsoft.Azure.Kinect.Sensor
 {
     /// <summary>
@@ -16,7 +14,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     /// </summary>
     public class Device : IDisposable
     {
-        // Cache these valuses so we don't need to re-marshal them for each
+        // Cache these values so we don't need to re-marshal them for each
         // access since they are immutable.
         private string serialNum = null;
         private HardwareVersion version = null;
@@ -229,7 +227,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Gets the device raw calibration data.
         /// </summary>
-        /// <returns>The raw data can be stored offline for future use.</returns>
+        /// <returns>The raw data can be stored off-line for future use.</returns>
         public byte[] GetRawCalibration()
         {
             lock (this)
@@ -261,10 +259,12 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// </summary>
         /// <param name="timeout">Time to wait for a capture.</param>
         /// <returns>A Capture object holding image data.</returns>
-        /// <remarks>Gets the next capture in the streamed sequence of captures from the camera. 
-        /// If a new capture is not currently available, this function will block until the timeout is reached. 
-        /// The SDK will buffer at least two captures worth of data before dropping the oldest capture. 
-        /// Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.</remarks>
+        /// <remarks>
+        /// Gets the next capture in the streamed sequence of captures from the camera.
+        /// If a new capture is not currently available, this function will block until the timeout is reached.
+        /// The SDK will buffer at least two captures worth of data before dropping the oldest capture.
+        /// Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.
+        /// </remarks>
         public Capture GetCapture(TimeSpan timeout)
         {
             lock (this)
@@ -299,10 +299,12 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Reads a sensor capture.
         /// </summary>
         /// <returns>A Capture object holding image data.</returns>
-        /// <remarks>Gets the next capture in the streamed sequence of captures from the camera.
-        /// If a new capture is not currently available, this function will block until one is available.
+        /// <remarks>
+        /// Gets the next capture in the streamed sequence of captures from the camera.
+        /// If a new capture is not currently available, this function will block until the timeout is reached.
         /// The SDK will buffer at least two captures worth of data before dropping the oldest capture.
-        /// Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.</remarks>
+        /// Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.
+        /// </remarks>
         public Capture GetCapture()
         {
             return this.GetCapture(TimeSpan.FromMilliseconds(-1));
@@ -333,7 +335,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                     if (result == NativeMethods.k4a_wait_result_t.K4A_WAIT_RESULT_TIMEOUT)
                     {
-                        throw new TimeoutException("Timed out waiting for imu sample");
+                        throw new TimeoutException("Timed out waiting for IMU sample");
                     }
 
                     AzureKinectException.ThrowIfNotSuccess(tracer, result);
@@ -417,7 +419,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Starts color and depth camera capture. 
+        /// Starts color and depth camera capture.
         /// </summary>
         /// <param name="configuration">The configuration we want to run the device in.</param>
         public void StartCameras(DeviceConfiguration configuration)
@@ -496,15 +498,15 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <inheritdoc/>
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            // Do not change this code. Put cleanup code in Dispose(disposing) below.
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         /// <summary>
-        /// Handle the Dispose pattern.
+        /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
-        /// <param name="disposing">True if called by Dispose</param>
+        /// <param name="disposing"><c>True</c> to release both managed and unmanaged resources; <c>False</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposedValue)

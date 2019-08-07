@@ -1,8 +1,12 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectMemoryCast.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
