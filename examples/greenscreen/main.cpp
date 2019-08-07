@@ -336,9 +336,9 @@ k4a::image create_depth_image_like(const k4a::image &im)
 int main(int argc, char **argv)
 {
     float chessboard_square_length = 0.; // Must be included in the input params
-    int32_t color_exposure_usec = 8000;  // somewhat reasonable default exposure time
-    int32_t powerline_freq = 2;          // default to a 60 Hz powerline
-    cv::Size chessboard_pattern(0, 0);   // height, width. Both need to be set.
+    int32_t color_exposure_usec = 8000; // somewhat reasonable default exposure time
+    int32_t powerline_freq = 2; // default to a 60 Hz powerline
+    cv::Size chessboard_pattern(0, 0); // height, width. Both need to be set.
 
     static struct option long_options[] = { { "board-height", required_argument, 0, 'h' },
                                             { "board-width", required_argument, 0, 'w' },
