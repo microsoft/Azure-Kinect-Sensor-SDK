@@ -1,11 +1,12 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="Extrinsics.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Linq;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
@@ -15,7 +16,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     [StructLayout(LayoutKind.Sequential)]
     public struct Extrinsics : IEquatable<Extrinsics>
     {
-        // Struct used for serialization to native SDK
+        // Structure used for serialization to native SDK
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
         /// <summary>
@@ -25,7 +26,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public float[] Rotation;
 
         /// <summary>
-        /// Gets translation vector, x,yz (in millimeters).
+        /// Gets translation vector, x, y, z (in millimeters).
         /// </summary>
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         public float[] Translation;
@@ -33,7 +34,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 #pragma warning restore CA1051 // Do not declare visible instance fields
 
         /// <summary>
-        /// Compares two Extrinsics for equality.
+        /// Compares two <see cref="Extrinsics"/> for equality.
         /// </summary>
         /// <param name="left">First extrinsic to compare.</param>
         /// <param name="right">Second extrinsic to compare.</param>
@@ -44,7 +45,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Compares two Extrinsics for inequality.
+        /// Compares two <see cref="Extrinsics"/> for inequality.
         /// </summary>
         /// <param name="left">First extrinsic to compare.</param>
         /// <param name="right">Second extrinsic to compare.</param>
@@ -70,7 +71,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            var hashCode = 1370020195;
+            int hashCode = 1370020195;
             hashCode = (hashCode * -1521134295) + EqualityComparer<float[]>.Default.GetHashCode(this.Rotation);
             hashCode = (hashCode * -1521134295) + EqualityComparer<float[]>.Default.GetHashCode(this.Translation);
             return hashCode;

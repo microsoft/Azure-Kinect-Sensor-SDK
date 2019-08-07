@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="Calibration.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -124,7 +128,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Transform a 2D pixel coordinate with an associated depth value of the source camera into a 3D point of the target coordinate system. 
+        /// Transform a 2D pixel coordinate with an associated depth value of the source camera into a 3D point of the target coordinate system.
         /// </summary>
         /// <param name="sourcePoint2D">The 2D pixel in <paramref name="sourceCamera"/> coordinates.</param>
         /// <param name="sourceDepth">The depth of <paramref name="sourceCamera"/> in millimeters.</param>
@@ -221,7 +225,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            var hashCode = -454809512;
+            int hashCode = -454809512;
             hashCode = (hashCode * -1521134295) + EqualityComparer<CameraCalibration>.Default.GetHashCode(this.DepthCameraCalibration);
             hashCode = (hashCode * -1521134295) + EqualityComparer<CameraCalibration>.Default.GetHashCode(this.ColorCameraCalibration);
             hashCode = (hashCode * -1521134295) + EqualityComparer<Extrinsics[]>.Default.GetHashCode(this.DeviceExtrinsics);
