@@ -1,8 +1,11 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="CameraCalibration.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Azure.Kinect.Sensor
@@ -13,7 +16,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     [StructLayout(LayoutKind.Sequential)]
     public struct CameraCalibration : IEquatable<CameraCalibration>
     {
-        // Struct used for serialization to native SDK
+        // Structure used for serialization to native SDK
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
         /// <summary>
@@ -86,7 +89,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            var hashCode = 2125552744;
+            int hashCode = 2125552744;
             hashCode = (hashCode * -1521134295) + EqualityComparer<Extrinsics>.Default.GetHashCode(this.Extrinsics);
             hashCode = (hashCode * -1521134295) + EqualityComparer<Intrinsics>.Default.GetHashCode(this.Intrinsics);
             hashCode = (hashCode * -1521134295) + this.ResolutionWidth.GetHashCode();

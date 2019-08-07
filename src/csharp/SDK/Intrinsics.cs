@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="Intrinsics.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -12,7 +16,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     [StructLayout(LayoutKind.Sequential)]
     public struct Intrinsics : IEquatable<Intrinsics>
     {
-        // Struct used for serialization to native SDK
+        // Structure used for serialization to native SDK
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
         /// <summary>
@@ -34,7 +38,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 #pragma warning restore CA1051 // Do not declare visible instance fields
 
         /// <summary>
-        /// Compare two Intrinsics for equality.
+        /// Compare two <see cref="Intrinsics"/> for equality.
         /// </summary>
         /// <param name="left">First intrinsic to compare.</param>
         /// <param name="right">Second intrinsic to compare.</param>
@@ -45,7 +49,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Compare two Intrinsics for inequality.
+        /// Compare two <see cref="Intrinsics"/> for inequality.
         /// </summary>
         /// <param name="left">First intrinsic to compare.</param>
         /// <param name="right">Second intrinsic to compare.</param>

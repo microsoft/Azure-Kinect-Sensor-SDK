@@ -1,8 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿//------------------------------------------------------------------------------
+// <copyright file="CalibrationModelType.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-using System;
-using System.Numerics;
-using System.Runtime.InteropServices;
+// </copyright>
+//------------------------------------------------------------------------------
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
