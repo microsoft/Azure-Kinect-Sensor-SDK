@@ -4,6 +4,7 @@
 // Licensed under the MIT License.
 // </copyright>
 //------------------------------------------------------------------------------
+using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -27,7 +28,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Vector3 AccelerometerSample { get; set; }
 
         /// <summary>
-        /// Gets or sets timestamp of the accelerometer.
+        /// Gets or sets time-stamp of the accelerometer.
         /// </summary>
         public TimeSpan AccelerometerTimestamp { get; set; }
 
@@ -37,7 +38,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Vector3 GyroSample { get; set; }
 
         /// <summary>
-        /// Gets or sets timestamp of the gyroscope.
+        /// Gets or sets time-stamp of the gyroscope.
         /// </summary>
         public TimeSpan GyroTimestamp { get; set; }
     }
