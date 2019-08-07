@@ -104,11 +104,11 @@ $(document).ready(function(){initNavTree('namespace_microsoft_1_1_azure_1_1_kine
 </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image.html" title="An Azure Kinect Image referencing its buffer and metadata. ">Image</a> format. </p>
+<p><a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image.html" title="An Azure Kinect Image referencing its buffer and meta-data. ">Image</a> format. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a7a3cb7a0a3073650bf17c2fef2bfbd1bae0fe85273b8aa7bb681ccae72a93d9f6"></a>ColorMJPG&#160;</td><td class="fielddoc"><p>Color image type MJPG. </p>
 <p>The buffer for each image is encoded as a JPEG and can be decoded by a JPEG decoder.</p>
-<p>Because the image is compressed, the Stride property of the <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image.html" title="An Azure Kinect Image referencing its buffer and metadata. ">Image</a> is not applicable.</p>
+<p>Because the image is compressed, the Stride property of the <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image.html" title="An Azure Kinect Image referencing its buffer and meta-data. ">Image</a> is not applicable.</p>
 <p>Each MJPG encoded image in a stream may be of differing size depending on the compression efficiency. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a7a3cb7a0a3073650bf17c2fef2bfbd1ba8ceef923f176230e7bd822a4f74022d7"></a>ColorNV12&#160;</td><td class="fielddoc"><p>Color image type NV12. </p>
@@ -125,11 +125,11 @@ $(document).ready(function(){initNavTree('namespace_microsoft_1_1_azure_1_1_kine
 <p>The <a class="el" href="namespace_microsoft_1_1_azure.html">Azure</a> <a class="el" href="namespace_microsoft_1_1_azure_1_1_kinect.html">Kinect</a> device does not natively capture in this format. Requesting images of this format requires additional computation in the API. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a7a3cb7a0a3073650bf17c2fef2bfbd1ba733d24756144709f569c5cdaae3af79e"></a>Depth16&#160;</td><td class="fielddoc"><p>Depth image type DEPTH16. </p>
-<p>Each pixel of DEPTH16 data is two bytes of little endian unsigned depth data. The unit of the data is in millimeters from the origin of the camera.</p>
+<p>Each pixel of DEPTH16 data is two bytes of little-endian unsigned depth data. The unit of the data is in millimeters from the origin of the camera.</p>
 <p>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a7a3cb7a0a3073650bf17c2fef2bfbd1ba8b014e5c0e7f59724ca291b30a3ec475"></a>IR16&#160;</td><td class="fielddoc"><p><a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image.html" title="An Azure Kinect Image referencing its buffer and metadata. ">Image</a> type IR16. </p>
-<p>Each pixel of IR16 data is two bytes of little endian unsigned depth data. The value of the data represents brightness.</p>
+<tr><td class="fieldname"><a id="a7a3cb7a0a3073650bf17c2fef2bfbd1ba8b014e5c0e7f59724ca291b30a3ec475"></a>IR16&#160;</td><td class="fielddoc"><p><a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image.html" title="An Azure Kinect Image referencing its buffer and meta-data. ">Image</a> type IR16. </p>
+<p>Each pixel of IR16 data is two bytes of little-endian unsigned depth data. The value of the data represents brightness.</p>
 <p>This format represents infrared light and is captured by the depth camera. Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a7a3cb7a0a3073650bf17c2fef2bfbd1ba6c132830dc8cd447bb42af638b5a7942"></a>Custom8&#160;</td><td class="fielddoc"><p>Single channel image type CUSTOM8. </p>
@@ -137,7 +137,7 @@ $(document).ready(function(){initNavTree('namespace_microsoft_1_1_azure_1_1_kine
 <p>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a7a3cb7a0a3073650bf17c2fef2bfbd1ba97de7eb7db438e3ec5501d5fc73a0224"></a>Custom16&#160;</td><td class="fielddoc"><p>Single channel image type CUSTOM16. </p>
-<p>Each pixel of CUSTOM16 is a single channel two bytes of little endian unsigned data.</p>
+<p>Each pixel of CUSTOM16 is a single channel two bytes of little-endian unsigned data.</p>
 <p>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a7a3cb7a0a3073650bf17c2fef2bfbd1ba90589c47f06eb971d548591f23c285af"></a>Custom&#160;</td><td class="fielddoc"><p>Custom image format. </p>

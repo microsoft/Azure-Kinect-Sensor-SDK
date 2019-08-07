@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['playback',['playback',['../classk4a_1_1playback_a19e7c75290cbef1587e80f493a9c4c74.html#a19e7c75290cbef1587e80f493a9c4c74',1,'k4a::playback::playback(k4a_playback_t handle=nullptr) noexcept'],['../classk4a_1_1playback.html#ae95a8d8d3133017d3c3200a18289c705',1,'k4a::playback::playback(playback &amp;&amp;other) noexcept']]]
+  ['reference',['Reference',['../class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_capture_a7dbfb218567624888eb4e92190f5c4b8.html#a7dbfb218567624888eb4e92190f5c4b8',1,'Microsoft.Azure.Kinect.Sensor.Capture.Reference()'],['../class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image_a5849dc4be3db0105f77cc0dc51517345.html#a5849dc4be3db0105f77cc0dc51517345',1,'Microsoft.Azure.Kinect.Sensor.Image.Reference()']]],
+  ['reset',['reset',['../classk4a_1_1image.html#a5654ce02204e255e11350c14cf1f4b89',1,'k4a::image::reset()'],['../classk4a_1_1capture.html#aa922aa6bae17310b4d73464a2486be92',1,'k4a::capture::reset()']]]
 ];
