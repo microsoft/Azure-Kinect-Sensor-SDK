@@ -496,32 +496,32 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
 
                 Assert.AreEqual(1, count.Calls("k4a_device_get_calibration"));
 
-                Assert.AreEqual(DepthMode.NFOV_Unbinned, calibration.depth_mode);
-                Assert.AreEqual(ColorResolution.R1440p, calibration.color_resolution);
+                Assert.AreEqual(DepthMode.NFOV_Unbinned, calibration.DepthMode);
+                Assert.AreEqual(ColorResolution.R1440p, calibration.ColorResolution);
 
                 for (int i = 0; i < 9; i++)
                 {
-                    Assert.AreEqual(i * 1.2f, calibration.depth_camera_calibration.extrinsics.rotation[i]);
+                    Assert.AreEqual(i * 1.2f, calibration.DepthCameraCalibration.Extrinsics.Rotation[i]);
                 }
                 for (int i = 0; i < 3; i++)
                 {
-                    Assert.AreEqual(i * 1.3f, calibration.depth_camera_calibration.extrinsics.translation[i]);
+                    Assert.AreEqual(i * 1.3f, calibration.DepthCameraCalibration.Extrinsics.Translation[i]);
                 }
 
-                Assert.AreEqual(81, calibration.depth_camera_calibration.intrinsics.parameter_count);
-                Assert.AreEqual(CalibrationModelType.BrownConrady, calibration.depth_camera_calibration.intrinsics.type);
+                Assert.AreEqual(81, calibration.DepthCameraCalibration.Intrinsics.ParameterCount);
+                Assert.AreEqual(CalibrationModelType.BrownConrady, calibration.DepthCameraCalibration.Intrinsics.Type);
 
-                for (int i = 0; i < calibration.depth_camera_calibration.intrinsics.parameters.Length; i++)
+                for (int i = 0; i < calibration.DepthCameraCalibration.Intrinsics.Parameters.Length; i++)
                 {
-                    Assert.AreEqual(i * 1.4f, calibration.depth_camera_calibration.intrinsics.parameters[i]);
+                    Assert.AreEqual(i * 1.4f, calibration.DepthCameraCalibration.Intrinsics.Parameters[i]);
                 }
-                Assert.AreEqual(91, calibration.depth_camera_calibration.resolution_width);
-                Assert.AreEqual(92, calibration.depth_camera_calibration.resolution_height);
-                Assert.AreEqual(1.23f, calibration.depth_camera_calibration.metric_radius);
+                Assert.AreEqual(91, calibration.DepthCameraCalibration.ResolutionWidth);
+                Assert.AreEqual(92, calibration.DepthCameraCalibration.ResolutionHeight);
+                Assert.AreEqual(1.23f, calibration.DepthCameraCalibration.MetricRadius);
 
-                Assert.AreEqual(101, calibration.color_camera_calibration.resolution_width);
-                Assert.AreEqual(102, calibration.color_camera_calibration.resolution_height);
-                Assert.AreEqual(4.56f, calibration.color_camera_calibration.metric_radius);
+                Assert.AreEqual(101, calibration.ColorCameraCalibration.ResolutionWidth);
+                Assert.AreEqual(102, calibration.ColorCameraCalibration.ResolutionHeight);
+                Assert.AreEqual(4.56f, calibration.ColorCameraCalibration.MetricRadius);
 
 
                 // GetCalibration with no arguments will throw if the device is not yet started
