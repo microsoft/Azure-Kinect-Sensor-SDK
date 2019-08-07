@@ -24,9 +24,9 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Vector3 AccelerometerSample { get; set; }
 
         /// <summary>
-        /// Gets or sets timestamp of the accerometer in microseconds.
+        /// Gets or sets timestamp of the accerometer.
         /// </summary>
-        public long AccelerometerTimestampInUsec { get; set; }
+        public TimeSpan AccelerometerTimestamp { get; set; }
 
         /// <summary>
         /// Gets or sets gyroscope sample in radians per second.
@@ -34,9 +34,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Vector3 GyroSample { get; set; }
 
         /// <summary>
-        /// Gets or sets timestamp of the gyroscope in microseconds.
+        /// Gets or sets timestamp of the gyroscope.
         /// </summary>
-        public long GyroTimestampInUsec { get; set; }
-
+        public TimeSpan GyroTimestamp { get; set; }
     }
 }

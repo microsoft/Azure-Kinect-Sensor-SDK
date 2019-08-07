@@ -63,7 +63,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 this.calibration.color_camera_calibration.resolution_width,
                 this.calibration.color_camera_calibration.resolution_height)
             {
-                Timestamp = depth.Timestamp,
+                DeviceTimestamp = depth.DeviceTimestamp,
             };
 
             this.DepthImageToColorCamera(depth, image);
@@ -182,7 +182,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
                 Exposure = color.Exposure,
                 ISOSpeed = color.ISOSpeed,
-                Timestamp = color.Timestamp,
+                DeviceTimestamp = color.DeviceTimestamp,
+                SystemTimestampNsec = color.SystemTimestampNsec,
                 WhiteBalance = color.WhiteBalance,
             };
 

@@ -6,6 +6,8 @@
 //------------------------------------------------------------------------------
 using System;
 using System.Buffers;
+using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Azure.Kinect.Sensor
@@ -355,7 +357,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Gets or sets the image time-stamp in the device's clock.
         /// </summary>
-        public TimeSpan Timestamp
+        public TimeSpan DeviceTimestamp
         {
             get
             {
@@ -366,7 +368,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                         throw new ObjectDisposedException(nameof(Image));
                     }
 
-                    ulong timestamp = NativeMethods.k4a_image_get_timestamp_usec(this.handle);
+                    ulong timestamp = NativeMethods.k4a_image_get_device_timestamp_usec(this.handle);
                     return TimeSpan.FromTicks(checked((long)timestamp) * 10);
                 }
             }
@@ -380,7 +382,45 @@ namespace Microsoft.Azure.Kinect.Sensor
                         throw new ObjectDisposedException(nameof(Image));
                     }
 
-                    NativeMethods.k4a_image_set_timestamp_usec(this.handle, checked((ulong)value.Ticks / 10));
+                    NativeMethods.k4a_image_set_device_timestamp_usec(this.handle, checked((ulong)value.Ticks / 10));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the image timestamp in nanoseconds.
+        /// </summary>
+        /// <remarks>
+        /// The base of the timestamp clock is the same as Stopwatch.GetTimestamp(). Units need to be
+        /// converted between nanoseconds and the Stopwatch frequency to make comparisons.
+        /// </remarks>
+        public long SystemTimestampNsec
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (this.disposedValue)
+                    {
+                        throw new ObjectDisposedException(nameof(Image));
+                    }
+
+                    ulong timestamp = NativeMethods.k4a_image_get_system_timestamp_nsec(this.handle);
+
+                    return (long)timestamp;
+                }
+            }
+
+            set
+            {
+                lock (this)
+                {
+                    if (this.disposedValue)
+                    {
+                        throw new ObjectDisposedException(nameof(Image));
+                    }
+
+                    NativeMethods.k4a_image_set_system_timestamp_nsec(this.handle, (ulong)value);
                 }
             }
         }

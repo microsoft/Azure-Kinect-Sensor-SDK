@@ -7,6 +7,7 @@
 using System;
 using Microsoft.Azure.Kinect.Sensor.Test.StubGenerator;
 using NUnit.Framework;
+using System;
 
 namespace Microsoft.Azure.Kinect.Sensor.UnitTests
 {
@@ -963,13 +964,14 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
     imu_sample->acc_sample.v[0] = 0.0f;
     imu_sample->acc_sample.v[1] = 0.1f;
     imu_sample->acc_sample.v[2] = 0.2f;
-    imu_sample->acc_timestamp_usec = 0x1000200030004000;
+    // 10 seconds
+    imu_sample->acc_timestamp_usec = 10000000;
 
     imu_sample->gyro_sample.v[0] = 0.4f;
     imu_sample->gyro_sample.v[1] = 0.5f;
     imu_sample->gyro_sample.v[2] = 0.6f;
 
-    imu_sample->gyro_timestamp_usec = 0x2000200030004002;
+    imu_sample->gyro_timestamp_usec = 60000000;
 
     return K4A_WAIT_RESULT_SUCCEEDED;
 }
@@ -987,12 +989,12 @@ k4a_wait_result_t k4a_device_get_imu_sample(k4a_device_t device_handle, k4a_imu_
                     Assert.AreEqual(0.0f, sample.AccelerometerSample.X);
                     Assert.AreEqual(0.1f, sample.AccelerometerSample.Y);
                     Assert.AreEqual(0.2f, sample.AccelerometerSample.Z);
-                    Assert.AreEqual(0x1000200030004000, sample.AccelerometerTimestampInUsec);
+                    Assert.AreEqual(TimeSpan.FromSeconds(10), sample.AccelerometerTimestamp);
 
                     Assert.AreEqual(0.4f, sample.GyroSample.X);
                     Assert.AreEqual(0.5f, sample.GyroSample.Y);
                     Assert.AreEqual(0.6f, sample.GyroSample.Z);
-                    Assert.AreEqual(0x2000200030004002, sample.GyroTimestampInUsec);
+                    Assert.AreEqual(TimeSpan.FromMinutes(1), sample.GyroTimestamp);
 
                     Assert.AreEqual(1, count.Calls("k4a_device_get_imu_sample"));
 

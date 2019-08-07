@@ -181,6 +181,29 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        [Native.NativeReference("k4a_imu_sample_t")]
+        public class k4a_imu_sample_t
+        {
+            public float temperature { get; set; }
+            public Vector3 acc_sample { get; set; }
+            public UInt64 acc_timestamp_usec { get; set; }
+            public Vector3 gyro_sample { get; set; }
+            public UInt64 gyro_timestamp_usec { get; set; }
+
+            public ImuSample ToImuSample()
+            {
+                return new ImuSample
+                {
+                    Temperature = temperature,
+                    AccelerometerSample = acc_sample,
+                    AccelerometerTimestamp = TimeSpan.FromTicks(checked((long)acc_timestamp_usec) * 10),
+                    GyroSample = gyro_sample,
+                    GyroTimestamp = TimeSpan.FromTicks(checked((long)gyro_timestamp_usec) * 10)
+                };
+            }
+        }
+
         [NativeReference]
         [StructLayout(LayoutKind.Sequential)]
         public struct k4a_device_configuration_t
@@ -398,7 +421,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         [NativeReference]
         public static extern k4a_wait_result_t k4a_device_get_imu_sample(
             k4a_device_t device_handle,
-            ImuSample imu_sample,
+            [Out] k4a_imu_sample_t imu_sample,
             Int32 timeout_in_ms);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
@@ -502,11 +525,19 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern UInt64 k4a_image_get_timestamp_usec(k4a_image_t image_handle);
+        public static extern UInt64 k4a_image_get_device_timestamp_usec(k4a_image_t image_handle);
+
+        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [NativeReference]
+        public static extern void k4a_image_set_device_timestamp_usec(k4a_image_t image_handle, UInt64 value);
+
+        [DllImport("k4a", CallingConvention = CallingConvention.Cdecl)]
+        [NativeReference]
+        public static extern UInt64 k4a_image_get_system_timestamp_nsec(k4a_image_t image_handle);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern void k4a_image_set_timestamp_usec(k4a_image_t image_handle, UInt64 value);
+        public static extern void k4a_image_set_system_timestamp_nsec(k4a_image_t image_handle, UInt64 value);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
