@@ -51,7 +51,7 @@ cv::Matx33f calibration_to_color_camera_matrix(const k4a::calibration &cal)
     return camera_matrix;
 }
 
-Transformation calibration_to_depth_to_color_transformation(const k4a::calibration &cal)
+Transformation get_depth_to_color_transformation_from_calibration(const k4a::calibration &cal)
 {
     const k4a_calibration_extrinsics_t &ex = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
     Transformation tr;
@@ -97,8 +97,10 @@ bool find_chessboard_corners_helper(cv::Mat master_color_image,
 {
     bool found_chessboard_master = cv::findChessboardCorners(master_color_image,
                                                              chessboard_pattern,
-                                                             master_chessboard_corners);
-    bool found_chessboard_sub = cv::findChessboardCorners(sub_color_image, chessboard_pattern, sub_chessboard_corners);
+                                                             master_chessboard_corners,
+                                                             cv::CALIB_CB_FAST_CHECK);
+    bool found_chessboard_sub =
+        cv::findChessboardCorners(sub_color_image, chessboard_pattern, sub_chessboard_corners, cv::CALIB_CB_FAST_CHECK);
 
     // Cover the failure cases where chessboards were not found in one or both images.
     if (!found_chessboard_master || !found_chessboard_sub)
@@ -155,17 +157,17 @@ bool find_chessboard_corners_helper(cv::Mat master_color_image,
     cv::drawChessboardCorners(master_color_image, chessboard_pattern, master_chessboard_corners, true);
     cv::drawChessboardCorners(sub_color_image, chessboard_pattern, sub_chessboard_corners, true);
     cv::imshow("Chessboard view from master camera", master_color_image);
-    cv::waitKey(500);
+    cv::waitKey(1);
     cv::imshow("Chessboard view from subordinate camera", sub_color_image);
-    cv::waitKey(500);
+    cv::waitKey(1);
 
     return true;
 }
 
 Transformation stereo_calibration(const k4a::calibration &master_calib,
                                   const k4a::calibration &sub_calib,
-                                  const vector<cv::Point2f> &master_chessboard_corners,
-                                  const vector<cv::Point2f> &sub_chessboard_corners,
+                                  const vector<vector<cv::Point2f>> &master_chessboard_corners_list,
+                                  const vector<vector<cv::Point2f>> &sub_chessboard_corners_list,
                                   const cv::Size &image_size,
                                   const cv::Size &chessboard_pattern,
                                   float chessboard_square_length)
@@ -211,9 +213,8 @@ Transformation stereo_calibration(const k4a::calibration &master_calib,
     //
     // A function in OpenCV's calibration function also requires that these points be F32 types, so we use those.
     // However, OpenCV still provides doubles as output, strangely enough.
-    vector<vector<cv::Point3f>> chessboard_corners_world_nested_for_cv(1, chessboard_corners_world);
-    vector<vector<cv::Point2f>> master_corners_nested_for_cv(1, master_chessboard_corners);
-    vector<vector<cv::Point2f>> sub_corners_nested_for_cv(1, sub_chessboard_corners);
+    vector<vector<cv::Point3f>> chessboard_corners_world_nested_for_cv(master_chessboard_corners_list.size(),
+                                                                       chessboard_corners_world);
 
     cv::Matx33f master_camera_matrix = calibration_to_color_camera_matrix(master_calib);
     cv::Matx33f sub_camera_matrix = calibration_to_color_camera_matrix(sub_calib);
@@ -224,8 +225,8 @@ Transformation stereo_calibration(const k4a::calibration &master_calib,
     // Pass subordinate first, then master, because we want a transform from subordinate to master.
     Transformation tr;
     double error = cv::stereoCalibrate(chessboard_corners_world_nested_for_cv,
-                                       sub_corners_nested_for_cv,
-                                       master_corners_nested_for_cv,
+                                       sub_chessboard_corners_list,
+                                       master_chessboard_corners_list,
                                        sub_camera_matrix,
                                        sub_dist_coeff,
                                        master_camera_matrix,
@@ -282,6 +283,8 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                                                               configs[0].color_resolution);
     k4a::calibration sub_calibration = capturer.devices[1].get_calibration(configs[1].depth_mode,
                                                                            configs[1].color_resolution);
+    vector<vector<cv::Point2f>> master_chessboard_corners_list;
+    vector<vector<cv::Point2f>> sub_chessboard_corners_list;
     while (true)
     {
         vector<k4a::capture> captures = capturer.get_synchronized_captures(configs);
@@ -293,21 +296,28 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
         k4a::image sub_color_image = sub_capture.get_color_image();
         cv::Mat cv_master_color_image = color_to_opencv(master_color_image);
         cv::Mat cv_sub_color_image = color_to_opencv(sub_color_image);
+
         vector<cv::Point2f> master_chessboard_corners;
         vector<cv::Point2f> sub_chessboard_corners;
-
-        bool ready_to_calibrate = find_chessboard_corners_helper(cv_master_color_image,
-                                                                 cv_sub_color_image,
-                                                                 chessboard_pattern,
-                                                                 master_chessboard_corners,
-                                                                 sub_chessboard_corners);
-
-        if (ready_to_calibrate)
+        bool got_corners = find_chessboard_corners_helper(cv_master_color_image,
+                                                          cv_sub_color_image,
+                                                          chessboard_pattern,
+                                                          master_chessboard_corners,
+                                                          sub_chessboard_corners);
+        if (got_corners)
         {
+            master_chessboard_corners_list.emplace_back(master_chessboard_corners);
+            sub_chessboard_corners_list.emplace_back(sub_chessboard_corners);
+        }
+
+        // Calibrate with 20 frames
+        if (master_chessboard_corners_list.size() >= 20)
+        {
+            cout << "Calculating calibration..." << endl;
             return stereo_calibration(master_calibration,
                                       sub_calibration,
-                                      master_chessboard_corners,
-                                      sub_chessboard_corners,
+                                      master_chessboard_corners_list,
+                                      sub_chessboard_corners_list,
                                       cv_master_color_image.size(),
                                       chessboard_pattern,
                                       chessboard_square_length);
@@ -415,7 +425,7 @@ int main(int argc, char **argv)
     k4a::calibration sub_calibration = capturer.devices[1].get_calibration(sub_config.depth_mode,
                                                                            sub_config.color_resolution);
     // Get the transformation from subordinate depth to subordinate color using its calibration object
-    Transformation tr_depth_sub_to_color_sub = calibration_to_depth_to_color_transformation(sub_calibration);
+    Transformation tr_depth_sub_to_color_sub = get_depth_to_color_transformation_from_calibration(sub_calibration);
 
     // We now have the subordinate depth to subordinate color transform. We also have the transformation from the
     // subordinate color perspective to the master color perspective from the calibration earlier. Now let's compose the
