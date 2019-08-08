@@ -450,7 +450,7 @@ int main(int argc, char **argv)
         k4a::image master_depth_image = captures[0].get_depth_image();
         k4a::image sub_depth_image = captures[1].get_depth_image();
 
-        // let's greenscreen out things that are far away.
+        // let's green screen out things that are far away.
         // first: let's get the master depth image into the color camera space
         k4a::image master_depth_in_master_color = create_depth_image_like(master_color_image);
         master_depth_to_master_color.depth_image_to_color_camera(master_depth_image, &master_depth_in_master_color);
@@ -466,7 +466,7 @@ int main(int argc, char **argv)
         // create the image that will be be used as output
         cv::Mat output_image(cv_master_color_image.rows, cv_master_color_image.cols, CV_8UC3, cv::Scalar(0, 0, 0));
 
-        // Now it's time to actually construct the greenscreen. Where the depth is 0, the camera doesn't know how far
+        // Now it's time to actually construct the green screen. Where the depth is 0, the camera doesn't know how far
         // away the object is because it didn't get a response at that point. That's where we'll try to fill in the gaps
         // with the other camera.
         cv::Mat master_valid_mask = cv_master_depth_in_master_color != 0;
