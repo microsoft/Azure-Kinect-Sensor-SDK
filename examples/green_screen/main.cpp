@@ -438,7 +438,9 @@ int main(int argc, char **argv)
 
     // We're going to update the existing calibration extrinsics on getting from the sub depth camera to the sub color
     // camera, overwriting it with the transformation to get from the sub depth camera to the master color camera
+    // TODO this needs to be done by constructing a new calibration object, not modifying
     set_calibration_depth_to_color_from_transformation(sub_calibration, tr_depth_sub_to_color_master);
+    sub_calibration.color_camera_calibration = master_calibration.color_camera_calibration;
     k4a::transformation sub_depth_to_master_color(sub_calibration);
 
     while (true)
