@@ -769,15 +769,6 @@ jobs:
         sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir"
         contents: '\*'
 
-    - task: CmdLine@2
-      displayName: 'Download findconnectedport'
-      inputs:
-        script:  curl "$(ResourceBaseUrl)/findconnectedport/linux/findconnectedport$(ResourceToken)" --output $(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport --create-dirs
-
-    - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
-      workingDirectory: '$(System.ArtifactsDirectory)'
-      displayName: 'Add execution property to findconnectedport'
-
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into Build Artifacts"
       inputs:
@@ -803,12 +794,6 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Prevent the USB connector from accidentally being reset'
 
-      # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-      # Wait a little bit so the device can enumerate, 3 seconds has seemed good.
-    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport && sleep 3'
-      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
-      displayName: 'Reset K4A Device'
-
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
@@ -829,8 +814,3 @@ jobs:
       displayName: 'Run Functional Tests - Onboarding'
       timeoutInMinutes: 15
       continueOnError: true
-
-    # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport'
-      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
-      displayName: 'Reset K4A Device'
