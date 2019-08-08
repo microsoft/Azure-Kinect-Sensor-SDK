@@ -918,11 +918,22 @@ public:
                                                       m_color_resolution.height,
                                                       m_color_resolution.width *
                                                           static_cast<int32_t>(sizeof(uint16_t)));
+        int32_t bytes_per_pixel;
+        switch (custom_image.get_format())
+        {
+        case K4A_IMAGE_FORMAT_CUSTOM8:
+            bytes_per_pixel = static_cast<int32_t>(sizeof(int8_t));
+            break;
+        case K4A_IMAGE_FORMAT_CUSTOM16:
+            bytes_per_pixel = static_cast<int32_t>(sizeof(int16_t));
+            break;
+        default:
+            throw error("Failed to support this format of custom image!");
+        }
         image transformed_custom_image = image::create(custom_image.get_format(),
                                                        m_color_resolution.width,
                                                        m_color_resolution.height,
-                                                       m_color_resolution.width * (custom_image.get_stride_bytes() /
-                                                                                   custom_image.get_width_pixels()));
+                                                       m_color_resolution.width * bytes_per_pixel);
         depth_image_to_color_camera_custom(depth_image,
                                            custom_image,
                                            &transformed_depth_image,
