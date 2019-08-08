@@ -474,8 +474,10 @@ int main(int argc, char **argv)
         cv::Mat within_threshold_range = (master_valid_mask & (cv_master_depth_in_master_color < depth_threshold)) |
                                          (~master_valid_mask & sub_valid_mask &
                                           (cv_sub_depth_in_master_color < depth_threshold));
-        cv::Mat output = cv_master_color_image;
-        cv::add(output, cv::Scalar(0, 100, 0), output, ~within_threshold_range);
+        // make a green background
+        cv::Mat output(cv_master_color_image.size(), cv_master_color_image.type(), cv::Scalar(0, 255, 0));
+        // copy all valid output to it
+        cv_master_color_image.copyTo(output, within_threshold_range);
         cv::imshow("Green Screen", output);
         cv::waitKey(1);
     }
