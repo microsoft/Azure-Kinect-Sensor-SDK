@@ -191,6 +191,20 @@ jobs:
     condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
 
   - powershell: |
+      git clone https://github.com/Microsoft/vcpkg.git
+      if ($LASTEXITCODE -ne 0) { throw "git clone failed" }
+      cd vcpkg
+      .\bootstrap-vcpkg.bat
+      if ($LASTEXITCODE -ne 0) { throw "bootstrap-vcpkg failed" }
+      .\vcpkg integrate install
+      if ($LASTEXITCODE -ne 0) { throw "vcpkg integrate failed" }
+      .\vcpkg install opencv:x64_windows
+      if ($LASTEXITCODE -ne 0) { throw "install opencv failed" }
+
+    displayName: 'Install OpenCV'
+    workingDirectory: '$(Build.BinariesDirectory)'
+
+  - powershell: |
       $ErrorActionPreference = "Stop"
 
       function Download-ToTemp

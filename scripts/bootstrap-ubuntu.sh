@@ -11,28 +11,29 @@ sudo apt update
 
 # Install tools needed to build
 sudo apt install -y \
-    pkg-config \
-    ninja-build \
-    doxygen \
     clang \
-    gcc-multilib \
+    cmake
+    doxygen \
     g++-multilib \
-    python3 \
+    gcc-multilib \
     git-lfs \
     nasm \
-    cmake
+    ninja-build \
+    pkg-config \
+    python3 \
 
 # Install libraries needed to build
 sudo apt install -y \
     libgl1-mesa-dev \
+    libopencv-dev \
     libsoundio-dev \
+    libssl-dev \
+    libudev-dev \
+    libusb-1.0-0-dev \
     libvulkan-dev \
     libx11-dev \
     libxcursor-dev \
     libxinerama-dev \
     libxrandr-dev \
-    libusb-1.0-0-dev \
-    libssl-dev \
-    libudev-dev \
     mesa-common-dev \
     uuid-dev
