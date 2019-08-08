@@ -89,30 +89,32 @@ vector<float> calibration_to_color_camera_dist_coeffs(const k4a::calibration &ca
 }
 
 // Takes the images by value so we can change them when shown.
-bool find_chessboard_corners_helper(cv::Mat master_color_image,
-                                    cv::Mat sub_color_image,
+bool find_chessboard_corners_helper(cv::Mat main_color_image,
+                                    cv::Mat backup_color_image,
                                     const cv::Size &chessboard_pattern,
-                                    vector<cv::Point2f> &master_chessboard_corners,
-                                    vector<cv::Point2f> &sub_chessboard_corners)
+                                    vector<cv::Point2f> &main_chessboard_corners,
+                                    vector<cv::Point2f> &backup_chessboard_corners)
 {
-    bool found_chessboard_master = cv::findChessboardCorners(master_color_image,
+    bool found_chessboard_main = cv::findChessboardCorners(main_color_image,
+                                                           chessboard_pattern,
+                                                           main_chessboard_corners,
+                                                           cv::CALIB_CB_FAST_CHECK);
+    bool found_chessboard_backup = cv::findChessboardCorners(backup_color_image,
                                                              chessboard_pattern,
-                                                             master_chessboard_corners,
+                                                             backup_chessboard_corners,
                                                              cv::CALIB_CB_FAST_CHECK);
-    bool found_chessboard_sub =
-        cv::findChessboardCorners(sub_color_image, chessboard_pattern, sub_chessboard_corners, cv::CALIB_CB_FAST_CHECK);
 
     // Cover the failure cases where chessboards were not found in one or both images.
-    if (!found_chessboard_master || !found_chessboard_sub)
+    if (!found_chessboard_main || !found_chessboard_backup)
     {
-        if (found_chessboard_master)
+        if (found_chessboard_main)
         {
-            cout << "Could not find the chessboard corners in the subordinate image. Trying again...\n";
+            cout << "Could not find the chessboard corners in the backup image. Trying again...\n";
         }
-        // Likewise, if the chessboard was found in the subordinate image, it was not found in the master image.
-        else if (found_chessboard_sub)
+        // Likewise, if the chessboard was found in the backup image, it was not found in the main image.
+        else if (found_chessboard_backup)
         {
-            cout << "Could not find the chessboard corners in the master image. Trying again...\n";
+            cout << "Could not find the chessboard corners in the main image. Trying again...\n";
         }
         // The only remaining case is the corners were in neither image.
         else
@@ -146,28 +148,28 @@ bool find_chessboard_corners_helper(cv::Mat master_color_image,
     // first and last points found in pixel space (which will be at opposite ends of the chessboard) are pointing the
     // same direction- so, the dot product of the two vectors is positive.
 
-    cv::Vec2f master_image_corners_vec = master_chessboard_corners.back() - master_chessboard_corners.front();
-    cv::Vec2f sub_image_corners_vec = sub_chessboard_corners.back() - sub_chessboard_corners.front();
-    if (master_image_corners_vec.dot(sub_image_corners_vec) <= 0.0)
+    cv::Vec2f main_image_corners_vec = main_chessboard_corners.back() - main_chessboard_corners.front();
+    cv::Vec2f backup_image_corners_vec = backup_chessboard_corners.back() - backup_chessboard_corners.front();
+    if (main_image_corners_vec.dot(backup_image_corners_vec) <= 0.0)
     {
-        std::reverse(sub_chessboard_corners.begin(), sub_chessboard_corners.end());
+        std::reverse(backup_chessboard_corners.begin(), backup_chessboard_corners.end());
     }
 
     // Comment out this section to not show the calibration output
-    cv::drawChessboardCorners(master_color_image, chessboard_pattern, master_chessboard_corners, true);
-    cv::drawChessboardCorners(sub_color_image, chessboard_pattern, sub_chessboard_corners, true);
-    cv::imshow("Chessboard view from master camera", master_color_image);
+    cv::drawChessboardCorners(main_color_image, chessboard_pattern, main_chessboard_corners, true);
+    cv::drawChessboardCorners(backup_color_image, chessboard_pattern, backup_chessboard_corners, true);
+    cv::imshow("Chessboard view from main camera", main_color_image);
     cv::waitKey(1);
-    cv::imshow("Chessboard view from subordinate camera", sub_color_image);
+    cv::imshow("Chessboard view from backup camera", backup_color_image);
     cv::waitKey(1);
 
     return true;
 }
 
-Transformation stereo_calibration(const k4a::calibration &master_calib,
-                                  const k4a::calibration &sub_calib,
-                                  const vector<vector<cv::Point2f>> &master_chessboard_corners_list,
-                                  const vector<vector<cv::Point2f>> &sub_chessboard_corners_list,
+Transformation stereo_calibration(const k4a::calibration &main_calib,
+                                  const k4a::calibration &backup_calib,
+                                  const vector<vector<cv::Point2f>> &main_chessboard_corners_list,
+                                  const vector<vector<cv::Point2f>> &backup_chessboard_corners_list,
                                   const cv::Size &image_size,
                                   const cv::Size &chessboard_pattern,
                                   float chessboard_square_length)
@@ -213,24 +215,24 @@ Transformation stereo_calibration(const k4a::calibration &master_calib,
     //
     // A function in OpenCV's calibration function also requires that these points be F32 types, so we use those.
     // However, OpenCV still provides doubles as output, strangely enough.
-    vector<vector<cv::Point3f>> chessboard_corners_world_nested_for_cv(master_chessboard_corners_list.size(),
+    vector<vector<cv::Point3f>> chessboard_corners_world_nested_for_cv(main_chessboard_corners_list.size(),
                                                                        chessboard_corners_world);
 
-    cv::Matx33f master_camera_matrix = calibration_to_color_camera_matrix(master_calib);
-    cv::Matx33f sub_camera_matrix = calibration_to_color_camera_matrix(sub_calib);
-    vector<float> master_dist_coeff = calibration_to_color_camera_dist_coeffs(master_calib);
-    vector<float> sub_dist_coeff = calibration_to_color_camera_dist_coeffs(sub_calib);
+    cv::Matx33f main_camera_matrix = calibration_to_color_camera_matrix(main_calib);
+    cv::Matx33f backup_camera_matrix = calibration_to_color_camera_matrix(backup_calib);
+    vector<float> main_dist_coeff = calibration_to_color_camera_dist_coeffs(main_calib);
+    vector<float> backup_dist_coeff = calibration_to_color_camera_dist_coeffs(backup_calib);
 
     // Finally, we'll actually calibrate the cameras.
-    // Pass subordinate first, then master, because we want a transform from subordinate to master.
+    // Pass backup first, then main, because we want a transform from backup to main.
     Transformation tr;
     double error = cv::stereoCalibrate(chessboard_corners_world_nested_for_cv,
-                                       sub_chessboard_corners_list,
-                                       master_chessboard_corners_list,
-                                       sub_camera_matrix,
-                                       sub_dist_coeff,
-                                       master_camera_matrix,
-                                       master_dist_coeff,
+                                       backup_chessboard_corners_list,
+                                       main_chessboard_corners_list,
+                                       backup_camera_matrix,
+                                       backup_dist_coeff,
+                                       main_camera_matrix,
+                                       main_dist_coeff,
                                        image_size,
                                        tr.R, // output
                                        tr.t, // output
@@ -245,14 +247,14 @@ Transformation stereo_calibration(const k4a::calibration &master_calib,
 // The following functions provide the configurations that should be used for each camera.
 // NOTE: Both cameras must have the same configuration (framerate, resolution, color and depth modes TODO what exactly
 // needs to be the same
-k4a_device_configuration_t get_master_config()
+k4a_device_configuration_t get_main_config()
 {
     k4a_device_configuration_t camera_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
     camera_config.color_resolution = K4A_COLOR_RESOLUTION_720P;
     camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED; // no need for depth during calibration
     camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
-    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
+    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER; // main will be the master
     camera_config.subordinate_delay_off_master_usec = 0; // Must be zero- this device is the master, so delay is 0.
     // Let half of the time needed for the depth cameras to not interfere with one another pass here (the other half is
     // in the master to subordinate delay)
@@ -261,12 +263,12 @@ k4a_device_configuration_t get_master_config()
     return camera_config;
 }
 
-k4a_device_configuration_t get_sub_config()
+k4a_device_configuration_t get_backup_config()
 {
-    k4a_device_configuration_t camera_config = get_master_config();
+    k4a_device_configuration_t camera_config = get_main_config();
     // The color camera must be running for synchronization to work, even though we don't really use it
-    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
-    camera_config.subordinate_delay_off_master_usec = 0; // sync up the color cameras to help calibration
+    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE; // backup will be the subordinate
+    camera_config.subordinate_delay_off_master_usec = 0;             // sync up the color cameras to help calibration
     // Only account for half of the delay here. The other half comes from the master depth camera capturing before the
     // master color camera.
     camera_config.depth_delay_off_color_usec = MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2;
@@ -279,46 +281,46 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                  const cv::Size &chessboard_pattern,
                                  float chessboard_square_length)
 {
-    k4a::calibration master_calibration = capturer.devices[0].get_calibration(configs[0].depth_mode,
-                                                                              configs[0].color_resolution);
-    k4a::calibration sub_calibration = capturer.devices[1].get_calibration(configs[1].depth_mode,
-                                                                           configs[1].color_resolution);
-    vector<vector<cv::Point2f>> master_chessboard_corners_list;
-    vector<vector<cv::Point2f>> sub_chessboard_corners_list;
+    k4a::calibration main_calibration = capturer.devices[0].get_calibration(configs[0].depth_mode,
+                                                                            configs[0].color_resolution);
+    k4a::calibration backup_calibration = capturer.devices[1].get_calibration(configs[1].depth_mode,
+                                                                              configs[1].color_resolution);
+    vector<vector<cv::Point2f>> main_chessboard_corners_list;
+    vector<vector<cv::Point2f>> backup_chessboard_corners_list;
     while (true)
     {
         vector<k4a::capture> captures = capturer.get_synchronized_captures(configs);
-        k4a::capture &master_capture = captures[0];
-        k4a::capture &sub_capture = captures[1];
+        k4a::capture &main_capture = captures[0];
+        k4a::capture &backup_capture = captures[1];
         // get_color_image is guaranteed to be non-null because we use get_synchronized_captures for color
-        // (get_synchronized_captures also offers a flag to use depth for the subordinate camera instead of color).
-        k4a::image master_color_image = master_capture.get_color_image();
-        k4a::image sub_color_image = sub_capture.get_color_image();
-        cv::Mat cv_master_color_image = color_to_opencv(master_color_image);
-        cv::Mat cv_sub_color_image = color_to_opencv(sub_color_image);
+        // (get_synchronized_captures also offers a flag to use depth for the backup camera instead of color).
+        k4a::image main_color_image = main_capture.get_color_image();
+        k4a::image backup_color_image = backup_capture.get_color_image();
+        cv::Mat cv_main_color_image = color_to_opencv(main_color_image);
+        cv::Mat cv_backup_color_image = color_to_opencv(backup_color_image);
 
-        vector<cv::Point2f> master_chessboard_corners;
-        vector<cv::Point2f> sub_chessboard_corners;
-        bool got_corners = find_chessboard_corners_helper(cv_master_color_image,
-                                                          cv_sub_color_image,
+        vector<cv::Point2f> main_chessboard_corners;
+        vector<cv::Point2f> backup_chessboard_corners;
+        bool got_corners = find_chessboard_corners_helper(cv_main_color_image,
+                                                          cv_backup_color_image,
                                                           chessboard_pattern,
-                                                          master_chessboard_corners,
-                                                          sub_chessboard_corners);
+                                                          main_chessboard_corners,
+                                                          backup_chessboard_corners);
         if (got_corners)
         {
-            master_chessboard_corners_list.emplace_back(master_chessboard_corners);
-            sub_chessboard_corners_list.emplace_back(sub_chessboard_corners);
+            main_chessboard_corners_list.emplace_back(main_chessboard_corners);
+            backup_chessboard_corners_list.emplace_back(backup_chessboard_corners);
         }
 
-        // Calibrate with 20 frames
-        if (master_chessboard_corners_list.size() >= 20)
+        // Get 20 frames before doing calibration.
+        if (main_chessboard_corners_list.size() >= 20)
         {
             cout << "Calculating calibration..." << endl;
-            return stereo_calibration(master_calibration,
-                                      sub_calibration,
-                                      master_chessboard_corners_list,
-                                      sub_chessboard_corners_list,
-                                      cv_master_color_image.size(),
+            return stereo_calibration(main_calibration,
+                                      backup_calibration,
+                                      main_chessboard_corners_list,
+                                      backup_chessboard_corners_list,
+                                      cv_main_color_image.size(),
                                       chessboard_pattern,
                                       chessboard_square_length);
         }
@@ -408,78 +410,80 @@ int main(int argc, char **argv)
     vector<int> device_indices{ 0, 1 };
     MultiDeviceCapturer capturer(device_indices, color_exposure_usec, powerline_freq);
 
-    // Create configurations. Note that the master MUST be first, and the order of indices in device_indices is not
-    // necessarily preserved because the device_indices may not have ordered according to master and subordinate
-    vector<k4a_device_configuration_t> configs{ get_master_config(), get_sub_config() };
-    k4a_device_configuration_t &master_config = configs.front();
-    k4a_device_configuration_t &sub_config = configs.back();
+    // Create configurations. Note that the main MUST be first, and the order of indices in device_indices is not
+    // necessarily preserved because the device_indices may not have ordered according to main and backup
+    vector<k4a_device_configuration_t> configs{ get_main_config(), get_backup_config() };
+    k4a_device_configuration_t &main_config = configs.front();
+    k4a_device_configuration_t &backup_config = configs.back();
 
     capturer.start_devices(configs);
 
     // This wraps all the device-to-device details
-    Transformation tr_color_sub_to_color_master =
+    Transformation tr_color_backup_to_color_main =
         calibrate_devices(capturer, configs, chessboard_pattern, chessboard_square_length);
 
-    k4a::calibration master_calibration = capturer.devices[0].get_calibration(master_config.depth_mode,
-                                                                              master_config.color_resolution);
-    k4a::calibration sub_calibration = capturer.devices[1].get_calibration(sub_config.depth_mode,
-                                                                           sub_config.color_resolution);
-    // Get the transformation from subordinate depth to subordinate color using its calibration object
-    Transformation tr_depth_sub_to_color_sub = get_depth_to_color_transformation_from_calibration(sub_calibration);
+    k4a::calibration main_calibration = capturer.devices[0].get_calibration(main_config.depth_mode,
+                                                                            main_config.color_resolution);
+    k4a::calibration backup_calibration = capturer.devices[1].get_calibration(backup_config.depth_mode,
+                                                                              backup_config.color_resolution);
+    // Get the transformation from backup depth to backup color using its calibration object
+    Transformation tr_depth_backup_to_color_backup = get_depth_to_color_transformation_from_calibration(
+        backup_calibration);
 
-    // We now have the subordinate depth to subordinate color transform. We also have the transformation from the
-    // subordinate color perspective to the master color perspective from the calibration earlier. Now let's compose the
-    // depth sub -> color sub, color sub -> color master into depth sub -> color master
-    Transformation tr_depth_sub_to_color_master = tr_depth_sub_to_color_sub.compose_with(tr_color_sub_to_color_master);
+    // We now have the backup depth to backup color transform. We also have the transformation from the
+    // backup color perspective to the main color perspective from the calibration earlier. Now let's compose the
+    // depth backup -> color backup, color backup -> color main into depth backup -> color main
+    Transformation tr_depth_backup_to_color_main = tr_depth_backup_to_color_backup.compose_with(
+        tr_color_backup_to_color_main);
 
     // Now, we're going to set up the transformations. DO THIS OUTSIDE OF YOUR MAIN LOOP! Constructing transformations
     // does a lot of preemptive work to make the transform as fast as possible.
-    k4a::transformation master_depth_to_master_color(master_calibration);
+    k4a::transformation main_depth_to_main_color(main_calibration);
 
-    // We're going to update the existing calibration extrinsics on getting from the sub depth camera to the sub color
-    // camera, overwriting it with the transformation to get from the sub depth camera to the master color camera
+    // We're going to update the existing calibration extrinsics on getting from the backup depth camera to the backup
+    // color camera, overwriting it with the transformation to get from the backup depth camera to the main color camera
     // TODO this needs to be done by constructing a new calibration object, not modifying
-    set_calibration_depth_to_color_from_transformation(sub_calibration, tr_depth_sub_to_color_master);
-    sub_calibration.color_camera_calibration = master_calibration.color_camera_calibration;
-    k4a::transformation sub_depth_to_master_color(sub_calibration);
+    set_calibration_depth_to_color_from_transformation(backup_calibration, tr_depth_backup_to_color_main);
+    backup_calibration.color_camera_calibration = main_calibration.color_camera_calibration;
+    k4a::transformation backup_depth_to_main_color(backup_calibration);
 
     while (true)
     {
         vector<k4a::capture> captures = capturer.get_synchronized_captures(configs,
                                                                            true); // This is to get the depth image for
-                                                                                  // the subordinate, not the color
-        k4a::image master_color_image = captures[0].get_color_image();
-        k4a::image master_depth_image = captures[0].get_depth_image();
-        k4a::image sub_depth_image = captures[1].get_depth_image();
+                                                                                  // the backup, not the color
+        k4a::image main_color_image = captures[0].get_color_image();
+        k4a::image main_depth_image = captures[0].get_depth_image();
+        k4a::image backup_depth_image = captures[1].get_depth_image();
 
         // let's green screen out things that are far away.
-        // first: let's get the master depth image into the color camera space
-        k4a::image master_depth_in_master_color = create_depth_image_like(master_color_image);
-        master_depth_to_master_color.depth_image_to_color_camera(master_depth_image, &master_depth_in_master_color);
-        cv::Mat cv_master_depth_in_master_color = depth_to_opencv(master_depth_in_master_color);
+        // first: let's get the main depth image into the color camera space
+        k4a::image main_depth_in_main_color = create_depth_image_like(main_color_image);
+        main_depth_to_main_color.depth_image_to_color_camera(main_depth_image, &main_depth_in_main_color);
+        cv::Mat cv_main_depth_in_main_color = depth_to_opencv(main_depth_in_main_color);
 
-        // Get the depth image in the master color perspective
-        k4a::image sub_depth_in_master_color = create_depth_image_like(master_color_image);
-        sub_depth_to_master_color.depth_image_to_color_camera(sub_depth_image, &sub_depth_in_master_color);
-        cv::Mat cv_sub_depth_in_master_color = depth_to_opencv(sub_depth_in_master_color);
+        // Get the depth image in the main color perspective
+        k4a::image backup_depth_in_main_color = create_depth_image_like(main_color_image);
+        backup_depth_to_main_color.depth_image_to_color_camera(backup_depth_image, &backup_depth_in_main_color);
+        cv::Mat cv_backup_depth_in_main_color = depth_to_opencv(backup_depth_in_main_color);
 
-        cv::Mat cv_master_color_image = color_to_opencv(master_color_image);
+        cv::Mat cv_main_color_image = color_to_opencv(main_color_image);
 
         // create the image that will be be used as output
-        cv::Mat output_image(cv_master_color_image.rows, cv_master_color_image.cols, CV_8UC3, cv::Scalar(0, 0, 0));
+        cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, cv::Scalar(0, 0, 0));
 
         // Now it's time to actually construct the green screen. Where the depth is 0, the camera doesn't know how far
         // away the object is because it didn't get a response at that point. That's where we'll try to fill in the gaps
         // with the other camera.
-        cv::Mat master_valid_mask = cv_master_depth_in_master_color != 0;
-        cv::Mat sub_valid_mask = cv_sub_depth_in_master_color != 0;
-        cv::Mat within_threshold_range = (master_valid_mask & (cv_master_depth_in_master_color < depth_threshold)) |
-                                         (~master_valid_mask & sub_valid_mask &
-                                          (cv_sub_depth_in_master_color < depth_threshold));
+        cv::Mat main_valid_mask = cv_main_depth_in_main_color != 0;
+        cv::Mat backup_valid_mask = cv_backup_depth_in_main_color != 0;
+        cv::Mat within_threshold_range = (main_valid_mask & (cv_main_depth_in_main_color < depth_threshold)) |
+                                         (~main_valid_mask & backup_valid_mask &
+                                          (cv_backup_depth_in_main_color < depth_threshold));
         // make a green background
-        cv::Mat output(cv_master_color_image.size(), cv_master_color_image.type(), cv::Scalar(0, 255, 0));
+        cv::Mat output(cv_main_color_image.size(), cv_main_color_image.type(), cv::Scalar(0, 255, 0));
         // copy all valid output to it
-        cv_master_color_image.copyTo(output, within_threshold_range);
+        cv_main_color_image.copyTo(output, within_threshold_range);
         cv::imshow("Green Screen", output);
         cv::waitKey(1);
     }
