@@ -650,10 +650,8 @@ jobs:
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
         flattenFolders: true
 
-    - task: PowerShell@2
-      inputs:
-        targetType: 'filePath'
-        filePath: './scripts/Reset-Device.ps1'
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -r'
+      workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
 
     - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
@@ -686,12 +684,6 @@ jobs:
         testAssemblyVer2: |
           **/*FunctionalTests.dll
           !**/obj/**
-
-    - task: PowerShell@2
-      inputs:
-        targetType: 'filePath'
-        filePath: './scripts/Reset-Device.ps1'
-      displayName: 'Reset K4A Device'
 
 - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
   - job: LinuxFunctionalTests
@@ -790,9 +782,9 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check openGL version'
 
-    - script: 'stty -F /dev/ttyACM0 -hupcl'
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
-      displayName: 'Prevent the USB connector from accidentally being reset'
+      displayName: 'Reset K4A Device'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
