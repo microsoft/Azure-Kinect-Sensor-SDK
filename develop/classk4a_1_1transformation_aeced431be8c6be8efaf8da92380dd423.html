@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: Data Fields - Functions</title>
+<title>Azure Kinect Sensor SDK: k4a::transformation::depth_image_to_point_cloud</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('functions_func_d.html','');});
+$(document).ready(function(){initNavTree('classk4a_1_1transformation_aeced431be8c6be8efaf8da92380dd423.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,43 +84,53 @@ $(document).ready(function(){initNavTree('functions_func_d.html','');});
 </div>
 
 <div class="contents">
-&#160;
+<a id="aeced431be8c6be8efaf8da92380dd423"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeced431be8c6be8efaf8da92380dd423">&#9670;&nbsp;</a></span>depth_image_to_point_cloud() <span class="overload">[2/2]</span></h2>
 
-<h3><a id="index_d"></a>- d -</h3><ul>
-<li>depth_image_to_color_camera()
-: <a class="el" href="classk4a_1_1transformation_a84d7583dff4ba83f9ed162233f860418.html#a84d7583dff4ba83f9ed162233f860418">k4a::transformation</a>
-</li>
-<li>depth_image_to_color_camera_custom()
-: <a class="el" href="classk4a_1_1transformation_a72eaf319f56076237371651dc483603e.html#a72eaf319f56076237371651dc483603e">k4a::transformation</a>
-</li>
-<li>depth_image_to_point_cloud()
-: <a class="el" href="classk4a_1_1transformation_aca376c8cca0f1157c3632b4f4c1a59ab.html#aca376c8cca0f1157c3632b4f4c1a59ab">k4a::transformation</a>
-</li>
-<li>DepthImageToColorCamera()
-: <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_transformation_af84dcbdbe24b9fef2dcdb1f362f6cb07.html#af84dcbdbe24b9fef2dcdb1f362f6cb07">Microsoft.Azure.Kinect.Sensor.Transformation</a>
-</li>
-<li>DepthImageToPointCloud()
-: <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_transformation_a8dc3bd0e8dec8d61d50ea5fa0086a8dc.html#a8dc3bd0e8dec8d61d50ea5fa0086a8dc">Microsoft.Azure.Kinect.Sensor.Transformation</a>
-</li>
-<li>destroy()
-: <a class="el" href="classk4a_1_1transformation.html#a0f938b04a6a4b3d6b15df85ec3dc0422">k4a::transformation</a>
-</li>
-<li>device()
-: <a class="el" href="classk4a_1_1device.html#a7543679a25b5761293869d1856d219aa">k4a::device</a>
-</li>
-<li>Dispose()
-: <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_capture.html#a9523d552fbf739411a4bcc39299cccc4">Microsoft.Azure.Kinect.Sensor.Capture</a>
-, <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_aaed479ad77ebcdc9036e82624b694cfc.html#aaed479ad77ebcdc9036e82624b694cfc">Microsoft.Azure.Kinect.Sensor.Device</a>
-, <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image.html#aa8f1166f38d40a07c2b30c89f9b7a51f">Microsoft.Azure.Kinect.Sensor.Image</a>
-, <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_transformation.html#aaeb4b27c43bb4b9badead24c2a1cd61d">Microsoft.Azure.Kinect.Sensor.Transformation</a>
-</li>
-</ul>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classk4a_1_1image.html">image</a> k4a::transformation::depth_image_to_point_cloud </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classk4a_1_1image.html">image</a> &amp;&#160;</td>
+          <td class="paramname"><em>depth_image</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5.html#ga8d5fae13125f360be86c166684cdb5c5">k4a_calibration_type_t</a>&#160;</td>
+          <td class="paramname"><em>camera</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding 3d points. </p>
+<p>Throws error on failure.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___functions_ga7385eb4beb9d8892e8a88cf4feb3be70.html#ga7385eb4beb9d8892e8a88cf4feb3be70" title="Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding ...">k4a_transformation_depth_image_to_point_cloud</a> Creates a new <a class="el" href="classk4a_1_1image.html" title="Wrapper for k4a_image_t. ">image</a> with the output. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.14-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><b>k4a</b></li><li class="navelem"><a class="el" href="classk4a_1_1transformation.html">transformation</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.14 </li>
