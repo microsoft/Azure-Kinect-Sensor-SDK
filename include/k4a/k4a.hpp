@@ -771,7 +771,14 @@ public:
      *
      * \sa k4a_transformation_create
      */
-    transformation(const k4a_calibration_t &calibration) noexcept : m_handle(k4a_transformation_create(&calibration)) {}
+    transformation(const k4a_calibration_t &calibration) noexcept :
+        m_handle(k4a_transformation_create(&calibration)),
+        m_color_resolution({ calibration.color_camera_calibration.resolution_width,
+                             calibration.color_camera_calibration.resolution_height }),
+        m_depth_resolution({ calibration.depth_camera_calibration.resolution_width,
+                             calibration.depth_camera_calibration.resolution_height })
+    {
+    }
 
     /** Creates a transformation from a k4a_transformation_t
      * Takes ownership of the handle, i.e. you should not call
@@ -782,7 +789,10 @@ public:
 
     /** Moves another tranformation into a new transformation
      */
-    transformation(transformation &&other) noexcept : m_handle(other.m_handle)
+    transformation(transformation &&other) noexcept :
+        m_handle(other.m_handle),
+        m_color_resolution(other.m_color_resolution),
+        m_depth_resolution(other.m_depth_resolution)
     {
         other.m_handle = nullptr;
     }
@@ -802,6 +812,8 @@ public:
         {
             destroy();
             m_handle = other.m_handle;
+            m_color_resolution = other.m_color_resolution;
+            m_depth_resolution = other.m_depth_resolution;
             other.m_handle = nullptr;
         }
 
@@ -833,6 +845,7 @@ public:
      * Throws error on failure
      *
      * \sa k4a_transformation_depth_image_to_color_camera
+     * Transforms the output in to the existing caller provided \p transformed_depth_image.
      */
     void depth_image_to_color_camera(const image &depth_image, image *transformed_depth_image) const
     {
@@ -845,10 +858,28 @@ public:
         }
     }
 
+    /** Transforms the depth map into the geometry of the color camera.
+     * Throws error on failure
+     *
+     * \sa k4a_transformation_depth_image_to_color_camera
+     * Creates a new image with the output.
+     */
+    image depth_image_to_color_camera(const image &depth_image) const
+    {
+        image transformed_depth_image = image::create(K4A_IMAGE_FORMAT_DEPTH16,
+                                                      m_color_resolution.width,
+                                                      m_color_resolution.height,
+                                                      m_color_resolution.width *
+                                                          static_cast<int32_t>(sizeof(uint16_t)));
+        depth_image_to_color_camera(depth_image, &transformed_depth_image);
+        return transformed_depth_image;
+    }
+
     /** Transforms depth map and a custom image into the geometry of the color camera.
      * Throws error on failure
      *
      * \sa k4a_transformation_depth_image_to_color_camera_custom
+     * Transforms the output in to the existing caller provided \p transformed_depth_image \p transformed_custom_image.
      */
     void depth_image_to_color_camera_custom(const image &depth_image,
                                             const image &custom_image,
@@ -870,10 +901,53 @@ public:
         }
     }
 
+    /** Transforms depth map and a custom image into the geometry of the color camera.
+     * Throws error on failure
+     *
+     * \sa k4a_transformation_depth_image_to_color_camera_custom
+     * Creates a new image with the output.
+     */
+    std::pair<image, image>
+    depth_image_to_color_camera_custom(const image &depth_image,
+                                       const image &custom_image,
+                                       k4a_transformation_interpolation_type_t interpolation_type,
+                                       uint32_t invalid_custom_value) const
+    {
+        image transformed_depth_image = image::create(K4A_IMAGE_FORMAT_DEPTH16,
+                                                      m_color_resolution.width,
+                                                      m_color_resolution.height,
+                                                      m_color_resolution.width *
+                                                          static_cast<int32_t>(sizeof(uint16_t)));
+        int32_t bytes_per_pixel;
+        switch (custom_image.get_format())
+        {
+        case K4A_IMAGE_FORMAT_CUSTOM8:
+            bytes_per_pixel = static_cast<int32_t>(sizeof(int8_t));
+            break;
+        case K4A_IMAGE_FORMAT_CUSTOM16:
+            bytes_per_pixel = static_cast<int32_t>(sizeof(int16_t));
+            break;
+        default:
+            throw error("Failed to support this format of custom image!");
+        }
+        image transformed_custom_image = image::create(custom_image.get_format(),
+                                                       m_color_resolution.width,
+                                                       m_color_resolution.height,
+                                                       m_color_resolution.width * bytes_per_pixel);
+        depth_image_to_color_camera_custom(depth_image,
+                                           custom_image,
+                                           &transformed_depth_image,
+                                           &transformed_custom_image,
+                                           interpolation_type,
+                                           invalid_custom_value);
+        return { std::move(transformed_depth_image), std::move(transformed_custom_image) };
+    }
+
     /** Transforms the color image into the geometry of the depth camera.
      * Throws error on failure
      *
      * \sa k4a_transformation_color_image_to_depth_camera
+     * Transforms the output in to the existing caller provided \p transformed_color_image.
      */
     void color_image_to_depth_camera(const image &depth_image,
                                      const image &color_image,
@@ -889,10 +963,28 @@ public:
         }
     }
 
+    /** Transforms the color image into the geometry of the depth camera.
+     * Throws error on failure
+     *
+     * \sa k4a_transformation_color_image_to_depth_camera
+     * Creates a new image with the output.
+     */
+    image color_image_to_depth_camera(const image &depth_image, const image &color_image) const
+    {
+        image transformed_color_image = image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                                                      m_depth_resolution.width,
+                                                      m_depth_resolution.height,
+                                                      m_depth_resolution.width * 4 *
+                                                          static_cast<int32_t>(sizeof(uint8_t)));
+        color_image_to_depth_camera(depth_image, color_image, &transformed_color_image);
+        return transformed_color_image;
+    }
+
     /** Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding 3d points.
      * Throws error on failure.
      *
      * \sa k4a_transformation_depth_image_to_point_cloud
+     * Transforms the output in to the existing caller provided \p xyz_image.
      */
     void depth_image_to_point_cloud(const image &depth_image, k4a_calibration_type_t camera, image *xyz_image) const
     {
@@ -904,8 +996,31 @@ public:
         }
     }
 
+    /** Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding 3d points.
+     * Throws error on failure.
+     *
+     * \sa k4a_transformation_depth_image_to_point_cloud
+     * Creates a new image with the output.
+     */
+    image depth_image_to_point_cloud(const image &depth_image, k4a_calibration_type_t camera) const
+    {
+        image xyz_image = image::create(K4A_IMAGE_FORMAT_CUSTOM,
+                                        depth_image.get_width_pixels(),
+                                        depth_image.get_height_pixels(),
+                                        depth_image.get_width_pixels() * 3 * static_cast<int32_t>(sizeof(int16_t)));
+        depth_image_to_point_cloud(depth_image, camera, &xyz_image);
+        return xyz_image;
+    }
+
 private:
     k4a_transformation_t m_handle;
+    struct resolution
+    {
+        int32_t width;
+        int32_t height;
+    };
+    resolution m_color_resolution;
+    resolution m_depth_resolution;
 };
 
 /** \class device k4a.hpp <k4a/k4a.hpp>
