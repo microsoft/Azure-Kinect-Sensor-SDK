@@ -6,11 +6,14 @@
 * Depth Engine breaking changes to 2.0, SDK now relies on this new version.
 * Firmware updates for better USB compatibility.
 * Added new API's k4a_image_get_device_timestamp_usec(), k4a_image_get_system_timestamp_usec(), 
-k4a_image_set_device_timestamp_usec(), k4a_image_set_system_timestamp_usec(), and k4a_image_set_exposure_usec().
+k4a_image_set_device_timestamp_usec(), k4a_image_set_system_timestamp_usec(), and k4a_image_set_exposure_usec(). (#350)
 * Deprecated API's k4a_image_get_timestamp_usec(), k4a_image_set_timestamp_usec(), and k4a_image_set_exposure_time_usec().
-* Added new transformation API k4a_transformation_depth_image_to_color_camera_custom().
-* Fixed color exposure get & set API's.
-* The C++ API for playback was made public.
+* Added new transformation API k4a_transformation_depth_image_to_color_camera_custom(). (#566)
+* Fixed color exposure get & set API's. (#515)
+* The C++ API for playback was made public. (#493)
+* Added custom track recording and playback API. (#246)
+* All playback API functions now return timestamps in device time instead of relative to start of recording. (#592)
+* Deprecated k4a_playback_get_last_timestamp_usec() and replaced with k4a_playback_get_recording_length_usec().
 
 ### v1.1.0
 
