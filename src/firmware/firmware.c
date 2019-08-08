@@ -471,13 +471,13 @@ k4a_result_t firmware_get_serial_number(colormcu_t color, depthmcu_t depth, char
     }
     else
     {
-        LOG_ERROR("No Color or Depth handle provided\n",0);
+        LOG_ERROR("No Color or Depth handle provided\n", 0);
         return K4A_RESULT_FAILED;
     }
 
     if (b_result != K4A_BUFFER_RESULT_TOO_SMALL)
     {
-        LOG_ERROR("Failed to get serial number length\n",0);
+        LOG_ERROR("Failed to get serial number length\n", 0);
         return K4A_RESULT_FAILED;
     }
 

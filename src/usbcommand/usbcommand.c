@@ -459,36 +459,36 @@ k4a_buffer_result_t usb_cmd_get_serial_number(usbcmd_t usbcmd_handle, char *seri
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, usbcmd_t, usbcmd_handle);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);
 
-    k4a_buffer_result_t result = K4A_BUFFER_RESULT_FAILED;
+    k4a_buffer_result_t result_b = K4A_BUFFER_RESULT_FAILED;
     usbcmd_context_t *usbcmd;
 
     if (K4A_FAILED(K4A_RESULT_FROM_BOOL((usbcmd = usbcmd_t_get_context(usbcmd_handle)) != NULL)))
     {
-        result = K4A_BUFFER_RESULT_FAILED;
+        result_b = K4A_BUFFER_RESULT_FAILED;
     }
 
     size_t required_length = strlen((const char *)usbcmd->serial_number) + 1;
 
-    if (K4A_SUCCEEDED(result) && (required_length > *serial_number_size))
+    if ((result_b == K4A_BUFFER_RESULT_SUCCEEDED) && (required_length > *serial_number_size))
     {
         *serial_number_size = required_length;
-        result = K4A_BUFFER_RESULT_TOO_SMALL;
+        result_b = K4A_BUFFER_RESULT_TOO_SMALL;
     }
 
-    if (K4A_SUCCEEDED(result) && (serial_number == NULL))
+    if ((result_b == K4A_BUFFER_RESULT_SUCCEEDED) && (serial_number == NULL))
     {
         LOG_ERROR("serial_number buffer cannot be NULL", 0);
-        result = K4A_BUFFER_RESULT_FAILED;
+        result_b = K4A_BUFFER_RESULT_FAILED;
     }
 
-    if (K4A_SUCCEEDED(result))
+    if (result_b == K4A_BUFFER_RESULT_SUCCEEDED)
     {
         *serial_number_size = strlen((const char *)usbcmd->serial_number) + 1;
         memset(serial_number, 0, *serial_number_size);
         memcpy(serial_number, usbcmd->serial_number, required_length - 1);
-        result = K4A_BUFFER_RESULT_SUCCEEDED;
+        result_b = K4A_BUFFER_RESULT_SUCCEEDED;
     }
-    return result;
+    return result_b;
 }
 
 /**
