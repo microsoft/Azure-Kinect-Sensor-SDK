@@ -31,12 +31,15 @@
             this.pictureBoxColor = new System.Windows.Forms.PictureBox();
             this.pictureBoxDepth = new System.Windows.Forms.PictureBox();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.fpsStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxColor)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxDepth)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
             this.splitContainer.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBoxColor
@@ -80,11 +83,29 @@
             this.splitContainer.SplitterWidth = 5;
             this.splitContainer.TabIndex = 2;
             // 
+            // statusStrip
+            // 
+            this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fpsStatusLabel});
+            this.statusStrip.Location = new System.Drawing.Point(0, 647);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(1067, 26);
+            this.statusStrip.TabIndex = 3;
+            this.statusStrip.Text = "statusStrip";
+            // 
+            // fpsStatusLabel
+            // 
+            this.fpsStatusLabel.Name = "fpsStatusLabel";
+            this.fpsStatusLabel.Size = new System.Drawing.Size(105, 20);
+            this.fpsStatusLabel.Text = "fpsStatusLabel";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1067, 673);
+            this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.splitContainer);
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
@@ -97,7 +118,10 @@
             this.splitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
             this.splitContainer.ResumeLayout(false);
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -106,6 +130,8 @@
         private System.Windows.Forms.PictureBox pictureBoxColor;
         private System.Windows.Forms.PictureBox pictureBoxDepth;
         private System.Windows.Forms.SplitContainer splitContainer;
+        private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel fpsStatusLabel;
     }
 }
 

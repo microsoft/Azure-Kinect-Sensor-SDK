@@ -229,7 +229,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
     RETURN_IF_ERROR(populate_cluster_cache(context));
 
     // Find the last timestamp in the file
-    context->last_timestamp_ns = 0;
+    context->last_file_timestamp_ns = 0;
     cluster_info_t *cluster_info = find_cluster(context, UINT64_MAX);
     if (cluster_info == NULL)
     {
@@ -251,9 +251,9 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
         {
             simple_block->SetParent(*last_cluster);
             uint64_t block_timestamp_ns = simple_block->GlobalTimecode();
-            if (block_timestamp_ns > context->last_timestamp_ns)
+            if (block_timestamp_ns > context->last_file_timestamp_ns)
             {
-                context->last_timestamp_ns = block_timestamp_ns;
+                context->last_file_timestamp_ns = block_timestamp_ns;
             }
         }
         else if (check_element_type(e, &block_group))
@@ -281,13 +281,13 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
                     block_timestamp_ns += block_duration_ns - 1;
                 }
             }
-            if (block_timestamp_ns > context->last_timestamp_ns)
+            if (block_timestamp_ns > context->last_file_timestamp_ns)
             {
-                context->last_timestamp_ns = block_timestamp_ns;
+                context->last_file_timestamp_ns = block_timestamp_ns;
             }
         }
     }
-    LOG_TRACE("Found last timestamp: %llu", context->last_timestamp_ns);
+    LOG_TRACE("Found last file timestamp: %llu", context->last_file_timestamp_ns);
 
     return K4A_RESULT_SUCCEEDED;
 }
@@ -393,15 +393,21 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     context->timecode_scale = GetChild<KaxTimecodeScale>(*context->segment_info).GetValue();
 
-    context->color_track.track = find_track(context, "COLOR", "K4A_COLOR_TRACK");
-    context->depth_track.track = find_track(context, "DEPTH", "K4A_DEPTH_TRACK");
-    context->ir_track.track = find_track(context, "IR", "K4A_IR_TRACK");
-    if (context->ir_track.track == NULL)
+    if (K4A_FAILED(parse_tracks(context)))
+    {
+        LOG_ERROR("Reading track data failed.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    context->color_track = find_track(context, "COLOR", "K4A_COLOR_TRACK");
+    context->depth_track = find_track(context, "DEPTH", "K4A_DEPTH_TRACK");
+    context->ir_track = find_track(context, "IR", "K4A_IR_TRACK");
+    if (context->ir_track == NULL)
     {
         // Support legacy IR track naming.
-        context->ir_track.track = find_track(context, "DEPTH_IR", NULL);
+        context->ir_track = find_track(context, "DEPTH_IR", NULL);
     }
-    context->imu_track.track = find_track(context, "IMU", "K4A_IMU_TRACK");
+    context->imu_track = find_track(context, "IMU", "K4A_IMU_TRACK");
 
     // Read device calibration attachment
     context->calibration_attachment = get_attachment_by_tag(context, "K4A_CALIBRATION_FILE");
@@ -416,37 +422,42 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     }
 
     uint64_t frame_period_ns = 0;
-    if (context->color_track.track)
+    if (context->color_track)
     {
-        KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*context->color_track.track);
-        context->color_track.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
-        context->color_track.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
+        if (context->color_track->type != track_video)
+        {
+            LOG_ERROR("Color track is not a video track.", 0);
+            return K4A_RESULT_FAILED;
+        }
 
-        frame_period_ns = GetChild<KaxTrackDefaultDuration>(*context->color_track.track).GetValue();
+        frame_period_ns = context->color_track->frame_period_ns;
 
-        RETURN_IF_ERROR(read_bitmap_info_header(&context->color_track));
+        RETURN_IF_ERROR(read_bitmap_info_header(context->color_track));
         context->record_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
         for (size_t i = 0; i < arraysize(color_resolutions); i++)
         {
             uint32_t width, height;
             if (k4a_convert_resolution_to_width_height(color_resolutions[i], &width, &height))
             {
-                if (context->color_track.width == width && context->color_track.height == height)
+                if (context->color_track->width == width && context->color_track->height == height)
                 {
                     context->record_config.color_resolution = color_resolutions[i];
                     break;
                 }
             }
         }
+
         if (context->record_config.color_resolution == K4A_COLOR_RESOLUTION_OFF)
         {
-            LOG_ERROR("Unsupported color resolution: %dx%d", context->color_track.width, context->color_track.height);
-            return K4A_RESULT_FAILED;
+            LOG_WARNING("The color resolution is not officially supported: %dx%d. You cannot get the calibration "
+                        "information for this color resolution",
+                        context->color_track->width,
+                        context->color_track->height);
         }
 
         context->record_config.color_track_enabled = true;
-        context->record_config.color_format = context->color_track.format;
-        context->color_format_conversion = context->color_track.format;
+        context->record_config.color_format = context->color_track->format;
+        context->color_format_conversion = context->color_track->format;
     }
     else
     {
@@ -457,7 +468,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     }
 
     KaxTag *depth_mode_tag = get_tag(context, "K4A_DEPTH_MODE");
-    if (depth_mode_tag == NULL && (context->depth_track.track || context->ir_track.track))
+    if (depth_mode_tag == NULL && (context->depth_track || context->ir_track))
     {
         LOG_ERROR("K4A_DEPTH_MODE tag is missing.", 0);
         return K4A_RESULT_FAILED;
@@ -482,6 +493,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 }
             }
         }
+
         if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
         {
             // Try to find the mode matching strings in the legacy modes
@@ -506,82 +518,86 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
     }
 
-    if (context->depth_track.track)
+    if (context->depth_track)
     {
-        KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*context->depth_track.track);
-        context->depth_track.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
-        context->depth_track.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
-
-        uint64_t depth_period_ns = GetChild<KaxTrackDefaultDuration>(*context->depth_track.track).GetValue();
-        if (frame_period_ns == 0)
+        if (context->depth_track->type != track_video)
         {
-            frame_period_ns = depth_period_ns;
-        }
-        else if (frame_period_ns != depth_period_ns)
-        {
-            LOG_ERROR("Track frame durations don't match (Depth): %llu ns != %llu ns",
-                      frame_period_ns,
-                      depth_period_ns);
+            LOG_ERROR("Depth track is not a video track.", 0);
             return K4A_RESULT_FAILED;
         }
 
-        if (context->depth_track.width != depth_width || context->depth_track.height != depth_height)
+        if (frame_period_ns == 0)
+        {
+            frame_period_ns = context->depth_track->frame_period_ns;
+        }
+        else if (frame_period_ns != context->depth_track->frame_period_ns)
+        {
+            LOG_ERROR("Track frame durations don't match (Depth): %llu ns != %llu ns",
+                      frame_period_ns,
+                      context->depth_track->frame_period_ns);
+            return K4A_RESULT_FAILED;
+        }
+
+        if (context->depth_track->width != depth_width || context->depth_track->height != depth_height)
         {
             LOG_ERROR("Unsupported depth resolution / mode: %dx%d (%s)",
-                      context->depth_track.width,
-                      context->depth_track.height,
+                      context->depth_track->width,
+                      context->depth_track->height,
                       depth_mode_str.c_str());
             return K4A_RESULT_FAILED;
         }
 
-        RETURN_IF_ERROR(read_bitmap_info_header(&context->depth_track));
+        RETURN_IF_ERROR(read_bitmap_info_header(context->depth_track));
 
         context->record_config.depth_track_enabled = true;
     }
 
-    if (context->ir_track.track)
+    if (context->ir_track)
     {
-        KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*context->ir_track.track);
-        context->ir_track.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
-        context->ir_track.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
-
-        uint64_t ir_period_ns = GetChild<KaxTrackDefaultDuration>(*context->ir_track.track).GetValue();
-        if (frame_period_ns == 0)
+        if (context->ir_track->type != track_video)
         {
-            frame_period_ns = ir_period_ns;
-        }
-        else if (frame_period_ns != ir_period_ns)
-        {
-            LOG_ERROR("Track frame durations don't match (IR): %llu ns != %llu ns", frame_period_ns, ir_period_ns);
+            LOG_ERROR("IR track is not a video track.", 0);
             return K4A_RESULT_FAILED;
         }
 
-        if (context->depth_track.track)
+        if (frame_period_ns == 0)
         {
-            if (context->ir_track.width != context->depth_track.width ||
-                context->ir_track.height != context->depth_track.height)
+            frame_period_ns = context->ir_track->frame_period_ns;
+        }
+        else if (frame_period_ns != context->ir_track->frame_period_ns)
+        {
+            LOG_ERROR("Track frame durations don't match (IR): %llu ns != %llu ns",
+                      frame_period_ns,
+                      context->ir_track->frame_period_ns);
+            return K4A_RESULT_FAILED;
+        }
+
+        if (context->depth_track)
+        {
+            if (context->ir_track->width != context->depth_track->width ||
+                context->ir_track->height != context->depth_track->height)
             {
                 LOG_ERROR("Depth and IR track have different resolutions: Depth %dx%d, IR %dx%d",
-                          context->depth_track.width,
-                          context->depth_track.height,
-                          context->ir_track.width,
-                          context->ir_track.height);
+                          context->depth_track->width,
+                          context->depth_track->height,
+                          context->ir_track->width,
+                          context->ir_track->height);
                 return K4A_RESULT_FAILED;
             }
         }
-        else if (context->ir_track.width != depth_width || context->ir_track.height != depth_height)
+        else if (context->ir_track->width != depth_width || context->ir_track->height != depth_height)
         {
             LOG_ERROR("Unsupported IR resolution / depth mode: %dx%d (%s)",
-                      context->ir_track.width,
-                      context->ir_track.height,
+                      context->ir_track->width,
+                      context->ir_track->height,
                       depth_mode_str.c_str());
             return K4A_RESULT_FAILED;
         }
 
-        RETURN_IF_ERROR(read_bitmap_info_header(&context->ir_track));
-        if (context->ir_track.format == K4A_IMAGE_FORMAT_DEPTH16)
+        RETURN_IF_ERROR(read_bitmap_info_header(context->ir_track));
+        if (context->ir_track->format == K4A_IMAGE_FORMAT_DEPTH16)
         {
-            context->ir_track.format = K4A_IMAGE_FORMAT_IR16;
+            context->ir_track->format = K4A_IMAGE_FORMAT_IR16;
         }
 
         context->record_config.ir_track_enabled = true;
@@ -614,7 +630,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     }
 
-    // Read depth_delay_off_color_usec and set offsets for each track accordingly.
+    // Read depth_delay_off_color_usec and set offsets for each builtin track accordingly.
     KaxTag *depth_delay_tag = get_tag(context, "K4A_DEPTH_DELAY_NS");
     if (depth_delay_tag != NULL)
     {
@@ -627,14 +643,16 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             context->record_config.depth_delay_off_color_usec = (int32_t)(depth_delay_ns / 1000);
 
             // Only set positive delays so that we don't wrap around near 0.
-            if (depth_delay_ns > 0)
+            if (depth_delay_ns > 0 && context->color_track)
             {
-                context->color_track.sync_delay_ns = (uint64_t)depth_delay_ns;
+                context->color_track->sync_delay_ns = (uint64_t)depth_delay_ns;
             }
             else if (depth_delay_ns < 0)
             {
-                context->depth_track.sync_delay_ns = (uint64_t)(-depth_delay_ns);
-                context->ir_track.sync_delay_ns = (uint64_t)(-depth_delay_ns);
+                if (context->depth_track)
+                    context->depth_track->sync_delay_ns = (uint64_t)(-depth_delay_ns);
+                if (context->ir_track)
+                    context->ir_track->sync_delay_ns = (uint64_t)(-depth_delay_ns);
             }
         }
         else
@@ -648,9 +666,17 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         context->record_config.depth_delay_off_color_usec = 0;
     }
 
-    if (context->imu_track.track)
+    if (context->imu_track)
     {
-        context->record_config.imu_track_enabled = true;
+        if (context->imu_track->type == track_subtitle)
+        {
+            context->record_config.imu_track_enabled = true;
+        }
+        else
+        {
+            LOG_WARNING("IMU track is not correct type, treating as a custom track.", 0);
+            context->imu_track = nullptr;
+        }
     }
 
     // Read wired_sync_mode and subordinate_delay_off_master_usec.
@@ -739,18 +765,20 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track->track == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track->codec_id.empty());
 
-    std::string codec_id = GetChild<KaxCodecID>(*track->track).GetValue();
-    if (codec_id == "V_MS/VFW/FOURCC")
+    if (track->codec_id == "V_MS/VFW/FOURCC")
     {
         KaxCodecPrivate &codec_private = GetChild<KaxCodecPrivate>(*track->track);
         RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, codec_private.GetSize() != sizeof(BITMAPINFOHEADER));
-        track->bitmap_header = reinterpret_cast<BITMAPINFOHEADER *>(codec_private.GetBuffer());
+        track->codec_private.assign(codec_private.GetBuffer(), codec_private.GetBuffer() + codec_private.GetSize());
 
-        assert(track->width == track->bitmap_header->biWidth);
-        assert(track->height == track->bitmap_header->biHeight);
+        BITMAPINFOHEADER *bitmap_header = reinterpret_cast<BITMAPINFOHEADER *>(track->codec_private.data());
 
-        switch (track->bitmap_header->biCompression)
+        assert(track->width == bitmap_header->biWidth);
+        assert(track->height == bitmap_header->biHeight);
+
+        switch (bitmap_header->biCompression)
         {
         case 0x3231564E: // NV12
             track->format = K4A_IMAGE_FORMAT_COLOR_NV12;
@@ -768,10 +796,14 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track)
             track->format = K4A_IMAGE_FORMAT_DEPTH16;
             track->stride = track->width * 2;
             break;
+        case 0x41524742: // BGRA
+            track->format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
+            track->stride = track->width * 4;
+            break;
         default:
             LOG_ERROR("Unsupported FOURCC format for track '%s': %x",
                       GetChild<KaxTrackName>(*track->track).GetValueUTF8().c_str(),
-                      track->bitmap_header->biCompression);
+                      bitmap_header->biCompression);
             return K4A_RESULT_FAILED;
         }
 
@@ -781,7 +813,7 @@ k4a_result_t read_bitmap_info_header(track_reader_t *track)
     {
         LOG_ERROR("Unsupported codec id for track '%s': %s",
                   GetChild<KaxTrackName>(*track->track).GetValueUTF8().c_str(),
-                  codec_id.c_str());
+                  track->codec_id.c_str());
         return K4A_RESULT_FAILED;
     }
 }
@@ -791,14 +823,59 @@ void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestam
     RETURN_VALUE_IF_ARG(VOID_VALUE, context == NULL);
 
     context->seek_timestamp_ns = seek_timestamp_ns;
-    context->color_track.current_block.reset();
-    context->depth_track.current_block.reset();
-    context->ir_track.current_block.reset();
-    context->imu_track.current_block.reset();
-    context->imu_sample_index = -1;
+
+    for (auto &itr : context->track_map)
+    {
+        auto &track_reader = itr.second;
+        track_reader.current_block.reset();
+    }
 }
 
-KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name)
+k4a_result_t parse_tracks(k4a_playback_context_t *context)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->tracks == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context->timecode_scale == 0);
+
+    KaxTrackEntry *track = NULL;
+    for (EbmlElement *e : context->tracks->GetElementList())
+    {
+        if (check_element_type(e, &track))
+        {
+            std::string track_name = GetChild<KaxTrackName>(*track).GetValueUTF8();
+
+            track_reader_t track_reader;
+            track_reader.track = track;
+
+            // Read generic tracks information
+            track_reader.track_name = GetChild<KaxTrackName>(*track).GetValueUTF8();
+            track_reader.track_uid = GetChild<KaxTrackUID>(*track).GetValue();
+            track_reader.codec_id = GetChild<KaxCodecID>(*track).GetValue();
+            KaxCodecPrivate &codec_private = GetChild<KaxCodecPrivate>(*track);
+            track_reader.codec_private.assign(codec_private.GetBuffer(),
+                                              codec_private.GetBuffer() + codec_private.GetSize());
+
+            track_reader.frame_period_ns = GetChild<KaxTrackDefaultDuration>(*track).GetValue();
+
+            track_reader.track->SetGlobalTimecodeScale(context->timecode_scale);
+
+            // Read track type specific information
+            track_reader.type = static_cast<track_type>(GetChild<KaxTrackType>(*track).GetValue());
+            if (track_reader.type == track_video)
+            {
+                KaxTrackVideo &video_track = GetChild<KaxTrackVideo>(*track);
+                track_reader.width = static_cast<uint32_t>(GetChild<KaxVideoPixelWidth>(video_track).GetValue());
+                track_reader.height = static_cast<uint32_t>(GetChild<KaxVideoPixelHeight>(video_track).GetValue());
+            }
+
+            context->track_map.insert(std::pair<std::string, track_reader_t>(track_name, track_reader));
+        }
+    }
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+track_reader_t *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name)
 {
     RETURN_VALUE_IF_ARG(NULL, context == NULL);
     RETURN_VALUE_IF_ARG(NULL, context->tracks == nullptr);
@@ -830,35 +907,45 @@ KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, con
         }
     }
 
-    KaxTrackEntry *track_found = NULL;
-    for (EbmlElement *e : context->tracks->GetElementList())
+    track_reader_t *found_reader = NULL;
+    for (auto &itr : context->track_map)
     {
-        KaxTrackEntry *track = NULL;
-        if (check_element_type(e, &track))
+        auto &reader = itr.second;
+        if (search_uid != 0 && reader.track_uid == search_uid)
         {
-            std::string track_name = GetChild<KaxTrackName>(*track).GetValueUTF8();
-            uint64_t track_uid = GetChild<KaxTrackUID>(*track).GetValue();
-            std::string track_codec_id = GetChild<KaxCodecID>(*track).GetValue();
-
-            if (search_uid != 0 && track_uid == search_uid)
-            {
-                track_found = track;
-                break;
-            }
-            else if (track_name == search_name)
-            {
-                track_found = track;
-                // Search by UID has priority over search by name, keep searching for a matching UID.
-            }
+            found_reader = &reader;
+            break;
+        }
+        else if (reader.track_name == search_name)
+        {
+            found_reader = &reader;
+            // Search by UID has priority over search by name, keep searching for a matching UID.
         }
     }
 
-    if (track_found != NULL)
+    return found_reader;
+}
+
+bool check_track_reader_is_builtin(k4a_playback_context_t *context, track_reader_t *track_reader)
+{
+    RETURN_VALUE_IF_ARG(false, context == NULL);
+    RETURN_VALUE_IF_ARG(false, track_reader == NULL);
+
+    return track_reader == context->color_track || track_reader == context->depth_track ||
+           track_reader == context->ir_track || track_reader == context->imu_track;
+}
+
+track_reader_t *get_track_reader_by_name(k4a_playback_context_t *context, std::string track_name)
+{
+    RETURN_VALUE_IF_ARG(nullptr, context == NULL);
+
+    auto itr = context->track_map.find(track_name);
+    if (itr != context->track_map.end())
     {
-        track_found->SetGlobalTimecodeScale(context->timecode_scale);
-        return track_found;
+        return &itr->second;
     }
-    return NULL;
+
+    return nullptr;
 }
 
 KaxTag *get_tag(k4a_playback_context_t *context, const char *name)
@@ -1426,6 +1513,19 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
     return result;
 }
 
+// If the block contains more than 1 frame, estimate the timestamp for the current frame based on the block duration.
+// See k4a_record_subtitle_settings_t::high_freq_data in types.h for more info on timestamp estimation behavior.
+uint64_t estimate_block_timestamp_ns(std::shared_ptr<block_info_t> &block)
+{
+    uint64_t timestamp_ns = block->sync_timestamp_ns;
+    size_t sample_count = block->block->NumberFrames();
+    if (block->sub_index > 0 && sample_count > 0)
+    {
+        timestamp_ns += (uint64_t)block->sub_index * (block->block_duration_ns - 1) / (sample_count - 1);
+    }
+    return timestamp_ns;
+}
+
 // Find the first block with a timestamp >= the specified timestamp. If a block group containing the specified timestamp
 // is found, it will be returned. If no blocks are found, a pointer to EOF will be returned, or nullptr if an error
 // occurs.
@@ -1439,6 +1539,7 @@ std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context, track_
     std::shared_ptr<block_info_t> block = std::make_shared<block_info_t>();
     block->reader = reader;
     block->index = -1;
+    block->sub_index = 0;
     cluster_info_t *cluster_info = find_cluster(context, timestamp_ns);
     if (cluster_info == NULL)
     {
@@ -1460,7 +1561,7 @@ std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context, track_
         if (block)
         {
             // Return this block if EOF was reached, or the timestamp is >= the search timestamp.
-            if (block->block == NULL || block->sync_timestamp_ns + block->block_duration_ns >= timestamp_ns)
+            if (block->block == NULL || estimate_block_timestamp_ns(block) >= timestamp_ns)
             {
                 return block;
             }
@@ -1487,8 +1588,16 @@ std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_
     assert(track_number <= UINT16_MAX);
     uint16_t search_number = static_cast<uint16_t>(track_number);
 
-    // Copy the current block and start the search at the next index.
+    // Copy the current block and start the search at the next index / sub-index.
     std::shared_ptr<block_info_t> next_block = std::shared_ptr<block_info_t>(new block_info_t(*current));
+    if (next_block->block != NULL)
+    {
+        next_block->sub_index += next ? 1 : -1;
+        if (next_block->sub_index >= 0 && next_block->sub_index < (int)next_block->block->NumberFrames())
+        {
+            return next_block;
+        }
+    }
     next_block->index += next ? 1 : -1;
 
     std::shared_ptr<loaded_cluster_t> search_cluster = next_block->cluster;
@@ -1530,6 +1639,7 @@ std::shared_ptr<block_info_t> next_block(k4a_playback_context_t *context, block_
                 // We found a valid block for this track, update the timestamp and return it.
                 next_block->timestamp_ns = next_block->block->GlobalTimecode();
                 next_block->sync_timestamp_ns = next_block->timestamp_ns + current->reader->sync_delay_ns;
+                next_block->sub_index = next ? 0 : ((int)next_block->block->NumberFrames() - 1);
 
                 return next_block;
             }
@@ -1750,7 +1860,9 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
                                                          &free_vector_buffer,
                                                          buffer,
                                                          image_out));
-        k4a_image_set_device_timestamp_usec(*image_out, in_block->timestamp_ns / 1000);
+        uint64_t device_timestamp_usec = in_block->timestamp_ns / 1000 +
+                                         (uint64_t)context->record_config.start_timestamp_offset_usec;
+        k4a_image_set_device_timestamp_usec(*image_out, device_timestamp_usec);
     }
 
     if (K4A_FAILED(result) && buffer != NULL)
@@ -1776,17 +1888,17 @@ k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k
 
     k4a_image_t image_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
-    if (block->reader == &context->color_track)
+    if (block->reader == context->color_track)
     {
         result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, context->color_format_conversion));
         k4a_capture_set_color_image(*capture_handle, image_handle);
     }
-    else if (block->reader == &context->depth_track)
+    else if (block->reader == context->depth_track)
     {
         result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, K4A_IMAGE_FORMAT_DEPTH16));
         k4a_capture_set_depth_image(*capture_handle, image_handle);
     }
-    else if (block->reader == &context->ir_track)
+    else if (block->reader == context->ir_track)
     {
         result = TRACE_CALL(convert_block_to_image(context, block, &image_handle, K4A_IMAGE_FORMAT_IR16));
         k4a_capture_set_ir_image(*capture_handle, image_handle);
@@ -1809,11 +1921,8 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, capture_handle == NULL);
 
-    track_reader_t *blocks[] = { &context->color_track, &context->depth_track, &context->ir_track };
-    std::shared_ptr<block_info_t> next_blocks[] = { context->color_track.current_block,
-                                                    context->depth_track.current_block,
-                                                    context->ir_track.current_block };
-    static_assert(arraysize(blocks) == arraysize(next_blocks), "Track / block mapping does not match");
+    track_reader_t *blocks[] = { context->color_track, context->depth_track, context->ir_track };
+    std::shared_ptr<block_info_t> next_blocks[arraysize(blocks)];
 
     uint64_t timestamp_start_ns = UINT64_MAX;
     uint64_t timestamp_end_ns = 0;
@@ -1822,12 +1931,12 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
     int enabled_tracks = 0;
     for (size_t i = 0; i < arraysize(blocks); i++)
     {
-        if (blocks[i]->track != NULL)
+        if (blocks[i] != NULL)
         {
             enabled_tracks++;
 
             // If the current block is NULL, find the next block before/after the seek timestamp.
-            if (next_blocks[i] == nullptr)
+            if (blocks[i]->current_block == nullptr)
             {
                 next_blocks[i] = find_block(context, blocks[i], context->seek_timestamp_ns);
                 if (!next && next_blocks[i])
@@ -1837,7 +1946,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             }
             else
             {
-                next_blocks[i] = next_block(context, next_blocks[i].get(), next);
+                next_blocks[i] = next_block(context, blocks[i]->current_block.get(), next);
             }
             if (next_blocks[i] && next_blocks[i]->block)
             {
@@ -1907,7 +2016,7 @@ k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *
             bool filled = false;
             for (size_t i = 0; i < arraysize(blocks); i++)
             {
-                if (blocks[i]->track != NULL && next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
+                if (blocks[i] != NULL && next_blocks[i] == nullptr && blocks[i]->current_block == nullptr)
                 {
                     std::shared_ptr<block_info_t> test_block = find_block(context,
                                                                           blocks[i],
@@ -2004,19 +2113,19 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
     RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, imu_sample == NULL);
 
-    if (context->imu_track.track == NULL)
+    if (context->imu_track == NULL)
     {
         LOG_WARNING("Recording has no IMU track.", 0);
         *imu_sample = { 0 };
         return K4A_STREAM_RESULT_EOF;
     }
 
-    std::shared_ptr<block_info_t> block_info = context->imu_track.current_block;
+    std::shared_ptr<block_info_t> block_info = context->imu_track->current_block;
 
     if (block_info == nullptr)
     {
         // There is no current IMU sample, find the next/previous sample based on seek_timestamp.
-        block_info = find_block(context, &context->imu_track, context->seek_timestamp_ns);
+        block_info = find_block(context, context->imu_track, context->seek_timestamp_ns);
         if (block_info && !block_info->block)
         {
             // The seek timestamp is past the end of the file, get the last block instead.
@@ -2025,23 +2134,28 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
 
         if (block_info && block_info->block)
         {
-            context->imu_track.current_block = block_info;
-
+            // The returned block will not have an accurate sub_index due to timestamp estimation, select the correct
+            // sub_index based on the real timestamp stored in the sample.
             size_t sample_count = block_info->block->NumberFrames();
             if (block_info->sync_timestamp_ns > context->seek_timestamp_ns)
             {
                 // The timestamp we're looking for is before the found block.
-                context->imu_sample_index = next ? 0 : -1;
+                block_info->sub_index = next ? 0 : -1;
             }
             else if (block_info->sync_timestamp_ns + block_info->block_duration_ns <= context->seek_timestamp_ns)
             {
                 // The timestamp we're looking for is after the found block.
-                context->imu_sample_index = (int)sample_count + (next ? 0 : -1);
+                block_info->sub_index = (int)sample_count + (next ? 0 : -1);
             }
             else
             {
                 // The timestamp we're looking for is within the found block.
-                context->imu_sample_index = -1;
+                // IMU timestamps within the sample buffer are device timestamps, not relative to start of file.
+                // The seek timestamp needs to be converted to a device timestamp when comparing.
+                uint64_t seek_device_timestamp_ns = context->seek_timestamp_ns +
+                                                    ((uint64_t)context->record_config.start_timestamp_offset_usec *
+                                                     1000);
+                block_info->sub_index = -1;
                 for (size_t i = 0; i < sample_count; i++)
                 {
                     matroska_imu_sample_t *sample = parse_imu_sample_buffer(
@@ -2051,61 +2165,109 @@ k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_samp
                         *imu_sample = { 0 };
                         return K4A_STREAM_RESULT_FAILED;
                     }
-                    else if (sample->acc_timestamp_ns >= context->seek_timestamp_ns)
+                    else if (sample->acc_timestamp_ns >= seek_device_timestamp_ns)
                     {
-                        context->imu_sample_index = next ? (int)i : (int)i - 1;
+                        block_info->sub_index = next ? (int)i : (int)i - 1;
                         break;
                     }
                 }
+            }
+            if (block_info->sub_index < 0 || block_info->sub_index >= (int)sample_count)
+            {
+                block_info = next_block(context, block_info.get(), next);
             }
         }
     }
     else
     {
-        // Advance to the next IMU sample.
-        context->imu_sample_index += next ? 1 : -1;
+        block_info = next_block(context, block_info.get(), next);
     }
 
-    while (block_info && block_info->block)
+    context->imu_track->current_block = block_info;
+
+    if (block_info && block_info->block && block_info->sub_index >= 0 &&
+        block_info->sub_index < (int)block_info->block->NumberFrames())
     {
-        size_t sample_count = block_info->block->NumberFrames();
-        if (context->imu_sample_index >= 0 && context->imu_sample_index < (int)sample_count)
+        matroska_imu_sample_t *sample = parse_imu_sample_buffer(
+            block_info->block->GetBuffer((unsigned int)block_info->sub_index));
+        if (sample == NULL)
         {
-            matroska_imu_sample_t *sample = parse_imu_sample_buffer(
-                block_info->block->GetBuffer((unsigned int)context->imu_sample_index));
-            if (sample == NULL)
-            {
-                *imu_sample = { 0 };
-                return K4A_STREAM_RESULT_FAILED;
-            }
-            else
-            {
-                imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
-                imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
-                imu_sample->temperature = std::numeric_limits<float>::quiet_NaN();
-                for (size_t i = 0; i < 3; i++)
-                {
-                    imu_sample->acc_sample.v[i] = sample->acc_data[i];
-                    imu_sample->gyro_sample.v[i] = sample->gyro_data[i];
-                }
-                return K4A_STREAM_RESULT_SUCCEEDED;
-            }
+            *imu_sample = { 0 };
+            return K4A_STREAM_RESULT_FAILED;
         }
         else
         {
-            // If we've reached the end of the current block, advance to the next one.
-            block_info = next_block(context, block_info.get(), next);
-            if (block_info && block_info->block)
+            imu_sample->acc_timestamp_usec = sample->acc_timestamp_ns / 1000;
+            imu_sample->gyro_timestamp_usec = sample->gyro_timestamp_ns / 1000;
+            imu_sample->temperature = std::numeric_limits<float>::quiet_NaN();
+            for (size_t i = 0; i < 3; i++)
             {
-                context->imu_track.current_block = block_info;
-                context->imu_sample_index = next ? 0 : (int)(block_info->block->NumberFrames() - 1);
+                imu_sample->acc_sample.v[i] = sample->acc_data[i];
+                imu_sample->gyro_sample.v[i] = sample->gyro_data[i];
             }
+            return K4A_STREAM_RESULT_SUCCEEDED;
         }
     }
 
     LOG_TRACE("%s of recording reached", next ? "End" : "Beginning");
     *imu_sample = { 0 };
     return K4A_STREAM_RESULT_EOF;
+}
+
+k4a_stream_result_t get_data_block(k4a_playback_context_t *context,
+                                   track_reader_t *track_reader,
+                                   k4a_playback_data_block_t *data_block_handle,
+                                   bool next)
+{
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, context == NULL);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, track_reader == NULL);
+    RETURN_VALUE_IF_ARG(K4A_STREAM_RESULT_FAILED, data_block_handle == NULL);
+
+    std::shared_ptr<block_info_t> read_block = track_reader->current_block;
+    if (read_block == nullptr)
+    {
+        // If the track current block is nullptr, it means we just performed a seek frame operation.
+        // find_block() always finds the block with timestamp >= seek_timestamp.
+        read_block = find_block(context, track_reader, context->seek_timestamp_ns);
+        if (!next && read_block)
+        {
+            // In order to find the first timestamp < seek_timestamp, we need to query the previous block.
+            read_block = next_block(context, read_block.get(), false);
+        }
+    }
+    else
+    {
+        read_block = next_block(context, read_block.get(), next);
+    }
+
+    if (read_block == nullptr)
+    {
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
+    track_reader->current_block = read_block;
+
+    // Reach EOF
+    if (read_block->block == nullptr)
+    {
+        return K4A_STREAM_RESULT_EOF;
+    }
+
+    k4a_playback_data_block_context_t *data_block_context = k4a_playback_data_block_t_create(data_block_handle);
+    if (data_block_context == nullptr)
+    {
+        LOG_ERROR("Creating data block failed.", 0);
+        return K4A_STREAM_RESULT_FAILED;
+    }
+
+    DataBuffer &data_buffer = track_reader->current_block->block->GetBuffer(
+        (unsigned int)track_reader->current_block->sub_index);
+
+    data_block_context->device_timestamp_usec = estimate_block_timestamp_ns(track_reader->current_block) / 1000 +
+                                                context->record_config.start_timestamp_offset_usec;
+    data_block_context->data_block.assign(data_buffer.Buffer(), data_buffer.Buffer() + data_buffer.Size());
+
+    return K4A_STREAM_RESULT_SUCCEEDED;
 }
 
 } // namespace k4arecord

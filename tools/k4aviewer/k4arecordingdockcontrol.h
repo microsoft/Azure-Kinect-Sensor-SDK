@@ -54,7 +54,6 @@ private:
         // Constant state (expected to be set once, accessible without synchronization)
         //
         std::chrono::microseconds TimePerFrame;
-        std::chrono::microseconds TimestampOffset = std::chrono::microseconds(0);
 
         // Recording state
         //

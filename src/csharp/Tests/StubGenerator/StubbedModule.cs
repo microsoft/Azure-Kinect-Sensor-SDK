@@ -38,7 +38,6 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
                 stubCode += stubFunction.ToString();
             }
 
-
             string sourceFilePath = Path.Combine(options.TempPath.FullName, "stubfunctions.cpp");
 
             using (var filestream = File.CreateText(sourceFilePath))
@@ -81,7 +80,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
         {
             if (stubbedModules.ContainsKey(moduleName))
             {
-                throw new Exception("Module already stubbed");
+                throw new AzureKinectStubGeneratorException("Module already stubbed");
             }
             else
             {
@@ -96,7 +95,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
             options = options ?? CompilerOptions.GetDefault();
             if (moduleName.EndsWith(".dll"))
             {
-                throw new Exception("Module name should not include file extension");
+                throw new AzureKinectStubGeneratorException("Module name should not include file extension");
             }
 
             this.ModuleName = moduleName;
@@ -105,28 +104,14 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
 
             if (options.TempPath.Exists)
             {
-                try
-                {
-                    options.TempPath.Delete(true);
-                    options.TempPath.Refresh();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Exception: {0}", ex);
-                }
+                options.TempPath.Delete(true);
+                options.TempPath.Refresh();
             }
 
             if (options.BinaryPath.Exists)
             {
-                try
-                {
-                    options.BinaryPath.Delete(true);
-                    options.BinaryPath.Refresh();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Exception: {0}", ex);
-                }
+                options.BinaryPath.Delete(true);
+                options.BinaryPath.Refresh();
             }
 
             options.TempPath.Create();
@@ -157,7 +142,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
 
             if (i.Functions.Where((x) => { return !x.Value.Name.StartsWith("Stub_"); }).Count() == 0)
             {
-                throw new Exception("No exported functions found in implementation");
+                throw new AzureKinectStubGeneratorException("No exported functions found in implementation");
             }
             foreach (var function in i.Functions)
             {

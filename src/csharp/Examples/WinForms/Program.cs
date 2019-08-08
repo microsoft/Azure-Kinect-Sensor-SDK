@@ -1,7 +1,9 @@
-﻿// <copyright file="Program.cs" company="Microsoft">
+﻿//------------------------------------------------------------------------------
+// <copyright file="Program.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // </copyright>
+//------------------------------------------------------------------------------
 using System;
 using System.Windows.Forms;
 

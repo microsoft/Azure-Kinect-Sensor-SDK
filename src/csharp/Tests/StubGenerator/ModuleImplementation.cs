@@ -52,14 +52,14 @@ namespace Microsoft.Azure.Kinect.Sensor.Test.StubGenerator
             IntPtr hModule = NativeMethods.LoadLibrary(path);
             if (hModule == IntPtr.Zero)
             {
-                throw new Exception("Unable to load implementation module");
+                throw new AzureKinectStubGeneratorException("Unable to load implementation module");
             }
 
 
             IntPtr Stub_SetErrorFunction = NativeMethods.GetProcAddress(hModule, "Stub_SetErrorFunction");
             if (Stub_SetErrorFunction == IntPtr.Zero)
             {
-                throw new Exception("No Error function");
+                throw new AzureKinectStubGeneratorException("No Error function");
             }
 
             NativeMethods.Stub_SetErrorFunction setError = System.Runtime.InteropServices.Marshal.GetDelegateForFunctionPointer<NativeMethods.Stub_SetErrorFunction>(Stub_SetErrorFunction);

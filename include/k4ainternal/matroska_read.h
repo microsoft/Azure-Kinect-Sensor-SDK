@@ -12,6 +12,7 @@
 #include <functional>
 #include <mutex>
 #include <future>
+#include <map>
 
 namespace k4arecord
 {
@@ -64,17 +65,29 @@ typedef struct _block_info_t
     uint64_t sync_timestamp_ns = 0; // The timestamp of the block, including sychronization offsets.
     uint64_t block_duration_ns = 0; // If the block is a KaxBlockGroup, otherwise 0.
     int index = -1;                 // Index of the block element within the cluster.
+    int sub_index = -1;             // Index of the current buffer within the block.
 } block_info_t;
 
 typedef struct _track_reader_t
 {
-    libmatroska::KaxTrackEntry *track;
-    uint32_t width, height, stride;
-    k4a_image_format_t format;
-    uint64_t sync_delay_ns;
-    BITMAPINFOHEADER *bitmap_header;
+    std::string track_name;
+    uint64_t track_uid = 0;
+    libmatroska::KaxTrackEntry *track = nullptr;
+
+    std::string codec_id;
+    std::vector<uint8_t> codec_private;
 
     std::shared_ptr<block_info_t> current_block;
+    uint64_t frame_period_ns = 0;
+    uint64_t sync_delay_ns = 0;
+
+    track_type type = track_video;
+
+    // Fields specific to video track
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t stride = 0;
+    k4a_image_format_t format = K4A_IMAGE_FORMAT_CUSTOM;
 } track_reader_t;
 
 typedef struct _k4a_playback_context_t
@@ -83,8 +96,6 @@ typedef struct _k4a_playback_context_t
     std::unique_ptr<IOCallback> ebml_file;
     std::mutex io_lock; // Locks access to ebml_file
     bool file_closing;
-
-    logger_t logger_handle;
 
     uint64_t timecode_scale;
     k4a_record_configuration_t record_config;
@@ -109,12 +120,12 @@ typedef struct _k4a_playback_context_t
     cluster_cache_t cluster_cache;
     std::recursive_mutex cache_lock; // Locks modification of cluster_cache
 
-    track_reader_t color_track;
-    track_reader_t depth_track;
-    track_reader_t ir_track;
+    track_reader_t *color_track = nullptr;
+    track_reader_t *depth_track = nullptr;
+    track_reader_t *ir_track = nullptr;
+    track_reader_t *imu_track = nullptr;
 
-    track_reader_t imu_track;
-    int imu_sample_index = -1;
+    std::map<std::string, track_reader_t> track_map;
 
     uint64_t segment_info_offset;
     uint64_t first_cluster_offset;
@@ -123,13 +134,21 @@ typedef struct _k4a_playback_context_t
     uint64_t attachments_offset;
     uint64_t tags_offset;
 
-    uint64_t last_timestamp_ns;
+    uint64_t last_file_timestamp_ns; // Relative to start of file.
 
     // Stats
     uint64_t seek_count, load_count, cache_hits;
 } k4a_playback_context_t;
 
 K4A_DECLARE_CONTEXT(k4a_playback_t, k4a_playback_context_t);
+
+typedef struct _k4a_playback_data_block_context_t
+{
+    uint64_t device_timestamp_usec;
+    std::vector<uint8_t> data_block;
+} k4a_playback_data_block_context_t;
+
+K4A_DECLARE_CONTEXT(k4a_playback_data_block_t, k4a_playback_data_block_context_t);
 
 std::unique_ptr<EbmlElement> next_child(k4a_playback_context_t *context, EbmlElement *parent);
 k4a_result_t skip_element(k4a_playback_context_t *context, EbmlElement *element);
@@ -142,7 +161,10 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context);
 k4a_result_t read_bitmap_info_header(track_reader_t *track);
 void reset_seek_pointers(k4a_playback_context_t *context, uint64_t seek_timestamp_ns);
 
-libmatroska::KaxTrackEntry *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name);
+k4a_result_t parse_tracks(k4a_playback_context_t *context);
+track_reader_t *find_track(k4a_playback_context_t *context, const char *name, const char *tag_name);
+bool check_track_reader_is_builtin(k4a_playback_context_t *context, track_reader_t *track_reader);
+track_reader_t *get_track_reader_by_name(k4a_playback_context_t *context, std::string track_name);
 libmatroska::KaxTag *get_tag(k4a_playback_context_t *context, const char *name);
 std::string get_tag_string(libmatroska::KaxTag *tag);
 libmatroska::KaxAttached *get_attachment_by_name(k4a_playback_context_t *context, const char *file_name);
@@ -161,6 +183,7 @@ std::shared_ptr<loaded_cluster_t> load_next_cluster(k4a_playback_context_t *cont
                                                     loaded_cluster_t *current_cluster,
                                                     bool next);
 
+uint64_t estimate_block_timestamp_ns(std::shared_ptr<block_info_t> &block);
 std::shared_ptr<block_info_t> find_block(k4a_playback_context_t *context,
                                          track_reader_t *reader,
                                          uint64_t timestamp_ns);
@@ -173,6 +196,10 @@ k4a_result_t convert_block_to_image(k4a_playback_context_t *context,
 k4a_result_t new_capture(k4a_playback_context_t *context, block_info_t *block, k4a_capture_t *capture_handle);
 k4a_stream_result_t get_capture(k4a_playback_context_t *context, k4a_capture_t *capture_handle, bool next);
 k4a_stream_result_t get_imu_sample(k4a_playback_context_t *context, k4a_imu_sample_t *imu_sample, bool next);
+k4a_stream_result_t get_data_block(k4a_playback_context_t *context,
+                                   track_reader_t *track_reader,
+                                   k4a_playback_data_block_t *data_block_handle,
+                                   bool next);
 
 // Template helper functions
 template<typename T> T *read_element(k4a_playback_context_t *context, EbmlElement *element)

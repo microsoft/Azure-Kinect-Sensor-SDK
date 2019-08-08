@@ -117,7 +117,11 @@ if (K4A_BUILD_DOCS)
     find_package(Doxygen 1.8.14 EXACT)
     if (DOXYGEN_FOUND)
         set(DOXYGEN_MAINPAGE ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/mainpage.md) 
-        set(DOXYGEN_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/include/k4a ${CMAKE_CURRENT_SOURCE_DIR}/include/k4arecord ${DOXYGEN_MAINPAGE})
+        set(DOXYGEN_SOURCES 
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/k4a 
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/k4arecord 
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/sdk
+            ${DOXYGEN_MAINPAGE})
         set(DOXYGEN_LAYOUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/DoxygenLayout.xml)
         # These variables are used in Doxyfile.in
         string(REPLACE ";" " " DOXYGEN_INPUT "${DOXYGEN_SOURCES}")

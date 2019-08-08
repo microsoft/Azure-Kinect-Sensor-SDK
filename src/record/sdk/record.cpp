@@ -22,24 +22,13 @@ k4a_result_t k4a_record_create(const char *path,
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, path == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, recording_handle == NULL);
     k4a_record_context_t *context = NULL;
-    logger_t logger_handle = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    // Instantiate the logger as early as possible
-    logger_config_t logger_config;
-    logger_config_init_default(&logger_config);
-    logger_config.env_var_log_to_a_file = K4A_RECORD_ENABLE_LOG_TO_A_FILE;
-    result = TRACE_CALL(logger_create(&logger_config, &logger_handle));
+    context = k4a_record_t_create(recording_handle);
+    result = K4A_RESULT_FROM_BOOL(context != NULL);
 
     if (K4A_SUCCEEDED(result))
     {
-        context = k4a_record_t_create(recording_handle);
-        result = K4A_RESULT_FROM_BOOL(context != NULL);
-    }
-
-    if (K4A_SUCCEEDED(result))
-    {
-        context->logger_handle = logger_handle;
         context->file_path = path;
 
         try
@@ -55,7 +44,6 @@ k4a_result_t k4a_record_create(const char *path,
 
     if (K4A_SUCCEEDED(result))
     {
-        context->device = device;
         context->device_config = device_config;
 
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
@@ -160,18 +148,26 @@ k4a_result_t k4a_record_create(const char *path,
             populate_bitmap_info_header(&codec_info, color_width, color_height, device_config.color_format));
 
         context->color_track = add_track(context,
-                                         "COLOR",
+                                         K4A_TRACK_NAME_COLOR,
                                          track_video,
                                          "V_MS/VFW/FOURCC",
                                          reinterpret_cast<uint8_t *>(&codec_info),
                                          sizeof(codec_info));
-        set_track_info_video(context->color_track, color_width, color_height, context->camera_fps);
+        if (context->color_track != nullptr)
+        {
+            set_track_info_video(context->color_track, color_width, color_height, context->camera_fps);
 
-        uint64_t track_uid = GetChild<KaxTrackUID>(*context->color_track).GetValue();
-        std::ostringstream track_uid_str;
-        track_uid_str << track_uid;
-        add_tag(context, "K4A_COLOR_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
-        add_tag(context, "K4A_COLOR_MODE", color_mode_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
+            uint64_t track_uid = GetChild<KaxTrackUID>(*context->color_track->track).GetValue();
+            std::ostringstream track_uid_str;
+            track_uid_str << track_uid;
+            add_tag(context, "K4A_COLOR_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
+            add_tag(context, "K4A_COLOR_MODE", color_mode_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
+        }
+        else
+        {
+            LOG_ERROR("Failed to add color track.", 0);
+            result = K4A_RESULT_FAILED;
+        }
     }
 
     if (K4A_SUCCEEDED(result))
@@ -188,18 +184,26 @@ k4a_result_t k4a_record_create(const char *path,
                 populate_bitmap_info_header(&codec_info, depth_width, depth_height, K4A_IMAGE_FORMAT_DEPTH16));
 
             context->depth_track = add_track(context,
-                                             "DEPTH",
+                                             K4A_TRACK_NAME_DEPTH,
                                              track_video,
                                              "V_MS/VFW/FOURCC",
                                              reinterpret_cast<uint8_t *>(&codec_info),
                                              sizeof(codec_info));
-            set_track_info_video(context->depth_track, depth_width, depth_height, context->camera_fps);
+            if (context->depth_track != nullptr)
+            {
+                set_track_info_video(context->depth_track, depth_width, depth_height, context->camera_fps);
 
-            uint64_t track_uid = GetChild<KaxTrackUID>(*context->depth_track).GetValue();
-            std::ostringstream track_uid_str;
-            track_uid_str << track_uid;
-            add_tag(context, "K4A_DEPTH_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
-            add_tag(context, "K4A_DEPTH_MODE", depth_mode_str, TAG_TARGET_TYPE_TRACK, track_uid);
+                uint64_t track_uid = GetChild<KaxTrackUID>(*context->depth_track->track).GetValue();
+                std::ostringstream track_uid_str;
+                track_uid_str << track_uid;
+                add_tag(context, "K4A_DEPTH_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
+                add_tag(context, "K4A_DEPTH_MODE", depth_mode_str, TAG_TARGET_TYPE_TRACK, track_uid);
+            }
+            else
+            {
+                LOG_ERROR("Failed to add depth track.", 0);
+                result = K4A_RESULT_FAILED;
+            }
         }
     }
 
@@ -210,22 +214,30 @@ k4a_result_t k4a_record_create(const char *path,
         result = TRACE_CALL(populate_bitmap_info_header(&codec_info, depth_width, depth_height, K4A_IMAGE_FORMAT_IR16));
 
         context->ir_track = add_track(context,
-                                      "IR",
+                                      K4A_TRACK_NAME_IR,
                                       track_video,
                                       "V_MS/VFW/FOURCC",
                                       reinterpret_cast<uint8_t *>(&codec_info),
                                       sizeof(codec_info));
-        set_track_info_video(context->ir_track, depth_width, depth_height, context->camera_fps);
+        if (context->ir_track != nullptr)
+        {
+            set_track_info_video(context->ir_track, depth_width, depth_height, context->camera_fps);
 
-        uint64_t track_uid = GetChild<KaxTrackUID>(*context->ir_track).GetValue();
-        std::ostringstream track_uid_str;
-        track_uid_str << track_uid;
-        add_tag(context, "K4A_IR_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
-        add_tag(context,
-                "K4A_IR_MODE",
-                device_config.depth_mode == K4A_DEPTH_MODE_PASSIVE_IR ? "PASSIVE" : "ACTIVE",
-                TAG_TARGET_TYPE_TRACK,
-                track_uid);
+            uint64_t track_uid = GetChild<KaxTrackUID>(*context->ir_track->track).GetValue();
+            std::ostringstream track_uid_str;
+            track_uid_str << track_uid;
+            add_tag(context, "K4A_IR_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
+            add_tag(context,
+                    "K4A_IR_MODE",
+                    device_config.depth_mode == K4A_DEPTH_MODE_PASSIVE_IR ? "PASSIVE" : "ACTIVE",
+                    TAG_TARGET_TYPE_TRACK,
+                    track_uid);
+        }
+        else
+        {
+            LOG_ERROR("Failed to add ir track.", 0);
+            result = K4A_RESULT_FAILED;
+        }
     }
 
     if (K4A_SUCCEEDED(result) && device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF &&
@@ -340,10 +352,6 @@ k4a_result_t k4a_record_create(const char *path,
             }
         }
 
-        if (logger_handle)
-        {
-            logger_destroy(logger_handle);
-        }
         k4a_record_t_destroy(*recording_handle);
         *recording_handle = NULL;
     }
@@ -370,6 +378,29 @@ k4a_result_t k4a_record_add_tag(const k4a_record_t recording_handle, const char 
     return K4A_RESULT_SUCCEEDED;
 }
 
+k4a_result_t k4a_record_add_attachment(const k4a_record_t recording_handle,
+                                       const char *file_name,
+                                       const uint8_t *buffer,
+                                       size_t buffer_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, file_name == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, buffer == NULL);
+
+    k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    if (context->header_written)
+    {
+        LOG_ERROR("Attachments must be added before the recording header is written.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    KaxAttached *attached = add_attachment(context, file_name, "application/octet-stream", buffer, buffer_size);
+
+    return K4A_RESULT_FROM_BOOL(attached != NULL);
+}
+
 k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
@@ -383,19 +414,106 @@ k4a_result_t k4a_record_add_imu_track(const k4a_record_t recording_handle)
         return K4A_RESULT_FAILED;
     }
 
-    if (context->imu_track != NULL)
+    if (context->imu_track)
     {
         LOG_ERROR("The IMU track has already been added to this recording.", 0);
         return K4A_RESULT_FAILED;
     }
 
-    context->imu_track = add_track(context, "IMU", track_subtitle, "S_K4A/IMU");
+    context->imu_track = add_track(context, K4A_TRACK_NAME_IMU, track_subtitle, "S_K4A/IMU");
+    if (context->imu_track == nullptr)
+    {
+        LOG_ERROR("Failed to add imu track.", 0);
+        return K4A_RESULT_FAILED;
+    }
 
-    uint64_t track_uid = GetChild<KaxTrackUID>(*context->imu_track).GetValue();
+    context->imu_track->high_freq_data = true;
+
+    uint64_t track_uid = GetChild<KaxTrackUID>(*context->imu_track->track).GetValue();
     std::ostringstream track_uid_str;
     track_uid_str << track_uid;
     add_tag(context, "K4A_IMU_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
     add_tag(context, "K4A_IMU_MODE", "ON", TAG_TARGET_TYPE_TRACK, track_uid);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t k4a_record_add_custom_video_track(const k4a_record_t recording_handle,
+                                               const char *track_name,
+                                               const char *codec_id,
+                                               const uint8_t *codec_context,
+                                               size_t codec_context_size,
+                                               const k4a_record_video_settings_t *track_settings)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, codec_id == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_settings == NULL);
+
+    k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    if (context->header_written)
+    {
+        LOG_ERROR("Custom tracks must be added before the recording header is written.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    track_header_t *track = add_track(context, track_name, track_video, codec_id, codec_context, codec_context_size);
+    if (track == NULL)
+    {
+        LOG_ERROR("Failed to add custom video track: %s", track_name);
+        return K4A_RESULT_FAILED;
+    }
+    set_track_info_video(track, track_settings->width, track_settings->height, track_settings->frame_rate);
+    track->custom_track = true;
+
+    uint64_t track_uid = GetChild<KaxTrackUID>(*track->track).GetValue();
+    std::ostringstream track_tag_str, track_uid_str;
+    track_tag_str << "K4A_CUSTOM_TRACK_" << track_name;
+    track_uid_str << track_uid;
+    add_tag(context, track_tag_str.str().c_str(), track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t k4a_record_add_custom_subtitle_track(const k4a_record_t recording_handle,
+                                                  const char *track_name,
+                                                  const char *codec_id,
+                                                  const uint8_t *codec_context,
+                                                  size_t codec_context_size,
+                                                  const k4a_record_subtitle_settings_t *track_settings)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, codec_id == NULL);
+
+    k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    if (context->header_written)
+    {
+        LOG_ERROR("Custom tracks must be added before the recording header is written.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    track_header_t *track = add_track(context, track_name, track_subtitle, codec_id, codec_context, codec_context_size);
+    if (track == NULL)
+    {
+        LOG_ERROR("Failed to add custom subtitle track: %s", track_name);
+        return K4A_RESULT_FAILED;
+    }
+    if (track_settings != NULL)
+    {
+        track->high_freq_data = track_settings->high_freq_data;
+    }
+    track->custom_track = true;
+
+    uint64_t track_uid = GetChild<KaxTrackUID>(*track->track).GetValue();
+    std::ostringstream track_tag_str, track_uid_str;
+    track_tag_str << "K4A_CUSTOM_TRACK_" << track_name;
+    track_uid_str << track_uid;
+    add_tag(context, track_tag_str.str().c_str(), track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
 
     return K4A_RESULT_SUCCEEDED;
 }
@@ -496,7 +614,7 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
     k4a_image_format_t expected_formats[] = { context->device_config.color_format,
                                               K4A_IMAGE_FORMAT_DEPTH16,
                                               K4A_IMAGE_FORMAT_IR16 };
-    KaxTrackEntry *tracks[] = { context->color_track, context->depth_track, context->ir_track };
+    track_header_t *tracks[] = { context->color_track, context->depth_track, context->ir_track };
     static_assert(arraysize(images) == arraysize(tracks), "Invalid mapping from images to track");
     static_assert(arraysize(images) == arraysize(expected_formats), "Invalid mapping from images to formats");
 
@@ -558,6 +676,13 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
     k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
 
+    if (!context->imu_track)
+    {
+        LOG_ERROR("The IMU track needs to be added with k4a_record_add_imu_track() before IMU samples can be written.",
+                  0);
+        return K4A_RESULT_FAILED;
+    }
+
     if (!context->header_written)
     {
         LOG_ERROR("The recording header needs to be written before any imu samples.", 0);
@@ -584,6 +709,53 @@ k4a_result_t k4a_record_write_imu_sample(const k4a_record_t recording_handle, k4
     }
 
     return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
+                                                const char *track_name,
+                                                uint64_t device_timestamp_usec,
+                                                uint8_t *buffer,
+                                                size_t buffer_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, track_name == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, buffer == NULL);
+
+    k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+
+    if (!context->header_written)
+    {
+        LOG_ERROR("The recording header needs to be written before any track data.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    auto itr = context->tracks.find(track_name);
+    if (itr == context->tracks.end())
+    {
+        LOG_ERROR("The custom track does not exist: %s", track_name);
+        return K4A_RESULT_FAILED;
+    }
+    if (!itr->second.custom_track)
+    {
+        LOG_ERROR("Custom track data cannot be written to built-in track: %s", track_name);
+        return K4A_RESULT_FAILED;
+    }
+
+    // Create a copy of the image buffer for writing to file.
+    assert(buffer_size <= UINT32_MAX);
+    DataBuffer *data_buffer = new DataBuffer(buffer, (uint32_t)buffer_size, NULL, true);
+
+    k4a_result_t result = TRACE_CALL(
+        write_track_data(context, &itr->second, device_timestamp_usec * 1000, data_buffer));
+    if (K4A_FAILED(result))
+    {
+        // Clean up the data_buffer if write_track_data failed.
+        data_buffer->FreeBuffer(*data_buffer);
+        delete data_buffer;
+    }
+
+    return result;
 }
 
 k4a_result_t k4a_record_flush(const k4a_record_t recording_handle)
@@ -740,12 +912,6 @@ void k4a_record_close(const k4a_record_t recording_handle)
         catch (std::ios_base::failure &e)
         {
             LOG_ERROR("Failed to close recording '%s': %s", context->file_path, e.what());
-        }
-
-        // After this destroy, logging will no longer happen.
-        if (context->logger_handle)
-        {
-            logger_destroy(context->logger_handle);
         }
     }
     k4a_record_t_destroy(recording_handle);

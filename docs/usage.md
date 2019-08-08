@@ -73,7 +73,7 @@ available in the installer 'tools' directory.
 ## Including the SDK in your project
 
 If you are including the Azure Kinect SDK in a C or C++ project, update your project to link to **k4a.lib** and
-add the include path such that you can `#include <k4a/k4a.h>`. You also need to ensure that **k4a.dll** and **depthengine_1_0.dll** are in your path or in the same directory as your application.
+add the include path such that you can `#include <k4a/k4a.h>`. You also need to ensure that **k4a.dll** and **depthengine_2_0.dll** are in your path or in the same directory as your application.
 
 For recording and playback you will need to also reference **k4arecord.lib** and the headers in include/k4arecord and have
 **k4arecord.dll** in your path.
