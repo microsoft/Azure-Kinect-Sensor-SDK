@@ -456,13 +456,16 @@ void usb_cmd_destroy(usbcmd_t usbcmd_handle)
 
 k4a_buffer_result_t usb_cmd_get_serial_number(usbcmd_t usbcmd_handle, char *serial_number, size_t *serial_number_size)
 {
-    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, usbcmd_t, usbcmd_handle);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, serial_number_size == NULL);
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, usbcmd_t, usbcmd_handle);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);
 
-    k4a_result_t result;
+    k4a_buffer_result_t result = K4A_BUFFER_RESULT_FAILED;
     usbcmd_context_t *usbcmd;
 
-    result = K4A_RESULT_FROM_BOOL((usbcmd = usbcmd_t_get_context(usbcmd_handle)) != NULL);
+    if (K4A_FAILED(K4A_RESULT_FROM_BOOL((usbcmd = usbcmd_t_get_context(usbcmd_handle)) != NULL)))
+    {
+        result = K4A_BUFFER_RESULT_FAILED;
+    }
 
     size_t required_length = strlen((const char *)usbcmd->serial_number) + 1;
 
@@ -935,8 +938,8 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
     libusb_device **dev_list; // pointer to pointer of device, used to retrieve a list of devices
     ssize_t count;            // holding number of devices in list
     int err;
-    int color_device_count = 0;
-    int depth_device_count = 0;
+    uint32_t color_device_count = 0;
+    uint32_t depth_device_count = 0;
 
     if (p_device_count == NULL)
     {

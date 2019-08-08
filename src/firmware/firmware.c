@@ -104,7 +104,6 @@ static uint32_t calculate_crc32(const uint8_t *pData, size_t len)
     return crc;
 }
 
-// k4a_result_t firmware_create(uint32_t index, firmware_t *firmware_handle)
 k4a_result_t firmware_create(char *device_serial_number, firmware_t *firmware_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_handle == NULL);
@@ -174,7 +173,7 @@ k4a_result_t firmware_create(char *device_serial_number, firmware_t *firmware_ha
                 result = K4A_RESULT_SUCCEEDED;
                 break;
             }
-            
+
             colormcu_destroy(firmware->colormcu);
             firmware_free_serial_number(firmware->serial_number);
             firmware->serial_number = NULL;
@@ -271,11 +270,13 @@ k4a_result_t firmware_reset_device(firmware_t firmware_handle)
         LOG_INFO("Issuing reset command to Depth MCU.", 0);
         result = TRACE_CALL(depthmcu_reset_device(firmware->depthmcu));
     }
+
     if (K4A_FAILED(result) && firmware->colormcu)
     {
         LOG_INFO("Issuing reset command to Color MCU.", 0);
         result = TRACE_CALL(colormcu_reset_device(firmware->colormcu));
     }
+
     Unlock(firmware->lock);
     return result;
 }
@@ -288,7 +289,7 @@ k4a_buffer_result_t firmware_get_device_serialnum(firmware_t firmware_handle,
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);
 
     firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware->depthmcu == NULL);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, firmware->depthmcu == NULL);
 
     return TRACE_BUFFER_CALL(depthmcu_get_serialnum(firmware->depthmcu, serial_number, serial_number_size));
 }
@@ -470,13 +471,13 @@ k4a_result_t firmware_get_serial_number(colormcu_t color, depthmcu_t depth, char
     }
     else
     {
-        LOG_ERROR("No Color or Depth handle provided\n");
+        LOG_ERROR("No Color or Depth handle provided\n",0);
         return K4A_RESULT_FAILED;
     }
 
     if (b_result != K4A_BUFFER_RESULT_TOO_SMALL)
     {
-        LOG_ERROR("Failed to get serial number length\n");
+        LOG_ERROR("Failed to get serial number length\n",0);
         return K4A_RESULT_FAILED;
     }
 
@@ -503,7 +504,7 @@ k4a_result_t firmware_get_serial_number(colormcu_t color, depthmcu_t depth, char
         free(ser_num);
         return K4A_RESULT_FAILED;
     }
-    
+
     *serial_number = ser_num;
     return K4A_RESULT_SUCCEEDED;
 }

@@ -777,14 +777,14 @@ jobs:
         sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir"
         contents: '\*'
 
-    - task: CmdLine@2
-      displayName: 'Download findconnectedport'
-      inputs:
-        script:  curl "$(ResourceBaseUrl)/findconnectedport/linux/findconnectedport$(ResourceToken)" --output $(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport --create-dirs
+#    - task: CmdLine@2
+#      displayName: 'Download findconnectedport'
+#      inputs:
+#        script:  curl "$(ResourceBaseUrl)/findconnectedport/linux/findconnectedport$(ResourceToken)" --output $(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport --create-dirs
 
-    - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
-      workingDirectory: '$(System.ArtifactsDirectory)'
-      displayName: 'Add execution property to findconnectedport'
+#    - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
+#      workingDirectory: '$(System.ArtifactsDirectory)'
+#      displayName: 'Add execution property to findconnectedport'
 
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into Build Artifacts"

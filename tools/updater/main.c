@@ -76,11 +76,11 @@ static void print_supprted_commands()
     printf("Commands:\n");
     printf("    List Devices: -List, -l\n");
     printf("    Query Device: -Query, -q\n");
-    printf("        Arguments: [Serial Number]\n");
+    printf("        Arguments: [Optional Serial Number for single device query]\n");
     printf("    Update Device: -Update, -u\n");
-    printf("        Arguments: <Firmware Package Path and FileName> [Serial Number]\n");
+    printf("        Arguments: <Firmware Package Path and FileName> [Option Serial Number for single device update]\n");
     printf("    Reset Device: -Reset, -r\n");
-    printf("        Arguments: [Serial Number]\n");
+    printf("        Arguments: [Optional Serial Number for single device reset]\n");
     printf("    Inspect Firmware: -Inspect, -i\n");
     printf("        Arguments: <Firmware Package Path and FileName>\n");
     printf("\n");
@@ -122,6 +122,7 @@ static int try_parse_device(int argc, char **argv, int current, updater_command_
     depthmcu_t depth = NULL;
     colormcu_t color = NULL;
     uint32_t device_count;
+    char *device_serial_number = NULL;
     int next = current + 1;
 
     if (next < argc)
@@ -129,21 +130,8 @@ static int try_parse_device(int argc, char **argv, int current, updater_command_
         char firstCharacter = argv[next][0];
         if (firstCharacter != '-' && firstCharacter != '/')
         {
-            char *device_serial_number = NULL;
-            size_t device_serial_number_sz = strlen(argv[next]) + 1;
-            device_serial_number = malloc(device_serial_number_sz);
-            if (device_serial_number == NULL)
-            {
-                printf("ERROR: unable to malloc for serial number.");
-            }
-            else
-            {
-                memset(device_serial_number, 0, device_serial_number_sz);
-                memcpy(device_serial_number, argv[next], device_serial_number_sz - 1);
-                command_info->device_count = 1;
-                command_info->device_serial_number[0] = device_serial_number;
-            }
-            return next;
+            // If the user is passing in a serial number, then we use it and exit. We will later check for it
+            device_serial_number = argv[next];
         }
     }
     usb_cmd_get_device_count(&device_count);
@@ -172,24 +160,27 @@ static int try_parse_device(int argc, char **argv, int current, updater_command_
 
             if (K4A_SUCCEEDED(result))
             {
-                // // Are we looking for a particular serial number?
-                // if ((device_serial_number) && (strcmp(device_serial_number, serial_number) == 0))
-                // {
-                //     if (K4A_SUCCEEDED(add_device(command_info, serial_number)))
-                //     {
-                //         // Add_device took ownership of serial_number
-                //         serial_number = NULL;
-                //     }
-                //     else
-                //     {
-                //         printf("ERROR: Unable to store device & serial number: %s\n", device_serial_number);
-                //     }
+                // Are we looking for a particular serial number?
+                if (device_serial_number)
+                {
+                    if (strcmp(device_serial_number, serial_number) == 0)
+                    {
+                        if (K4A_SUCCEEDED(add_device(command_info, serial_number)))
+                        {
+                            // Add_device took ownership of serial_number
+                            serial_number = NULL;
+                        }
+                        else
+                        {
+                            printf("ERROR: Unable to store device & serial number: %s\n", device_serial_number);
+                        }
 
-                //     // Success or failure, the serial number being searched for was found.
-                //     device_found = true;
-                // }
+                        // Success or failure, the serial number being searched for was found.
+                        device_found = true;
+                    }
+                }
                 // We are saving all unique devices found to the list
-                /* else */ if (K4A_SUCCEEDED(add_device(command_info, serial_number)))
+                else if (K4A_SUCCEEDED(add_device(command_info, serial_number)))
                 {
                     // Add_device took ownership of serial_number
                     serial_number = NULL;
@@ -213,10 +204,12 @@ static int try_parse_device(int argc, char **argv, int current, updater_command_
             serial_number = NULL;
         }
     }
-    // if (device_serial_number && command_info->device_count == 0)
-    // {
-    //     printf("ERROR: Unable to find a device with serial number: %s\n", device_serial_number);
-    // }
+
+    if (device_serial_number && command_info->device_count == 0)
+    {
+        printf("ERROR: Unable to find a device with serial number: %s\n", device_serial_number);
+    }
+
     if (command_info->device_count == 0)
     {
         printf("ERROR: Unable to find a device\n");
@@ -261,7 +254,6 @@ static int parse_command_line(int argc, char **argv, updater_command_info_t *com
         {
             command_info->requested_command = K4A_FIRMWARE_COMMAND_QUERY_DEVICE;
             i = try_parse_device(argc, argv, i, command_info);
-            // if (command_info->device_index == UINT32_MAX)
             if (command_info->device_count == 0)
             {
                 return EXIT_USAGE;
@@ -282,7 +274,6 @@ static int parse_command_line(int argc, char **argv, updater_command_info_t *com
             command_info->firmware_path = argv[i];
 
             i = try_parse_device(argc, argv, i, command_info);
-            // if (command_info->device_index == UINT32_MAX)
             if (command_info->device_count == 0)
             {
                 return EXIT_USAGE;
@@ -292,7 +283,6 @@ static int parse_command_line(int argc, char **argv, updater_command_info_t *com
         {
             command_info->requested_command = K4A_FIRMWARE_COMMAND_RESET_DEVICE;
             i = try_parse_device(argc, argv, i, command_info);
-            // if (command_info->device_index == UINT32_MAX)
             if (command_info->device_count == 0)
             {
                 return EXIT_USAGE;
@@ -483,12 +473,6 @@ static k4a_result_t print_firmware_package_info(firmware_package_info_t package_
 
 static k4a_result_t print_device_serialnum(updater_command_info_t *command_info)
 {
-    // k4a_result_t result = ensure_firmware_open(command_info);
-    // if (!K4A_SUCCEEDED(result))
-    // {
-    //     return result;
-    // }
-
     char *serial_number = NULL;
     size_t serial_number_length = 0;
 
@@ -717,7 +701,7 @@ static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info, u
                 continue;
             }
 
-            // Store a copy of the serial number
+            // Store a copy of the serial number - so we later know what firmware_handle points to.
             command_info->firmware_serial_number = command_info->device_serial_number[device_index];
         } while (!K4A_SUCCEEDED(result) && retry++ < 20);
 
@@ -1037,6 +1021,7 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
 
         if (K4A_FAILED(result))
         {
+            // keep track of overal status
             finalCmdStatus = K4A_RESULT_FAILED;
         }
     }

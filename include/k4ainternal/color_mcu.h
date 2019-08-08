@@ -75,7 +75,7 @@ typedef struct _imu_payload_metadata_t
  * The container ID of the device to open
  *
  * \param colormcu_handle [OUT]
- *    A pointer to write the opened color mcu handle to
+ * A pointer to write the opened color mcu handle to
  *
  * \return K4A_RESULT_SUCCEEDED if the device was opened, otherwise an error code
  *
@@ -87,10 +87,43 @@ typedef struct _imu_payload_metadata_t
  */
 k4a_result_t colormcu_create(const guid_t *container_id, colormcu_t *colormcu_handle);
 
-//????
+/** Open a handle to the color mcu device.
+ *
+ * \param device_index
+ * The index number of the color MCU device to open.
+ *
+ * \param colormcu_handle [OUT]
+ * A pointer to write the opened color mcu handle to
+ *
+ * \return K4A_RESULT_SUCCEEDED if the device was opened, otherwise an error code
+ *
+ * If successful, \ref colormcu_create will return a color mcu device handle in the color mcu
+ * parameter. This handle grants exclusive access to the device and may be used in
+ * the other k4a API calls.
+ *
+ * When done with the device, close the handle with \ref colormcu_destroy
+ */
 k4a_result_t colormcu_create_by_index(uint32_t device_index, colormcu_t *colormcu_handle);
 
-//????
+/** Get the serial number associated with the USB descriptor.
+ *
+ * \param colormcu_handle
+ *  Colormcu handle provided by the colormcu_create() call
+ *
+ * \param serial_number [OUT]
+ * A pointer to write the serial number to
+ *
+ * \param serial_number_size [IN OUT]
+ * IN: a pointer to the size of the serial number buffer passed in
+ * OUT: the size of the serial number written to the buffer including the NULL.
+ *
+ * \return K4A_BUFFER_RESULT_SUCCEEDED if the serial number was successfully opened, K4A_BUFFER_RESULT_TOO_SMALL is the
+ * memory passed in is insufficient, K4A_BUFFER_RESULT_FAILED if an error occurs.
+ *
+ * If successful, \ref serial_number will contain a serial number and serial_number_size will be the null terminated
+ * string length. If K4A_BUFFER_RESULT_TOO_SMALL is returned, then serial_number_size will contain the required size.
+ */
+
 k4a_buffer_result_t colormcu_get_serialnum(colormcu_t colormcu_handle, char *serial_number, size_t *serial_number_size);
 
 /** Closes the color mcu module and free's it resources
