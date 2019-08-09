@@ -142,7 +142,7 @@ k4a_result_t setup_common_test()
     {
         depthmcu_t depthmcu;
         size_t serial_number_size = 0;
-            std::cout << "Reading serial number of Azure Kinect\n";
+        std::cout << "Reading serial number of Azure Kinect\n";
         K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(g_k4a_port_number));
         ThreadAPI_Sleep(3000);
         K4A_TEST_VERIFY_EQUAL(K4A_RESULT_SUCCEEDED, depthmcu_create(K4A_DEVICE_DEFAULT, &depthmcu));
