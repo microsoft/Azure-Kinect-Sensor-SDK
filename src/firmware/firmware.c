@@ -367,24 +367,22 @@ k4a_result_t firmware_get_device_version(firmware_t firmware_handle, k4a_hardwar
     return result;
 }
 
-k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
-                                    size_t firmware_size,
-                                    firmware_package_info_t *package_info)
+k4a_result_t parse_firmware_package(firmware_package_info_t *package_info)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_buffer == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_size < sizeof(firmware_package_header_t));
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, package_info == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, package_info->buffer == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, package_info->size < sizeof(firmware_package_header_t));
 
-    const firmware_package_header_t *package_header = (const firmware_package_header_t *)firmware_buffer;
+    const firmware_package_header_t *package_header = (const firmware_package_header_t *)package_info->buffer;
 
     package_info->package_valid = true;
     package_info->signature_type = (k4a_firmware_signature_t)package_header->signature_type;
     package_info->build_config = (k4a_firmware_build_t)package_header->build_configuration;
 
     uint32_t crc = 0;
-    size_t crc_offset = firmware_size - sizeof(crc);
-    memcpy(&crc, firmware_buffer + crc_offset, sizeof(crc));
-    uint32_t calculatedCRC = calculate_crc32(firmware_buffer, crc_offset);
+    size_t crc_offset = package_info->size - sizeof(crc);
+    memcpy(&crc, package_info->buffer + crc_offset, sizeof(crc));
+    uint32_t calculatedCRC = calculate_crc32(package_info->buffer, crc_offset);
     if (crc != calculatedCRC)
     {
         LOG_ERROR("Firmware Package CRC error. original crc: 0x%08X calculated crc: 0x%08X", crc, calculatedCRC);
@@ -427,7 +425,7 @@ k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
     uint32_t certificate_block_start_offset = 0;
     uint16_t certificate_block_length = 0;
 
-    if (package_header->auth_block_start + 6 > firmware_size)
+    if (package_header->auth_block_start + 6 > package_info->size)
     {
         LOG_ERROR("Firmware Package Authentication block not found.", 0);
         package_info->package_valid = false;
@@ -435,13 +433,14 @@ k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
     else
     {
         memcpy(&certificate_block_start_offset,
-               firmware_buffer + package_header->auth_block_start,
+               package_info->buffer + package_header->auth_block_start,
                sizeof(certificate_block_start_offset));
         memcpy(&certificate_block_length,
-               firmware_buffer + package_header->auth_block_start + sizeof(certificate_block_start_offset),
+               package_info->buffer + package_header->auth_block_start + sizeof(certificate_block_start_offset),
                sizeof(certificate_block_length));
 
-        if (certificate_block_length < 1 || (certificate_block_start_offset + certificate_block_length) > firmware_size)
+        if (certificate_block_length < 1 ||
+            (certificate_block_start_offset + certificate_block_length) > package_info->size)
         {
             LOG_ERROR("Firmware Package Authentication invalid.", 0);
             package_info->package_valid = false;
@@ -449,7 +448,7 @@ k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
         else
         {
             uint8_t certificate_type;
-            memcpy(&certificate_type, firmware_buffer + certificate_block_start_offset, sizeof(certificate_type));
+            memcpy(&certificate_type, package_info->buffer + certificate_block_start_offset, sizeof(certificate_type));
 
             package_info->certificate_type = (k4a_firmware_signature_t)certificate_type;
         }

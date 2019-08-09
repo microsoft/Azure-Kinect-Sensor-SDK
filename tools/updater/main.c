@@ -95,7 +95,7 @@ static void print_supprted_commands()
 static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info, bool resetting_device, uint32_t device);
 static void command_list_devices(updater_command_info_t *command_info);
 static k4a_result_t command_query_device(updater_command_info_t *command_info);
-static k4a_result_t command_inspect_firmware(char *firmware_path, firmware_package_info_t *firmware_info);
+static k4a_result_t command_load_and_inspect_firmware(char *firmware_path, firmware_package_info_t *firmware_info);
 static k4a_result_t command_update_device(updater_command_info_t *command_info);
 static k4a_result_t command_reset_device(updater_command_info_t *command_info);
 static void close_all_handles(updater_command_info_t *command_info, firmware_package_info_t *firmware_info);
@@ -763,7 +763,7 @@ static k4a_result_t command_query_device(updater_command_info_t *command_info)
     return K4A_RESULT_SUCCEEDED;
 }
 
-static k4a_result_t command_inspect_firmware(char *firmware_path, firmware_package_info_t *firmware_info)
+static k4a_result_t command_load_and_inspect_firmware(char *firmware_path, firmware_package_info_t *firmware_info)
 {
     k4a_result_t result;
 
@@ -783,7 +783,7 @@ static k4a_result_t command_inspect_firmware(char *firmware_path, firmware_packa
         return result;
     }
 
-    parse_firmware_package(firmware_info->buffer, firmware_info->size, firmware_info);
+    parse_firmware_package(firmware_info);
 
     result = print_firmware_package_info(firmware_info);
 
@@ -797,7 +797,7 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
 
     // Load and parse the firmware file information...
     firmware_package_info_t firmware_info;
-    k4a_result_t result = command_inspect_firmware(command_info->firmware_path, &firmware_info);
+    k4a_result_t result = command_load_and_inspect_firmware(command_info->firmware_path, &firmware_info);
     if (!K4A_SUCCEEDED(result))
     {
         return result;
@@ -952,6 +952,8 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
         }
     }
 
+    close_all_handles(command_info, &firmware_info);
+
     return finalCmdStatus;
 }
 
@@ -1043,7 +1045,7 @@ int main(int argc, char **argv)
         break;
 
     case K4A_FIRMWARE_COMMAND_INSPECT_FIRMWARE:
-        result = command_inspect_firmware(command_info.firmware_path, &firmware_info);
+        result = command_load_and_inspect_firmware(command_info.firmware_path, &firmware_info);
         break;
 
     default:

@@ -152,25 +152,34 @@ k4a_result_t setup_common_test()
         K4A_TEST_VERIFY_EQUAL(K4A_BUFFER_RESULT_SUCCEEDED,
                               depthmcu_get_serialnum(depthmcu, g_serial_number, &serial_number_size));
         depthmcu_destroy(depthmcu);
+        std::cout << "Azure Kinect S/N is " << g_serial_number << std::endl;
     }
 
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
 
     std::cout << "Loading Release Candidate firmware package: " << g_candidate_firmware_path << std::endl;
     load_firmware_files(g_candidate_firmware_path, &g_candidate_firmware_buffer, &g_candidate_firmware_size);
-    parse_firmware_package(g_candidate_firmware_buffer, g_candidate_firmware_size, &g_candidate_firmware_package_info);
+    g_candidate_firmware_package_info.buffer = g_candidate_firmware_buffer;
+    g_candidate_firmware_package_info.size = g_candidate_firmware_size;
+    parse_firmware_package(&g_candidate_firmware_package_info);
 
     std::cout << "Loading Test firmware package: " << g_test_firmware_path << std::endl;
     load_firmware_files(g_test_firmware_path, &g_test_firmware_buffer, &g_test_firmware_size);
-    parse_firmware_package(g_test_firmware_buffer, g_test_firmware_size, &g_test_firmware_package_info);
+    g_candidate_firmware_package_info.buffer = g_candidate_firmware_buffer;
+    g_candidate_firmware_package_info.size = g_candidate_firmware_size;
+    parse_firmware_package(&g_test_firmware_package_info);
 
     std::cout << "Loading LKG firmware package: " << g_lkg_firmware_path << std::endl;
     load_firmware_files(g_lkg_firmware_path, &g_lkg_firmware_buffer, &g_lkg_firmware_size);
-    parse_firmware_package(g_lkg_firmware_buffer, g_lkg_firmware_size, &g_lkg_firmware_package_info);
+    g_candidate_firmware_package_info.buffer = g_candidate_firmware_buffer;
+    g_candidate_firmware_package_info.size = g_candidate_firmware_size;
+    parse_firmware_package(&g_lkg_firmware_package_info);
 
     std::cout << "Loading Factory firmware package: " << g_factory_firmware_path << std::endl;
     load_firmware_files(g_factory_firmware_path, &g_factory_firmware_buffer, &g_factory_firmware_size);
-    parse_firmware_package(g_factory_firmware_buffer, g_factory_firmware_size, &g_factory_firmware_package_info);
+    g_candidate_firmware_package_info.buffer = g_candidate_firmware_buffer;
+    g_candidate_firmware_package_info.size = g_candidate_firmware_size;
+    parse_firmware_package(&g_factory_firmware_package_info);
 
     common_initialized = true;
     return K4A_RESULT_SUCCEEDED;

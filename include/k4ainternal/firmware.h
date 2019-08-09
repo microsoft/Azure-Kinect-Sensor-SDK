@@ -76,9 +76,7 @@ k4a_result_t firmware_reset_device(firmware_t firmware_handle);
 
 k4a_result_t firmware_get_device_version(firmware_t firmware_handle, k4a_hardware_version_t *version);
 
-k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
-                                    size_t firmware_size,
-                                    firmware_package_info_t *package_info);
+k4a_result_t parse_firmware_package(firmware_package_info_t *package_info);
 
 // If successful, the user must free the serial number
 k4a_result_t firmware_get_serial_number(colormcu_t colormcu, depthmcu_t depthmcu, char **serial_number);
