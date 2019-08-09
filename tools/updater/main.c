@@ -966,6 +966,7 @@ static k4a_result_t command_reset_device(updater_command_info_t *command_info)
         result = ensure_firmware_open(command_info, FW_OPEN_RESET, device_index);
         if (!K4A_SUCCEEDED(result))
         {
+            printf("\nERROR: Failed to open device S/N: %s\n", command_info->device_serial_number[device_index]);
             finalCmdStatus = K4A_RESULT_FAILED;
             continue;
         }

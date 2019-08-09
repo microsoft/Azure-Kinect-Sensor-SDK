@@ -96,12 +96,14 @@ k4a_result_t setup_common_test()
     std::cout << "Searching for the connection exerciser and device..." << std::endl;
     LOG_INFO("Searching for the connection exerciser...", 0);
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->find_connection_exerciser());
+    std::cout << "Found it, searching ports\n";
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
 
     LOG_INFO("Searching for device...", 0);
 
     for (int i = 0; i < CONN_EX_MAX_NUM_PORTS; ++i)
     {
+        std::cout << "Inspecting port " << i << "\n";
         K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(i));
         port = g_connection_exerciser->get_usb_port();
         K4A_TEST_VERIFY_EQUAL(port, i);
@@ -123,6 +125,7 @@ k4a_result_t setup_common_test()
                 std::cout << "More than one device was detected on the connection exerciser." << std::endl;
                 return K4A_RESULT_FAILED;
             }
+            std::cout << "Found a device on port " << i << "\n";
             g_k4a_port_number = port;
         }
 
@@ -136,14 +139,20 @@ k4a_result_t setup_common_test()
     }
 
     // Get the serial number of the connected device
-    depthmcu_t depthmcu;
-    size_t serial_number_size = 0;
-    K4A_TEST_VERIFY_EQUAL(K4A_RESULT_SUCCEEDED, depthmcu_create(K4A_DEVICE_DEFAULT, &depthmcu));
-    K4A_TEST_VERIFY_EQUAL(K4A_BUFFER_RESULT_TOO_SMALL, depthmcu_get_serialnum(depthmcu, nullptr, &serial_number_size));
-    K4A_TEST_VERIFY_NOT_EQUAL(NULL, g_serial_number = (char *)malloc(serial_number_size));
-    K4A_TEST_VERIFY_EQUAL(K4A_BUFFER_RESULT_SUCCEEDED,
-                          depthmcu_get_serialnum(depthmcu, g_serial_number, &serial_number_size));
-    depthmcu_destroy(depthmcu);
+    {
+        depthmcu_t depthmcu;
+        size_t serial_number_size = 0;
+            std::cout << "Reading serial number of Azure Kinect\n";
+        K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(g_k4a_port_number));
+        ThreadAPI_Sleep(3000);
+        K4A_TEST_VERIFY_EQUAL(K4A_RESULT_SUCCEEDED, depthmcu_create(K4A_DEVICE_DEFAULT, &depthmcu));
+        K4A_TEST_VERIFY_EQUAL(K4A_BUFFER_RESULT_TOO_SMALL,
+                              depthmcu_get_serialnum(depthmcu, nullptr, &serial_number_size));
+        K4A_TEST_VERIFY_NOT_EQUAL(NULL, g_serial_number = (char *)malloc(serial_number_size));
+        K4A_TEST_VERIFY_EQUAL(K4A_BUFFER_RESULT_SUCCEEDED,
+                              depthmcu_get_serialnum(depthmcu, g_serial_number, &serial_number_size));
+        depthmcu_destroy(depthmcu);
+    }
 
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
 

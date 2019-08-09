@@ -137,8 +137,14 @@ k4a_result_t firmware_create(char *device_serial_number, bool resetting_device, 
             break;
         }
 
-        firmware_free_serial_number(firmware->serial_number);
-        depthmcu_destroy(firmware->depthmcu);
+        if (firmware->serial_number)
+        {
+            firmware_free_serial_number(firmware->serial_number);
+        }
+        if (firmware->depthmcu)
+        {
+            depthmcu_destroy(firmware->depthmcu);
+        }
         firmware->depthmcu = NULL;
         firmware->serial_number = NULL;
         result = K4A_RESULT_FAILED;
@@ -175,8 +181,14 @@ k4a_result_t firmware_create(char *device_serial_number, bool resetting_device, 
                 break;
             }
 
-            colormcu_destroy(firmware->colormcu);
-            firmware_free_serial_number(firmware->serial_number);
+            if (firmware->serial_number)
+            {
+                firmware_free_serial_number(firmware->serial_number);
+            }
+            if (firmware->colormcu)
+            {
+                colormcu_destroy(firmware->colormcu);
+            }
             firmware->serial_number = NULL;
             firmware->colormcu = NULL;
             result = K4A_RESULT_FAILED;
@@ -460,14 +472,9 @@ k4a_result_t firmware_get_serial_number(colormcu_t color, depthmcu_t depth, char
     {
         b_result = colormcu_get_usb_serialnum(color, NULL, &serial_number_length);
     }
-    else if (depth)
-    {
-        b_result = depthmcu_get_serialnum(depth, NULL, &serial_number_length);
-    }
     else
     {
-        LOG_ERROR("No Color or Depth handle provided\n", 0);
-        return K4A_RESULT_FAILED;
+        b_result = depthmcu_get_serialnum(depth, NULL, &serial_number_length);
     }
 
     if (b_result != K4A_BUFFER_RESULT_TOO_SMALL)
@@ -496,7 +503,7 @@ k4a_result_t firmware_get_serial_number(colormcu_t color, depthmcu_t depth, char
     {
         LOG_ERROR("Failed to get serial number: %s\n",
                   b_result == K4A_BUFFER_RESULT_FAILED ? "K4A_BUFFER_RESULT_FAILED" : "K4A_BUFFER_RESULT_TOO_SMALL");
-        free(ser_num);
+        firmware_free_serial_number(ser_num);
         return K4A_RESULT_FAILED;
     }
 
