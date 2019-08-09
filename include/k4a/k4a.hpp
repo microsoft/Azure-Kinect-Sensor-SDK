@@ -503,6 +503,13 @@ public:
         return m_handle != nullptr;
     }
 
+    /** Returns the underlying k4a_capture_t handle
+     */
+    k4a_capture_t handle() const noexcept
+    {
+        return m_handle;
+    }
+
     /** Releases the underlying k4a_capture_t; the capture is set to invalid.
      */
     void reset() noexcept
