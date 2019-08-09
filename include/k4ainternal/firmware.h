@@ -49,6 +49,10 @@ typedef struct _firmware_status_summary_t
 
 typedef struct _firmware_package_info_t
 {
+    char *path;
+    uint8_t *buffer;
+    size_t size;
+
     bool package_valid;
     bool crc_valid;
     k4a_version_t rgb;

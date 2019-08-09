@@ -63,8 +63,6 @@ typedef struct _updater_command_info_t
     firmware_t firmware_handle;
     char *firmware_serial_number;
 
-    uint8_t *firmware_buffer;
-    size_t firmware_size;
     firmware_package_info_t firmware_package_info;
 
     k4a_hardware_version_t current_version;
@@ -97,13 +95,19 @@ static void print_supprted_commands()
 static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info, bool resetting_device, uint32_t device);
 static void command_list_devices(updater_command_info_t *command_info);
 static k4a_result_t command_query_device(updater_command_info_t *command_info);
-static k4a_result_t command_inspect_firmware(updater_command_info_t *command_info);
+static k4a_result_t command_inspect_firmware(char *firmware_path, firmware_package_info_t *firmware_info);
 static k4a_result_t command_update_device(updater_command_info_t *command_info);
 static k4a_result_t command_reset_device(updater_command_info_t *command_info);
-static void close_all_handles(updater_command_info_t *command_info);
+static void close_all_handles(updater_command_info_t *command_info, firmware_package_info_t *firmware_info);
 
 static k4a_result_t add_device(updater_command_info_t *command_info, char *serial_number)
 {
+    if (command_info->device_count >= COUNTOF(command_info->device_serial_number))
+    {
+        printf("ERROR: too many devices connected\n");
+        return K4A_RESULT_FAILED;
+    }
+
     for (uint32_t index = 0; index < command_info->device_count; index++)
     {
         if (strcmp(serial_number, command_info->device_serial_number[index]) == 0)
@@ -139,6 +143,8 @@ static int try_parse_device(int argc, char **argv, int current, updater_command_
     }
     usb_cmd_get_device_count(&device_count);
 
+    // The purpose of this loop to walk through all depth devices first and then walk through all color devices.
+    // add_device() ensures there are no duplicate entries.
     for (uint32_t color_loop = 0; color_loop < 2 && !device_found; color_loop++)
     {
         for (uint32_t device_index = 0; device_index < device_count && !device_found; device_index++)
@@ -316,22 +322,22 @@ static int parse_command_line(int argc, char **argv, updater_command_info_t *com
     return EXIT_OK;
 }
 
-static k4a_result_t load_firmware_file(updater_command_info_t *command_info)
+static k4a_result_t load_firmware_file(firmware_package_info_t *firmware_info)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, command_info == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_info == NULL);
 
     k4a_result_t result = K4A_RESULT_FAILED;
     FILE *pFirmwareFile = NULL;
     size_t numRead = 0;
     uint8_t *tempFirmwareBuffer = NULL;
 
-    if (command_info->firmware_path == NULL)
+    if (firmware_info->path == NULL)
     {
         printf("ERROR: The firmware path was not specified.\n");
         return K4A_RESULT_FAILED;
     }
 
-    if ((pFirmwareFile = fopen(command_info->firmware_path, "rb")) != NULL)
+    if ((pFirmwareFile = fopen(firmware_info->path, "rb")) != NULL)
     {
         fseek(pFirmwareFile, 0, SEEK_END);
         size_t tempFirmwareSize = (size_t)ftell(pFirmwareFile);
@@ -360,15 +366,15 @@ static k4a_result_t load_firmware_file(updater_command_info_t *command_info)
         }
         else
         {
-            command_info->firmware_buffer = tempFirmwareBuffer;
-            command_info->firmware_size = tempFirmwareSize;
+            firmware_info->buffer = tempFirmwareBuffer;
+            firmware_info->size = tempFirmwareSize;
             tempFirmwareBuffer = NULL;
             result = K4A_RESULT_SUCCEEDED;
         }
     }
     else
     {
-        printf("ERROR: Cannot Open (%s) errno=%d\n", command_info->firmware_path, errno);
+        printf("ERROR: Cannot Open (%s) errno=%d\n", firmware_info->path, errno);
     }
 
     if (tempFirmwareBuffer)
@@ -427,15 +433,15 @@ static void print_firmware_signature_type(k4a_firmware_signature_t signature_typ
     }
 }
 
-static k4a_result_t print_firmware_package_info(firmware_package_info_t package_info)
+static k4a_result_t print_firmware_package_info(firmware_package_info_t *firmware_info)
 {
-    if (!package_info.crc_valid)
+    if (!firmware_info->crc_valid)
     {
         printf("ERROR: CRC check failed\n");
         return K4A_RESULT_FAILED;
     }
 
-    if (!package_info.package_valid)
+    if (!firmware_info->package_valid)
     {
         printf("ERROR: Firmware package is malformed.\n");
         return K4A_RESULT_FAILED;
@@ -444,31 +450,31 @@ static k4a_result_t print_firmware_package_info(firmware_package_info_t package_
     printf("This package contains:\n");
 
     printf("  RGB camera firmware:      %d.%d.%d\n",
-           package_info.rgb.major,
-           package_info.rgb.minor,
-           package_info.rgb.iteration);
+           firmware_info->rgb.major,
+           firmware_info->rgb.minor,
+           firmware_info->rgb.iteration);
 
     printf("  Depth camera firmware:    %d.%d.%d\n",
-           package_info.depth.major,
-           package_info.depth.minor,
-           package_info.depth.iteration);
+           firmware_info->depth.major,
+           firmware_info->depth.minor,
+           firmware_info->depth.iteration);
 
     printf("  Depth config files: ");
 
-    for (size_t i = 0; i < package_info.depth_config_number_versions; i++)
+    for (size_t i = 0; i < firmware_info->depth_config_number_versions; i++)
     {
-        printf("%d.%d ", package_info.depth_config_versions[i].major, package_info.depth_config_versions[i].minor);
+        printf("%d.%d ", firmware_info->depth_config_versions[i].major, firmware_info->depth_config_versions[i].minor);
     }
     printf("\n");
 
     printf("  Audio firmware:           %d.%d.%d\n",
-           package_info.audio.major,
-           package_info.audio.minor,
-           package_info.audio.iteration);
+           firmware_info->audio.major,
+           firmware_info->audio.minor,
+           firmware_info->audio.iteration);
 
-    print_firmware_build_config(package_info.build_config);
-    print_firmware_signature_type(package_info.certificate_type, true);
-    print_firmware_signature_type(package_info.signature_type, false);
+    print_firmware_build_config(firmware_info->build_config);
+    print_firmware_signature_type(firmware_info->certificate_type, true);
+    print_firmware_signature_type(firmware_info->signature_type, false);
     printf("\n");
 
     return K4A_RESULT_SUCCEEDED;
@@ -653,7 +659,7 @@ static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info,
         (command_info->firmware_serial_number == NULL ||
          strcmp(command_info->firmware_serial_number, command_info->device_serial_number[device_index]) != 0))
     {
-        close_all_handles(command_info);
+        close_all_handles(command_info, NULL);
     }
 
     if (command_info->firmware_handle == NULL)
@@ -684,16 +690,16 @@ static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info,
     return result;
 }
 
-static void close_all_handles(updater_command_info_t *command_info)
+static void close_all_handles(updater_command_info_t *command_info, firmware_package_info_t *firmware_info)
 {
-    if (command_info->firmware_buffer != NULL)
+    if (firmware_info && firmware_info->buffer != NULL)
     {
-        free(command_info->firmware_buffer);
-        command_info->firmware_buffer = NULL;
-        command_info->firmware_size = 0;
+        free(firmware_info->buffer);
+        firmware_info->buffer = NULL;
+        firmware_info->size = 0;
     }
 
-    if (command_info->firmware_handle)
+    if (command_info && command_info->firmware_handle)
     {
         firmware_destroy(command_info->firmware_handle);
         command_info->firmware_handle = NULL;
@@ -757,30 +763,29 @@ static k4a_result_t command_query_device(updater_command_info_t *command_info)
     return K4A_RESULT_SUCCEEDED;
 }
 
-static k4a_result_t command_inspect_firmware(updater_command_info_t *command_info)
+static k4a_result_t command_inspect_firmware(char *firmware_path, firmware_package_info_t *firmware_info)
 {
     k4a_result_t result;
 
     // Load the firmware from the file...
-    printf("Loading firmware package %s.\n", command_info->firmware_path);
+    printf("Loading firmware package %s.\n", firmware_path);
+    firmware_info->path = firmware_path;
 
-    if (access(command_info->firmware_path, 04) == -1)
+    if (access(firmware_path, 04) == -1)
     {
         printf("ERROR: Firmware Path is invalid.\n");
         return K4A_RESULT_FAILED;
     }
 
-    result = load_firmware_file(command_info);
+    result = load_firmware_file(firmware_info);
     if (!K4A_SUCCEEDED(result))
     {
         return result;
     }
 
-    parse_firmware_package(command_info->firmware_buffer,
-                           command_info->firmware_size,
-                           &command_info->firmware_package_info);
+    parse_firmware_package(firmware_info->buffer, firmware_info->size, firmware_info);
 
-    result = print_firmware_package_info(command_info->firmware_package_info);
+    result = print_firmware_package_info(firmware_info);
 
     return result;
 }
@@ -790,9 +795,17 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
     firmware_status_summary_t finalFwCommandStatus;
     k4a_result_t finalCmdStatus = K4A_RESULT_SUCCEEDED;
 
+    // Load and parse the firmware file information...
+    firmware_package_info_t firmware_info;
+    k4a_result_t result = command_inspect_firmware(command_info->firmware_path, &firmware_info);
+    if (!K4A_SUCCEEDED(result))
+    {
+        return result;
+    }
+
     for (uint32_t device_index = 0; device_index < command_info->device_count; device_index++)
     {
-        k4a_result_t result = ensure_firmware_open(command_info, FW_OPEN_FULL_FEATURE, device_index);
+        result = ensure_firmware_open(command_info, FW_OPEN_FULL_FEATURE, device_index);
         if (!K4A_SUCCEEDED(result))
         {
             return result;
@@ -804,7 +817,10 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
         sub_command_info.device_serial_number[0] = command_info->device_serial_number[device_index];
         sub_command_info.firmware_handle = command_info->firmware_handle;
         sub_command_info.firmware_serial_number = command_info->firmware_serial_number;
-        sub_command_info.firmware_path = command_info->firmware_path;
+
+        // Passed the ownership of the handle to sub_command_info
+        command_info->firmware_handle = NULL;
+        command_info->firmware_serial_number = NULL;
 
         // Query the current device information...
         result = command_query_device(&sub_command_info);
@@ -813,31 +829,18 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
             return result;
         }
 
-        // Load and parse the firmware file information...
-        result = command_inspect_firmware(&sub_command_info);
-        if (!K4A_SUCCEEDED(result))
-        {
-            return result;
-        }
-
-        bool audio_current_version_same = compare_version(sub_command_info.current_version.audio,
-                                                          sub_command_info.firmware_package_info.audio);
-        bool depth_config_current_version_same =
-            compare_version_list(sub_command_info.current_version.depth_sensor,
-                                 sub_command_info.firmware_package_info.depth_config_number_versions,
-                                 sub_command_info.firmware_package_info.depth_config_versions);
-        bool depth_current_version_same = compare_version(sub_command_info.current_version.depth,
-                                                          sub_command_info.firmware_package_info.depth);
-        bool rgb_current_version_same = compare_version(sub_command_info.current_version.rgb,
-                                                        sub_command_info.firmware_package_info.rgb);
+        bool audio_current_version_same = compare_version(sub_command_info.current_version.audio, firmware_info.audio);
+        bool depth_config_current_version_same = compare_version_list(sub_command_info.current_version.depth_sensor,
+                                                                      firmware_info.depth_config_number_versions,
+                                                                      firmware_info.depth_config_versions);
+        bool depth_current_version_same = compare_version(sub_command_info.current_version.depth, firmware_info.depth);
+        bool rgb_current_version_same = compare_version(sub_command_info.current_version.rgb, firmware_info.rgb);
 
         printf("Please wait, updating device firmware. Don't unplug the device. This operation can take a few "
                "minutes...\n");
 
         // Write the loaded firmware to the device...
-        result = firmware_download(sub_command_info.firmware_handle,
-                                   sub_command_info.firmware_buffer,
-                                   sub_command_info.firmware_size);
+        result = firmware_download(sub_command_info.firmware_handle, firmware_info.buffer, firmware_info.size);
         if (!K4A_SUCCEEDED(result))
         {
             printf("ERROR: Downloading the firmware failed! %d\n", result);
@@ -881,15 +884,13 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
         if (K4A_SUCCEEDED(result))
         {
             bool audio_updated_version_same = compare_version(sub_command_info.updated_version.audio,
-                                                              sub_command_info.firmware_package_info.audio);
-            bool depth_config_updated_version_same =
-                compare_version_list(sub_command_info.updated_version.depth_sensor,
-                                     sub_command_info.firmware_package_info.depth_config_number_versions,
-                                     sub_command_info.firmware_package_info.depth_config_versions);
+                                                              firmware_info.audio);
+            bool depth_config_updated_version_same = compare_version_list(sub_command_info.updated_version.depth_sensor,
+                                                                          firmware_info.depth_config_number_versions,
+                                                                          firmware_info.depth_config_versions);
             bool depth_updated_version_same = compare_version(sub_command_info.updated_version.depth,
-                                                              sub_command_info.firmware_package_info.depth);
-            bool rgb_updated_version_same = compare_version(sub_command_info.updated_version.rgb,
-                                                            sub_command_info.firmware_package_info.rgb);
+                                                              firmware_info.depth);
+            bool rgb_updated_version_same = compare_version(sub_command_info.updated_version.rgb, firmware_info.rgb);
 
             if (audio_current_version_same && audio_updated_version_same && depth_config_current_version_same &&
                 depth_config_updated_version_same && depth_current_version_same && depth_updated_version_same &&
@@ -980,7 +981,7 @@ static k4a_result_t command_reset_device(updater_command_info_t *command_info)
         }
 
         // We should have just reset, close out all of our connections.
-        close_all_handles(command_info);
+        close_all_handles(command_info, NULL);
         // Sleeping for a second to allow the device to reset and the system to properly de-enumerate the device.
         // One second is an arbitrary value that appeared to work on most systems. Ideally this should be a wait
         // until an event where the OS indicates the device has de-enumerated.
@@ -1040,20 +1041,22 @@ int main(int argc, char **argv)
         break;
 
     case K4A_FIRMWARE_COMMAND_INSPECT_FIRMWARE:
-        result = command_inspect_firmware(&command_info);
+        firmware_package_info_t firmware_info = { 0 };
+        result = command_inspect_firmware(command_info.firmware_path, &firmware_info);
+        close_all_handles(NULL, &firmware_info);
         break;
 
     default:
         break;
     }
 
-    close_all_handles(&command_info);
+    close_all_handles(&command_info, NULL);
 
     for (uint32_t device_index = 0; device_index < command_info.device_count; device_index++)
     {
         if (command_info.device_serial_number[device_index])
         {
-            free(command_info.device_serial_number[device_index]);
+            firmware_free_serial_number(command_info.device_serial_number[device_index]);
             command_info.device_serial_number[device_index] = NULL;
         }
     }
