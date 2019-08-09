@@ -35,6 +35,9 @@
 #define EXIT_FAILED -1 // general failure
 #define EXIT_USAGE 64  // The arguments were incorrect
 
+#define FW_OPEN_RESET (1)        // When firmware create is called, it will be done to enable reset.
+#define FW_OPEN_FULL_FEATURE (0) // When firmware_create is called, it will ensure all resources are available.
+
 char K4A_ENV_VAR_LOG_TO_A_FILE[] = K4A_ENABLE_LOG_TO_A_FILE;
 
 typedef enum
@@ -91,7 +94,7 @@ static void print_supprted_commands()
     printf("    %s -Update c:\\data\\firmware.bin 0123456\n", EXECUTABLE_NAME);
 }
 
-static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info, uint32_t device);
+static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info, bool resetting_device, uint32_t device);
 static void command_list_devices(updater_command_info_t *command_info);
 static k4a_result_t command_query_device(updater_command_info_t *command_info);
 static k4a_result_t command_inspect_firmware(updater_command_info_t *command_info);
@@ -638,7 +641,9 @@ static k4a_result_t wait_update_operation_complete(firmware_t firmware_handle, f
     return K4A_RESULT_SUCCEEDED;
 }
 
-static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info, uint32_t device_index)
+static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info,
+                                         bool resetting_device,
+                                         uint32_t device_index)
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     int retry = 0;
@@ -658,7 +663,9 @@ static k4a_result_t ensure_firmware_open(updater_command_info_t *command_info, u
         // Wait until the device is available...
         do
         {
-            result = firmware_create(command_info->device_serial_number[device_index], &command_info->firmware_handle);
+            result = firmware_create(command_info->device_serial_number[device_index],
+                                     resetting_device,
+                                     &command_info->firmware_handle);
             if (!K4A_SUCCEEDED(result))
             {
                 LOG_INFO("Failed to connect to the Azure Kinect device", 0);
@@ -708,7 +715,7 @@ static k4a_result_t command_query_device(updater_command_info_t *command_info)
 {
     for (uint32_t device = 0; device < command_info->device_count; device++)
     {
-        k4a_result_t result = ensure_firmware_open(command_info, device);
+        k4a_result_t result = ensure_firmware_open(command_info, FW_OPEN_FULL_FEATURE, device);
         if (!K4A_SUCCEEDED(result))
         {
             return result;
@@ -785,7 +792,7 @@ static k4a_result_t command_update_device(updater_command_info_t *command_info)
 
     for (uint32_t device_index = 0; device_index < command_info->device_count; device_index++)
     {
-        k4a_result_t result = ensure_firmware_open(command_info, device_index);
+        k4a_result_t result = ensure_firmware_open(command_info, FW_OPEN_FULL_FEATURE, device_index);
         if (!K4A_SUCCEEDED(result))
         {
             return result;
@@ -954,8 +961,8 @@ static k4a_result_t command_reset_device(updater_command_info_t *command_info)
 
     for (uint32_t device_index = 0; device_index < command_info->device_count; device_index++)
     {
-        printf("Resetting Azure Kinect S/N: %s\n", command_info->device_serial_number[device_index]);
-        result = ensure_firmware_open(command_info, device_index);
+        printf("\nResetting Azure Kinect S/N: %s\n", command_info->device_serial_number[device_index]);
+        result = ensure_firmware_open(command_info, FW_OPEN_RESET, device_index);
         if (!K4A_SUCCEEDED(result))
         {
             finalCmdStatus = K4A_RESULT_FAILED;
@@ -981,7 +988,8 @@ static k4a_result_t command_reset_device(updater_command_info_t *command_info)
 
         // Re-open the device to ensure it is ready.
         printf("Waiting for reset of S/N: %s to complete.\n", command_info->device_serial_number[device_index]);
-        result = ensure_firmware_open(command_info, device_index);
+        result = ensure_firmware_open(command_info, FW_OPEN_FULL_FEATURE, device_index);
+        printf("Reset of S/N: %s is complete.\n", command_info->device_serial_number[device_index]);
 
         if (K4A_FAILED(result))
         {

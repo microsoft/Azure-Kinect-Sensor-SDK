@@ -104,7 +104,7 @@ static uint32_t calculate_crc32(const uint8_t *pData, size_t len)
     return crc;
 }
 
-k4a_result_t firmware_create(char *device_serial_number, firmware_t *firmware_handle)
+k4a_result_t firmware_create(char *device_serial_number, bool resetting_device, firmware_t *firmware_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_handle == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device_serial_number == NULL);
@@ -158,8 +158,9 @@ k4a_result_t firmware_create(char *device_serial_number, firmware_t *firmware_ha
             result = TRACE_CALL(colormcu_create(container_id, &firmware->colormcu));
         }
     }
-    else // Search for just the colormcu
+    else if (resetting_device) // Search for just the colormcu
     {
+        // When resetting the device we only need the depthmcu or the colormcu
         for (uint32_t device_index = 0; device_index < device_count; device_index++)
         {
             result = TRACE_CALL(colormcu_create_by_index(device_index, &firmware->colormcu));

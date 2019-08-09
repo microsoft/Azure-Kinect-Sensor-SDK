@@ -61,7 +61,7 @@ typedef struct _firmware_package_info_t
     k4a_firmware_signature_t certificate_type;
 } firmware_package_info_t;
 
-k4a_result_t firmware_create(char *device_serial_number, firmware_t *firmware_handle);
+k4a_result_t firmware_create(char *device_serial_number, bool resetting_device, firmware_t *firmware_handle);
 void firmware_destroy(firmware_t firmware_handle);
 
 k4a_result_t firmware_download(firmware_t firmware_handle, uint8_t *pFirmwareBuffer, size_t firmwareSize);

@@ -471,7 +471,7 @@ k4a_result_t open_firmware_device(firmware_t *firmware_handle)
     K4A_TEST_VERIFY_LE(retry, 20);
 
     LOG_INFO("Opening firmware device...", 0);
-    K4A_TEST_VERIFY_SUCCEEDED(firmware_create(g_serial_number, firmware_handle));
+    K4A_TEST_VERIFY_SUCCEEDED(firmware_create(g_serial_number, false, firmware_handle));
     K4A_TEST_VERIFY_TRUE(*firmware_handle != nullptr);
 
     return K4A_RESULT_SUCCEEDED;
