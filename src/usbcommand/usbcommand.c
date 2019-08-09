@@ -459,7 +459,7 @@ k4a_buffer_result_t usb_cmd_get_serial_number(usbcmd_t usbcmd_handle, char *seri
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, usbcmd_t, usbcmd_handle);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);
 
-    k4a_buffer_result_t result_b = K4A_BUFFER_RESULT_FAILED;
+    k4a_buffer_result_t result_b = K4A_BUFFER_RESULT_SUCCEEDED;
     usbcmd_context_t *usbcmd;
 
     if (K4A_FAILED(K4A_RESULT_FROM_BOOL((usbcmd = usbcmd_t_get_context(usbcmd_handle)) != NULL)))
