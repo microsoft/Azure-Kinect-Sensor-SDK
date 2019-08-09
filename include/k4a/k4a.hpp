@@ -182,10 +182,10 @@ public:
     }
 
     /** Returns the underlying k4a_image_t handle
-     * 
+     *
      * Note that this function does not increment the reference count on the k4a_image_t.
-     * The caller is responsible for incrementing the reference count on 
-     * the k4a_image_t if the caller needs the k4a_image_t to outlive this C++ object. 
+     * The caller is responsible for incrementing the reference count on
+     * the k4a_image_t if the caller needs the k4a_image_t to outlive this C++ object.
      * Otherwise, the k4a_image_t will be destroyed by this C++ object.
      */
     k4a_image_t handle() const noexcept
@@ -509,10 +509,10 @@ public:
     }
 
     /** Returns the underlying k4a_capture_t handle
-     * 
+     *
      * Note that this function does not increment the reference count on the k4a_capture_t.
-     * The caller is responsible for incrementing the reference count on 
-     * the k4a_capture_t if the caller needs the k4a_capture_t to outlive this C++ object. 
+     * The caller is responsible for incrementing the reference count on
+     * the k4a_capture_t if the caller needs the k4a_capture_t to outlive this C++ object.
      * Otherwise, the k4a_capture_t will be destroyed by this C++ object.
      */
     k4a_capture_t handle() const noexcept
