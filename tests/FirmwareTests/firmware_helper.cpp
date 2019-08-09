@@ -49,6 +49,7 @@
 
 int g_k4a_port_number = -1;
 connection_exerciser *g_connection_exerciser = nullptr;
+char *g_serial_number;
 
 char *g_candidate_firmware_path = nullptr;
 uint8_t *g_candidate_firmware_buffer = nullptr;
@@ -133,6 +134,17 @@ k4a_result_t setup_common_test()
         std::cout << "The Azure Kinect DK was not detected on any port of the connection exerciser." << std::endl;
         return K4A_RESULT_FAILED;
     }
+
+    // Get the serial number of the connected device
+    depthmcu_t depthmcu;
+    size_t serial_number_size = 0;
+    K4A_TEST_VERIFY_EQUAL(K4A_RESULT_SUCCEEDED, depthmcu_create(K4A_DEVICE_DEFAULT, &depthmcu));
+    K4A_TEST_VERIFY_EQUAL(K4A_BUFFER_RESULT_TOO_SMALL, depthmcu_get_serialnum(depthmcu, nullptr, &serial_number_size));
+    K4A_TEST_VERIFY_NOT_EQUAL(NULL, g_serial_number = (char *)malloc(serial_number_size));
+    K4A_TEST_VERIFY_EQUAL(K4A_BUFFER_RESULT_SUCCEEDED,
+                          depthmcu_get_serialnum(depthmcu, g_serial_number, &serial_number_size));
+    depthmcu_destroy(depthmcu);
+
     K4A_TEST_VERIFY_SUCCEEDED(g_connection_exerciser->set_usb_port(0));
 
     std::cout << "Loading Release Candidate firmware package: " << g_candidate_firmware_path << std::endl;
@@ -186,6 +198,12 @@ void tear_down_common_test()
     {
         free(g_factory_firmware_buffer);
         g_factory_firmware_buffer = nullptr;
+    }
+
+    if (g_serial_number != nullptr)
+    {
+        free(g_serial_number);
+        g_serial_number = nullptr;
     }
 
     common_initialized = false;
@@ -332,43 +350,6 @@ bool compare_version_list(k4a_version_t device_version, uint8_t count, k4a_versi
     return false;
 }
 
-bool compare_device_serial_number(firmware_t firmware_handle, char *device_serial_number)
-{
-    char *serial_number = nullptr;
-    size_t serial_number_length = 0;
-
-    if (K4A_BUFFER_RESULT_TOO_SMALL != firmware_get_device_serialnum(firmware_handle, nullptr, &serial_number_length))
-    {
-        printf("ERROR: Failed to get serial number length\n");
-        return false;
-    }
-
-    serial_number = (char *)malloc(serial_number_length);
-    if (serial_number == nullptr)
-    {
-        printf("ERROR: Failed to allocate memory for serial number (%zu bytes)\n", serial_number_length);
-        return false;
-    }
-
-    if (K4A_BUFFER_RESULT_SUCCEEDED !=
-        firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length))
-    {
-        printf("ERROR: Failed to get serial number\n");
-        free(serial_number);
-        return false;
-    }
-
-    if (strcmp(device_serial_number, serial_number) != 0)
-    {
-        printf("\'%s\' != \'%s\'", device_serial_number, serial_number);
-        free(serial_number);
-        return false;
-    }
-
-    free(serial_number);
-    return true;
-}
-
 void log_firmware_build_config(k4a_firmware_build_t build_config)
 {
     std::cout << "  Build Config:             ";
@@ -490,7 +471,7 @@ k4a_result_t open_firmware_device(firmware_t *firmware_handle)
     K4A_TEST_VERIFY_LE(retry, 20);
 
     LOG_INFO("Opening firmware device...", 0);
-    K4A_TEST_VERIFY_SUCCEEDED(firmware_create(K4A_DEVICE_DEFAULT, firmware_handle));
+    K4A_TEST_VERIFY_SUCCEEDED(firmware_create(g_serial_number, firmware_handle));
     K4A_TEST_VERIFY_TRUE(*firmware_handle != nullptr);
 
     return K4A_RESULT_SUCCEEDED;

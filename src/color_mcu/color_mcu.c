@@ -97,7 +97,9 @@ void colormcu_destroy(colormcu_t colormcu_handle)
     colormcu_t_destroy(colormcu_handle);
 }
 
-k4a_buffer_result_t colormcu_get_serialnum(colormcu_t colormcu_handle, char *serial_number, size_t *serial_number_size)
+k4a_buffer_result_t colormcu_get_usb_serialnum(colormcu_t colormcu_handle,
+                                               char *serial_number,
+                                               size_t *serial_number_size)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, colormcu_t, colormcu_handle);
     RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);

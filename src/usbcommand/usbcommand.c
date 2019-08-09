@@ -483,7 +483,7 @@ k4a_buffer_result_t usb_cmd_get_serial_number(usbcmd_t usbcmd_handle, char *seri
 
     if (result_b == K4A_BUFFER_RESULT_SUCCEEDED)
     {
-        *serial_number_size = strlen((const char *)usbcmd->serial_number) + 1;
+        *serial_number_size = required_length;
         memset(serial_number, 0, *serial_number_size);
         memcpy(serial_number, usbcmd->serial_number, required_length - 1);
         result_b = K4A_BUFFER_RESULT_SUCCEEDED;
@@ -982,7 +982,7 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
             break;
         }
 
-        //  Just check for one PID assuming the other is in the package
+        //  Count how many color or depth end points we find.
         if (desc.idVendor == K4A_MSFT_VID)
         {
             if (desc.idProduct == K4A_RGB_PID)

@@ -55,13 +55,6 @@ protected:
             firmware_handle = nullptr;
         }
 
-        if (serial_number != nullptr)
-        {
-            free(serial_number);
-            serial_number = nullptr;
-            serial_number_length = 0;
-        }
-
         if (calibration_pre_update != nullptr)
         {
             free(calibration_pre_update);
@@ -137,8 +130,6 @@ protected:
     }
 
     firmware_t firmware_handle = nullptr;
-    char *serial_number = nullptr;
-    size_t serial_number_length = 0;
 
     uint8_t *calibration_pre_update = nullptr;
     size_t calibration_pre_update_size = 0;
@@ -214,14 +205,6 @@ TEST_F(firmware_fw, DISABLED_update_timing)
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
-    ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
-
-    serial_number = (char *)malloc(serial_number_length);
-    ASSERT_NE(nullptr, serial_number);
-
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-              firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
-
     printf("\n == Updating the device to the Candidate firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
@@ -230,8 +213,6 @@ TEST_F(firmware_fw, DISABLED_update_timing)
                                     g_candidate_firmware_package_info,
                                     true));
 
-    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
-
     printf("\n == Updating the device to the Test firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
               perform_device_update(&firmware_handle,
@@ -239,8 +220,6 @@ TEST_F(firmware_fw, DISABLED_update_timing)
                                     g_test_firmware_size,
                                     g_test_firmware_package_info,
                                     true));
-
-    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 }
 
 TEST_F(firmware_fw, simple_update_from_lkg)
@@ -249,14 +228,6 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_pre_update, &calibration_pre_update_size));
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
-
-    ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
-
-    serial_number = (char *)malloc(serial_number_length);
-    ASSERT_NE(nullptr, serial_number);
-
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-              firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
 
     printf("\n == Updating the device to the LKG firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -273,7 +244,6 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
-    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
     printf("\n == Updating the device to the Candidate firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -290,7 +260,6 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
-    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
     printf("\n == Updating the device to the Test firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -307,7 +276,6 @@ TEST_F(firmware_fw, simple_update_from_lkg)
     ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
-    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 }
 
 TEST_F(firmware_fw, simple_update_from_factory)
@@ -316,14 +284,6 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, connect_device());
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, read_calibration(&calibration_pre_update, &calibration_pre_update_size));
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
-
-    ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
-
-    serial_number = (char *)malloc(serial_number_length);
-    ASSERT_NE(nullptr, serial_number);
-
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-              firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
 
     printf("\n == Updating the device to the Factory firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -340,7 +300,6 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
-    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
     printf("\n == Updating the device to the Candidate firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -357,7 +316,6 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
-    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 
     printf("\n == Updating the device to the Test firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -374,5 +332,4 @@ TEST_F(firmware_fw, simple_update_from_factory)
     ASSERT_TRUE(compare_calibration());
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
-    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 }

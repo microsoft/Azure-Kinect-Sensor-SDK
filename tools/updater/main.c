@@ -471,40 +471,6 @@ static k4a_result_t print_firmware_package_info(firmware_package_info_t package_
     return K4A_RESULT_SUCCEEDED;
 }
 
-static k4a_result_t print_device_serialnum(updater_command_info_t *command_info)
-{
-    char *serial_number = NULL;
-    size_t serial_number_length = 0;
-
-    if (K4A_BUFFER_RESULT_TOO_SMALL !=
-        firmware_get_device_serialnum(command_info->firmware_handle, NULL, &serial_number_length))
-    {
-        printf("ERROR: Failed to get serial number length\n");
-        return K4A_RESULT_FAILED;
-    }
-
-    serial_number = malloc(serial_number_length);
-    if (serial_number == NULL)
-    {
-        printf("ERROR: Failed to allocate memory for serial number (%zu bytes)\n", serial_number_length);
-        return K4A_RESULT_FAILED;
-    }
-
-    if (K4A_BUFFER_RESULT_SUCCEEDED !=
-        firmware_get_device_serialnum(command_info->firmware_handle, serial_number, &serial_number_length))
-    {
-        printf("ERROR: Failed to get serial number\n");
-        free(serial_number);
-        serial_number = NULL;
-        return K4A_RESULT_FAILED;
-    }
-
-    printf("Device Serial Number: %s\n", serial_number);
-    free(serial_number);
-    serial_number = NULL;
-    return K4A_RESULT_SUCCEEDED;
-}
-
 static firmware_operation_status_t calculate_overall_component_status(const firmware_component_status_t status)
 {
     if (status.overall == FIRMWARE_OPERATION_SUCCEEDED)
@@ -730,55 +696,11 @@ static void close_all_handles(updater_command_info_t *command_info)
 
 static void command_list_devices(updater_command_info_t *command_info)
 {
-    firmware_t device = NULL;
-
     printf("Found %d connected devices:\n", command_info->device_count);
 
     for (uint32_t deviceIndex = 0; deviceIndex < command_info->device_count; deviceIndex++)
     {
-        if (K4A_RESULT_SUCCEEDED != firmware_create(command_info->device_serial_number[deviceIndex], &device))
-        {
-            printf("ERROR: %d: Failed to open device\n", deviceIndex);
-        }
-
-        char *serial_number = NULL;
-        size_t serial_number_length = 0;
-
-        if (K4A_BUFFER_RESULT_TOO_SMALL != firmware_get_device_serialnum(device, NULL, &serial_number_length))
-        {
-            printf("ERROR: %d: Failed to get serial number length\n", deviceIndex);
-            firmware_destroy(device);
-            device = NULL;
-            continue;
-        }
-
-        serial_number = malloc(serial_number_length);
-        if (serial_number == NULL)
-        {
-            printf("ERROR: %d: Failed to allocate memory for serial number (%zu bytes)\n",
-                   deviceIndex,
-                   serial_number_length);
-            firmware_destroy(device);
-            device = NULL;
-            continue;
-        }
-
-        if (K4A_BUFFER_RESULT_SUCCEEDED != firmware_get_device_serialnum(device, serial_number, &serial_number_length))
-        {
-            printf("ERROR: %d: Failed to get serial number\n", deviceIndex);
-            free(serial_number);
-            serial_number = NULL;
-            firmware_destroy(device);
-            device = NULL;
-            continue;
-        }
-
-        printf("%d: Device \"%s\"\n", deviceIndex, serial_number);
-
-        free(serial_number);
-        serial_number = NULL;
-        firmware_destroy(device);
-        device = NULL;
+        printf("%d: Device \"%s\"\n", deviceIndex + 1, command_info->device_serial_number[deviceIndex]);
     }
 }
 
@@ -792,11 +714,7 @@ static k4a_result_t command_query_device(updater_command_info_t *command_info)
             return result;
         }
 
-        result = print_device_serialnum(command_info);
-        if (!K4A_SUCCEEDED(result))
-        {
-            return result;
-        }
+        printf("Device Serial Number: %s\n", command_info->firmware_serial_number);
 
         result = firmware_get_device_version(command_info->firmware_handle, &command_info->current_version);
         if (K4A_SUCCEEDED(result))

@@ -205,10 +205,17 @@ void firmware_destroy(firmware_t firmware_handle)
         depthmcu_destroy(firmware->depthmcu);
         firmware->depthmcu = NULL;
     }
+
     if (firmware->colormcu)
     {
         colormcu_destroy(firmware->colormcu);
         firmware->colormcu = NULL;
+    }
+
+    if (firmware->serial_number)
+    {
+        firmware_free_serial_number(firmware->serial_number);
+        firmware->serial_number = NULL;
     }
 
     Unlock(firmware->lock);
@@ -265,33 +272,20 @@ k4a_result_t firmware_reset_device(firmware_t firmware_handle)
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware->depthmcu == NULL && firmware->colormcu == NULL);
 
     Lock(firmware->lock);
-    if (firmware->depthmcu)
-    {
-        LOG_INFO("Issuing reset command to Depth MCU.", 0);
-        result = TRACE_CALL(depthmcu_reset_device(firmware->depthmcu));
-    }
-
-    if (K4A_FAILED(result) && firmware->colormcu)
+    if (firmware->colormcu)
     {
         LOG_INFO("Issuing reset command to Color MCU.", 0);
         result = TRACE_CALL(colormcu_reset_device(firmware->colormcu));
     }
 
+    if (K4A_FAILED(result) && firmware->depthmcu)
+    {
+        LOG_INFO("Issuing reset command to Depth MCU.", 0);
+        result = TRACE_CALL(depthmcu_reset_device(firmware->depthmcu));
+    }
+
     Unlock(firmware->lock);
     return result;
-}
-
-k4a_buffer_result_t firmware_get_device_serialnum(firmware_t firmware_handle,
-                                                  char *serial_number,
-                                                  size_t *serial_number_size)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, firmware_t, firmware_handle);
-    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);
-
-    firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
-    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, firmware->depthmcu == NULL);
-
-    return TRACE_BUFFER_CALL(depthmcu_get_serialnum(firmware->depthmcu, serial_number, serial_number_size));
 }
 
 k4a_result_t firmware_get_device_version(firmware_t firmware_handle, k4a_hardware_version_t *version)
@@ -463,7 +457,7 @@ k4a_result_t firmware_get_serial_number(colormcu_t color, depthmcu_t depth, char
     // Get the serial_number length
     if (color)
     {
-        b_result = colormcu_get_serialnum(color, NULL, &serial_number_length);
+        b_result = colormcu_get_usb_serialnum(color, NULL, &serial_number_length);
     }
     else if (depth)
     {
@@ -490,7 +484,7 @@ k4a_result_t firmware_get_serial_number(colormcu_t color, depthmcu_t depth, char
 
     if (color)
     {
-        b_result = colormcu_get_serialnum(color, ser_num, &serial_number_length);
+        b_result = colormcu_get_usb_serialnum(color, ser_num, &serial_number_length);
     }
     else
     {

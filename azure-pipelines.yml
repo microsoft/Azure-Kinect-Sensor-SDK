@@ -782,10 +782,6 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check openGL version'
 
-    - script: 'stty -F /dev/ttyACM0 -hupcl'
-      workingDirectory: '$(System.ArtifactsDirectory)'
-      displayName: 'Prevent the USB connector from accidentally being reset'
-
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'

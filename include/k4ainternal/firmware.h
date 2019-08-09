@@ -70,10 +70,6 @@ k4a_result_t firmware_get_download_status(firmware_t firmware_handle, firmware_s
 
 k4a_result_t firmware_reset_device(firmware_t firmware_handle);
 
-k4a_buffer_result_t firmware_get_device_serialnum(firmware_t firmware_handle,
-                                                  char *serial_number,
-                                                  size_t *serial_number_size);
-
 k4a_result_t firmware_get_device_version(firmware_t firmware_handle, k4a_hardware_version_t *version);
 
 k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,

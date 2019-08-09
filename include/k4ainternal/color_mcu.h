@@ -102,6 +102,10 @@ k4a_result_t colormcu_create(const guid_t *container_id, colormcu_t *colormcu_ha
  * the other k4a API calls.
  *
  * When done with the device, close the handle with \ref colormcu_destroy
+ *
+ * NOTE: This API is not garanteed to return a matching colormcu for depthmcu_create(device_index). Container id or
+ * serial number must be matched to ensure the two devices are on the same phyisical Kinect.
+ *
  */
 k4a_result_t colormcu_create_by_index(uint32_t device_index, colormcu_t *colormcu_handle);
 
@@ -124,7 +128,9 @@ k4a_result_t colormcu_create_by_index(uint32_t device_index, colormcu_t *colormc
  * string length. If K4A_BUFFER_RESULT_TOO_SMALL is returned, then serial_number_size will contain the required size.
  */
 
-k4a_buffer_result_t colormcu_get_serialnum(colormcu_t colormcu_handle, char *serial_number, size_t *serial_number_size);
+k4a_buffer_result_t colormcu_get_usb_serialnum(colormcu_t colormcu_handle,
+                                               char *serial_number,
+                                               size_t *serial_number_size);
 
 /** Closes the color mcu module and free's it resources
  * */
