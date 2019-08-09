@@ -1053,17 +1053,14 @@ static k4a_result_t command_reset_device(updater_command_info_t *command_info)
                    command_info->device_serial_number[device_index]);
             continue;
         }
-    }
 
-    // We should have just reset, close out all of our connections.
-    close_all_handles(command_info);
-    // Sleeping for a second to allow the device to reset and the system to properly de-enumerate the device.
-    // One second is an arbitrary value that appeared to work on most systems. Ideally this should be a wait
-    // until an event where the OS indicates the device has de-enumerated.
-    ThreadAPI_Sleep(1000);
+        // We should have just reset, close out all of our connections.
+        close_all_handles(command_info);
+        // Sleeping for a second to allow the device to reset and the system to properly de-enumerate the device.
+        // One second is an arbitrary value that appeared to work on most systems. Ideally this should be a wait
+        // until an event where the OS indicates the device has de-enumerated.
+        ThreadAPI_Sleep(1000);
 
-    for (uint32_t device_index = 0; device_index < command_info->device_count; device_index++)
-    {
         // Re-open the device to ensure it is ready.
         printf("Waiting for reset of S/N: %s to complete.\n", command_info->device_serial_number[device_index]);
         result = ensure_firmware_open(command_info, device_index);
