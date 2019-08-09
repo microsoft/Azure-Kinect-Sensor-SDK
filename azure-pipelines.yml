@@ -785,6 +785,8 @@ jobs:
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
+      env:
+        K4A_LOG_LEVEL: 'I'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
