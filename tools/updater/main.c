@@ -1007,6 +1007,7 @@ int main(int argc, char **argv)
 {
     updater_command_info_t command_info;
     memset(&command_info, 0, sizeof(updater_command_info_t));
+    firmware_package_info_t firmware_info = { 0 };
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     printf(" == Azure Kinect DK Firmware Tool == \n");
@@ -1042,16 +1043,14 @@ int main(int argc, char **argv)
         break;
 
     case K4A_FIRMWARE_COMMAND_INSPECT_FIRMWARE:
-        firmware_package_info_t firmware_info = { 0 };
         result = command_inspect_firmware(command_info.firmware_path, &firmware_info);
-        close_all_handles(NULL, &firmware_info);
         break;
 
     default:
         break;
     }
 
-    close_all_handles(&command_info, NULL);
+    close_all_handles(&command_info, &firmware_info);
 
     for (uint32_t device_index = 0; device_index < command_info.device_count; device_index++)
     {
