@@ -28,7 +28,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{118BF8E1-C662-4852-955F-22DC68BB95CC}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.gitignore = .gitignore
 		AzureKinectSensorSDK.ruleset = AzureKinectSensorSDK.ruleset
+		k4a.props = k4a.props
 		Microsoft.Azure.Kinect.Sensor.snk = Microsoft.Azure.Kinect.Sensor.snk
 		stylecop.json = stylecop.json
 		VersionInfo.cs = VersionInfo.cs
