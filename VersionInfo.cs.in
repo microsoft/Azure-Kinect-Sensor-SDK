@@ -16,14 +16,14 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("Release")]
 #endif
 
-[assembly: AssemblyProduct("Azure Kinect")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyProduct("@K4A_PRODUCTNAME@")]
+[assembly: AssemblyCompany("@K4A_COMPANYNAME@")]
 [assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 
 [assembly: CLSCompliant(true)]
 
 // This is the shared assembly version file for all of our assemblies.
-[assembly: AssemblyVersion("1.2.0")]
-[assembly: AssemblyFileVersion("1.2.0-Beta.5")]
-[assembly: AssemblyInformationalVersion("1.2.0-Informational")]
+[assembly: AssemblyVersion("@K4A_VERSION_MAJOR@.@K4A_VERSION_MINOR@.@K4A_VERSION_PATCH@.0")]
+[assembly: AssemblyFileVersion("@VERSION_STR@")]
+[assembly: AssemblyInformationalVersion("@VERSION_STR@")]
