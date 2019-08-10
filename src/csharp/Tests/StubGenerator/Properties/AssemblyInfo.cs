@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Microsoft.Azure.Kinect.Sensor")]
+[assembly: AssemblyTitle("Microsoft.Azure.Kinect.Sensor.Test.StubGenerator")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,4 +20,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("28E47B37-B205-4353-92B1-1345C47CD710")]
+[assembly: Guid("44795fa0-9b17-40fb-8c8b-f77d754970c8")]

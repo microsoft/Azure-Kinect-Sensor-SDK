@@ -13,24 +13,14 @@
     <BaseIntermediateOutputPath>$(K4aBinaryDirectory)\obj\</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(Configuration)\$(Platform)\$(AssemblyName)\</IntermediateOutputPath>-->
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(BaseOutputPath)' == ''">
     <!-- This should happen if we failed to find the Azure Kinect properties file for the given platform. 
-	This will also happen if the platform is AnyCPU and the output path wasn't included. -->
+	  This will also happen if the platform is AnyCPU and the output path wasn't included. -->
     <BaseOutputPath>$(MSBuildThisFileDirectory)\Build\$(Configuration)\$(Platform)\</BaseOutputPath>
   </PropertyGroup>
-  
+
   <PropertyGroup>
-    <Description>Microsoft Azure Kinect Sensor SDK</Description>
-    <Company>Microsoft</Company>
-    <Authors>Microsoft</Authors>
-    <Product>Azure Kinect</Product>
-    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
-    <PackageLicenseExpression>Licensed under the MIT License.</PackageLicenseExpression>
-    <!-- This is the "Product version", which is the version of this file and just a string. See  AssemblyFileVersion. -->
-    <Version>1.2.3.4</Version>
-    <AssemblyVersion>2.3.4.5</AssemblyVersion>
-    <!-- This is the "File version", which is the identifying version of the assembly. See AssemblyVersion. -->
-    <FileVersion>3.3.4.5</FileVersion>    
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 </Project>
