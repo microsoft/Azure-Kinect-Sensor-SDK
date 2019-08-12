@@ -66,20 +66,30 @@ Transformation get_depth_to_color_transformation_from_calibration(const k4a::cal
     return tr;
 }
 
-void set_calibration_depth_to_color_from_transformation(k4a::calibration &cal, const Transformation &tr)
+// This function constructs a calibration that operates as a transformation between the backup device's depth camera and
+// the main camera's color camera. IT WILL NOT GENERALIZE TO OTHER TRANSFORMS. Under the hood, the transformation
+// depth_image_to_color_camera method can be thought of as converting each depth pixel to a 3d point using the
+// intrinsics of the depth camera, then using the calibration's extrinsics to convert between depth and color, then
+// using the color intrinsics to produce the point in the color camera perspective.
+k4a::calibration construct_device_to_device_calibration(const k4a::calibration &main_cal,
+                                                        const k4a::calibration &backup_cal,
+                                                        const Transformation &backup_to_main)
 {
+    k4a::calibration cal = backup_cal;
     k4a_calibration_extrinsics_t &ex = cal.extrinsics[K4A_CALIBRATION_TYPE_DEPTH][K4A_CALIBRATION_TYPE_COLOR];
     for (int i = 0; i < 3; ++i)
     {
         for (int j = 0; j < 3; ++j)
         {
-            ex.rotation[i * 3 + j] = static_cast<float>(tr.R(i, j));
+            ex.rotation[i * 3 + j] = static_cast<float>(backup_to_main.R(i, j));
         }
     }
     for (int i = 0; i < 3; ++i)
     {
-        ex.translation[i] = static_cast<float>(tr.t[i]);
+        ex.translation[i] = static_cast<float>(backup_to_main.t[i]);
     }
+    cal.color_camera_calibration = main_cal.color_camera_calibration;
+    return cal;
 }
 
 vector<float> calibration_to_color_camera_dist_coeffs(const k4a::calibration &cal)
@@ -441,15 +451,15 @@ int main(int argc, char **argv)
     // We're going to update the existing calibration extrinsics on getting from the backup depth camera to the backup
     // color camera, overwriting it with the transformation to get from the backup depth camera to the main color camera
     // TODO this needs to be done by constructing a new calibration object, not modifying
-    set_calibration_depth_to_color_from_transformation(backup_calibration, tr_depth_backup_to_color_main);
-    backup_calibration.color_camera_calibration = main_calibration.color_camera_calibration;
-    k4a::transformation backup_depth_to_main_color(backup_calibration);
+    k4a::calibration depth_backup_to_color_main_cal =
+        construct_device_to_device_calibration(main_calibration, backup_calibration, tr_depth_backup_to_color_main);
+    k4a::transformation backup_depth_to_main_color(depth_backup_to_color_main_cal);
 
     while (true)
     {
-        vector<k4a::capture> captures = capturer.get_synchronized_captures(configs,
-                                                                           true); // This is to get the depth image for
-                                                                                  // the backup, not the color
+        vector<k4a::capture> captures = capturer.get_synchronized_captures(configs, true); // This is to get the depth
+                                                                                           // image for the backup, not
+                                                                                           // the color
         k4a::image main_color_image = captures[0].get_color_image();
         k4a::image main_depth_image = captures[0].get_depth_image();
         k4a::image backup_depth_image = captures[1].get_depth_image();
