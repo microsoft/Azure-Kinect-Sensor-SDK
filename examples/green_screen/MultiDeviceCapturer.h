@@ -39,10 +39,18 @@ struct MultiDeviceCapturer
                 }
                 master_found = true;
             }
+            else if (!devices.back().is_sync_in_connected() && !devices.back().is_sync_out_connected())
+            {
+                throw std::runtime_error("Each device must have sync in or sync out connected!");
+            }
             else if (!devices.back().is_sync_in_connected())
             {
-                throw std::runtime_error("Non-master camera doesn't have the sync in port connected!");
+                throw std::runtime_error("Non-master camera found that doesn't have the sync in port connected!");
             }
+        }
+        if (!master_found)
+        {
+            throw std::runtime_error("No device with sync out connected found!");
         }
     }
 
