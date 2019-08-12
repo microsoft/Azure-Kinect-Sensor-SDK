@@ -30,7 +30,7 @@ This example requires OpenCV to be installed to build. TODO make this example, a
 
 Our recommended way of getting OpenCV on Windows is by using `vcpkg`. First, get `vcpkg` on your computer by following the instructions [here](https://github.com/Microsoft/vcpkg) (make sure to hook up user-wide integration).
 
-Then, run `vcpkg.exe install opencv:x64_windows`.
+Then, run `vcpkg.exe install opencv:x64-windows`.
 
 You should now be ready to build the SDK normally, which should build this example and put it in your build folder's `bin` directory.
 

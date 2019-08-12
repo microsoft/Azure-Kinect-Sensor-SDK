@@ -198,7 +198,7 @@ jobs:
       if ($LASTEXITCODE -ne 0) { throw "bootstrap-vcpkg failed" }
       .\vcpkg integrate install
       if ($LASTEXITCODE -ne 0) { throw "vcpkg integrate failed" }
-      .\vcpkg install opencv:x64_windows
+      .\vcpkg install opencv:x64-windows
       if ($LASTEXITCODE -ne 0) { throw "install opencv failed" }
 
     displayName: 'Install OpenCV'
