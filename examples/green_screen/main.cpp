@@ -445,7 +445,8 @@ int main(int argc, char **argv)
         tr_backup_color_to_main_color);
 
     // Now, we're going to set up the transformations. DO THIS OUTSIDE OF YOUR MAIN LOOP! Constructing transformations
-    // does a lot of preemptive work to make the transform as fast as possible.
+    // involves time-intensive hardware setup and should not change once you have a rigid setup, so only call it once or
+    // it will run very slowly.
     k4a::transformation main_depth_to_main_color(main_calibration);
 
     // Construct a new calibration object to transform from the backup depth camera to the main color camera
