@@ -13,6 +13,8 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>$(OutputPath)Microsoft.Azure.Kinect.Sensor.xml</DocumentationFile>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\Microsoft.Azure.Kinect.Sensor.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   
   <ItemGroup>
