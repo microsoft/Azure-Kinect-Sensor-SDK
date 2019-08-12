@@ -24,7 +24,7 @@ typedef struct _coordinate_t
 {
     int x;
     int y;
-    float weight[3];
+    float weight[4];
 } coordinate_t;
 
 typedef enum
@@ -205,15 +205,16 @@ static void create_undistortion_lut(const k4a_calibration_t *calibration,
                     // image coordinate of the upper left neighbor
                     float w_x = distorted.xy.x - src.x;
                     float w_y = distorted.xy.y - src.y;
-                    // float w0 = (1.f - w_x) * (1.f - w_y); // reference only
+                    float w0 = (1.f - w_x) * (1.f - w_y);
                     float w1 = w_x * (1.f - w_y);
                     float w2 = (1.f - w_x) * w_y;
                     float w3 = w_x * w_y;
 
                     // Fill into lut
-                    lut_data[idx].weight[0] = w1;
-                    lut_data[idx].weight[1] = w2;
-                    lut_data[idx].weight[2] = w3;
+                    lut_data[idx].weight[0] = w0;
+                    lut_data[idx].weight[1] = w1;
+                    lut_data[idx].weight[2] = w2;
+                    lut_data[idx].weight[3] = w3;
                 }
             }
             else
@@ -262,10 +263,9 @@ static void remap(const k4a_image_t src, const k4a_image_t lut, k4a_image_t dst,
                         continue;
                 }
 
-                dst_data[i] = (uint16_t)(
-                    neighbors[0] * (1.0f - (lut_data[i].weight[0] + lut_data[i].weight[1] + lut_data[i].weight[2])) +
-                    neighbors[1] * lut_data[i].weight[0] + neighbors[2] * lut_data[i].weight[1] +
-                    neighbors[3] * lut_data[i].weight[2] + 0.5f);
+                dst_data[i] = (uint16_t)(neighbors[0] * lut_data[i].weight[0] + neighbors[1] * lut_data[i].weight[1] +
+                                         neighbors[2] * lut_data[i].weight[2] + neighbors[3] * lut_data[i].weight[3] +
+                                         0.5f);
             }
             else
             {
