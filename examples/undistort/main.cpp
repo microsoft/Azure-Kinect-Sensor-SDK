@@ -125,7 +125,7 @@ static pinhole_t create_pinhole_from_xy_range(const k4a_calibration_t *calibrati
         height = calibration->color_camera_calibration.resolution_height;
     }
 
-    float x_min, x_max, y_min, y_max;
+    float x_min = 0, x_max = 0, y_min = 0, y_max = 0;
     compute_xy_range(calibration, K4A_CALIBRATION_TYPE_DEPTH, width, height, x_min, x_max, y_min, y_max);
 
     pinhole_t pinhole;
@@ -318,6 +318,7 @@ int main(int argc, char **argv)
     k4a_image_t lut = NULL;
     k4a_image_t undistorted = NULL;
     interpolation_t interpolation_type = INTERPOLATION_NEARESTNEIGHBOR;
+    pinhole_t pinhole;
 
     if (argc != 3)
     {
@@ -360,7 +361,7 @@ int main(int argc, char **argv)
     }
 
     // Generate a pinhole model for depth camera
-    pinhole_t pinhole = create_pinhole_from_xy_range(&calibration, K4A_CALIBRATION_TYPE_DEPTH);
+    pinhole = create_pinhole_from_xy_range(&calibration, K4A_CALIBRATION_TYPE_DEPTH);
 
     k4a_image_create(K4A_IMAGE_FORMAT_CUSTOM,
                      pinhole.width,
