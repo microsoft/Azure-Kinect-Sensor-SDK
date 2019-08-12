@@ -448,9 +448,7 @@ int main(int argc, char **argv)
     // does a lot of preemptive work to make the transform as fast as possible.
     k4a::transformation main_depth_to_main_color(main_calibration);
 
-    // We're going to update the existing calibration extrinsics on getting from the backup depth camera to the backup
-    // color camera, overwriting it with the transformation to get from the backup depth camera to the main color camera
-    // TODO this needs to be done by constructing a new calibration object, not modifying
+    // Construct a new calibration object to transform from the backup depth camera to the main color camera
     k4a::calibration backup_depth_to_main_color_cal =
         construct_device_to_device_calibration(main_calibration, backup_calibration, tr_backup_depth_to_main_color);
     k4a::transformation backup_depth_to_main_color(backup_depth_to_main_color_cal);
