@@ -13,10 +13,15 @@
     <BaseIntermediateOutputPath>$(K4aBinaryDirectory)\obj\</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(Configuration)\$(Platform)\$(AssemblyName)\</IntermediateOutputPath>-->
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(BaseOutputPath)' == ''">
     <!-- This should happen if we failed to find the Azure Kinect properties file for the given platform. 
-	This will also happen if the platform is AnyCPU and the output path wasn't included. -->
+    This will also happen if the platform is AnyCPU and the output path wasn't included. -->
     <BaseOutputPath>$(MSBuildThisFileDirectory)\Build\$(Configuration)\$(Platform)\</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Prevent .NET Core and .NET Standard projects from generating assembly info from the project.-->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 </Project>

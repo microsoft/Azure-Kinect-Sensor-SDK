@@ -222,6 +222,9 @@ else()
 
 endif()
 
+# Generate .NET Version file.
+configure_file(VersionInfo.cs.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/VersionInfo.cs)
+
 set(TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR})
 
 # CMake doesn't set the target processor correctly for MSVC

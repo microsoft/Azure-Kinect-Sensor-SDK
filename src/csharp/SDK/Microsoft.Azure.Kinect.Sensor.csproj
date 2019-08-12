@@ -13,12 +13,6 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>$(OutputPath)Microsoft.Azure.Kinect.Sensor.xml</DocumentationFile>
-    <Description>Microsoft Azure Kinect Sensor SDK</Description>
-    <Company>Microsoft</Company>
-    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
-    <PackageLicenseExpression>Licensed under the MIT License.</PackageLicenseExpression>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\Microsoft.Azure.Kinect.Sensor.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -27,6 +21,10 @@
     <AdditionalFiles Include="..\stylecop.json">
       <Link>stylecop.json</Link>
     </AdditionalFiles>  
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Include="..\VersionInfo.cs" Link="Properties\VersionInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
