@@ -7,8 +7,8 @@
 #ifndef K4A_PLAYBACK_H
 #define K4A_PLAYBACK_H
 
-#include <k4arecord/types.h>
-#include <k4arecord/k4arecord_export.h>
+#include <k4arecord/types_private.h>
+#include <k4arecord/k4arecord_export_private.h>
 
 #ifdef __cplusplus
 
@@ -38,7 +38,7 @@ extern "C" {
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle);
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_playback_open(const char *path, k4a_playback_t *playback_handle);
 
 /** Get the raw calibration blob for the Azure Kinect device used during recording.
  *
@@ -71,7 +71,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_open(const char *path, k4a_playback_t
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t playback_handle,
                                                                       uint8_t *data,
                                                                       size_t *data_size);
 
@@ -100,7 +100,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playba
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle,
                                                            k4a_calibration_t *calibration);
 
 /** Get the device configuration used during recording.
@@ -124,7 +124,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_calibration(k4a_playback_t playba
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle,
                                                                     k4a_record_configuration_t *config);
 
 /** Checks whether a track with the given track name exists in the playback file
@@ -145,7 +145,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_get_record_configuration(k4a_playback
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT bool k4a_playback_track_check_exists(k4a_playback_t playback_handle, const char *track_name);
+K4ARECORD_PRIVATE_EXPORT bool k4a_playback_track_check_exists(k4a_playback_t playback_handle, const char *track_name);
 
 /** Gets the track video information with the given track name
  *
@@ -168,7 +168,7 @@ K4ARECORD_EXPORT bool k4a_playback_track_check_exists(k4a_playback_t playback_ha
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t playback_handle,
                                                                 const char *track_name,
                                                                 k4a_record_video_info_t *video_info);
 
@@ -206,7 +206,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_track_get_video_info(k4a_playback_t p
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_handle,
                                                                      const char *track_name,
                                                                      char *codec_id,
                                                                      size_t *codec_id_size);
@@ -243,7 +243,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playbac
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_private(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_private(k4a_playback_t playback_handle,
                                                                           const char *track_name,
                                                                           uint8_t *data,
                                                                           size_t *data_size);
@@ -284,7 +284,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_track_get_codec_private(k4a_pl
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playback_handle,
                                                           const char *name,
                                                           char *value,
                                                           size_t *value_size);
@@ -320,7 +320,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playbac
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle,
                                                                 k4a_image_format_t target_format);
 
 /** Reads the attachment from a recording.
@@ -353,7 +353,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t p
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_attachment(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_buffer_result_t k4a_playback_get_attachment(k4a_playback_t playback_handle,
                                                                  const char *file_name,
                                                                  uint8_t *data,
                                                                  size_t *data_size);
@@ -377,7 +377,7 @@ K4ARECORD_EXPORT k4a_buffer_result_t k4a_playback_get_attachment(k4a_playback_t 
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT size_t k4a_playback_track_get_frame_count(k4a_playback_t playback_handle, const char *track_name);
+K4ARECORD_PRIVATE_EXPORT size_t k4a_playback_track_get_frame_count(k4a_playback_t playback_handle, const char *track_name);
 
 /** Queries the frame timestamp based on the frame index from a given track name
  *
@@ -404,7 +404,7 @@ K4ARECORD_EXPORT size_t k4a_playback_track_get_frame_count(k4a_playback_t playba
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT int64_t k4a_playback_track_get_frame_usec_by_index(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT int64_t k4a_playback_track_get_frame_usec_by_index(k4a_playback_t playback_handle,
                                                                     const char *track_name,
                                                                     size_t frame_index);
 
@@ -448,7 +448,7 @@ K4ARECORD_EXPORT int64_t k4a_playback_track_get_frame_usec_by_index(k4a_playback
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_t playback_handle,
                                                                    k4a_capture_t *capture_handle);
 
 /** Read the previous capture in the recording sequence.
@@ -492,7 +492,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_capture(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_stream_result_t k4a_playback_get_previous_capture(k4a_playback_t playback_handle,
                                                                        k4a_capture_t *capture_handle);
 
 /** Read the next IMU sample in the recording sequence.
@@ -529,7 +529,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_capture(k4a_playb
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playback_t playback_handle,
                                                                       k4a_imu_sample_t *imu_sample);
 
 /** Read the previous IMU sample in the recording sequence.
@@ -566,7 +566,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playba
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback_handle,
                                                                           k4a_imu_sample_t *imu_sample);
 
 /** Read the next data block of a track with the given track name.
@@ -606,7 +606,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_pl
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_handle,
                                                                       const char *track_name,
                                                                       k4a_playback_data_block_t *data_block_handle);
 
@@ -647,7 +647,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playba
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback_handle,
                                                                           const char *track_name,
                                                                           k4a_playback_data_block_t *data_block_handle);
 
@@ -692,7 +692,7 @@ K4ARECORD_EXPORT k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_pl
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle,
                                                           int64_t offset_usec,
                                                           k4a_playback_seek_origin_t origin);
 
@@ -717,7 +717,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playbac
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle);
+K4ARECORD_PRIVATE_EXPORT uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle);
 
 /** Closes a recording playback handle.
  *
@@ -736,7 +736,7 @@ K4ARECORD_EXPORT uint64_t k4a_playback_get_last_timestamp_usec(k4a_playback_t pl
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT void k4a_playback_close(k4a_playback_t playback_handle);
+K4ARECORD_PRIVATE_EXPORT void k4a_playback_close(k4a_playback_t playback_handle);
 
 /** Get the data block timestamp in microseconds
  *
@@ -761,7 +761,7 @@ K4ARECORD_EXPORT void k4a_playback_close(k4a_playback_t playback_handle);
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playback_data_block_t data_block_handle);
+K4ARECORD_PRIVATE_EXPORT uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playback_data_block_t data_block_handle);
 
 /** Get the data block buffer size.
  *
@@ -784,7 +784,7 @@ K4ARECORD_EXPORT uint64_t k4a_playback_data_block_get_timestamp_usec(k4a_playbac
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT size_t k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_block_handle);
+K4ARECORD_PRIVATE_EXPORT size_t k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_block_handle);
 
 /** Get the data block buffer.
  *
@@ -807,7 +807,7 @@ K4ARECORD_EXPORT size_t k4a_playback_data_block_get_buffer_size(k4a_playback_dat
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT uint8_t *k4a_playback_data_block_get_buffer(k4a_playback_data_block_t data_block_handle);
+K4ARECORD_PRIVATE_EXPORT uint8_t *k4a_playback_data_block_get_buffer(k4a_playback_data_block_t data_block_handle);
 
 /** Release the data block
  *
@@ -827,7 +827,7 @@ K4ARECORD_EXPORT uint8_t *k4a_playback_data_block_get_buffer(k4a_playback_data_b
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT void k4a_playback_data_block_release(k4a_playback_data_block_t data_block_handle);
+K4ARECORD_PRIVATE_EXPORT void k4a_playback_data_block_release(k4a_playback_data_block_t data_block_handle);
 
 #ifdef __cplusplus
 } // extern "C"

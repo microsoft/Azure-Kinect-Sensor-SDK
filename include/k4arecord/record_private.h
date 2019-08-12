@@ -7,8 +7,8 @@
 #ifndef K4A_RECORD_H
 #define K4A_RECORD_H
 
-#include <k4arecord/types.h>
-#include <k4arecord/k4arecord_export.h>
+#include <k4arecord/types_private.h>
+#include <k4arecord/k4arecord_export_private.h>
 
 #ifdef __cplusplus
 
@@ -55,7 +55,7 @@ extern "C" {
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_create(const char *path,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_create(const char *path,
                                                 k4a_device_t device,
                                                 const k4a_device_configuration_t device_config,
                                                 k4a_record_t *recording_handle);
@@ -89,7 +89,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_create(const char *path,
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, const char *name, const char *value);
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, const char *name, const char *value);
 
 /** Adds the track header for recording IMU.
  *
@@ -112,7 +112,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, 
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_handle);
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_handle);
 
 /** Adds an attachment to the recording. Add attachments need to be added before the recording header is written.
  *
@@ -145,7 +145,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_imu_track(k4a_record_t recording_ha
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recording_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recording_handle,
                                                         const char *file_name,
                                                         const char *tag_name,
                                                         const uint8_t *buffer,
@@ -191,7 +191,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_attachment(const k4a_record_t recor
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t recording_handle,
                                                          const char *track_name,
                                                          const char *codec_id,
                                                          const uint8_t *codec_private,
@@ -235,7 +235,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_video_track(const k4a_record_t reco
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t recording_handle,
                                                             const char *track_name,
                                                             const char *codec_id,
                                                             const uint8_t *codec_private,
@@ -269,7 +269,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_subtitle_track(const k4a_record_t r
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_track_tag(const k4a_record_t recording_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_add_custom_track_tag(const k4a_record_t recording_handle,
                                                               const char *track_name,
                                                               const char *tag_name,
                                                               const char *tag_value);
@@ -295,7 +295,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_add_custom_track_tag(const k4a_record_t
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_write_header(k4a_record_t recording_handle);
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_write_header(k4a_record_t recording_handle);
 
 /** Writes a camera capture to file.
  *
@@ -325,7 +325,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_header(k4a_record_t recording_han
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_handle, k4a_capture_t capture_handle);
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_handle, k4a_capture_t capture_handle);
 
 /** Writes an imu sample to file.
  *
@@ -353,7 +353,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_capture(k4a_record_t recording_ha
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording_handle, k4a_imu_sample_t imu_sample);
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording_handle, k4a_imu_sample_t imu_sample);
 
 /** Writes a custom track data to file.
  *
@@ -388,7 +388,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_imu_sample(k4a_record_t recording
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_record_t recording_handle,
                                                                  const char *track_name,
                                                                  uint64_t timestamp_usec,
                                                                  uint8_t *buffer,
@@ -422,7 +422,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_write_custom_track_data(const k4a_recor
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT k4a_result_t k4a_record_flush(k4a_record_t recording_handle);
+K4ARECORD_PRIVATE_EXPORT k4a_result_t k4a_record_flush(k4a_record_t recording_handle);
 
 /** Closes a recording handle.
  *
@@ -444,7 +444,7 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_flush(k4a_record_t recording_handle);
  * </requirements>
  * \endxmlonly
  */
-K4ARECORD_EXPORT void k4a_record_close(k4a_record_t recording_handle);
+K4ARECORD_PRIVATE_EXPORT void k4a_record_close(k4a_record_t recording_handle);
 
 #ifdef __cplusplus
 } // extern "C"

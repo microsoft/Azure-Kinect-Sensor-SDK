@@ -6,7 +6,7 @@
 #include <sstream>
 
 #include <k4a/k4a.h>
-#include <k4arecord/record.h>
+#include <k4arecord/record_private.h>
 #include <k4ainternal/matroska_write.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/common.h>

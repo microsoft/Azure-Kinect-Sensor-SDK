@@ -7,7 +7,7 @@
 #ifndef RECORD_COMMON_H
 #define RECORD_COMMON_H
 
-#include <k4arecord/types.h>
+#include <k4arecord/types_private.h>
 #include <k4ainternal/handle.h>
 #include <list>
 #include <fstream>
