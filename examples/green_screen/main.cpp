@@ -427,7 +427,7 @@ int main(int argc, char **argv)
     capturer.start_devices(configs);
 
     // This wraps all the device-to-device details
-    Transformation tr_color_backup_to_color_main =
+    Transformation tr_backup_color_to_main_color =
         calibrate_devices(capturer, configs, chessboard_pattern, chessboard_square_length);
 
     k4a::calibration main_calibration = capturer.devices[0].get_calibration(main_config.depth_mode,
@@ -435,14 +435,14 @@ int main(int argc, char **argv)
     k4a::calibration backup_calibration = capturer.devices[1].get_calibration(backup_config.depth_mode,
                                                                               backup_config.color_resolution);
     // Get the transformation from backup depth to backup color using its calibration object
-    Transformation tr_depth_backup_to_color_backup = get_depth_to_color_transformation_from_calibration(
+    Transformation tr_backup_depth_to_backup_color = get_depth_to_color_transformation_from_calibration(
         backup_calibration);
 
     // We now have the backup depth to backup color transform. We also have the transformation from the
     // backup color perspective to the main color perspective from the calibration earlier. Now let's compose the
     // depth backup -> color backup, color backup -> color main into depth backup -> color main
-    Transformation tr_depth_backup_to_color_main = tr_depth_backup_to_color_backup.compose_with(
-        tr_color_backup_to_color_main);
+    Transformation tr_backup_depth_to_main_color = tr_backup_depth_to_backup_color.compose_with(
+        tr_backup_color_to_main_color);
 
     // Now, we're going to set up the transformations. DO THIS OUTSIDE OF YOUR MAIN LOOP! Constructing transformations
     // does a lot of preemptive work to make the transform as fast as possible.
@@ -451,9 +451,9 @@ int main(int argc, char **argv)
     // We're going to update the existing calibration extrinsics on getting from the backup depth camera to the backup
     // color camera, overwriting it with the transformation to get from the backup depth camera to the main color camera
     // TODO this needs to be done by constructing a new calibration object, not modifying
-    k4a::calibration depth_backup_to_color_main_cal =
-        construct_device_to_device_calibration(main_calibration, backup_calibration, tr_depth_backup_to_color_main);
-    k4a::transformation backup_depth_to_main_color(depth_backup_to_color_main_cal);
+    k4a::calibration backup_depth_to_main_color_cal =
+        construct_device_to_device_calibration(main_calibration, backup_calibration, tr_backup_depth_to_main_color);
+    k4a::transformation backup_depth_to_main_color(backup_depth_to_main_color_cal);
 
     while (true)
     {
