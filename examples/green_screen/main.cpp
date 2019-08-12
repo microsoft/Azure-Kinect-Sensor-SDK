@@ -97,12 +97,10 @@ bool find_chessboard_corners_helper(cv::Mat main_color_image,
 {
     bool found_chessboard_main = cv::findChessboardCorners(main_color_image,
                                                            chessboard_pattern,
-                                                           main_chessboard_corners,
-                                                           cv::CALIB_CB_FAST_CHECK);
+                                                           main_chessboard_corners);
     bool found_chessboard_backup = cv::findChessboardCorners(backup_color_image,
                                                              chessboard_pattern,
-                                                             backup_chessboard_corners,
-                                                             cv::CALIB_CB_FAST_CHECK);
+                                                             backup_chessboard_corners);
 
     // Cover the failure cases where chessboards were not found in one or both images.
     if (!found_chessboard_main || !found_chessboard_backup)
