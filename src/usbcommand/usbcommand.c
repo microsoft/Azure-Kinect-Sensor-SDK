@@ -454,6 +454,43 @@ void usb_cmd_destroy(usbcmd_t usbcmd_handle)
     usbcmd_t_destroy(usbcmd_handle);
 }
 
+k4a_buffer_result_t usb_cmd_get_serial_number(usbcmd_t usbcmd_handle, char *serial_number, size_t *serial_number_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, usbcmd_t, usbcmd_handle);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);
+
+    k4a_buffer_result_t result_b = K4A_BUFFER_RESULT_SUCCEEDED;
+    usbcmd_context_t *usbcmd;
+
+    if (K4A_FAILED(K4A_RESULT_FROM_BOOL((usbcmd = usbcmd_t_get_context(usbcmd_handle)) != NULL)))
+    {
+        result_b = K4A_BUFFER_RESULT_FAILED;
+    }
+
+    size_t required_length = strlen((const char *)usbcmd->serial_number) + 1;
+
+    if ((result_b == K4A_BUFFER_RESULT_SUCCEEDED) && (required_length > *serial_number_size))
+    {
+        *serial_number_size = required_length;
+        result_b = K4A_BUFFER_RESULT_TOO_SMALL;
+    }
+
+    if ((result_b == K4A_BUFFER_RESULT_SUCCEEDED) && (serial_number == NULL))
+    {
+        LOG_ERROR("serial_number buffer cannot be NULL", 0);
+        result_b = K4A_BUFFER_RESULT_FAILED;
+    }
+
+    if (result_b == K4A_BUFFER_RESULT_SUCCEEDED)
+    {
+        *serial_number_size = required_length;
+        memset(serial_number, 0, *serial_number_size);
+        memcpy(serial_number, usbcmd->serial_number, required_length - 1);
+        result_b = K4A_BUFFER_RESULT_SUCCEEDED;
+    }
+    return result_b;
+}
+
 /**
  *  Function to handle a command transaction with a sensor module
  *
@@ -901,6 +938,8 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
     libusb_device **dev_list; // pointer to pointer of device, used to retrieve a list of devices
     ssize_t count;            // holding number of devices in list
     int err;
+    uint32_t color_device_count = 0;
+    uint32_t depth_device_count = 0;
 
     if (p_device_count == NULL)
     {
@@ -943,10 +982,17 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
             break;
         }
 
-        //  Just check for one PID assuming the other is in the package
-        if ((desc.idVendor == K4A_MSFT_VID) && (desc.idProduct == K4A_RGB_PID))
+        //  Count how many color or depth end points we find.
+        if (desc.idVendor == K4A_MSFT_VID)
         {
-            *p_device_count += 1;
+            if (desc.idProduct == K4A_RGB_PID)
+            {
+                color_device_count += 1;
+            }
+            else if (desc.idProduct == K4A_DEPTH_PID)
+            {
+                depth_device_count += 1;
+            }
         }
     }
     // free the list, unref the devices in it
@@ -954,6 +1000,9 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
 
     // close the instance
     libusb_exit(NULL);
+
+    // Color or Depth end point my be in a bad state so we cound both and return the larger count
+    *p_device_count = color_device_count > depth_device_count ? color_device_count : depth_device_count;
 
     return result;
 }

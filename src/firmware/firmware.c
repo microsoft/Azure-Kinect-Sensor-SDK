@@ -4,9 +4,6 @@
 // This library
 #include <k4ainternal/firmware.h>
 
-#include <k4ainternal/depth_mcu.h>
-#include <k4ainternal/color_mcu.h>
-
 // Dependent libraries
 #include <azure_c_shared_utility/lock.h>
 
@@ -57,6 +54,7 @@ typedef struct _firmware_context_t
 {
     depthmcu_t depthmcu;
     colormcu_t colormcu;
+    char *serial_number;
     LOCK_HANDLE lock;
 } firmware_context_t;
 
@@ -106,32 +104,96 @@ static uint32_t calculate_crc32(const uint8_t *pData, size_t len)
     return crc;
 }
 
-k4a_result_t firmware_create(uint32_t index, firmware_t *firmware_handle)
+k4a_result_t firmware_create(char *device_serial_number, bool resetting_device, firmware_t *firmware_handle)
 {
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_handle == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device_serial_number == NULL);
+
     firmware_context_t *firmware = NULL;
     const guid_t *container_id = NULL;
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
-
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_handle == NULL);
+    k4a_result_t result = K4A_RESULT_FAILED;
+    uint32_t device_count;
 
     firmware = firmware_t_create(firmware_handle);
     firmware->lock = Lock_Init();
 
-    result = TRACE_CALL(depthmcu_create(index, &firmware->depthmcu));
+    usb_cmd_get_device_count(&device_count);
+    if (device_count == 0)
+    {
+        result = K4A_RESULT_FAILED;
+    }
+
+    for (uint32_t device_index = 0; device_index < device_count; device_index++)
+    {
+        result = TRACE_CALL(depthmcu_create(device_index, &firmware->depthmcu));
+        if (K4A_SUCCEEDED(result))
+        {
+            result = firmware_get_serial_number(NULL, firmware->depthmcu, &firmware->serial_number);
+        }
+
+        if ((K4A_SUCCEEDED(result)) && (strcmp(device_serial_number, firmware->serial_number) == 0))
+        {
+            result = K4A_RESULT_SUCCEEDED;
+            break;
+        }
+
+        if (firmware->serial_number)
+        {
+            firmware_free_serial_number(firmware->serial_number);
+        }
+        if (firmware->depthmcu)
+        {
+            depthmcu_destroy(firmware->depthmcu);
+        }
+        firmware->depthmcu = NULL;
+        firmware->serial_number = NULL;
+        result = K4A_RESULT_FAILED;
+    }
+
     if (K4A_SUCCEEDED(result))
     {
         // Wait until the device is responding correctly...
         result = TRACE_CALL(K4A_RESULT_FROM_BOOL(depthmcu_wait_is_ready(firmware->depthmcu)));
-    }
+        if (K4A_SUCCEEDED(result))
+        {
+            result = K4A_RESULT_FROM_BOOL((container_id = depthmcu_get_container_id(firmware->depthmcu)) != NULL);
+        }
 
-    if (K4A_SUCCEEDED(result))
-    {
-        result = K4A_RESULT_FROM_BOOL((container_id = depthmcu_get_container_id(firmware->depthmcu)) != NULL);
+        if (K4A_SUCCEEDED(result))
+        {
+            result = TRACE_CALL(colormcu_create(container_id, &firmware->colormcu));
+        }
     }
-
-    if (K4A_SUCCEEDED(result))
+    else if (resetting_device) // Search for just the colormcu
     {
-        result = TRACE_CALL(colormcu_create(container_id, &firmware->colormcu));
+        // When resetting the device we only need the depthmcu or the colormcu
+        for (uint32_t device_index = 0; device_index < device_count; device_index++)
+        {
+            result = TRACE_CALL(colormcu_create_by_index(device_index, &firmware->colormcu));
+            if (K4A_SUCCEEDED(result))
+            {
+                result = firmware_get_serial_number(firmware->colormcu, NULL, &firmware->serial_number);
+            }
+
+            if ((K4A_SUCCEEDED(result)) && (strcmp(device_serial_number, firmware->serial_number) == 0))
+            {
+                result = K4A_RESULT_SUCCEEDED;
+                break;
+            }
+
+            if (firmware->serial_number)
+            {
+                firmware_free_serial_number(firmware->serial_number);
+            }
+            if (firmware->colormcu)
+            {
+                colormcu_destroy(firmware->colormcu);
+            }
+            firmware->serial_number = NULL;
+            firmware->colormcu = NULL;
+            result = K4A_RESULT_FAILED;
+            continue;
+        }
     }
 
     if (K4A_FAILED(result))
@@ -157,6 +219,18 @@ void firmware_destroy(firmware_t firmware_handle)
         firmware->depthmcu = NULL;
     }
 
+    if (firmware->colormcu)
+    {
+        colormcu_destroy(firmware->colormcu);
+        firmware->colormcu = NULL;
+    }
+
+    if (firmware->serial_number)
+    {
+        firmware_free_serial_number(firmware->serial_number);
+        firmware->serial_number = NULL;
+    }
+
     Unlock(firmware->lock);
     Lock_Deinit(firmware->lock);
 
@@ -170,6 +244,7 @@ k4a_result_t firmware_download(firmware_t firmware_handle, uint8_t *pFirmwareBuf
 
     k4a_result_t result = K4A_RESULT_FAILED;
     firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware->depthmcu == NULL);
 
     Lock(firmware->lock);
     result = TRACE_CALL(depthmcu_download_firmware(firmware->depthmcu, pFirmwareBuffer, firmwareSize));
@@ -185,6 +260,7 @@ k4a_result_t firmware_get_download_status(firmware_t firmware_handle, firmware_s
     k4a_result_t result = K4A_RESULT_FAILED;
     depthmcu_firmware_update_status_t depthmcu_status = { 0 };
     firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware->depthmcu == NULL);
 
     // NOTE: The spec says this shouldn't be called more frequently than 2Hz.
     result = TRACE_CALL(depthmcu_get_firmware_update_status(firmware->depthmcu, &depthmcu_status));
@@ -206,29 +282,23 @@ k4a_result_t firmware_reset_device(firmware_t firmware_handle)
     LOG_INFO("Issuing reset command to device.", 0);
     k4a_result_t result = K4A_RESULT_FAILED;
     firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware->depthmcu == NULL && firmware->colormcu == NULL);
 
     Lock(firmware->lock);
-    result = TRACE_CALL(colormcu_reset_device(firmware->colormcu));
-    if (K4A_FAILED(result))
+    if (firmware->colormcu)
     {
-        // Failed to issue the reset to the Color MCU, try issuing to the Depth MCU.
+        LOG_INFO("Issuing reset command to Color MCU.", 0);
+        result = TRACE_CALL(colormcu_reset_device(firmware->colormcu));
+    }
+
+    if (K4A_FAILED(result) && firmware->depthmcu)
+    {
         LOG_INFO("Issuing reset command to Depth MCU.", 0);
         result = TRACE_CALL(depthmcu_reset_device(firmware->depthmcu));
     }
+
     Unlock(firmware->lock);
     return result;
-}
-
-k4a_buffer_result_t firmware_get_device_serialnum(firmware_t firmware_handle,
-                                                  char *serial_number,
-                                                  size_t *serial_number_size)
-{
-    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, firmware_t, firmware_handle);
-    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);
-
-    firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
-
-    return TRACE_BUFFER_CALL(depthmcu_get_serialnum(firmware->depthmcu, serial_number, serial_number_size));
 }
 
 k4a_result_t firmware_get_device_version(firmware_t firmware_handle, k4a_hardware_version_t *version)
@@ -240,6 +310,7 @@ k4a_result_t firmware_get_device_version(firmware_t firmware_handle, k4a_hardwar
 
     firmware_context_t *firmware = firmware_t_get_context(firmware_handle);
     depthmcu_firmware_versions_t mcu_version;
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware->depthmcu == NULL);
 
     result = TRACE_CALL(depthmcu_get_version(firmware->depthmcu, &mcu_version));
 
@@ -296,24 +367,22 @@ k4a_result_t firmware_get_device_version(firmware_t firmware_handle, k4a_hardwar
     return result;
 }
 
-k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
-                                    size_t firmware_size,
-                                    firmware_package_info_t *package_info)
+k4a_result_t parse_firmware_package(firmware_package_info_t *package_info)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_buffer == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, firmware_size < sizeof(firmware_package_header_t));
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, package_info == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, package_info->buffer == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, package_info->size < sizeof(firmware_package_header_t));
 
-    const firmware_package_header_t *package_header = (const firmware_package_header_t *)firmware_buffer;
+    const firmware_package_header_t *package_header = (const firmware_package_header_t *)package_info->buffer;
 
     package_info->package_valid = true;
     package_info->signature_type = (k4a_firmware_signature_t)package_header->signature_type;
     package_info->build_config = (k4a_firmware_build_t)package_header->build_configuration;
 
     uint32_t crc = 0;
-    size_t crc_offset = firmware_size - sizeof(crc);
-    memcpy(&crc, firmware_buffer + crc_offset, sizeof(crc));
-    uint32_t calculatedCRC = calculate_crc32(firmware_buffer, crc_offset);
+    size_t crc_offset = package_info->size - sizeof(crc);
+    memcpy(&crc, package_info->buffer + crc_offset, sizeof(crc));
+    uint32_t calculatedCRC = calculate_crc32(package_info->buffer, crc_offset);
     if (crc != calculatedCRC)
     {
         LOG_ERROR("Firmware Package CRC error. original crc: 0x%08X calculated crc: 0x%08X", crc, calculatedCRC);
@@ -356,7 +425,7 @@ k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
     uint32_t certificate_block_start_offset = 0;
     uint16_t certificate_block_length = 0;
 
-    if (package_header->auth_block_start + 6 > firmware_size)
+    if (package_header->auth_block_start + 6 > package_info->size)
     {
         LOG_ERROR("Firmware Package Authentication block not found.", 0);
         package_info->package_valid = false;
@@ -364,13 +433,14 @@ k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
     else
     {
         memcpy(&certificate_block_start_offset,
-               firmware_buffer + package_header->auth_block_start,
+               package_info->buffer + package_header->auth_block_start,
                sizeof(certificate_block_start_offset));
         memcpy(&certificate_block_length,
-               firmware_buffer + package_header->auth_block_start + sizeof(certificate_block_start_offset),
+               package_info->buffer + package_header->auth_block_start + sizeof(certificate_block_start_offset),
                sizeof(certificate_block_length));
 
-        if (certificate_block_length < 1 || (certificate_block_start_offset + certificate_block_length) > firmware_size)
+        if (certificate_block_length < 1 ||
+            (certificate_block_start_offset + certificate_block_length) > package_info->size)
         {
             LOG_ERROR("Firmware Package Authentication invalid.", 0);
             package_info->package_valid = false;
@@ -378,11 +448,70 @@ k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
         else
         {
             uint8_t certificate_type;
-            memcpy(&certificate_type, firmware_buffer + certificate_block_start_offset, sizeof(certificate_type));
+            memcpy(&certificate_type, package_info->buffer + certificate_block_start_offset, sizeof(certificate_type));
 
             package_info->certificate_type = (k4a_firmware_signature_t)certificate_type;
         }
     }
 
     return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t firmware_get_serial_number(colormcu_t color, depthmcu_t depth, char **serial_number)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, color == NULL && depth == NULL);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, serial_number == NULL);
+
+    char *ser_num;
+    size_t serial_number_length = 0;
+    k4a_buffer_result_t b_result;
+
+    // Get the serial_number length
+    if (color)
+    {
+        b_result = colormcu_get_usb_serialnum(color, NULL, &serial_number_length);
+    }
+    else
+    {
+        b_result = depthmcu_get_serialnum(depth, NULL, &serial_number_length);
+    }
+
+    if (b_result != K4A_BUFFER_RESULT_TOO_SMALL)
+    {
+        LOG_ERROR("Failed to get serial number length\n", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    ser_num = malloc(serial_number_length);
+    if (ser_num == NULL)
+    {
+        LOG_ERROR("Failed to allocate memory for serial number (%zu bytes)\n", serial_number_length);
+        return K4A_RESULT_FAILED;
+    }
+
+    if (color)
+    {
+        b_result = colormcu_get_usb_serialnum(color, ser_num, &serial_number_length);
+    }
+    else
+    {
+        b_result = depthmcu_get_serialnum(depth, ser_num, &serial_number_length);
+    }
+
+    if (b_result != K4A_BUFFER_RESULT_SUCCEEDED)
+    {
+        LOG_ERROR("Failed to get serial number: %s\n",
+                  b_result == K4A_BUFFER_RESULT_FAILED ? "K4A_BUFFER_RESULT_FAILED" : "K4A_BUFFER_RESULT_TOO_SMALL");
+        firmware_free_serial_number(ser_num);
+        return K4A_RESULT_FAILED;
+    }
+
+    *serial_number = ser_num;
+    return K4A_RESULT_SUCCEEDED;
+}
+
+void firmware_free_serial_number(char *serial_number)
+{
+    RETURN_VALUE_IF_ARG(VOID_VALUE, serial_number == NULL);
+    free(serial_number);
 }
