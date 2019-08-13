@@ -249,7 +249,7 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
-      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
+      cmake -GNinja "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:
@@ -419,7 +419,7 @@ jobs:
        fi
     displayName: 'Check Line Endings'
 
-  - script: 'cmake -GNinja -DCMAKE_VERBOSE_MAKEFILE=ON "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DCMAKE_TOOLCHAIN_FILE=$(Build.SourcesDirectory)/cmake/toolchains/$(CMakeLinuxTargetTriple).cmake"'
+  - script: 'cmake -GNinja -DCMAKE_VERBOSE_MAKEFILE=ON -DOpenCV_REQUIRED=ON "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DCMAKE_TOOLCHAIN_FILE=$(Build.SourcesDirectory)/cmake/toolchains/$(CMakeLinuxTargetTriple).cmake"'
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
 
@@ -533,7 +533,7 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\doxygenexe
-      cmake -G Ninja "-DK4A_BUILD_DOCS:BOOL=ON" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DSOURCE_BRANCH=$(Build.SourceBranch)" "$(Build.SourcesDirectory)"
+      cmake -GNinja "-DK4A_BUILD_DOCS:BOOL=ON" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED=ON" "-DSOURCE_BRANCH=$(Build.SourceBranch)" "$(Build.SourcesDirectory)"
 
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'

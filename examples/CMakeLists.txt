@@ -11,7 +11,12 @@ add_subdirectory(transformation)
 add_subdirectory(undistort)
 add_subdirectory(viewer)
 
-find_package(OpenCV)
+if (OpenCV_REQUIRED)
+    find_package(OpenCV REQUIRED)
+else ()
+    find_package(OpenCV)
+endif ()
+
 if (OpenCV_FOUND)
     add_subdirectory(green_screen)
     add_subdirectory(opencv_compatibility)
