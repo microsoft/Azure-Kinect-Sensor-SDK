@@ -21,7 +21,7 @@ if (NOT CMAKE_PROJECT_NAME)
 endif()
 
 project(K4A LANGUAGES C CXX
-    VERSION 1.1)
+    VERSION 1.2)
 
 option(K4A_BUILD_DOCS "Build K4A doxygen documentation" OFF)
 option(K4A_MTE_VERSION "Skip FW version check" OFF)
