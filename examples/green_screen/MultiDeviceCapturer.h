@@ -9,8 +9,9 @@
 // This is the maximum difference between when we expected an image's timestamp to be and when it actually occurred.
 constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(50);
 
-struct MultiDeviceCapturer
+class MultiDeviceCapturer
 {
+public:
     // Set up all the devices. Note that the index order isn't necessarily preserved, because we might swap with master
     MultiDeviceCapturer(const vector<int> &device_indices, int32_t color_exposure_usec, int32_t powerline_freq)
     {
@@ -55,23 +56,24 @@ struct MultiDeviceCapturer
     }
 
     // configs[0] should be the master, the rest subordinate
-    void start_devices(const std::vector<k4a_device_configuration_t> &configs)
+    void start_devices(const k4a_device_configuration_t &master_config,
+                       const std::vector<k4a_device_configuration_t> &sub_configs)
     {
-        if (devices.size() != configs.size())
+        if (devices.size() != 1 + sub_configs.size())
         {
-            throw std::runtime_error("Size of configurations not the same as size of devices!");
+            throw std::runtime_error("Size of sub_configs not the same as number of subordinate devices!");
         }
         // Start by starting all of the subordinate devices. They must be started before the master!
-        for (size_t i = 1; i < devices.size(); ++i)
+        for (size_t i = 0; i < sub_configs.size(); ++i)
         {
-            devices[i].start_cameras(&configs[i]);
+            devices[i + 1].start_cameras(&sub_configs[i]);
         }
         // Lastly, start the master device
-        devices[0].start_cameras(&configs[0]);
+        devices[0].start_cameras(&master_config);
     }
 
-    // Blocks until we have synchronized captures stored in the output
-    std::vector<k4a::capture> get_synchronized_captures(const vector<k4a_device_configuration_t> configs,
+    // Blocks until we have synchronized captures stored in the output. First is master, rest are subordinates
+    std::vector<k4a::capture> get_synchronized_captures(const vector<k4a_device_configuration_t> &sub_configs,
                                                         bool compare_sub_depth_instead_of_color = false)
     {
         // Dealing with the synchronized cameras is complex. The Azure Kinect DK:
@@ -103,16 +105,16 @@ struct MultiDeviceCapturer
             k4a::image master_color_image = captures[0].get_color_image();
             std::chrono::microseconds master_color_image_time = master_color_image.get_device_timestamp();
 
-            for (size_t i = 1; i < devices.size(); ++i)
+            for (size_t i = 0; i < sub_configs.size(); ++i)
             {
                 k4a::image sub_image;
                 if (compare_sub_depth_instead_of_color)
                 {
-                    sub_image = captures[i].get_depth_image();
+                    sub_image = captures[i + 1].get_depth_image();
                 }
                 else
                 {
-                    sub_image = captures[i].get_color_image();
+                    sub_image = captures[i + 1].get_color_image();
                 }
 
                 if (master_color_image && sub_image)
@@ -122,8 +124,8 @@ struct MultiDeviceCapturer
                     // delay we configured between the master device color camera and subordinate device color camera
                     std::chrono::microseconds expected_sub_image_time =
                         master_color_image_time +
-                        std::chrono::microseconds{ configs[i].subordinate_delay_off_master_usec } +
-                        std::chrono::microseconds{ configs[i].depth_delay_off_color_usec };
+                        std::chrono::microseconds{ sub_configs[i].subordinate_delay_off_master_usec } +
+                        std::chrono::microseconds{ sub_configs[i].depth_delay_off_color_usec };
                     std::chrono::microseconds sub_image_time_error = sub_image_time - expected_sub_image_time;
                     // The time error's absolute value must be within the permissible range. So, for example, if
                     // MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 2, offsets of -2, -1, 0, 1, and -2 are
@@ -138,7 +140,7 @@ struct MultiDeviceCapturer
                         // the subordinate camera image timestamp was earlier than it is allowed to be. This means the
                         // subordinate is lagging and we need to update the subordinate to get the subordinate caught up
                         std::cout << "Subordinate lagging...\n";
-                        devices[i].get_capture(&captures[i], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+                        devices[i + 1].get_capture(&captures[i + 1], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                         break;
                     }
                     else if (sub_image_time_error > MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP)
@@ -158,7 +160,7 @@ struct MultiDeviceCapturer
                     {
                         // These captures are sufficiently synchronized. If we've gotten to the end, then all are
                         // synchronized.
-                        if (i == devices.size() - 1)
+                        if (i == sub_configs.size() - 1)
                         {
                             have_synced_images = true; // now we'll finish the for loop and then exit the while loop
                         }
@@ -173,7 +175,7 @@ struct MultiDeviceCapturer
                 else if (!sub_image)
                 {
                     std::cout << "Subordinate image was bad!" << endl;
-                    devices[i].get_capture(&captures[i], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+                    devices[i + 1].get_capture(&captures[i + 1], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                     break;
                 }
             }
@@ -182,6 +184,22 @@ struct MultiDeviceCapturer
         return captures;
     }
 
+    const k4a::device &get_master_device() const
+    {
+        return devices[0];
+    }
+
+    const k4a::device &get_subordinate_device_by_index(size_t i) const
+    {
+        // devices[0] is the master. There are only devices.size() - 1 others. So, indices greater or equal are invalid
+        if (i >= devices.size() - 1)
+        {
+            throw std::runtime_error("Subordinate index too large!");
+        }
+        return devices[i + 1];
+    }
+
+private:
     // Once the constuctor finishes, devices[0] will always be the master
     std::vector<k4a::device> devices;
 };

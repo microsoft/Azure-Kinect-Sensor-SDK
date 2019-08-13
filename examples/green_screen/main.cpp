@@ -287,19 +287,21 @@ k4a_device_configuration_t get_secondary_config()
 }
 
 Transformation calibrate_devices(MultiDeviceCapturer &capturer,
-                                 vector<k4a_device_configuration_t> &configs,
+                                 const k4a_device_configuration_t &main_config,
+                                 const k4a_device_configuration_t &secondary_config,
                                  const cv::Size &chessboard_pattern,
                                  float chessboard_square_length)
 {
-    k4a::calibration main_calibration = capturer.devices[0].get_calibration(configs[0].depth_mode,
-                                                                            configs[0].color_resolution);
-    k4a::calibration secondary_calibration = capturer.devices[1].get_calibration(configs[1].depth_mode,
-                                                                                 configs[1].color_resolution);
+    k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode,
+                                                                                     main_config.color_resolution);
+    k4a::calibration secondary_calibration =
+        capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode,
+                                                                    secondary_config.color_resolution);
     vector<vector<cv::Point2f>> main_chessboard_corners_list;
     vector<vector<cv::Point2f>> secondary_chessboard_corners_list;
     while (true)
     {
-        vector<k4a::capture> captures = capturer.get_synchronized_captures(configs);
+        vector<k4a::capture> captures = capturer.get_synchronized_captures({ secondary_config }); // requires vector
         k4a::capture &main_capture = captures[0];
         k4a::capture &secondary_capture = captures[1];
         // get_color_image is guaranteed to be non-null because we use get_synchronized_captures for color
@@ -420,22 +422,20 @@ int main(int argc, char **argv)
     vector<int> device_indices{ 0, 1 };
     MultiDeviceCapturer capturer(device_indices, color_exposure_usec, powerline_freq);
 
-    // Create configurations. Note that the main MUST be first, and the order of indices in device_indices is not
-    // necessarily preserved because the device_indices may not have ordered according to main and secondary
-    vector<k4a_device_configuration_t> configs{ get_main_config(), get_secondary_config() };
-    k4a_device_configuration_t &main_config = configs.front();
-    k4a_device_configuration_t &secondary_config = configs.back();
+    k4a_device_configuration_t main_config = get_main_config();
+    k4a_device_configuration_t secondary_config = get_secondary_config();
 
-    capturer.start_devices(configs);
+    capturer.start_devices(main_config, { secondary_config });
 
     // This wraps all the device-to-device details
     Transformation tr_secondary_color_to_main_color =
-        calibrate_devices(capturer, configs, chessboard_pattern, chessboard_square_length);
+        calibrate_devices(capturer, main_config, secondary_config, chessboard_pattern, chessboard_square_length);
 
-    k4a::calibration main_calibration = capturer.devices[0].get_calibration(main_config.depth_mode,
-                                                                            main_config.color_resolution);
-    k4a::calibration secondary_calibration = capturer.devices[1].get_calibration(secondary_config.depth_mode,
-                                                                                 secondary_config.color_resolution);
+    k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode,
+                                                                                     main_config.color_resolution);
+    k4a::calibration secondary_calibration =
+        capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode,
+                                                                    secondary_config.color_resolution);
     // Get the transformation from secondary depth to secondary color using its calibration object
     Transformation tr_secondary_depth_to_secondary_color = get_depth_to_color_transformation_from_calibration(
         secondary_calibration);
@@ -460,9 +460,8 @@ int main(int argc, char **argv)
 
     while (true)
     {
-        vector<k4a::capture> captures = capturer.get_synchronized_captures(configs, true); // This is to get the depth
-                                                                                           // image for the secondary,
-                                                                                           // not the color
+        // The extra argument is to get the depth image on the secondary device, not the color
+        vector<k4a::capture> captures = capturer.get_synchronized_captures({ secondary_config }, true);
         k4a::image main_color_image = captures[0].get_color_image();
         k4a::image main_depth_image = captures[0].get_depth_image();
         k4a::image secondary_depth_image = captures[1].get_depth_image();
