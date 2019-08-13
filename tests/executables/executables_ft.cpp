@@ -235,7 +235,7 @@ TEST_F(executables_ft, undistort)
 {
     const std::string undistort_path = PATH_TO_BIN("undistort");
     const std::string undistort_write_file = TEST_TEMP_DIR + "/undistort-record.csv";
-    ASSERT_EQ(run_and_record_executable(undistort_path + " " + undistort_write_file, ""), EXIT_SUCCESS);
+    ASSERT_EQ(run_and_record_executable(undistort_path + " 2 " + undistort_write_file, ""), EXIT_SUCCESS);
 
     std::ifstream undistort_results(undistort_write_file);
     // don't bother checking the csv file- just make sure it's there

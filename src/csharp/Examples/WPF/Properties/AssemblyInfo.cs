@@ -13,7 +13,6 @@ using System.Windows;
 // associated with an assembly.
 [assembly: AssemblyTitle("Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer")]
 [assembly: AssemblyDescription("")]
-[assembly: AssemblyProduct("Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components. If you need to access a type in this assembly from

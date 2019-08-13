@@ -62,6 +62,27 @@ k4a_result_t colormcu_create(const guid_t *container_id, colormcu_t *colormcu_ha
     return result;
 }
 
+k4a_result_t colormcu_create_by_index(uint32_t device_index, colormcu_t *colormcu_handle)
+{
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, colormcu_handle == NULL);
+
+    colormcu_context_t *colormcu = colormcu_t_create(colormcu_handle);
+    k4a_result_t result = K4A_RESULT_FROM_BOOL(colormcu != NULL);
+
+    if (K4A_SUCCEEDED(result))
+    {
+        result = TRACE_CALL(usb_cmd_create(USB_DEVICE_COLOR_IMU_PROCESSOR, device_index, NULL, &colormcu->usb_cmd));
+    }
+
+    if (K4A_FAILED(result))
+    {
+        colormcu_destroy(*colormcu_handle);
+        *colormcu_handle = NULL;
+    }
+
+    return result;
+}
+
 void colormcu_destroy(colormcu_t colormcu_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(VOID_VALUE, colormcu_t, colormcu_handle);
@@ -74,6 +95,17 @@ void colormcu_destroy(colormcu_t colormcu_handle)
     }
 
     colormcu_t_destroy(colormcu_handle);
+}
+
+k4a_buffer_result_t colormcu_get_usb_serialnum(colormcu_t colormcu_handle,
+                                               char *serial_number,
+                                               size_t *serial_number_size)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_BUFFER_RESULT_FAILED, colormcu_t, colormcu_handle);
+    RETURN_VALUE_IF_ARG(K4A_BUFFER_RESULT_FAILED, serial_number_size == NULL);
+    colormcu_context_t *colormcu = colormcu_t_get_context(colormcu_handle);
+
+    return usb_cmd_get_serial_number(colormcu->usb_cmd, serial_number, serial_number_size);
 }
 
 /**

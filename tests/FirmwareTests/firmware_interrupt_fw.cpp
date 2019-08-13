@@ -93,14 +93,6 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, g_connection_exerciser->set_usb_port(g_k4a_port_number));
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, open_firmware_device(&firmware_handle));
 
-    ASSERT_EQ(K4A_BUFFER_RESULT_TOO_SMALL, firmware_get_device_serialnum(firmware_handle, NULL, &serial_number_length));
-
-    serial_number = (char *)malloc(serial_number_length);
-    ASSERT_NE(nullptr, serial_number);
-
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-              firmware_get_device_serialnum(firmware_handle, serial_number, &serial_number_length));
-
     // Update to the Candidate firmware
     printf("\n == Updating the device to the Candidate firmware.\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -229,8 +221,6 @@ TEST_P(firmware_interrupt_fw, interrupt_update)
                                     g_lkg_firmware_size,
                                     g_lkg_firmware_package_info,
                                     false));
-
-    ASSERT_TRUE(compare_device_serial_number(firmware_handle, serial_number));
 }
 
 static struct firmware_interrupt_parameters tests_interrupt_reboot[] = {
