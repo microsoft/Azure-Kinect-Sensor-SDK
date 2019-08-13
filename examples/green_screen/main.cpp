@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include <chrono>
-#include <getopt.h>
 
 #include <k4a/k4a.hpp>
 #include <opencv2/calib3d.hpp>
@@ -27,7 +26,7 @@ constexpr uint32_t MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC = 160;
 cv::Mat color_to_opencv(const k4a::image &im)
 {
     // TODO this only handles mjpg
-    cv::Mat raw_data(1, im.get_size(), CV_8UC1, (void *)im.get_buffer());
+    cv::Mat raw_data(1, (int)im.get_size(), CV_8UC1, (void *)im.get_buffer());
     cv::Mat decoded = cv::imdecode(raw_data, cv::IMREAD_COLOR);
     return decoded;
 }
@@ -336,6 +335,11 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                       chessboard_pattern,
                                       chessboard_square_length);
         }
+
+        cv::imshow("Chessboard view from main camera", cv_main_color_image);
+        cv::waitKey(1);
+        cv::imshow("Chessboard view from backup camera", cv_backup_color_image);
+        cv::waitKey(1);
     }
 }
 
@@ -353,45 +357,37 @@ int main(int argc, char **argv)
     int32_t color_exposure_usec = 8000;  // somewhat reasonable default exposure time
     int32_t powerline_freq = 2;          // default to a 60 Hz powerline
     cv::Size chessboard_pattern(0, 0);   // height, width. Both need to be set.
+    uint16_t depth_threshold = 1000;     // default to 1 meter
 
-    static struct option long_options[] = { { "board-height", required_argument, 0, 'h' },
-                                            { "board-width", required_argument, 0, 'w' },
-                                            { "board-square-length", required_argument, 0, 's' },
-                                            { "powerline-frequency", required_argument, 0, 'f' },
-                                            { "color-exposure", required_argument, 0, 'e' },
-                                            { "depth-threshold", required_argument, 0, 't' },
-                                            { 0, 0, 0, 0 } };
-    int option_index = 0;
-    int input_opt = 0;
-    uint16_t depth_threshold = 1000; // default to 1 meter
-    while ((input_opt = getopt_long(argc, argv, "h:w:s:f:e:t:", long_options, &option_index)) != -1)
+    vector<int> device_indices{ 0, 1 }; // Set up a MultiDeviceCapturer to handle getting many synchronous captures
+                                        // Note that the master MUST be first, and the order of indices in
+                                        // device_indices is not necessarily preserved because the device_indices may
+                                        // not have ordered according to main and backup
+
+    if (argc < 3)
     {
-        switch (input_opt)
+        printf("Usage: green_screen "
+               "<board-height> <board-width> <board-square-length> "
+               "[powerline-frequency (default 60)] [color-exposure-time-usec (default 8000)] "
+               "[depth-threshold-mm (default 1000)]");
+    }
+    else
+    {
+        chessboard_pattern.height = atoi(argv[1]);
+        chessboard_pattern.width = atoi(argv[2]);
+        chessboard_square_length = (float)atof(argv[3]);
+
+        if (argc > 4)
         {
-        case 'h':
-            chessboard_pattern.height = std::stoi(optarg);
-            break;
-        case 'w':
-            chessboard_pattern.width = std::stoi(optarg);
-            break;
-        case 's':
-            chessboard_square_length = std::stof(optarg);
-            break;
-        case 'f':
-            powerline_freq = std::stoi(optarg);
-            break;
-        case 'e':
-            color_exposure_usec = std::stoi(optarg);
-            break;
-        case 't':
-            depth_threshold = std::stoi(optarg);
-            break;
-        case '?':
-            throw std::runtime_error("Incorrect arguments");
-            break;
-        default:
-            throw std::runtime_error(std::string("getopt returned unexpected character code, ") +
-                                     std::to_string(input_opt));
+            powerline_freq = atoi(argv[4]);
+            if (argc > 5)
+            {
+                color_exposure_usec = atoi(argv[5]);
+                if (argc > 6)
+                {
+                    depth_threshold = (uint16_t)atoi(argv[6]);
+                }
+            }
         }
     }
 
@@ -418,12 +414,12 @@ int main(int argc, char **argv)
         throw std::runtime_error("Exactly 2 cameras are required!");
     }
 
-    // Set up a MultiDeviceCapturer to handle getting many synchronous captures
-    vector<int> device_indices{ 0, 1 };
     MultiDeviceCapturer capturer(device_indices, color_exposure_usec, powerline_freq);
 
-    k4a_device_configuration_t main_config = get_main_config();
-    k4a_device_configuration_t secondary_config = get_secondary_config();
+    // Create configurations for devices
+    vector<k4a_device_configuration_t> configs{ get_main_config(), get_backup_config() };
+    k4a_device_configuration_t &main_config = configs.front();
+    k4a_device_configuration_t &backup_config = configs.back();
 
     capturer.start_devices(main_config, { secondary_config });
 
