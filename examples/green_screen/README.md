@@ -20,7 +20,7 @@ TODO add images
 
 This example requires OpenCV to be installed to build. TODO make this example, and OpenCV at large, optional in CMake
 
-### Installation Instructions
+### OpenCV Installation Instructions
 
 #### Linux
 

@@ -12,7 +12,7 @@ sudo apt update
 # Install tools needed to build
 sudo apt install -y \
     clang \
-    cmake
+    cmake \
     doxygen \
     g++-multilib \
     gcc-multilib \
@@ -20,7 +20,7 @@ sudo apt install -y \
     nasm \
     ninja-build \
     pkg-config \
-    python3 \
+    python3
 
 # Install libraries needed to build
 sudo apt install -y \
