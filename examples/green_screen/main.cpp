@@ -26,7 +26,7 @@ constexpr uint32_t MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC = 160;
 cv::Mat color_to_opencv(const k4a::image &im)
 {
     // TODO this only handles mjpg
-    cv::Mat raw_data(1, (int)im.get_size(), CV_8UC1, (void *)im.get_buffer());
+    cv::Mat raw_data(1, static_cast<int>(im.get_size()), CV_8UC1, (void *)im.get_buffer());
     cv::Mat decoded = cv::imdecode(raw_data, cv::IMREAD_COLOR);
     return decoded;
 }
@@ -100,8 +100,8 @@ vector<float> calibration_to_color_camera_dist_coeffs(const k4a::calibration &ca
 }
 
 // Takes the images by value so we can change them when shown.
-bool find_chessboard_corners_helper(cv::Mat main_color_image,
-                                    cv::Mat secondary_color_image,
+bool find_chessboard_corners_helper(const cv::Mat &main_color_image,
+                                    const cv::Mat &secondary_color_image,
                                     const cv::Size &chessboard_pattern,
                                     vector<cv::Point2f> &main_chessboard_corners,
                                     vector<cv::Point2f> &secondary_chessboard_corners)
@@ -163,15 +163,6 @@ bool find_chessboard_corners_helper(cv::Mat main_color_image,
     {
         std::reverse(secondary_chessboard_corners.begin(), secondary_chessboard_corners.end());
     }
-
-    // Comment out this section to not show the calibration output
-    cv::drawChessboardCorners(main_color_image, chessboard_pattern, main_chessboard_corners, true);
-    cv::drawChessboardCorners(secondary_color_image, chessboard_pattern, secondary_chessboard_corners, true);
-    cv::imshow("Chessboard view from main camera", main_color_image);
-    cv::waitKey(1);
-    cv::imshow("Chessboard view from secondary camera", secondary_color_image);
-    cv::waitKey(1);
-
     return true;
 }
 
@@ -321,7 +312,14 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
         {
             main_chessboard_corners_list.emplace_back(main_chessboard_corners);
             secondary_chessboard_corners_list.emplace_back(secondary_chessboard_corners);
+            cv::drawChessboardCorners(cv_main_color_image, chessboard_pattern, main_chessboard_corners, true);
+            cv::drawChessboardCorners(cv_secondary_color_image, chessboard_pattern, secondary_chessboard_corners, true);
         }
+
+        cv::imshow("Chessboard view from main camera", cv_main_color_image);
+        cv::waitKey(1);
+        cv::imshow("Chessboard view from secondary camera", cv_secondary_color_image);
+        cv::waitKey(1);
 
         // Get 20 frames before doing calibration.
         if (main_chessboard_corners_list.size() >= 20)
@@ -335,11 +333,6 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                       chessboard_pattern,
                                       chessboard_square_length);
         }
-
-        cv::imshow("Chessboard view from main camera", cv_main_color_image);
-        cv::waitKey(1);
-        cv::imshow("Chessboard view from backup camera", cv_backup_color_image);
-        cv::waitKey(1);
     }
 }
 
@@ -360,32 +353,33 @@ int main(int argc, char **argv)
     uint16_t depth_threshold = 1000;     // default to 1 meter
 
     vector<int> device_indices{ 0, 1 }; // Set up a MultiDeviceCapturer to handle getting many synchronous captures
-                                        // Note that the master MUST be first, and the order of indices in
-                                        // device_indices is not necessarily preserved because the device_indices may
-                                        // not have ordered according to main and backup
+                                        // Note that the order of indices in device_indices is not necessarily preserved
+                                        // because MultiDeviceCapturer tries to find the master device based on which
+                                        // one has sync out plugged in.
 
-    if (argc < 3)
+    if (argc < 4)
     {
-        printf("Usage: green_screen "
-               "<board-height> <board-width> <board-square-length> "
-               "[powerline-frequency (default 60)] [color-exposure-time-usec (default 8000)] "
-               "[depth-threshold-mm (default 1000)]");
+        cout << "Usage: green_screen <board-height> <board-width> <board-square-length> "
+                "[depth-threshold-mm (default 1000)] [color-exposure-time-usec (default 8000)] "
+                "[powerline-frequency-mode (default 2 for 60 Hz)]"
+             << endl;
+        throw(std::runtime_error("Not enough arguments!"));
     }
     else
     {
         chessboard_pattern.height = atoi(argv[1]);
         chessboard_pattern.width = atoi(argv[2]);
-        chessboard_square_length = (float)atof(argv[3]);
+        chessboard_square_length = static_cast<float>(atof(argv[3]));
 
         if (argc > 4)
         {
-            powerline_freq = atoi(argv[4]);
+            depth_threshold = static_cast<uint16_t>(atoi(argv[4]));
             if (argc > 5)
             {
                 color_exposure_usec = atoi(argv[5]);
                 if (argc > 6)
                 {
-                    depth_threshold = (uint16_t)atoi(argv[6]);
+                    powerline_freq = atoi(argv[6]);
                 }
             }
         }
@@ -393,19 +387,21 @@ int main(int argc, char **argv)
 
     if (chessboard_pattern.height == 0)
     {
-        throw std::runtime_error("Chessboard height is not properly set! Use -h");
+        throw std::runtime_error("Chessboard height is not properly set!");
     }
     if (chessboard_pattern.width == 0)
     {
-        throw std::runtime_error("Chessboard height is not properly set! Use -w");
+        throw std::runtime_error("Chessboard height is not properly set!");
     }
     if (chessboard_square_length == 0.)
     {
-        throw std::runtime_error("Chessboard square size is not properly set! Use -s");
+        throw std::runtime_error("Chessboard square size is not properly set!");
     }
 
     cout << "Chessboard height: " << chessboard_pattern.height << ". Chessboard width: " << chessboard_pattern.width
          << ". Chessboard square length: " << chessboard_square_length << endl;
+    cout << "Depth threshold: : " << depth_threshold << ". Color exposure time: " << color_exposure_usec
+         << ". Powerline frequency mode: " << powerline_freq << endl;
 
     // Require 2 cameras
     const int num_devices = k4a::device::get_installed_count();
@@ -417,9 +413,8 @@ int main(int argc, char **argv)
     MultiDeviceCapturer capturer(device_indices, color_exposure_usec, powerline_freq);
 
     // Create configurations for devices
-    vector<k4a_device_configuration_t> configs{ get_main_config(), get_backup_config() };
-    k4a_device_configuration_t &main_config = configs.front();
-    k4a_device_configuration_t &backup_config = configs.back();
+    k4a_device_configuration_t main_config = get_main_config();
+    k4a_device_configuration_t secondary_config = get_secondary_config();
 
     capturer.start_devices(main_config, { secondary_config });
 

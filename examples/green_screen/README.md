@@ -36,9 +36,10 @@ You should now be ready to build the SDK normally, which should build this examp
 
 ## Running the program
 
-TODO better explanation of the command line arguments.
-
-I've been running `./bin/green_screen -h 8 -w 6 -s 33 --color-exposure 4000 -t 1000`. h is chessboard height, w width, s is calibration board square side length in millimeters, color-exposure is...color exposure (usec), and t is threshold (in millimeters) past which the example paints the image green.
+Run the `green_screen` executable in the `bin` folder with no arguments for usage details and defaults. The first
+argument is chessboard height, the second is chessboard width, and third is calibration board square side length in
+millimeters. The next three are optional: the fourth is the threshold (in millimeters) past which the example paints the
+image green, the fifth is the color camera exposure time in usec, and the sixth is the powerline frequency mode.
 
 ## A Note on Calibration
 
