@@ -193,7 +193,7 @@ k4a_result_t parse_mkv(k4a_playback_context_t *context)
                     if (check_element_type(e, &seek))
                     {
                         KaxSeekID &seek_id = GetChild<KaxSeekID>(*seek);
-                        EbmlId ebml_id(seek_id.GetBuffer(), (const unsigned int)seek_id.GetSize());
+                        EbmlId ebml_id(seek_id.GetBuffer(), (unsigned int)seek_id.GetSize());
                         int64_t seek_location = seek->Location();
                         assert(seek_location >= 0);
                         match_ebml_id(context, ebml_id, (uint64_t)seek_location);
