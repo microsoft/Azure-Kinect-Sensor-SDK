@@ -31,10 +31,11 @@ typedef enum
 {
     INTERPOLATION_NEARESTNEIGHBOR, /**< Nearest neighbor interpolation */
     INTERPOLATION_BILINEAR,        /**< Bilinear interpolation */
-    INTERPOLATION_BILINEAR_CUSTOM  /**< Bilinear interpolation with invalidation when neighbor contain invalid
-                                                data with value 0 */
+    INTERPOLATION_BILINEAR_DEPTH   /**< Bilinear interpolation with invalidation when neighbor contain invalid
+                                                 data with value 0 */
 } interpolation_t;
 
+// Compute a conservative bounding box on the unit plane in which all the points have valid projections
 static void compute_xy_range(const k4a_calibration_t *calibration,
                              const k4a_calibration_type_t camera,
                              const int width,
@@ -183,7 +184,7 @@ static void create_undistortion_lut(const k4a_calibration_t *calibration,
                 src.x = (int)floorf(distorted.xy.x + 0.5f);
                 src.y = (int)floorf(distorted.xy.y + 0.5f);
             }
-            else if (type == INTERPOLATION_BILINEAR || type == INTERPOLATION_BILINEAR_CUSTOM)
+            else if (type == INTERPOLATION_BILINEAR || type == INTERPOLATION_BILINEAR_DEPTH)
             {
                 // Remapping via bilinear interpolation
                 src.x = (int)floorf(distorted.xy.x);
@@ -199,7 +200,7 @@ static void create_undistortion_lut(const k4a_calibration_t *calibration,
             {
                 lut_data[idx] = src;
 
-                if (type == INTERPOLATION_BILINEAR || type == INTERPOLATION_BILINEAR_CUSTOM)
+                if (type == INTERPOLATION_BILINEAR || type == INTERPOLATION_BILINEAR_DEPTH)
                 {
                     // Compute the floating point weights, using the distance from projected point src to the
                     // image coordinate of the upper left neighbor
@@ -246,7 +247,7 @@ static void remap(const k4a_image_t src, const k4a_image_t lut, k4a_image_t dst,
             {
                 dst_data[i] = src_data[lut_data[i].y * src_width + lut_data[i].x];
             }
-            else if (type == INTERPOLATION_BILINEAR || type == INTERPOLATION_BILINEAR_CUSTOM)
+            else if (type == INTERPOLATION_BILINEAR || type == INTERPOLATION_BILINEAR_DEPTH)
             {
                 const uint16_t neighbors[4]{ src_data[lut_data[i].y * src_width + lut_data[i].x],
                                              src_data[lut_data[i].y * src_width + lut_data[i].x + 1],
@@ -257,7 +258,7 @@ static void remap(const k4a_image_t src, const k4a_image_t lut, k4a_image_t dst,
                 // interpolation for current target pixel if one of the neighbors contains invalid data to avoid
                 // introduce noise on the edge. If the image is color or ir images, user should use
                 // INTERPOLATION_BILINEAR
-                if (type == INTERPOLATION_BILINEAR_CUSTOM)
+                if (type == INTERPOLATION_BILINEAR_DEPTH)
                 {
                     if (neighbors[0] == 0 || neighbors[1] == 0 || neighbors[2] == 0 || neighbors[3] == 0)
                         continue;
