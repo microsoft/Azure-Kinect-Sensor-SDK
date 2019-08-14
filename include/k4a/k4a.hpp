@@ -734,8 +734,11 @@ struct calibration : public k4a_calibration_t
                                     k4a_color_resolution_t target_color_resolution)
     {
         calibration calib;
-        k4a_result_t result =
-            k4a_calibration_get_from_raw(raw_calibration, raw_calibration_size, target_depth_mode, target_color_resolution, &calib);
+        k4a_result_t result = k4a_calibration_get_from_raw(raw_calibration,
+                                                           raw_calibration_size,
+                                                           target_depth_mode,
+                                                           target_color_resolution,
+                                                           &calib);
 
         if (K4A_RESULT_SUCCEEDED != result)
         {
