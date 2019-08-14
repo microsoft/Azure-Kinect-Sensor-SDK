@@ -1257,6 +1257,27 @@ static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = { K
                                                                                0,
                                                                                false };
 
+/** Initial default configuration setting.
+ *
+ * \remarks
+ * Use this setting to initialize a \ref k4a_device_configuration_t to a default state.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DEFAULT = { K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                                                                           K4A_COLOR_RESOLUTION_720P,
+                                                                           K4A_DEPTH_MODE_NFOV_UNBINNED,
+                                                                           K4A_FRAMES_PER_SECOND_30,
+                                                                           true,
+                                                                           0,
+                                                                           K4A_WIRED_SYNC_MODE_STANDALONE,
+                                                                           0,
+                                                                           false };
+
 /**
  * @}
  */
