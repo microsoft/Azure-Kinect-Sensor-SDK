@@ -223,15 +223,19 @@ jobs:
           return $path
       }
 
-      # Download OpenCV
-      $url = "https://sourceforge.net/projects/opencvlibrary/files/opencv-win/3.2.0/opencv-3.2.0-vc14.exe/download"
-      $filename = "opencv-3.2.0-vc14.exe"
-      $opencv_exe = Download-ToTemp -url $url -filename $filename
+      if ([Environment]::Is64BitOperatingSystem) # only install OpenCV on 64-bit systems
+      {
+          # Download OpenCV
+          $url = "https://sourceforge.net/projects/opencvlibrary/files/opencv-win/3.2.0/opencv-3.2.0-vc14.exe/download"
+          $filename = "opencv-3.2.0-vc14.exe"
+          $opencv_exe = Download-ToTemp -url $url -filename $filename
 
-      Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
-      Write-Host "##vso[task.setvariable variable=OPENCV_DIR;]C:\OpenCV\Build\x64\vc14\";
-      Write-Host "##vso[task.setvariable variable=PATH;]${env:PATH};${env:OPENCV_DIR}\bin";
-      Write-Host "OpenCV installed."
+          Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
+          Write-Host "##vso[task.setvariable variable=OPENCV_DIR;]C:\OpenCV\Build\x64\vc14\";
+          Write-Host "##vso[task.setvariable variable=PATH;]${env:PATH};${env:OPENCV_DIR}\bin";
+          Write-Host "OpenCV installed."
+      }
+
 
     displayName: 'Install OpenCV'
     workingDirectory: '$(Build.BinariesDirectory)'
