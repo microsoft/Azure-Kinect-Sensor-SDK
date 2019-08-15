@@ -730,12 +730,15 @@ struct calibration : public k4a_calibration_t
      */
     static calibration get_from_raw(char *raw_calibration,
                                     size_t raw_calibration_size,
-                                    k4a_depth_mode_t depth_mode,
-                                    k4a_color_resolution_t color_resolution)
+                                    k4a_depth_mode_t target_depth_mode,
+                                    k4a_color_resolution_t target_color_resolution)
     {
         calibration calib;
-        k4a_result_t result =
-            k4a_calibration_get_from_raw(raw_calibration, raw_calibration_size, depth_mode, color_resolution, &calib);
+        k4a_result_t result = k4a_calibration_get_from_raw(raw_calibration,
+                                                           raw_calibration_size,
+                                                           target_depth_mode,
+                                                           target_color_resolution,
+                                                           &calib);
 
         if (K4A_RESULT_SUCCEEDED != result)
         {
@@ -751,13 +754,13 @@ struct calibration : public k4a_calibration_t
      */
     static calibration get_from_raw(uint8_t *raw_calibration,
                                     size_t raw_calibration_size,
-                                    k4a_depth_mode_t depth_mode,
-                                    k4a_color_resolution_t color_resolution)
+                                    k4a_depth_mode_t target_depth_mode,
+                                    k4a_color_resolution_t target_color_resolution)
     {
         return get_from_raw(reinterpret_cast<char *>(raw_calibration),
                             raw_calibration_size,
-                            depth_mode,
-                            color_resolution);
+                            target_depth_mode,
+                            target_color_resolution);
     }
 
     /** Get the camera calibration for a device from a raw calibration blob.
@@ -766,13 +769,13 @@ struct calibration : public k4a_calibration_t
      * \sa k4a_calibration_get_from_raw
      */
     static calibration get_from_raw(std::vector<uint8_t> &raw_calibration,
-                                    k4a_depth_mode_t depth_mode,
-                                    k4a_color_resolution_t color_resolution)
+                                    k4a_depth_mode_t target_depth_mode,
+                                    k4a_color_resolution_t target_color_resolution)
     {
         return get_from_raw(reinterpret_cast<char *>(raw_calibration.data()),
                             raw_calibration.size(),
-                            depth_mode,
-                            color_resolution);
+                            target_depth_mode,
+                            target_color_resolution);
     }
 };
 
