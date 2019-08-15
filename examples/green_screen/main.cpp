@@ -28,6 +28,10 @@ cv::Mat color_to_opencv(const k4a::image &im)
     // TODO this only handles mjpg
     cv::Mat raw_data(1, static_cast<int>(im.get_size()), CV_8UC1, (void *)im.get_buffer());
     cv::Mat decoded = cv::imdecode(raw_data, cv::IMREAD_COLOR);
+    if (decoded.data == nullptr)
+    {
+        throw std::runtime_error("Decoding image failed!");
+    }
     return decoded;
 }
 
