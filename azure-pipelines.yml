@@ -229,7 +229,8 @@ jobs:
       $opencv_exe = Download-ToTemp -url $url -filename $filename
 
       Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
-      setx OPENCV_DIR C:\OpenCV\Build\x64\vc14
+      Write-Host "##vso[task.setvariable variable=OPENCV_DIR;]C:\OpenCV\Build\x64\vc14\";
+      Write-Host "##vso[task.setvariable variable=PATH;]${env:PATH};${env:OPENCV_DIR}\bin";
       Write-Host "OpenCV installed."
 
     displayName: 'Install OpenCV'
@@ -280,8 +281,6 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
-      set PATH=%PATH%;%OPENCV_DIR%\bin
-      # TODO HERE
       cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED=ON"  "-DOpenCV_DIR=%OPENCV_DIR%\lib" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
@@ -566,9 +565,7 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\doxygenexe
-      set PATH=%PATH%;%OPENCV_DIR%\bin
-      # TODO HERE
-      cmake -G Ninja "-DK4A_BUILD_DOCS:BOOL=ON" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED=ON" "-DOpenCV_DIR=%OPENCV_DIR%\lib" "-DSOURCE_BRANCH=$(Build.SourceBranch)" "$(Build.SourcesDirectory)"
+      cmake -G Ninja "-DK4A_BUILD_DOCS:BOOL=ON" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DSOURCE_BRANCH=$(Build.SourceBranch)" "$(Build.SourcesDirectory)"
 
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
