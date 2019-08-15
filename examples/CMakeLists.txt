@@ -13,7 +13,7 @@ add_subdirectory(viewer)
 
 if (OpenCV_REQUIRED_IF_X64 AND TARGET_ARCH EQUAL "x64")
     find_package(OpenCV REQUIRED)
-else ()
+else if (TARGET_ARCH EQUAL "x64")
     find_package(OpenCV)
 endif ()
 
