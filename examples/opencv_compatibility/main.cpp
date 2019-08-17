@@ -8,8 +8,6 @@
 #include <vector>
 using namespace std;
 
-// #define HAVE_OPENCV
-#ifdef HAVE_OPENCV
 #include "opencv2/core.hpp"
 #include "opencv2/calib3d.hpp"
 using namespace cv;
@@ -82,7 +80,6 @@ int main(int argc, char ** /*argv*/)
                                  &valid);
     }
 
-#ifdef HAVE_OPENCV
     // converting the calibration data to OpenCV format
     // extrinsic transformation from color to depth camera
     Mat se3 =
