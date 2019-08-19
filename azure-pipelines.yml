@@ -247,7 +247,7 @@ jobs:
 
     displayName: 'Install OpenCV'
     workingDirectory: '$(Build.BinariesDirectory)'
-    condition: $(UsesOpenCV)
+    condition: variables['UsesOpenCV']
 
   - powershell: |
       $ErrorActionPreference = "Stop"
