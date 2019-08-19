@@ -294,12 +294,12 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
-      opencv_flag = ""
-      if ($(UsesOpenCV))
-      {
-          opencv_flag = "-DOpenCV_REQUIRED=ON"  
-      }
-      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" $(opencv_flag) "-DOpenCV_DIR=%OPENCV_DIR%\lib" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
+      if $(UsesOpenCV) == "TRUE" (
+        set opencv_flag=-DOpenCV_REQUIRED=ON
+      ) else (
+        set opencv_flag=-DOpenCV_REQUIRED=OFF
+      )
+      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" %opencv_flag% "-DOpenCV_DIR=%OPENCV_DIR%\lib" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:
