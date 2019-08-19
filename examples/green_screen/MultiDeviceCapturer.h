@@ -16,6 +16,10 @@ public:
     MultiDeviceCapturer(const vector<int> &device_indices, int32_t color_exposure_usec, int32_t powerline_freq)
     {
         bool master_found = false;
+        if (device_indices.size() == 0)
+        {
+            throw std::runtime_error("Capturer must be passed at least one camera!");
+        }
         for (int i : device_indices)
         {
             devices.emplace_back(k4a::device::open(i)); // construct a device using this index
@@ -30,8 +34,8 @@ public:
                                              K4A_COLOR_CONTROL_MODE_MANUAL,
                                              powerline_freq);
             // We treat the first device found with a sync out cable attached as the master. If it's not supposed to be,
-            // unplug the cable from it.
-            if (devices.back().is_sync_out_connected() && !master_found)
+            // unplug the cable from it. Also, if there's only one device, just use it
+            if ((devices.back().is_sync_out_connected() && !master_found) || device_indices.size() == 1)
             {
                 // If this isn't already the first and only device, make it the first
                 if (devices.size() > 1)
@@ -93,10 +97,21 @@ public:
 
         // The captures used in the loop are outside of it so that they can persist across loop iterations. This is
         // necessary because each time this loop runs we'll only update the older capture.
+        if (devices.size() != 1 + sub_configs.size())
+        {
+            throw std::runtime_error("Size of sub_configs not the same as number of subordinate devices!");
+        }
+
         std::vector<k4a::capture> captures(devices.size());
         for (size_t i = 0; i < devices.size(); ++i)
         {
             devices[i].get_capture(&captures[i], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+        }
+
+        // If there are no subordinate devices, just return captures which only has the master image
+        if (sub_configs.empty())
+        {
+            return captures;
         }
 
         bool have_synced_images = false;

@@ -355,40 +355,54 @@ int main(int argc, char **argv)
     int32_t powerline_freq = 2;          // default to a 60 Hz powerline
     cv::Size chessboard_pattern(0, 0);   // height, width. Both need to be set.
     uint16_t depth_threshold = 1000;     // default to 1 meter
+    size_t num_devices = 0;
 
-    vector<int> device_indices{ 0, 1 }; // Set up a MultiDeviceCapturer to handle getting many synchronous captures
-                                        // Note that the order of indices in device_indices is not necessarily preserved
-                                        // because MultiDeviceCapturer tries to find the master device based on which
-                                        // one has sync out plugged in.
+    vector<int> device_indices{ 0 }; // Set up a MultiDeviceCapturer to handle getting many synchronous captures
+                                     // Note that the order of indices in device_indices is not necessarily preserved
+                                     // because MultiDeviceCapturer tries to find the master device based on which
+                                     // one has sync out plugged in. Start with just { 0 }, and add another if needed
 
-    if (argc < 4)
+    if (argc < 5)
     {
-        cout << "Usage: green_screen <board-height> <board-width> <board-square-length> "
+        cout << "Usage: green_screen <num-cameras> <board-height> <board-width> <board-square-length> "
                 "[depth-threshold-mm (default 1000)] [color-exposure-time-usec (default 8000)] "
                 "[powerline-frequency-mode (default 2 for 60 Hz)]"
              << endl;
-        throw(std::runtime_error("Not enough arguments!"));
+        throw std::runtime_error("Not enough arguments!");
     }
     else
     {
-        chessboard_pattern.height = atoi(argv[1]);
-        chessboard_pattern.width = atoi(argv[2]);
-        chessboard_square_length = static_cast<float>(atof(argv[3]));
-
-        if (argc > 4)
+        num_devices = atoi(argv[1]);
+        if (num_devices > k4a::device::get_installed_count())
         {
-            depth_threshold = static_cast<uint16_t>(atoi(argv[4]));
-            if (argc > 5)
+            throw(std::runtime_error("Not enough cameras plugged in!"));
+        }
+        chessboard_pattern.height = atoi(argv[2]);
+        chessboard_pattern.width = atoi(argv[3]);
+        chessboard_square_length = static_cast<float>(atof(argv[4]));
+
+        if (argc > 5)
+        {
+            depth_threshold = static_cast<uint16_t>(atoi(argv[5]));
+            if (argc > 6)
             {
-                color_exposure_usec = atoi(argv[5]);
-                if (argc > 6)
+                color_exposure_usec = atoi(argv[6]);
+                if (argc > 7)
                 {
-                    powerline_freq = atoi(argv[6]);
+                    powerline_freq = atoi(argv[7]);
                 }
             }
         }
     }
 
+    if (num_devices != 2 && num_devices != 1)
+    {
+        throw std::runtime_error("Invalid choice for number of devices!");
+    }
+    else if (num_devices == 2)
+    {
+        device_indices.emplace_back(1); // now device indices are { 0, 1 }
+    }
     if (chessboard_pattern.height == 0)
     {
         throw std::runtime_error("Chessboard height is not properly set!");
@@ -407,20 +421,20 @@ int main(int argc, char **argv)
     cout << "Depth threshold: : " << depth_threshold << ". Color exposure time: " << color_exposure_usec
          << ". Powerline frequency mode: " << powerline_freq << endl;
 
-    // Require 2 cameras
-    const int num_devices = k4a::device::get_installed_count();
-    if (num_devices != 2)
-    {
-        throw std::runtime_error("Exactly 2 cameras are required!");
-    }
-
     MultiDeviceCapturer capturer(device_indices, color_exposure_usec, powerline_freq);
 
     // Create configurations for devices
     k4a_device_configuration_t main_config = get_main_config();
     k4a_device_configuration_t secondary_config = get_secondary_config();
 
-    capturer.start_devices(main_config, { secondary_config });
+    if (num_devices == 1)
+    {
+        capturer.start_devices(main_config, {});
+    }
+    else
+    {
+        capturer.start_devices(main_config, { secondary_config });
+    }
 
     // This wraps all the device-to-device details
     Transformation tr_secondary_color_to_main_color =
@@ -456,41 +470,60 @@ int main(int argc, char **argv)
     while (true)
     {
         // The extra argument is to get the depth image on the secondary device, not the color
-        vector<k4a::capture> captures = capturer.get_synchronized_captures({ secondary_config }, true);
+        vector<k4a::capture> captures;
+        if (num_devices == 1)
+        {
+            captures = capturer.get_synchronized_captures({}, true);
+        }
+        else
+        {
+            captures = capturer.get_synchronized_captures({ secondary_config }, true);
+        }
         k4a::image main_color_image = captures[0].get_color_image();
         k4a::image main_depth_image = captures[0].get_depth_image();
-        k4a::image secondary_depth_image = captures[1].get_depth_image();
 
         // let's green screen out things that are far away.
         // first: let's get the main depth image into the color camera space
         k4a::image main_depth_in_main_color = create_depth_image_like(main_color_image);
         main_depth_to_main_color.depth_image_to_color_camera(main_depth_image, &main_depth_in_main_color);
         cv::Mat cv_main_depth_in_main_color = depth_to_opencv(main_depth_in_main_color);
-
-        // Get the depth image in the main color perspective
-        k4a::image secondary_depth_in_main_color = create_depth_image_like(main_color_image);
-        secondary_depth_to_main_color.depth_image_to_color_camera(secondary_depth_image,
-                                                                  &secondary_depth_in_main_color);
-        cv::Mat cv_secondary_depth_in_main_color = depth_to_opencv(secondary_depth_in_main_color);
-
         cv::Mat cv_main_color_image = color_to_opencv(main_color_image);
 
         // create the image that will be be used as output
-        cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, cv::Scalar(0, 0, 0));
-
-        // Now it's time to actually construct the green screen. Where the depth is 0, the camera doesn't know how far
-        // away the object is because it didn't get a response at that point. That's where we'll try to fill in the gaps
-        // with the other camera.
-        cv::Mat main_valid_mask = cv_main_depth_in_main_color != 0;
-        cv::Mat secondary_valid_mask = cv_secondary_depth_in_main_color != 0;
-        cv::Mat within_threshold_range = (main_valid_mask & (cv_main_depth_in_main_color < depth_threshold)) |
-                                         (~main_valid_mask & secondary_valid_mask &
-                                          (cv_secondary_depth_in_main_color < depth_threshold));
         // make a green background
-        cv::Mat output(cv_main_color_image.size(), cv_main_color_image.type(), cv::Scalar(0, 255, 0));
-        // copy all valid output to it
-        cv_main_color_image.copyTo(output, within_threshold_range);
-        cv::imshow("Green Screen", output);
+        cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, cv::Scalar(0, 255, 0));
+
+        if (num_devices == 1)
+        {
+            // single-camera case
+            cv::Mat nongreen_mask = (cv_main_depth_in_main_color != 0) &
+                                    (cv_main_depth_in_main_color < depth_threshold);
+            cv_main_color_image.copyTo(output_image, nongreen_mask);
+        }
+        else
+        {
+            // dual-camera case
+            k4a::image secondary_depth_image = captures[1].get_depth_image();
+
+            // Get the depth image in the main color perspective
+            k4a::image secondary_depth_in_main_color = create_depth_image_like(main_color_image);
+            secondary_depth_to_main_color.depth_image_to_color_camera(secondary_depth_image,
+                                                                      &secondary_depth_in_main_color);
+            cv::Mat cv_secondary_depth_in_main_color = depth_to_opencv(secondary_depth_in_main_color);
+
+            // Now it's time to actually construct the green screen. Where the depth is 0, the camera doesn't know how
+            // far away the object is because it didn't get a response at that point. That's where we'll try to fill in
+            // the gaps with the other camera.
+            cv::Mat main_valid_mask = cv_main_depth_in_main_color != 0;
+            cv::Mat secondary_valid_mask = cv_secondary_depth_in_main_color != 0;
+            cv::Mat within_threshold_range = (main_valid_mask & (cv_main_depth_in_main_color < depth_threshold)) |
+                                             (~main_valid_mask & secondary_valid_mask &
+                                              (cv_secondary_depth_in_main_color < depth_threshold));
+            // copy all valid output to it
+            cv_main_color_image.copyTo(output_image, within_threshold_range);
+        }
+
+        cv::imshow("Green Screen", output_image);
         cv::waitKey(1);
     }
 }
