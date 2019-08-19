@@ -36,7 +36,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: true
       VS2017_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -44,7 +44,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: true
       VS2017_x64-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
@@ -52,7 +52,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: true
       VS2017_x64-msvc_rel_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
@@ -60,7 +60,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: true
       VS2017_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -68,7 +68,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: ${{ false }}
+        UsesOpenCV: false
       VS2017_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -76,7 +76,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: ${{ false }}
+        UsesOpenCV: false
       VS2017_x86-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
@@ -84,7 +84,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: ${{ false }}
+        UsesOpenCV: false
       VS2017_x86-msvc_rel_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
@@ -92,7 +92,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: ${{ false }}
+        UsesOpenCV: false
       VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -100,7 +100,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: true
       VS2019_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -108,7 +108,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: true
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'amd64'
@@ -131,7 +131,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
-        UsesOpenCV: ${{ false }}
+        UsesOpenCV: false
       VS2019_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -139,7 +139,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
-        UsesOpenCV: ${{ false }}
+        UsesOpenCV: false
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'x86'
