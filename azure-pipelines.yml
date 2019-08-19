@@ -223,7 +223,7 @@ jobs:
           return $path
       }
 
-      if ($(CMakeArch) -Match "64") # only install OpenCV on 64-bit systems
+      if ("$(CMakeArch)" -Match "64") # only install OpenCV on 64-bit systems
       {
           # Download OpenCV
           $url = "https://sourceforge.net/projects/opencvlibrary/files/opencv-win/3.2.0/opencv-3.2.0-vc14.exe/download"
