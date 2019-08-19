@@ -36,6 +36,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: TRUE
       VS2017_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -43,6 +44,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: TRUE
       VS2017_x64-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
@@ -50,6 +52,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: TRUE
       VS2017_x64-msvc_rel_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
@@ -57,6 +60,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: TRUE
       VS2017_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -64,6 +68,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: FALSE
       VS2017_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -71,6 +76,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: FALSE
       VS2017_x86-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
@@ -78,6 +84,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: FALSE
       VS2017_x86-msvc_rel_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
@@ -85,6 +92,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: FALSE
       VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -92,6 +100,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
+        UsesOpenCV: TRUE
       VS2019_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -99,6 +108,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
+        UsesOpenCV: TRUE
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'amd64'
@@ -121,6 +131,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
+        UsesOpenCV: FALSE
       VS2019_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -128,6 +139,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
+        UsesOpenCV: FALSE
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'x86'
@@ -223,22 +235,19 @@ jobs:
           return $path
       }
 
-      if ("$(CMakeArch)" -Match "64") # only install OpenCV on 64-bit systems
-      {
-          # Download OpenCV
-          $url = "https://sourceforge.net/projects/opencvlibrary/files/opencv-win/3.2.0/opencv-3.2.0-vc14.exe/download"
-          $filename = "opencv-3.2.0-vc14.exe"
-          $opencv_exe = Download-ToTemp -url $url -filename $filename
+      # Download OpenCV
+      $url = "https://sourceforge.net/projects/opencvlibrary/files/opencv-win/3.2.0/opencv-3.2.0-vc14.exe/download"
+      $filename = "opencv-3.2.0-vc14.exe"
+      $opencv_exe = Download-ToTemp -url $url -filename $filename
 
-          Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
-          Write-Host "##vso[task.setvariable variable=OPENCV_DIR;]C:\OpenCV\Build\x64\vc14\";
-          Write-Host "##vso[task.setvariable variable=PATH;]${env:PATH};${env:OPENCV_DIR}\bin";
-          Write-Host "OpenCV installed."
-      }
-
+      Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
+      Write-Host "##vso[task.setvariable variable=OPENCV_DIR;]C:\OpenCV\Build\x64\vc14\";
+      Write-Host "##vso[task.setvariable variable=PATH;]${env:PATH};${env:OPENCV_DIR}\bin";
+      Write-Host "OpenCV installed."
 
     displayName: 'Install OpenCV'
     workingDirectory: '$(Build.BinariesDirectory)'
+    condition: $(UsesOpenCV)
 
   - powershell: |
       $ErrorActionPreference = "Stop"
@@ -285,7 +294,12 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
-      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED_IF_X64=ON"  "-DOpenCV_DIR=%OPENCV_DIR%\lib" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
+      opencv_flag = ""
+      if ($(UsesOpenCV))
+      {
+          opencv_flag = "-DOpenCV_REQUIRED=ON"  
+      }
+      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" $(opencv_flag) "-DOpenCV_DIR=%OPENCV_DIR%\lib" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:
@@ -409,15 +423,19 @@ jobs:
       x64-clang_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'debug'
+        UsesOpenCV: TRUE
       x64-gnu_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'debug'
+        UsesOpenCV: TRUE
       x64-clang_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'relwithdebinfo'
+        UsesOpenCV: TRUE
       x64-gnu_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'relwithdebinfo'
+        UsesOpenCV: TRUE
 
       # 32-bit builds are currently broken
       # i386-unknown-linux-clang_debug_ninja:
@@ -455,7 +473,8 @@ jobs:
        fi
     displayName: 'Check Line Endings'
 
-  - script: 'cmake -GNinja -DCMAKE_VERBOSE_MAKEFILE=ON -DOpenCV_REQUIRED_IF_X64=ON "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DCMAKE_TOOLCHAIN_FILE=$(Build.SourcesDirectory)/cmake/toolchains/$(CMakeLinuxTargetTriple).cmake"'
+    # OpenCV always required on Linux
+  - script: 'cmake -GNinja -DCMAKE_VERBOSE_MAKEFILE=ON -DOpenCV_REQUIRED=ON "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DCMAKE_TOOLCHAIN_FILE=$(Build.SourcesDirectory)/cmake/toolchains/$(CMakeLinuxTargetTriple).cmake"'
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
 
