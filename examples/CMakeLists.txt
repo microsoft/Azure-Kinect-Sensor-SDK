@@ -11,9 +11,9 @@ add_subdirectory(transformation)
 add_subdirectory(undistort)
 add_subdirectory(viewer)
 
-if (OpenCV_REQUIRED_IF_X64 AND TARGET_ARCH EQUAL "x64")
+if (OpenCV_REQUIRED_IF_X64 AND TARGET_ARCH MATCHES "64")
     find_package(OpenCV REQUIRED)
-elseif (TARGET_ARCH EQUAL "x64")
+elseif (TARGET_ARCH MATCHES "64")
     find_package(OpenCV)
 endif ()
 
