@@ -11,7 +11,6 @@ using namespace std;
 #include "opencv2/core.hpp"
 #include "opencv2/calib3d.hpp"
 using namespace cv;
-#endif
 
 static void clean_up(k4a_device_t device)
 {
@@ -110,7 +109,6 @@ int main(int argc, char ** /*argv*/)
         printf("OpenCV projectPoints:\t\t(%.5f, %.5f)\n", cv_points_2d[i].x, cv_points_2d[i].y);
         printf("k4a_calibration_3d_to_2d:\t(%.5f, %.5f)\n\n", k4a_points_2d[i].v[0], k4a_points_2d[i].v[1]);
     }
-#endif
 
     clean_up(device);
     return 0;
