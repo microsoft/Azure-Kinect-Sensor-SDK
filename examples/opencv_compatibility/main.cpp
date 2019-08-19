@@ -101,7 +101,12 @@ int main(int argc, char ** /*argv*/)
 
     // OpenCV project function
     vector<Point2f> cv_points_2d(points_3d.size());
-    projectPoints(*(vector<Point3f> *)&points_3d, r_vec, t_vec, camera_matrix, dist_coeffs, cv_points_2d);
+    projectPoints(*reinterpret_cast<vector<Point3f> *>(&points_3d),
+                  r_vec,
+                  t_vec,
+                  camera_matrix,
+                  dist_coeffs,
+                  cv_points_2d);
 
     for (size_t i = 0; i < points_3d.size(); i++)
     {
