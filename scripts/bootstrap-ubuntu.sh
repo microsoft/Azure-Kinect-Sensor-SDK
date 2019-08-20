@@ -4,13 +4,13 @@
 # Licensed under the MIT License.
 
 # Setup machine to build amd64 and i386
-sudo dpkg --add-architecture amd64
+dpkg --add-architecture amd64
 
 # Update list of packages
-sudo apt update
+apt update
 
 # Install tools needed to build
-sudo apt install -y \
+apt install -y \
     pkg-config \
     ninja-build \
     doxygen \
@@ -23,7 +23,7 @@ sudo apt install -y \
     cmake
 
 # Install libraries needed to build
-sudo apt install -y \
+apt install -y \
     libgl1-mesa-dev \
     libsoundio-dev \
     libvulkan-dev \
