@@ -235,7 +235,7 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
-      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
+      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DK4A_SOURCE_LINK=ON"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:

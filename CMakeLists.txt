@@ -25,6 +25,7 @@ project(K4A LANGUAGES C CXX
 
 option(K4A_BUILD_DOCS "Build K4A doxygen documentation" OFF)
 option(K4A_MTE_VERSION "Skip FW version check" OFF)
+option(K4A_SOURCE_LINK "Enable source linking on MSVC" OFF)
 
 include(GitCommands)
 
@@ -55,10 +56,30 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-# For code, link against the static crt on windows
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    # Link against the static crt
     include(MSVCStaticCrt)
+
+    # Turn off incremental linking
     include(MSVCLinkerFlags)
+
+    # Enable source linking
+    # NOTE: Dependencies are not properly setup here.
+    #       Currently, CMake does not know to re-link if SOURCE_LINK_JSON changes
+    #       Currently, CMake does not re-generate SOURCE_LINK_JSON if git's HEAD changes
+    if (K4A_SOURCE_LINK)
+        if ("${CMAKE_C_COMPILER_VERSION}" VERSION_GREATER_EQUAL "19.20")
+            include(SourceLink)
+            file(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}/source_link.json" SOURCE_LINK_JSON)
+            source_link(${PROJECT_SOURCE_DIR} ${SOURCE_LINK_JSON})
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SOURCELINK:${SOURCE_LINK_JSON}")
+            set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SOURCELINK:${SOURCE_LINK_JSON}")
+        else()
+            message(WARNING "Disabling SourceLink due to old version of MSVC. Please update to VS2019!")
+        endif()
+    endif()
+
+    # Include hashes of source files in the PDB
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /ZH:SHA_256")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZH:SHA_256")
 endif()
