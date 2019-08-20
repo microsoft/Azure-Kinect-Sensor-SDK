@@ -36,7 +36,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: true
+        UsesOpenCV: 'TRUE'
       VS2017_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -44,7 +44,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: true
+        UsesOpenCV: 'TRUE'
       VS2017_x64-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
@@ -52,7 +52,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: true
+        UsesOpenCV: 'TRUE'
       VS2017_x64-msvc_rel_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
@@ -60,7 +60,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: true
+        UsesOpenCV: 'TRUE'
       VS2017_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -68,7 +68,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: false
+        UsesOpenCV: 'FALSE'
       VS2017_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -76,7 +76,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: false
+        UsesOpenCV: 'FALSE'
       VS2017_x86-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
@@ -84,7 +84,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: false
+        UsesOpenCV: 'FALSE'
       VS2017_x86-msvc_rel_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
@@ -92,7 +92,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: false
+        UsesOpenCV: 'FALSE'
       VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -100,7 +100,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
-        UsesOpenCV: true
+        UsesOpenCV: 'TRUE'
       VS2019_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -108,7 +108,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
-        UsesOpenCV: true
+        UsesOpenCV: 'TRUE'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'amd64'
@@ -131,7 +131,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
-        UsesOpenCV: false
+        UsesOpenCV: 'FALSE'
       VS2019_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -139,7 +139,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
-        UsesOpenCV: false
+        UsesOpenCV: 'FALSE'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'x86'
@@ -247,7 +247,7 @@ jobs:
 
     displayName: 'Install OpenCV'
     workingDirectory: '$(Build.BinariesDirectory)'
-    condition: variables['UsesOpenCV']
+    condition: and(succeeded(), eq(variables['UsesOpenCV'], 'TRUE'))
 
   - powershell: |
       $ErrorActionPreference = "Stop"
@@ -418,19 +418,19 @@ jobs:
       x64-clang_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'debug'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: 'TRUE'
       x64-gnu_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'debug'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: 'TRUE'
       x64-clang_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'relwithdebinfo'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: 'TRUE'
       x64-gnu_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'relwithdebinfo'
-        UsesOpenCV: ${{ true }}
+        UsesOpenCV: 'TRUE'
 
       # 32-bit builds are currently broken
       # i386-unknown-linux-clang_debug_ninja:
