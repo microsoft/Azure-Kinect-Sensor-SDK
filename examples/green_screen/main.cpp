@@ -25,14 +25,10 @@ constexpr uint32_t MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC = 160;
 // ideally, we could generalize this to many OpenCV types
 cv::Mat color_to_opencv(const k4a::image &im)
 {
-    // TODO this only handles mjpg
-    cv::Mat raw_data(1, static_cast<int>(im.get_size()), CV_8UC1, (void *)im.get_buffer());
-    cv::Mat decoded = cv::imdecode(raw_data, cv::IMREAD_COLOR);
-    if (decoded.data == nullptr)
-    {
-        throw std::runtime_error("Decoding image failed!");
-    }
-    return decoded;
+    cv::Mat cv_image_with_alpha(im.get_height_pixels(), im.get_width_pixels(), CV_8UC4, (void *)im.get_buffer());
+    cv::Mat cv_image_no_alpha;
+    cv::cvtColor(cv_image_with_alpha, cv_image_no_alpha, cv::COLOR_BGRA2BGR);
+    return cv_image_no_alpha;
 }
 
 cv::Mat depth_to_opencv(const k4a::image &im)
@@ -254,7 +250,7 @@ Transformation stereo_calibration(const k4a::calibration &main_calib,
 k4a_device_configuration_t get_main_config()
 {
     k4a_device_configuration_t camera_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-    camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
+    camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
     camera_config.color_resolution = K4A_COLOR_RESOLUTION_720P;
     camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED; // no need for depth during calibration
     camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
