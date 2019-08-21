@@ -726,6 +726,57 @@ jobs:
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
         flattenFolders: true
 
+    # TODO this is just to get OpenCV on the test machine - temporary
+    - pwsh: |
+        $ErrorActionPreference = "Stop"
+
+        function Download-ToTemp
+        {
+            param
+            (
+                [Parameter(Mandatory)]
+                [string] $url,
+                [string] $filename
+            )
+
+            if (-not ($filename))
+            {
+                $filename = Split-Path -Path $url -Leaf
+            }
+
+            if (-not ($filename))
+            {
+                Write-Error "Unable to parse filename from $url"
+                return $null
+            }
+
+            $tempDir = [System.IO.Path]::GetTempPath()
+            $path = Join-Path -Path $tempDir -ChildPath $filename
+
+            Write-Host -NoNewline "Downloading $url to $path..."
+            Invoke-WebRequest -Uri $url -OutFile $path -UserAgent "NativeClient" -MaximumRetryCount 5 -RetryIntervalSec 60
+            Write-Host "Done"
+
+            return $path
+        }
+
+        # Download OpenCV
+        $url = "https://sourceforge.net/projects/opencvlibrary/files/opencv-win/3.2.0/opencv-3.2.0-vc14.exe/download"
+        $filename = "opencv-3.2.0-vc14.exe"
+        $opencv_exe = Download-ToTemp -url $url -filename $filename
+
+        Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
+        Write-Host "##vso[task.setvariable variable=OPENCV_DIR;]C:\OpenCV\Build\x64\vc14\";
+        Write-Host "##vso[task.setvariable variable=PATH;]${env:PATH};${env:OPENCV_DIR}\bin";
+        Write-Host OpenCV Install PATH:${env:PATH}
+        Write-Host OpenCV Install OPENCV_DIR:${env:OPENCV_DIR}
+        Write-Host "OpenCV installed."
+
+      displayName: 'Install OpenCV'
+      workingDirectory: '$(Build.BinariesDirectory)'
+      condition: and(succeeded(), eq(variables['UsesOpenCV'], 'TRUE'))
+      enabled: true
+
     - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
@@ -792,7 +843,8 @@ jobs:
 
     # The account on the NUC does not currently give this user permission to install, so we have done so manually.
     # This captures the dependency NuGet has in this environment. We locally ran 'apt-get install mono-complete'
-    #- script: 'apt-get install mono'
+    # We also need opencv, so install that too
+    #- script: 'apt-get install mono libopencv-dev'
     #  workingDirectory: '$(System.ArtifactsDirectory)'
     #  displayName: "Ensure Mono is installed"
 
