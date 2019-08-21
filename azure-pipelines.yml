@@ -418,19 +418,19 @@ jobs:
       x64-clang_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'debug'
-        UsesOpenCV: 'TRUE'
+        UsesOpenCV: 'FALSE'
       x64-gnu_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'debug'
-        UsesOpenCV: 'TRUE'
+        UsesOpenCV: 'FALSE'
       x64-clang_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'relwithdebinfo'
-        UsesOpenCV: 'TRUE'
+        UsesOpenCV: 'FALSE'
       x64-gnu_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'relwithdebinfo'
-        UsesOpenCV: 'TRUE'
+        UsesOpenCV: 'FALSE'
 
       # 32-bit builds are currently broken
       # i386-unknown-linux-clang_debug_ninja:
