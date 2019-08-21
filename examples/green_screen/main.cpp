@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
-#include <memory>
+#include <limits>
 
 #include <k4a/k4a.hpp>
 #include <opencv2/calib3d.hpp>
@@ -282,7 +282,8 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                  const k4a_device_configuration_t &main_config,
                                  const k4a_device_configuration_t &secondary_config,
                                  const cv::Size &chessboard_pattern,
-                                 float chessboard_square_length)
+                                 float chessboard_square_length,
+                                 double calibration_timeout)
 {
     k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode,
                                                                                      main_config.color_resolution);
@@ -292,7 +293,8 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                                                     secondary_config.color_resolution);
     vector<vector<cv::Point2f>> main_chessboard_corners_list;
     vector<vector<cv::Point2f>> secondary_chessboard_corners_list;
-    while (true)
+    std::chrono::time_point<std::chrono::system_clock> start_time = std::chrono::system_clock::now();
+    while (std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() < calibration_timeout)
     {
         vector<k4a::capture> captures = capturer.get_synchronized_captures({ secondary_config }); // requires vector
         k4a::capture &main_capture = captures[0];
@@ -337,6 +339,7 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                       chessboard_square_length);
         }
     }
+    throw std::runtime_error("Calibration timed out!");
 }
 
 k4a::image create_depth_image_like(const k4a::image &im)
@@ -355,6 +358,8 @@ int main(int argc, char **argv)
     cv::Size chessboard_pattern(0, 0);   // height, width. Both need to be set.
     uint16_t depth_threshold = 1000;     // default to 1 meter
     size_t num_devices = 0;
+    double calibration_timeout = 60.0; // default to timing out after 60s of trying to get calibrated
+    double greenscreen_duration = std::numeric_limits<double>::max(); // run forever
 
     vector<int> device_indices{ 0 }; // Set up a MultiDeviceCapturer to handle getting many synchronous captures
                                      // Note that the order of indices in device_indices is not necessarily preserved
@@ -365,7 +370,8 @@ int main(int argc, char **argv)
     {
         cout << "Usage: green_screen <num-cameras> <board-height> <board-width> <board-square-length> "
                 "[depth-threshold-mm (default 1000)] [color-exposure-time-usec (default 8000)] "
-                "[powerline-frequency-mode (default 2 for 60 Hz)]"
+                "[powerline-frequency-mode (default 2 for 60 Hz)] [calibration-timeout-sec (default 60)]"
+                "[greenscreen-duration-sec (default infinity- run forever)]"
              << endl;
         throw std::runtime_error("Not enough arguments!");
     }
@@ -389,6 +395,14 @@ int main(int argc, char **argv)
                 if (argc > 7)
                 {
                     powerline_freq = atoi(argv[7]);
+                    if (argc > 8)
+                    {
+                        calibration_timeout = atof(argv[8]);
+                        if (argc > 9)
+                        {
+                            greenscreen_duration = atof(argv[9]);
+                        }
+                    }
                 }
             }
         }
@@ -442,7 +456,9 @@ int main(int argc, char **argv)
     if (num_devices == 1)
     {
         capturer.start_devices(main_config, {});
-        while (true)
+        std::chrono::time_point<std::chrono::system_clock> start_time = std::chrono::system_clock::now();
+        while (std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() <
+               greenscreen_duration)
         {
             vector<k4a::capture> captures;
             captures = capturer.get_synchronized_captures({}, true);
@@ -474,8 +490,12 @@ int main(int argc, char **argv)
         capturer.start_devices(main_config, { secondary_config });
 
         // This wraps all the device-to-device details
-        Transformation tr_secondary_color_to_main_color =
-            calibrate_devices(capturer, main_config, secondary_config, chessboard_pattern, chessboard_square_length);
+        Transformation tr_secondary_color_to_main_color = calibrate_devices(capturer,
+                                                                            main_config,
+                                                                            secondary_config,
+                                                                            chessboard_pattern,
+                                                                            chessboard_square_length,
+                                                                            calibration_timeout);
 
         k4a::calibration secondary_calibration =
             capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode,
@@ -497,7 +517,9 @@ int main(int argc, char **argv)
                                                    tr_secondary_depth_to_main_color);
         k4a::transformation secondary_depth_to_main_color(secondary_depth_to_main_color_cal);
 
-        while (true)
+        std::chrono::time_point<std::chrono::system_clock> start_time = std::chrono::system_clock::now();
+        while (std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() <
+               greenscreen_duration)
         {
             vector<k4a::capture> captures;
             captures = capturer.get_synchronized_captures({ secondary_config }, true);
