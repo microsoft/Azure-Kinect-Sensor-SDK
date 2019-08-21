@@ -155,6 +155,25 @@ TEST_F(executables_ft, enumerate)
     test_stream_against_regexes(&results, &regexes);
 }
 
+TEST_F(executables_ft, green_screen_single_cam)
+{
+    const std::string green_screen_path = PATH_TO_BIN("green_screen");
+    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-single-out.txt";
+    ASSERT_EQ(run_and_record_executable(green_screen_path + " 1 8 6 33 1000 4000 2 30 5", green_screen_out),
+              EXIT_SUCCESS);
+}
+
+TEST_F(executables_ft, green_screen_double_cam)
+{
+    const std::string green_screen_path = PATH_TO_BIN("green_screen");
+    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-double-out.txt";
+    ASSERT_EQ(run_and_record_executable(green_screen_path + " 2 8 6 33 1000 4000 2 30 5", green_screen_out),
+              EXIT_SUCCESS);
+    std::ifstream results(green_screen_out.c_str());
+    std::vector<std::string> regexes{ "Finished calibrating!" };
+    test_stream_against_regexes(&results, &regexes);
+}
+
 TEST_F(executables_ft, fastpointcloud)
 {
     const std::string fastpoint_path = PATH_TO_BIN("fastpointcloud");
