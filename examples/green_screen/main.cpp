@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <memory>
 
 #include <k4a/k4a.hpp>
 #include <opencv2/calib3d.hpp>
@@ -254,7 +255,7 @@ k4a_device_configuration_t get_main_config()
     camera_config.color_resolution = K4A_COLOR_RESOLUTION_720P;
     camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED; // no need for depth during calibration
     camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
-    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER; // main will be the master
+    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER; // main will be the master. Overwritten if only cam
     camera_config.subordinate_delay_off_master_usec = 0; // Must be zero- this device is the master, so delay is 0.
     // Let half of the time needed for the depth cameras to not interfere with one another pass here (the other half is
     // in the master to subordinate delay)
@@ -284,6 +285,7 @@ Transformation calibrate_devices(MultiDeviceCapturer &capturer,
 {
     k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode,
                                                                                      main_config.color_resolution);
+
     k4a::calibration secondary_calibration =
         capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode,
                                                                     secondary_config.color_resolution);
@@ -421,84 +423,97 @@ int main(int argc, char **argv)
 
     // Create configurations for devices
     k4a_device_configuration_t main_config = get_main_config();
+    if (num_devices == 1) // no need to have a master cable if it's standalone
+    {
+        main_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
+    }
     k4a_device_configuration_t secondary_config = get_secondary_config();
+
+    // Construct all the things that we'll need whether or not we are running with 1 or 2 cameras
+    k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode,
+                                                                                     main_config.color_resolution);
+
+    // Set up a transformation. DO THIS OUTSIDE OF YOUR MAIN LOOP! Constructing transformations involves time-intensive
+    // hardware setup and should not change once you have a rigid setup, so only call it once or it will run very
+    // slowly.
+    k4a::transformation main_depth_to_main_color(main_calibration);
 
     if (num_devices == 1)
     {
         capturer.start_devices(main_config, {});
-    }
-    else
-    {
-        capturer.start_devices(main_config, { secondary_config });
-    }
-
-    // This wraps all the device-to-device details
-    Transformation tr_secondary_color_to_main_color =
-        calibrate_devices(capturer, main_config, secondary_config, chessboard_pattern, chessboard_square_length);
-
-    k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode,
-                                                                                     main_config.color_resolution);
-    k4a::calibration secondary_calibration =
-        capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode,
-                                                                    secondary_config.color_resolution);
-    // Get the transformation from secondary depth to secondary color using its calibration object
-    Transformation tr_secondary_depth_to_secondary_color = get_depth_to_color_transformation_from_calibration(
-        secondary_calibration);
-
-    // We now have the secondary depth to secondary color transform. We also have the transformation from the
-    // secondary color perspective to the main color perspective from the calibration earlier. Now let's compose the
-    // depth secondary -> color secondary, color secondary -> color main into depth secondary -> color main
-    Transformation tr_secondary_depth_to_main_color = tr_secondary_depth_to_secondary_color.compose_with(
-        tr_secondary_color_to_main_color);
-
-    // Now, we're going to set up the transformations. DO THIS OUTSIDE OF YOUR MAIN LOOP! Constructing transformations
-    // involves time-intensive hardware setup and should not change once you have a rigid setup, so only call it once or
-    // it will run very slowly.
-    k4a::transformation main_depth_to_main_color(main_calibration);
-
-    // Construct a new calibration object to transform from the secondary depth camera to the main color camera
-    k4a::calibration secondary_depth_to_main_color_cal =
-        construct_device_to_device_calibration(main_calibration,
-                                               secondary_calibration,
-                                               tr_secondary_depth_to_main_color);
-    k4a::transformation secondary_depth_to_main_color(secondary_depth_to_main_color_cal);
-
-    while (true)
-    {
-        // The extra argument is to get the depth image on the secondary device, not the color
-        vector<k4a::capture> captures;
-        if (num_devices == 1)
+        while (true)
         {
+            vector<k4a::capture> captures;
             captures = capturer.get_synchronized_captures({}, true);
-        }
-        else
-        {
-            captures = capturer.get_synchronized_captures({ secondary_config }, true);
-        }
-        k4a::image main_color_image = captures[0].get_color_image();
-        k4a::image main_depth_image = captures[0].get_depth_image();
+            k4a::image main_color_image = captures[0].get_color_image();
+            k4a::image main_depth_image = captures[0].get_depth_image();
 
-        // let's green screen out things that are far away.
-        // first: let's get the main depth image into the color camera space
-        k4a::image main_depth_in_main_color = create_depth_image_like(main_color_image);
-        main_depth_to_main_color.depth_image_to_color_camera(main_depth_image, &main_depth_in_main_color);
-        cv::Mat cv_main_depth_in_main_color = depth_to_opencv(main_depth_in_main_color);
-        cv::Mat cv_main_color_image = color_to_opencv(main_color_image);
+            // let's green screen out things that are far away.
+            // first: let's get the main depth image into the color camera space
+            k4a::image main_depth_in_main_color = create_depth_image_like(main_color_image);
+            main_depth_to_main_color.depth_image_to_color_camera(main_depth_image, &main_depth_in_main_color);
+            cv::Mat cv_main_depth_in_main_color = depth_to_opencv(main_depth_in_main_color);
+            cv::Mat cv_main_color_image = color_to_opencv(main_color_image);
 
-        // create the image that will be be used as output
-        // make a green background
-        cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, cv::Scalar(0, 255, 0));
+            // create the image that will be be used as output
+            // make a green background
+            cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, cv::Scalar(0, 255, 0));
 
-        if (num_devices == 1)
-        {
             // single-camera case
             cv::Mat nongreen_mask = (cv_main_depth_in_main_color != 0) &
                                     (cv_main_depth_in_main_color < depth_threshold);
             cv_main_color_image.copyTo(output_image, nongreen_mask);
+
+            cv::imshow("Green Screen", output_image);
+            cv::waitKey(1);
         }
-        else
+    }
+    else if (num_devices == 2)
+    {
+        capturer.start_devices(main_config, { secondary_config });
+
+        // This wraps all the device-to-device details
+        Transformation tr_secondary_color_to_main_color =
+            calibrate_devices(capturer, main_config, secondary_config, chessboard_pattern, chessboard_square_length);
+
+        k4a::calibration secondary_calibration =
+            capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode,
+                                                                        secondary_config.color_resolution);
+        // Get the transformation from secondary depth to secondary color using its calibration object
+        Transformation tr_secondary_depth_to_secondary_color = get_depth_to_color_transformation_from_calibration(
+            secondary_calibration);
+
+        // We now have the secondary depth to secondary color transform. We also have the transformation from the
+        // secondary color perspective to the main color perspective from the calibration earlier. Now let's compose the
+        // depth secondary -> color secondary, color secondary -> color main into depth secondary -> color main
+        Transformation tr_secondary_depth_to_main_color = tr_secondary_depth_to_secondary_color.compose_with(
+            tr_secondary_color_to_main_color);
+
+        // Construct a new calibration object to transform from the secondary depth camera to the main color camera
+        k4a::calibration secondary_depth_to_main_color_cal =
+            construct_device_to_device_calibration(main_calibration,
+                                                   secondary_calibration,
+                                                   tr_secondary_depth_to_main_color);
+        k4a::transformation secondary_depth_to_main_color(secondary_depth_to_main_color_cal);
+
+        while (true)
         {
-            // dual-camera case
+            vector<k4a::capture> captures;
+            captures = capturer.get_synchronized_captures({ secondary_config }, true);
+            k4a::image main_color_image = captures[0].get_color_image();
+            k4a::image main_depth_image = captures[0].get_depth_image();
+
+            // let's green screen out things that are far away.
+            // first: let's get the main depth image into the color camera space
+            k4a::image main_depth_in_main_color = create_depth_image_like(main_color_image);
+            main_depth_to_main_color.depth_image_to_color_camera(main_depth_image, &main_depth_in_main_color);
+            cv::Mat cv_main_depth_in_main_color = depth_to_opencv(main_depth_in_main_color);
+            cv::Mat cv_main_color_image = color_to_opencv(main_color_image);
+
+            // create the image that will be be used as output
+            // make a green background
+            cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, cv::Scalar(0, 255, 0));
+
             k4a::image secondary_depth_image = captures[1].get_depth_image();
 
             // Get the depth image in the main color perspective
@@ -517,9 +532,13 @@ int main(int argc, char **argv)
                                               (cv_secondary_depth_in_main_color < depth_threshold));
             // copy all valid output to it
             cv_main_color_image.copyTo(output_image, within_threshold_range);
-        }
 
-        cv::imshow("Green Screen", output_image);
-        cv::waitKey(1);
+            cv::imshow("Green Screen", output_image);
+            cv::waitKey(1);
+        }
+    }
+    else
+    {
+        throw std::runtime_error("Invalid number of devices!");
     }
 }
