@@ -179,9 +179,17 @@ TEST_F(executables_ft, fastpointcloud)
 
 TEST_F(executables_ft, opencv_compatibility)
 {
-    const std::string transformation_dir = TEST_TEMP_DIR;
-    const std::string transformation_path = PATH_TO_BIN("opencv_example");
-    ASSERT_EQ(run_and_record_executable(transformation_path, ""), EXIT_SUCCESS);
+    const std::string opencv_dir = TEST_TEMP_DIR;
+    const std::string opencv_path = PATH_TO_BIN("opencv_example");
+    const std::string opencv_out = TEST_TEMP_DIR + "/opencv-out.txt";
+    ASSERT_EQ(run_and_record_executable(opencv_path, opencv_out), EXIT_SUCCESS);
+
+    std::ifstream opencv_results(opencv_out);
+    ASSERT_TRUE(opencv_results.good());
+
+    std::vector<std::string> regexes{ "3d point:.*", "OpenCV projectPoints:.*", "k4a_calibration_3d_to_2d:.*" };
+
+    test_stream_against_regexes(&opencv_results, &regexes);
 }
 
 TEST_F(executables_ft, streaming)
