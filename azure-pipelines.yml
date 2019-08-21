@@ -202,7 +202,7 @@ jobs:
       modifyEnvironment: true
     condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
 
-  - powershell: |
+  - pwsh: |
       $ErrorActionPreference = "Stop"
 
       function Download-ToTemp
