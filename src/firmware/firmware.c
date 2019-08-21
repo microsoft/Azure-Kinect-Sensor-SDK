@@ -162,6 +162,11 @@ k4a_result_t firmware_create(char *device_serial_number, bool resetting_device, 
         if (K4A_SUCCEEDED(result))
         {
             result = TRACE_CALL(colormcu_create(container_id, &firmware->colormcu));
+            if ((resetting_device) && K4A_FAILED(result))
+            {
+                // We only need 1 USB device to reset
+                result = K4A_RESULT_SUCCEEDED;
+            }
         }
     }
     else if (resetting_device) // Search for just the colormcu
