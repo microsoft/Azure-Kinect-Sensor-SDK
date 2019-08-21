@@ -495,7 +495,7 @@ TEST_F(depthmcu_ut, depthmcu_get_serialnum_non_ascii)
 
     // Create a serial number with non-ACII characters
     char mockSerialNumber[20];
-    memcpy(mockSerialNumber, "12\145\t67890\0WXYZ", sizeof("1234567890\0WXYZ"));
+    memcpy(mockSerialNumber, "12\145\t67890\0WXYZ", sizeof("12\145\t67890\0WXYZ"));
 
     // If the implementation caches the result, only a single call may be made. Otherwise it may be called multiple
     // times
