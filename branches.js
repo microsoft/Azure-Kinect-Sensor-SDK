@@ -11,5 +11,6 @@ var BRANCHES = [
     "refs/pull/548/merge",
     "refs/pull/619/merge",
     "refs/pull/628/merge",
-    "release/1.1.x"
+    "release/1.1.x",
+    "release/1.2.x"
 ]
