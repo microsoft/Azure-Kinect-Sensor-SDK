@@ -459,6 +459,11 @@ jobs:
     displayName: 'Run bootstrap-ubuntu.sh'
 
   - script: |
+       sudo apt install -y libopencv-dev
+    displayName: 'Install OpenCV'
+    condition: and(succeeded(), eq(variables['UsesOpenCV'], 'TRUE'))
+
+  - script: |
        git add --renormalize . && git diff-index --quiet HEAD --
        if [ $? -ne 0 ]
        then

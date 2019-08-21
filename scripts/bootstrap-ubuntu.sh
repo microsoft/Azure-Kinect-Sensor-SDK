@@ -25,7 +25,6 @@ sudo apt install -y \
 # Install libraries needed to build
 sudo apt install -y \
     libgl1-mesa-dev \
-    libopencv-dev \
     libsoundio-dev \
     libssl-dev \
     libudev-dev \
