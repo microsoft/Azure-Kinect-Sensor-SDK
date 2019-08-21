@@ -725,6 +725,22 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
     bool supports_auto;
     int32_t value = 0;
 
+    // 50% of the time we should test with the camera running
+    if ((rand() * 2 / RAND_MAX) >= 1)
+    {
+        k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
+        config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+        config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
+        config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
+        config.depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
+        std::cout << "control_test_worker: k4a_device_start_cameras called\n";
+    }
+    else
+    {
+        std::cout << "control_test_worker: k4a_device_start_cameras not called\n";
+    }
+
     // Invalid device handle test
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_control(nullptr, command, &default_mode_read, &value));
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_set_color_control(nullptr, command, default_mode_read, value));
@@ -820,6 +836,8 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
         }
     }
 
+    k4a_device_stop_cameras(m_device);
+
     // Restore Defaults
     {
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, command, default_mode, default_value));
@@ -867,5 +885,6 @@ INSTANTIATE_TEST_CASE_P(
 
 int main(int argc, char **argv)
 {
+    srand((unsigned int)time(0)); // use current time as seed for random generator
     return k4a_test_common_main(argc, argv);
 }
