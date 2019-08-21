@@ -38,7 +38,7 @@ static int run_and_record_executable(std::string shell_command_path, std::string
     std::string formatted_command = shell_command_path;
     if (!output_path.empty())
     {
-        formatted_command += " 2>&1 > " + output_path;
+        formatted_command += " > " + output_path + " 2>&1";
     }
     // In Linux, forking a process causes the under buffers to be forked, too. So, because popen uses fork under the
     // hood, there may have been a risk of printing something in both processes. I'm not sure if this could happen in
@@ -47,10 +47,25 @@ static int run_and_record_executable(std::string shell_command_path, std::string
     FILE *process_stream = POPEN(formatted_command.c_str(), "r");
     if (!process_stream)
     {
-        printf("process_stream is NULL\n");
+        std::cout << "process_stream is NULL" << std::endl;
         return EXIT_FAILURE; // if popen fails, it returns null, which is an error
     }
-    return PCLOSE(process_stream);
+    int return_code = PCLOSE(process_stream);
+    std::cout << "Ran: " << formatted_command << std::endl;
+    std::cout << "<==============================================" << std::endl;
+    try
+    {
+        if (!output_path.empty())
+        {
+            std::cout << std::ifstream(output_path).rdbuf() << std::endl;
+        }
+    }
+    catch (std::exception &e)
+    {
+        std::cout << "Dumping log file threw a std::exception: " << e.what() << std::endl;
+    }
+    std::cout << "==============================================>" << std::endl;
+    return return_code;
 }
 
 /*
