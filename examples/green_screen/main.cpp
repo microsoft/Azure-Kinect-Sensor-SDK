@@ -255,7 +255,8 @@ k4a_device_configuration_t get_main_config()
     camera_config.color_resolution = K4A_COLOR_RESOLUTION_720P;
     camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED; // no need for depth during calibration
     camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
-    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER; // main will be the master. Overwritten if only cam
+    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER; // main device is master in two-camera case. It will be
+                                                                // changed later on if it's a single-camera case
     camera_config.subordinate_delay_off_master_usec = 0; // Must be zero- this device is the master, so delay is 0.
     // Let half of the time needed for the depth cameras to not interfere with one another pass here (the other half is
     // in the master to subordinate delay)
