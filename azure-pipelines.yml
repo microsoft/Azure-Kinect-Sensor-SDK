@@ -12,6 +12,8 @@ variables:
   value: '1.6.102075014'
 - name: 'PackageVersion'
   value: '1.2.0-alpha.10'
+- name: 'OpenCVPath'
+  value: 'C:\OpenCV\Build\x64\vc14\'
 
 trigger:
   batch: false
@@ -241,10 +243,6 @@ jobs:
       $opencv_exe = Download-ToTemp -url $url -filename $filename
 
       Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
-      Write-Host "##vso[task.setvariable variable=OPENCV_DIR;]C:\OpenCV\Build\x64\vc14\";
-      Write-Host "##vso[task.setvariable variable=PATH;]${env:PATH};${env:OPENCV_DIR}\bin";
-      Write-Host OpenCV Install PATH:${env:PATH}
-      Write-Host OpenCV Install OPENCV_DIR:${env:OPENCV_DIR}
       Write-Host "OpenCV installed."
 
     displayName: 'Install OpenCV'
@@ -296,7 +294,7 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
-      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED=$(UsesOpenCV)" "-DOpenCV_DIR=%OPENCV_DIR%\lib" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DK4A_SOURCE_LINK=ON"
+      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED=$(UsesOpenCV)" "-DOpenCV_DIR=$(OpenCVPath)\lib" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DK4A_SOURCE_LINK=ON"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:
@@ -619,12 +617,6 @@ jobs:
       filePath: '$(Build.SourcesDirectory)\doxygen\PublishDocs.ps1'
     condition: and(eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564'), and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')))
 
-  - pwsh: |
-      Write-Host PATH:${env:PATH}
-      Write-Host OPENCV_DIR:${env:OPENCV_DIR}
-    displayName: 'Check Path TODO remove'
-    condition: and(succeeded(), eq(variables['UsesOpenCV'], 'TRUE'))
-
 - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
   - job: WindowsFunctionalTests
     displayName: Windows Functional Test
@@ -727,6 +719,7 @@ jobs:
         flattenFolders: true
 
     # TODO this is just to get OpenCV on the test machine - temporary
+    # should be disabled
     - pwsh: |
         $ErrorActionPreference = "Stop"
 
@@ -766,16 +759,13 @@ jobs:
         $opencv_exe = Download-ToTemp -url $url -filename $filename
 
         Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
-        Write-Host "##vso[task.setvariable variable=OPENCV_DIR;]C:\OpenCV\Build\x64\vc14\";
-        Write-Host "##vso[task.setvariable variable=PATH;]${env:PATH};${env:OPENCV_DIR}\bin";
-        Write-Host OpenCV Install PATH:${env:PATH}
-        Write-Host OpenCV Install OPENCV_DIR:${env:OPENCV_DIR}
         Write-Host "OpenCV installed."
 
       displayName: 'Install OpenCV'
       workingDirectory: '$(Build.BinariesDirectory)'
-      condition: and(succeeded(), eq(variables['UsesOpenCV'], 'TRUE'))
-      enabled: true
+
+    - script: 'set PATH=%PATH%;$(OpenCVPath)\bin'
+      displayName: 'Add OpenCV to PATH'
 
     - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
