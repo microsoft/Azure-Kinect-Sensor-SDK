@@ -170,6 +170,7 @@ TEST_F(executables_ft, enumerate)
     test_stream_against_regexes(&results, &regexes);
 }
 
+#ifdef USE_OPENCV
 TEST_F(executables_ft, green_screen_single_cam)
 {
     const std::string green_screen_path = PATH_TO_BIN("green_screen");
@@ -188,6 +189,7 @@ TEST_F(executables_ft, green_screen_double_cam)
     std::vector<std::string> regexes{ "Finished calibrating!" };
     test_stream_against_regexes(&results, &regexes);
 }
+#endif
 
 TEST_F(executables_ft, fastpointcloud)
 {
@@ -211,6 +213,7 @@ TEST_F(executables_ft, fastpointcloud)
     test_stream_against_regexes(&fastpointcloud_results, &regexes);
 }
 
+#ifdef USE_OPENCV
 TEST_F(executables_ft, opencv_compatibility)
 {
     const std::string opencv_dir = TEST_TEMP_DIR;
@@ -225,6 +228,7 @@ TEST_F(executables_ft, opencv_compatibility)
 
     test_stream_against_regexes(&opencv_results, &regexes);
 }
+#endif
 
 TEST_F(executables_ft, streaming)
 {
