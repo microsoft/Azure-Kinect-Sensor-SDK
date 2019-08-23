@@ -1109,7 +1109,7 @@ public:
      *
      * \sa k4a_device_get_capture
      */
-    bool get_capture(capture *cap, std::chrono::milliseconds timeout = std::chrono::milliseconds(K4A_WAIT_INFINITE))
+    bool get_capture(capture *cap, std::chrono::milliseconds timeout)
     {
         k4a_capture_t capture_handle = nullptr;
         int32_t timeout_ms = internal::clamp_cast<int32_t>(timeout.count());
@@ -1126,14 +1126,23 @@ public:
         *cap = capture(capture_handle);
         return true;
     }
-
+    
+    /** Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
+     * Throws error on failure. This API assumes an inifinate timeout.
+     *
+     * \sa k4a_device_get_capture
+     */
+    bool get_capture(capture *cap)
+    {
+        return get_capture(cap, std::chrono::milliseconds(K4A_WAIT_INFINITE));
+    }
+    
     /** Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
      * Throws error on failure.
      *
      * \sa k4a_device_get_imu_sample
      */
-    bool get_imu_sample(k4a_imu_sample_t *imu_sample,
-                        std::chrono::milliseconds timeout = std::chrono::milliseconds(K4A_WAIT_INFINITE))
+    bool get_imu_sample(k4a_imu_sample_t *imu_sample, std::chrono::milliseconds timeout)
     {
         int32_t timeout_ms = internal::clamp_cast<int32_t>(timeout.count());
         k4a_wait_result_t result = k4a_device_get_imu_sample(m_handle, imu_sample, timeout_ms);
@@ -1148,7 +1157,17 @@ public:
 
         return true;
     }
-
+    
+    /** Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
+     * Throws error on failure. This API assumes an infinate timeout.
+     *
+     * \sa k4a_device_get_imu_sample
+     */
+    bool get_imu_sample(k4a_imu_sample_t *imu_sample)
+    {
+        return get_imu_sample(imu_sample, std::chrono::milliseconds(K4A_WAIT_INFINITE));
+    }
+    
     /** Starts the K4A device's cameras
      * Throws error on failure.
      *
