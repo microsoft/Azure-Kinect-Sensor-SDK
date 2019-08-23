@@ -6,8 +6,10 @@ var annotated =
       [ "device", "classk4a_1_1device.html", "classk4a_1_1device" ],
       [ "error", "classk4a_1_1error.html", null ],
       [ "image", "classk4a_1_1image.html", "classk4a_1_1image" ],
+      [ "playback", "classk4a_1_1playback.html", "classk4a_1_1playback" ],
       [ "transformation", "classk4a_1_1transformation.html", "classk4a_1_1transformation" ]
     ] ],
+    [ "Microsoft", "namespace_microsoft.html", "namespace_microsoft" ],
     [ "k4a_calibration_camera_t", "structk4a__calibration__camera__t.html", "structk4a__calibration__camera__t" ],
     [ "k4a_calibration_extrinsics_t", "structk4a__calibration__extrinsics__t.html", "structk4a__calibration__extrinsics__t" ],
     [ "k4a_calibration_intrinsic_parameters_t", "unionk4a__calibration__intrinsic__parameters__t.html", "unionk4a__calibration__intrinsic__parameters__t" ],
@@ -21,9 +23,12 @@ var annotated =
     [ "k4a_hardware_version_t", "structk4a__hardware__version__t.html", "structk4a__hardware__version__t" ],
     [ "k4a_image_t", "structk4a__image__t.html", "structk4a__image__t" ],
     [ "k4a_imu_sample_t", "structk4a__imu__sample__t.html", "structk4a__imu__sample__t" ],
+    [ "k4a_playback_data_block_t", "structk4a__playback__data__block__t.html", "structk4a__playback__data__block__t" ],
     [ "k4a_playback_t", "structk4a__playback__t.html", "structk4a__playback__t" ],
     [ "k4a_record_configuration_t", "structk4a__record__configuration__t.html", "structk4a__record__configuration__t" ],
+    [ "k4a_record_subtitle_settings_t", "structk4a__record__subtitle__settings__t.html", "structk4a__record__subtitle__settings__t" ],
     [ "k4a_record_t", "structk4a__record__t.html", "structk4a__record__t" ],
+    [ "k4a_record_video_settings_t", "structk4a__record__video__settings__t.html", "structk4a__record__video__settings__t" ],
     [ "k4a_transformation_t", "structk4a__transformation__t.html", "structk4a__transformation__t" ],
     [ "k4a_version_t", "structk4a__version__t.html", "structk4a__version__t" ]
 ];

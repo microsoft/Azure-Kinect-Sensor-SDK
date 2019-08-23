@@ -153,7 +153,7 @@ $(document).ready(function(){initNavTree('group___functions_ga3b6bf6dedbfe67468e
   <table class="params">
     <tr><td class="paramname">calibration</td><td>Location to read the camera calibration obtained by <a class="el" href="group___functions_ga4e43940d8d8db48da266c7a7842c8d78.html#ga4e43940d8d8db48da266c7a7842c8d78" title="Get the camera calibration for the entire Azure Kinect device. ">k4a_device_get_calibration()</a>.</td></tr>
     <tr><td class="paramname">source_point2d</td><td>The 2D pixel in <code>source_camera</code> coordinates.</td></tr>
-    <tr><td class="paramname">source_depth_mm</td><td>The depth of <code>source_point2d</code> in millimeters.</td></tr>
+    <tr><td class="paramname">source_depth_mm</td><td>The depth of <code>source_point2d</code> in millimeters. One way to derive the depth value in the color camera geometry is to use the function <a class="el" href="group___functions_gafacffb5f781a9c2df30d4a16241cd514.html#gafacffb5f781a9c2df30d4a16241cd514" title="Transforms the depth map into the geometry of the color camera. ">k4a_transformation_depth_image_to_color_camera()</a>.</td></tr>
     <tr><td class="paramname">source_camera</td><td>The current camera.</td></tr>
     <tr><td class="paramname">target_camera</td><td>The target camera.</td></tr>
     <tr><td class="paramname">target_point2d</td><td>The 2D pixel in <code>target_camera</code> coordinates.</td></tr>

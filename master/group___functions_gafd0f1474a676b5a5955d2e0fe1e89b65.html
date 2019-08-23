@@ -119,7 +119,6 @@ $(document).ready(function(){initNavTree('group___functions_gafd0f1474a676b5a595
 </div><div class="memdoc">
 
 <p>Writes an imu sample to file. </p>
-<p>Samples must be written in increasing order of timestamp, and the file's header must already be written. When writing imu samples at the same time as captures, the samples should be within 1 second of the most recently written capture.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">recording_handle</td><td>The handle of a new recording, obtained by <a class="el" href="group___functions_gae14f4181e9688e710d1c80b215413831.html#gae14f4181e9688e710d1c80b215413831" title="Opens a new recording file for writing. ">k4a_record_create()</a>.</td></tr>
@@ -128,6 +127,9 @@ $(document).ready(function(){initNavTree('group___functions_gafd0f1474a676b5a595
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5.html#gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" title="The result was successful. ">K4A_RESULT_SUCCEEDED</a> is returned on success</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Samples must be written in increasing order of timestamp, and the file's header must already be written.</dd>
+<dd>
+When writing imu samples at the same time as captures, the samples should be within 1 second of the most recently written capture.</dd></dl>
  
 </div>
 </div>

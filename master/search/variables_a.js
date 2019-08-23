@@ -1,7 +1,9 @@
 var searchData=
 [
-  ['resolution_5fheight',['resolution_height',['../structk4a__calibration__camera__t_ac47d2146081bca338ddf9d71cccdb2b8.html#ac47d2146081bca338ddf9d71cccdb2b8',1,'k4a_calibration_camera_t']]],
-  ['resolution_5fwidth',['resolution_width',['../structk4a__calibration__camera__t_a3e45105675a0b95f139f3ecae1e46427.html#a3e45105675a0b95f139f3ecae1e46427',1,'k4a_calibration_camera_t']]],
-  ['rgb',['rgb',['../structk4a__hardware__version__t_a1fee646cb54b74f2c257ee528322f4b4.html#a1fee646cb54b74f2c257ee528322f4b4',1,'k4a_hardware_version_t']]],
-  ['rotation',['rotation',['../structk4a__calibration__extrinsics__t.html#a2227d500bc6f240628774be2503c20a7',1,'k4a_calibration_extrinsics_t']]]
+  ['p1',['p1',['../structk4a__calibration__intrinsic__parameters__t_1_1__param.html#a0967d84ba1f4ce82b47bfa2fa13a8360',1,'k4a_calibration_intrinsic_parameters_t::_param']]],
+  ['p2',['p2',['../structk4a__calibration__intrinsic__parameters__t_1_1__param.html#a80718603ed70e762dfe9aa01eccbcc6b',1,'k4a_calibration_intrinsic_parameters_t::_param']]],
+  ['param',['param',['../unionk4a__calibration__intrinsic__parameters__t.html#a9d3f4b9a3ddc6f91074dea019fbcaa78',1,'k4a_calibration_intrinsic_parameters_t']]],
+  ['parameter_5fcount',['parameter_count',['../structk4a__calibration__intrinsics__t.html#a2e0654444a6d350ce3e5e19ffdb3c7f6',1,'k4a_calibration_intrinsics_t']]],
+  ['parametercount',['ParameterCount',['../struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_intrinsics_a28cb058f9be04625129eaafb2cda14d8.html#a28cb058f9be04625129eaafb2cda14d8',1,'Microsoft::Azure::Kinect::Sensor::Intrinsics']]],
+  ['parameters',['parameters',['../structk4a__calibration__intrinsics__t.html#a0b48309440647746ea36015cd618bbba',1,'k4a_calibration_intrinsics_t::parameters()'],['../struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_intrinsics_a48c74bb79d2901b59ecb623a60a25136.html#a48c74bb79d2901b59ecb623a60a25136',1,'Microsoft.Azure.Kinect.Sensor.Intrinsics.Parameters()']]]
 ];

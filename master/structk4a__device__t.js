@@ -14,7 +14,7 @@ var structk4a__device__t =
     [ "k4a_device_get_version", "group___functions_gaea1def0a70bfa64ba275534be945669e.html#gaea1def0a70bfa64ba275534be945669e", null ],
     [ "k4a_device_open", "group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113.html#ga3d4eb5dfbf4d576d4978b66ea419f113", null ],
     [ "k4a_device_set_color_control", "group___functions_gae81269489170b26b7f0bbe1a7f9d31d6.html#gae81269489170b26b7f0bbe1a7f9d31d6", null ],
-    [ "k4a_device_start_cameras", "group___functions_ga4dc81cbeb54b07e4bbb7d639c448f6eb.html#ga4dc81cbeb54b07e4bbb7d639c448f6eb", null ],
+    [ "k4a_device_start_cameras", "group___functions_gaad7a85e1e5471810262442fc4a8e217a.html#gaad7a85e1e5471810262442fc4a8e217a", null ],
     [ "k4a_device_start_imu", "group___functions_gaa855688659a69c0098ce9e0b2ffcc152.html#gaa855688659a69c0098ce9e0b2ffcc152", null ],
     [ "k4a_device_stop_cameras", "group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8.html#ga4fa0e0a011a7105309ad97f081a5d6b8", null ],
     [ "k4a_device_stop_imu", "group___functions_ga731c3ddd0833ce86d31e278992cf3453.html#ga731c3ddd0833ce86d31e278992cf3453", null ]

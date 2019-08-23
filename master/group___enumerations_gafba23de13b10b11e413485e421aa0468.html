@@ -104,13 +104,14 @@ Control values set on a device are reset only when the device is power cycled. T
  <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggafba23de13b10b11e413485e421aa0468a13b21d4ea33a20633096955c966d96e5"></a>K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE&#160;</td><td class="fielddoc"><p>Exposure time setting. </p>
 <p>May be set to <a class="el" href="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88.html#gga3485402fc1bc5dc709e0d5859b6e8c88a4f851ff5f566e23588abaa10ba1e9194" title="set the associated k4a_color_control_command_t to auto ">K4A_COLOR_CONTROL_MODE_AUTO</a> or <a class="el" href="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88.html#gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" title="set the associated k4a_color_control_command_t to manual ">K4A_COLOR_CONTROL_MODE_MANUAL</a>.</p>
+<p>The Azure Kinect supports a limited number of fixed expsore settings. When setting this, expect the exposure to be rounded up to the nearest setting. Exceptions are 1) The last value in the table is the upper limit, so a value larger than this will be overridden to the largest entry in the table. 2) The exposure time cannot be larger than the equivelent FPS. So expect 100ms exposure time to be reduced to 30ms or 33.33ms when the camera is started. The most recent copy of the table 'device_exposure_mapping' is in <a href="https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/src/color/color_priv.h">https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/src/color/color_priv.h</a></p>
 <p>Exposure time is measured in microseconds. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ggafba23de13b10b11e413485e421aa0468a2dc2ccb23e64049b49a57e2a44346e46"></a>K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY&#160;</td><td class="fielddoc"><p>Exposure or Framerate priority setting. </p>
 <p>May only be set to <a class="el" href="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88.html#gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" title="set the associated k4a_color_control_command_t to manual ">K4A_COLOR_CONTROL_MODE_MANUAL</a>.</p>
 <p>Value of 0 means framerate priority. Value of 1 means exposure priority.</p>
 <p>Using exposure priority may impact the framerate of both the color and depth cameras.</p>
-<p>Deprecated starting in 1.1.0. Please discontinue usage, firmware does not support this. </p>
+<p>Deprecated starting in 1.2.0. Please discontinue usage, firmware does not support this. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ggafba23de13b10b11e413485e421aa0468a4c6d97415ef755ab4966e5952d68eb5d"></a>K4A_COLOR_CONTROL_BRIGHTNESS&#160;</td><td class="fielddoc"><p>Brightness setting. </p>
 <p>May only be set to <a class="el" href="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88.html#gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" title="set the associated k4a_color_control_command_t to manual ">K4A_COLOR_CONTROL_MODE_MANUAL</a>.</p>

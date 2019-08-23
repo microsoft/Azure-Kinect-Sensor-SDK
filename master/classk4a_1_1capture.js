@@ -9,6 +9,7 @@ var classk4a_1_1capture =
     [ "get_depth_image", "classk4a_1_1capture_a36de50df5f36391e7ed606c0cb5607a2.html#a36de50df5f36391e7ed606c0cb5607a2", null ],
     [ "get_ir_image", "classk4a_1_1capture_aa19b3af5fefbb2dc4dabd4a31c94d6fc.html#aa19b3af5fefbb2dc4dabd4a31c94d6fc", null ],
     [ "get_temperature_c", "classk4a_1_1capture_a48bbcd6a4e69cf1c5574162d2d0f0d33.html#a48bbcd6a4e69cf1c5574162d2d0f0d33", null ],
+    [ "handle", "classk4a_1_1capture_a5e5a361b96542cc0206524b03ddaf95d.html#a5e5a361b96542cc0206524b03ddaf95d", null ],
     [ "operator bool", "classk4a_1_1capture.html#a9b195bd62ed46c3138b88942ca8b6447", null ],
     [ "operator!=", "classk4a_1_1capture.html#a34e5cc8621b5c782f79e8ad7a6d667b1", null ],
     [ "operator!=", "classk4a_1_1capture.html#a1a5b1eac81bfd22a978f5c2ccbfc38a4", null ],
