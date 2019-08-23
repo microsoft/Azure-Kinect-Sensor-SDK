@@ -98,7 +98,8 @@ TEST_F(playback_perf, test_open)
             {
                 std::cout << std::endl;
                 std::cout << "First " << images[i].second << " image:" << std::endl;
-                std::cout << "    Timestamp: " << k4a_image_get_timestamp_usec(images[i].first) << " usec" << std::endl;
+                std::cout << "    Timestamp: " << k4a_image_get_device_timestamp_usec(images[i].first) << " usec"
+                          << std::endl;
                 std::cout << "    Image format: " << format_names[k4a_image_get_format(images[i].first)] << std::endl;
                 std::cout << "    Resolution: " << k4a_image_get_width_pixels(images[i].first) << "x"
                           << k4a_image_get_height_pixels(images[i].first) << std::endl;
@@ -106,6 +107,28 @@ TEST_F(playback_perf, test_open)
                           << " (stride: " << k4a_image_get_stride_bytes(images[i].first) << " bytes)" << std::endl;
                 k4a_image_release(images[i].first);
             }
+        }
+    }
+
+    if (config.imu_track_enabled)
+    {
+        k4a_imu_sample_t imu_sample = { 0 };
+        k4a_stream_result_t playback_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
+        ASSERT_NE(playback_result, K4A_STREAM_RESULT_FAILED);
+        if (playback_result == K4A_STREAM_RESULT_EOF)
+        {
+            std::cout << "No IMU data in recording." << std::endl;
+        }
+        else
+        {
+            std::cout << std::endl;
+            std::cout << "First IMU sample:" << std::endl;
+            std::cout << "    Accel Timestamp: " << imu_sample.acc_timestamp_usec << " usec" << std::endl;
+            std::cout << "    Accel Data: (" << imu_sample.acc_sample.xyz.x << ", " << imu_sample.acc_sample.xyz.y
+                      << ", " << imu_sample.acc_sample.xyz.z << ")" << std::endl;
+            std::cout << "    Gyro Timestamp: " << imu_sample.gyro_timestamp_usec << " usec" << std::endl;
+            std::cout << "    Gyro Data: (" << imu_sample.gyro_sample.xyz.x << ", " << imu_sample.gyro_sample.xyz.y
+                      << ", " << imu_sample.gyro_sample.xyz.z << ")" << std::endl;
         }
     }
 

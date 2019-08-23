@@ -3,6 +3,8 @@
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(DYNLIB_SRCS dynlib_windows.c)
+    set(DYNLIB_DEPENDENCIES 
+        pathcch.lib)
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(DYNLIB_SRCS dynlib_linux.c)
 else()
@@ -18,7 +20,8 @@ target_include_directories(k4a_dynlib PUBLIC ${K4A_PRIV_INCLUDE_DIR})
 
 target_link_libraries(k4a_dynlib PUBLIC
     k4ainternal::allocator
-    k4ainternal::logging)
+    k4ainternal::logging
+	${DYNLIB_DEPENDENCIES})
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     target_link_libraries(k4a_dynlib PUBLIC dl)

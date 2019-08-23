@@ -286,6 +286,7 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_depth_mode_to_string in k4a.c if enum values are added.
 typedef enum
 {
     K4A_DEPTH_MODE_OFF = 0,        /**< Depth sensor will be turned off with this setting. */
@@ -304,6 +305,7 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_color_resolution_to_string in k4a.c if enum values are added.
 typedef enum
 {
     K4A_COLOR_RESOLUTION_OFF = 0, /**< Color camera will be turned off with this setting */
@@ -326,6 +328,7 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+// Be sure to update k4a_image_format_to_string in k4a.c if enum values are added.
 typedef enum
 {
     /** Color image type MJPG.
@@ -409,6 +412,28 @@ typedef enum
      */
     K4A_IMAGE_FORMAT_IR16,
 
+    /** Single channel image type CUSTOM8.
+     *
+     * \details
+     * Each pixel of CUSTOM8 is a single channel one byte of unsigned data.
+     *
+     * \details
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
+     */
+    K4A_IMAGE_FORMAT_CUSTOM8,
+
+    /** Single channel image type CUSTOM16.
+     *
+     * \details
+     * Each pixel of CUSTOM16 is a single channel two bytes of little endian unsigned data.
+     *
+     * \details
+     * Stride indicates the length of each line in bytes and should be used to determine the start location of each
+     * line of the image in memory.
+     */
+    K4A_IMAGE_FORMAT_CUSTOM16,
+
     /** Custom image format.
      *
      * \details
@@ -420,12 +445,10 @@ typedef enum
     K4A_IMAGE_FORMAT_CUSTOM,
 } k4a_image_format_t;
 
-/** Color and depth sensor frame rate.
+/** Transformation interpolation type.
  *
  * \remarks
- * This enumeration is used to select the desired frame rate to operate the cameras. The actual
- * frame rate may vary slightly due to dropped data, synchronization variation between devices,
- * clock accuracy, or if the camera exposure priority mode causes reduced frame rate.
+ * Interpolation type used with k4a_transformation_depth_image_to_color_camera_custom.
  *
  * \xmlonly
  * <requirements>
@@ -433,6 +456,25 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
+typedef enum
+{
+    K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST = 0, /**< Nearest neighbor interpolation */
+    K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,      /**< Linear interpolation */
+} k4a_transformation_interpolation_type_t;
+
+/** Color and depth sensor frame rate.
+ *
+ * \remarks
+ * This enumeration is used to select the desired frame rate to operate the cameras. The actual
+ * frame rate may vary slightly due to dropped data, synchronization variation between devices,
+ * clock accuracy, or if the camera exposure priority mode causes reduced frame rate.
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+// Be sure to update k4a_fps_to_string in k4a.c if enum values are added.
 typedef enum
 {
     K4A_FRAMES_PER_SECOND_5 = 0, /**< 5 FPS */
@@ -466,6 +508,14 @@ typedef enum
      * May be set to ::K4A_COLOR_CONTROL_MODE_AUTO or ::K4A_COLOR_CONTROL_MODE_MANUAL.
      *
      * \details
+     * The Azure Kinect supports a limited number of fixed expsore settings. When setting this, expect the exposure to
+     * be rounded up to the nearest setting. Exceptions are 1) The last value in the table is the upper limit, so a
+     * value larger than this will be overridden to the largest entry in the table. 2) The exposure time cannot be
+     * larger than the equivelent FPS. So expect 100ms exposure time to be reduced to 30ms or 33.33ms when the camera is
+     * started. The most recent copy of the table 'device_exposure_mapping' is in
+     * https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/src/color/color_priv.h
+     *
+     * \details
      * Exposure time is measured in microseconds.
      */
     K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE = 0,
@@ -482,7 +532,7 @@ typedef enum
      * Using exposure priority may impact the framerate of both the color and depth cameras.
      *
      * \details
-     * Deprecated starting in 1.1.0. Please discontinue usage, firmware does not support this.
+     * Deprecated starting in 1.2.0. Please discontinue usage, firmware does not support this.
      */
     K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY,
 
@@ -587,7 +637,9 @@ typedef enum
 {
     K4A_WIRED_SYNC_MODE_STANDALONE, /**< Neither 'Sync In' or 'Sync Out' connections are used. */
     K4A_WIRED_SYNC_MODE_MASTER,     /**< The 'Sync Out' jack is enabled and synchronization data it driven out the
-                                       connected wire.*/
+                                       connected wire. While in master mode the color camera must be enabled as part of the
+                                       multi device sync signalling logic. Even if the color image is not needed, the color
+                                       camera must be running.*/
     K4A_WIRED_SYNC_MODE_SUBORDINATE /**< The 'Sync In' jack is used for synchronization and 'Sync Out' is driven for the
                                        next device in the chain. 'Sync Out' is a mirror of 'Sync In' for this mode.
                                      */
@@ -705,13 +757,19 @@ typedef enum
  *
  * The SDK can log data to the console, files, or to a custom handler.
  *
- * Environment Variables
+ * Environment Variables:
+ *
+ * K4A_ENABLE_LOG_TO_A_FILE / K4A_RECORD_ENABLE_LOG_TO_A_FILE
+ * Specifies the log file to save the log to. K4a.dll and k4arecord.dll can not log to the same file.
  *
  * K4A_ENABLE_LOG_TO_A_FILE =
+ * K4A_RECORD_ENABLE_LOG_TO_A_FILE =
  *    0    - completely disable logging to a file
  *    log\custom.log - log all messages to the path and file specified - must end in '.log' to
  *                     be considered a valid entry
- *    ** When enabled this takes precedence over the value of K4A_ENABLE_LOG_TO_STDOUT
+ *    NOTE 1: When enabled this takes precedence over the value of K4A_ENABLE_LOG_TO_STDOUT.
+ *    NOTE 2: This can not be set to the same value as K4A_RECORD_ENABLE_LOG_TO_A_FILE as they represent separate
+ *            logger instance that do not allowed shared access to the file being written to.
  *
  * K4A_ENABLE_LOG_TO_STDOUT =
  *    0    - disable logging to stdout
@@ -805,6 +863,30 @@ typedef void(k4a_logging_message_cb_t)(void *context,
  *
  */
 typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
+
+/** Callback function for a memory allocation.
+ *
+ * \param size
+ * Minimum size in bytes needed for the buffer.
+ *
+ * \param context
+ * Output parameter for a context that will be provided in the subsequent call to the \ref k4a_memory_destroy_cb_t
+ * callback.
+ *
+ * \return
+ * A pointer to the newly allocated memory.
+ *
+ * \remarks
+ * A callback of this type is provided when there is an application defined allocator.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ *
+ */
+typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
 
 /**
  *
@@ -915,8 +997,8 @@ typedef struct _k4a_device_configuration_t
  */
 typedef struct _k4a_calibration_extrinsics_t
 {
-    float rotation[9];    /**< Rotation matrix*/
-    float translation[3]; /**< Translation vector*/
+    float rotation[9];    /**< 3x3 Rotation matrix stored in row major order */
+    float translation[3]; /**< Translation vector, x,y,z (in millimeters) */
 } k4a_calibration_extrinsics_t;
 
 /** Camera intrinsic calibration data.

@@ -1,0 +1,24 @@
+﻿<Window x:Class="Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" Closed="Window_Closed">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+            
+        <Image x:Name="inputColorImageViewPane" />
+        <Image x:Name="outputColorImageViewPane" Grid.Column="1"/>
+
+        <Label x:Name="fps" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1"></Label>
+    </Grid>
+</Window>

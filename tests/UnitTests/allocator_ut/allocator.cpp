@@ -14,7 +14,7 @@
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }
 
 #define GTEST_LOG_ERROR std::cout << "[    ERROR ] "
@@ -86,12 +86,12 @@ TEST(allocator_ut, allocator_api_validation)
         ASSERT_NE((image_c = capture_get_color_image(capture_c)), (k4a_image_t)NULL);
         ASSERT_NE((image_d = capture_get_depth_image(capture_d)), (k4a_image_t)NULL);
 
-        image_set_timestamp_usec(image_d, 0x1234);
-        image_set_timestamp_usec(image_c, 0x5678);
-        image_set_timestamp_usec(NULL, 0x2222);
-        image_set_timestamp_usec(NULL, 0x1111);
-        image_set_timestamp_usec(image_d, 0); // should be rejected for being 0
-        image_set_timestamp_usec(image_c, 0); // should be rejected for being 0
+        image_set_device_timestamp_usec(image_d, 0x1234);
+        image_set_device_timestamp_usec(image_c, 0x5678);
+        image_set_device_timestamp_usec(NULL, 0x2222);
+        image_set_device_timestamp_usec(NULL, 0x1111);
+        image_set_device_timestamp_usec(image_d, 0); // should be rejected for being 0
+        image_set_device_timestamp_usec(image_c, 0); // should be rejected for being 0
 
         image_dec_ref(image_c);
         image_dec_ref(image_d);
@@ -150,12 +150,18 @@ TEST(allocator_ut, allocator_api_validation)
     ASSERT_EQ(allocator_test_for_leaks(), 0);
 }
 
+static void image_free_function(void *buffer, void *context)
+{
+    (void)context;
+    allocator_free(buffer);
+}
+
 TEST(allocator_ut, image_api_validation)
 {
     uint8_t *buffer = NULL;
     k4a_image_t image = NULL;
     const int IMAGE_SIZE = 128;
-    void *context;
+    void *context = NULL;
 
     {
         allocation_source_t source_depth = ALLOCATION_SOURCE_DEPTH;
@@ -175,44 +181,108 @@ TEST(allocator_ut, image_api_validation)
 
     {
         // Unsupported formats for this creation API.
+
+        // Invalid FORMAT
         k4a_image_format_t bad_format = (k4a_image_format_t)99;
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, ALLOCATION_SOURCE_USER, &image));
 
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 10, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 0, 0, 0, NULL));
+        // No output argument
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, ALLOCATION_SOURCE_USER, NULL));
 
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 10, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 10, 0, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 10, 0, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 1, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 1, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 0, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create(bad_format, 0, 0, 0, NULL));
+        // Stride of zero
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, ALLOCATION_SOURCE_USER, &image));
 
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, &image));
+        // Stride length
+        // Validate a valid length and an invalid length
+
+        // NV12
+        //   Minimum stride
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 10, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(10 * 10 * 3 / 2, (int)image_get_size(image));
         image_dec_ref(image);
+        //   Extra stride
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 11, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(10 * 11 * 3 / 2, (int)image_get_size(image));
+        image_dec_ref(image);
+        //   Insufficient stride
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 9, ALLOCATION_SOURCE_USER, &image));
+        //   Odd number of rows
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 11, 20, ALLOCATION_SOURCE_USER, &image));
+        //   Odd number of columns
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 11, 10, 20, ALLOCATION_SOURCE_USER, &image));
+
+        // YUY2
+        //   Minimum stride
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 10, 20, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(/* lines * stride*/ 10 * 20, (int)image_get_size(image));
+        image_dec_ref(image);
+        //   Extra stride
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 10, 22, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(/* lines * stride*/ 10 * 22, (int)image_get_size(image));
+        image_dec_ref(image);
+        //   Insufficient stride
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 10, 19, ALLOCATION_SOURCE_USER, &image));
+        //   Odd number of rows
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 11, 20, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(/* lines * stride*/ 11 * 20, (int)image_get_size(image));
+        image_dec_ref(image);
+        //   Odd number of columns
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 11, 10, 20, ALLOCATION_SOURCE_USER, &image));
+
+        // BGRA32
+        //   Minimum stride
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32, 10, 10, 40, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(/* lines * stride*/ 10 * 40, (int)image_get_size(image));
+        image_dec_ref(image);
+        //   Insufficient stride
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32, 10, 10, 39, ALLOCATION_SOURCE_USER, &image));
+
+        // MJPEG (no length is valid)
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_MJPG, 10, 10, 100, ALLOCATION_SOURCE_USER, &image));
+
+        // DEPTH16
+        //   Minimum stride
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_DEPTH16, 10, 10, 20, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(10 * 10 * 2, (int)image_get_size(image));
+        image_dec_ref(image);
+        //   Insufficient stride
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  image_create(K4A_IMAGE_FORMAT_DEPTH16, 10, 10, 19, ALLOCATION_SOURCE_USER, &image));
+
+        // Custom8
+        //   Minimum stride
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 10, 10, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(10 * 10, (int)image_get_size(image));
+        image_dec_ref(image);
+        //   Insufficient stride
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 10, 9, ALLOCATION_SOURCE_USER, &image));
+
+        // Height of zero
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 0, 10, ALLOCATION_SOURCE_USER, &image));
+
+        // Width of zero
+        ASSERT_EQ(K4A_RESULT_FAILED,
+                  (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 0, 10, 10, ALLOCATION_SOURCE_USER, &image));
+
         ASSERT_EQ(allocator_test_for_leaks(), 0);
     }
 
@@ -220,87 +290,94 @@ TEST(allocator_ut, image_api_validation)
         k4a_image_format_t bad_format = (k4a_image_format_t)99;
 
         // clang-format off
-        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
+        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
 
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,   10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,   10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, NULL));
 
-        //ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0,  1, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0,  1, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0,  0, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0,  0, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  10, 1, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  10, 0, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  10, 0, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  0,  1, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  0,  1, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  0,  0, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  0,  0, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 10, 0, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 10, 0, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 0,  1, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 0,  1, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 0,  0, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 0,  0, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  10, 1, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  10, 0, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  10, 0, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  0,  1, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  0,  1, buffer, IMAGE_SIZE, allocator_free, context, NULL));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  0,  0, buffer, IMAGE_SIZE, allocator_free, context, &image));
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  0,  0, buffer, IMAGE_SIZE, allocator_free, context, NULL));
+        //ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0,  1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0,  1, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0,  0, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 0,  0, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  10, 1, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  10, 0, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  10, 0, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  0,  1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  0,  1, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  0,  0, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 0,  0,  0, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 10, 0, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 10, 0, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 0,  1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 0,  1, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 0,  0, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  10, 0,  0, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  10, 1, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  10, 0, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  10, 0, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  0,  1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  0,  1, buffer, IMAGE_SIZE, image_free_function, context, NULL));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  0,  0, buffer, IMAGE_SIZE, image_free_function, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(bad_format,                  0,  0,  0, buffer, IMAGE_SIZE, image_free_function, context, NULL));
 
         // No buffer
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, NULL,   IMAGE_SIZE, allocator_free, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, NULL,   IMAGE_SIZE, image_free_function, context, &image));
         // bad size
-        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, 0,          allocator_free, context, &image));
+        ASSERT_EQ(K4A_RESULT_FAILED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, 0,          image_free_function, context, &image));
 
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_MJPG, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_MJPG, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
         image_dec_ref(image);
 
-        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
         image_dec_ref(image);
 
-        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
         image_dec_ref(image);
 
-        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_BGRA32, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_BGRA32, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
         image_dec_ref(image);
 
-        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_DEPTH16, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_DEPTH16, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
         image_dec_ref(image);
 
-        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_IR16, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_IR16, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
         image_dec_ref(image);
 
-        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_CUSTOM, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_CUSTOM, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
         image_dec_ref(image);
 
-        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
+        ASSERT_NE((uint8_t*)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_MJPG, 10, 10, 1, buffer, IMAGE_SIZE, NULL, NULL, &image));
         image_dec_ref(image);
-        allocator_free(buffer, context);
+        allocator_free(buffer);
         ASSERT_EQ(allocator_test_for_leaks(), 0);
 
         // clang-format on
     }
 
     {
-        ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
+        ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  image_create_from_buffer(
-                      K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+                  image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12,
+                                           10,
+                                           10,
+                                           1,
+                                           buffer,
+                                           IMAGE_SIZE,
+                                           image_free_function,
+                                           context,
+                                           &image));
 
         ASSERT_EQ((uint8_t *)NULL, image_get_buffer(NULL));
         ASSERT_EQ(buffer, image_get_buffer(image));
@@ -324,20 +401,20 @@ TEST(allocator_ut, image_api_validation)
 
         ASSERT_EQ(0, image_get_stride_bytes(NULL));
         ASSERT_EQ(1, image_get_stride_bytes(image));
-        ASSERT_EQ(0, image_get_timestamp_usec(NULL));
-        ASSERT_EQ(0, image_get_timestamp_usec(image));
-        image_set_timestamp_usec(NULL, 10);
-        ASSERT_EQ(0, image_get_timestamp_usec(image));
-        image_set_timestamp_usec(image, 10); // should succeed
-        ASSERT_EQ(10, image_get_timestamp_usec(image));
-        image_set_timestamp_usec(image, 0); // should succeed
-        ASSERT_EQ(0, image_get_timestamp_usec(image));
+        ASSERT_EQ(0, image_get_device_timestamp_usec(NULL));
+        ASSERT_EQ(0, image_get_device_timestamp_usec(image));
+        image_set_device_timestamp_usec(NULL, 10);
+        ASSERT_EQ(0, image_get_device_timestamp_usec(image));
+        image_set_device_timestamp_usec(image, 10); // should succeed
+        ASSERT_EQ(10, image_get_device_timestamp_usec(image));
+        image_set_device_timestamp_usec(image, 0); // should succeed
+        ASSERT_EQ(0, image_get_device_timestamp_usec(image));
 
         ASSERT_EQ(0, image_get_exposure_usec(NULL));
         ASSERT_EQ(0, image_get_exposure_usec(image));
-        image_set_exposure_time_usec(NULL, 10);
+        image_set_exposure_usec(NULL, 10);
         ASSERT_EQ(0, image_get_exposure_usec(image));
-        image_set_exposure_time_usec(image, 10); // should succeed
+        image_set_exposure_usec(image, 10); // should succeed
         ASSERT_EQ(10, image_get_exposure_usec(image));
 
         ASSERT_EQ((uint32_t)0, image_get_white_balance(NULL));
@@ -359,10 +436,17 @@ TEST(allocator_ut, image_api_validation)
     }
 
     {
-        ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE, &context));
+        ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  image_create_from_buffer(
-                      K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, allocator_free, context, &image));
+                  image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12,
+                                           10,
+                                           10,
+                                           1,
+                                           buffer,
+                                           IMAGE_SIZE,
+                                           image_free_function,
+                                           context,
+                                           &image));
 
         image_inc_ref(NULL);
         image_inc_ref(NULL);
@@ -386,8 +470,70 @@ TEST(allocator_ut, image_api_validation)
         image_dec_ref(image);
         ASSERT_EQ(allocator_test_for_leaks(), 0);
     }
+
+    {
+        ASSERT_EQ(K4A_RESULT_FAILED, image_apply_system_timestamp(nullptr));
+        ASSERT_EQ(0, image_get_system_timestamp_nsec(nullptr));
+        image_set_system_timestamp_nsec(nullptr, 0);
+
+        ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create_from_buffer(K4A_IMAGE_FORMAT_COLOR_NV12,
+                                           10,
+                                           10,
+                                           1,
+                                           buffer,
+                                           IMAGE_SIZE,
+                                           image_free_function,
+                                           context,
+                                           &image));
+
+        ASSERT_EQ(0, image_get_system_timestamp_nsec(image));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_apply_system_timestamp(image));
+        ASSERT_NE(0, image_get_system_timestamp_nsec(image));
+        image_set_system_timestamp_nsec(image, 1);
+        ASSERT_EQ(1, image_get_system_timestamp_nsec(image));
+
+        image_dec_ref(image);
+        ASSERT_EQ(allocator_test_for_leaks(), 0);
+    }
+
     ASSERT_EQ(allocator_test_for_leaks(), 0);
 }
+
+//
+// This test is sensitive to workload and should be a manual test.
+//
+TEST(allocator_ut, manual_image_system_time)
+{
+    uint8_t *buffer = NULL;
+    k4a_image_t image;
+    const int IMAGE_SIZE = 128;
+    void *context = NULL;
+    uint64_t ts_last;
+
+    ASSERT_NE((uint8_t *)NULL, buffer = allocator_alloc(ALLOCATION_SOURCE_USER, IMAGE_SIZE));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              image_create_from_buffer(
+                  K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, buffer, IMAGE_SIZE, image_free_function, context, &image));
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_apply_system_timestamp(image));
+    ASSERT_NE((ts_last = image_get_system_timestamp_nsec(image)), 0);
+
+    for (int x = 0; x < 100; x++)
+    {
+        uint64_t ts;
+        ThreadAPI_Sleep(50);
+
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, image_apply_system_timestamp(image));
+        ASSERT_NE((ts = image_get_system_timestamp_nsec(image)), 0);
+        ASSERT_GT(ts, ts_last);
+        ts_last = ts;
+    }
+    image_dec_ref(image);
+    ASSERT_EQ(allocator_test_for_leaks(), 0);
+}
+
 static int allocator_thread_adjust_ref(void *param)
 {
     allocator_thread_adjust_ref_data_t *data = (allocator_thread_adjust_ref_data_t *)param;

@@ -11,6 +11,8 @@
 #define UVC_AUTO_EXPOSURE_MODE_SHUTTER_PRIORITY 4  // manual exposure time, auto iris
 #define UVC_AUTO_EXPOSURE_MODE_APERTURE_PRIORITY 8 // auto exposure time, manual iris
 
+#define CONV_100USEC_TO_USEC (100)
+
 // libUVC frame callback
 static void UVCFrameCallback(uvc_frame_t *frame, void *ptr)
 {
@@ -292,10 +294,10 @@ k4a_result_t UVCCameraReader::GetCameraControlCapabilities(const k4a_color_contr
 
         // 0.0001 sec to uSec
         capabilities->supportAuto = true;
-        capabilities->minValue = (int32_t)(min_exposure_time * 100);
-        capabilities->maxValue = (int32_t)(max_exposure_time * 100);
-        capabilities->stepValue = (int32_t)(step_exposure_time * 100);
-        capabilities->defaultValue = (int32_t)(default_exposure_time * 100);
+        capabilities->stepValue = (int32_t)(step_exposure_time * CONV_100USEC_TO_USEC);
+        capabilities->minValue = MapLinuxExposureToK4a((int32_t)min_exposure_time);
+        capabilities->maxValue = MapLinuxExposureToK4a((int32_t)max_exposure_time);
+        capabilities->defaultValue = MapLinuxExposureToK4a((int32_t)default_exposure_time);
         capabilities->valid = true;
     }
     break;
@@ -743,7 +745,7 @@ k4a_result_t UVCCameraReader::GetCameraControl(const k4a_color_control_command_t
             return K4A_RESULT_FAILED;
         }
 
-        *pValue = (int32_t)(exposure_time * 100); // 0.0001 sec to uSec
+        *pValue = MapLinuxExposureToK4a((int32_t)exposure_time);
     }
     break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
@@ -897,8 +899,6 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
     case K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE:
         if (mode == K4A_COLOR_CONTROL_MODE_MANUAL)
         {
-            uint32_t exposure_time = (uint32_t)(newValue / 100); // uSec to 0.0001 sec
-
             res = uvc_set_ae_mode(m_pDeviceHandle, UVC_AUTO_EXPOSURE_MODE_MANUAL);
             if (res < 0)
             {
@@ -906,7 +906,7 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
                 return K4A_RESULT_FAILED;
             }
 
-            res = uvc_set_exposure_abs(m_pDeviceHandle, exposure_time);
+            res = uvc_set_exposure_abs(m_pDeviceHandle, (uint32_t)MapK4aExposureToLinux(newValue));
             if (res < 0)
             {
                 LOG_ERROR("Failed to set exposure time abs: %s", uvc_strerror(res));
@@ -1074,6 +1074,10 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
                 LOG_ERROR("Failed to set powerline frequency: %s", uvc_strerror(res));
                 return K4A_RESULT_FAILED;
             }
+            else
+            {
+                m_using_60hz_power = (newValue == 2);
+            }
         }
         else
         {
@@ -1092,6 +1096,13 @@ k4a_result_t UVCCameraReader::SetCameraControl(const k4a_color_control_command_t
     }
 
     return K4A_RESULT_SUCCEEDED;
+}
+
+// Callback function for when image objects are destroyed
+static void uvc_camerareader_free_allocation(void *buffer, void *context)
+{
+    (void)context;
+    allocator_free(buffer);
 }
 
 void UVCCameraReader::Callback(uvc_frame_t *frame)
@@ -1184,7 +1195,7 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
         }
 
         // Allocate K4A Color buffer
-        buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, buffer_size, &context);
+        buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, buffer_size);
         k4a_result_t result = K4A_RESULT_FROM_BOOL(buffer != NULL);
 
         if (K4A_SUCCEEDED(result))
@@ -1203,20 +1214,22 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
 
         if (K4A_SUCCEEDED(result))
         {
+            // The buffer size may be larger than the height * stride for some formats
+            // so we must use image_create_from_buffer rather than image_create
             result = TRACE_CALL(image_create_from_buffer(m_output_image_format,
                                                          (int)m_width_pixels,
                                                          (int)m_height_pixels,
                                                          stride,
                                                          buffer,
                                                          buffer_size,
-                                                         allocator_free,
+                                                         uvc_camerareader_free_allocation,
                                                          context,
                                                          &image));
         }
         else
         {
             // cleanup if there was an error
-            allocator_free(buffer, context);
+            allocator_free(buffer);
         }
 
         k4a_capture_t capture = NULL;
@@ -1228,8 +1241,11 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
         if (K4A_SUCCEEDED(result))
         {
             // Set metadata
-            image_set_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(framePTS));
-            image_set_exposure_time_usec(image, exposure_time);
+            uint64_t ts = (uint64_t)frame->capture_time_finished.tv_sec * 1000000000;
+            ts += (uint64_t)frame->capture_time_finished.tv_nsec;
+            image_set_system_timestamp_nsec(image, ts);
+            image_set_device_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(framePTS));
+            image_set_exposure_usec(image, exposure_time);
             image_set_iso_speed(image, iso_speed);
             image_set_white_balance(image, white_balance);
 
@@ -1286,4 +1302,48 @@ UVCCameraReader::DecodeMJPEGtoBGRA32(uint8_t *in_buf, const size_t in_size, uint
     }
 
     return K4A_RESULT_SUCCEEDED;
+}
+
+// Returns exposure in 100us time base
+int32_t UVCCameraReader::MapK4aExposureToLinux(int32_t K4aExposure_usec)
+{
+    // We map to the expected exposure then convert to 100us time base to ensure we roll over to the next exposure
+    // setting in the same way Windows does.
+    for (uint32_t x = 0; x < COUNTOF(device_exposure_mapping); x++)
+    {
+        int32_t mapped_exposure = device_exposure_mapping[x].exposure_mapped_50Hz_usec;
+        if (m_using_60hz_power)
+        {
+            mapped_exposure = device_exposure_mapping[x].exposure_mapped_60Hz_usec;
+        }
+
+        if (K4aExposure_usec <= mapped_exposure)
+        {
+            return mapped_exposure / CONV_100USEC_TO_USEC;
+        }
+    }
+
+    // Default to longest capture in the event mapping failed.
+    return MAX_EXPOSURE(m_using_60hz_power) / CONV_100USEC_TO_USEC;
+}
+
+int32_t UVCCameraReader::MapLinuxExposureToK4a(int32_t LinuxExposure)
+{
+    LinuxExposure *= CONV_100USEC_TO_USEC; // Convert Linux 100us units to us.
+    for (uint32_t x = 0; x < COUNTOF(device_exposure_mapping); x++)
+    {
+        int32_t mapped_exposure = device_exposure_mapping[x].exposure_mapped_50Hz_usec;
+        if (m_using_60hz_power)
+        {
+            mapped_exposure = device_exposure_mapping[x].exposure_mapped_60Hz_usec;
+        }
+
+        if (LinuxExposure <= mapped_exposure)
+        {
+            return mapped_exposure;
+        }
+    }
+
+    // Default to longest capture in the event mapping failed.
+    return MAX_EXPOSURE(m_using_60hz_power);
 }

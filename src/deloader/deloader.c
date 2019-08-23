@@ -185,22 +185,37 @@ k4a_depth_engine_result_code_t deloader_transform_engine_create_and_initialize(k
                                                                     callback_context);
 }
 
-k4a_depth_engine_result_code_t deloader_transform_engine_process_frame(k4a_transform_engine_context_t *context,
-                                                                       k4a_transform_engine_type_t type,
-                                                                       const void *depth_frame,
-                                                                       size_t depth_frame_size,
-                                                                       const void *color_frame,
-                                                                       size_t color_frame_size,
-                                                                       void *output_frame,
-                                                                       size_t output_frame_size)
+k4a_depth_engine_result_code_t
+deloader_transform_engine_process_frame(k4a_transform_engine_context_t *context,
+                                        k4a_transform_engine_type_t type,
+                                        const void *depth_frame,
+                                        size_t depth_frame_size,
+                                        const void *frame2,
+                                        size_t frame2_size,
+                                        void *output_frame,
+                                        size_t output_frame_size,
+                                        void *output_frame2,
+                                        size_t output_frame2_size,
+                                        k4a_transform_engine_interpolation_t interpolation,
+                                        uint32_t invalid_value)
 {
     if (!is_plugin_loaded())
     {
         return K4A_DEPTH_ENGINE_RESULT_FATAL_ERROR_ENGINE_NOT_LOADED;
     }
 
-    return g_deloader.plugin.transform_engine_process_frame(
-        context, type, depth_frame, depth_frame_size, color_frame, color_frame_size, output_frame, output_frame_size);
+    return g_deloader.plugin.transform_engine_process_frame(context,
+                                                            type,
+                                                            interpolation,
+                                                            invalid_value,
+                                                            depth_frame,
+                                                            depth_frame_size,
+                                                            frame2,
+                                                            frame2_size,
+                                                            output_frame,
+                                                            output_frame_size,
+                                                            output_frame2,
+                                                            output_frame2_size);
 }
 
 size_t deloader_transform_engine_get_output_frame_size(k4a_transform_engine_context_t *context,

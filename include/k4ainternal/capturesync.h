@@ -58,7 +58,7 @@ void capturesync_destroy(capturesync_t capturesync_handle);
  * \remarks
  * Enables the capturesync to enable its queues and begin synchronizing depth and color frames
  */
-k4a_result_t capturesync_start(capturesync_t capturesync_handle, k4a_device_configuration_t *config);
+k4a_result_t capturesync_start(capturesync_t capturesync_handle, const k4a_device_configuration_t *config);
 
 /** Prepares the capturesync object to stop synchronizing color and depth captures
  *

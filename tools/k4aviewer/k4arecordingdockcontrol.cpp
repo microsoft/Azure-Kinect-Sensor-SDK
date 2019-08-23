@@ -73,8 +73,9 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     // We don't record a depth track if the camera is started in passive IR mode
     //
     m_recordingHasDepth = m_recordConfiguration.depth_track_enabled;
+    m_recordingHasIR = m_recordConfiguration.ir_track_enabled;
     std::stringstream depthSS;
-    if (m_recordingHasDepth)
+    if (m_recordingHasDepth || m_recordingHasIR)
     {
         depthSS << m_recordConfiguration.depth_mode;
     }
@@ -111,8 +112,7 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
 
     m_subordinateDelayOffMasterUsec = m_recordConfiguration.subordinate_delay_off_master_usec;
     m_startTimestampOffsetUsec = m_recordConfiguration.start_timestamp_offset_usec;
-    m_playbackThreadState.TimestampOffset = std::chrono::microseconds(m_startTimestampOffsetUsec);
-    m_recordingLengthUsec = static_cast<uint64_t>(recording.get_last_timestamp().count());
+    m_recordingLengthUsec = static_cast<uint64_t>(recording.get_recording_length().count());
 
     // Device info
     //
@@ -360,12 +360,6 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
                         break;
                     }
 
-                    // Update the timestamps on the IMU samples using the timing data embedded in the recording
-                    // so we show comparable timestamps when playing back synchronized recordings
-                    //
-                    nextImuSample.acc_timestamp_usec += static_cast<uint64_t>(state->TimestampOffset.count());
-                    nextImuSample.gyro_timestamp_usec += static_cast<uint64_t>(state->TimestampOffset.count());
-
                     state->ImuDataSource.NotifyObservers(nextImuSample);
                 }
             }
@@ -391,7 +385,7 @@ bool K4ARecordingDockControl::PlaybackThreadFn(PlaybackThreadState *state)
         {
             if (image)
             {
-                image.set_timestamp(image.get_device_timestamp() + state->TimestampOffset);
+                image.set_timestamp(image.get_device_timestamp());
             }
         }
 
@@ -469,7 +463,7 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
                                          &m_playbackThreadState.CaptureDataSource,
                                          imuDataSource,
                                          nullptr, // Audio source - sound is not supported in recordings
-                                         m_recordingHasDepth,
+                                         m_recordingHasDepth || m_recordingHasIR,
                                          m_recordConfiguration.depth_mode,
                                          m_recordingHasColor,
                                          m_recordConfiguration.color_format,

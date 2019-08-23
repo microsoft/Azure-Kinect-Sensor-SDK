@@ -31,6 +31,9 @@ typedef void(image_destroy_cb_t)(void *buffer, void *context);
  * \param stride_bytes [IN]
  * stride of the image being created
  *
+ * \param source
+ * source of the image for allocation accounting
+ *
  * \return NULL if failed, otherwise a k4a_image_t handle
  *
  * If successful, \ref image_create will return an image_t handle. This function will allocate a function of size
@@ -38,8 +41,12 @@ typedef void(image_destroy_cb_t)(void *buffer, void *context);
  *
  * When done with the device, close the handle with \ref image_release
  */
-k4a_result_t
-image_create(k4a_image_format_t format, int width_pixels, int height_pixels, int stride_bytes, k4a_image_t *image);
+k4a_result_t image_create(k4a_image_format_t format,
+                          int width_pixels,
+                          int height_pixels,
+                          int stride_bytes,
+                          allocation_source_t source,
+                          k4a_image_t *image);
 
 /** Create a handle to an image object.
  * internal function to allocate an image object and memory blob of 'size'. Used for USB layer where we need counted
@@ -111,12 +118,15 @@ k4a_image_format_t image_get_format(k4a_image_t image_handle);
 int image_get_width_pixels(k4a_image_t image_handle);
 int image_get_height_pixels(k4a_image_t image_handle);
 int image_get_stride_bytes(k4a_image_t image_handle);
-uint64_t image_get_timestamp_usec(k4a_image_t image_handle);
+uint64_t image_get_device_timestamp_usec(k4a_image_t image_handle);
+uint64_t image_get_system_timestamp_nsec(k4a_image_t image_handle);
 uint64_t image_get_exposure_usec(k4a_image_t image_handle);
 uint32_t image_get_white_balance(k4a_image_t image_handle);
 uint32_t image_get_iso_speed(k4a_image_t image_handle);
-void image_set_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
-void image_set_exposure_time_usec(k4a_image_t image_handle, uint64_t exposure_time_usec);
+void image_set_device_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
+void image_set_system_timestamp_nsec(k4a_image_t image_handle, uint64_t timestamp_nsec);
+k4a_result_t image_apply_system_timestamp(k4a_image_t image_handle);
+void image_set_exposure_usec(k4a_image_t image_handle, uint64_t exposure_usec);
 void image_set_white_balance(k4a_image_t image_handle, uint32_t white_balance);
 void image_set_iso_speed(k4a_image_t image_handle, uint32_t iso_speed);
 

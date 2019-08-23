@@ -35,3 +35,7 @@
 [submodule "extern/libusb/src"]
 	path = extern/libusb/src
 	url = https://github.com/libusb/libusb
+[submodule "extern/libuvc/src"]
+	path = extern/libuvc/src
+	url = https://github.com/microsoft/libuvc.git
+	branch = Azure-Kinect-Sensor-SDK

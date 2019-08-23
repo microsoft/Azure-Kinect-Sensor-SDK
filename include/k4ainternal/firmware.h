@@ -8,6 +8,8 @@
 #define FIRMWARE_H
 
 #include <k4a/k4atypes.h>
+#include <k4ainternal/color_mcu.h>
+#include <k4ainternal/depth_mcu.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +49,10 @@ typedef struct _firmware_status_summary_t
 
 typedef struct _firmware_package_info_t
 {
+    char *path;
+    uint8_t *buffer;
+    size_t size;
+
     bool package_valid;
     bool crc_valid;
     k4a_version_t rgb;
@@ -59,7 +65,7 @@ typedef struct _firmware_package_info_t
     k4a_firmware_signature_t certificate_type;
 } firmware_package_info_t;
 
-k4a_result_t firmware_create(uint32_t index, firmware_t *firmware_handle);
+k4a_result_t firmware_create(char *device_serial_number, bool resetting_device, firmware_t *firmware_handle);
 void firmware_destroy(firmware_t firmware_handle);
 
 k4a_result_t firmware_download(firmware_t firmware_handle, uint8_t *pFirmwareBuffer, size_t firmwareSize);
@@ -68,15 +74,14 @@ k4a_result_t firmware_get_download_status(firmware_t firmware_handle, firmware_s
 
 k4a_result_t firmware_reset_device(firmware_t firmware_handle);
 
-k4a_buffer_result_t firmware_get_device_serialnum(firmware_t firmware_handle,
-                                                  char *serial_number,
-                                                  size_t *serial_number_size);
-
 k4a_result_t firmware_get_device_version(firmware_t firmware_handle, k4a_hardware_version_t *version);
 
-k4a_result_t parse_firmware_package(const uint8_t *firmware_buffer,
-                                    size_t firmware_size,
-                                    firmware_package_info_t *package_info);
+k4a_result_t parse_firmware_package(firmware_package_info_t *package_info);
+
+// If successful, the user must free the serial number
+k4a_result_t firmware_get_serial_number(colormcu_t colormcu, depthmcu_t depthmcu, char **serial_number);
+
+void firmware_free_serial_number(char *serial_number);
 
 #ifdef __cplusplus
 }

@@ -11,11 +11,10 @@
 
 // Library headers
 //
+#include <k4arecord/playback.hpp>
 
 // Project headers
 //
-#include "playback.hpp"
-
 #include "ik4adockcontrol.h"
 #include "k4adatasource.h"
 #include "k4aimugraphdatagenerator.h"
@@ -55,7 +54,6 @@ private:
         // Constant state (expected to be set once, accessible without synchronization)
         //
         std::chrono::microseconds TimePerFrame;
-        std::chrono::microseconds TimestampOffset = std::chrono::microseconds(0);
 
         // Recording state
         //
@@ -94,6 +92,7 @@ private:
 
     bool m_recordingHasColor = false;
     bool m_recordingHasDepth = false;
+    bool m_recordingHasIR = false;
 
     K4AWindowSet::ViewType m_viewType = K4AWindowSet::ViewType::Normal;
 

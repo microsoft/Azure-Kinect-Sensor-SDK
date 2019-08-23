@@ -56,6 +56,11 @@ set_target_properties(
         SOVERSION
             "${K4A_VERSION_MAJOR}.${K4A_VERSION_MINOR}")
 
+set(NAMELINK_IF_AVAILABLE)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+    set(NAMELINK_IF_AVAILABLE NAMELINK_COMPONENT development)
+endif()
+
 # Setup install
 include(GNUInstallDirs)
 install(
@@ -68,7 +73,7 @@ install(
             ${CMAKE_INSTALL_LIBDIR}
         COMPONENT
             runtime
-        NAMELINK_SKIP
+        ${NAMELINK_IF_AVAILABLE}
     ARCHIVE
         DESTINATION
             ${CMAKE_INSTALL_LIBDIR}
@@ -117,6 +122,7 @@ install(
     FILES
         ${K4A_INCLUDE_DIR}/k4arecord/record.h
         ${K4A_INCLUDE_DIR}/k4arecord/playback.h
+        ${K4A_INCLUDE_DIR}/k4arecord/playback.hpp
         ${K4A_INCLUDE_DIR}/k4arecord/types.h
         ${CMAKE_CURRENT_BINARY_DIR}/include/k4arecord/k4arecord_export.h
     DESTINATION

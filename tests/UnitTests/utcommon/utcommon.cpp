@@ -58,7 +58,7 @@ std::ostream &operator<<(std::ostream &s, const k4a_wait_result_t &val)
 
 extern "C" {
 
-static logger_t g_logger_handle = NULL;
+char K4A_ENV_VAR_LOG_TO_A_FILE[] = "K4A_ENABLE_LOG_TO_A_FILE_TEST";
 
 static void enable_leak_detection()
 {
@@ -81,12 +81,6 @@ void k4a_unittest_init()
 {
     enable_leak_detection();
 
-    logger_config_t logger_config;
-    logger_config_init_default(&logger_config);
-    logger_config.env_var_log_to_a_file = "K4A_ENABLE_LOG_TO_A_FILE_TEST";
-    assert(g_logger_handle == NULL);
-    (void)logger_create(&logger_config, &g_logger_handle);
-
     // Mocked functions that return k4a_result_t should default to returning K4A_RESULT_FAILED
     // unless specifically expected
     DefaultValue<k4a_result_t>::Set(K4A_RESULT_FAILED);
@@ -99,41 +93,11 @@ void k4a_unittest_deinit()
     DefaultValue<k4a_result_t>::Clear();
     DefaultValue<k4a_wait_result_t>::Clear();
     DefaultValue<k4a_buffer_result_t>::Clear();
-    logger_destroy(g_logger_handle);
 }
 
-#ifdef _WIN32
-char g_log_file_name[1024];
-void k4a_unittest_init_logging_with_processid()
+int k4a_test_common_main(int argc, char **argv)
 {
-    enable_leak_detection();
-
-    logger_config_t logger_config;
-    logger_t logger_handle = NULL;
-    logger_config_init_default(&logger_config);
-
-    // NOTE: K4A_ENABLE_LOG_TO_A_FILE=1 is what is needed to use this costom log
-    snprintf(g_log_file_name, sizeof(g_log_file_name), "k4a_%d_0x%x.log", _getpid(), _getpid());
-    printf("the log file name is %s\n", g_log_file_name);
-    logger_config.log_file = g_log_file_name;
-
-    (void)logger_create(&logger_config, &logger_handle);
-
-    // Mocked functions that return k4a_result_t should default to returning K4A_RESULT_FAILED
-    // unless specifically expected
-    DefaultValue<k4a_result_t>::Set(K4A_RESULT_FAILED);
-    DefaultValue<k4a_wait_result_t>::Set(K4A_WAIT_RESULT_FAILED);
-    DefaultValue<k4a_buffer_result_t>::Set(K4A_BUFFER_RESULT_FAILED);
-}
-#endif
-
-int k4a_test_commmon_main(int argc, char **argv)
-{
-#if 0
-    k4a_unittest_init_logging_with_processid();
-#else
     k4a_unittest_init();
-#endif
 
     ::testing::InitGoogleTest(&argc, argv);
 

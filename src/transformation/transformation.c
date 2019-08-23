@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#ifndef _MSC_VER
+#define _ISOC11_SOURCE /* for aligned_alloc() */
+#endif
+
 #include <k4ainternal/logging.h>
 #include <k4ainternal/deloader.h>
 #include <k4ainternal/tewrapper.h>
@@ -347,7 +351,11 @@ static k4a_result_t transformation_allocate_xy_tables(const k4a_calibration_t *c
         return K4A_RESULT_FAILED;
     }
 
-    *buffer = malloc(xy_tables_data_size * sizeof(float));
+#ifdef _MSC_VER
+    *buffer = _aligned_malloc(xy_tables_data_size * sizeof(float), 16);
+#else
+    *buffer = aligned_alloc(16, xy_tables_data_size * sizeof(float));
+#endif
 
     if (K4A_BUFFER_RESULT_SUCCEEDED !=
         TRACE_BUFFER_CALL(transformation_init_xy_tables(calibration, camera, *buffer, &xy_tables_data_size, xy_tables)))
@@ -439,11 +447,19 @@ void transformation_destroy(k4a_transformation_t transformation_handle)
 
     if (transformation_context->memory_depth_camera_xy_tables != 0)
     {
+#ifdef _MSC_VER
+        _aligned_free(transformation_context->memory_depth_camera_xy_tables);
+#else
         free(transformation_context->memory_depth_camera_xy_tables);
+#endif
     }
     if (transformation_context->memory_color_camera_xy_tables != 0)
     {
+#ifdef _MSC_VER
+        _aligned_free(transformation_context->memory_color_camera_xy_tables);
+#else
         free(transformation_context->memory_color_camera_xy_tables);
+#endif
     }
     if (transformation_context->tewrapper)
     {
@@ -452,12 +468,18 @@ void transformation_destroy(k4a_transformation_t transformation_handle)
     k4a_transformation_t_destroy(transformation_handle);
 }
 
-k4a_result_t
-transformation_depth_image_to_color_camera(k4a_transformation_t transformation_handle,
-                                           const uint8_t *depth_image_data,
-                                           const k4a_transformation_image_descriptor_t *depth_image_descriptor,
-                                           uint8_t *transformed_depth_image_data,
-                                           k4a_transformation_image_descriptor_t *transformed_depth_image_descriptor)
+k4a_result_t transformation_depth_image_to_color_camera_custom(
+    k4a_transformation_t transformation_handle,
+    const uint8_t *depth_image_data,
+    const k4a_transformation_image_descriptor_t *depth_image_descriptor,
+    const uint8_t *custom_image_data,
+    const k4a_transformation_image_descriptor_t *custom_image_descriptor,
+    uint8_t *transformed_depth_image_data,
+    k4a_transformation_image_descriptor_t *transformed_depth_image_descriptor,
+    uint8_t *transformed_custom_image_data,
+    k4a_transformation_image_descriptor_t *transformed_custom_image_descriptor,
+    k4a_transformation_interpolation_type_t interpolation_type,
+    uint32_t invalid_custom_value)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_transformation_t, transformation_handle);
     k4a_transformation_context_t *transformation_context = k4a_transformation_t_get_context(transformation_handle);
@@ -476,26 +498,63 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
                 &transformation_context->depth_camera_xy_tables,
                 depth_image_data,
                 depth_image_descriptor,
+                custom_image_data,
+                custom_image_descriptor,
                 transformed_depth_image_data,
-                transformed_depth_image_descriptor)))
+                transformed_depth_image_descriptor,
+                transformed_custom_image_data,
+                transformed_custom_image_descriptor)))
         {
             return K4A_RESULT_FAILED;
         }
 
         size_t depth_image_size = (size_t)(depth_image_descriptor->stride_bytes *
                                            depth_image_descriptor->height_pixels);
+        size_t custom_image_size = (size_t)(custom_image_descriptor->stride_bytes *
+                                            custom_image_descriptor->height_pixels);
         size_t transformed_depth_image_size = (size_t)(transformed_depth_image_descriptor->stride_bytes *
                                                        transformed_depth_image_descriptor->height_pixels);
+        size_t transformed_custom_image_size = (size_t)(transformed_custom_image_descriptor->stride_bytes *
+                                                        transformed_custom_image_descriptor->height_pixels);
+
+        k4a_transform_engine_type_t transform_type = K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR;
+        if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_CUSTOM8)
+        {
+            transform_type = K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM8_TO_COLOR;
+        }
+        else if (custom_image_descriptor->format == K4A_IMAGE_FORMAT_CUSTOM16)
+        {
+            transform_type = K4A_TRANSFORM_ENGINE_TYPE_DEPTH_CUSTOM16_TO_COLOR;
+        }
+
+        k4a_transform_engine_interpolation_t interpolation;
+        switch (interpolation_type)
+        {
+        case K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST:
+            interpolation = K4A_TRANSFORM_ENGINE_INTERPOLATION_NEAREST;
+            break;
+
+        case K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR:
+            interpolation = K4A_TRANSFORM_ENGINE_INTERPOLATION_LINEAR;
+            break;
+
+        default:
+            interpolation = K4A_TRANSFORM_ENGINE_INTERPOLATION_LINEAR;
+            break;
+        }
 
         if (K4A_FAILED(TRACE_CALL(tewrapper_process_frame(transformation_context->tewrapper,
-                                                          K4A_TRANSFORM_ENGINE_TYPE_DEPTH_TO_COLOR,
+                                                          transform_type,
                                                           depth_image_data,
                                                           depth_image_size,
-                                                          NULL, // Color image data is not needed when transform depth
-                                                                // image to the geometry of color camera
-                                                          0,
+                                                          custom_image_data,
+                                                          custom_image_size,
                                                           transformed_depth_image_data,
-                                                          transformed_depth_image_size))))
+                                                          transformed_depth_image_size,
+                                                          transformed_custom_image_data,
+                                                          transformed_custom_image_size,
+                                                          interpolation,
+                                                          invalid_custom_value))))
         {
             return K4A_RESULT_FAILED;
         }
@@ -508,8 +567,14 @@ transformation_depth_image_to_color_camera(k4a_transformation_t transformation_h
                                                                     &transformation_context->depth_camera_xy_tables,
                                                                     depth_image_data,
                                                                     depth_image_descriptor,
+                                                                    custom_image_data,
+                                                                    custom_image_descriptor,
                                                                     transformed_depth_image_data,
-                                                                    transformed_depth_image_descriptor)))
+                                                                    transformed_depth_image_descriptor,
+                                                                    transformed_custom_image_data,
+                                                                    transformed_custom_image_descriptor,
+                                                                    interpolation_type,
+                                                                    invalid_custom_value)))
         {
             return K4A_RESULT_FAILED;
         }
@@ -565,7 +630,11 @@ transformation_color_image_to_depth_camera(k4a_transformation_t transformation_h
                                                           color_image_data,
                                                           color_image_size,
                                                           transformed_color_image_data,
-                                                          transformed_color_image_size))))
+                                                          transformed_color_image_size,
+                                                          NULL,
+                                                          (size_t)0,
+                                                          K4A_TRANSFORM_ENGINE_INTERPOLATION_LINEAR,
+                                                          (uint16_t)0))))
         {
             return K4A_RESULT_FAILED;
         }

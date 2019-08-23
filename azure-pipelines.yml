@@ -7,9 +7,11 @@ variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
 - name: 'linux_firmware_version'
-  value: '1.6.987014'
+  value: '1.6.102075014'
 - name: 'windows_firmware_version'
-  value: '1.6.987014'
+  value: '1.6.102075014'
+- name: 'PackageVersion'
+  value: '1.2.0-alpha.10'
 
 trigger:
   batch: false
@@ -31,83 +33,115 @@ jobs:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2017_x64-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x64-msvc_rel_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
       VS2017_x86-msvc_rel_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
       VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
       VS2019_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x64'
+        MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'amd64'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'debug'
+      #   MSBuildPlatform: 'x64'
+      #   MSBuildConfiguration: 'Debug'
       #   vmImage: 'windows-2019'
       # VS2019_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
       #   CMakeArch: 'amd64'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'relwithdebinfo'
+      #   MSBuildPlatform: 'x64'
+      #   MSBuildConfiguration: 'Release'
       #   vmImage: 'windows-2019'
       VS2019_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
       VS2019_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
         CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'x86'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'debug'
+      #   MSBuildPlatform: 'x86'
+      #   MSBuildConfiguration: 'Debug'
       #   vmImage: 'windows-2019'
       # VS2019_x86-pc-windows-msvc_relwithdebinfo_msbuild:
       #   CMakeArch: 'x86'
       #   BuildGenerator: 'Visual Studio 16 2019'
       #   CMakeConfiguration: 'relwithdebinfo'
+      #   MSBuildPlatform: 'x86'
+      #   MSBuildConfiguration: 'Release'
       #   vmImage: 'windows-2019'
   pool:
     vmImage: $(vmImage)
@@ -115,7 +149,6 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    fetchDepth: 20
     lfs: false
     persistCredentials: true
     submodules: true
@@ -223,7 +256,7 @@ jobs:
 
   - script: 'ctest -V -C "$(CMakeConfiguration)" -L unit'
     workingDirectory: '$(Build.BinariesDirectory)'
-    displayName: 'Unit Tests'
+    displayName: 'Run Native Unit Tests'
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
@@ -234,13 +267,63 @@ jobs:
       testRunTitle: 'Unit Tests'
     condition: succeededOrFailed()
 
+  # Create a placeholder version of the depth engine to satisfy MSBuild copy rules.
+  # This version is not needed for actual execution.
+  # In the future we should fetch the real version from a valid source.
+  - powershell: |
+      if ("$(BuildGenerator)" -eq "Ninja")
+      {
+        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\depthengine_2_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\depthengine_2_0.dll" "Placeholder file, please download real depth engine." }
+      }
+      elseif ("$(BuildGenerator)" -like "Visual Studio *")
+      {
+        IF(-Not (Test-Path "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_2_0.dll")) { Add-Content "$(Build.BinariesDirectory)\bin\$(CMakeConfiguration)\depthengine_2_0.dll" "Placeholder file, please download real depth engine." }
+      }
+      else
+      {
+        Write-Error "Unknown Generator <<$(BuildGenerator)>>"
+      }
+    displayName: 'Create placeholder depth engine'
+
+  - task: NuGetToolInstaller@0
+    inputs:
+      versionSpec: '>=4.3.1' 
+
+  - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2 # NuGetCommand@2
+    inputs:
+      command: 'restore'
+      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+
+  - task: VSBuild@1
+    displayName: 'Build C# Wrappers'
+    inputs:
+      solution: '$(Build.SourcesDirectory)\src\csharp\K4a.sln'
+      msbuildArgs: '/p:BaseOutputPath="$(Build.BinariesDirectory)\bin\$(MSBuildConfiguration)\\"'
+      platform: '$(MSBuildPlatform)'
+      configuration: '$(MSBuildConfiguration)'
+
+  - task: VSTest@2
+    displayName: 'Run C# Unit Tests'
+    inputs:
+      testSelector: 'testAssemblies'
+      searchFolder: '$(Build.BinariesDirectory)\bin'
+      platform: '$(MSBuildPlatform)'
+      configuration: '$(MSBuildConfiguration)'
+      testAssemblyVer2: |
+        **/*UnitTests.dll
+        !**/obj/**
+  
+  # Clean up any placeholder version of the depth engine that were created.
+  - powershell:  Get-ChildItem -Path "$(Build.BinariesDirectory)\bin\\" -Filter "DepthEngine_*.dll" -Recurse | Remove-Item
+    displayName: 'Clean up temp depth engine'
+
   - task: CopyFiles@2
     displayName: 'Copy build folder to Staging'
     inputs:
       SourceFolder: '$(Build.BinariesDirectory)'
       Contents: |
         *
-        bin/*
+        bin/**/*
         docs/**/*
         CMakeFiles/**/*
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
@@ -260,7 +343,7 @@ jobs:
     displayName: 'Publish K4A Symbols'
     inputs:
       symbolsFolder: '$(Build.BinariesDirectory)'
-      searchPattern: 'bin/*.pdb'
+      searchPattern: 'bin/**/*.pdb'
       indexSources: true
       publishSymbols: true
       symbolServerType: 'teamServices'
@@ -303,7 +386,6 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    fetchDepth: 20
     lfs: false
     persistCredentials: true
     submodules: true
@@ -381,7 +463,6 @@ jobs:
   steps:
   - checkout: self
     clean: true
-    fetchDepth: 20
     lfs: false
     persistCredentials: true
     submodules: true
@@ -481,6 +562,9 @@ jobs:
       - Agent.OS -equals Windows_NT
 
     steps:
+    - task: VisualStudioTestPlatformInstaller@1
+      displayName: 'Install Visual Studio Test Platform tools'
+
     - checkout: self
       clean: true
       lfs: false
@@ -493,32 +577,81 @@ jobs:
         artifactName: 'amd64-windows-msvc-RelWithDebInfo'
         parallelizationLimit: 8
 
-    - powershell: |
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/debug/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\debug\depthengine_1_0.dll"
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/amd64/release/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\amd64\release\depthengine_1_0.dll"
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/debug/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\debug\depthengine_1_0.dll"
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/depthengineplugin/1.0.5/windows/x86/release/depthengine_1_0.dll$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\depthengineplugin\windows\x86\release\depthengine_1_0.dll"
-         $null = New-Item -ItemType Directory -Force -Ea 0 -Path "$(System.ArtifactsDirectory)\firmware"
-         Invoke-WebRequest -uri "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" -OutFile "$(System.ArtifactsDirectory)\firmware\AzureKinectDK_Fw_$(firmware_version).bin"
-      displayName: 'Download Resources'
+    - task: NuGetToolInstaller@0
+      inputs:
+        versionSpec: '>=5.1.0' 
 
+    - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2  #NugetCommand@2
+      displayName: "Get Azure Kinect NuGet Package"
+      inputs: 
+        command: custom 
+        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(PackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
 
     - task: CopyFiles@2
-      displayName: "Copy DepthEnginePlugin into bin folder"
+      displayName: "Copy DepthEngine into amd64/debug artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/amd64/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/debug"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into amd64/release artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/amd64/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into x86/debug artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/x86/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/x86/debug"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into x86/release artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/x86/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/x86/release"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy AzureKinectDK_Fw_$(firmware_version).bin artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/firmware/"
+        contents: "AzureKinectDK_Fw_$(firmware_version).bin"
+        targetFolder: "$(System.ArtifactsDirectory)/firmware"
+        flattenFolders: true
+
+    # we don't want to test other binaries in the NuGet package, so delete it.
+    - task: DeleteFiles@1
+      displayName: "Delete Microsoft.Azure.Kinect.Sensor NuGet Package"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir"
+        contents: '\*'
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into bin folder"
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
         flattenFolders: true
 
-    - task: PowerShell@2
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into C# functional tests folder"
       inputs:
-        targetType: 'filePath'
-        filePath: './scripts/Reset-Device.ps1'
+        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
+        contents: "depthengine*.dll"
+        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
+        flattenFolders: true
+
+    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -r'
+      workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
 
     - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
@@ -529,23 +662,28 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check Device Health'
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list amd64-windows-msvc-RelWithDebInfo/bin/functional_test_list.txt --bin amd64-windows-msvc-RelWithDebInfo/bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
       displayName: 'Run Functional Tests'
       timeoutInMinutes: 15
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list amd64-windows-msvc-RelWithDebInfo/bin/functional_test_list.txt --bin amd64-windows-msvc-RelWithDebInfo/bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
       displayName: 'Run Functional Tests - Onboarding'
       timeoutInMinutes: 15
       continueOnError: true
 
-    - task: PowerShell@2
+    - task: VSTest@2
+      displayName: 'Run C# Functional Tests'
       inputs:
-        targetType: 'filePath'
-        filePath: './scripts/Reset-Device.ps1'
-      displayName: 'Reset K4A Device'
-
+        testSelector: 'testAssemblies'
+        searchFolder: '$(Build.BinariesDirectory)'
+        platform: '$(MSBuildPlatform)'
+        configuration: '$(MSBuildConfiguration)'
+        vsTestVersion: 'toolsInstaller'
+        testAssemblyVer2: |
+          **/*FunctionalTests.dll
+          !**/obj/**
 
 - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
   - job: LinuxFunctionalTests
@@ -571,30 +709,57 @@ jobs:
       inputs:
         artifactName: 'x86_64-linux-clang-RelWithDebInfo'
         parallelizationLimit: 8
-
-
-    - task: CmdLine@2
-      displayName: 'Download Azure Kinect Firmware'
+        
+    - task: NuGetToolInstaller@0
       inputs:
-        script: curl "$(ResourceBaseUrl)/firmware/AzureKinectDK_Fw_$(firmware_version).bin$(ResourceToken)" --output $(System.ArtifactsDirectory)/firmware/AzureKinectDK_Fw_$(firmware_version).bin --create-dirs
-                
-    - task: CmdLine@2
-      displayName: 'Download DepthEngine Plugin'
-      inputs:
-        script: |
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/debug/libdepthengine.so.1.0$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug/libdepthengine.so.1.0 --create-dirs
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/debug/libdepthengine.so$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug/libdepthengine.so --create-dirs
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/release/libdepthengine.so.1.0$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/libdepthengine.so.1.0 --create-dirs
-         curl "$(ResourceBaseUrl)/depthengineplugin/1.0.5/linux/x86_64/release/libdepthengine.so$(ResourceToken)" --output $(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/libdepthengine.so --create-dirs
+        versionSpec: '>=5.1.0' 
 
-    - task: CmdLine@2
-      displayName: 'Download findconnectedport'
-      inputs:
-        script:  curl "$(ResourceBaseUrl)/findconnectedport/linux/findconnectedport$(ResourceToken)" --output $(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport --create-dirs
+    # The account on the NUC does not currently give this user permission to install, so we have done so manually.
+    # This captures the dependency NuGet has in this environment. We locally ran 'apt-get install mono-complete'
+    #- script: 'apt-get install mono'
+    #  workingDirectory: '$(System.ArtifactsDirectory)'
+    #  displayName: "Ensure Mono is installed"
 
-    - script: 'chmod +x $(System.ArtifactsDirectory)/findconnectedport/linux/*'
-      workingDirectory: '$(System.ArtifactsDirectory)'
-      displayName: 'Add execution property to findconnectedport'
+    - task: 333b11bd-d341-40d9-afcf-b32d5ce6f23b@2  #NugetCommand@2
+      displayName: "Get Azure Kinect NuGet Package"
+      inputs: 
+        command: custom 
+        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(PackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
+
+    - script: 'ls -alR'
+      workingDirectory: '$(System.ArtifactsDirectory)/NugetOutputDir'
+      displayName: "Temp List files"
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into amd64/debug artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/linux/lib/native/x64/release/"
+        contents: "libdepthengine*"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy DepthEngine into amd64/release artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/linux/lib/native/x64/release/"
+        contents: "libdepthengine*"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release"
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: "Copy AzureKinectDK_Fw_$(firmware_version).bin artifacts folder"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/firmware/"
+        contents: "AzureKinectDK_Fw_$(firmware_version).bin"
+        targetFolder: "$(System.ArtifactsDirectory)/firmware"
+        flattenFolders: true
+
+    # we don't want to test other binaries in the NuGet package, so delete it.
+    - task: DeleteFiles@1
+      displayName: "Delete Microsoft.Azure.Kinect.Sensor NuGet Package"
+      inputs:
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir"
+        contents: '\*'
 
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into Build Artifacts"
@@ -617,15 +782,11 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check openGL version'
 
-    - script: 'stty -F /dev/ttyACM0 -hupcl'
+    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
-      displayName: 'Prevent the USB connector from accidentally being reset'
-
-      # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-      # Wait a little bit so the device can enumerate, 3 seconds has seemed good.
-    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport && sleep 3'
-      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
       displayName: 'Reset K4A Device'
+      env:
+        K4A_LOG_LEVEL: 'I'
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
@@ -637,18 +798,13 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check Device Health'
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list x86_64-linux-clang-relwithdebinfo/bin/functional_test_list.txt --bin x86_64-linux-clang-relwithdebinfo/bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
       displayName: 'Run Functional Tests'
       timeoutInMinutes: 15
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list x86_64-linux-clang-relwithdebinfo/bin/functional_test_list.txt --bin x86_64-linux-clang-relwithdebinfo/bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
-      workingDirectory: '$(System.ArtifactsDirectory)'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
       displayName: 'Run Functional Tests - Onboarding'
       timeoutInMinutes: 15
       continueOnError: true
-
-    # The binary is built from https://microsoft.visualstudio.com/Analog/_git/systems.rustyhmdkit
-    - script: '$(System.ArtifactsDirectory)/findconnectedport/linux/findconnectedport'
-      workingDirectory: '$(System.ArtifactsDirectory)/findconnectedport/linux/'
-      displayName: 'Reset K4A Device'

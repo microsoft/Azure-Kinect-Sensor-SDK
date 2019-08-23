@@ -20,43 +20,6 @@ protected:
     void TearDown() override {}
 };
 
-TEST_F(logging_ut, create)
-{
-    // Create the logging instance
-    logger_t logger_handle1 = nullptr;
-    logger_t logger_handle2 = nullptr;
-    logger_config_t config;
-
-    logger_config_init_default(&config);
-
-    // Validate input checking
-    ASSERT_EQ(K4A_RESULT_FAILED, logger_create(nullptr, nullptr));
-    ASSERT_EQ(K4A_RESULT_FAILED, logger_create(&config, nullptr));
-    ASSERT_EQ(K4A_RESULT_FAILED, logger_create(nullptr, &logger_handle1));
-    ASSERT_EQ(logger_handle1, (logger_t) nullptr);
-
-    // Create an instance
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_create(&config, &logger_handle1));
-    ASSERT_NE(logger_handle1, (logger_t) nullptr);
-
-    // Create a second instance
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, logger_create(&config, &logger_handle2));
-    ASSERT_NE(logger_handle2, (logger_t) nullptr);
-    ASSERT_NE(logger_handle2, logger_handle1);
-
-    // Verify the instances are unique
-    ASSERT_NE(logger_handle1, logger_handle2);
-
-    LOG_TRACE("Test Trace Message", 0);
-    LOG_INFO("Test Info Message", 0);
-    LOG_WARNING("Test Warning Message", 0);
-    LOG_ERROR("Test Error Message", 0);
-    LOG_CRITICAL("Test Critical Message", 0);
-
-    logger_destroy(logger_handle1);
-    logger_destroy(logger_handle2);
-}
-
 typedef struct _logger_test_callback_info_t
 {
     int message_count_trace;
@@ -298,5 +261,5 @@ TEST_F(logging_ut, callback_threading)
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }

@@ -164,19 +164,12 @@ CFrameContext::~CFrameContext()
     }
 }
 
-typedef struct _mf_buffer_wrapper_t
-{
-    void *allocator_context;
-    CFrameContext *pFrameContext;
-} mf_buffer_wrapper_t;
-
 void FrameDestroyCallback(void *frame, void *context)
 {
     (void)frame;
-    mf_buffer_wrapper_t *wrapper = (mf_buffer_wrapper_t *)context;
+    CFrameContext *pFrameContext = (CFrameContext *)context;
 
-    delete wrapper->pFrameContext;
-    allocator_free(wrapper, wrapper->allocator_context);
+    delete pFrameContext;
 }
 
 CMFCameraReader::CMFCameraReader()
@@ -564,9 +557,9 @@ k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_contr
                                  &defaultValue);
 
         // Convert KSProperty exposure time value to micro-second unit
-        minValue = (LONG)(exp2f((float)minValue) * 1000000.0f);
-        maxValue = (LONG)(exp2f((float)maxValue) * 1000000.0f);
-        defaultValue = (LONG)(exp2f((float)defaultValue) * 1000000.0f);
+        minValue = MapMfExponentToK4a(minValue);
+        maxValue = MapMfExponentToK4a(maxValue);
+        defaultValue = MapMfExponentToK4a(defaultValue);
         defaultMode = K4A_COLOR_CONTROL_MODE_AUTO;
 
         // Windows KsProperty uses exposure time value as log base 2 seconds, which is not linear.
@@ -719,7 +712,7 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
                                    nullptr);
 
         // Convert KSProperty exposure time value to micro-second unit
-        propertyValue = (LONG)(exp2f((float)propertyValue) * 1000000.0f);
+        propertyValue = MapMfExponentToK4a(propertyValue);
     }
     break;
     case K4A_COLOR_CONTROL_BRIGHTNESS:
@@ -848,7 +841,7 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
         // Convert micro-second unit to KSProperty exposure time value
         hr = SetCameraControlValue(PROPSETID_VIDCAP_CAMERACONTROL,
                                    KSPROPERTY_CAMERACONTROL_EXPOSURE,
-                                   (LONG)log2f((float)newValue * 0.000001f),
+                                   MapK4aExposureToMf(newValue),
                                    flags);
     }
     break;
@@ -911,6 +904,11 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
                                    KSPROPERTY_VIDEOPROCAMP_POWERLINE_FREQUENCY,
                                    (LONG)newValue,
                                    flags);
+
+        if (SUCCEEDED(hr))
+        {
+            m_using_60hz_power = (newValue == 2);
+        }
     }
     break;
     case K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY:
@@ -948,17 +946,6 @@ int CMFCameraReader::GetStride()
 
 k4a_result_t CMFCameraReader::CreateImage(CFrameContext *pFrameContext, k4a_image_t *image)
 {
-    void *context;
-    mf_buffer_wrapper_t *wrapper;
-
-    // We use a wrapper here so that we can keep track of the MF frame buffers in use; ALLOCATION_SOURCE_COLOR will
-    // count outstanding allocations. If too many are used then MF stops receiving images over USB until the captures
-    // are released.
-    wrapper = (mf_buffer_wrapper_t *)allocator_alloc(ALLOCATION_SOURCE_COLOR, sizeof(mf_buffer_wrapper_t), &context);
-
-    wrapper->allocator_context = context;
-    wrapper->pFrameContext = pFrameContext;
-
     return TRACE_CALL(image_create_from_buffer(m_image_format,
                                                m_width_pixels,
                                                m_height_pixels,
@@ -966,38 +953,52 @@ k4a_result_t CMFCameraReader::CreateImage(CFrameContext *pFrameContext, k4a_imag
                                                pFrameContext->GetBuffer(),
                                                pFrameContext->GetFrameSize(),
                                                FrameDestroyCallback,
-                                               wrapper,
+                                               pFrameContext,
                                                image));
+}
+
+static void mfcamerareader_free_allocation(void *buffer, void *context)
+{
+    (void)context;
+    allocator_free(buffer);
 }
 
 k4a_result_t CMFCameraReader::CreateImageCopy(CFrameContext *pFrameContext, k4a_image_t *image)
 {
 
     size_t size = pFrameContext->GetFrameSize();
-    void *context;
+
     k4a_result_t result;
-    uint8_t *buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, size, &context);
+    uint8_t *buffer = allocator_alloc(ALLOCATION_SOURCE_COLOR, size);
     result = K4A_RESULT_FROM_BOOL(buffer != NULL);
 
     if (K4A_SUCCEEDED(result))
     {
-        memcpy(buffer, pFrameContext->GetBuffer(), size);
-
         result = TRACE_CALL(image_create_from_buffer(m_image_format,
                                                      m_width_pixels,
                                                      m_height_pixels,
                                                      GetStride(),
                                                      buffer,
                                                      size,
-                                                     allocator_free,
-                                                     context,
+                                                     mfcamerareader_free_allocation,
+                                                     NULL,
                                                      image));
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        assert(image_get_size(*image) == size);
+        memcpy(image_get_buffer(*image), pFrameContext->GetBuffer(), size);
     }
     else
     {
-        // cleanup if there was an error
-        allocator_free(buffer, context);
+        if (buffer != NULL)
+        {
+            allocator_free(buffer);
+            buffer = NULL;
+        }
     }
+
     return result;
 }
 
@@ -1056,10 +1057,25 @@ STDMETHODIMP CMFCameraReader::OnReadSample(HRESULT hrStatus,
 
                 if (K4A_SUCCEEDED(result))
                 {
-                    image_set_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(pFrameContext->GetPTSTime()));
+                    // Read the QPC value MF attached to the sample when it was received.
+                    unsigned long long mf_device_time_100nsec = 0;
+                    if (FAILED(hr = pSample->GetUINT64(MFSampleExtension_DeviceTimestamp, &mf_device_time_100nsec)))
+                    {
+                        result = K4A_RESULT_FAILED;
+                        LOG_ERROR("IMFSample::GetUINT64(MFSampleExtension_DeviceTimestamp) failed; hr=0x%08X", hr);
+                    }
+                    else
+                    {
+                        image_set_system_timestamp_nsec(image, mf_device_time_100nsec * 100);
+                    }
+                }
+
+                if (K4A_SUCCEEDED(result))
+                {
+                    image_set_device_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(pFrameContext->GetPTSTime()));
 
                     // Set metadata
-                    image_set_exposure_time_usec(image, pFrameContext->GetExposureTime());
+                    image_set_exposure_usec(image, pFrameContext->GetExposureTime());
                     image_set_white_balance(image, pFrameContext->GetWhiteBalance());
                     image_set_iso_speed(image, pFrameContext->GetISOSpeed());
 
@@ -1433,4 +1449,39 @@ CMFCameraReader::SetCameraControlValue(const GUID PropertySet, const ULONG Prope
                                      &videoControl,
                                      sizeof(videoControl),
                                      &retSize);
+}
+
+LONG CMFCameraReader::MapK4aExposureToMf(int K4aExposure)
+{
+    for (int x = 0; x < COUNTOF(device_exposure_mapping); x++)
+    {
+        if ((m_using_60hz_power && K4aExposure <= device_exposure_mapping[x].exposure_mapped_60Hz_usec) ||
+            (!m_using_60hz_power && K4aExposure <= device_exposure_mapping[x].exposure_mapped_50Hz_usec))
+        {
+            return device_exposure_mapping[x].exponent;
+        }
+    }
+    // Default to longest capture in the event mapping failed.
+    return device_exposure_mapping[COUNTOF(device_exposure_mapping) - 1].exponent;
+}
+
+LONG CMFCameraReader::MapMfExponentToK4a(LONG MfExponent)
+{
+    for (int x = 0; x < COUNTOF(device_exposure_mapping); x++)
+    {
+        if (MfExponent <= device_exposure_mapping[x].exponent)
+        {
+            if (m_using_60hz_power)
+            {
+                return device_exposure_mapping[x].exposure_mapped_60Hz_usec;
+            }
+            else
+            {
+                return device_exposure_mapping[x].exposure_mapped_50Hz_usec;
+            }
+        }
+    }
+
+    // Default to longest capture in the event mapping failed.
+    return MAX_EXPOSURE(m_using_60hz_power);
 }

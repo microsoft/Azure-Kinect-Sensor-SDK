@@ -1,0 +1,27 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)k4a.$(Platform).props" Condition="Exists('$(MSBuildThisFileDirectory)k4a.$(Platform).props')" />
+
+  <Target Name="VerifyCMakeDependencies" BeforeTargets="Build" Condition="'$(Platform)' != 'AnyCPU'">
+    <Error Condition="!Exists('$(MSBuildThisFileDirectory)k4a.$(Platform).props')" Text="$(Platform) version of the Azure Kinect properties file was not found. Please run CMake configure."/>
+  </Target>
+
+  <PropertyGroup Condition="'$(Platform)' != 'AnyCPU'">
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(K4aBinaryDirectory)\$(Configuration)\$(Platform)\</BaseOutputPath>
+    <!-- According to "EnableBaseIntermediateOutputPathMismatchWarning" there will be a warning if $(BaseIntermediateOutputPath) is not the same as $(MSBuildProjectExtensionsPath).
+    Not changing the IntermediateOutputPath until we have a better understanding of where we want files.
+    
+    <BaseIntermediateOutputPath>$(K4aBinaryDirectory)\obj\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(Configuration)\$(Platform)\$(AssemblyName)\</IntermediateOutputPath>-->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BaseOutputPath)' == ''">
+    <!-- This should happen if we failed to find the Azure Kinect properties file for the given platform. 
+    This will also happen if the platform is AnyCPU and the output path wasn't included. -->
+    <BaseOutputPath>$(MSBuildThisFileDirectory)\Build\$(Configuration)\$(Platform)\</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Prevent .NET Core and .NET Standard projects from generating assembly info from the project.-->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+</Project>

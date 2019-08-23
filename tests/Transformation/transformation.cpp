@@ -90,6 +90,7 @@ static k4a_transformation_image_descriptor_t image_get_descriptor(const k4a_imag
     descriptor.width_pixels = image_get_width_pixels(image);
     descriptor.height_pixels = image_get_height_pixels(image);
     descriptor.stride_bytes = image_get_stride_bytes(image);
+    descriptor.format = image_get_format(image);
     return descriptor;
 }
 
@@ -318,7 +319,12 @@ TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
     int width = m_calibration.depth_camera_calibration.resolution_width;
     int height = m_calibration.depth_camera_calibration.resolution_height;
     k4a_image_t depth_image = NULL;
-    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_DEPTH16, width, height, width * (int)sizeof(uint16_t), &depth_image),
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_DEPTH16,
+                           width,
+                           height,
+                           width * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
+                           &depth_image),
               K4A_RESULT_SUCCEEDED);
     ASSERT_NE(depth_image, (k4a_image_t)NULL);
     k4a_transformation_image_descriptor_t depth_image_descriptor = image_get_descriptor(depth_image);
@@ -330,7 +336,12 @@ TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
     }
 
     k4a_image_t xyz_image = NULL;
-    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM, width, height, width * 3 * (int)sizeof(int16_t), &xyz_image),
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM,
+                           width,
+                           height,
+                           width * 3 * (int)sizeof(int16_t),
+                           ALLOCATION_SOURCE_USER,
+                           &xyz_image),
               K4A_RESULT_SUCCEEDED);
     ASSERT_NE(xyz_image, (k4a_image_t)NULL);
     k4a_transformation_image_descriptor_t xyz_image_descriptor = image_get_descriptor(xyz_image);
@@ -373,16 +384,36 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            depth_image_width_pixels,
                            depth_image_height_pixels,
                            depth_image_width_pixels * 1 * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
                            &depth_image),
+              K4A_WAIT_RESULT_SUCCEEDED);
+
+    k4a_image_t custom_image8 = NULL;
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM8,
+                           depth_image_width_pixels,
+                           depth_image_height_pixels,
+                           depth_image_width_pixels * 1 * (int)sizeof(uint8_t),
+                           ALLOCATION_SOURCE_USER,
+                           &custom_image8),
+              K4A_WAIT_RESULT_SUCCEEDED);
+
+    k4a_image_t custom_image16 = NULL;
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM16,
+                           depth_image_width_pixels,
+                           depth_image_height_pixels,
+                           depth_image_width_pixels * 1 * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
+                           &custom_image16),
               K4A_WAIT_RESULT_SUCCEEDED);
 
     int color_image_width_pixels = 1280;
     int color_image_height_pixels = 720;
     k4a_image_t color_image = NULL;
-    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_DEPTH16,
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
                            color_image_width_pixels,
                            color_image_height_pixels,
                            color_image_width_pixels * 4 * (int)sizeof(uint8_t),
+                           ALLOCATION_SOURCE_USER,
                            &color_image),
               K4A_WAIT_RESULT_SUCCEEDED);
 
@@ -391,6 +422,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            depth_image_width_pixels,
                            depth_image_height_pixels,
                            depth_image_width_pixels * 4 * (int)sizeof(uint8_t),
+                           ALLOCATION_SOURCE_USER,
                            &transformed_color_image),
               K4A_WAIT_RESULT_SUCCEEDED);
 
@@ -399,7 +431,26 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            color_image_width_pixels,
                            color_image_height_pixels,
                            color_image_width_pixels * 1 * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
                            &transformed_depth_image),
+              K4A_WAIT_RESULT_SUCCEEDED);
+
+    k4a_image_t transformed_custom_image8 = NULL;
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM8,
+                           color_image_width_pixels,
+                           color_image_height_pixels,
+                           color_image_width_pixels * 1 * (int)sizeof(uint8_t),
+                           ALLOCATION_SOURCE_USER,
+                           &transformed_custom_image8),
+              K4A_WAIT_RESULT_SUCCEEDED);
+
+    k4a_image_t transformed_custom_image16 = NULL;
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_CUSTOM16,
+                           color_image_width_pixels,
+                           color_image_height_pixels,
+                           color_image_width_pixels * 1 * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
+                           &transformed_custom_image16),
               K4A_WAIT_RESULT_SUCCEEDED);
 
     k4a_image_t xyz_depth_image = NULL;
@@ -407,6 +458,7 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            depth_image_width_pixels,
                            depth_image_height_pixels,
                            depth_image_width_pixels * 3 * (int)sizeof(int16_t),
+                           ALLOCATION_SOURCE_USER,
                            &xyz_depth_image),
               K4A_RESULT_SUCCEEDED);
 
@@ -415,21 +467,34 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                            color_image_width_pixels,
                            color_image_height_pixels,
                            color_image_width_pixels * 3 * (int)sizeof(int16_t),
+                           ALLOCATION_SOURCE_USER,
                            &xyz_color_image),
               K4A_RESULT_SUCCEEDED);
 
     k4a_transformation_image_descriptor_t depth_image_descriptor = image_get_descriptor(depth_image);
+    k4a_transformation_image_descriptor_t custom_image8_descriptor = image_get_descriptor(custom_image8);
+    k4a_transformation_image_descriptor_t custom_image16_descriptor = image_get_descriptor(custom_image16);
     k4a_transformation_image_descriptor_t color_image_descriptor = image_get_descriptor(color_image);
     k4a_transformation_image_descriptor_t transformed_color_image_descriptor = image_get_descriptor(
         transformed_color_image);
     k4a_transformation_image_descriptor_t transformed_depth_image_descriptor = image_get_descriptor(
         transformed_depth_image);
+    k4a_transformation_image_descriptor_t transformed_custom_image8_descriptor = image_get_descriptor(
+        transformed_custom_image8);
+    k4a_transformation_image_descriptor_t transformed_custom_image16_descriptor = image_get_descriptor(
+        transformed_custom_image16);
     k4a_transformation_image_descriptor_t xyz_depth_image_descriptor = image_get_descriptor(xyz_depth_image);
     k4a_transformation_image_descriptor_t xyz_color_image_descriptor = image_get_descriptor(xyz_color_image);
 
+    k4a_transformation_image_descriptor_t dummy_descriptor = { 0 };
+
     uint8_t *depth_image_buffer = image_get_buffer(depth_image);
+    uint8_t *custom_image8_buffer = image_get_buffer(custom_image8);
+    uint8_t *custom_image16_buffer = image_get_buffer(custom_image16);
     uint8_t *color_image_buffer = image_get_buffer(color_image);
     uint8_t *transformed_depth_image_buffer = image_get_buffer(transformed_depth_image);
+    uint8_t *transformed_custom_image8_buffer = image_get_buffer(transformed_custom_image8);
+    uint8_t *transformed_custom_image16_buffer = image_get_buffer(transformed_custom_image16);
     uint8_t *transformed_color_image_buffer = image_get_buffer(transformed_color_image);
     uint8_t *xyz_depth_image_buffer = image_get_buffer(xyz_depth_image);
     uint8_t *xyz_color_image_buffer = image_get_buffer(xyz_color_image);
@@ -480,11 +545,43 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
                                                        &transformed_color_image_descriptor);
 
         k4a_result_t result_depth_to_color =
-            transformation_depth_image_to_color_camera(transformation_handle,
-                                                       depth_image_buffer,
-                                                       &depth_image_descriptor,
-                                                       transformed_depth_image_buffer,
-                                                       &transformed_depth_image_descriptor);
+            transformation_depth_image_to_color_camera_custom(transformation_handle,
+                                                              depth_image_buffer,
+                                                              &depth_image_descriptor,
+                                                              0,
+                                                              &dummy_descriptor,
+                                                              transformed_depth_image_buffer,
+                                                              &transformed_depth_image_descriptor,
+                                                              0,
+                                                              &dummy_descriptor,
+                                                              K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,
+                                                              0);
+
+        k4a_result_t result_custom8_depth_to_color =
+            transformation_depth_image_to_color_camera_custom(transformation_handle,
+                                                              depth_image_buffer,
+                                                              &depth_image_descriptor,
+                                                              custom_image8_buffer,
+                                                              &custom_image8_descriptor,
+                                                              transformed_depth_image_buffer,
+                                                              &transformed_depth_image_descriptor,
+                                                              transformed_custom_image8_buffer,
+                                                              &transformed_custom_image8_descriptor,
+                                                              K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST,
+                                                              255);
+
+        k4a_result_t result_custom16_depth_to_color =
+            transformation_depth_image_to_color_camera_custom(transformation_handle,
+                                                              depth_image_buffer,
+                                                              &depth_image_descriptor,
+                                                              custom_image16_buffer,
+                                                              &custom_image16_descriptor,
+                                                              transformed_depth_image_buffer,
+                                                              &transformed_depth_image_descriptor,
+                                                              transformed_custom_image16_buffer,
+                                                              &transformed_custom_image16_descriptor,
+                                                              K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,
+                                                              65535);
 
         k4a_result_t result_xyz_depth = transformation_depth_image_to_point_cloud(transformation_handle,
                                                                                   depth_image_buffer,
@@ -504,11 +601,15 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
         {
             ASSERT_NE(result_color_to_depth, K4A_RESULT_SUCCEEDED);
             ASSERT_NE(result_depth_to_color, K4A_RESULT_SUCCEEDED);
+            ASSERT_NE(result_custom8_depth_to_color, K4A_RESULT_SUCCEEDED);
+            ASSERT_NE(result_custom16_depth_to_color, K4A_RESULT_SUCCEEDED);
         }
         else
         {
             ASSERT_EQ(result_color_to_depth, K4A_RESULT_SUCCEEDED);
             ASSERT_EQ(result_depth_to_color, K4A_RESULT_SUCCEEDED);
+            ASSERT_EQ(result_custom8_depth_to_color, K4A_RESULT_SUCCEEDED);
+            ASSERT_EQ(result_custom16_depth_to_color, K4A_RESULT_SUCCEEDED);
         }
 
         if (i != 0 && i != 3 && i != 4)
@@ -542,5 +643,5 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }

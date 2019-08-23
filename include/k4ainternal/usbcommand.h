@@ -79,6 +79,26 @@ k4a_result_t usb_cmd_create(usb_command_device_type_t device_type,
 
 void usb_cmd_destroy(usbcmd_t usb_handle);
 
+/** Get the serial number associated with the USB descriptor.
+ *
+ * \param usb_handle [IN]
+ *    A pointer to the opened usbcmd_t device handle
+ *
+ * \param serial_number [OUT]
+ *    A pointer to write the serial number to
+ *
+ * \param serial_number_size [IN OUT]
+ *    IN: a pointer to the size of the serial number buffer passed in
+      OUT: the size of the serial number written to the buffer including the NULL.
+ *
+ * \return K4A_BUFFER_RESULT_SUCCEEDED if the serial number was successfully opened, K4A_BUFFER_RESULT_TOO_SMALL is the
+ memory passed in is insufficient, K4A_BUFFER_RESULT_FAILED if an error occurs.
+ *
+ * If successful, \ref serial_number will contain a serial number and serial_number_size will be the null terminated
+ string length. If K4A_BUFFER_RESULT_TOO_SMALL is returned, then serial_number_size will contain the required size.
+ */
+k4a_buffer_result_t usb_cmd_get_serial_number(usbcmd_t usb_handle, char *serial_number, size_t *serial_number_size);
+
 // Read command
 k4a_result_t usb_cmd_read(usbcmd_t usb_handle,
                           uint32_t cmd,

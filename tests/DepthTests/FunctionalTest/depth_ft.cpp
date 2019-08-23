@@ -545,5 +545,5 @@ TEST_F(depth_ft, depthModeChange)
 
 int main(int argc, char **argv)
 {
-    return k4a_test_commmon_main(argc, argv);
+    return k4a_test_common_main(argc, argv);
 }

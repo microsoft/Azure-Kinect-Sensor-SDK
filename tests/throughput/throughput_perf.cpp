@@ -15,7 +15,7 @@
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/envvariable.h>
 
-#define TS_TO_MS(ts) ((long long)((ts) / 1000)) // TS convertion to milliseconds
+#define TS_TO_MS(ts) ((long long)((ts) / 1)) // TS convertion to milliseconds
 
 #define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
 
@@ -26,6 +26,11 @@ static k4a_wired_sync_mode_t g_wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
 static int g_capture_count = 100;
 static bool g_synchronized_images_only = false;
 static bool g_no_imu = false;
+static bool g_no_startup_flush = false;
+static uint32_t g_subordinate_delay_off_master_usec = 0;
+static bool g_manual_exposure = false;
+static uint32_t g_exposure_setting = 0;
+static bool g_power_line_50_hz = false;
 
 using ::testing::ValuesIn;
 
@@ -94,6 +99,12 @@ static const char *get_string_from_color_format(k4a_image_format_t format)
         break;
     case K4A_IMAGE_FORMAT_IR16:
         return "K4A_IMAGE_FORMAT_IR16";
+        break;
+    case K4A_IMAGE_FORMAT_CUSTOM8:
+        return "K4A_IMAGE_FORMAT_CUSTOM8";
+        break;
+    case K4A_IMAGE_FORMAT_CUSTOM16:
+        return "K4A_IMAGE_FORMAT_CUSTOM16";
         break;
     case K4A_IMAGE_FORMAT_CUSTOM:
         return "K4A_IMAGE_FORMAT_CUSTOM";
@@ -237,6 +248,46 @@ TEST_P(throughput_perf, testTest)
 
     printf("Capturing %d frames for test: %s\n", g_capture_count, as.test_name);
 
+    {
+        int32_t power_line_setting = g_power_line_50_hz ? 1 : 2;
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
+                                               K4A_COLOR_CONTROL_MODE_MANUAL,
+                                               power_line_setting));
+        printf("Power line mode set to manual and %s.\n", power_line_setting == 1 ? "50Hz" : "60Hz");
+    }
+
+    if (g_manual_exposure)
+    {
+        k4a_color_control_mode_t read_mode;
+        int32_t read_exposure;
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               K4A_COLOR_CONTROL_MODE_MANUAL,
+                                               (int32_t)g_exposure_setting));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_get_color_control(m_device,
+                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               &read_mode,
+                                               &read_exposure));
+        printf(
+            "Setting exposure to manual mode, exposure target is: %d.   Actual mode is: %s.   Actual value is: %d.\n",
+            g_exposure_setting,
+            read_mode == K4A_COLOR_CONTROL_MODE_AUTO ? "auto" : "manual",
+            read_exposure);
+    }
+    else
+    {
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  k4a_device_set_color_control(m_device,
+                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                               K4A_COLOR_CONTROL_MODE_AUTO,
+                                               0));
+        printf("Auto Exposure\n");
+    }
+
     fps_in_usec = 1000000 / k4a_convert_fps_to_uint(as.fps);
 
     config.color_format = as.color_format;
@@ -246,6 +297,7 @@ TEST_P(throughput_perf, testTest)
     config.depth_delay_off_color_usec = g_depth_delay_off_color_usec;
     config.wired_sync_mode = g_wired_sync_mode;
     config.synchronized_images_only = g_synchronized_images_only;
+    config.subordinate_delay_off_master_usec = g_subordinate_delay_off_master_usec;
     if (g_depth_delay_off_color_usec == 0)
     {
         // Create delay that can be +fps to -fps
@@ -271,26 +323,36 @@ TEST_P(throughput_perf, testTest)
         ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&th1, _throughput_imu_thread, &thread));
     }
 
-    //
-    // Wait allow streams to start and then purge the data collected
-    //
-    if (as.fps == K4A_FRAMES_PER_SECOND_30)
+    if (!g_no_startup_flush)
     {
-        ThreadAPI_Sleep(2000);
-    }
-    else if (as.fps == K4A_FRAMES_PER_SECOND_15)
-    {
-        ThreadAPI_Sleep(3000);
+        //
+        // Wait for streams to start and then purge the data collected
+        //
+        if (as.fps == K4A_FRAMES_PER_SECOND_30)
+        {
+            printf("Flushing first 2s of data\n");
+            ThreadAPI_Sleep(2000);
+        }
+        else if (as.fps == K4A_FRAMES_PER_SECOND_15)
+        {
+            printf("Flushing first 3s of data\n");
+            ThreadAPI_Sleep(3000);
+        }
+        else
+        {
+            printf("Flushing first 4s of data\n");
+            ThreadAPI_Sleep(4000);
+        }
+        while (K4A_WAIT_RESULT_SUCCEEDED == k4a_device_get_capture(m_device, &capture, 0))
+        {
+            // Drain the queue
+            k4a_capture_release(capture);
+        };
     }
     else
     {
-        ThreadAPI_Sleep(4000);
+        printf("Flushing no start of stream data\n");
     }
-    while (K4A_WAIT_RESULT_SUCCEEDED == k4a_device_get_capture(m_device, &capture, 0))
-    {
-        // Drain the queue
-        k4a_capture_release(capture);
-    };
 
     // For consistent IMU timing, block entering the while loop until we get 1 sample
     if (K4A_WAIT_RESULT_SUCCEEDED == k4a_device_get_capture(m_device, &capture, 1000))
@@ -298,9 +360,11 @@ TEST_P(throughput_perf, testTest)
         k4a_capture_release(capture);
     }
 
-    printf("\n");
-    printf("       | TS [Delta TS]          | TS [Delta TS]          | TS [Delta TS]           | TS Delta (C&D)\n");
-    printf("===================================================================================================\n");
+    printf("All times in us\n");
+    printf("+---------------------------+-------------------+-------------------+--------+\n");
+    printf("|         Color Info        |     IR 16 Info    |   Depth16 Info    | TS Del |\n");
+    printf("|  TS [Delta TS][Exposure]  |   TS [Delta TS]   |   TS [Delta TS]   | (C-D)  |\n");
+    printf("+---------------------------+-------------------+-------------------+--------+\n");
 
     thread.enable_counting = true; // start counting IMU samples
     while (capture_count-- > 0)
@@ -317,17 +381,20 @@ TEST_P(throughput_perf, testTest)
         {
             k4a_image_t image;
 
-            printf("Capture:");
+            printf("|");
 
             // Probe for a color image
             image = k4a_capture_get_color_image(capture);
             if (image)
             {
                 color = true;
-                ts = k4a_image_get_timestamp_usec(image);
+                ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts, adjusted_max_ts);
                 static_assert(sizeof(ts) == 8, "this should not be wrong");
-                printf(" Color TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_color_ts));
+                printf(" %9lld[%6lld][%6lld]",
+                       TS_TO_MS(ts),
+                       TS_TO_MS(ts - last_color_ts),
+                       (long long int)k4a_image_get_exposure_usec(image));
 
                 // TS should increase
                 EXPECT_GT(ts, last_color_ts);
@@ -337,7 +404,7 @@ TEST_P(throughput_perf, testTest)
             }
             else
             {
-                printf(" Color None            ");
+                printf(" Color None               ");
             }
 
             // probe for a IR16 image
@@ -345,9 +412,9 @@ TEST_P(throughput_perf, testTest)
             if (image)
             {
                 depth = true;
-                ts = k4a_image_get_timestamp_usec(image);
+                ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
-                printf(" | Ir16  TS:%6lld[%4lld] ", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
+                printf(" | %9lld[%6lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
 
                 // TS should increase
                 EXPECT_GT(ts, last_ir16_ts);
@@ -357,16 +424,16 @@ TEST_P(throughput_perf, testTest)
             }
             else
             {
-                printf(" | Ir16 None             ");
+                printf(" |                  ");
             }
 
             // Probe for a depth16 image
             image = k4a_capture_get_depth_image(capture);
             if (image)
             {
-                ts = k4a_image_get_timestamp_usec(image);
+                ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
-                printf(" | Depth16 TS:%6lld[%4lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
+                printf(" | %9lld[%6lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
 
                 // TS should increase
                 EXPECT_GT(ts, last_depth16_ts);
@@ -376,7 +443,7 @@ TEST_P(throughput_perf, testTest)
             }
             else
             {
-                printf(" | Depth16 None           ");
+                printf(" |                  ");
             }
         }
         else if (wresult == K4A_WAIT_RESULT_TIMEOUT)
@@ -394,7 +461,7 @@ TEST_P(throughput_perf, testTest)
             both_count++;
 
             int64_t delta = (int64_t)(last_ir16_ts - last_color_ts);
-            printf(" | %" PRId64 "us\n", delta);
+            printf(" | %6" PRId64, delta);
 
             delta -= config.depth_delay_off_color_usec;
             if (delta < 0)
@@ -408,14 +475,16 @@ TEST_P(throughput_perf, testTest)
         }
         else if (depth)
         {
-            printf(" | ---us\n");
+            printf(" | ------");
             depth_count++;
         }
         else if (color)
         {
-            printf(" | ---us\n");
+            printf(" | ------");
             color_count++;
         }
+
+        printf(" |\n");
 
         EXPECT_NE(adjusted_max_ts, 0);
         if (last_ts == UINT64_MAX)
@@ -584,6 +653,12 @@ TEST_P(throughput_perf, testTest)
         fputs(buffer, file_handle);
         fclose(file_handle);
     }
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              k4a_device_set_color_control(m_device,
+                                           K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                           K4A_COLOR_CONTROL_MODE_AUTO,
+                                           0));
 
     ASSERT_EQ(failed, false);
     return;
@@ -777,6 +852,21 @@ int main(int argc, char **argv)
             g_synchronized_images_only = true;
             printf("g_synchronized_images_only = true\n");
         }
+        else if (strcmp(argument, "--no_startup_flush") == 0)
+        {
+            g_no_startup_flush = true;
+            printf("g_no_startup_flush = true\n");
+        }
+        else if (strcmp(argument, "--60hz") == 0)
+        {
+            g_power_line_50_hz = false;
+            printf("g_power_line_50_hz = false\n");
+        }
+        else if (strcmp(argument, "--50hz") == 0)
+        {
+            g_power_line_50_hz = true;
+            printf("g_power_line_50_hz = true\n");
+        }
         else if (strcmp(argument, "--index") == 0)
         {
             if (i + 1 <= argc)
@@ -791,12 +881,41 @@ int main(int argc, char **argv)
                 error = true;
             }
         }
+        else if (strcmp(argument, "--subordinate_delay_off_master_usec") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_subordinate_delay_off_master_usec = (uint32_t)strtol(argv[i + 1], NULL, 10);
+                printf("g_subordinate_delay_off_master_usec = %d\n", g_subordinate_delay_off_master_usec);
+                i++;
+            }
+            else
+            {
+                printf("Error: index parameter missing\n");
+                error = true;
+            }
+        }
         else if (strcmp(argument, "--capture_count") == 0)
         {
             if (i + 1 <= argc)
             {
                 g_capture_count = (int)strtol(argv[i + 1], NULL, 10);
                 printf("g_capture_count g_device_index = %d\n", g_capture_count);
+                i++;
+            }
+            else
+            {
+                printf("Error: index parameter missing\n");
+                error = true;
+            }
+        }
+        else if (strcmp(argument, "--exposure") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_exposure_setting = (uint32_t)strtol(argv[i + 1], NULL, 10);
+                printf("g_exposure_setting = %d\n", g_capture_count);
+                g_manual_exposure = true;
                 i++;
             }
             else
@@ -838,6 +957,20 @@ int main(int argc, char **argv)
         printf("  --synchronized_images_only\n");
         printf("      By default this setting is false, enabling this will for the test to wait for\n");
         printf("      both and depth images to be available.\n");
+        printf("  --subordinate_delay_off_master_usec <+ microseconds>\n");
+        printf("      This is the time delay the device captures off the master devices capture sync\n");
+        printf("      pulse. This value needs to be less than one image sample period, i.e for 30FPS \n");
+        printf("      this needs to be less than 33333us.\n");
+        printf("  --no_startup_flush\n");
+        printf("      By default the test will wait for streams to run for X seconds to stabilize. This\n");
+        printf("      disables that.\n");
+        printf("  --exposure <exposure in usec>\n");
+        printf("      By default the test uses auto exposure. This will test with the manual exposure setting\n");
+        printf("      that is passed in.\n");
+        printf("  --60hz\n");
+        printf("      <default> Sets the power line compensation frequency to 60Hz\n");
+        printf("  --50hz\n");
+        printf("      Sets the power line compensation frequency to 50Hz\n");
 
         return 1; // Indicates an error or warning
     }

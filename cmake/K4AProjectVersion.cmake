@@ -22,6 +22,16 @@ if (NOT VERSION_MATCH)
     message(FATAL_ERROR "Contents of VERSION_STR ('${VERSION_STR}') are not a valid version")
 endif()
 
+if (NOT ("${CMAKE_MATCH_1}" STREQUAL "${PROJECT_VERSION_MAJOR}"))
+    # You can update cmake project version in the project() command in the root CMakeLists.txt
+    message(FATAL "CMake Project Major Version \"${PROJECT_VERSION_MAJOR}\" did not match VERSION_STR major version \"${CMAKE_MATCH_1}\"")
+endif()
+
+if (NOT ("${CMAKE_MATCH_2}" STREQUAL "${PROJECT_VERSION_MINOR}"))
+    # You can update cmake project version in the project() command in the root CMakeLists.txt
+    message(FATAL "CMake Project Minor Version \"${PROJECT_VERSION_MINOR}\" did not match VERSION_STR minor version \"${CMAKE_MATCH_2}\"")
+endif()
+
 set(K4A_VERSION_MAJOR ${CMAKE_MATCH_1})
 set(K4A_VERSION_MINOR ${CMAKE_MATCH_2})
 set(K4A_VERSION_PATCH ${CMAKE_MATCH_3})
@@ -32,6 +42,7 @@ set(K4A_VERSION_STR ${VERSION_STR})
 if (NOT K4A_VERSION_REVISION)
     set(K4A_VERSION_REVISION "0")
 endif()
+
 
 set(K4A_COMPANYNAME "Microsoft")
 set(K4A_PRODUCTNAME "Azure Kinect")

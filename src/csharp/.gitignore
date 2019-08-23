@@ -1,0 +1,9 @@
+## Ignore CMake generated files that enable the CSharp solution to find and interact with the CMake built files.
+
+/k4a.*.props
+/StubGenerator.*.xml
+
+/VersionInfo.cs
+
+## Ignore the generated documentation file
+/SDK/Microsoft.Azure.Kinect.Sensor.xml
