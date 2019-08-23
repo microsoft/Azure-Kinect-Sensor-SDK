@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: k4a::device::get_capture</title>
+<title>Azure Kinect Sensor SDK: k4a::device::get_imu_sample</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('classk4a_1_1device_a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e.html','');});
+$(document).ready(function(){initNavTree('classk4a_1_1device_a5957d37c22bca085fe4a8da3d7444999.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,8 +84,8 @@ $(document).ready(function(){initNavTree('classk4a_1_1device_a591d2f9a0a1a25eaf7
 </div>
 
 <div class="contents">
-<a id="a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e">&#9670;&nbsp;</a></span>get_capture() <span class="overload">[1/2]</span></h2>
+<a id="a5957d37c22bca085fe4a8da3d7444999"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5957d37c22bca085fe4a8da3d7444999">&#9670;&nbsp;</a></span>get_imu_sample() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -94,21 +94,11 @@ $(document).ready(function(){initNavTree('classk4a_1_1device_a591d2f9a0a1a25eaf7
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool k4a::device::get_capture </td>
+          <td class="memname">bool k4a::device::get_imu_sample </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classk4a_1_1capture.html">capture</a> *&#160;</td>
-          <td class="paramname"><em>cap</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype"><a class="el" href="structk4a__imu__sample__t.html">k4a_imu_sample_t</a> *&#160;</td>
+          <td class="paramname"><em>imu_sample</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">std::chrono::milliseconds&#160;</td>
-          <td class="paramname"><em>timeout</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -118,9 +108,9 @@ $(document).ready(function(){initNavTree('classk4a_1_1device_a591d2f9a0a1a25eaf7
 </table>
 </div><div class="memdoc">
 
-<p>Reads a sensor capture into cap. </p>
-<p>Returns true if a capture was read, false if the read timed out. Throws error on failure.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a.html#ga4dac757a33657f4d3dbf1ae8b21c158a" title="Reads a sensor capture. ">k4a_device_get_capture</a> </dd></dl>
+<p>Reads an IMU sample. </p>
+<p>Returns true if a sample was read, false if the read timed out. Throws error on failure. This API assumes an infinate timeout.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e.html#ga8e5913b3bb94a453c7143bbd6e399a0e" title="Reads an IMU sample. ">k4a_device_get_imu_sample</a> </dd></dl>
 
 </div>
 </div>
