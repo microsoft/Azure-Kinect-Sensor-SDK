@@ -10,7 +10,7 @@ variables:
   value: '1.6.102075014'
 - name: 'windows_firmware_version'
   value: '1.6.102075014'
-- name: 'PackageVersion'
+- name: 'NuGetPackageVersion'
   value: '1.2.0'
 
 trigger:
@@ -585,12 +585,12 @@ jobs:
       displayName: "Get Azure Kinect NuGet Package"
       inputs: 
         command: custom 
-        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(PackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
+        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(NuGetPackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
 
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/debug artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/amd64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/lib/native/amd64/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/debug"
         flattenFolders: true
@@ -598,7 +598,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/release artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/amd64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/lib/native/amd64/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release"
         flattenFolders: true
@@ -606,7 +606,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into x86/debug artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/x86/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/lib/native/x86/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/x86/debug"
         flattenFolders: true
@@ -614,7 +614,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into x86/release artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/x86/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/lib/native/x86/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/x86/release"
         flattenFolders: true
@@ -622,7 +622,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy AzureKinectDK_Fw_$(firmware_version).bin artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/firmware/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/firmware/"
         contents: "AzureKinectDK_Fw_$(firmware_version).bin"
         targetFolder: "$(System.ArtifactsDirectory)/firmware"
         flattenFolders: true
@@ -724,7 +724,7 @@ jobs:
       displayName: "Get Azure Kinect NuGet Package"
       inputs: 
         command: custom 
-        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(PackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
+        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(NuGetPackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
 
     - script: 'ls -alR'
       workingDirectory: '$(System.ArtifactsDirectory)/NugetOutputDir'
@@ -733,7 +733,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/debug artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/linux/lib/native/x64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/x64/release/"
         contents: "libdepthengine*"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug"
         flattenFolders: true
@@ -741,7 +741,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/release artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/linux/lib/native/x64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/x64/release/"
         contents: "libdepthengine*"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release"
         flattenFolders: true
@@ -749,7 +749,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy AzureKinectDK_Fw_$(firmware_version).bin artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/firmware/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/firmware/"
         contents: "AzureKinectDK_Fw_$(firmware_version).bin"
         targetFolder: "$(System.ArtifactsDirectory)/firmware"
         flattenFolders: true
