@@ -1130,6 +1130,16 @@ public:
         return true;
     }
 
+    /** Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
+     * Throws error on failure. This API assumes an inifinate timeout.
+     *
+     * \sa k4a_device_get_capture
+     */
+    bool get_capture(capture *cap)
+    {
+        return get_capture(cap, std::chrono::milliseconds(K4A_WAIT_INFINITE));
+    }
+
     /** Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
      * Throws error on failure.
      *
@@ -1149,6 +1159,16 @@ public:
         }
 
         return true;
+    }
+
+    /** Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
+     * Throws error on failure. This API assumes an infinate timeout.
+     *
+     * \sa k4a_device_get_imu_sample
+     */
+    bool get_imu_sample(k4a_imu_sample_t *imu_sample)
+    {
+        return get_imu_sample(imu_sample, std::chrono::milliseconds(K4A_WAIT_INFINITE));
     }
 
     /** Starts the K4A device's cameras
