@@ -391,11 +391,6 @@ jobs:
     persistCredentials: true
     submodules: true
 
-  - task: ShellScript@2
-    inputs:
-      scriptPath: '$(Build.SourcesDirectory)/scripts/bootstrap-ubuntu.sh'
-    displayName: 'Run bootstrap-ubuntu.sh'
-
   - script: |
        git add --renormalize . && git diff-index --quiet HEAD --
        if [ $? -ne 0 ]
