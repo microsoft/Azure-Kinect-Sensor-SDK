@@ -62,9 +62,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                         this.pictureBoxDepth.Image = await Task.Run(() =>
                         {
                             Bitmap depthVisualization = new Bitmap(capture.Depth.WidthPixels, capture.Depth.HeightPixels, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                
+
                             BitmapData bitmapData = depthVisualization.LockBits(new Rectangle(0, 0, depthVisualization.Width, depthVisualization.Height),ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                            
+
                             IntPtr ptr = bitmapData.Scan0;
 
                             int bytes = Math.Abs(bitmapData.Stride) * depthVisualization.Height;
