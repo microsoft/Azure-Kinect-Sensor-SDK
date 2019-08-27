@@ -61,42 +61,55 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                         this.pictureBoxDepth.Image = await Task.Run(() =>
                         {
                             Bitmap depthVisualization = new Bitmap(capture.Depth.WidthPixels, capture.Depth.HeightPixels, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                
+                            BitmapData bitmapData = depthVisualization.LockBits(new Rectangle(0, 0, depthVisualization.Width, depthVisualization.Height),ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                            
+                            IntPtr ptr = bitmapData.Scan0;
 
-                            // TODO: Lock the Bitmap and access the bytes directly?
-                            ////BitmapData d = depthVisualization.LockBits(new Rectangle(0, 0, depthVisualization.Width, depthVisualization.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                            int bytes = Math.Abs(bitmapData.Stride) * depthVisualization.Height;
+
+                            byte[] rgbValues = new byte[bytes];
+
+                            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
 
                             ushort[] depthValues = capture.Depth.GetPixels<ushort>().ToArray();
 
-                            for (int y = 0; y < capture.Depth.HeightPixels; y++)
+                            for (int i = 0; i < depthValues.Length; i++)
                             {
-                                for (int x = 0; x < capture.Depth.WidthPixels; x++)
+                                ushort depthValue = depthValues[i];
+                                Color color;
+                                if (depthValue == 0)
                                 {
-                                    ushort depthValue = depthValues[(y * capture.Depth.WidthPixels) + x];
+                                    color = Color.Red;
+                                   
+                                }
+                                else if (depthValue == ushort.MaxValue)
+                                {
+                                    color = Color.Green;
+                                }
+                                else
+                                {
+                                    float brightness = depthValue / 2000f;
 
-                                    if (depthValue == 0)
+                                    if (brightness > 1.0f)
                                     {
-                                        depthVisualization.SetPixel(x, y, Color.Red);
-                                    }
-                                    else if (depthValue == ushort.MaxValue)
-                                    {
-                                        depthVisualization.SetPixel(x, y, Color.Green);
+                                        color = Color.White;
                                     }
                                     else
                                     {
-                                        float brightness = depthValue / 2000f;
-
-                                        if (brightness > 1.0f)
-                                        {
-                                            depthVisualization.SetPixel(x, y, Color.White);
-                                        }
-                                        else
-                                        {
-                                            int c = (int)(brightness * 250);
-                                            depthVisualization.SetPixel(x, y, Color.FromArgb(c, c, c));
-                                        }
+                                        int c = (int)(brightness * 250);
+                                        color = Color.FromArgb(c, c, c);
                                     }
                                 }
+                                rgbValues[i * 4] = color.B;
+                                rgbValues[(i * 4) + 1] = color.G;
+                                rgbValues[(i * 4) + 2] = color.R;
+                                rgbValues[(i * 4) + 3] = color.A;
                             }
+
+                            System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);
+
+                            depthVisualization.UnlockBits(bitmapData);
 
                             return depthVisualization;
                         }).ConfigureAwait(true);
