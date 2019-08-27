@@ -7,6 +7,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Azure.Kinect.Sensor.WinForms;
@@ -81,7 +82,6 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                                 if (depthValue == 0)
                                 {
                                     color = Color.Red;
-                                   
                                 }
                                 else if (depthValue == ushort.MaxValue)
                                 {
