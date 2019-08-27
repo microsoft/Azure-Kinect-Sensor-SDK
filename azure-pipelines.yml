@@ -353,7 +353,7 @@ jobs:
   displayName: Linux
   pool:
     vmImage: 'ubuntu-16.04'
-    container: 'schultetwin1/akbuilder:0.0.1'
+    container: schultetwin1/akbuilder:0.0.1
   strategy:
     maxParallel: 100
     matrix:
