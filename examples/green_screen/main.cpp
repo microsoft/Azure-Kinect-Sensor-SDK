@@ -192,7 +192,7 @@ int main(int argc, char **argv)
     }
     else if (num_devices == 2)
     {
-        capturer.start_devices(main_config, { secondary_config });
+        capturer.start_devices(main_config, secondary_config);
 
         // This wraps all the device-to-device details
         Transformation tr_secondary_color_to_main_color = calibrate_devices(capturer,
