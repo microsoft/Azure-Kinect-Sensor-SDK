@@ -413,11 +413,6 @@ jobs:
     persistCredentials: true
     submodules: true
 
-  - task: ShellScript@2
-    inputs:
-      scriptPath: '$(Build.SourcesDirectory)/scripts/bootstrap-ubuntu.sh'
-    displayName: 'Run bootstrap-ubuntu.sh'
-
   - script: |
        sudo apt install -y libopencv-dev
     displayName: 'Install OpenCV'
