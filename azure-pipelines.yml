@@ -371,25 +371,26 @@ jobs:
   displayName: Linux
   pool:
     vmImage: 'ubuntu-16.04'
+  container: schultetwin1/akbuilder:0.0.2
   strategy:
     maxParallel: 100
     matrix:
       x64-clang_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'debug'
-        UsesOpenCV: 'FALSE'
+        UsesOpenCV: 'TRUE'
       x64-gnu_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'debug'
-        UsesOpenCV: 'FALSE'
+        UsesOpenCV: 'TRUE'
       x64-clang_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'relwithdebinfo'
-        UsesOpenCV: 'FALSE'
+        UsesOpenCV: 'TRUE'
       x64-gnu_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'relwithdebinfo'
-        UsesOpenCV: 'FALSE'
+        UsesOpenCV: 'TRUE'
 
       # 32-bit builds are currently broken
       # i386-unknown-linux-clang_debug_ninja:
