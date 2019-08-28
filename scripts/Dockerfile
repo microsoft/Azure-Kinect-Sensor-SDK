@@ -1,16 +1,14 @@
-#!/usr/bin/env bash
+# Use the official ubuntu:18.04 image as the parent image
+FROM ubuntu:18.04
 
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
+# Tell Ubuntu non-interactive install
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Setup machine to build amd64 and i386
-dpkg --add-architecture amd64
+# Set the working directory to /app
+WORKDIR /app
 
-# Update list of packages
-apt update
-
-# Install tools needed to build
-apt install -y \
+# Run apt-get steps
+RUN apt-get update && apt-get install -y \
     pkg-config \
     ninja-build \
     doxygen \
@@ -20,10 +18,7 @@ apt install -y \
     python3 \
     git-lfs \
     nasm \
-    cmake
-
-# Install libraries needed to build
-apt install -y \
+    cmake \
     libgl1-mesa-dev \
     libsoundio-dev \
     libvulkan-dev \
@@ -35,4 +30,5 @@ apt install -y \
     libssl-dev \
     libudev-dev \
     mesa-common-dev \
-    uuid-dev
+    uuid-dev \
+    libopencv-dev
