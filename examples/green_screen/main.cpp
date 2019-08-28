@@ -158,15 +158,16 @@ int main(int argc, char **argv)
     // slowly.
     k4a::transformation main_depth_to_main_color(main_calibration);
 
+    capturer.start_devices(main_config, secondary_config);
     if (num_devices == 1)
     {
-        capturer.start_devices(main_config, {});
         std::chrono::time_point<std::chrono::system_clock> start_time = std::chrono::system_clock::now();
         while (std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() <
                greenscreen_duration)
         {
             vector<k4a::capture> captures;
-            captures = capturer.get_synchronized_captures({}, true);
+            // secondary_config isn't actually used here because there's no secondary device but the function needs it
+            captures = capturer.get_synchronized_captures(secondary_config, true);
             k4a::image main_color_image = captures[0].get_color_image();
             k4a::image main_depth_image = captures[0].get_depth_image();
 
@@ -192,8 +193,6 @@ int main(int argc, char **argv)
     }
     else if (num_devices == 2)
     {
-        capturer.start_devices(main_config, secondary_config);
-
         // This wraps all the device-to-device details
         Transformation tr_secondary_color_to_main_color = calibrate_devices(capturer,
                                                                             main_config,
@@ -227,7 +226,7 @@ int main(int argc, char **argv)
                greenscreen_duration)
         {
             vector<k4a::capture> captures;
-            captures = capturer.get_synchronized_captures({ secondary_config }, true);
+            captures = capturer.get_synchronized_captures(secondary_config, true);
             k4a::image main_color_image = captures[0].get_color_image();
             k4a::image main_depth_image = captures[0].get_depth_image();
 
@@ -542,7 +541,7 @@ static Transformation calibrate_devices(MultiDeviceCapturer &capturer,
     std::chrono::time_point<std::chrono::system_clock> start_time = std::chrono::system_clock::now();
     while (std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() < calibration_timeout)
     {
-        vector<k4a::capture> captures = capturer.get_synchronized_captures({ secondary_config }); // requires vector
+        vector<k4a::capture> captures = capturer.get_synchronized_captures(secondary_config);
         k4a::capture &main_capture = captures[0];
         k4a::capture &secondary_capture = captures[1];
         // get_color_image is guaranteed to be non-null because we use get_synchronized_captures for color
