@@ -23,7 +23,7 @@ typedef struct _queue_entry_t
 typedef struct _queue_context_t
 {
     bool enabled;
-    bool error;
+    bool stopped;
     uint32_t queue_pop_blocked; // number of waiting threads for queue_pop so complete
     uint32_t read_location;     // current location to read frokm
     uint32_t write_location;    // current location to write to
@@ -109,7 +109,7 @@ k4a_wait_result_t queue_pop(queue_t queue_handle, int32_t wait_in_ms, k4a_captur
 
     if (queue->enabled != true)
     {
-        LOG_ERROR("%s: capture popped from disabled queue", queue->name);
+        LOG_ERROR("Queue \"%s\" was popped in a disabled state.", queue->name);
         wresult = K4A_WAIT_RESULT_FAILED;
     }
 
@@ -167,7 +167,7 @@ k4a_wait_result_t queue_pop(queue_t queue_handle, int32_t wait_in_ms, k4a_captur
 
     if (queue->dropped_count != 0)
     {
-        LOG_WARNING("%s: Dropped oldest %d captures from queue", queue->name, queue->dropped_count);
+        LOG_INFO("Queue \"%s\" dropped oldest %d captures from queue.", queue->name, queue->dropped_count);
         queue->dropped_count = 0;
     }
 
@@ -199,7 +199,7 @@ void queue_push_w_dropped(queue_t queue_handle, k4a_capture_t capture, k4a_captu
 
     if (queue->enabled == false)
     {
-        LOG_WARNING("Capture pushed into disabled queue", queue->name);
+        LOG_WARNING("Capture pushed into disabled queue.", queue->name);
     }
     else
     {
@@ -260,7 +260,7 @@ void queue_enable(queue_t queue_handle)
     queue_context_t *queue = queue_t_get_context(queue_handle);
     Lock(queue->lock);
     queue->enabled = true;
-    queue->error = false;
+    queue->stopped = false;
     Unlock(queue->lock);
 }
 
@@ -275,7 +275,7 @@ void queue_disable(queue_t queue_handle)
 
     while (queue->queue_pop_blocked != 0)
     {
-        LOG_WARNING("Waiting for blocking call to complete", 0);
+        LOG_INFO("Queue \"%s\" waiting for blocking call to complete.", queue->name);
         Condition_Post(queue->condition);
         Unlock(queue->lock);
         ThreadAPI_Sleep(25);
@@ -289,14 +289,14 @@ void queue_disable(queue_t queue_handle)
     Unlock(queue->lock);
 }
 
-void queue_error(queue_t queue_handle)
+void queue_stop(queue_t queue_handle)
 {
     queue_context_t *queue = queue_t_get_context(queue_handle);
 
     Lock(queue->lock);
-    queue->error = true;
+    queue->stopped = true;
     Unlock(queue->lock);
 
-    LOG_WARNING("Error detected, shutting down queue and notifying consumers", 0);
+    LOG_INFO("Queue \"%s\" stopped, shutting down and notifying consumers.", queue->name);
     queue_disable(queue_handle);
 }

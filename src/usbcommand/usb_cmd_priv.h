@@ -76,6 +76,7 @@ typedef struct _usbcmd_context_t
     // LIBUSB properties
     libusb_device_handle *libusb;
     libusb_context *libusb_context;
+    enum libusb_log_level libusb_verbosity;
 
     uint8_t index;
     uint16_t pid;

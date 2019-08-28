@@ -218,7 +218,15 @@ HRESULT CMFCameraReader::RuntimeClassInitialize(GUID *containerId)
         // Activate Color Media Source
         if (FAILED(hr = spDevice->ActivateObject(IID_PPV_ARGS(&spColorSource))))
         {
-            LOG_ERROR("Failed to activate source in open camera: 0x%08x", hr);
+            if (hr == E_ACCESSDENIED)
+            {
+                LOG_CRITICAL("Media Foundation failed to open the color camera with E_ACCESSDENIED. Is the camera "
+                             "already in use? Is Windows enabled to allow access to the camera via Setting / Privacy?");
+            }
+            else
+            {
+                LOG_ERROR("Failed to activate source in open camera: 0x%08x", hr);
+            }
             return hr;
         }
 
