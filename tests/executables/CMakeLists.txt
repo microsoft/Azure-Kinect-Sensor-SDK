@@ -5,7 +5,7 @@ include(k4aTest)
 
 # Only run green screen tests if OpenCV is installed
 find_package(OpenCV)
-if (FALSE)
+if (OpenCV_FOUND)
     add_definitions( -DUSE_OPENCV=1 )
 endif()
 
