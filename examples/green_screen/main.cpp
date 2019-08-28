@@ -149,7 +149,7 @@ bool find_chessboard_corners_helper(const cv::Mat &main_color_image,
     // .....................    .....................
 
     // The problem occurs when this case happens: the find_chessboard() function correctly identifies the points on the
-    // checkerboard (shown as 'x's) but the order of those points differs between images taken by the two cameras.
+    // chessboard (shown as 'x's) but the order of those points differs between images taken by the two cameras.
     // Specifically, the first point in the list of points found for the first image (1) is the *last* point in the list
     // of points found for the second image (2), though they correspond to the same physical point on the chessboard.
 
