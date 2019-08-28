@@ -13,13 +13,7 @@ struct Transformation
     Transformation() : R(cv::Matx33d::eye()), t(0., 0., 0.) {}
 
     // Construct from H
-    Transformation(const cv::Matx44d &H) : R(H.get_minor<3, 3>(0, 0)), t(H(0, 3), H(1, 3), H(2, 3))
-    {
-        if (H(3, 0) != 0 || H(3, 1) != 0 || H(3, 2) != 0 || H(3, 3) != 1)
-        {
-            throw std::runtime_error("Please use a valid homogeneous matrix.");
-        }
-    }
+    Transformation(const cv::Matx44d &H) : R(H.get_minor<3, 3>(0, 0)), t(H(0, 3), H(1, 3), H(2, 3)) {}
 
     // Create homogeneous matrix from this transformation
     cv::Matx44d to_homogeneous() const

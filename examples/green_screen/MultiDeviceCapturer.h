@@ -13,14 +13,14 @@ class MultiDeviceCapturer
 {
 public:
     // Set up all the devices. Note that the index order isn't necessarily preserved, because we might swap with master
-    MultiDeviceCapturer(const vector<int> &device_indices, int32_t color_exposure_usec, int32_t powerline_freq)
+    MultiDeviceCapturer(const vector<uint32_t> &device_indices, int32_t color_exposure_usec, int32_t powerline_freq)
     {
         bool master_found = false;
         if (device_indices.size() == 0)
         {
             throw std::runtime_error("Capturer must be passed at least one camera!");
         }
-        for (int i : device_indices)
+        for (uint32_t i : device_indices)
         {
             k4a::device next_device = k4a::device::open(i); // construct a device using this index
             // If you want to synchronize cameras, you need to manually set both their exposures
