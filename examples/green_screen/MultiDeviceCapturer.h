@@ -22,35 +22,35 @@ public:
         }
         for (int i : device_indices)
         {
-            devices.emplace_back(k4a::device::open(i)); // construct a device using this index
+            k4a::device next_device = k4a::device::open(i); // construct a device using this index
             // If you want to synchronize cameras, you need to manually set both their exposures
-            devices.back().set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-                                             K4A_COLOR_CONTROL_MODE_MANUAL,
-                                             color_exposure_usec);
+            next_device.set_color_control(K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                          K4A_COLOR_CONTROL_MODE_MANUAL,
+                                          color_exposure_usec);
             // This setting compensates for the flicker of lights due to the frequency of AC power in your region. If
             // you are in an area with 50 Hz power, this may need to be updated (check the docs for
             // k4a_color_control_command_t)
-            devices.back().set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
-                                             K4A_COLOR_CONTROL_MODE_MANUAL,
-                                             powerline_freq);
+            next_device.set_color_control(K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
+                                          K4A_COLOR_CONTROL_MODE_MANUAL,
+                                          powerline_freq);
             // We treat the first device found with a sync out cable attached as the master. If it's not supposed to be,
             // unplug the cable from it. Also, if there's only one device, just use it
-            if ((devices.back().is_sync_out_connected() && !master_found) || device_indices.size() == 1)
+            if ((next_device.is_sync_out_connected() && !master_found) || device_indices.size() == 1)
             {
-                // If this isn't already the first and only device, make it the first
-                if (devices.size() > 1)
-                {
-                    std::swap(devices.front(), devices.back());
-                }
+                master_device = std::move(next_device);
                 master_found = true;
             }
-            else if (!devices.back().is_sync_in_connected() && !devices.back().is_sync_out_connected())
+            else if (!next_device.is_sync_in_connected() && !next_device.is_sync_out_connected())
             {
                 throw std::runtime_error("Each device must have sync in or sync out connected!");
             }
-            else if (!devices.back().is_sync_in_connected())
+            else if (!next_device.is_sync_in_connected())
             {
                 throw std::runtime_error("Non-master camera found that doesn't have the sync in port connected!");
+            }
+            else
+            {
+                subordinate_devices.emplace_back(std::move(next_device));
             }
         }
         if (!master_found)
@@ -60,24 +60,19 @@ public:
     }
 
     // configs[0] should be the master, the rest subordinate
-    void start_devices(const k4a_device_configuration_t &master_config,
-                       const std::vector<k4a_device_configuration_t> &sub_configs)
+    void start_devices(const k4a_device_configuration_t &master_config, const k4a_device_configuration_t &sub_config)
     {
-        if (devices.size() != 1 + sub_configs.size())
-        {
-            throw std::runtime_error("Size of sub_configs not the same as number of subordinate devices!");
-        }
         // Start by starting all of the subordinate devices. They must be started before the master!
-        for (size_t i = 0; i < sub_configs.size(); ++i)
+        for (k4a::device &d : subordinate_devices)
         {
-            devices[i + 1].start_cameras(&sub_configs[i]);
+            d.start_cameras(&sub_config);
         }
         // Lastly, start the master device
-        devices[0].start_cameras(&master_config);
+        master_device.start_cameras(&master_config);
     }
 
     // Blocks until we have synchronized captures stored in the output. First is master, rest are subordinates
-    std::vector<k4a::capture> get_synchronized_captures(const vector<k4a_device_configuration_t> &sub_configs,
+    std::vector<k4a::capture> get_synchronized_captures(const k4a_device_configuration_t &sub_config,
                                                         bool compare_sub_depth_instead_of_color = false)
     {
         // Dealing with the synchronized cameras is complex. The Azure Kinect DK:
@@ -97,19 +92,20 @@ public:
 
         // The captures used in the loop are outside of it so that they can persist across loop iterations. This is
         // necessary because each time this loop runs we'll only update the older capture.
-        if (devices.size() != 1 + sub_configs.size())
+        // The captures are stored in a vector where the first element of the vector is the master capture and
+        // subsequent elements are subordinate captures
+        std::vector<k4a::capture> captures(subordinate_devices.size() + 1); // add 1 for the master
+        size_t current_index = 0;
+        master_device.get_capture(&captures[current_index], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+        ++current_index;
+        for (k4a::device &d : subordinate_devices)
         {
-            throw std::runtime_error("Size of sub_configs not the same as number of subordinate devices!");
-        }
-
-        std::vector<k4a::capture> captures(devices.size());
-        for (size_t i = 0; i < devices.size(); ++i)
-        {
-            devices[i].get_capture(&captures[i], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+            d.get_capture(&captures[current_index], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+            ++current_index;
         }
 
         // If there are no subordinate devices, just return captures which only has the master image
-        if (sub_configs.empty())
+        if (subordinate_devices.empty())
         {
             return captures;
         }
@@ -120,16 +116,16 @@ public:
             k4a::image master_color_image = captures[0].get_color_image();
             std::chrono::microseconds master_color_image_time = master_color_image.get_device_timestamp();
 
-            for (size_t i = 0; i < sub_configs.size(); ++i)
+            for (size_t i = 0; i < subordinate_devices.size(); ++i)
             {
                 k4a::image sub_image;
                 if (compare_sub_depth_instead_of_color)
                 {
-                    sub_image = captures[i + 1].get_depth_image();
+                    sub_image = captures[i + 1].get_depth_image(); // offset of 1 because master capture is at front
                 }
                 else
                 {
-                    sub_image = captures[i + 1].get_color_image();
+                    sub_image = captures[i + 1].get_color_image(); // offset of 1 because master capture is at front
                 }
 
                 if (master_color_image && sub_image)
@@ -139,8 +135,8 @@ public:
                     // delay we configured between the master device color camera and subordinate device color camera
                     std::chrono::microseconds expected_sub_image_time =
                         master_color_image_time +
-                        std::chrono::microseconds{ sub_configs[i].subordinate_delay_off_master_usec } +
-                        std::chrono::microseconds{ sub_configs[i].depth_delay_off_color_usec };
+                        std::chrono::microseconds{ sub_config.subordinate_delay_off_master_usec } +
+                        std::chrono::microseconds{ sub_config.depth_delay_off_color_usec };
                     std::chrono::microseconds sub_image_time_error = sub_image_time - expected_sub_image_time;
                     // The time error's absolute value must be within the permissible range. So, for example, if
                     // MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP is 2, offsets of -2, -1, 0, 1, and -2 are
@@ -155,7 +151,8 @@ public:
                         // the subordinate camera image timestamp was earlier than it is allowed to be. This means the
                         // subordinate is lagging and we need to update the subordinate to get the subordinate caught up
                         std::cout << "Subordinate lagging...\n";
-                        devices[i + 1].get_capture(&captures[i + 1], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+                        subordinate_devices[i].get_capture(&captures[i + 1],
+                                                           std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                         break;
                     }
                     else if (sub_image_time_error > MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP)
@@ -168,14 +165,14 @@ public:
                         // the subordinate camera image timestamp was later than it is allowed to be. This means the
                         // subordinate is ahead and we need to update the master to get the master caught up
                         std::cout << "Master lagging...\n";
-                        devices[0].get_capture(&captures[0], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+                        master_device.get_capture(&captures[0], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                         break;
                     }
                     else
                     {
                         // These captures are sufficiently synchronized. If we've gotten to the end, then all are
                         // synchronized.
-                        if (i == sub_configs.size() - 1)
+                        if (i == subordinate_devices.size() - 1)
                         {
                             have_synced_images = true; // now we'll finish the for loop and then exit the while loop
                         }
@@ -184,13 +181,14 @@ public:
                 else if (!master_color_image)
                 {
                     std::cout << "Master image was bad!\n";
-                    devices[0].get_capture(&captures[0], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+                    master_device.get_capture(&captures[0], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                     break;
                 }
                 else if (!sub_image)
                 {
                     std::cout << "Subordinate image was bad!" << endl;
-                    devices[i + 1].get_capture(&captures[i + 1], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
+                    subordinate_devices[i].get_capture(&captures[i + 1],
+                                                       std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                     break;
                 }
             }
@@ -201,20 +199,21 @@ public:
 
     const k4a::device &get_master_device() const
     {
-        return devices[0];
+        return master_device;
     }
 
     const k4a::device &get_subordinate_device_by_index(size_t i) const
     {
         // devices[0] is the master. There are only devices.size() - 1 others. So, indices greater or equal are invalid
-        if (i >= devices.size() - 1)
+        if (i >= subordinate_devices.size())
         {
             throw std::runtime_error("Subordinate index too large!");
         }
-        return devices[i + 1];
+        return subordinate_devices[i];
     }
 
 private:
     // Once the constuctor finishes, devices[0] will always be the master
-    std::vector<k4a::device> devices;
+    k4a::device master_device;
+    std::vector<k4a::device> subordinate_devices;
 };
