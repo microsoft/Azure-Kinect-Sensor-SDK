@@ -59,8 +59,6 @@ k4a_result_t logger_register_message_callback(k4a_logging_message_cb_t *message_
 
 void logger_log(k4a_log_level_t level, const char *file, const int line, const char *format, ...);
 
-k4a_log_level_t logger_get_verbosity();
-
 FORCEINLINE k4a_result_t
 TraceError(k4a_result_t result, const char *szCall, const char *szFile, int line, const char *szFunction)
 {

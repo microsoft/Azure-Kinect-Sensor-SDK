@@ -262,32 +262,6 @@ void logger_deinit(void)
     rwlock_release_write(&g_context->lock);
 }
 
-// return the most most verbose logging setting.
-k4a_log_level_t logger_get_verbosity(void)
-{
-    k4a_log_level_t level = K4A_LOG_LEVEL_OFF;
-    logger_global_context_t *g_context = logger_global_context_t_get();
-    rwlock_acquire_read(&g_context->lock);
-
-    if (g_context->user_log_level == K4A_LOG_LEVEL_OFF)
-    {
-        level = g_context->env_log_level;
-    }
-    else if (g_context->env_log_level == K4A_LOG_LEVEL_OFF)
-    {
-        level = g_context->user_log_level;
-    }
-    else
-    {
-        // Neither log level is off, so pick the largest, most verbose value.
-        level = g_context->env_log_level > g_context->user_log_level ? g_context->env_log_level :
-                                                                       g_context->user_log_level;
-    }
-    rwlock_release_read(&g_context->lock);
-
-    return level;
-}
-
 #if defined(__GNUC__) || defined(__clang__)
 // Enable printf type checking in clang and gcc
 __attribute__((__format__ (__printf__, 2, 0)))

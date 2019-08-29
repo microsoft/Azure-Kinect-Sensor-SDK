@@ -112,56 +112,37 @@ static k4a_result_t usb_cmd_set_libusb_debug_verbosity(usbcmd_context_t *usbcmd)
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
     libusb_context *libusb_ctx = usbcmd ? usbcmd->libusb_context : NULL;
 
-#if (LIBUSB_API_VERSION >= 0x01000106)
-    k4a_log_level_t k4a_lvl = logger_get_verbosity();
-
-    enum libusb_log_level table[] = {
-        LIBUSB_LOG_LEVEL_NONE,    /**< K4A_LOG_LEVEL_CRITICAL */
-        LIBUSB_LOG_LEVEL_ERROR,   /**< K4A_LOG_LEVEL_ERROR */
-        LIBUSB_LOG_LEVEL_WARNING, /**< K4A_LOG_LEVEL_WARNING */
-        LIBUSB_LOG_LEVEL_WARNING, /**< K4A_LOG_LEVEL_INFO */
-        LIBUSB_LOG_LEVEL_DEBUG,   /**< K4A_LOG_LEVEL_TRACE */
-        LIBUSB_LOG_LEVEL_NONE     /**< K4A_LOG_LEVEL_OFF */
-    };
-
-    if (k4a_lvl >= COUNTOF(table))
+    // #if (LIBUSB_API_VERSION >= 0x01000106)
+    enum libusb_log_level level = LIBUSB_LOG_LEVEL_WARNING;
+    if (usbcmd)
     {
-        LOG_ERROR("k4a_lvl is too large, %d, %d.", k4a_lvl, COUNTOF(table));
-        result = K4A_RESULT_FAILED;
+        usbcmd->libusb_verbosity = level;
     }
-    else
-    {
-        enum libusb_log_level level = table[k4a_lvl];
-        if (usbcmd)
-        {
-            usbcmd->libusb_verbosity = level;
-        }
-        result = K4A_RESULT_FROM_LIBUSB(libusb_set_option(libusb_ctx, LIBUSB_OPTION_LOG_LEVEL, level));
-    }
-#else
-    libusb_set_debug(libusb_ctx, 3); // set verbosity level to 3, as suggested in the documentation
-#endif
+    result = K4A_RESULT_FROM_LIBUSB(libusb_set_option(libusb_ctx, LIBUSB_OPTION_LOG_LEVEL, level));
+    // #else
+    //     libusb_set_debug(libusb_ctx, 3); // set verbosity level to 3, as suggested in the documentation
+    // #endif
     return result;
 }
 
 // Stop LIBUSB from generating any debug messages
 void libusb_logging_disable(libusb_context *context)
 {
-#if (LIBUSB_API_VERSION >= 0x01000106)
+    // #if (LIBUSB_API_VERSION >= 0x01000106)
     K4A_RESULT_FROM_LIBUSB(libusb_set_option(context, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_NONE));
-#else
-    libusb_set_debug(context, 0);
-#endif
+    // #else
+    //     libusb_set_debug(context, 0);
+    // #endif
 }
 
 // Restore LIBUSB's ability to generate debug messages
 void libusb_logging_restore(libusb_context *context, enum libusb_log_level verbosity)
 {
-#if (LIBUSB_API_VERSION >= 0x01000106)
+    // #if (LIBUSB_API_VERSION >= 0x01000106)
     K4A_RESULT_FROM_LIBUSB(libusb_set_option(context, LIBUSB_OPTION_LOG_LEVEL, verbosity));
-#else
-    libusb_set_debug(context, 3); // set verbosity level to 3, as suggested in the documentation
-#endif
+    // #else
+    //     libusb_set_debug(context, 3); // set verbosity level to 3, as suggested in the documentation
+    // #endif
 }
 
 static k4a_result_t populate_container_id(usbcmd_context_t *usbcmd)
