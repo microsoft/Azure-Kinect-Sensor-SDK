@@ -1932,6 +1932,62 @@ K4A_EXPORT k4a_result_t k4a_calibration_2d_to_2d(const k4a_calibration_t *calibr
                                                  k4a_float2_t *target_point2d,
                                                  int *valid);
 
+/** Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of
+ * the depth camera.
+ *
+ * \param calibration
+ * Location to read the camera calibration obtained by k4a_device_get_calibration().
+ *
+ * \param source_point2d
+ * The 2D pixel in \p color camera coordinates.
+ *
+ * \param depth_image
+ * Handle to input depth image.
+ *
+ * \param target_point2d
+ * The 2D pixel in \p depth camera coordinates.
+ *
+ * \param valid
+ * The output parameter returns a value of 1 if the \p source_point2d is a valid coordinate in the \p target_camera
+ * coordinate system, and will return 0 if the coordinate is not valid in the calibration model.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p target_point2d was successfully written. ::K4A_RESULT_FAILED if \p calibration
+ * contained invalid transformation parameters. If the function returns ::K4A_RESULT_SUCCEEDED, but \p valid is 0,
+ * the transformation was computed, but the results in \p target_point2d are outside of the range of valid calibration
+ * and should be ignored.
+ *
+ * \remarks
+ * This function maps a pixel from the coordinate system of the color camera to the depth camera. As described in
+ * k4a_calibration_2d_to_2d(), this procedure requires the depth value of the color pixel as the input. One way to
+ * obtain the depth value is to use k4a_transformation_depth_image_to_color_camera() to get the transformed depth image
+ * in color camera space and then read the depth value for the color pixel from the transformed depth image.
+ * However, it might be an overkill for user who only wants to transform a few pixels. This function is based on the
+ * epipolar geometry to search along the epipolar line in undistorted depth image space that corresponds to the color
+ * pixel ray, it tries to find the depth pixel that can be transformed back to color camera space and also is the
+ * closest one to the oringinal color pixel.
+ *
+ * \remarks
+ * If \p source_point2d does not map to a valid 2D coordinate in the \p target_camera coordinate system, \p valid is set
+ * to 0. If it is valid, \p valid will be set to 1. The user should not use the value of \p target_point2d if \p valid
+ * was set to 0.
+ *
+ * \relates k4a_calibration_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_calibration_color_2d_to_depth_2d(const k4a_calibration_t *calibration,
+                                                             const k4a_float2_t *source_point2d,
+                                                             const k4a_image_t depth_image,
+                                                             k4a_float2_t *target_point2d,
+                                                             int *valid);
+
 /** Get handle to transformation handle.
  *
  * \param calibration
