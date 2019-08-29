@@ -558,7 +558,7 @@ static inline void mat4x4_from_quat(mat4x4 M, quat q)
     M[0][2] = 2.f * (b * d - a * c);
     M[0][3] = 0.f;
 
-    M[1][0] = 2 * (b * c - a * d);
+    M[1][0] = 2.f * (b * c - a * d);
     M[1][1] = a2 - b2 + c2 - d2;
     M[1][2] = 2.f * (c * d + a * b);
     M[1][3] = 0.f;
