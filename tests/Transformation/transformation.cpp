@@ -327,7 +327,6 @@ TEST_F(transformation_ut, transformation_color_2d_to_depth_2d)
                            &depth_image),
               K4A_RESULT_SUCCEEDED);
     ASSERT_NE(depth_image, (k4a_image_t)NULL);
-    k4a_transformation_image_descriptor_t depth_image_descriptor = image_get_descriptor(depth_image);
 
     uint16_t *depth_image_buffer = (uint16_t *)(void *)image_get_buffer(depth_image);
     for (int i = 0; i < width * height; i++)
