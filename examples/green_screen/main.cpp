@@ -239,7 +239,8 @@ int main(int argc, char **argv)
 
             // create the image that will be be used as output
             // make a green background
-            cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, cv::Scalar(0, 255, 0));
+            cv::Scalar green_pixel(0, 255, 0);
+            cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, green_pixel);
 
             k4a::image secondary_depth_image = captures[1].get_depth_image();
 
@@ -254,10 +255,13 @@ int main(int argc, char **argv)
             // the gaps with the other camera.
             cv::Mat main_valid_mask = cv_main_depth_in_main_color != 0;
             cv::Mat secondary_valid_mask = cv_secondary_depth_in_main_color != 0;
+            // build depth mask. If the main camera depth for a pixel is valid and the depth is within the threshold,
+            // then set the mask to display that pixel. If the main camera depth for a pixel is invalid but the
+            // secondary depth for a pixel is valid and within the threshold, then set the mask to display that pixel.
             cv::Mat within_threshold_range = (main_valid_mask & (cv_main_depth_in_main_color < depth_threshold)) |
                                              (~main_valid_mask & secondary_valid_mask &
                                               (cv_secondary_depth_in_main_color < depth_threshold));
-            // copy all valid output to it
+            // copy main color image to output image only where the mask within_threshold_range is true
             cv_main_color_image.copyTo(output_image, within_threshold_range);
 
             cv::imshow("Green Screen", output_image);
