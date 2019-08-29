@@ -7,7 +7,9 @@
 #include <k4a/k4a.hpp>
 
 // This is the maximum difference between when we expected an image's timestamp to be and when it actually occurred.
-constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(50);
+// TODO waiting on a firmware update to be returned to 50
+constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(33000);
+// constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(50);
 
 class MultiDeviceCapturer
 {
