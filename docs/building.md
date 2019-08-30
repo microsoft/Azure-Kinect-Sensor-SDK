@@ -80,8 +80,8 @@ Windows PC is setup properly.*
 ### Linux Dependencies
 
 The list of libraries and tools that must be installed on your machine in
-order to build can be found in our script
-[bootstrap-ubuntu.sh](../scripts/bootstrap-ubuntu.sh).
+order to build can be found in our build system Dockerfile
+[Dockerfile](../scripts/Dockerfile).
 
 The depth engine is needed as well. The depth engine (DE) is a closed source
 binary shipped with the linux debian package. The DE binary needs to be copied
