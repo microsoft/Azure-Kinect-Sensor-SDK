@@ -253,7 +253,7 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
-      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED=$(UsesOpenCV)" "-DOpenCV_DIR=$(OpenCVPath)\lib" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DK4A_SOURCE_LINK=ON"
+      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED=$(UsesOpenCV)" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DK4A_SOURCE_LINK=ON"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:
