@@ -141,6 +141,8 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
         set(K4A_BINARY_DIR_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo)
     endif()
 
+    # Check what architecture we are building for. This assumes all 64-bit architectures are amd64, which will break
+    # if we decide to support arm.
     if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(TARGET_ARCH "amd64")
         configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x64.props)
