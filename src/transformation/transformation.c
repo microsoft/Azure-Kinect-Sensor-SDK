@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
-#include <stdio.h>
 
 k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_camera_t *depth_camera_calibration,
                                                           const k4a_calibration_camera_t *color_camera_calibration,
