@@ -159,6 +159,11 @@ int main(int argc, char **argv)
     k4a::transformation main_depth_to_main_color(main_calibration);
 
     capturer.start_devices(main_config, secondary_config);
+    // get an image to be the background
+    vector<k4a::capture> background_captures = capturer.get_synchronized_captures(secondary_config);
+    cv::Mat background_image = color_to_opencv(background_captures[0].get_color_image());
+    cv::Mat output_image = background_image.clone(); // allocated outside the loop to avoid re-creating every time
+
     if (num_devices == 1)
     {
         std::chrono::time_point<std::chrono::system_clock> start_time = std::chrono::system_clock::now();
@@ -178,14 +183,13 @@ int main(int argc, char **argv)
             cv::Mat cv_main_depth_in_main_color = depth_to_opencv(main_depth_in_main_color);
             cv::Mat cv_main_color_image = color_to_opencv(main_color_image);
 
-            // create the image that will be be used as output
-            // make a green background
-            cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, cv::Scalar(0, 255, 0));
-
             // single-camera case
-            cv::Mat nongreen_mask = (cv_main_depth_in_main_color != 0) &
-                                    (cv_main_depth_in_main_color < depth_threshold);
-            cv_main_color_image.copyTo(output_image, nongreen_mask);
+            cv::Mat within_threshold_range = (cv_main_depth_in_main_color != 0) &
+                                             (cv_main_depth_in_main_color < depth_threshold);
+            // show the close details
+            cv_main_color_image.copyTo(output_image, within_threshold_range);
+            // hide the rest with the background image
+            background_image.copyTo(output_image, ~within_threshold_range);
 
             cv::imshow("Green Screen", output_image);
             cv::waitKey(1);
@@ -237,11 +241,6 @@ int main(int argc, char **argv)
             cv::Mat cv_main_depth_in_main_color = depth_to_opencv(main_depth_in_main_color);
             cv::Mat cv_main_color_image = color_to_opencv(main_color_image);
 
-            // create the image that will be be used as output
-            // make a green background
-            cv::Scalar green_pixel(0, 255, 0);
-            cv::Mat output_image(cv_main_color_image.rows, cv_main_color_image.cols, CV_8UC3, green_pixel);
-
             k4a::image secondary_depth_image = captures[1].get_depth_image();
 
             // Get the depth image in the main color perspective
@@ -263,6 +262,8 @@ int main(int argc, char **argv)
                                               (cv_secondary_depth_in_main_color < depth_threshold));
             // copy main color image to output image only where the mask within_threshold_range is true
             cv_main_color_image.copyTo(output_image, within_threshold_range);
+            // fill the rest with the background image
+            background_image.copyTo(output_image, ~within_threshold_range);
 
             cv::imshow("Green Screen", output_image);
             cv::waitKey(1);
