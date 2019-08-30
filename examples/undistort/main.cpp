@@ -255,12 +255,12 @@ static void remap(const k4a_image_t src, const k4a_image_t lut, k4a_image_t dst,
                                              src_data[(lut_data[i].y + 1) * src_width + lut_data[i].x],
                                              src_data[(lut_data[i].y + 1) * src_width + lut_data[i].x + 1] };
 
-                // If the image contains invalid data, e.g. depth image contains value 0, ignore the bilinear
-                // interpolation for current target pixel if one of the neighbors contains invalid data to avoid
-                // introduce noise on the edge. If the image is color or ir images, user should use
-                // INTERPOLATION_BILINEAR
                 if (type == INTERPOLATION_BILINEAR_DEPTH)
                 {
+                    // If the image contains invalid data, e.g. depth image contains value 0, ignore the bilinear
+                    // interpolation for current target pixel if one of the neighbors contains invalid data to avoid
+                    // introduce noise on the edge. If the image is color or ir images, user should use
+                    // INTERPOLATION_BILINEAR
                     if (neighbors[0] == 0 || neighbors[1] == 0 || neighbors[2] == 0 || neighbors[3] == 0)
                     {
                         continue;
