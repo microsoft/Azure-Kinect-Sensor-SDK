@@ -44,6 +44,10 @@ if ((NOT K4A_TURNED_ON_GIT_SUBMODULES_RECURSE) OR
         endif()
     endif()
 endif()
+
+# Set default policies for older CMake projects
+set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
+
 add_subdirectory(azure_c_shared)
 add_subdirectory(cjson)
 add_subdirectory(glfw)

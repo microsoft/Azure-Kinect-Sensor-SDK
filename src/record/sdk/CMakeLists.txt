@@ -17,12 +17,6 @@ include(GenerateExportHeader)
 generate_export_header(k4arecord
     EXPORT_FILE_NAME "include/k4arecord/k4arecord_export.h")
 
-# Only export functions decorated to be exported (k4arecord_export.h needed for this work)
-if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-    target_compile_options(k4arecord PRIVATE "-fvisibility=hidden")
-    target_link_libraries(k4arecord PRIVATE "-Wl,--exclude-libs,ALL")
-endif()
-
 # Include ${CMAKE_CURRENT_BINARY_DIR}/version.rc in the target's sources
 # to embed version information
 set(K4A_FILEDESCRIPTION "Azure Kinect Recording SDK")
