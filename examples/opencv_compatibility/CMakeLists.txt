@@ -1,7 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-find_package(OpenCV REQUIRED)
 add_executable(opencv_example main.cpp)
 target_include_directories( opencv_example PRIVATE ${OpenCV_INCLUDE_DIRS} )
 
