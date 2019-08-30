@@ -1958,14 +1958,11 @@ K4A_EXPORT k4a_result_t k4a_calibration_2d_to_2d(const k4a_calibration_t *calibr
  * and should be ignored.
  *
  * \remarks
- * This function maps a pixel from the coordinate system of the color camera to the depth camera. As described in
- * k4a_calibration_2d_to_2d(), this procedure requires the depth value of the color pixel as the input. One way to
- * obtain the depth value is to use k4a_transformation_depth_image_to_color_camera() to get the transformed depth image
- * in color camera space and then read the depth value for the color pixel from the transformed depth image.
- * However, it might be an overkill for user who only wants to transform a few pixels. This function is based on the
- * epipolar geometry to search along the epipolar line in undistorted depth image space that corresponds to the color
- * pixel ray, it tries to find the depth pixel that can be transformed back to color camera space and also is the
- * closest one to the oringinal color pixel.
+ * This function represents an alternative to k4a_calibration_2d_to_2d() if the number of pixels that need to be
+ * transformed is small. This function searches along an epipolar line in the depth image to find the corresponding
+ * depth pixel. If a larger number of pixels need to be transformed, it might be computationally cheaper to call
+ * k4a_transformation_depth_image_to_color_camera() to get correspondence depth values for these color pixels, then call
+ * the function k4a_calibration_2d_to_2d().
  *
  * \remarks
  * If \p source_point2d does not map to a valid 2D coordinate in the \p target_camera coordinate system, \p valid is set

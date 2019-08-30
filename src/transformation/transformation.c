@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
+#include <stdio.h>
 
 k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_camera_t *depth_camera_calibration,
                                                           const k4a_calibration_camera_t *color_camera_calibration,
@@ -98,7 +99,7 @@ static k4a_result_t transformation_possible(const k4a_calibration_t *camera_cali
     return K4A_RESULT_SUCCEEDED;
 }
 
-static bool transformation_is_pixel_within_line(const float p[2], const float start[2], const float stop[2])
+static bool transformation_is_pixel_within_line_segment(const float p[2], const float start[2], const float stop[2])
 {
     return (stop[0] >= start[0] ? stop[0] >= p[0] && p[0] >= start[0] : stop[0] <= p[0] && p[0] <= start[0]) &&
            (stop[1] >= start[1] ? stop[1] >= p[1] && p[1] >= start[1] : stop[1] <= p[1] && p[1] <= start[1]);
@@ -366,6 +367,10 @@ k4a_result_t transformation_color_2d_to_depth_2d(const k4a_calibration_t *calibr
 
     // Search every pixel on the epipolar line so that its reprojected pixel coordinates in color image have minimum
     // distance from the input color pixel coordinates
+    if (stop_point2d[0] == start_point2d[0])
+    {
+        return K4A_RESULT_FAILED;
+    }
     int depth_image_width_pixels = image_get_width_pixels(depth_image);
     int depth_image_height_pixels = image_get_height_pixels(depth_image);
     const uint16_t *depth_image_data = (const uint16_t *)(const void *)(image_get_buffer(depth_image));
@@ -374,7 +379,9 @@ k4a_result_t transformation_color_2d_to_depth_2d(const k4a_calibration_t *calibr
     p[0] = start_point2d[0];
     p[1] = start_point2d[1];
     float epipolar_line_slope = (stop_point2d[1] - start_point2d[1]) / (stop_point2d[0] - start_point2d[0]);
-    while (transformation_is_pixel_within_line(p, start_point2d, stop_point2d))
+    bool xStep1 = fabs(epipolar_line_slope) < 1;
+    bool stop_larger_than_start = xStep1 ? stop_point2d[0] > start_point2d[0] : stop_point2d[1] > start_point2d[1];
+    while (transformation_is_pixel_within_line_segment(p, start_point2d, stop_point2d))
     {
         // Compute the ray from the depth camera oringin, intersecting with the current searching pixel on the epipolar
         // line
@@ -429,7 +436,6 @@ k4a_result_t transformation_color_2d_to_depth_2d(const k4a_calibration_t *calibr
                             best_error = error;
                             target_point2d[0] = depth_point2d[0];
                             target_point2d[1] = depth_point2d[1];
-                            *valid = 1;
                         }
                     }
                 }
@@ -437,16 +443,21 @@ k4a_result_t transformation_color_2d_to_depth_2d(const k4a_calibration_t *calibr
         }
 
         // Compute next pixel to search for on the epipolar line
-        if (fabs(stop_point2d[0] - start_point2d[0]) > fabs(stop_point2d[1] - start_point2d[1]))
+        if (xStep1)
         {
-            p[0] = stop_point2d[0] > p[0] ? p[0] + 1 : p[0] - 1;
-            p[1] = stop_point2d[1] - epipolar_line_slope * (stop_point2d[0] - p[0]);
+            p[0] = stop_larger_than_start ? p[0] + 1 : p[0] - 1;
+            p[1] = stop_larger_than_start ? p[1] + epipolar_line_slope : p[1] - epipolar_line_slope;
         }
         else
         {
-            p[1] = stop_point2d[1] > p[1] ? p[1] + 1 : p[1] - 1;
-            p[0] = stop_point2d[0] - ((stop_point2d[1] - p[1]) / epipolar_line_slope);
+            p[1] = stop_larger_than_start ? p[1] + 1 : p[1] - 1;
+            p[0] = stop_larger_than_start ? p[1] + 1 / epipolar_line_slope : p[1] - 1 / epipolar_line_slope;
         }
+    }
+
+    if (best_error > 10)
+    {
+        *valid = 0;
     }
 
     return K4A_RESULT_SUCCEEDED;
