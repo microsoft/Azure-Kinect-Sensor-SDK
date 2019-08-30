@@ -366,10 +366,6 @@ k4a_result_t transformation_color_2d_to_depth_2d(const k4a_calibration_t *calibr
 
     // Search every pixel on the epipolar line so that its reprojected pixel coordinates in color image have minimum
     // distance from the input color pixel coordinates
-    if (stop_point2d[0] == start_point2d[0])
-    {
-        return K4A_RESULT_FAILED;
-    }
     int depth_image_width_pixels = image_get_width_pixels(depth_image);
     int depth_image_height_pixels = image_get_height_pixels(depth_image);
     const uint16_t *depth_image_data = (const uint16_t *)(const void *)(image_get_buffer(depth_image));
@@ -377,6 +373,10 @@ k4a_result_t transformation_color_2d_to_depth_2d(const k4a_calibration_t *calibr
     float p[2];
     p[0] = start_point2d[0];
     p[1] = start_point2d[1];
+    if (stop_point2d[0] - start_point2d[0] == 0.0f)
+    {
+        return K4A_RESULT_FAILED;
+    }
     float epipolar_line_slope = (stop_point2d[1] - start_point2d[1]) / (stop_point2d[0] - start_point2d[0]);
     bool xStep1 = fabs(epipolar_line_slope) < 1;
     bool stop_larger_than_start = xStep1 ? stop_point2d[0] > start_point2d[0] : stop_point2d[1] > start_point2d[1];
