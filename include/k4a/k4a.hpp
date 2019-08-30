@@ -723,6 +723,28 @@ struct calibration : public k4a_calibration_t
         return static_cast<bool>(valid);
     }
 
+    /** Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of the depth camera. This function
+     * searches along an epipolar line in the depth image to find the corresponding depth pixel.
+     * Returns false if the point is invalid in the target coordinate system (and therefore target_point2d should not be
+     * used) Throws error if calibration contains invalid data.
+     *
+     * \sa k4a_calibration_color_2d_to_depth_2d
+     */
+    bool convert_color_2d_to_depth_2d(const k4a_float2_t &source_point2d,
+                                      const image &depth_image,
+                                      k4a_float2_t *target_point2d) const
+    {
+        int valid = 0;
+        k4a_result_t result =
+            k4a_calibration_color_2d_to_depth_2d(this, &source_point2d, depth_image.handle(), target_point2d, &valid);
+
+        if (K4A_RESULT_SUCCEEDED != result)
+        {
+            throw error("Calibration contained invalid transformation parameters!");
+        }
+        return static_cast<bool>(valid);
+    }
+
     /** Get the camera calibration for a device from a raw calibration blob.
      * Throws error on failure.
      *

@@ -2,7 +2,7 @@
 
 This information is for how to build your own copy of the SDK binaries. Most users of 
 the Azure Kinect DK should not need to re-build the SDK, if you just need to use the SDK
-see [usage](usage.md) for more information.
+see [usage](usage.md) for more information. If you need to build from source, you have to clone the repository instead of downloading the Zip file o ensure all the submodule dependencies in place.
 
 ## Support Configurations
 
@@ -80,8 +80,8 @@ Windows PC is setup properly.*
 ### Linux Dependencies
 
 The list of libraries and tools that must be installed on your machine in
-order to build can be found in our script
-[bootstrap-ubuntu.sh](../scripts/bootstrap-ubuntu.sh).
+order to build can be found in our build system Dockerfile
+[Dockerfile](../scripts/Dockerfile).
 
 The depth engine is needed as well. The depth engine (DE) is a closed source
 binary shipped with the linux debian package. The DE binary needs to be copied

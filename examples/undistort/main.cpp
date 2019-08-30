@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string>
+#include <algorithm>
 
 #define INVALID INT32_MIN
 
@@ -254,14 +255,40 @@ static void remap(const k4a_image_t src, const k4a_image_t lut, k4a_image_t dst,
                                              src_data[(lut_data[i].y + 1) * src_width + lut_data[i].x],
                                              src_data[(lut_data[i].y + 1) * src_width + lut_data[i].x + 1] };
 
-                // If the image contains invalid data, e.g. depth image contains value 0, ignore the bilinear
-                // interpolation for current target pixel if one of the neighbors contains invalid data to avoid
-                // introduce noise on the edge. If the image is color or ir images, user should use
-                // INTERPOLATION_BILINEAR
                 if (type == INTERPOLATION_BILINEAR_DEPTH)
                 {
+                    // If the image contains invalid data, e.g. depth image contains value 0, ignore the bilinear
+                    // interpolation for current target pixel if one of the neighbors contains invalid data to avoid
+                    // introduce noise on the edge. If the image is color or ir images, user should use
+                    // INTERPOLATION_BILINEAR
                     if (neighbors[0] == 0 || neighbors[1] == 0 || neighbors[2] == 0 || neighbors[3] == 0)
+                    {
                         continue;
+                    }
+
+                    // Ignore interpolation at large depth discontinuity without disrupting slanted surface
+                    // Skip interpolation threshold is estimated based on the following logic:
+                    // - angle between two pixels is: theta = 0.234375 degree (120 degree / 512) in binning resolution
+                    // mode
+                    // - distance between two pixels at same depth approximately is: A ~= sin(theta) * depth
+                    // - distance between two pixels at highly slanted surface (e.g. alpha = 85 degree) is: B = A /
+                    // cos(alpha)
+                    // - skip_interpolation_ratio ~= sin(theta) / cos(alpha)
+                    // We use B as the threshold that to skip interpolation if the depth difference in the triangle is
+                    // larger than B. This is a conservative threshold to estimate largest distance on a highly slanted
+                    // surface at given depth, in reality, given distortion, distance, resolution difference, B can be
+                    // smaller
+                    const float skip_interpolation_ratio = 0.04693441759f;
+                    float depth_min = std::min(std::min(neighbors[0], neighbors[1]),
+                                               std::min(neighbors[2], neighbors[3]));
+                    float depth_max = std::max(std::max(neighbors[0], neighbors[1]),
+                                               std::max(neighbors[2], neighbors[3]));
+                    float depth_delta = depth_max - depth_min;
+                    float skip_interpolation_threshold = skip_interpolation_ratio * depth_min;
+                    if (depth_delta > skip_interpolation_threshold)
+                    {
+                        continue;
+                    }
                 }
 
                 dst_data[i] = (uint16_t)(neighbors[0] * lut_data[i].weight[0] + neighbors[1] * lut_data[i].weight[1] +
