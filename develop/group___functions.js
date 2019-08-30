@@ -4,6 +4,7 @@ var group___functions =
     [ "k4a_calibration_2d_to_3d", "group___functions_ga664602bdb48dab38117a6c1d14b880de.html#ga664602bdb48dab38117a6c1d14b880de", null ],
     [ "k4a_calibration_3d_to_2d", "group___functions_ga2ed8b51d727425caa942aab190fc2ba9.html#ga2ed8b51d727425caa942aab190fc2ba9", null ],
     [ "k4a_calibration_3d_to_3d", "group___functions_gaacd1eab997ef964b5e436afa5295726e.html#gaacd1eab997ef964b5e436afa5295726e", null ],
+    [ "k4a_calibration_color_2d_to_depth_2d", "group___functions_ga18bc3138d6cc68af6c49902853fda9b5.html#ga18bc3138d6cc68af6c49902853fda9b5", null ],
     [ "k4a_calibration_get_from_raw", "group___functions_ga1718f22605c9cfd8f0b8887169f78f8f.html#ga1718f22605c9cfd8f0b8887169f78f8f", null ],
     [ "k4a_capture_create", "group___functions_gaffbf32b4d014c31826d52de1c0c932cc.html#gaffbf32b4d014c31826d52de1c0c932cc", null ],
     [ "k4a_capture_get_color_image", "group___functions_ga683e440b5f22215a2de58d7fa140488c.html#ga683e440b5f22215a2de58d7fa140488c", null ],

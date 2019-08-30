@@ -13,6 +13,7 @@ var searchData=
   ['k4a_5fcalibration_5f3d_5fto_5f2d',['k4a_calibration_3d_to_2d',['../group___functions_ga2ed8b51d727425caa942aab190fc2ba9.html#ga2ed8b51d727425caa942aab190fc2ba9',1,'k4a_calibration_t']]],
   ['k4a_5fcalibration_5f3d_5fto_5f3d',['k4a_calibration_3d_to_3d',['../group___functions_gaacd1eab997ef964b5e436afa5295726e.html#gaacd1eab997ef964b5e436afa5295726e',1,'k4a_calibration_t']]],
   ['k4a_5fcalibration_5fcamera_5ft',['k4a_calibration_camera_t',['../structk4a__calibration__camera__t.html',1,'']]],
+  ['k4a_5fcalibration_5fcolor_5f2d_5fto_5fdepth_5f2d',['k4a_calibration_color_2d_to_depth_2d',['../group___functions_ga18bc3138d6cc68af6c49902853fda9b5.html#ga18bc3138d6cc68af6c49902853fda9b5',1,'k4a_calibration_t']]],
   ['k4a_5fcalibration_5fextrinsics_5ft',['k4a_calibration_extrinsics_t',['../structk4a__calibration__extrinsics__t.html',1,'']]],
   ['k4a_5fcalibration_5fget_5ffrom_5fraw',['k4a_calibration_get_from_raw',['../group___functions_ga1718f22605c9cfd8f0b8887169f78f8f.html#ga1718f22605c9cfd8f0b8887169f78f8f',1,'k4a_device_t']]],
   ['k4a_5fcalibration_5fintrinsic_5fparameters_5ft',['k4a_calibration_intrinsic_parameters_t',['../unionk4a__calibration__intrinsic__parameters__t.html',1,'']]],

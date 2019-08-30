@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure Kinect Sensor SDK: Data Fields</title>
+<title>Azure Kinect Sensor SDK: k4a::calibration::convert_color_2d_to_depth_2d</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('functions_t.html','');});
+$(document).ready(function(){initNavTree('structk4a_1_1calibration_ab72a37ed466a41d68c522678fa57ff4f.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -84,53 +84,59 @@ $(document).ready(function(){initNavTree('functions_t.html','');});
 </div>
 
 <div class="contents">
-<div class="textblock">Here is a list of all documented struct and union fields with links to the struct/union documentation for each field:</div>
+<a id="ab72a37ed466a41d68c522678fa57ff4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab72a37ed466a41d68c522678fa57ff4f">&#9670;&nbsp;</a></span>convert_color_2d_to_depth_2d()</h2>
 
-<h3><a id="index_t"></a>- t -</h3><ul>
-<li>temperature
-: <a class="el" href="structk4a__imu__sample__t_aa18dbd8281ba8f570c6717253af3b1c4.html#aa18dbd8281ba8f570c6717253af3b1c4">k4a_imu_sample_t</a>
-</li>
-<li>Temperature
-: <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_capture_ad664fa5b678fbd611c4dc9e7b1688337.html#ad664fa5b678fbd611c4dc9e7b1688337">Microsoft.Azure.Kinect.Sensor.Capture</a>
-, <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_imu_sample_a422cc40b9770be1a236511314b8ee98d.html#a422cc40b9770be1a236511314b8ee98d">Microsoft.Azure.Kinect.Sensor.ImuSample</a>
-</li>
-<li>Time
-: <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_log_message_a68133f5aac44963cf0eee4ec1c610720.html#a68133f5aac44963cf0eee4ec1c610720">Microsoft.Azure.Kinect.Sensor.LogMessage</a>
-</li>
-<li>ToString()
-: <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_log_message.html#aea2c5b9b838e4fd8af0313c83a46fecc">Microsoft.Azure.Kinect.Sensor.LogMessage</a>
-</li>
-<li>transformation()
-: <a class="el" href="classk4a_1_1transformation_a7b98768f8ee53d39f20ec1d79bfec39a.html#a7b98768f8ee53d39f20ec1d79bfec39a">k4a::transformation</a>
-</li>
-<li>Transformation()
-: <a class="el" href="class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_transformation_adcc341742f4a6f6a9037bb48bb8a4463.html#adcc341742f4a6f6a9037bb48bb8a4463">Microsoft.Azure.Kinect.Sensor.Transformation</a>
-</li>
-<li>TransformTo2D()
-: <a class="el" href="struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration_a98a3bfa4fb4f6b2e50cfa8a2d8f2f0fa.html#a98a3bfa4fb4f6b2e50cfa8a2d8f2f0fa">Microsoft.Azure.Kinect.Sensor.Calibration</a>
-</li>
-<li>TransformTo3D()
-: <a class="el" href="struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration_a19547584dae08ca0882ef3152ad7e577.html#a19547584dae08ca0882ef3152ad7e577">Microsoft.Azure.Kinect.Sensor.Calibration</a>
-</li>
-<li>translation
-: <a class="el" href="structk4a__calibration__extrinsics__t.html#a9246edc779148b57fb90efa283e65fcf">k4a_calibration_extrinsics_t</a>
-</li>
-<li>Translation
-: <a class="el" href="struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_extrinsics_aa4c43c4d82ea95f4105d7caeb2f55b2b.html#aa4c43c4d82ea95f4105d7caeb2f55b2b">Microsoft.Azure.Kinect.Sensor.Extrinsics</a>
-</li>
-<li>type
-: <a class="el" href="structk4a__calibration__intrinsics__t.html#abf7247b67cdc839e09ab226498f22294">k4a_calibration_intrinsics_t</a>
-</li>
-<li>Type
-: <a class="el" href="struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_intrinsics_acb54d9eb0b540d4e6eae43ece1539008.html#acb54d9eb0b540d4e6eae43ece1539008">Microsoft.Azure.Kinect.Sensor.Intrinsics</a>
-</li>
-</ul>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool k4a::calibration::convert_color_2d_to_depth_2d </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="unionk4a__float2__t.html">k4a_float2_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>source_point2d</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classk4a_1_1image.html">image</a> &amp;&#160;</td>
+          <td class="paramname"><em>depth_image</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="unionk4a__float2__t.html">k4a_float2_t</a> *&#160;</td>
+          <td class="paramname"><em>target_point2d</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of the depth camera. </p>
+<p>This function searches along an epipolar line in the depth image to find the corresponding depth pixel. Returns false if the point is invalid in the target coordinate system (and therefore target_point2d should not be used) Throws error if calibration contains invalid data.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="group___functions_ga18bc3138d6cc68af6c49902853fda9b5.html#ga18bc3138d6cc68af6c49902853fda9b5" title="Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of the depth camera...">k4a_calibration_color_2d_to_depth_2d</a> </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.8.14-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><b>k4a</b></li><li class="navelem"><a class="el" href="structk4a_1_1calibration.html">calibration</a></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.14 </li>
