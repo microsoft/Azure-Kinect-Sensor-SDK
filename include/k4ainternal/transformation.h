@@ -36,6 +36,16 @@ typedef struct _k4a_transformation_xy_tables_t
     int height;     // height of x and y tables
 } k4a_transformation_xy_tables_t;
 
+typedef struct _k4a_transformation_pinhole_t
+{
+    float px;
+    float py;
+    float fx;
+    float fy;
+    int width;
+    int height;
+} k4a_transformation_pinhole_t;
+
 typedef struct _k4a_transform_engine_calibration_t
 {
     k4a_calibration_camera_t depth_camera_calibration;                    // depth camera calibration
@@ -81,6 +91,12 @@ k4a_result_t transformation_2d_to_2d(const k4a_calibration_t *calibration,
                                      const k4a_calibration_type_t target_camera,
                                      float target_point2d[2],
                                      int *valid);
+
+k4a_result_t transformation_color_2d_to_depth_2d(const k4a_calibration_t *calibration,
+                                                 const float source_point2d[2],
+                                                 const k4a_image_t depth_image,
+                                                 float target_point2d[2],
+                                                 int *valid);
 
 k4a_transformation_t transformation_create(const k4a_calibration_t *calibration, bool gpu_optimization);
 
