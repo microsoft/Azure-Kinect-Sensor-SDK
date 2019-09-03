@@ -1,6 +1,11 @@
 ## Change Log
 
-### v1.2.0 (not yet released)
+### v1.3.0
+
+* Error and Warning messages have been cleaned up to be less verbose.
+* Multi camera sync and capture green screen example added.
+
+### v1.2.0
 
 * CSharp support added.
 * Depth Engine breaking changes to 2.0, SDK now relies on this new version.
