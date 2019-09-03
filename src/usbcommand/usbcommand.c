@@ -126,7 +126,7 @@ static k4a_result_t usb_cmd_set_libusb_debug_verbosity(usbcmd_context_t *usbcmd)
 }
 
 // Stop LIBUSB from generating any debug messages
-void libusb_logging_disable(libusb_context *context)
+static void libusb_logging_disable(libusb_context *context)
 {
     // #if (LIBUSB_API_VERSION >= 0x01000106)
     K4A_RESULT_FROM_LIBUSB(libusb_set_option(context, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_NONE));
@@ -136,7 +136,7 @@ void libusb_logging_disable(libusb_context *context)
 }
 
 // Restore LIBUSB's ability to generate debug messages
-void libusb_logging_restore(libusb_context *context, enum libusb_log_level verbosity)
+static void libusb_logging_restore(libusb_context *context, enum libusb_log_level verbosity)
 {
     // #if (LIBUSB_API_VERSION >= 0x01000106)
     K4A_RESULT_FROM_LIBUSB(libusb_set_option(context, LIBUSB_OPTION_LOG_LEVEL, verbosity));
