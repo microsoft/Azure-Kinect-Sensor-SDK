@@ -3,7 +3,13 @@
 
 include(k4aTest)
 
+# Only run green screen tests if OpenCV is installed
+find_package(OpenCV)
 add_executable(executables_ft executables_ft.cpp)
+if (OpenCV_FOUND)
+    target_compile_definitions(executables_ft PRIVATE -DUSE_OPENCV=1 )
+endif()
+
 target_link_libraries(executables_ft PRIVATE 
     k4a::k4a
     k4ainternal::utcommon

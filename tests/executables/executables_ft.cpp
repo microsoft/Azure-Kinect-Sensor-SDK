@@ -38,7 +38,7 @@ static int run_and_record_executable(std::string shell_command_path, std::string
     std::string formatted_command = shell_command_path;
     if (!output_path.empty())
     {
-        formatted_command += " 2>&1 > " + output_path;
+        formatted_command += " > " + output_path + " 2>&1";
     }
     // In Linux, forking a process causes the under buffers to be forked, too. So, because popen uses fork under the
     // hood, there may have been a risk of printing something in both processes. I'm not sure if this could happen in
@@ -47,10 +47,25 @@ static int run_and_record_executable(std::string shell_command_path, std::string
     FILE *process_stream = POPEN(formatted_command.c_str(), "r");
     if (!process_stream)
     {
-        printf("process_stream is NULL\n");
+        std::cout << "process_stream is NULL" << std::endl;
         return EXIT_FAILURE; // if popen fails, it returns null, which is an error
     }
-    return PCLOSE(process_stream);
+    int return_code = PCLOSE(process_stream);
+    std::cout << "Ran: " << formatted_command << std::endl;
+    std::cout << "<==============================================" << std::endl;
+    try
+    {
+        if (!output_path.empty())
+        {
+            std::cout << std::ifstream(output_path).rdbuf() << std::endl;
+        }
+    }
+    catch (std::exception &e)
+    {
+        std::cout << "Dumping log file threw a std::exception: " << e.what() << std::endl;
+    }
+    std::cout << "==============================================>" << std::endl;
+    return return_code;
 }
 
 /*
@@ -155,6 +170,27 @@ TEST_F(executables_ft, enumerate)
     test_stream_against_regexes(&results, &regexes);
 }
 
+#ifdef USE_OPENCV
+TEST_F(executables_ft, green_screen_single_cam)
+{
+    const std::string green_screen_path = PATH_TO_BIN("green_screen");
+    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-single-out.txt";
+    ASSERT_EQ(run_and_record_executable(green_screen_path + " 1 7 5 21 1000 4000 2 30 5", green_screen_out),
+              EXIT_SUCCESS);
+}
+
+TEST_F(executables_ft, green_screen_double_cam)
+{
+    const std::string green_screen_path = PATH_TO_BIN("green_screen");
+    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-double-out.txt";
+    ASSERT_EQ(run_and_record_executable(green_screen_path + " 2 7 5 21 1000 4000 2 30 5", green_screen_out),
+              EXIT_SUCCESS);
+    std::ifstream results(green_screen_out.c_str());
+    std::vector<std::string> regexes{ "Finished calibrating!" };
+    test_stream_against_regexes(&results, &regexes);
+}
+#endif
+
 TEST_F(executables_ft, fastpointcloud)
 {
     const std::string fastpoint_path = PATH_TO_BIN("fastpointcloud");
@@ -177,12 +213,22 @@ TEST_F(executables_ft, fastpointcloud)
     test_stream_against_regexes(&fastpointcloud_results, &regexes);
 }
 
+#ifdef USE_OPENCV
 TEST_F(executables_ft, opencv_compatibility)
 {
-    const std::string transformation_dir = TEST_TEMP_DIR;
-    const std::string transformation_path = PATH_TO_BIN("opencv_example");
-    ASSERT_EQ(run_and_record_executable(transformation_path, ""), EXIT_SUCCESS);
+    const std::string opencv_dir = TEST_TEMP_DIR;
+    const std::string opencv_path = PATH_TO_BIN("opencv_example");
+    const std::string opencv_out = TEST_TEMP_DIR + "/opencv-out.txt";
+    ASSERT_EQ(run_and_record_executable(opencv_path, opencv_out), EXIT_SUCCESS);
+
+    std::ifstream opencv_results(opencv_out);
+    ASSERT_TRUE(opencv_results.good());
+
+    std::vector<std::string> regexes{ "3d point:.*", "OpenCV projectPoints:.*", "k4a_calibration_3d_to_2d:.*" };
+
+    test_stream_against_regexes(&opencv_results, &regexes);
 }
+#endif
 
 TEST_F(executables_ft, streaming)
 {

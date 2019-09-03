@@ -8,10 +8,12 @@
 #include <k4ainternal/logging.h>
 #include <k4ainternal/deloader.h>
 #include <k4ainternal/tewrapper.h>
+#include <k4ainternal/image.h>
 
 // System dependencies
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 
 k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_camera_t *depth_camera_calibration,
                                                           const k4a_calibration_camera_t *color_camera_calibration,
@@ -93,6 +95,56 @@ static k4a_result_t transformation_possible(const k4a_calibration_t *camera_cali
         LOG_ERROR("Expect color camera is running to perform transformation.", 0);
         return K4A_RESULT_FAILED;
     }
+    return K4A_RESULT_SUCCEEDED;
+}
+
+static bool transformation_is_pixel_within_line_segment(const float p[2], const float start[2], const float stop[2])
+{
+    return (stop[0] >= start[0] ? stop[0] >= p[0] && p[0] >= start[0] : stop[0] <= p[0] && p[0] <= start[0]) &&
+           (stop[1] >= start[1] ? stop[1] >= p[1] && p[1] >= start[1] : stop[1] <= p[1] && p[1] <= start[1]);
+}
+
+static bool transformation_is_pixel_within_image(const float p[2], const int width, const int height)
+{
+    return p[0] >= 0 && p[0] < width && p[1] >= 0 && p[1] < height;
+}
+
+static k4a_result_t transformation_create_depth_camera_pinhole(const k4a_calibration_t *calibration,
+                                                               k4a_transformation_pinhole_t *pinhole)
+{
+    float fov_degrees[2];
+    switch (calibration->depth_mode)
+    {
+    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
+    case K4A_DEPTH_MODE_NFOV_UNBINNED:
+    {
+        fov_degrees[0] = 75;
+        fov_degrees[1] = 65;
+        break;
+    }
+    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
+    case K4A_DEPTH_MODE_WFOV_UNBINNED:
+    case K4A_DEPTH_MODE_PASSIVE_IR:
+    {
+        fov_degrees[0] = 120;
+        fov_degrees[1] = 120;
+        break;
+    }
+    default:
+        LOG_ERROR("Invalid depth mode.", 0);
+        return K4A_RESULT_FAILED;
+    }
+
+    float radian_per_degree = 3.14159265f / 180.f;
+    float fx = 0.5f / tanf(0.5f * fov_degrees[0] * radian_per_degree);
+    float fy = 0.5f / tanf(0.5f * fov_degrees[1] * radian_per_degree);
+    pinhole->width = calibration->depth_camera_calibration.resolution_width;
+    pinhole->height = calibration->depth_camera_calibration.resolution_height;
+    pinhole->px = pinhole->width / 2.f;
+    pinhole->py = pinhole->height / 2.f;
+    pinhole->fx = fx * pinhole->width;
+    pinhole->fy = fy * pinhole->height;
+
     return K4A_RESULT_SUCCEEDED;
 }
 
@@ -254,6 +306,158 @@ k4a_result_t transformation_2d_to_2d(const k4a_calibration_t *calibration,
         return K4A_RESULT_FAILED;
     }
     *valid = *valid && valid_transformation1;
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t transformation_color_2d_to_depth_2d(const k4a_calibration_t *calibration,
+                                                 const float source_point2d[2],
+                                                 const k4a_image_t depth_image,
+                                                 float target_point2d[2],
+                                                 int *valid)
+{
+    k4a_transformation_pinhole_t pinhole = { 0 };
+    if (K4A_FAILED(TRACE_CALL(transformation_create_depth_camera_pinhole(calibration, &pinhole))))
+    {
+        return K4A_RESULT_FAILED;
+    }
+
+    // Compute the 3d points in depth camera space that the current color camera pixel can be transformed to with the
+    // theoretical minimum and maximum depth values (mm)
+    float depth_range_mm[2] = { 50.f, 14000.f };
+    float start_point3d[3], stop_point3d[3];
+    int start_valid = 0;
+    if (K4A_FAILED(TRACE_CALL(transformation_2d_to_3d(calibration,
+                                                      source_point2d,
+                                                      depth_range_mm[0],
+                                                      K4A_CALIBRATION_TYPE_COLOR,
+                                                      K4A_CALIBRATION_TYPE_DEPTH,
+                                                      start_point3d,
+                                                      &start_valid))))
+    {
+        return K4A_RESULT_FAILED;
+    }
+
+    int stop_valid = 0;
+    if (K4A_FAILED(TRACE_CALL(transformation_2d_to_3d(calibration,
+                                                      source_point2d,
+                                                      depth_range_mm[1],
+                                                      K4A_CALIBRATION_TYPE_COLOR,
+                                                      K4A_CALIBRATION_TYPE_DEPTH,
+                                                      stop_point3d,
+                                                      &stop_valid))))
+    {
+        return K4A_RESULT_FAILED;
+    }
+
+    *valid = start_valid && stop_valid;
+    if (*valid == 0)
+    {
+        return K4A_RESULT_SUCCEEDED;
+    }
+
+    // Project above two 3d points into the undistorted depth image space with the pinhole model, both start and stop 2d
+    // points are expected to locate on the epipolar line
+    float start_point2d[2], stop_point2d[2];
+    start_point2d[0] = start_point3d[0] / start_point3d[2] * pinhole.fx + pinhole.px;
+    start_point2d[1] = start_point3d[1] / start_point3d[2] * pinhole.fy + pinhole.py;
+    stop_point2d[0] = stop_point3d[0] / stop_point3d[2] * pinhole.fx + pinhole.px;
+    stop_point2d[1] = stop_point3d[1] / stop_point3d[2] * pinhole.fy + pinhole.py;
+
+    // Search every pixel on the epipolar line so that its reprojected pixel coordinates in color image have minimum
+    // distance from the input color pixel coordinates
+    int depth_image_width_pixels = image_get_width_pixels(depth_image);
+    int depth_image_height_pixels = image_get_height_pixels(depth_image);
+    const uint16_t *depth_image_data = (const uint16_t *)(const void *)(image_get_buffer(depth_image));
+    float best_error = FLT_MAX;
+    float p[2];
+    p[0] = start_point2d[0];
+    p[1] = start_point2d[1];
+    if (stop_point2d[0] - start_point2d[0] == 0.0f)
+    {
+        return K4A_RESULT_FAILED;
+    }
+    float epipolar_line_slope = (stop_point2d[1] - start_point2d[1]) / (stop_point2d[0] - start_point2d[0]);
+    bool xStep1 = fabs(epipolar_line_slope) < 1;
+    bool stop_larger_than_start = xStep1 ? stop_point2d[0] > start_point2d[0] : stop_point2d[1] > start_point2d[1];
+    while (transformation_is_pixel_within_line_segment(p, start_point2d, stop_point2d))
+    {
+        // Compute the ray from the depth camera oringin, intersecting with the current searching pixel on the epipolar
+        // line
+        float ray[3];
+        ray[0] = (p[0] - pinhole.px) / pinhole.fx;
+        ray[1] = (p[1] - pinhole.py) / pinhole.fy;
+        ray[2] = 1.f;
+
+        // Project the ray to the distorted depth image to read the depth value from nearest pixel
+        float depth_point2d[2];
+        int p_valid = 0;
+        if (K4A_FAILED(TRACE_CALL(transformation_3d_to_2d(
+                calibration, ray, K4A_CALIBRATION_TYPE_DEPTH, K4A_CALIBRATION_TYPE_DEPTH, depth_point2d, &p_valid))))
+        {
+            return K4A_RESULT_FAILED;
+        }
+
+        if (p_valid == 1)
+        {
+            // Transform the current searching depth pixel to color image
+            if (transformation_is_pixel_within_image(depth_point2d,
+                                                     depth_image_width_pixels,
+                                                     depth_image_height_pixels))
+            {
+                int u = (int)(floorf(depth_point2d[0] + 0.5f));
+                int v = (int)(floorf(depth_point2d[1] + 0.5f));
+                uint16_t d = depth_image_data[v * depth_image_width_pixels + u];
+                float reprojected_point2d[2];
+                if (K4A_FAILED(TRACE_CALL(transformation_2d_to_2d(calibration,
+                                                                  depth_point2d,
+                                                                  d,
+                                                                  K4A_CALIBRATION_TYPE_DEPTH,
+                                                                  K4A_CALIBRATION_TYPE_COLOR,
+                                                                  reprojected_point2d,
+                                                                  &p_valid))))
+                {
+                    return K4A_RESULT_FAILED;
+                }
+
+                if (p_valid == 1)
+                {
+                    if (transformation_is_pixel_within_image(reprojected_point2d,
+                                                             calibration->color_camera_calibration.resolution_width,
+                                                             calibration->color_camera_calibration.resolution_height))
+                    {
+
+                        // Compute the 2d reprojection error and store the minimum one
+                        float error = sqrtf(powf(reprojected_point2d[0] - source_point2d[0], 2) +
+                                            powf(reprojected_point2d[1] - source_point2d[1], 2));
+                        if (error < best_error)
+                        {
+                            best_error = error;
+                            target_point2d[0] = depth_point2d[0];
+                            target_point2d[1] = depth_point2d[1];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Compute next pixel to search for on the epipolar line
+        if (xStep1)
+        {
+            p[0] = stop_larger_than_start ? p[0] + 1 : p[0] - 1;
+            p[1] = stop_larger_than_start ? p[1] + epipolar_line_slope : p[1] - epipolar_line_slope;
+        }
+        else
+        {
+            p[1] = stop_larger_than_start ? p[1] + 1 : p[1] - 1;
+            p[0] = stop_larger_than_start ? p[1] + 1 / epipolar_line_slope : p[1] - 1 / epipolar_line_slope;
+        }
+    }
+
+    if (best_error > 10)
+    {
+        *valid = 0;
+    }
 
     return K4A_RESULT_SUCCEEDED;
 }

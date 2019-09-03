@@ -8,12 +8,9 @@
 #include <vector>
 using namespace std;
 
-// #define HAVE_OPENCV
-#ifdef HAVE_OPENCV
 #include "opencv2/core.hpp"
 #include "opencv2/calib3d.hpp"
 using namespace cv;
-#endif
 
 static void clean_up(k4a_device_t device)
 {
@@ -82,7 +79,6 @@ int main(int argc, char ** /*argv*/)
                                  &valid);
     }
 
-#ifdef HAVE_OPENCV
     // converting the calibration data to OpenCV format
     // extrinsic transformation from color to depth camera
     Mat se3 =
@@ -105,7 +101,12 @@ int main(int argc, char ** /*argv*/)
 
     // OpenCV project function
     vector<Point2f> cv_points_2d(points_3d.size());
-    projectPoints(*(vector<Point3f> *)&points_3d, r_vec, t_vec, camera_matrix, dist_coeffs, cv_points_2d);
+    projectPoints(*reinterpret_cast<vector<Point3f> *>(&points_3d),
+                  r_vec,
+                  t_vec,
+                  camera_matrix,
+                  dist_coeffs,
+                  cv_points_2d);
 
     for (size_t i = 0; i < points_3d.size(); i++)
     {
@@ -113,7 +114,6 @@ int main(int argc, char ** /*argv*/)
         printf("OpenCV projectPoints:\t\t(%.5f, %.5f)\n", cv_points_2d[i].x, cv_points_2d[i].y);
         printf("k4a_calibration_3d_to_2d:\t(%.5f, %.5f)\n\n", k4a_points_2d[i].v[0], k4a_points_2d[i].v[1]);
     }
-#endif
 
     clean_up(device);
     return 0;
