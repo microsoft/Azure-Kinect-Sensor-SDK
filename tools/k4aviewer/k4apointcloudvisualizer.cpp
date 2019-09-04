@@ -140,8 +140,8 @@ PointCloudVisualizationResult K4APointCloudVisualizer::SetColorizationStrategy(C
         m_pointCloudColorization = k4a::image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                       m_calibrationData.depth_camera_calibration.resolution_width,
                                                       m_calibrationData.depth_camera_calibration.resolution_height,
-                                                      m_calibrationData.depth_camera_calibration.resolution_width * 3 *
-                                                          static_cast<int>(sizeof(int16_t)));
+                                                      m_calibrationData.depth_camera_calibration.resolution_width *
+                                                          static_cast<int>(sizeof(BgraPixel)));
 
         xyTableStatus = m_pointCloudConverter.SetActiveXyTable(m_depthXyTable);
     }
