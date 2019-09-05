@@ -13,6 +13,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
+using std::cerr;
 using std::cout;
 using std::endl;
 using std::vector;
@@ -78,14 +79,17 @@ int main(int argc, char **argv)
                 "[powerline-frequency-mode (default 2 for 60 Hz)] [calibration-timeout-sec (default 60)]"
                 "[greenscreen-duration-sec (default infinity- run forever)]"
              << endl;
-        throw std::runtime_error("Not enough arguments!");
+
+        cerr << "Not enough arguments!\n";
+        exit(1);
     }
     else
     {
         num_devices = static_cast<size_t>(atoi(argv[1]));
         if (num_devices > k4a::device::get_installed_count())
         {
-            throw(std::runtime_error("Not enough cameras plugged in!"));
+            cerr << "Not enough cameras plugged in!\n";
+            exit(1);
         }
         chessboard_pattern.height = atoi(argv[2]);
         chessboard_pattern.width = atoi(argv[3]);
@@ -115,7 +119,8 @@ int main(int argc, char **argv)
 
     if (num_devices != 2 && num_devices != 1)
     {
-        throw std::runtime_error("Invalid choice for number of devices!");
+        cerr << "Invalid choice for number of devices!\n";
+        exit(1);
     }
     else if (num_devices == 2)
     {
@@ -123,15 +128,18 @@ int main(int argc, char **argv)
     }
     if (chessboard_pattern.height == 0)
     {
-        throw std::runtime_error("Chessboard height is not properly set!");
+        cerr << "Chessboard height is not properly set!\n";
+        exit(1);
     }
     if (chessboard_pattern.width == 0)
     {
-        throw std::runtime_error("Chessboard height is not properly set!");
+        cerr << "Chessboard height is not properly set!\n";
+        exit(1);
     }
     if (chessboard_square_length == 0.)
     {
-        throw std::runtime_error("Chessboard square size is not properly set!");
+        cerr << "Chessboard square size is not properly set!\n";
+        exit(1);
     }
 
     cout << "Chessboard height: " << chessboard_pattern.height << ". Chessboard width: " << chessboard_pattern.width
@@ -271,8 +279,10 @@ int main(int argc, char **argv)
     }
     else
     {
-        throw std::runtime_error("Invalid number of devices!");
+        cerr << "Invalid number of devices!" << endl;
+        exit(1);
     }
+    return 0;
 }
 
 static cv::Mat color_to_opencv(const k4a::image &im)
@@ -589,7 +599,8 @@ static Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                       chessboard_square_length);
         }
     }
-    throw std::runtime_error("Calibration timed out!");
+    std::cerr << "Calibration timed out !\n ";
+    exit(1);
 }
 
 static k4a::image create_depth_image_like(const k4a::image &im)
