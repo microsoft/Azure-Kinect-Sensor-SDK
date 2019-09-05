@@ -58,7 +58,7 @@ For SDK feedback or to report a bug, please file a [GitHub Issue](https://github
 
 There are several places where the sample code can be found.
 
-- In this repository: \\Azure-Kinect-Sensor-SDK\examples- each example has a read me page that describes it and the steps to set it up.
+- In this repository: [Azure-Kinect-Sensor-SDK\examples](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/tree/develop/examples)- each example has a readme page that describes it and the steps to set it up.
 - [Azure-Kinect-Samples](https://github.com/microsoft/Azure-Kinect-Samples) repository. There are multiple examples of how to use both Sensor and Body tracking SDKs.
 
 ## Q&A
