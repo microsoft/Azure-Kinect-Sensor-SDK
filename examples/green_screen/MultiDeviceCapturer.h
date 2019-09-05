@@ -14,14 +14,14 @@ constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TI
 
 constexpr int64_t WAIT_FOR_SYNCHRONIZED_CAPTURE_TIMEOUT = 60000;
 
-void log_lagging_time(char *lagger, k4a::capture &master, k4a::capture &sub)
+static void log_lagging_time(char *lagger, k4a::capture &master, k4a::capture &sub)
 {
     std::cout << std::setw(6) << lagger << " lagging: mc:" << std::setw(6)
               << master.get_color_image().get_device_timestamp().count() << "us sc:" << std::setw(6)
               << sub.get_color_image().get_device_timestamp().count() << "us\n";
 }
 
-void log_synced_image_time(k4a::capture &master, k4a::capture &sub)
+static void log_synced_image_time(k4a::capture &master, k4a::capture &sub)
 {
     std::cout << "Sync'd capture: mc:" << std::setw(6) << master.get_color_image().get_device_timestamp().count()
               << "us sc:" << std::setw(6) << sub.get_color_image().get_device_timestamp().count() << "us\n";
