@@ -40,7 +40,7 @@ if (NOT is_defined)
     BRIEF_DOCS "List of types of tests"
     FULL_DOCS "Contains full list of all test types")
 
-    set(TEST_TYPES "UNIT" "FUNCTIONAL" "STRESS" "PERF" "FIRMWARE")
+    set(TEST_TYPES "UNIT" "FUNCTIONAL" "STRESS" "PERF" "FIRMWARE" "FUNCTIONAL_CUSTOM")
     set_property(GLOBAL PROPERTY TEST_TYPES ${TEST_TYPES})
 
     foreach(TEST_TYPE ${TEST_TYPES})
