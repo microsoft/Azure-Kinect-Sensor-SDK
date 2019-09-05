@@ -14,15 +14,18 @@ constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TI
 
 constexpr int64_t WAIT_FOR_SYNCHRONIZED_CAPTURE_TIMEOUT = 60000;
 
-#define LOG_LAGGING_TIME(lagger)                                                                                       \
-    std::cout << std::setw(6) << lagger << " lagging: mc:" << std::setw(6)                                             \
-              << captures[0].get_color_image().get_device_timestamp().count() << "us sc:" << std::setw(6)              \
-              << captures[i + 1].get_color_image().get_device_timestamp().count() << "us\n"
+void log_lagging_time(char *lagger, k4a::capture &master, k4a::capture &sub)
+{
+    std::cout << std::setw(6) << lagger << " lagging: mc:" << std::setw(6)
+              << master.get_color_image().get_device_timestamp().count() << "us sc:" << std::setw(6)
+              << sub.get_color_image().get_device_timestamp().count() << "us\n";
+}
 
-#define LOG_SYNCED_IMAGE_TIME()                                                                                        \
-    std::cout << "Sync'd capture: mc:" << std::setw(6) << captures[0].get_color_image().get_device_timestamp().count() \
-              << "us sc:" << std::setw(6) << captures[i + 1].get_color_image().get_device_timestamp().count()          \
-              << "us\n"
+void log_synced_image_time(k4a::capture &master, k4a::capture &sub)
+{
+    std::cout << "Sync'd capture: mc:" << std::setw(6) << master.get_color_image().get_device_timestamp().count()
+              << "us sc:" << std::setw(6) << sub.get_color_image().get_device_timestamp().count() << "us\n";
+}
 
 class MultiDeviceCapturer
 {
@@ -179,7 +182,7 @@ public:
                         // error: 1 - 3 = -2, which is less than the worst-case-allowable offset of -1
                         // the subordinate camera image timestamp was earlier than it is allowed to be. This means the
                         // subordinate is lagging and we need to update the subordinate to get the subordinate caught up
-                        LOG_LAGGING_TIME("sub");
+                        log_lagging_time("sub", captures[0], captures[i + 1]);
                         subordinate_devices[i].get_capture(&captures[i + 1],
                                                            std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                         break;
@@ -193,7 +196,7 @@ public:
                         // error: 3 - 1 = 2, which is more than the worst-case-allowable offset of 1
                         // the subordinate camera image timestamp was later than it is allowed to be. This means the
                         // subordinate is ahead and we need to update the master to get the master caught up
-                        LOG_LAGGING_TIME("master");
+                        log_lagging_time("master", captures[0], captures[i + 1]);
                         master_device.get_capture(&captures[0], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                         break;
                     }
@@ -203,7 +206,7 @@ public:
                         // synchronized.
                         if (i == subordinate_devices.size() - 1)
                         {
-                            LOG_SYNCED_IMAGE_TIME();
+                            log_synced_image_time(captures[0], captures[i + 1]);
                             have_synced_images = true; // now we'll finish the for loop and then exit the while loop
                         }
                     }
