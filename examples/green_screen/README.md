@@ -47,8 +47,8 @@ is installed as recommended then it will automatically be used by the build.
 
 Our recommended way of getting OpenCV on Windows is by installing pre-built libraries. There's even a PowerShell script
 that'll do much of the work for you in `scripts/install-opencv.ps1`. This will place OpenCV in your `C:\` folder. CMake
-will copy the OpenCV binaries to the the `${CMAKE_BINARY_DIR}` folder so that all built binaries will run as expected. A 
-user may choose to add the OpenCV binaries location to thier `%PATH%` to avoid this dependency.
+will copy the OpenCV binaries to the the `${CMAKE_RUNTIME_OUTPUT_DIRECTORY}` folder so that all built binaries will run
+as expected. A user may choose to add the OpenCV binaries location to thier `%PATH%` to avoid this dependency.
 
 ## A Note on Calibration (only relevant for 2-camera version)
 
