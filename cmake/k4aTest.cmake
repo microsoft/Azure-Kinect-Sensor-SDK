@@ -17,7 +17,15 @@
 #
 #             FUNCTIONAL - Tests meant to run on test machine. These tests run
 #                          quickly (<10s), may require hardware, run on PCs that
-#                          meet min spec requirements, and are reproducible.
+#                          meet min spec requirements, and are reproducible. 
+#                          These tests must also be capable of working on a 
+#                          single Azure Kinect and not require any additional 
+#                          setup to succeed.
+#
+#             FUNCTIONAL_CUSTOM - Similar to FUNCTIONAL tests above. These tests
+#                          however are allowed to have additional physical 
+#                          requirements like lighting, multiple devices, or
+#                          visible chessboard pattern for calibration.
 #
 #             STRESS - Tests that run repeatedly and look for statistical
 #                      failures
@@ -40,7 +48,7 @@ if (NOT is_defined)
     BRIEF_DOCS "List of types of tests"
     FULL_DOCS "Contains full list of all test types")
 
-    set(TEST_TYPES "UNIT" "FUNCTIONAL" "STRESS" "PERF" "FIRMWARE")
+    set(TEST_TYPES "UNIT" "FUNCTIONAL" "STRESS" "PERF" "FIRMWARE" "FUNCTIONAL_CUSTOM")
     set_property(GLOBAL PROPERTY TEST_TYPES ${TEST_TYPES})
 
     foreach(TEST_TYPE ${TEST_TYPES})

@@ -11,7 +11,7 @@ To build from source, the Azure Kinect repo must first download the source.
 The Azure Kinect repo uses git submodules to download the source. These submodules are
 initialized on the first CMake configure by executing
 
-```shell
+```
 git submodule update --init --recursive
 ```
 
