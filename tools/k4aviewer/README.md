@@ -10,8 +10,6 @@ To use, select a device from the list, click "Open Device", choose the settings 
 k4aviewer will try to detect if you have a high-DPI system and scale automatically; however, if you want to force it into or out of
 high-DPI mode, you can pass -HighDPI or -NormalDPI to override that behavior.
 
-```shell
+```
 k4aviewer.exe [-HighDPI|-NormalDPI]
 ```
-
-

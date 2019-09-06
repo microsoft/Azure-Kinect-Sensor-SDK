@@ -60,18 +60,18 @@ The following tools are required to build on Windows:
 The following tools are optional:
 
 * [Doxygen](http://www.doxygen.nl/download.html). Add doxygen to the PATH.
-  Required for building documentation. To use, pass the CMake parameter ```-DK4A_BUILD_DOCS=1```
+  Required for building documentation. To use, pass the CMake parameter `-DK4A_BUILD_DOCS=1`
 
 * [Clang-Format](http://releases.llvm.org/download.html). Please download clang
-  v6.0.0 since that is what we are using to format our code. To invoke, call ```ninja clangformat```
+  v6.0.0 since that is what we are using to format our code. To invoke, call `ninja clangformat`
 
 If you are building from a command prompt, it **must** be a **x64 Visual Studio
 developer command prompt** in order for CMake to find the installed compilers.
 We build both 32-bit and 64-bit binaries, but 64-bit binaries are the only
 binaries that are tested. (The command prompt should be called something like
 x64 Native Tools Command Prompt for VS 2017). Note: call the command line tool
-with the option ```-arch=amd64``` for x64 builds i.e ```VsDevCmd.bat
--arch=amd64```
+with the option `-arch=amd64` for x64 builds i.e `VsDevCmd.bat
+-arch=amd64`
 
 **NOTE:** *You can run
 [scripts/verify-windows.ps1](../scripts/verify-windows.ps1) to verify that your
@@ -95,20 +95,20 @@ need for building, but is required running the SDK*
 1. Create a folder named "build" in the root of the git repo and cd into that
     directory.
 
-    ```shell
+    ```
     mkdir build && cd build
     ```
 
 2. Run CMake from that directory. The preferred build is ninja. All other
     generators are untested.
 
-    ```shell
+    ```
     cmake .. -GNinja
     ```
 
 3. Run the build (ninja).
 
-    ```shell
+    ```
     ninja
     ```
 
