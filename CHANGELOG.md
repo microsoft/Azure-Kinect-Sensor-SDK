@@ -2,6 +2,8 @@
 
 ### v1.3.0
 
+* On Windows VS dependencies are now dynamically linked and require redistributables for
+[VS2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) or newer.
 * Error and Warning messages have been cleaned up to be less verbose.
 * Multi camera sync and capture green screen example added.
 
