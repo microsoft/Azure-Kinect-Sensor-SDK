@@ -4,12 +4,28 @@
 
 #include <chrono>
 #include <vector>
+#include <iomanip> // std::setw
 #include <k4a/k4a.hpp>
 
 // This is the maximum difference between when we expected an image's timestamp to be and when it actually occurred.
 // TODO waiting on a firmware update to be returned to 50
 constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(33000);
 // constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(50);
+
+constexpr int64_t WAIT_FOR_SYNCHRONIZED_CAPTURE_TIMEOUT = 60000;
+
+static void log_lagging_time(const char *lagger, k4a::capture &master, k4a::capture &sub)
+{
+    std::cout << std::setw(6) << lagger << " lagging: mc:" << std::setw(6)
+              << master.get_color_image().get_device_timestamp().count() << "us sc:" << std::setw(6)
+              << sub.get_color_image().get_device_timestamp().count() << "us\n";
+}
+
+static void log_synced_image_time(k4a::capture &master, k4a::capture &sub)
+{
+    std::cout << "Sync'd capture: mc:" << std::setw(6) << master.get_color_image().get_device_timestamp().count()
+              << "us sc:" << std::setw(6) << sub.get_color_image().get_device_timestamp().count() << "us\n";
+}
 
 class MultiDeviceCapturer
 {
@@ -20,7 +36,8 @@ public:
         bool master_found = false;
         if (device_indices.size() == 0)
         {
-            throw std::runtime_error("Capturer must be passed at least one camera!");
+            cerr << "Capturer must be passed at least one camera!\n ";
+            exit(1);
         }
         for (uint32_t i : device_indices)
         {
@@ -44,11 +61,13 @@ public:
             }
             else if (!next_device.is_sync_in_connected() && !next_device.is_sync_out_connected())
             {
-                throw std::runtime_error("Each device must have sync in or sync out connected!");
+                cerr << "Each device must have sync in or sync out connected!\n ";
+                exit(1);
             }
             else if (!next_device.is_sync_in_connected())
             {
-                throw std::runtime_error("Non-master camera found that doesn't have the sync in port connected!");
+                cerr << "Non-master camera found that doesn't have the sync in port connected!\n ";
+                exit(1);
             }
             else
             {
@@ -57,7 +76,8 @@ public:
         }
         if (!master_found)
         {
-            throw std::runtime_error("No device with sync out connected found!");
+            cerr << "No device with sync out connected found!\n ";
+            exit(1);
         }
     }
 
@@ -113,8 +133,18 @@ public:
         }
 
         bool have_synced_images = false;
+        std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
         while (!have_synced_images)
         {
+            // Timeout if this is taking too long
+            int64_t duration_ms =
+                std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count();
+            if (duration_ms > WAIT_FOR_SYNCHRONIZED_CAPTURE_TIMEOUT)
+            {
+                cerr << "ERROR: Timedout waiting for synchronized captures\n";
+                exit(1);
+            }
+
             k4a::image master_color_image = captures[0].get_color_image();
             std::chrono::microseconds master_color_image_time = master_color_image.get_device_timestamp();
 
@@ -152,7 +182,7 @@ public:
                         // error: 1 - 3 = -2, which is less than the worst-case-allowable offset of -1
                         // the subordinate camera image timestamp was earlier than it is allowed to be. This means the
                         // subordinate is lagging and we need to update the subordinate to get the subordinate caught up
-                        std::cout << "Subordinate lagging...\n";
+                        log_lagging_time("sub", captures[0], captures[i + 1]);
                         subordinate_devices[i].get_capture(&captures[i + 1],
                                                            std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                         break;
@@ -166,7 +196,7 @@ public:
                         // error: 3 - 1 = 2, which is more than the worst-case-allowable offset of 1
                         // the subordinate camera image timestamp was later than it is allowed to be. This means the
                         // subordinate is ahead and we need to update the master to get the master caught up
-                        std::cout << "Master lagging...\n";
+                        log_lagging_time("master", captures[0], captures[i + 1]);
                         master_device.get_capture(&captures[0], std::chrono::milliseconds{ K4A_WAIT_INFINITE });
                         break;
                     }
@@ -176,6 +206,7 @@ public:
                         // synchronized.
                         if (i == subordinate_devices.size() - 1)
                         {
+                            log_synced_image_time(captures[0], captures[i + 1]);
                             have_synced_images = true; // now we'll finish the for loop and then exit the while loop
                         }
                     }
@@ -209,7 +240,8 @@ public:
         // devices[0] is the master. There are only devices.size() - 1 others. So, indices greater or equal are invalid
         if (i >= subordinate_devices.size())
         {
-            throw std::runtime_error("Subordinate index too large!");
+            cerr << "Subordinate index too large!\n ";
+            exit(1);
         }
         return subordinate_devices[i];
     }
