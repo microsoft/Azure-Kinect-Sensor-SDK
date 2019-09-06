@@ -175,8 +175,8 @@ TEST_F(executables_ft, green_screen_single_cam)
 {
     const std::string green_screen_path = PATH_TO_BIN("green_screen");
     const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-single-out.txt";
-    // Calibration timeout for this is 10min due to low light conditions in the lab and slow perf of 
-    // cv::findChessboardCorners in these conditions.
+    // Calibration timeout for this is 10min due to low light conditions in the lab and slow perf of
+    // cv::findChessboardCorners.
     ASSERT_EQ(run_and_record_executable(green_screen_path + " 1 9 6 22 1000 4000 2 600 5", green_screen_out),
               EXIT_SUCCESS);
 }
@@ -185,8 +185,8 @@ TEST_F(executables_ft, green_screen_double_cam)
 {
     const std::string green_screen_path = PATH_TO_BIN("green_screen");
     const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-double-out.txt";
-    // Calibration timeout for this is 10min due to low light conditions in the lab and slow perf of 
-    // cv::findChessboardCorners in these conditions.
+    // Calibration timeout for this is 10min due to low light conditions in the lab and slow perf of
+    // cv::findChessboardCorners.
     ASSERT_EQ(run_and_record_executable(green_screen_path + " 2 9 6 22 1000 4000 2 600 5", green_screen_out),
               EXIT_SUCCESS);
     std::ifstream results(green_screen_out.c_str());
