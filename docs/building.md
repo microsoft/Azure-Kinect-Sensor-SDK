@@ -2,7 +2,7 @@
 
 This information is for how to build your own copy of the SDK binaries. Most users of 
 the Azure Kinect DK should not need to re-build the SDK, if you just need to use the SDK
-see [usage](usage.md) for more information. If you need to build from source, you have to clone the repository instead of downloading the Zip file o ensure all the submodule dependencies in place.
+see [usage](usage.md) for more information. If you need to build from source, you have to clone the repository instead of downloading the Zip file to ensure all the submodule dependencies in place.
 
 ## Support Configurations
 
