@@ -37,7 +37,7 @@ Directly include the Sensor SDK in your project using
 
 We currently have debian packages available for Ubuntu 18.04. If you have
 need for a different debian distribution, please file an
-[issue](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/new?assignees=&labels=Enhancement&template=feature-request--enhancement-.md&title=).
+[enhancement request](https://aka.ms/azurekinectfeedback).
 
 Our packages are hosted in [Microsoft's Package
 Repository](https://packages.microsoft.com). Please follow [these
