@@ -57,9 +57,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-    # Link against the static crt
-    include(MSVCStaticCrt)
-
     # Turn off incremental linking
     include(MSVCLinkerFlags)
 

@@ -57,7 +57,18 @@ static int run_and_record_executable(std::string shell_command_path, std::string
     {
         if (!output_path.empty())
         {
-            std::cout << std::ifstream(output_path).rdbuf() << std::endl;
+            std::ifstream file(output_path);
+            if (file.is_open())
+            {
+                std::string line;
+                while (getline(file, line))
+                {
+                    // Using cout for these logs was causing cout to get into a bad state, which would stop delivering
+                    // output messages.
+                    printf("%s\n", line.c_str());
+                }
+                file.close();
+            }
         }
     }
     catch (std::exception &e)
