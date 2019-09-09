@@ -9,6 +9,6 @@ Streaming tool is already running.
 
 ## Usage Info
 
-Run ```fastcapture_trigger.exe``` to take a capture.
+Run `fastcapture_trigger.exe` to take a capture.
 
-Run ```fastcapture_trigger.exe``` to exit the streaming process.
+Run `fastcapture_trigger.exe` to exit the streaming process.

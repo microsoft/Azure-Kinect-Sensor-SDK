@@ -85,9 +85,9 @@ start a conversation with the Azure Kinect Team to get the Issue Triage Approved
 1) If you have not already, fork the repo.
 1) Make changes.
 1) Test the change, all tests should pass:
-   * ``` CTest -L unit ```
-   * ``` CTest -L function```
-   * ``` CTest -L perf```
+   * ` CTest -L unit `
+   * ` CTest -L function`
+   * ` CTest -L perf`
 1) Create a pull request.
    * The PR description must reference the issue.
 1) An Azure Kinect SDK team member will review the change. See the [review process](#review-process) for more information.

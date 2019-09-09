@@ -34,7 +34,8 @@ depth camera.
 ## Installation instructions
 
 This example requires OpenCV to be installed to build. To ensure it will be built, ensure that OpenCV is found by adding
-`-DOpenCV_REQUIRED` to the `cmake` command (this should not be necessary if you have OpenCV installed).
+`-DOpenCV_REQUIRED=TRUE` to the `cmake` command (this should not be necessary if you have OpenCV installed). If OpenCV 
+is installed as recommended then it will automatically be used by the build.
 
 ### OpenCV Installation Instructions
 
@@ -45,11 +46,9 @@ This example requires OpenCV to be installed to build. To ensure it will be buil
 #### Windows
 
 Our recommended way of getting OpenCV on Windows is by installing pre-built libraries. There's even a PowerShell script
-that'll do much of the work for you in `scripts/install-opencv.ps1`. This will place OpenCV in your `C:\` folder. You'll
-also need to add the folder where the OpenCV DLLs are to your PATH. If you used the script, that means you need to add
-`C:\opencv\build\x64\vc14\bin` to your PATH. If you installed OpenCV somewhere else, you may need to add the
-`-DOpenCV_DIR=path\to\a\folder\in\your\opencv\install\that\contains\the\file\OpenCVConfig.cmake` option to cmake when
-you build.
+that'll do much of the work for you in `scripts/install-opencv.ps1`. This will place OpenCV in your `C:\` folder. CMake
+will copy the OpenCV binaries to the the `${CMAKE_RUNTIME_OUTPUT_DIRECTORY}` folder so that all built binaries will run
+as expected. A user may choose to add the OpenCV binaries location to thier `%PATH%` to avoid this dependency.
 
 ## A Note on Calibration (only relevant for 2-camera version)
 
@@ -60,6 +59,8 @@ use while calibrating the cameras. If you don't have one, print one out. You can
 [here](https://docs.opencv.org/2.4/_downloads/pattern.png) (note that the 9x6 comes from the interior corners, not the
 number of squares). The example requires the calibration board to be in view for both devices' color cameras for many
 frames, so make sure it's visible to both cameras.
+
+Checked into this folder is chessboard.png. It is 10 x 7. To OpenCV it is 9 x 6 and 22 mm if printed in landscape, at 100%, and with normal margins.
 
 Also, DO NOT move the cameras during or after calibration! Changing that translation will cause the backup camera to
 provide inaccurate information.

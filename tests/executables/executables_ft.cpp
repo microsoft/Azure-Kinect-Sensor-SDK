@@ -43,6 +43,7 @@ static int run_and_record_executable(std::string shell_command_path, std::string
     // In Linux, forking a process causes the under buffers to be forked, too. So, because popen uses fork under the
     // hood, there may have been a risk of printing something in both processes. I'm not sure if this could happen in
     // this situation, but better safe than sorry.
+    std::cout << "Running: " << formatted_command << std::endl;
     std::cout.flush();
     FILE *process_stream = POPEN(formatted_command.c_str(), "r");
     if (!process_stream)
@@ -51,7 +52,6 @@ static int run_and_record_executable(std::string shell_command_path, std::string
         return EXIT_FAILURE; // if popen fails, it returns null, which is an error
     }
     int return_code = PCLOSE(process_stream);
-    std::cout << "Ran: " << formatted_command << std::endl;
     std::cout << "<==============================================" << std::endl;
     try
     {
@@ -129,6 +129,7 @@ protected:
     }
 };
 
+#if (USE_CUSTOM_TEST_CONFIGURATION == 0)
 TEST_F(executables_ft, calibration)
 {
     const std::string calibration_path = PATH_TO_BIN("calibration_info");
@@ -169,27 +170,6 @@ TEST_F(executables_ft, enumerate)
     std::vector<std::string> regexes{ "Found [1-5] connected devices:", "0: Device [^]*" };
     test_stream_against_regexes(&results, &regexes);
 }
-
-#ifdef USE_OPENCV
-TEST_F(executables_ft, green_screen_single_cam)
-{
-    const std::string green_screen_path = PATH_TO_BIN("green_screen");
-    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-single-out.txt";
-    ASSERT_EQ(run_and_record_executable(green_screen_path + " 1 7 5 21 1000 4000 2 30 5", green_screen_out),
-              EXIT_SUCCESS);
-}
-
-TEST_F(executables_ft, green_screen_double_cam)
-{
-    const std::string green_screen_path = PATH_TO_BIN("green_screen");
-    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-double-out.txt";
-    ASSERT_EQ(run_and_record_executable(green_screen_path + " 2 7 5 21 1000 4000 2 30 5", green_screen_out),
-              EXIT_SUCCESS);
-    std::ifstream results(green_screen_out.c_str());
-    std::vector<std::string> regexes{ "Finished calibrating!" };
-    test_stream_against_regexes(&results, &regexes);
-}
-#endif
 
 TEST_F(executables_ft, fastpointcloud)
 {
@@ -287,6 +267,40 @@ TEST_F(executables_ft, undistort)
     // don't bother checking the csv file- just make sure it's there
     ASSERT_TRUE(undistort_results.good());
 }
+#endif // USE_CUSTOM_TEST_CONFIGURATION == 0
+
+#if (USE_CUSTOM_TEST_CONFIGURATION == 1)
+#ifdef USE_OPENCV
+TEST_F(executables_ft, green_screen_single_cam)
+#else
+TEST_F(executables_ft, DISABLED_green_screen_single_cam)
+#endif
+{
+    const std::string green_screen_path = PATH_TO_BIN("green_screen");
+    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-single-out.txt";
+    // Calibration timeout for this is 10min due to low light conditions in the lab and slow perf of
+    // cv::findChessboardCorners.
+    ASSERT_EQ(run_and_record_executable(green_screen_path + " 1 9 6 22 1000 4000 2 600 5", green_screen_out),
+              EXIT_SUCCESS);
+}
+
+#ifdef USE_OPENCV
+TEST_F(executables_ft, green_screen_double_cam)
+#else
+TEST_F(executables_ft, DISABLED_green_screen_double_cam)
+#endif
+{
+    const std::string green_screen_path = PATH_TO_BIN("green_screen");
+    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-double-out.txt";
+    // Calibration timeout for this is 10min due to low light conditions in the lab and slow perf of
+    // cv::findChessboardCorners.
+    ASSERT_EQ(run_and_record_executable(green_screen_path + " 2 9 6 22 1000 4000 2 600 5", green_screen_out),
+              EXIT_SUCCESS);
+    std::ifstream results(green_screen_out.c_str());
+    std::vector<std::string> regexes{ "Finished calibrating!" };
+    test_stream_against_regexes(&results, &regexes);
+}
+#endif // USE_CUSTOM_TEST_CONFIGURATION == 1
 
 int main(int argc, char **argv)
 {

@@ -668,9 +668,6 @@ jobs:
         targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
         flattenFolders: true
 
-    - script: 'if exist $(OpenCVPath) ( set PATH=%PATH%;$(OpenCVPath)\bin ) else ( exit 1 )'
-      displayName: 'Add OpenCV to PATH'
-
     - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
@@ -686,6 +683,11 @@ jobs:
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
       workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
       displayName: 'Run Functional Tests'
+      timeoutInMinutes: 15
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
@@ -823,6 +825,11 @@ jobs:
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
       workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
       displayName: 'Run Functional Tests'
+      timeoutInMinutes: 15
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'

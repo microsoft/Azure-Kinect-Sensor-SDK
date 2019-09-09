@@ -15,15 +15,15 @@ More details about release versioning can be found [here](releasing.md)
 ## Firmware Versioning
 
 The Azure Kinect firmware is composed of 4 different firmware versions. These firmware versions are exposed through 
-```k4a_hardware_version_t```. Here is a sample of that hardware version:
+`k4a_hardware_version_t`. Here is a sample of that hardware version:
 
-```shell
+```
 RGB Sensor Version:  1.6.98
 Depth Sensor Version:1.6.70
 Mic Array Version:   1.6.14
 Sensor Config:       5006.27
 ```
 
-This version can also be simplified as ```1.6.098070014``` where ```098```, ```070```,
-and ```014``` are the patch versions of each component version, converted to a 
+This version can also be simplified as `1.6.098070014` where `098`, `070`,
+and `014` are the patch versions of each component version, converted to a 
 zero-based 3 digit form, and concatenated.
