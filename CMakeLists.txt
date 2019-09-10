@@ -191,6 +191,8 @@ endif()
 
 option(K4A_VALIDATE_CLANG_FORMAT "Validate clang-format results as part of build" Yes)
 
+message (" Clang Format is ${K4A_VALIDATE_CLANG_FORMAT} WES WES WES ")
+
 set (CLANG_FORMAT_ROOT
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/include
