@@ -1116,6 +1116,18 @@ public:
         return m_handle != nullptr;
     }
 
+    /** Returns the underlying k4a_device_t handle
+     *
+     * Note that this function does not increment the reference count on the k4a_device_t.
+     * The caller is responsible for incrementing the reference count on
+     * the k4a_device_t if the caller needs the k4a_device_t to outlive this C++ object.
+     * Otherwise, the k4a_device_t will be destroyed by this C++ object.
+     */
+    k4a_device_t handle() const noexcept
+    {
+        return m_handle;
+    }
+
     /** Closes a k4a device.
      *
      * \sa k4a_device_close
