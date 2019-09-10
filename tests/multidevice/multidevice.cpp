@@ -19,7 +19,7 @@
 // How close 2 timestamps should be to be considered accurately synchronized.
 // TODO restore to 50us
 // const int MAX_SYNC_CAPTURE_DIFFERENCE_USEC = 50;
-const int MAX_SYNC_CAPTURE_DIFFERENCE_USEC = 100;
+const int MAX_SYNC_CAPTURE_DIFFERENCE_USEC = 10000;
 
 int main(int argc, char **argv)
 {
@@ -302,8 +302,8 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
     k4a_image_t image_m, image_s;
     int tries = 0;
 
-    R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(master, cap_m, 10000));
-    R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(sub, cap_s, 10000));
+    R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(master, cap_m, timeout_ms));
+    R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(sub, cap_s, timeout_ms));
 
     R_EXPECT_NE(NULL, (int64_t)(image_m = k4a_capture_get_color_image(*cap_m)));
     R_EXPECT_NE(NULL, (int64_t)(image_s = k4a_capture_get_color_image(*cap_s)));
@@ -314,13 +314,13 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
 
     ts_s_adj = ts_s - subordinate_delay_off_master_usec;
 
-    int64_t ts_delta = (ts_m) > ts_s_adj ? ts_m - ts_s_adj : ts_s_adj - ts_m;
+    int64_t ts_delta = ts_m > ts_s_adj ? ts_m - ts_s_adj : ts_s_adj - ts_m;
     while (ts_delta > MAX_SYNC_CAPTURE_DIFFERENCE_USEC)
     {
         // bail out if it never happens
         R_EXPECT_LE(tries++, 1000);
 
-        if (ts_m < ts_s)
+        if (ts_m < ts_s_adj)
         {
             printf("Master too old m:%9lld s:%9lld adj sub:%9lld adj delta:%9lld\n", ts_m, ts_s, ts_s_adj, ts_delta);
             k4a_capture_release(*cap_m);
@@ -340,7 +340,7 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
             k4a_image_release(image_s);
         }
 
-        ts_delta = (ts_m) > ts_s_adj ? ts_m - ts_s_adj : ts_s_adj - ts_m;
+        ts_delta = ts_m > ts_s_adj ? ts_m - ts_s_adj : ts_s_adj - ts_m;
     }
     // printf("JUST RIGHT     m:%9lld s:%9lld adj sub:%9lld adj delta:%9lld\n", ts_m, ts_s, ts_s_adj, ts_delta); //????
     return K4A_RESULT_SUCCEEDED;
@@ -389,7 +389,9 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     printf("         Sub depth_delay_off_color_usec: %d\n", s_config.depth_delay_off_color_usec);
     printf("  Sub subordinate_delay_off_master_usec: %d\n", s_config.subordinate_delay_off_master_usec);
 
-    printf("\nMaster Color, Master IR, Sub Color, Sub IR\n");
+    printf("\nDelta = Time off master color.\n");
+    printf("Master Color, Master IR(Delta), Sub Color(Delta), Sub IR(Delta)\n");
+    printf("---------------------------------------------------------------\n");
     for (int x = 0; x < 100; x++)
     {
         k4a_capture_t cap_m, cap_s;
