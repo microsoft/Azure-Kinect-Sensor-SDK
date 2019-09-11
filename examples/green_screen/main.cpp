@@ -305,12 +305,11 @@ static cv::Mat depth_to_opencv(const k4a::image &im)
 static cv::Matx33f calibration_to_color_camera_matrix(const k4a::calibration &cal)
 {
     const k4a_calibration_intrinsic_parameters_t::_param &i = cal.color_camera_calibration.intrinsics.parameters.param;
-    cv::Matx33f camera_matrix = cv::Matx33f::zeros();
+    cv::Matx33f camera_matrix = cv::Matx33f::eye();
     camera_matrix(0, 0) = i.fx;
-    camera_matrix(1, 1) = i.fx;
+    camera_matrix(1, 1) = i.fy;
     camera_matrix(0, 2) = i.cx;
     camera_matrix(1, 2) = i.cy;
-    camera_matrix(2, 2) = 1;
     return camera_matrix;
 }
 
