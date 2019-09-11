@@ -25,9 +25,7 @@ typedef struct _INTRINSIC_TYPE_TO_STRING_MAPPER
 } intrinsic_type_to_string_mapper_t;
 
 static intrinsic_type_to_string_mapper_t intrinsic_type_mapper[] =
-    { { K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA, "CALIBRATION_LensDistortionModelTheta" },
-      { K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K, "CALIBRATION_LensDistortionModelPolynomial3K" },
-      { K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT, "CALIBRATION_LensDistortionModelRational6KT" },
+    { { K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT, "CALIBRATION_LensDistortionModelRational6KT" },
       { K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY, "CALIBRATION_LensDistortionModelBrownConrady" } };
 
 typedef struct _calibration_context_t
