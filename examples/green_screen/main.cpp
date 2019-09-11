@@ -45,8 +45,8 @@ static Transformation stereo_calibration(const k4a::calibration &main_calib,
                                          const cv::Size &image_size,
                                          const cv::Size &chessboard_pattern,
                                          float chessboard_square_length);
-static k4a_device_configuration_t get_main_config();
-static k4a_device_configuration_t get_secondary_config();
+static k4a_device_configuration_t get_master_config();
+static k4a_device_configuration_t get_subordinate_config();
 static Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                         const k4a_device_configuration_t &main_config,
                                         const k4a_device_configuration_t &secondary_config,
@@ -150,12 +150,12 @@ int main(int argc, char **argv)
     MultiDeviceCapturer capturer(device_indices, color_exposure_usec, powerline_freq);
 
     // Create configurations for devices
-    k4a_device_configuration_t main_config = get_main_config();
+    k4a_device_configuration_t main_config = get_master_config();
     if (num_devices == 1) // no need to have a master cable if it's standalone
     {
         main_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
     }
-    k4a_device_configuration_t secondary_config = get_secondary_config();
+    k4a_device_configuration_t secondary_config = get_subordinate_config();
 
     // Construct all the things that we'll need whether or not we are running with 1 or 2 cameras
     k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode,
@@ -505,35 +505,52 @@ Transformation stereo_calibration(const k4a::calibration &main_calib,
 }
 
 // The following functions provide the configurations that should be used for each camera.
-// NOTE: Both cameras must have the same configuration (framerate, resolution, color and depth modes TODO what exactly
-// needs to be the same
-static k4a_device_configuration_t get_main_config()
+// NOTE: For best results both cameras should have the same configuration (framerate, resolution, color and depth
+// modes). Additionally the both master and subordinate should have the same exposure and power line settings. Exposure
+// settings can be different but the subordinate must have a longer exposure from master. To synchronize a master and
+// subordinate with different exposures the user should set `subordinate_delay_off_master_usec = ((subordinate exposure
+// time) - (master exposure time))/2`.
+//
+static k4a_device_configuration_t get_default_config()
 {
     k4a_device_configuration_t camera_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
     camera_config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED; // no need for depth during calibration
-    camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
-    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER; // main device is master in two-camera case. It will be
-                                                                // changed later on if it's a single-camera case
-    camera_config.subordinate_delay_off_master_usec = 0; // Must be zero- this device is the master, so delay is 0.
-    // Let half of the time needed for the depth cameras to not interfere with one another pass here (the other half is
-    // in the master to subordinate delay)
+    camera_config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED; // No need for depth during calibration
+    camera_config.camera_fps = K4A_FRAMES_PER_SECOND_15;     // Don't use all USB bandwidth
+    camera_config.subordinate_delay_off_master_usec = 0;     // Must be zero for master
+    camera_config.synchronized_images_only = true;
+    return camera_config;
+}
+
+// Master customizable settings
+static k4a_device_configuration_t get_master_config()
+{
+    k4a_device_configuration_t camera_config = get_default_config();
+    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
+
+    // Two depth images should be seperated by MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC to ensure the depth imaging
+    // sensor doesn't interfere with the other. To accomplish this the master depth image captures
+    // (MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2) before the color image, and the subordinate camera captures its
+    // depth image (MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2) after the color image. This gives us two depth
+    // images centered around the color image as closely as possible.
     camera_config.depth_delay_off_color_usec = -static_cast<int32_t>(MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2);
     camera_config.synchronized_images_only = true;
     return camera_config;
 }
 
-static k4a_device_configuration_t get_secondary_config()
+// Subordinate customizable settings
+static k4a_device_configuration_t get_subordinate_config()
 {
-    k4a_device_configuration_t camera_config = get_main_config();
-    // The color camera must be running for synchronization to work, even though we don't really use it
-    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE; // secondary will be the subordinate
-    camera_config.subordinate_delay_off_master_usec = 0;             // sync up the color cameras to help calibration
-    // Only account for half of the delay here. The other half comes from the master depth camera capturing before the
-    // master color camera.
+    k4a_device_configuration_t camera_config = get_default_config();
+    camera_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
+
+    // Two depth images should be seperated by MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC to ensure the depth imaging
+    // sensor doesn't interfere with the other. To accomplish this the master depth image captures
+    // (MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2) before the color image, and the subordinate camera captures its
+    // depth image (MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2) after the color image. This gives us two depth
+    // images centered around the color image as closely as possible.
     camera_config.depth_delay_off_color_usec = MIN_TIME_BETWEEN_DEPTH_CAMERA_PICTURES_USEC / 2;
-    camera_config.synchronized_images_only = true;
     return camera_config;
 }
 
