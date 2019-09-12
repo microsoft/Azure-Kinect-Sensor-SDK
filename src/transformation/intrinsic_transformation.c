@@ -34,7 +34,8 @@ static k4a_result_t transformation_project_internal(const k4a_calibration_camera
 
     if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT)
     {
-        LOG_CRITICAL("Rational 6KT is deprecated (only supported early internal devices). Please replace your Azure Kinect with a retail device.",
+        LOG_CRITICAL("Rational 6KT is deprecated (only supported early internal devices). Please replace your Azure "
+                     "Kinect with a retail device.",
                      0);
     }
 
@@ -249,7 +250,8 @@ static k4a_result_t transformation_unproject_internal(const k4a_calibration_came
 
     if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT)
     {
-        LOG_CRITICAL("Rational 6KT is deprecated (only supported early internal devices). Please replace your Azure Kinect with a retail device.",
+        LOG_CRITICAL("Rational 6KT is deprecated (only supported early internal devices). Please replace your Azure "
+                     "Kinect with a retail device.",
                      0);
     }
 
