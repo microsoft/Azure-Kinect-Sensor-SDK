@@ -32,6 +32,13 @@ static k4a_result_t transformation_project_internal(const k4a_calibration_camera
         return K4A_RESULT_FAILED;
     }
 
+    if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT)
+    {
+        LOG_CRITICAL("Rational 6KT is deprecated (only supported early internal devices). Please replace your Azure "
+                     "Kinect with a retail device.",
+                     0);
+    }
+
     const k4a_calibration_intrinsic_parameters_t *params = &camera_calibration->intrinsics.parameters;
 
     float cx = params->param.cx;
@@ -239,6 +246,13 @@ static k4a_result_t transformation_unproject_internal(const k4a_calibration_came
                       14);
         }
         return K4A_RESULT_FAILED;
+    }
+
+    if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT)
+    {
+        LOG_CRITICAL("Rational 6KT is deprecated (only supported early internal devices). Please replace your Azure "
+                     "Kinect with a retail device.",
+                     0);
     }
 
     const k4a_calibration_intrinsic_parameters_t *params = &camera_calibration->intrinsics.parameters;
