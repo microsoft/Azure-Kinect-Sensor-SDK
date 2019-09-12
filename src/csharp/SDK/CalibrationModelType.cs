@@ -20,19 +20,19 @@ namespace Microsoft.Azure.Kinect.Sensor
         Unknown = 0,
 
         /// <summary>
-        /// Calibration model is Theta (arctan). Deprecated (not supported).
+        /// Deprecated (not supported). Calibration model is Theta (arctan).
         /// </summary>
         [Native.NativeReference("K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA")]
         Theta,
 
         /// <summary>
-        /// Calibration model is Polynomial 3K. Deprecated (not supported).
+        /// Deprecated (not supported). Calibration model is Polynomial 3K.
         /// </summary>
         [Native.NativeReference("K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K")]
         Polynomial3K,
 
         /// <summary>
-        /// Calibration model is Rational 6KT. Deprecated (only supported early internal devices).
+        /// Deprecated (only supported early internal devices). Calibration model is Rational 6KT.
         /// </summary>
         [Native.NativeReference("K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT")]
         Rational6KT,
