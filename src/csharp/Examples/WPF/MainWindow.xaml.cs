@@ -45,7 +45,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorResolution = ColorResolution.R1440p,
+                    ColorResolution = ColorResolution.R720p,
                     DepthMode = DepthMode.WFOV_2x2Binned,
                     SynchronizedImagesOnly = true,
                     CameraFPS = FPS.FPS30,
