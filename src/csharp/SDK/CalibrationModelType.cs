@@ -8,7 +8,7 @@
 namespace Microsoft.Azure.Kinect.Sensor
 {
     /// <summary>
-    /// The model used to interpret the calibration parameters.
+    /// The model used to interpret the calibration parameters. Azure Kinect devices are calibrated with Brown Conrady.
     /// </summary>
     [Native.NativeReference("k4a_calibration_model_type_t")]
     public enum CalibrationModelType
@@ -20,19 +20,19 @@ namespace Microsoft.Azure.Kinect.Sensor
         Unknown = 0,
 
         /// <summary>
-        /// Calibration model is Theta (arctan).
+        /// Deprecated (not supported). Calibration model is Theta (arctan).
         /// </summary>
         [Native.NativeReference("K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA")]
         Theta,
 
         /// <summary>
-        /// Calibration model is Polynomial 3K.
+        /// Deprecated (not supported). Calibration model is Polynomial 3K.
         /// </summary>
         [Native.NativeReference("K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K")]
         Polynomial3K,
 
         /// <summary>
-        /// Calibration model is Rational 6KT.
+        /// Deprecated (only supported early internal devices). Calibration model is Rational 6KT.
         /// </summary>
         [Native.NativeReference("K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT")]
         Rational6KT,
