@@ -15,12 +15,6 @@ include(GenerateExportHeader)
 generate_export_header(k4a
     EXPORT_FILE_NAME "include/k4a/k4a_export.h")
 
-# Only export functions decorated to be exported (k4a_export.h needed for this work)
-if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-    target_compile_options(k4a PRIVATE "-fvisibility=hidden")
-    target_link_libraries(k4a PRIVATE "-Wl,--exclude-libs,ALL")
-endif()
-
 configure_file(
     "${K4A_INCLUDE_DIR}/k4a/k4aversion.h.in"
     "${CMAKE_CURRENT_BINARY_DIR}/include/k4a/k4aversion.h"
