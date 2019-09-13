@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 add_library(k4a_deloader STATIC
-            deloader.c
+            deloader.cpp
             )
 
 # Consumers should #include <k4ainternal/dewrapper.h>

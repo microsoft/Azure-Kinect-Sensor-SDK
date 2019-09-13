@@ -225,3 +225,154 @@ TEST_F(multidevice_ft, ensure_color_camera_is_enabled)
     ASSERT_EQ(master_device_found, true);
     ASSERT_EQ(subordinate_device_found, true);
 }
+
+typedef struct _parallel_start_data_t
+{
+    k4a_device_t device;
+    k4a_device_configuration_t *config;
+    bool started;
+    LOCK_HANDLE lock;
+} parallel_start_data_t;
+
+static int parallel_start_thread(void *param)
+{
+    parallel_start_data_t *data = (parallel_start_data_t *)param;
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
+    Lock(data->lock);
+    Unlock(data->lock);
+
+    if (!data->started)
+    {
+        EXPECT_EQ(K4A_RESULT_SUCCEEDED, result = k4a_device_start_cameras(data->device, data->config));
+
+        if (K4A_SUCCEEDED(result))
+        {
+            EXPECT_EQ(K4A_RESULT_SUCCEEDED, result = k4a_device_start_imu(data->device));
+        }
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        ThreadAPI_Sleep(1000);
+    }
+
+    if (data->device)
+    {
+        k4a_device_stop_cameras(data->device);
+        k4a_device_stop_imu(data->device);
+        k4a_device_close(data->device);
+        data->device = NULL;
+    }
+
+    return result;
+}
+
+TEST_F(multidevice_ft, start_parallel)
+{
+    LOCK_HANDLE lock;
+    THREAD_HANDLE th1, th2;
+    ASSERT_NE((lock = Lock_Init()), (LOCK_HANDLE)NULL);
+    parallel_start_data_t data1 = { 0 }, data2 = { 0 };
+
+    ASSERT_EQ((uint32_t)2, k4a_device_get_installed_count());
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_open(0, &data1.device));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_open(1, &data2.device));
+
+    k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
+    config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
+    config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
+    config.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+
+    // prevent the threads from running
+    Lock(lock);
+
+    data1.lock = data2.lock = lock;
+    data2.config = data1.config = &config;
+
+    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&th1, parallel_start_thread, &data1));
+    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&th2, parallel_start_thread, &data2));
+
+    // start the test
+    Unlock(lock);
+
+    // Wait for the threads to terminate
+    int result1, result2;
+    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Join(th1, &result1));
+    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Join(th2, &result2));
+
+    ASSERT_EQ(result1, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(result2, K4A_RESULT_SUCCEEDED);
+
+    if (data1.device)
+    {
+        k4a_device_close(data1.device);
+    }
+
+    if (data2.device)
+    {
+        k4a_device_close(data2.device);
+    }
+
+    Lock_Deinit(lock);
+}
+
+TEST_F(multidevice_ft, close_parallel)
+{
+    LOCK_HANDLE lock;
+    THREAD_HANDLE th1, th2;
+    ASSERT_NE((lock = Lock_Init()), (LOCK_HANDLE)NULL);
+    parallel_start_data_t data1 = { 0 }, data2 = { 0 };
+
+    ASSERT_EQ((uint32_t)2, k4a_device_get_installed_count());
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_open(0, &data1.device));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_open(1, &data2.device));
+
+    k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
+    config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
+    config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
+    config.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+
+    data2.config = data1.config = &config;
+    data1.lock = data2.lock = lock;
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(data1.device, data1.config));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(data2.device, data2.config));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(data1.device));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(data2.device));
+
+    data1.started = data2.started = true;
+
+    // Prevent the threads from running
+    Lock(lock);
+
+    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&th1, parallel_start_thread, &data1));
+    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&th2, parallel_start_thread, &data2));
+
+    // start the test
+    Unlock(lock);
+
+    // Wait for the threads to terminate
+    int result1, result2;
+    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Join(th1, &result1));
+    ASSERT_EQ(THREADAPI_OK, ThreadAPI_Join(th2, &result2));
+
+    ASSERT_EQ(result1, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(result2, K4A_RESULT_SUCCEEDED);
+
+    if (data1.device)
+    {
+        k4a_device_close(data1.device);
+    }
+
+    if (data2.device)
+    {
+        k4a_device_close(data2.device);
+    }
+
+    Lock_Deinit(lock);
+}
