@@ -50,7 +50,7 @@ endif()
 # This forces cmake to apply CMAKE_C_VISIBILITY_PRESET,
 # CMAKE_CXX_VISIBILITY_PRESET and VISIBILITY_INLINES_HIDDEN target properties
 # to all targets, not just SHARED libraries. We want this so that files
-# compiled into static libraries have the same visibility flags and those
+# compiled into static libraries have the same visibility flags as those
 # compiled into shared libraries.
 #
 # NEW is the default for this policy except when cmake_minimum_required is
