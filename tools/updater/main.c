@@ -996,11 +996,11 @@ static k4a_result_t command_reset_device(updater_command_info_t *command_info)
 
         if (K4A_SUCCEEDED(result))
         {
-            printf("Reset of S/N: %s is complete.\n", command_info->device_serial_number[device_index]);
+            printf("Reset of S/N: %s completed successfully.\n", command_info->device_serial_number[device_index]);
         }
         else
         {
-            printf("Reset of S/N: %s failed.\n", command_info->device_serial_number[device_index]);
+            printf("Reset of S/N: %s failed. Device did not re-enumerate\n", command_info->device_serial_number[device_index]);
             finalCmdStatus = K4A_RESULT_FAILED;
         }
     }
