@@ -161,7 +161,7 @@ k4a_result_t dynlib_find_symbol(dynlib_t dynlib_handle, const char *symbol, void
     }
     else
     {
-        LOG_ERROR("Failed to find symbol %s in dynamic library", symbol);
+        LOG_ERROR("Failed to find symbol %s in dynamic library, GLE is 0x%08x", symbol, GetLastError());
     }
 
     return result;
