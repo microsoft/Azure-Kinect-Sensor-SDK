@@ -129,6 +129,7 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     k4a_image_t depth_image = NULL;
     k4a_image_t color_image = NULL;
+    k4a_image_t color_image_downscaled = NULL;
 
     device_count = k4a_device_get_installed_count();
 
@@ -220,10 +221,10 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
     // Compute color point cloud by warping depth image into color camera geometry with downscaled color image and
     // downscaled calibration. This example's goal is to show how to configure the calibration and use the
     // transformation API as it is when the user does not need a point cloud from high resolution transformed depth
-    // image. The downscaleing method here is naively to average binning 2x2 pixels, user should choose their own
+    // image. The downscaling method here is naively to average binning 2x2 pixels, user should choose their own
     // appropriate downscale method on the color image, this example is only demonstrating the idea. However, no matter
     // what scale you choose to downscale the color image, please keep the aspect ratio unchanged (to ensure the
-    // distortion parameters from oringinal calibration can still be used for the downscaled image).
+    // distortion parameters from original calibration can still be used for the downscaled image).
     k4a_calibration_t calibration_color_downscaled;
     memcpy(&calibration_color_downscaled, &calibration, sizeof(k4a_calibration_t));
     calibration_color_downscaled.color_camera_calibration.resolution_width /= 2;
@@ -233,7 +234,7 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
     calibration_color_downscaled.color_camera_calibration.intrinsics.parameters.param.fx /= 2;
     calibration_color_downscaled.color_camera_calibration.intrinsics.parameters.param.fy /= 2;
     transformation_color_downscaled = k4a_transformation_create(&calibration_color_downscaled);
-    k4a_image_t color_image_downscaled = downscale_image_2x2_binning(color_image);
+    color_image_downscaled = downscale_image_2x2_binning(color_image);
     if (color_image_downscaled == 0)
     {
         printf("Failed to downscaled color image\n");
