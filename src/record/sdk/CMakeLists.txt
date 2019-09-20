@@ -39,10 +39,13 @@ target_include_directories(k4arecord PUBLIC
 target_link_libraries(k4arecord PRIVATE
     k4ainternal::record
     k4ainternal::playback
-    k4a::k4a
     k4ainternal::logging
     ebml::ebml
     matroska::matroska
+)
+
+target_link_libraries(k4arecord PUBLIC
+    k4a::k4a
 )
 
 # Define alias for k4arecord

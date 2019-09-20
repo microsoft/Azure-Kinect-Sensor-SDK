@@ -436,7 +436,7 @@ public:
         reset();
     }
 
-    /** Sets capture to a shallow copy of other
+    /** Sets capture to a shallow copy of the other
      */
     capture &operator=(const capture &other) noexcept
     {
