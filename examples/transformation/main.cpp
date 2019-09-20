@@ -221,7 +221,9 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
     // downscaled calibration. This example's goal is to show how to configure the calibration and use the
     // transformation API as it is when the user does not need a point cloud from high resolution transformed depth
     // image. The downscaleing method here is naively to average binning 2x2 pixels, user should choose their own
-    // appropriate downscale method on the color image, this example is only demonstrating the idea
+    // appropriate downscale method on the color image, this example is only demonstrating the idea. However, no matter
+    // what scale you choose to downscale the color image, please keep the aspect ratio unchanged (to ensure the
+    // distortion parameters from oringinal calibration can still be used for the downscaled image).
     k4a_calibration_t calibration_color_downscaled;
     memcpy(&calibration_color_downscaled, &calibration, sizeof(k4a_calibration_t));
     calibration_color_downscaled.color_camera_calibration.resolution_width /= 2;
