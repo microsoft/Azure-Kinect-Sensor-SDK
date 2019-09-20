@@ -81,3 +81,54 @@ void tranformation_helpers_write_point_cloud(const k4a_image_t point_cloud_image
     std::ofstream ofs_text(file_name, std::ios::out | std::ios::app);
     ofs_text.write(ss.str().c_str(), (std::streamsize)ss.str().length());
 }
+
+k4a_image_t downscale_image_2x2_binning(const k4a_image_t color_image)
+{
+    int color_image_width_pixels = k4a_image_get_width_pixels(color_image);
+    int color_image_height_pixels = k4a_image_get_height_pixels(color_image);
+    int color_image_downscaled_width_pixels = color_image_width_pixels / 2;
+    int color_image_downscaled_height_pixels = color_image_height_pixels / 2;
+    k4a_image_t color_image_downscaled = NULL;
+    if (K4A_RESULT_SUCCEEDED != k4a_image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                                                 color_image_downscaled_width_pixels,
+                                                 color_image_downscaled_height_pixels,
+                                                 color_image_downscaled_width_pixels * 4 * (int)sizeof(uint8_t),
+                                                 &color_image_downscaled))
+    {
+        printf("Failed to create downscaled color image\n");
+        return color_image_downscaled;
+    }
+
+    uint8_t *color_image_data = k4a_image_get_buffer(color_image);
+    uint8_t *color_image_downscaled_data = k4a_image_get_buffer(color_image_downscaled);
+    for (int j = 0; j < color_image_downscaled_height_pixels; j++)
+    {
+        for (int i = 0; i < color_image_downscaled_width_pixels; i++)
+        {
+            int index_downscaled = j * color_image_downscaled_width_pixels + i;
+            int index_tl = (j * 2 + 0) * color_image_width_pixels + i * 2 + 0;
+            int index_tr = (j * 2 + 0) * color_image_width_pixels + i * 2 + 1;
+            int index_bl = (j * 2 + 1) * color_image_width_pixels + i * 2 + 0;
+            int index_br = (j * 2 + 1) * color_image_width_pixels + i * 2 + 1;
+
+            color_image_downscaled_data[4 * index_downscaled + 0] = (uint8_t)(
+                (color_image_data[4 * index_tl + 0] + color_image_data[4 * index_tr + 0] +
+                 color_image_data[4 * index_bl + 0] + color_image_data[4 * index_br + 0]) /
+                4.0f);
+            color_image_downscaled_data[4 * index_downscaled + 1] = (uint8_t)(
+                (color_image_data[4 * index_tl + 1] + color_image_data[4 * index_tr + 1] +
+                 color_image_data[4 * index_bl + 1] + color_image_data[4 * index_br + 1]) /
+                4.0f);
+            color_image_downscaled_data[4 * index_downscaled + 2] = (uint8_t)(
+                (color_image_data[4 * index_tl + 2] + color_image_data[4 * index_tr + 2] +
+                 color_image_data[4 * index_bl + 2] + color_image_data[4 * index_br + 2]) /
+                4.0f);
+            color_image_downscaled_data[4 * index_downscaled + 3] = (uint8_t)(
+                (color_image_data[4 * index_tl + 3] + color_image_data[4 * index_tr + 3] +
+                 color_image_data[4 * index_bl + 3] + color_image_data[4 * index_br + 3]) /
+                4.0f);
+        }
+    }
+
+    return color_image_downscaled;
+}
