@@ -109,7 +109,7 @@ public:
         reset();
     }
 
-    /** Sets image to a shallow copy of other
+    /** Sets image to a shallow copy of the other
      */
     image &operator=(const image &other) noexcept
     {
@@ -1318,7 +1318,7 @@ public:
     {
         std::vector<uint8_t> calibration;
         size_t buffer = 0;
-        k4a_buffer_result_t result = k4a_device_get_raw_calibration(m_handle, &calibration[0], &buffer);
+        k4a_buffer_result_t result = k4a_device_get_raw_calibration(m_handle, nullptr, &buffer);
 
         if (result == K4A_BUFFER_RESULT_TOO_SMALL && buffer > 1)
         {

@@ -10,11 +10,6 @@
 #include <k4a/k4a.hpp>
 #include <k4arecord/record.h>
 
-#include <algorithm>
-#include <chrono>
-#include <string>
-#include <vector>
-
 namespace k4a
 {
 
