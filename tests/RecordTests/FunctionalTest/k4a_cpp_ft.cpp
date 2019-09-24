@@ -195,4 +195,43 @@ TEST_F(k4a_cpp_ft, k4a)
         color.set_iso_speed(500);
     }
 }
+
+TEST_F(k4a_cpp_ft, record)
+{
+    device kinect = device::open(0);
+    k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
+    config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
+    config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    config.synchronized_images_only = true;
+    kinect.start_cameras(&config);
+    kinect.start_imu();
+
+    record recorder = record::create("./k4a_cpp_ft.mkv", kinect, &config);
+    {
+        record recorder2 = record::create("./k4a_cpp_ft_2.mkv", kinect, &config);
+        record recorder3 = recorder2; //shallow copy
+        ASSERT_TRUE(recorder != recorder2);
+        ASSERT_TRUE(recorder2 == recorder3);
+
+        record recorder4 = std::move(recorder3); // deep copy
+        assert_true(recorder3 == nullptr);
+        assert_true(recorder4 != nullptr);
+
+        recorder2.close();
+        recorder3.close();
+        recorder4.close();
+    }
+
+    recorder.add_tag("K4A_CPP_FT_ADD_TAG", "K4A_CPP_FT_ADD_TAG");
+    recorder.add_imu_track();
+
+    std::string k4a_cpp_ft_attachment = "K4A_CPP_FT_ADD_ATTACHMENT";
+    recorder.add_attachment("K4A_CPP_FT_ADD_TAG", k4a_cpp_ft_attachment, k4a_cpp_ft_attachment.size());
+
+    k4a_record_video_settings_t vid_settings = {1920,1080, 30};
+    std::string k4a_cpp_ft_custom_vid_track = "K4A_CPP_FT_CUSTOM_VID_TRACK";
+    recorder.add_custom_video_track(k4a_cpp_ft_custom_vid_track, "V_MPEG1", nullptr, 0, &vid_settings);
+
+    add_custom_subtitle_track
+}
 #endif

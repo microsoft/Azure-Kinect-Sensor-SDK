@@ -267,10 +267,10 @@ public:
      *
      * \sa k4a_record_open
      */
-    static record create(const char *path, k4a_device_t device, const k4a_device_configuration_t *device_config)
+    static record create(const char *path, device device, const k4a_device_configuration_t *device_config)
     {
         k4a_record_t handle = nullptr;
-        k4a_result_t result = k4a_record_create(path, device, *device_config, &handle);
+        k4a_result_t result = k4a_record_create(path, device.handle(), *device_config, &handle);
 
         if (K4A_RESULT_SUCCEEDED != result)
         {
