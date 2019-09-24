@@ -40,7 +40,6 @@ public:
 
     ~record()
     {
-        flush();
         close();
     }
 
@@ -52,7 +51,6 @@ public:
     {
         if (this != &other)
         {
-            flush();
             close();
             m_handle = other.m_handle;
             other.m_handle = nullptr;
@@ -89,7 +87,12 @@ public:
     {
         if (m_handle)
         {
-            k4a_record_flush(m_handle);
+            k4a_result_t result = k4a_record_flush(m_handle);
+
+            if (K4A_RESULT_SUCCEEDED != result)
+            {
+                throw error("Failed to flush!");
+            }
         }
     }
 
