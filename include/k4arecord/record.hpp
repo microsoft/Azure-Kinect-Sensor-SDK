@@ -252,7 +252,7 @@ public:
 
         if (K4A_RESULT_SUCCEEDED != result)
         {
-            throw error("Failed to write custom_track_data!");
+            throw error("Failed to write custom track data!");
         }
     }
 
