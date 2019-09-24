@@ -747,6 +747,7 @@ bool color_control_test::validate_image_exposure_setting(int test_value, bool si
 {
     // TODO remove this if block to test 50Hz and values larger than 10,000us
     // https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/448
+    // Fixed by firmware version 1.6.104
     if ((!sixty_hertz && test_value >= 10000) /* Ignoring 50Hz setting  */)
     {
         return true;
