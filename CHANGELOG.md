@@ -6,6 +6,8 @@
 [VS2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) or newer.
 * Error and Warning messages have been cleaned up to be less verbose.
 * Multi camera sync and capture green screen example added.
+* New API to transform pixel from color image to depth image with searching on epipolar line
+* Add a capture::handle() function to k4a.hpp
 
 ### v1.2.0
 
