@@ -40,6 +40,7 @@ public:
 
     ~record()
     {
+        // NOTE: flush is called internally when closing record
         close();
     }
 
