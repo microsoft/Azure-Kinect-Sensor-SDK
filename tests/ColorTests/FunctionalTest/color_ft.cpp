@@ -766,20 +766,20 @@ bool color_control_test::validate_image_exposure_setting(int test_value, bool si
     test_value = limit_exposure_to_fps_setting(test_value, sixty_hertz, fps);
 
     // Validate the exposure value on the image is correct
-    uint64_t exposure = 0;
+    uint64_t img_exposure_setting = 0;
     int tries = 0;
-    for (tries = 0; tries < 10 && (int32_t)exposure != test_value; tries++)
+    for (tries = 0; tries < 10 && (int32_t)img_exposure_setting != test_value; tries++)
     {
         k4a_capture_t capture;
         EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(m_device, &capture, 1000));
         k4a_image_t img = k4a_capture_get_color_image(capture);
         EXPECT_NE((k4a_image_t)NULL, img);
-        exposure = k4a_image_get_exposure_usec(img);
+        img_exposure_setting = k4a_image_get_exposure_usec(img);
         k4a_image_release(img);
         k4a_capture_release(capture);
     }
-    EXPECT_EQ(exposure, test_value);
-    return (int32_t)exposure == test_value;
+    EXPECT_EQ(img_exposure_setting, test_value);
+    return (int32_t)img_exposure_setting == test_value;
 }
 
 void color_control_test::control_test_worker(const k4a_color_control_command_t command,
