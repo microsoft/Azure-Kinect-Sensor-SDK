@@ -7,6 +7,7 @@ var annotated =
       [ "error", "classk4a_1_1error.html", null ],
       [ "image", "classk4a_1_1image.html", "classk4a_1_1image" ],
       [ "playback", "classk4a_1_1playback.html", "classk4a_1_1playback" ],
+      [ "record", "classk4a_1_1record.html", "classk4a_1_1record" ],
       [ "transformation", "classk4a_1_1transformation.html", "classk4a_1_1transformation" ]
     ] ],
     [ "Microsoft", "namespace_microsoft.html", "namespace_microsoft" ],
