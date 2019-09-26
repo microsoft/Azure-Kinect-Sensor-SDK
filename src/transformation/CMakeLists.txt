@@ -17,7 +17,7 @@ target_link_libraries(k4a_transformation PUBLIC
     )
 
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-    if ("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "amd64.*|x86_64.*|AMD64.*|i686.*|i386.*|x86.*|amd64.*|AMD64.*")
+    if ("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "amd64.*|x86_64.*|AMD64.*|i686.*|i386.*|x86.*")
         target_compile_options(k4a_transformation PRIVATE "-msse4.1")
     endif()
 endif()
