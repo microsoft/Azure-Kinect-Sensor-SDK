@@ -59,7 +59,7 @@ int main(const int argc, const char *argv[])
             if (K4A_SUCCEEDED(result))
             {
                 bool current = (major_ver == K4A_PLUGIN_MAJOR_VERSION) && (minor_ver == K4A_PLUGIN_MINOR_VERSION);
-                printf("Found Depth Engine Pluging Version: %u.%u.%u%s\n",
+                printf("Found Depth Engine Version: %u.%u.%u%s\n",
                        plugin.version.major,
                        plugin.version.minor,
                        plugin.version.patch,

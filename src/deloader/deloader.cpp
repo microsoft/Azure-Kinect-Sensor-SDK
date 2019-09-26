@@ -45,7 +45,7 @@ static bool verify_plugin(const k4a_plugin_t *plugin)
 {
     RETURN_VALUE_IF_ARG(false, plugin == NULL);
 
-    LOG_INFO("Loaded K4A Plugin with version: %u.%u.%u",
+    LOG_INFO("Loaded Depth Engine version: %u.%u.%u",
              plugin->version.major,
              plugin->version.minor,
              plugin->version.patch);

@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#define __USE_GNU
+#define _GNU_SOURCE
 #include <dlfcn.h>
 
 #define TOSTRING(x) STRINGIFY(x)
@@ -119,6 +121,19 @@ k4a_result_t dynlib_find_symbol(dynlib_t dynlib_handle, const char *symbol, void
     else
     {
         LOG_ERROR("Failed to find symbol %s in dynamic library. Error: ", symbol, dlerror());
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        Dl_info info;
+        if (dladdr(*address, &info) != 0)
+        {
+            LOG_INFO("Depth Engine loaded %s", info.dli_fname);
+        }
+        else
+        {
+            LOG_ERROR("Failed calling dladdr %x", dlerror());
+        }
     }
 
     return result;

@@ -121,6 +121,22 @@ k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_
         }
     }
 
+    if (dynlib->handle)
+    {
+        char file_path[MAX_PATH];
+
+        DWORD ret = GetModuleFileNameA(dynlib->handle, file_path, sizeof(file_path));
+        result = K4A_RESULT_FROM_BOOL(ret <= sizeof(file_path));
+        if (K4A_FAILED(result))
+        {
+            LOG_ERROR("Failed calling GetModuleFileNameA %x", GetLastError());
+        }
+        else
+        {
+            LOG_INFO("Depth Engine loaded %s", file_path);
+        }
+    }
+
     if (dllDirectory != NULL)
     {
         if (RemoveDllDirectory(dllDirectory) == 0)
