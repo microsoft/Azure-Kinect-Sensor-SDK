@@ -1,0 +1,7 @@
+var searchData=
+[
+  ['image',['Image',['../class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image_ad6642c467aab1bfcaeaec8ef8edd289e.html#ad6642c467aab1bfcaeaec8ef8edd289e',1,'Microsoft.Azure.Kinect.Sensor.Image.Image(ImageFormat format, int widthPixels, int heightPixels, int strideBytes)'],['../class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image_acc14bff98a2655b3ee8cbb2a742c77a3.html#acc14bff98a2655b3ee8cbb2a742c77a3',1,'Microsoft.Azure.Kinect.Sensor.Image.Image(ImageFormat format, int widthPixels, int heightPixels)'],['../classk4a_1_1image_ac9f26e8ea2dc561d64de0cabe004967e.html#ac9f26e8ea2dc561d64de0cabe004967e',1,'k4a::image::image(k4a_image_t handle=nullptr) noexcept'],['../classk4a_1_1image.html#aff608c45cc2a141c71a448607741df34',1,'k4a::image::image(const image &amp;other) noexcept'],['../classk4a_1_1image.html#adb337f5ae0c5428a7d34876affdb5ae8',1,'k4a::image::image(image &amp;&amp;other) noexcept']]],
+  ['initialize',['Initialize',['../class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_logger_a269d4f72e4f41e93d8fd6bd8e51f291c.html#a269d4f72e4f41e93d8fd6bd8e51f291c',1,'Microsoft::Azure::Kinect::Sensor::Logger']]],
+  ['is_5fsync_5fin_5fconnected',['is_sync_in_connected',['../classk4a_1_1device_acaba6c5d8a28965882a4703e8806810a.html#acaba6c5d8a28965882a4703e8806810a',1,'k4a::device']]],
+  ['is_5fsync_5fout_5fconnected',['is_sync_out_connected',['../classk4a_1_1device_aec0191ecf75549f650af7ac61d0afbef.html#aec0191ecf75549f650af7ac61d0afbef',1,'k4a::device']]]
+];
