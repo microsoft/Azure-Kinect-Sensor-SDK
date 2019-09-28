@@ -31,8 +31,8 @@ function Download-ToTemp
 }
 
 # Download OpenCV
-$url = "https://sourceforge.net/projects/opencvlibrary/files/opencv-win/3.2.0/opencv-3.2.0-vc14.exe/download"
-$filename = "opencv-3.2.0-vc14.exe"
+$url = "https://sourceforge.net/projects/opencvlibrary/files/4.1.1/opencv-4.1.1-vc14_vc15.exe/download"
+$filename = "opencv-4.1.1-vc14_vc15.exe"
 $opencv_exe = Download-ToTemp -url $url -filename $filename
 
 Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y

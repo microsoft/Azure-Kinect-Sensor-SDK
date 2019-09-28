@@ -13,7 +13,7 @@ variables:
 - name: 'NuGetPackageVersion'
   value: '1.3.0-alpha.1'
 - name: 'OpenCVPath'
-  value: 'C:\OpenCV\Build\x64\vc14\'
+  value: 'C:\OpenCV\Build\x64\vc15\'
 
 trigger:
   batch: false
