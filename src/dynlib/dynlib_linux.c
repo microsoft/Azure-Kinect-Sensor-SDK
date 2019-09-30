@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #define __USE_GNU
-#define _GNU_SOURCE
 #include <dlfcn.h>
 
 #define TOSTRING(x) STRINGIFY(x)
