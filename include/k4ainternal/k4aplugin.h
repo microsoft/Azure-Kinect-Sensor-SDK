@@ -23,28 +23,16 @@ extern "C" {
 #endif
 
 /**
- * Current Version of the K4A depth engine and this Plugin interface
+ * Current Version of the Azure Kinect Depth Engine Plugin
  *
  * \remarks
- * This plugin version and the depth engine are tied together with the major.minor version. When the depth engine takes
- * a breaking change, then its major version must me increased. In turn the major version of this interface must
- * also be increased.
+ * When the depth engine plugin is updated this version should be increased.
  *
  * \remarks
- * When the depth engine takes on new features, then the minor version must be increased. Increasing the minor version
- * while keep the major version the same is not expected to be a breaking change. This in theory should allow a new
- * version of the depth engine to work with an older version of the SDK. However the SDK team does not explicitly test
- * and verify this, as a result there is no attempt to allow the sdk to work with depth engine version newer than the
- * version it was built with. Instead the plug in minor version is updated with the minor version of the depth engine.
- *
- * \remarks
- * The patch version of the depth engine is increased for bug fixes.
+ * The depth version binary name has the plugin version appended to it to signify the compatibility between the plugin
+ * and the depth engine.
  */
-#define K4A_DEPTH_ENGINE_MAJOR_VERSION 2 /**< Depth engine major version */
-#define K4A_DEPTH_ENGINE_MINOR_VERSION 1 /**< Depth engine minor version */
-
-#define K4A_PLUGIN_MAJOR_VERSION K4A_DEPTH_ENGINE_MAJOR_VERSION /**< Azure Kinect plugin major version */
-#define K4A_PLUGIN_MINOR_VERSION K4A_DEPTH_ENGINE_MINOR_VERSION /**< Azure Kinect plugin minor version */
+#define K4A_PLUGIN_VERSION 2 /**< Azure Kinect plugin version */
 
 /**
  * Expected name of plugin's dynamic library
@@ -227,7 +215,7 @@ typedef enum
 
 /** Depth Engine plugin version
  *
- * /remarks On load, k4a will validate that major versions match between the SDK
+ * /remarks On load, Azure Kinect will validate that major versions match between the SDK
  * and the plugin.
  *
  * \xmlonly
@@ -483,9 +471,9 @@ typedef void(__stdcall *k4a_te_destroy_fn_t)(k4a_transform_engine_context_t **co
 /** Plugin API which must be populated on plugin registration.
  *
  * \remarks
- * The K4A SDK will call k4a_register_plugin, and pass in a pointer to a \ref
+ * The Azure Kinect SDK will call k4a_register_plugin, and pass in a pointer to a \ref
  * k4a_plugin_t. The plugin must properly fill out all fields of the plugin for
- * the K4A SDK to accept the plugin.
+ * the Azure Kinect SDK to accept the plugin.
  *
  * \xmlonly
  * <requirements>
