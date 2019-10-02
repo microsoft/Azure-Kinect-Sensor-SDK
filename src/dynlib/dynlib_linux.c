@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#define _GNU_SOURCE // ldaddr() extention in dlfcn.h
+
 // This library
 #include <k4ainternal/dynlib.h>
 
@@ -11,7 +13,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#define __USE_GNU
 #include <dlfcn.h>
 
 #define TOSTRING(x) STRINGIFY(x)
@@ -26,7 +27,8 @@ static char *generate_file_name(const char *name, uint32_t version)
 {
     const char *lib_prefix = "lib";
     const char *lib_suffix = "so";
-    // Format of the depth engine name is: libdepthengine.so.2.0
+    // Format of the depth engine name is: libdepthengine.so.<K4A_PLUGIN_VERSION>.0
+    //                                     libdepthengine.so.2.0
     size_t max_buffer_size = strlen(name) + strlen(TOSTRING(DYNLIB_MAX_VERSION)) + strlen(".0") + strlen(".") +
                              strlen(".") + strlen(lib_suffix) + strlen(lib_prefix) + 1;
 

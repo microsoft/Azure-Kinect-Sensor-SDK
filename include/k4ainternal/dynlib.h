@@ -42,8 +42,7 @@ K4A_DECLARE_HANDLE(dynlib_t);
  * The version information should be encoded in the filename of the dynamic
  * library being loaded. This encoding will be different for Windows versus Linux. For
  * Windows the dynamic library name is "<name>_<version>_0.dll".
- * For Linux, the dynamic library name is
- * "lib<name>.so.<version>".
+ * For Linux, the dynamic library name is "lib<name>.so.<version>.0".
  *
  * \remarks
  * This function only supports relative path libraries. If you try to load an
