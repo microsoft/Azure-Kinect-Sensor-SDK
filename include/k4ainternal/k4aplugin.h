@@ -23,10 +23,10 @@ extern "C" {
 #endif
 
 /**
- * Current Version of the Azure Kinect Depth Engine Plugin
+ * Current Version of the Azure Kinect Depth Engine Plugin Interface
  *
  * \remarks
- * When the depth engine plugin is updated this version should be increased.
+ * When the depth engine plugin interface (k4a_plugin_t) is updated, this version should be increased.
  *
  * \remarks
  * The depth version binary name has the plugin version appended to it to signify the compatibility between the plugin

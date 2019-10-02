@@ -26,9 +26,9 @@ static char *generate_file_name(const char *name, uint32_t version)
 {
     const char *lib_prefix = "lib";
     const char *lib_suffix = "so";
-    size_t max_buffer_size = strlen(name) + strlen(TOSTRING(DYNLIB_MAX_VERSION)) +
-                             strlen(TOSTRING(DYNLIB_MAX_MINOR_VERSION)) + strlen(".") + strlen(".") +
-                             strlen(lib_suffix) + strlen(lib_prefix) + 1;
+    // Format of the depth engine name is: libdepthengine.so.2.0
+    size_t max_buffer_size = strlen(name) + strlen(TOSTRING(DYNLIB_MAX_VERSION)) + strlen(".0") + strlen(".") +
+                             strlen(".") + strlen(lib_suffix) + strlen(lib_prefix) + 1;
 
     char *versioned_file_name = malloc(max_buffer_size);
     if (versioned_file_name == NULL)

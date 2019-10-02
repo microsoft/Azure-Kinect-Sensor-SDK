@@ -23,8 +23,8 @@ K4A_DECLARE_CONTEXT(dynlib_t, dynlib_context_t);
 
 static char *generate_file_name(const char *name, uint32_t version)
 {
-    size_t max_buffer_size = strlen(name) + strlen(TOSTRING(DYNLIB_MAX_VERSION)) + strlen(TOSTRING(0)) + strlen("_") +
-                             strlen("_") + 1;
+    // Format of the depth engine name is: depthengine_2_0
+    size_t max_buffer_size = strlen(name) + strlen(TOSTRING(DYNLIB_MAX_VERSION)) + strlen("_0") + strlen("_") + 1;
 
     char *versioned_file_name = malloc(max_buffer_size);
     if (versioned_file_name == NULL)
