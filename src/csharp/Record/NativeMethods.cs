@@ -70,16 +70,16 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         public static extern k4a_result_t k4a_record_add_tag(k4a_record_t handle, string name, string value);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
-        public static extern k4a_result_t k4a_record_add_imu_track(k4a_result_t handle);
+        public static extern k4a_result_t k4a_record_add_imu_track(k4a_record_t handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
-        public static extern k4a_result_t k4a_record_add_attachment(k4a_result_t handle, string attachment_name, byte[] buffer, UIntPtr buffer_size);
+        public static extern k4a_result_t k4a_record_add_attachment(k4a_record_t handle, string attachment_name, byte[] buffer, UIntPtr buffer_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
-        public static extern k4a_result_t k4a_record_add_custom_video_track(k4a_result_t handle, string track_name, string codec_id, byte[] codec_context, UIntPtr codec_context_size, k4a_record_video_settings_t track_settings);
+        public static extern k4a_result_t k4a_record_add_custom_video_track(k4a_record_t handle, string track_name, string codec_id, byte[] codec_context, UIntPtr codec_context_size, RecordVideoSettings track_settings);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
-        public static extern k4a_result_t k4a_record_add_custom_subtitle_track(k4a_result_t handle, string track_name, string codec_id, byte[] codec_context, UIntPtr codec_context_size, k4a_record_subtitle_settings_t track_settings);
+        public static extern k4a_result_t k4a_record_add_custom_subtitle_track(k4a_record_t handle, string track_name, string codec_id, byte[] codec_context, UIntPtr codec_context_size, RecordSubtitleSettings track_settings);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_result_t k4a_record_write_header(k4a_record_t handle);
@@ -123,8 +123,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern bool k4a_playback_track_is_builtin(k4a_playback_t playback_handle, string track_name);
 
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handle, string track_name, out k4a_record_video_settings_t video_settings);
+        //[DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
+        //public static extern k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handle, string track_name, out k4a_record_video_settings_t video_settings);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_handle, string track_name, out string codec_id, UIntPtr codec_id_size);
@@ -359,19 +359,6 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             uint start_timestamp_offset_usec;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        public class k4a_record_video_settings_t
-        {
-            UInt64 width;
-            UInt64 height;
-            UInt64 frame_rate;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public class k4a_record_subtitle_settings_t
-        {
-            bool high_freq_data;
-        }
     }
 #pragma warning restore SA1602 // Enumeration items should be documented
 #pragma warning restore SA1600 // Elements should be documented
