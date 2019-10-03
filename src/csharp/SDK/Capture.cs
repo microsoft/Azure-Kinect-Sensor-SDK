@@ -170,6 +170,32 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
+        /// Gets the native handle.
+        /// </summary>
+        /// <remarks>This is the value of the k4a_capture_t handle of the native library.
+        ///
+        /// This handle value can be used to interoperate with other native libraries that use
+        /// Azure Kinect objects.
+        ///
+        /// When using this handle value, the caller is responsible for ensuring that the
+        /// Capture object does not become disposed.</remarks>
+        public IntPtr Handle
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (this.disposedValue)
+                    {
+                        throw new ObjectDisposedException(nameof(Capture));
+                    }
+
+                    return this.handle.DangerousGetHandle();
+                }
+            }
+        }
+
+        /// <summary>
         /// Creates a duplicate reference to the same Capture.
         /// </summary>
         /// <returns>A new Capture object representing the same data.</returns>
