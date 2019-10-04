@@ -257,16 +257,13 @@ public:
      * \sa k4a_record_add_tag
      */
     void write_custom_track_data(const char *track_name,
-                                 uint64_t device_timestamp_usec,
+                                 std::chrono::microseconds timestamp,
                                  uint8_t *custom_data,
                                  size_t custom_data_size)
     {
         k4a_result_t result;
-        result = k4a_record_write_custom_track_data(m_handle,
-                                                    track_name,
-                                                    device_timestamp_usec,
-                                                    custom_data,
-                                                    custom_data_size);
+        result =
+            k4a_record_write_custom_track_data(m_handle, track_name, timestamp.count(), custom_data, custom_data_size);
 
         if (K4A_FAILED(result))
         {

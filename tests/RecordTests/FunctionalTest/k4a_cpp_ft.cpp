@@ -216,6 +216,8 @@ TEST_F(k4a_cpp_ft, record)
         record recorder4 = std::move(recorder3); // deep copy
         ASSERT_TRUE(recorder3 == nullptr);
         ASSERT_TRUE(recorder4 != nullptr);
+        ASSERT_TRUE(recorder4 != recorder3);
+        ASSERT_FALSE(recorder4 == recorder3);
 
         recorder2.close();
         recorder3.close();
@@ -226,12 +228,45 @@ TEST_F(k4a_cpp_ft, record)
     recorder.add_imu_track();
 
     std::string k4a_cpp_ft_attachment = "K4A_CPP_FT_ADD_ATTACHMENT";
-    recorder.add_attachment("K4A_CPP_FT_ADD_TAG", k4a_cpp_ft_attachment, k4a_cpp_ft_attachment.size());
+    recorder.add_attachment("K4A_CPP_FT_ADD_TAG",
+                            (uint8_t *)k4a_cpp_ft_attachment.data(),
+                            k4a_cpp_ft_attachment.size());
 
     k4a_record_video_settings_t vid_settings = { 1920, 1080, 30 };
     std::string k4a_cpp_ft_custom_vid_track = "K4A_CPP_FT_CUSTOM_VID_TRACK";
-    recorder.add_custom_video_track(k4a_cpp_ft_custom_vid_track, "V_MPEG1", nullptr, 0, &vid_settings);
+    recorder.add_custom_video_track(k4a_cpp_ft_custom_vid_track.data(), "V_MPEG1", nullptr, 0, &vid_settings);
 
-    std::string k4a_cpp recorder.add_custom_subtitle_track()
+    k4a_record_subtitle_settings_t st_track = { false };
+    std::string k4a_cpp_ft_custom_subtitle_track = "CUSTOM_K4A_SUBTITLE_TRACE";
+    recorder.add_custom_subtitle_track(k4a_cpp_ft_custom_subtitle_track.data(), "V_MPEG1", nullptr, 0, &st_track);
+
+    recorder.write_header();
+
+    for (int x = 0; x < 100; x++)
+    {
+        capture capture;
+        k4a_imu_sample_t imu;
+        if (kinect.get_capture(&capture, std::chrono::milliseconds(1000)))
+        {
+            recorder.write_capture(capture);
+        }
+        while (kinect.get_imu_sample(0))
+        {
+            recorder.write_imu_sample(imu);
+        }
+        image color = capture.get_color_image();
+        recorder.write_custom_track_data(k4a_cpp_ft_custom_vid_track.data(),
+                                         color.get_device_timestamp(),
+                                         color.get_buffer(),
+                                         color.get_size());
+        color.reset();
+
+        image depth = capture.get_depth_image();
+        recorder.write_custom_track_data(k4a_cpp_ft_custom_subtitle_track.data(),
+                                         depth.get_device_timestamp(),
+                                         depth.get_buffer(),
+                                         depth.get_size());
+    }
+    recorder.flush();
 }
 #endif
