@@ -412,6 +412,103 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             }
         }
 
+        public DataBlock GetNextDataBlock(string trackName)
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Playback));
+                }
+
+                if (trackName == null)
+                {
+                    throw new ArgumentNullException(nameof(trackName));
+                }
+
+                switch (NativeMethods.k4a_playback_get_next_data_block(this.handle, trackName, out NativeMethods.k4a_playback_data_block_t dataBlock))
+                {
+                    case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_EOF:
+                        return null;
+                    case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_FAILED:
+                        throw new AzureKinectGetDataBlockException();
+                    case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_SUCCEEDED:
+                        return new DataBlock(dataBlock);
+                }
+
+                return null;
+            }
+        }
+
+        public DataBlock GetPreviousDataBlock(string trackName)
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Playback));
+                }
+
+                if (trackName == null)
+                {
+                    throw new ArgumentNullException(nameof(trackName));
+                }
+
+                switch (NativeMethods.k4a_playback_get_previous_data_block(this.handle, trackName, out NativeMethods.k4a_playback_data_block_t dataBlock))
+                {
+                    case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_EOF:
+                        return null;
+                    case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_FAILED:
+                        throw new AzureKinectGetDataBlockException();
+                    case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_SUCCEEDED:
+                        return new DataBlock(dataBlock);
+                }
+
+                return null;
+            }
+        }
+
+        public void Seek(TimeSpan offset, PlaybackSeekOrigin origin = PlaybackSeekOrigin.Begin)
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Playback));
+                }
+
+                AzureKinectSeekException.ThrowIfNotSuccess(() => NativeMethods.k4a_playback_seek_timestamp(this.handle, checked((ulong)(offset.Ticks / 10)), origin));
+            }
+        }
+
+        public TimeSpan RecordingLength
+        {
+            get
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Playback));
+                }
+
+                long length = checked((long)NativeMethods.k4a_playback_get_recording_length_usec(this.handle));
+                return TimeSpan.FromTicks(length * 10);
+            }
+        }
+
+        public TimeSpan LastTimestamp
+        {
+            get
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Playback));
+                }
+
+                long length = checked((long)NativeMethods.k4a_playback_get_last_timestamp_usec(this.handle));
+                return TimeSpan.FromTicks(length * 10);
+            }
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
