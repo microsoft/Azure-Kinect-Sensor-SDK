@@ -62,7 +62,6 @@ namespace Recording
             {
                 Console.WriteLine($"Tracks = {playback.TrackCount}");
                 Console.WriteLine($"RecordingLength = {playback.RecordingLength}");
-                Console.WriteLine($"LastTimestamp = {playback.LastTimestamp}");
 
                 for (int i = 0; i < playback.TrackCount; i++)
                 {
