@@ -103,10 +103,10 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         public static extern k4a_result_t k4a_playback_open(string path, out k4a_playback_t handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t handle, byte[] data, UIntPtr data_size);
+        public static extern k4a_buffer_result_t k4a_playback_get_raw_calibration(k4a_playback_t handle, byte[] data, ref UIntPtr data_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, Calibration calibration);
+        public static extern k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, out Calibration calibration);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle, out k4a_record_configuration_t configuration);
@@ -118,38 +118,38 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         public static extern UIntPtr k4a_playback_get_track_count(k4a_playback_t playback_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_buffer_result_t k4a_playback_get_track_name(k4a_playback_t playback_handle, UIntPtr track_index, out string track_name, UIntPtr track_name_size);
+        public static extern k4a_buffer_result_t k4a_playback_get_track_name(k4a_playback_t playback_handle, UIntPtr track_index, StringBuilder track_name, ref UIntPtr track_name_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern bool k4a_playback_track_is_builtin(k4a_playback_t playback_handle, string track_name);
 
-        //[DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        //public static extern k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handle, string track_name, out k4a_record_video_settings_t video_settings);
+        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
+        public static extern k4a_result_t k4a_playback_track_get_video_settings(k4a_playback_t playback_handle, string track_name, out RecordVideoSettings video_settings);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_handle, string track_name, out string codec_id, UIntPtr codec_id_size);
+        public static extern k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_handle, string track_name, StringBuilder codec_id, ref UIntPtr codec_id_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_playback_t playback_handle,
                                                                           string track_name,
                                                                           byte[] codec_context,
-                                                                          UIntPtr codec_context_size);
+                                                                          ref UIntPtr codec_context_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playback_handle,
                                                                       string track_name,
-                                                                      out string value,
-                                                                      UIntPtr codec_context_size);
+                                                                      StringBuilder value,
+                                                                      ref UIntPtr codec_context_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle,
                                                                             ImageFormat target_format);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_result_t k4a_playback_get_attachment(k4a_playback_t playback_handle,
+        public static extern k4a_buffer_result_t k4a_playback_get_attachment(k4a_playback_t playback_handle,
                                                                       string file_name,
-                                                                      out byte[] data,
-                                                                      UIntPtr data_size);
+                                                                      byte[] data,
+                                                                      ref UIntPtr data_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_t playback_handle,
@@ -346,17 +346,17 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         [StructLayout(LayoutKind.Sequential)]
         public class k4a_record_configuration_t
         {
-            ImageFormat color_format;
-            ColorResolution color_resolution;
-            DepthMode depth_mode;
-            FPS camera_fps;
-            bool color_track_enabled;
-            bool depth_track_enabled;
-            bool imu_track_enabled;
-            int depth_delay_off_color_usec;
-            WiredSyncMode wired_sync_mode;
-            uint subordinate_delay_off_master_usec;
-            uint start_timestamp_offset_usec;
+            public ImageFormat color_format;
+            public ColorResolution color_resolution;
+            public DepthMode depth_mode;
+            public FPS camera_fps;
+            public bool color_track_enabled;
+            public bool depth_track_enabled;
+            public bool imu_track_enabled;
+            public int depth_delay_off_color_usec;
+            public WiredSyncMode wired_sync_mode;
+            public uint subordinate_delay_off_master_usec;
+            public uint start_timestamp_offset_usec;
         }
 
     }
