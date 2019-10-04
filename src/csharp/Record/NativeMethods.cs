@@ -50,13 +50,6 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             K4A_STREAM_RESULT_EOF,
         }
         
-        public enum k4a_playback_seek_origin_t
-        {
-            K4A_PLAYBACK_SEEK_BEGIN = 0,
-            K4A_PLAYBACK_SEEK_END,
-            K4A_PLAYBACK_SEEK_DEVICE_TIME
-        }
-
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         public static extern k4a_result_t k4a_set_debug_message_handler(
             k4a_logging_message_cb_t message_cb,
@@ -179,6 +172,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                                                                           out k4a_playback_data_block_t data_block_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
+        public static extern IntPtr k4a_playback_data_block_get_buffer(k4a_playback_data_block_t data_block_handle);
+
+        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern UInt64 k4a_playback_data_block_get_device_timestamp_usec(k4a_playback_data_block_t data_block_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
@@ -189,7 +185,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
 
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle, UInt64 offset_usec, k4a_playback_seek_origin_t origin);
+        public static extern k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle, UInt64 offset_usec, PlaybackSeekOrigin origin);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern UInt64 k4a_playback_get_recording_length_usec(k4a_playback_t playback_handle);
