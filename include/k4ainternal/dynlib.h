@@ -20,14 +20,9 @@ extern "C" {
 K4A_DECLARE_HANDLE(dynlib_t);
 
 /**
- * The maximum major version we support for loading a dynamic library
+ * The maximum version we support for loading a dynamic library
  */
-#define DYNLIB_MAX_MAJOR_VERSION 99ul
-
-/**
- * The maximum minor version we support for loading a dynamic library
- */
-#define DYNLIB_MAX_MINOR_VERSION 99ul
+#define DYNLIB_MAX_VERSION 99ul
 
 /** Loads a versioned dynamic library (shared library) by name and version.
  *  The version information is encoded in the filename.
@@ -35,13 +30,9 @@ K4A_DECLARE_HANDLE(dynlib_t);
  * \param name [IN]
  * Name of the dynamic library or shared library
  *
- * \param major_ver
- * Expected major version of the dynamic library. This number must be less than
- * or equal to \ref DYNLIB_MAX_MAJOR_VERSION.
- *
- * \param minor_ver
- * Expected minor version of the dynamic library. This number must be less than
- * or equal to \ref DYNLIB_MIN_MAJOR_VERSION.
+ * \param version
+ * Version of the plugin being used to load the dynamic library. This number must be less than
+ * or equal to \ref DYNLIB_MAX_VERSION.
  *
  * \param dynlib_handle [OUT]
  * A handle to store dynlib in. Only valid if function returns
@@ -49,10 +40,9 @@ K4A_DECLARE_HANDLE(dynlib_t);
  *
  * \remarks
  * The version information should be encoded in the filename of the dynamic
- * library. This encoding will be different for Windows versus Linux. For
- * Windows the dynamic library name is "<name>_<major_ver>_<minor_ver>.dll".
- * For Linux, the dynamic library name is
- * "lib<name>.so.<major_ver>.<minor_ver>".
+ * library being loaded. This encoding will be different for Windows versus Linux. For
+ * Windows the dynamic library name is "<name>_<version>_0.dll".
+ * For Linux, the dynamic library name is "lib<name>.so.<version>.0".
  *
  * \remarks
  * This function only supports relative path libraries. If you try to load an
@@ -64,7 +54,7 @@ K4A_DECLARE_HANDLE(dynlib_t);
  * \return K4A_RESULT_SUCCEEDED if the library was loaded, K4A_RESULT_FAILED
  * otherwise
  */
-k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_ver, dynlib_t *dynlib_handle);
+k4a_result_t dynlib_create(const char *name, uint32_t version, dynlib_t *dynlib_handle);
 
 /** Finds the address of an exported symbol in a loaded dynamic library
  *
