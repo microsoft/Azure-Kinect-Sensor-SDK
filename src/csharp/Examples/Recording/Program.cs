@@ -37,6 +37,25 @@ namespace Recording
             }
 
             Console.WriteLine($"Wrote {frame} frames to output.mkv");
+
+            using (Playback playback = Playback.Open(@"output.mkv"))
+            {
+                Console.WriteLine($"Tracks = {playback.TrackCount}");
+                
+                for (int i = 0; i < playback.TrackCount; i++)
+                {
+                    string name = playback.GetTrackName(i);
+                    string codecId = playback.GetTrackCodecId(name);
+
+                    Console.WriteLine($"  Track {i}: {name} ({codecId}) (builtin={playback.GetTrackIsBuiltin(name)}");
+                }
+                Capture capture;
+                while ( null != (capture = playback.GetNextCapture()))
+                {
+                    Console.WriteLine($"Depth timestamp: {capture.Depth.DeviceTimestamp}");
+                        
+                }
+            }
         }
     }
 }

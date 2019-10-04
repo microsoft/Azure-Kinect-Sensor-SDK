@@ -8,6 +8,6 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
     [StructLayout(LayoutKind.Sequential)]
     public class RecordSubtitleSettings
     {
-        bool HighFrequencyData { get; set; }
+        public bool HighFrequencyData { get; set; }
     }
 }

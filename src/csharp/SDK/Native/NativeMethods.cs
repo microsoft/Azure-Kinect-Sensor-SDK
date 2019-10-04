@@ -482,6 +482,12 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public class k4a_capture_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
         {
+            public k4a_capture_t(IntPtr handle)
+                : base(true)
+            {
+                this.handle = handle;
+            }
+
             private k4a_capture_t()
                 : base(true)
             {

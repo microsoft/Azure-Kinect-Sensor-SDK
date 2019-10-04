@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
     public class Record : IDisposable
     {
         // The native handle for this recording.
-        private NativeMethods.k4a_record_t handle;
+        private readonly NativeMethods.k4a_record_t handle;
 
         // To detect redundant calls to Dispose
         private bool disposedValue = false;
