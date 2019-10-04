@@ -214,8 +214,8 @@ TEST_F(k4a_cpp_ft, record)
         ASSERT_TRUE(recorder2 == recorder3);
 
         record recorder4 = std::move(recorder3); // deep copy
-        assert_true(recorder3 == nullptr);
-        assert_true(recorder4 != nullptr);
+        ASSERT_TRUE(recorder3 == nullptr);
+        ASSERT_TRUE(recorder4 != nullptr);
 
         recorder2.close();
         recorder3.close();
@@ -232,7 +232,6 @@ TEST_F(k4a_cpp_ft, record)
     std::string k4a_cpp_ft_custom_vid_track = "K4A_CPP_FT_CUSTOM_VID_TRACK";
     recorder.add_custom_video_track(k4a_cpp_ft_custom_vid_track, "V_MPEG1", nullptr, 0, &vid_settings);
 
-    std::string k4a_cpp
-    recorder.add_custom_subtitle_track()
+    std::string k4a_cpp recorder.add_custom_subtitle_track()
 }
 #endif
