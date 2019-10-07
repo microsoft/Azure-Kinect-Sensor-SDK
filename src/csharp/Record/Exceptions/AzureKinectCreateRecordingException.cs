@@ -84,9 +84,10 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Throws an <see cref="AzureKinectCreateRecordingException"/> if the result of the function
         /// is not a success.
         /// </summary>
+        /// <param name="fileName">File name of the create</param>
         /// <param name="function">The native function to call.</param>
         /// <typeparam name="T">The type of result to expect from the function call.</typeparam>
-        internal static void ThrowIfNotSuccess<T>(Func<T> function)
+        internal static void ThrowIfNotSuccess<T>(string fileName, Func<T> function)
             where T : System.Enum
         {
             
@@ -95,7 +96,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 T result = function();
                 if (!AzureKinectRecordException.IsSuccess(result))
                 {
-                    throw new AzureKinectCreateRecordingException($"result = {result}", tracer.LogMessages);
+                    throw new AzureKinectCreateRecordingException($"fileName = \"{fileName}\"\r\nresult = {result}", tracer.LogMessages);
                 }
             }
         }
@@ -104,15 +105,16 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// Throws an <see cref="AzureKinectCreateRecordingException"/> if the result of the function
         /// is not a success.
         /// </summary>
+        /// <param name="fileName">File name of the create</param>
         /// <param name="tracer">The tracer is that is capturing logging messages.</param>
         /// <param name="result">The result native function to call.</param>
         /// <typeparam name="T">The type of result to expect from the function call.</typeparam>
-        internal static void ThrowIfNotSuccess<T>(LoggingTracer tracer, T result)
+        internal static void ThrowIfNotSuccess<T>(string fileName, LoggingTracer tracer, T result)
             where T : System.Enum
         {
             if (!AzureKinectRecordException.IsSuccess(result))
             {
-                throw new AzureKinectCreateRecordingException($"result = {result}", tracer.LogMessages);
+                throw new AzureKinectCreateRecordingException($"fileName = \"{fileName}\"\r\nresult = {result}", tracer.LogMessages);
             }
         }
     }
