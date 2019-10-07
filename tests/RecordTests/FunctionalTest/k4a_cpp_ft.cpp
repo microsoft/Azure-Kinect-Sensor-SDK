@@ -269,4 +269,47 @@ TEST_F(k4a_cpp_ft, record)
     }
     recorder.flush();
 }
+
+TEST_F(k4a_cpp_ft, playback)
+{
+    playback pb = playback::open("./k4a_cpp_ft.mkv");
+    playback pb_empty;
+    playback pb_copy = pb;
+    ASSERT_TRUE(pb); // bool operation
+    ASSERT_TRUE(pb != nullptr); //!= nullptr
+    ASSERT_FALSE(pb == nullptr);// == nullptr
+    ASSERT_TRUE(pb != pb_empty);
+    ASSERT_FALSE(pb == pb_empty);
+
+    // Shallow copy
+    ASSERT_TRUE(pb_copy != nullptr);
+    ASSERT_FALSE(pb_copy == nullptr);
+    ASSERT_TRUE(pb_copy == pb);
+    ASSERT_FALSE(pb_copy != pb);
+
+    // Deep copy
+    playback pback = std::move(pb);
+    ASSERT_TRUE(pback != nullptr);
+    ASSERT_TRUE(pb == nullptr);
+
+    std::vector<uint8_t> raw_cal = pback.get_raw_calibration();
+    std::cout << "calibration is : " << raw_cal << "\n";
+
+    k4a_record_configuration_t config = pback.get_record_configuration();
+
+    calibration cal = pback.get_calibration();
+    {
+        device kinect = device::open(0);
+        calibration device_cal = kinect.get_calibration(config.depth_mode, config.color_resolution);
+        ASSERT_TRUE(calibration == device_cal);
+    }
+    pback.get_next_capture();
+    pback.get_previous_capture();
+    pback.get_tag();
+    pback.get_next_imu_sample();
+    pback.get_previous_imu_sample();
+    pback.seek_timestamp();
+    pback.get_recording_length();
+    pback.set_color_conversion();
+}
 #endif
