@@ -43,12 +43,12 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                 // Device.Dispose will take the same lock.
                 lock (device)
                 {
-                    AzureKinectCreateRecordingException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_create(path, device.Handle, NativeMethods.k4a_device_configuration_t.FromDeviceConfiguration(deviceConfiguration), out handle));
+                    AzureKinectCreateRecordingException.ThrowIfNotSuccess(path, () => NativeMethods.k4a_record_create(path, device.Handle, NativeMethods.k4a_device_configuration_t.FromDeviceConfiguration(deviceConfiguration), out handle));
                 }
             }
             else
             {
-                AzureKinectCreateRecordingException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_create(path, IntPtr.Zero, NativeMethods.k4a_device_configuration_t.FromDeviceConfiguration(deviceConfiguration), out handle));
+                AzureKinectCreateRecordingException.ThrowIfNotSuccess(path, () => NativeMethods.k4a_record_create(path, IntPtr.Zero, NativeMethods.k4a_device_configuration_t.FromDeviceConfiguration(deviceConfiguration), out handle));
             }
 
             return new Record(handle);
