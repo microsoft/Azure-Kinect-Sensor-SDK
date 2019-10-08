@@ -1116,6 +1116,16 @@ public:
         return m_handle != nullptr;
     }
 
+    /** Returns the underlying k4a_device_t handle
+     *
+     * Note the k4a_device_t handle does not have a reference count will be destroyed when the C++ object is destroyed.
+     * The caller is responsible for ensuring the C++ object outlives this handle.
+     */
+    k4a_device_t handle() const noexcept
+    {
+        return m_handle;
+    }
+
     /** Closes a k4a device.
      *
      * \sa k4a_device_close

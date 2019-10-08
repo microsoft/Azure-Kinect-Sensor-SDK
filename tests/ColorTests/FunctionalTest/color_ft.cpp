@@ -689,6 +689,8 @@ public:
 
 private:
     int32_t map_manual_exposure(int32_t value, bool sixty_hertz);
+    int32_t limit_exposure_to_fps_setting(int32_t value, bool sixty_hertz, k4a_fps_t fps);
+    bool validate_image_exposure_setting(int test_value, bool b_sixty_hertz, k4a_fps_t fps);
 };
 
 int32_t color_control_test::map_manual_exposure(int32_t value, bool sixty_hertz)
@@ -711,6 +713,75 @@ int32_t color_control_test::map_manual_exposure(int32_t value, bool sixty_hertz)
     return MAX_EXPOSURE(sixty_hertz);
 }
 
+// Limit exposure setting based on FPS setting.
+int32_t color_control_test::limit_exposure_to_fps_setting(int32_t value, bool sixty_hertz, k4a_fps_t fps)
+{
+    int fps_usec = 1000000 / k4a_convert_fps_to_uint(fps);
+    int last_exposure;
+
+    if (value < fps_usec)
+    {
+        // No work to do
+        return value;
+    }
+
+    last_exposure = sixty_hertz ? device_exposure_mapping[0].exposure_mapped_60Hz_usec :
+                                  device_exposure_mapping[0].exposure_mapped_50Hz_usec;
+    for (uint32_t x = 1; x < COUNTOF(device_exposure_mapping); x++)
+    {
+        int mapped_exposure = sixty_hertz ? device_exposure_mapping[x].exposure_mapped_60Hz_usec :
+                                            device_exposure_mapping[x].exposure_mapped_50Hz_usec;
+
+        if (mapped_exposure > fps_usec)
+        {
+            return last_exposure;
+        }
+        last_exposure = mapped_exposure;
+    }
+    EXPECT_FALSE(1); // we should not get here
+    return last_exposure;
+}
+
+// returns true if the exposure setting on the read image has been updated.
+bool color_control_test::validate_image_exposure_setting(int test_value, bool sixty_hertz, k4a_fps_t fps)
+{
+    // TODO remove this if block to test 50Hz and values larger than 10,000us
+    // https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/448
+    // Fixed by firmware version 1.6.104
+    if ((!sixty_hertz && test_value >= 10000) /* Ignoring 50Hz setting  */)
+    {
+        return true;
+    }
+#ifndef _WIN32
+    // TODO remove this if block to test 60Hz and exposures of 8,330us and 16,670us
+    // https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/792
+    if (sixty_hertz && (test_value == 8330 || test_value == 16670 || test_value == 33330 || test_value == 41670 ||
+                        test_value == 66670 || test_value == 50000 || test_value == 83330 || test_value == 100000 ||
+                        test_value == 116670 || test_value == 133330))
+    {
+        return true;
+    }
+#endif
+
+    test_value = limit_exposure_to_fps_setting(test_value, sixty_hertz, fps);
+
+    // Validate the exposure value on the image is correct
+    uint64_t img_exposure_setting = 0;
+    int tries = 0;
+    for (tries = 0; tries < 10 && (int32_t)img_exposure_setting != test_value; tries++)
+    {
+        k4a_capture_t capture;
+        EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(m_device, &capture, 1000));
+        k4a_image_t img = k4a_capture_get_color_image(capture);
+        EXPECT_NE((k4a_image_t)NULL, img);
+        img_exposure_setting = k4a_image_get_exposure_usec(img);
+        k4a_image_release(img);
+        k4a_capture_release(capture);
+    }
+    EXPECT_EQ(img_exposure_setting, test_value);
+    return (int32_t)img_exposure_setting == test_value;
+}
+
 void color_control_test::control_test_worker(const k4a_color_control_command_t command,
                                              const k4a_color_control_mode_t default_mode,
                                              const int32_t default_value)
@@ -724,26 +795,31 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
     k4a_color_control_mode_t current_mode = K4A_COLOR_CONTROL_MODE_MANUAL;
     bool supports_auto;
     int32_t value = 0;
+    bool cameras_running = false;
+    k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
     // 50% of the time we should test with the camera running
     if ((rand() * 2 / RAND_MAX) >= 1)
     {
-        k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+        config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
+        config.camera_fps = K4A_FRAMES_PER_SECOND_5;
         config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
         config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
         config.depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
+        config.synchronized_images_only = true;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
         std::cout << "control_test_worker: k4a_device_start_cameras called\n";
+        cameras_running = true;
+
+        // ensure the captures are flowing
+        k4a_capture_t capture;
+        ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(m_device, &capture, 30000));
+        k4a_capture_release(capture);
     }
     else
     {
         std::cout << "control_test_worker: k4a_device_start_cameras not called\n";
     }
-
-    // Invalid device handle test
-    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_control(nullptr, command, &default_mode_read, &value));
-    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_set_color_control(nullptr, command, default_mode_read, value));
 
     // Read control capabilities
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -778,6 +854,9 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
     if (command == K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE)
     {
         bool b_sixty_hertz = (default_value == EXPOSURE_TIME_ABSOLUTE_CONTROL_DEFAULT_60_HZ_VALUE) ? true : false;
+        std::cout << "K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE running at " << (b_sixty_hertz ? "60Hz" : "50Hz")
+                  << "\n";
+
         k4a_color_control_mode_t manual = K4A_COLOR_CONTROL_MODE_MANUAL;
 
         for (uint32_t x = 0; x < COUNTOF(device_exposure_mapping); x++)
@@ -791,18 +870,30 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
             ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, command, &current_mode, &value));
             ASSERT_EQ(current_mode, manual);
             ASSERT_EQ(value, map_manual_exposure(testValue, b_sixty_hertz)) << testValue << " was the value tested\n";
+            if (cameras_running)
+            {
+                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, config.camera_fps)) << "1";
+            }
 
             testValue = threshold;
             ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, command, manual, testValue));
             ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, command, &current_mode, &value));
             ASSERT_EQ(current_mode, manual);
             ASSERT_EQ(value, map_manual_exposure(testValue, b_sixty_hertz)) << testValue << " was the value tested\n";
+            if (cameras_running)
+            {
+                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, config.camera_fps)) << "2";
+            }
 
             testValue = threshold + 1;
             ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, command, manual, testValue));
             ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, command, &current_mode, &value));
             ASSERT_EQ(current_mode, manual);
             ASSERT_EQ(value, map_manual_exposure(testValue, b_sixty_hertz)) << testValue << " was the value tested\n";
+            if (cameras_running)
+            {
+                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, config.camera_fps)) << "3";
+            }
 
             ASSERT_EQ(current_mode, manual);
             ASSERT_EQ(current_mode, K4A_COLOR_CONTROL_MODE_MANUAL);
@@ -836,7 +927,10 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
         }
     }
 
-    k4a_device_stop_cameras(m_device);
+    if (cameras_running)
+    {
+        k4a_device_stop_cameras(m_device);
+    }
 
     // Restore Defaults
     {

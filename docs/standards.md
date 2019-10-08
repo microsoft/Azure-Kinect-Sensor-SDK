@@ -46,6 +46,7 @@ allow the reader to quickly and easily tell the difference between internal and 
  there is nothing the user can do to resolve the issue, then it is acceptable to crash. If there is action the
  user could take (not including an application restart or PC reboot), then returning an error specific to the recovery
  action is acceptable.
+* Don't use default parameters in public APIs (C++/C#)
 
 ## Clang-format
 

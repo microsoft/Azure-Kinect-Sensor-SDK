@@ -24,8 +24,8 @@ protected:
         m_depth_point3d_reference[1] = -1.66107690f;
         m_depth_point3d_reference[2] = 1000.f;
 
-        m_color_point2d_reference[0] = 1835.68555f;
-        m_color_point2d_reference[1] = 1206.31128f;
+        m_color_point2d_reference[0] = 1835.689453f;
+        m_color_point2d_reference[1] = 1206.290039f;
 
         m_color_point3d_reference[0] = -37.6291695f;
         m_color_point3d_reference[1] = 63.3947754f;

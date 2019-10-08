@@ -165,20 +165,20 @@ k4a_result_t setup_common_test()
 
     std::cout << "Loading Test firmware package: " << g_test_firmware_path << std::endl;
     load_firmware_files(g_test_firmware_path, &g_test_firmware_buffer, &g_test_firmware_size);
-    g_candidate_firmware_package_info.buffer = g_candidate_firmware_buffer;
-    g_candidate_firmware_package_info.size = g_candidate_firmware_size;
+    g_test_firmware_package_info.buffer = g_test_firmware_buffer;
+    g_test_firmware_package_info.size = g_test_firmware_size;
     parse_firmware_package(&g_test_firmware_package_info);
 
     std::cout << "Loading LKG firmware package: " << g_lkg_firmware_path << std::endl;
     load_firmware_files(g_lkg_firmware_path, &g_lkg_firmware_buffer, &g_lkg_firmware_size);
-    g_candidate_firmware_package_info.buffer = g_candidate_firmware_buffer;
-    g_candidate_firmware_package_info.size = g_candidate_firmware_size;
+    g_lkg_firmware_package_info.buffer = g_lkg_firmware_buffer;
+    g_lkg_firmware_package_info.size = g_lkg_firmware_size;
     parse_firmware_package(&g_lkg_firmware_package_info);
 
     std::cout << "Loading Factory firmware package: " << g_factory_firmware_path << std::endl;
     load_firmware_files(g_factory_firmware_path, &g_factory_firmware_buffer, &g_factory_firmware_size);
-    g_candidate_firmware_package_info.buffer = g_candidate_firmware_buffer;
-    g_candidate_firmware_package_info.size = g_candidate_firmware_size;
+    g_factory_firmware_package_info.buffer = g_factory_firmware_buffer;
+    g_factory_firmware_package_info.size = g_factory_firmware_size;
     parse_firmware_package(&g_factory_firmware_package_info);
 
     common_initialized = true;
