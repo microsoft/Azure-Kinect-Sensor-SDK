@@ -47,7 +47,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <param name="widthPixels">Width of the image in pixels.</param>
         /// <param name="heightPixels">Height of the image in pixels.</param>
         /// <param name="strideBytes">Stride of the image in bytes. Must be as large as the width times the size of a pixel. Set to zero for the default if available for that format.</param>
-        public Image(ImageFormat format, int widthPixels, int heightPixels, int strideBytes = 0)
+        public Image(ImageFormat format, int widthPixels, int heightPixels, int strideBytes)
         {
             // Hook the native allocator and register this object.
             // .Dispose() will be called on this object when the allocator is shut down.
@@ -59,6 +59,28 @@ namespace Microsoft.Azure.Kinect.Sensor
                 heightPixels,
                 strideBytes,
                 out this.handle));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Image"/> class.
+        /// </summary>
+        /// <param name="format">The pixel format of the image. Must be a format with a constant pixel size.</param>
+        /// <param name="widthPixels">Width of the image in pixels.</param>
+        /// <param name="heightPixels">Height of the image in pixels.</param>
+        public Image(ImageFormat format, int widthPixels, int heightPixels)
+        {
+            // Hook the native allocator and register this object.
+            // .Dispose() will be called on this object when the allocator is shut down.
+            Allocator.Singleton.RegisterForDisposal(this);
+
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_image_create(
+                format,
+                widthPixels,
+                heightPixels,
+                0,
+                image_handle: out this.handle));
+#pragma warning restore CA2000 // Dispose objects before losing scope
         }
 
         /// <summary>
