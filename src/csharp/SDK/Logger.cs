@@ -9,12 +9,6 @@ using System.Diagnostics;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-
-    public interface ILoggingProvider
-    {
-        event Action<LogMessage> LogMessage;
-    }
-
     /// <summary>
     /// The Azure Kinect logging system. Enables access to the debug messages from the Azure Kinect device.
     /// </summary>
@@ -22,39 +16,15 @@ namespace Microsoft.Azure.Kinect.Sensor
     {
         private static readonly object SyncRoot = new object();
         private static readonly NativeMethods.k4a_logging_message_cb_t DebugMessageHandler = OnDebugMessage;
+        private static readonly LoggerProvider LoggerProviderValue = new LoggerProvider();
         private static bool isInitialized;
 
-        private static event Action<LogMessage> LogMessageHandlers;
-
-        private class LoggerProvider : ILoggingProvider
-        {
-            public event Action<LogMessage> LogMessage
-            {
-                add
-                {
-                    Logger.LogMessage += value;
-                }
-                remove
-                {
-                    Logger.LogMessage -= value;
-                }
-            }
-        }
-
-        private readonly static LoggerProvider loggerProvider = new LoggerProvider();
-
-        public static ILoggingProvider LogProvider
-        {
-            get
-            {
-                return Logger.loggerProvider;
-            }
-        }
-
+#pragma warning disable CA1003 // Use generic event handler instances
         /// <summary>
         /// Occurs when the Azure Kinect Sensor SDK delivers a debug message.
         /// </summary>
         public static event Action<LogMessage> LogMessage
+#pragma warning restore CA1003 // Use generic event handler instances
         {
             add
             {
@@ -75,6 +45,19 @@ namespace Microsoft.Azure.Kinect.Sensor
                 {
                     LogMessageHandlers -= value;
                 }
+            }
+        }
+
+        private static event Action<LogMessage> LogMessageHandlers;
+
+        /// <summary>
+        /// Gets the interface for reading log messages.
+        /// </summary>
+        public static ILoggingProvider LogProvider
+        {
+            get
+            {
+                return Logger.LoggerProviderValue;
             }
         }
 
@@ -147,6 +130,24 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
                 Trace.WriteLine("Failed to close the debug message handler");
             }
+        }
+
+        private class LoggerProvider : ILoggingProvider
+        {
+            public event Action<LogMessage> LogMessage
+            {
+                add
+                {
+                    Logger.LogMessage += value;
+                }
+
+                remove
+                {
+                    Logger.LogMessage -= value;
+                }
+            }
+
+            public string ProviderName => "Azure Kinect SDK";
         }
     }
 }
