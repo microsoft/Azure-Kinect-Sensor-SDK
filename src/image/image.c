@@ -186,6 +186,12 @@ k4a_result_t image_create(k4a_image_format_t format,
 
     case K4A_IMAGE_FORMAT_COLOR_NV12:
     {
+        if (stride_bytes == 0)
+        {
+            // If stride isn't specified, assume the minimum stride
+            stride_bytes = width_pixels;
+        }
+
         if (height_pixels % 2 != 0)
         {
             LOG_ERROR("NV12 requires an even number of lines. Height %d is invalid.", height_pixels);
@@ -215,6 +221,12 @@ k4a_result_t image_create(k4a_image_format_t format,
     // 1 Byte per pixel
     case K4A_IMAGE_FORMAT_CUSTOM8:
     {
+        if (stride_bytes == 0)
+        {
+            // If stride isn't specified, assume the minimum stride
+            stride_bytes = width_pixels;
+        }
+
         if (stride_bytes < 1 * width_pixels)
         {
             LOG_ERROR("Insufficient stride (%d bytes) to represent image width (%d pixels).",
@@ -235,6 +247,12 @@ k4a_result_t image_create(k4a_image_format_t format,
     case K4A_IMAGE_FORMAT_IR16:
     case K4A_IMAGE_FORMAT_CUSTOM16:
     {
+        if (stride_bytes == 0)
+        {
+            // If stride isn't specified, assume the minimum stride
+            stride_bytes = width_pixels * 2;
+        }
+
         if (stride_bytes < 2 * width_pixels)
         {
             LOG_ERROR("Insufficient stride (%d bytes) to represent image width (%d pixels).",
@@ -253,6 +271,12 @@ k4a_result_t image_create(k4a_image_format_t format,
     // 2 Bytes per pixel
     case K4A_IMAGE_FORMAT_COLOR_YUY2:
     {
+        if (stride_bytes == 0)
+        {
+            // If stride isn't specified, assume the minimum stride
+            stride_bytes = width_pixels * 2;
+        }
+
         if (width_pixels % 2 != 0)
         {
             LOG_ERROR("YUY2 requires an even number of pixels per line. Width of %d is invalid.", width_pixels);
@@ -276,6 +300,12 @@ k4a_result_t image_create(k4a_image_format_t format,
     // 4 Bytes per pixel
     case K4A_IMAGE_FORMAT_COLOR_BGRA32:
     {
+        if (stride_bytes == 0)
+        {
+            // If stride isn't specified, assume the minimum stride
+            stride_bytes = width_pixels * 4;
+        }
+
         if (stride_bytes < 4 * width_pixels)
         {
             LOG_ERROR("Insufficient stride (%d bytes) to represent image width (%d pixels).",
