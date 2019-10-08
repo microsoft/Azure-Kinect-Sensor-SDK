@@ -11,6 +11,10 @@
     <CodeAnalysisRuleSet>..\..\AzureKinectSensorSDK.ruleset</CodeAnalysisRuleSet>
     <OutputPath>$(BaseOutputPath)\$(AssemblyName)\</OutputPath>
   </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Optimize>false</Optimize>
+  </PropertyGroup>
 
   <ItemGroup>
     <Content Include="$(K4aBinaryDirectory)\k4a.dll" Link="k4a.dll">

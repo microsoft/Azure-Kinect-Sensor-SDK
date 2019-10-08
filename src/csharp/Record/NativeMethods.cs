@@ -155,11 +155,11 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playback_t playback_handle,
-                                                                       out k4a_imu_sample_t imu_sample);
+                                                                       [Out] k4a_imu_sample_t imu_sample);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback_handle,
-                                                                       out k4a_imu_sample_t imu_sample);
+                                                                       [Out] k4a_imu_sample_t imu_sample);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_handle,
