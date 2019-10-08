@@ -7,9 +7,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Microsoft.Azure.Kinect.Sensor.Record.Exceptions;
 
-namespace Microsoft.Azure.Kinect.Sensor
+namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
     /// <summary>
     /// Represents errors that occur when adding a tag to a recording
@@ -89,7 +88,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         internal static void ThrowIfNotSuccess<T>(Func<T> function)
             where T : System.Enum
         {
-            using (LoggingTracer tracer = new LoggingTracer())
+            using (LoggingTracer tracer = new LoggingTracer(LogLevel.Warning, Logger.LogProvider, RecordLogger.LogProvider))
             {
                 T result = function();
                 if (!AzureKinectRecordException.IsSuccess(result))
