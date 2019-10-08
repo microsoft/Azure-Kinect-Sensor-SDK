@@ -1,5 +1,7 @@
 ## Change Log
 
+### v1.4.0
+
 ### v1.3.0
 
 * On Windows VS dependencies are now dynamically linked and require redistributables for
