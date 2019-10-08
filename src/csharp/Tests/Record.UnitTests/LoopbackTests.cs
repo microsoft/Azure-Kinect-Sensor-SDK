@@ -1,29 +1,41 @@
-using System;
-using System.Threading;
+﻿using System;
 using Microsoft.Azure.Kinect.Sensor;
 using Microsoft.Azure.Kinect.Sensor.Record;
 using NUnit.Framework;
 
 namespace Tests
 {
-    public class Tests
+    /// <summary>
+    /// Loopback Tests write to a recording, and then read the recording back to verify the API.
+    /// </summary>
+    public class LoopbackTests
     {
-        string recordingPath;
+        private string recordingPath;
+
+        /// <summary>
+        /// Allocate a path for the recording.
+        /// </summary>
         [SetUp]
         public void Setup()
         {
-            recordingPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "testfile.mkv");
+            this.recordingPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "testfile.mkv");
         }
 
+        /// <summary>
+        /// Delete the temporary recording.
+        /// </summary>
         [TearDown]
         public void TearDown()
         {
-            System.IO.File.Delete(recordingPath);
+            System.IO.File.Delete(this.recordingPath);
         }
-        
 
+        /// <summary>
+        /// Writes each of the data types to a file and reads them back.
+        /// Verfies as many properties as possible.
+        /// </summary>
         [Test]
-        public void Test1()
+        public void LoopbackTest1()
         {
             DeviceConfiguration deviceConfiguration = new DeviceConfiguration()
             {
@@ -34,15 +46,17 @@ namespace Tests
                 DepthMode = DepthMode.NFOV_2x2Binned,
                 DisableStreamingIndicator = true,
                 SuboridinateDelayOffMaster = TimeSpan.FromMilliseconds(456),
-                SynchronizedImagesOnly  = true,
-                WiredSyncMode = WiredSyncMode.Subordinate
+                SynchronizedImagesOnly = true,
+                WiredSyncMode = WiredSyncMode.Subordinate,
             };
 
+#pragma warning disable CA1508 // Avoid dead conditional code
             using (Record record = Record.Create(this.recordingPath, null, deviceConfiguration))
+#pragma warning restore CA1508 // Avoid dead conditional code
             {
                 record.AddImuTrack();
                 record.AddCustomVideoTrack("CUSTOM_VIDEO", "V_CUSTOM1", new byte[] { 1, 2, 3 }, new RecordVideoSettings() { FrameRate = 1, Height = 10, Width = 20 });
-                record.AddCustomSubtitleTrack("CUSTOM_SUBTITLE", "S_CUSTOM1", new byte[] { 4, 5, 6, 7 }, new RecordSubtitleSettings() { HighFrequencyData = false});
+                record.AddCustomSubtitleTrack("CUSTOM_SUBTITLE", "S_CUSTOM1", new byte[] { 4, 5, 6, 7 }, new RecordSubtitleSettings() { HighFrequencyData = false });
                 record.AddTag("MyTag1", "one");
                 record.AddTag("MyTag2", "two");
 
@@ -50,9 +64,11 @@ namespace Tests
 
                 for (int i = 0; i < 10; i++)
                 {
-                    double timeStamp = 10.0 + i * 1.0;
+                    double timeStamp = 10.0 + (i * 1.0);
 
+#pragma warning disable CA1508 // Avoid dead conditional code
                     using (Capture c = new Capture())
+#pragma warning restore CA1508 // Avoid dead conditional code
                     {
                         c.Color = new Image(ImageFormat.ColorNV12, 1280, 720);
                         c.IR = new Image(ImageFormat.IR16, 320, 288);
@@ -80,8 +96,8 @@ namespace Tests
                         {
                             AccelerometerSample = new System.Numerics.Vector3(1.0f, 2.0f, 3.0f),
                             GyroSample = new System.Numerics.Vector3(4.0f, 5.0f, 6.0f),
-                            AccelerometerTimestamp = TimeSpan.FromSeconds(timeStamp + 0.1 * y),
-                            GyroTimestamp = TimeSpan.FromSeconds(timeStamp + 0.1 * y),
+                            AccelerometerTimestamp = TimeSpan.FromSeconds(timeStamp + (0.1 * y)),
+                            GyroTimestamp = TimeSpan.FromSeconds(timeStamp + (0.1 * y)),
                             Temperature = 26.0f,
                         };
 
@@ -93,20 +109,21 @@ namespace Tests
                     {
                         customData[x] = (byte)(i + x);
                     }
+
                     record.WriteCustomTrackData("CUSTOM_VIDEO", TimeSpan.FromSeconds(timeStamp), customData);
 
                     for (int x = 0; x < customData.Length; x++)
                     {
                         customData[x] = (byte)(i + x + 1);
                     }
+
                     record.WriteCustomTrackData("CUSTOM_SUBTITLE", TimeSpan.FromSeconds(timeStamp), customData);
 
                     record.Flush();
                 }
             }
 
-
-            using (Playback playback = Playback.Open(recordingPath))
+            using (Playback playback = Playback.Open(this.recordingPath))
             {
                 Assert.IsTrue(playback.CheckTrackExists("CUSTOM_VIDEO"));
                 Assert.IsTrue(playback.CheckTrackExists("CUSTOM_SUBTITLE"));
@@ -115,28 +132,25 @@ namespace Tests
 
                 for (int i = 0; i < 10; i++)
                 {
-                    double timeStamp = 10.0 + i * 1.0;
+                    double timeStamp = 10.0 + (i * 1.0);
 
-                    
                     using (Capture c = playback.GetNextCapture())
                     {
                         // Not captured in recording
                         // Assert.AreEqual(25.0f, c.Temperature);
-
                         Assert.AreEqual(ImageFormat.ColorNV12, c.Color.Format);
                         Assert.AreEqual(1280, c.Color.WidthPixels);
                         Assert.AreEqual(720, c.Color.HeightPixels);
-                        
+
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp), c.Color.DeviceTimestamp);
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp) + deviceConfiguration.DepthDelayOffColor, c.Depth.DeviceTimestamp);
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp) + deviceConfiguration.DepthDelayOffColor, c.IR.DeviceTimestamp);
 
                         // Not captured in recording
                         // Assert.AreEqual(TimeSpan.FromMilliseconds(12), c.Color.Exposure);
-                        
+
                         // Not captured in recording
                         // Assert.AreEqual(100, c.Color.ISOSpeed);
-
                         Assert.AreEqual(0, c.Color.SystemTimestampNsec);
 
                         // Not captured in recording
@@ -155,7 +169,7 @@ namespace Tests
                         };
 
                         ImuSample readSample = playback.GetNextImuSample();
-                        
+
                         Assert.AreEqual(imuSample.AccelerometerSample, readSample.AccelerometerSample);
                         Assert.AreEqual(imuSample.GyroSample, readSample.GyroSample);
                         Assert.AreEqual(imuSample.AccelerometerTimestamp, readSample.AccelerometerTimestamp);
@@ -170,6 +184,7 @@ namespace Tests
                     {
                         customData[x] = (byte)(i + x);
                     }
+
                     using (DataBlock videoBlock = playback.GetNextDataBlock("CUSTOM_VIDEO"))
                     {
                         Assert.AreEqual(customData, videoBlock.Buffer);
@@ -180,6 +195,7 @@ namespace Tests
                     {
                         customData[x] = (byte)(i + x + 1);
                     }
+
                     using (DataBlock subtitleBlock = playback.GetNextDataBlock("CUSTOM_SUBTITLE"))
                     {
                         Assert.AreEqual(customData, subtitleBlock.Buffer);

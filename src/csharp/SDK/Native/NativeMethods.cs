@@ -394,7 +394,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
         [NativeReference]
-        public static extern k4a_result_t k4a_record_create(string path, k4a_device_t device, k4a_device_configuration_t deviceConfiguration, out k4a_record_t handle);
+        public static extern k4a_result_t k4a_record_create([MarshalAs(UnmanagedType.LPStr)] string path, k4a_device_t device, k4a_device_configuration_t deviceConfiguration, out k4a_record_t handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         [NativeReference]

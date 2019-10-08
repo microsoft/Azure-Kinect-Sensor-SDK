@@ -1,4 +1,10 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="RecordLogger.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -12,39 +18,15 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
     {
         private static readonly object SyncRoot = new object();
         private static readonly NativeMethods.k4a_logging_message_cb_t DebugMessageHandler = OnDebugMessage;
+        private static readonly RecordLoggerProvider LoggerProvider = new RecordLoggerProvider();
         private static bool isInitialized;
 
-        private static event Action<LogMessage> LogMessageHandlers;
-
-        private class RecordLoggerProvider : ILoggingProvider
-        {
-            public event Action<LogMessage> LogMessage
-            {
-                add
-                {
-                    RecordLogger.LogMessage += value;
-                }
-                remove
-                {
-                    RecordLogger.LogMessage -= value;
-                }
-            }
-        }
-
-        private readonly static RecordLoggerProvider loggerProvider = new RecordLoggerProvider();
-
-        public static ILoggingProvider LogProvider
-        {
-            get
-            {
-                return RecordLogger.loggerProvider;
-            }
-        }
-
+#pragma warning disable CA1003 // Use generic event handler instances
         /// <summary>
         /// Occurs when the Azure Kinect Sensor Record and Playback SDK delivers a debug message.
         /// </summary>
         public static event Action<LogMessage> LogMessage
+#pragma warning restore CA1003 // Use generic event handler instances
         {
             add
             {
@@ -65,6 +47,19 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                 {
                     LogMessageHandlers -= value;
                 }
+            }
+        }
+
+        private static event Action<LogMessage> LogMessageHandlers;
+
+        /// <summary>
+        /// Gets the interface for reading log messages.
+        /// </summary>
+        public static ILoggingProvider LogProvider
+        {
+            get
+            {
+                return RecordLogger.LoggerProvider;
             }
         }
 
@@ -137,6 +132,24 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 Trace.WriteLine("Failed to close the debug message handler");
             }
+        }
+
+        private class RecordLoggerProvider : ILoggingProvider
+        {
+            public event Action<LogMessage> LogMessage
+            {
+                add
+                {
+                    RecordLogger.LogMessage += value;
+                }
+
+                remove
+                {
+                    RecordLogger.LogMessage -= value;
+                }
+            }
+
+            public string ProviderName => "Azure Kinect Recording SDK";
         }
     }
 }
