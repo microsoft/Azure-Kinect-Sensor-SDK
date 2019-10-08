@@ -595,6 +595,7 @@ K4A_EXPORT float k4a_capture_get_temperature_c(k4a_capture_t capture_handle);
  *
  * \param stride_bytes
  * The number of bytes per horizontal line of the image.
+ * If set to 0, the stride will be set to the minimum size given the \p format and \p width_pixels.
  *
  * \param image_handle
  * Pointer to store image handle in.

@@ -190,10 +190,6 @@ TEST(allocator_ut, image_api_validation)
         ASSERT_EQ(K4A_RESULT_FAILED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 1, ALLOCATION_SOURCE_USER, NULL));
 
-        // Stride of zero
-        ASSERT_EQ(K4A_RESULT_FAILED,
-                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, ALLOCATION_SOURCE_USER, &image));
-
         // Stride length
         // Validate a valid length and an invalid length
 
@@ -217,6 +213,11 @@ TEST(allocator_ut, image_api_validation)
         //   Odd number of columns
         ASSERT_EQ(K4A_RESULT_FAILED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 11, 10, 20, ALLOCATION_SOURCE_USER, &image));
+        // Stride of zero (should succeed and infer the minimum stride)
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_NV12, 10, 10, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(10, image_get_stride_bytes(image));
+        image_dec_ref(image);
 
         // YUY2
         //   Minimum stride
@@ -240,6 +241,11 @@ TEST(allocator_ut, image_api_validation)
         //   Odd number of columns
         ASSERT_EQ(K4A_RESULT_FAILED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 11, 10, 20, ALLOCATION_SOURCE_USER, &image));
+        // Stride of zero (should succeed and infer the minimum stride)
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_YUY2, 10, 10, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(10 * 2, image_get_stride_bytes(image));
+        image_dec_ref(image);
 
         // BGRA32
         //   Minimum stride
@@ -250,6 +256,11 @@ TEST(allocator_ut, image_api_validation)
         //   Insufficient stride
         ASSERT_EQ(K4A_RESULT_FAILED,
                   image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32, 10, 10, 39, ALLOCATION_SOURCE_USER, &image));
+        // Stride of zero (should succeed and infer the minimum stride)
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_COLOR_BGRA32, 10, 10, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(10 * 4, image_get_stride_bytes(image));
+        image_dec_ref(image);
 
         // MJPEG (no length is valid)
         ASSERT_EQ(K4A_RESULT_FAILED,
@@ -264,6 +275,11 @@ TEST(allocator_ut, image_api_validation)
         //   Insufficient stride
         ASSERT_EQ(K4A_RESULT_FAILED,
                   image_create(K4A_IMAGE_FORMAT_DEPTH16, 10, 10, 19, ALLOCATION_SOURCE_USER, &image));
+        // Stride of zero (should succeed and infer the minimum stride)
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_DEPTH16, 10, 10, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(10 * 2, image_get_stride_bytes(image));
+        image_dec_ref(image);
 
         // Custom8
         //   Minimum stride
@@ -274,6 +290,11 @@ TEST(allocator_ut, image_api_validation)
         //   Insufficient stride
         ASSERT_EQ(K4A_RESULT_FAILED,
                   (int)image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 10, 9, ALLOCATION_SOURCE_USER, &image));
+        // Stride of zero (should succeed and infer the minimum stride)
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  image_create(K4A_IMAGE_FORMAT_CUSTOM8, 10, 10, 0, ALLOCATION_SOURCE_USER, &image));
+        ASSERT_EQ(10 * 1, image_get_stride_bytes(image));
+        image_dec_ref(image);
 
         // Height of zero
         ASSERT_EQ(K4A_RESULT_FAILED,
