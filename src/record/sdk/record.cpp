@@ -15,8 +15,8 @@ using namespace k4arecord;
 using namespace LIBMATROSKA_NAMESPACE;
 
 k4a_result_t k4a_record_set_debug_message_handler(k4a_logging_message_cb_t *message_cb,
-                                           void *message_cb_context,
-                                           k4a_log_level_t min_level)
+                                                  void *message_cb_context,
+                                                  k4a_log_level_t min_level)
 {
     return logger_register_message_callback(message_cb, message_cb_context, min_level);
 }

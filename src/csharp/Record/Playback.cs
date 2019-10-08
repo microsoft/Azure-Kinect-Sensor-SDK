@@ -536,8 +536,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                 {
                     throw new ObjectDisposedException(nameof(Playback));
                 }
+                NativeMethods.k4a_imu_sample_t imu_sample = new NativeMethods.k4a_imu_sample_t();
 
-                switch (NativeMethods.k4a_playback_get_next_imu_sample(this.handle, out NativeMethods.k4a_imu_sample_t imu_sample))
+                switch (NativeMethods.k4a_playback_get_next_imu_sample(this.handle, imu_sample))
                 {
                     case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_EOF:
                         return null;
@@ -574,7 +575,9 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                     throw new ObjectDisposedException(nameof(Playback));
                 }
 
-                switch (NativeMethods.k4a_playback_get_previous_imu_sample(this.handle, out NativeMethods.k4a_imu_sample_t imu_sample))
+                NativeMethods.k4a_imu_sample_t imu_sample = new NativeMethods.k4a_imu_sample_t();
+
+                switch (NativeMethods.k4a_playback_get_previous_imu_sample(this.handle, imu_sample))
                 {
                     case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_EOF:
                         return null;

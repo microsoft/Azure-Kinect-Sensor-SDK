@@ -40,7 +40,7 @@ namespace Tests
 
             using (Record record = Record.Create(this.recordingPath, null, deviceConfiguration))
             {
-
+                record.AddImuTrack();
                 record.AddCustomVideoTrack("CUSTOM_VIDEO", "V_CUSTOM1", new byte[] { 1, 2, 3 }, new RecordVideoSettings() { FrameRate = 1, Height = 10, Width = 20 });
                 record.AddCustomSubtitleTrack("CUSTOM_SUBTITLE", "S_CUSTOM1", new byte[] { 4, 5, 6, 7 }, new RecordSubtitleSettings() { HighFrequencyData = false});
                 record.AddTag("MyTag1", "one");
@@ -120,8 +120,8 @@ namespace Tests
                     
                     using (Capture c = playback.GetNextCapture())
                     {
-
-                        Assert.AreEqual(25.0f, c.Temperature);
+                        // Not captured in recording
+                        // Assert.AreEqual(25.0f, c.Temperature);
 
                         Assert.AreEqual(ImageFormat.ColorNV12, c.Color.Format);
                         Assert.AreEqual(1280, c.Color.WidthPixels);
@@ -131,10 +131,16 @@ namespace Tests
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp) + deviceConfiguration.DepthDelayOffColor, c.Depth.DeviceTimestamp);
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp) + deviceConfiguration.DepthDelayOffColor, c.IR.DeviceTimestamp);
 
-                        Assert.AreEqual(TimeSpan.FromMilliseconds(12), c.Color.Exposure);
-                        Assert.AreEqual(100, c.Color.ISOSpeed);
+                        // Not captured in recording
+                        // Assert.AreEqual(TimeSpan.FromMilliseconds(12), c.Color.Exposure);
+                        
+                        // Not captured in recording
+                        // Assert.AreEqual(100, c.Color.ISOSpeed);
+
                         Assert.AreEqual(0, c.Color.SystemTimestampNsec);
-                        Assert.AreEqual(2, c.Color.WhiteBalance);
+
+                        // Not captured in recording
+                        // Assert.AreEqual(2, c.Color.WhiteBalance);
                     }
 
                     for (int y = 0; y < 10; y++)
@@ -149,7 +155,14 @@ namespace Tests
                         };
 
                         ImuSample readSample = playback.GetNextImuSample();
-                        Assert.AreEqual(imuSample, readSample);
+                        
+                        Assert.AreEqual(imuSample.AccelerometerSample, readSample.AccelerometerSample);
+                        Assert.AreEqual(imuSample.GyroSample, readSample.GyroSample);
+                        Assert.AreEqual(imuSample.AccelerometerTimestamp, readSample.AccelerometerTimestamp);
+                        Assert.AreEqual(imuSample.GyroTimestamp, readSample.GyroTimestamp);
+
+                        // Not captured in recording
+                        // Assert.AreEqual(imuSample.Temperature, readSample.Temperature);
                     }
 
                     byte[] customData = new byte[i + 1];
@@ -159,7 +172,7 @@ namespace Tests
                     }
                     using (DataBlock videoBlock = playback.GetNextDataBlock("CUSTOM_VIDEO"))
                     {
-                        Assert.AreEqual(customData, videoBlock);
+                        Assert.AreEqual(customData, videoBlock.Buffer);
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp), videoBlock.DeviceTimestamp);
                     }
 
@@ -169,12 +182,11 @@ namespace Tests
                     }
                     using (DataBlock subtitleBlock = playback.GetNextDataBlock("CUSTOM_SUBTITLE"))
                     {
-                        Assert.AreEqual(customData, subtitleBlock);
+                        Assert.AreEqual(customData, subtitleBlock.Buffer);
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp), subtitleBlock.DeviceTimestamp);
                     }
                 }
             }
-            Assert.Pass();
         }
     }
 }
