@@ -28,7 +28,7 @@ namespace Tests
             DeviceConfiguration deviceConfiguration = new DeviceConfiguration()
             {
                 CameraFPS = FPS.FPS30,
-                ColorFormat = ImageFormat.ColorBGRA32,
+                ColorFormat = ImageFormat.ColorNV12,
                 ColorResolution = ColorResolution.R720p,
                 DepthDelayOffColor = TimeSpan.FromMilliseconds(123),
                 DepthMode = DepthMode.NFOV_2x2Binned,
@@ -41,8 +41,8 @@ namespace Tests
             using (Record record = Record.Create(this.recordingPath, null, deviceConfiguration))
             {
 
-                record.AddCustomVideoTrack("CustomVideo", "V_CUSTOM1", new byte[] { 1, 2, 3 }, new RecordVideoSettings() { FrameRate = 1, Height = 10, Width = 20 });
-                record.AddCustomSubtitleTrack("CustomSubtitle", "S_CUSTOM1", new byte[] { 4, 5, 6, 7 }, new RecordSubtitleSettings() { HighFrequencyData = false});
+                record.AddCustomVideoTrack("CUSTOM_VIDEO", "V_CUSTOM1", new byte[] { 1, 2, 3 }, new RecordVideoSettings() { FrameRate = 1, Height = 10, Width = 20 });
+                record.AddCustomSubtitleTrack("CUSTOM_SUBTITLE", "S_CUSTOM1", new byte[] { 4, 5, 6, 7 }, new RecordSubtitleSettings() { HighFrequencyData = false});
                 record.AddTag("MyTag1", "one");
                 record.AddTag("MyTag2", "two");
 
@@ -54,7 +54,7 @@ namespace Tests
 
                     using (Capture c = new Capture())
                     {
-                        c.Color = new Image(ImageFormat.ColorBGRA32, 1280, 720);
+                        c.Color = new Image(ImageFormat.ColorNV12, 1280, 720);
                         c.IR = new Image(ImageFormat.IR16, 320, 288);
                         c.Depth = new Image(ImageFormat.Depth16, 320, 288);
                         c.Temperature = 25.0f;
@@ -93,13 +93,13 @@ namespace Tests
                     {
                         customData[x] = (byte)(i + x);
                     }
-                    record.WriteCustomTrackData("CustomVideo", TimeSpan.FromSeconds(timeStamp), customData);
+                    record.WriteCustomTrackData("CUSTOM_VIDEO", TimeSpan.FromSeconds(timeStamp), customData);
 
                     for (int x = 0; x < customData.Length; x++)
                     {
                         customData[x] = (byte)(i + x + 1);
                     }
-                    record.WriteCustomTrackData("CustomSubtitle", TimeSpan.FromSeconds(timeStamp), customData);
+                    record.WriteCustomTrackData("CUSTOM_SUBTITLE", TimeSpan.FromSeconds(timeStamp), customData);
 
                     record.Flush();
                 }
@@ -108,10 +108,10 @@ namespace Tests
 
             using (Playback playback = Playback.Open(recordingPath))
             {
-                Assert.IsTrue(playback.CheckTrackExists("CustomVideo"));
-                Assert.IsTrue(playback.CheckTrackExists("CustomSubtitle"));
-                Assert.AreEqual("V_CUSTOM1", playback.GetTrackCodecId("CustomVideo"));
-                Assert.AreEqual(new byte[] { 1, 2, 3 }, playback.GetTrackCodecContext("CustomVideo"));
+                Assert.IsTrue(playback.CheckTrackExists("CUSTOM_VIDEO"));
+                Assert.IsTrue(playback.CheckTrackExists("CUSTOM_SUBTITLE"));
+                Assert.AreEqual("V_CUSTOM1", playback.GetTrackCodecId("CUSTOM_VIDEO"));
+                Assert.AreEqual(new byte[] { 1, 2, 3 }, playback.GetTrackCodecContext("CUSTOM_VIDEO"));
 
                 for (int i = 0; i < 10; i++)
                 {
@@ -123,11 +123,7 @@ namespace Tests
 
                         Assert.AreEqual(25.0f, c.Temperature);
 
-                        c.Color = new Image(ImageFormat.ColorBGRA32, 1280, 720);
-                        c.IR = new Image(ImageFormat.IR16, 320, 288);
-                        c.Depth = new Image(ImageFormat.Depth16, 320, 288);
-
-                        Assert.AreEqual(ImageFormat.ColorBGRA32, c.Color.Format);
+                        Assert.AreEqual(ImageFormat.ColorNV12, c.Color.Format);
                         Assert.AreEqual(1280, c.Color.WidthPixels);
                         Assert.AreEqual(720, c.Color.HeightPixels);
                         
@@ -161,7 +157,7 @@ namespace Tests
                     {
                         customData[x] = (byte)(i + x);
                     }
-                    using (DataBlock videoBlock = playback.GetNextDataBlock("CustomVideo"))
+                    using (DataBlock videoBlock = playback.GetNextDataBlock("CUSTOM_VIDEO"))
                     {
                         Assert.AreEqual(customData, videoBlock);
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp), videoBlock.DeviceTimestamp);
@@ -171,7 +167,7 @@ namespace Tests
                     {
                         customData[x] = (byte)(i + x + 1);
                     }
-                    using (DataBlock subtitleBlock = playback.GetNextDataBlock("CustomSubtitle"))
+                    using (DataBlock subtitleBlock = playback.GetNextDataBlock("CUSTOM_SUBTITLE"))
                     {
                         Assert.AreEqual(customData, subtitleBlock);
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp), subtitleBlock.DeviceTimestamp);

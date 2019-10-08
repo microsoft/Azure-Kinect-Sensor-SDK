@@ -21,14 +21,30 @@ namespace Microsoft.Azure.Kinect.Sensor
         private bool disposed;
         private List<LogMessage> messages;
 
+        private ILoggingProvider[] loggingProviders;
+
+        private LogLevel minLevel;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LoggingTracer"/> class.
         /// </summary>
         public LoggingTracer()
+            : this(LogLevel.Warning, Logger.LogProvider)
+        {
+        }
+
+        public LoggingTracer(LogLevel minLevel, params ILoggingProvider[] loggingProvider)
         {
             this.messages = new List<LogMessage>();
             this.threadId = Thread.CurrentThread.ManagedThreadId;
-            Logger.LogMessage += this.Logger_LogMessage;
+            this.minLevel = minLevel;
+
+            this.loggingProviders = (ILoggingProvider[])loggingProvider.Clone();
+
+            foreach (ILoggingProvider provider in this.loggingProviders)
+            {
+                provider.LogMessage += this.Logger_LogMessage;
+            }
         }
 
         /// <summary>
@@ -71,7 +87,12 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
                 if (disposing)
                 {
-                    Logger.LogMessage -= this.Logger_LogMessage;
+                    foreach (ILoggingProvider provider in this.loggingProviders)
+                    {
+                        provider.LogMessage -= this.Logger_LogMessage;
+                    }
+
+                    this.loggingProviders = null;
 
                     // There are no longer any tracers on this thread. Clear the message list to allow the memory to be freed.
                     this.messages = null;
@@ -86,6 +107,12 @@ namespace Microsoft.Azure.Kinect.Sensor
             if (this.threadId != Thread.CurrentThread.ManagedThreadId)
             {
                 // The log messages aren't coming from this thread. Ignore them.
+                return;
+            }
+
+            if (logMessage.LogLevel > this.minLevel)
+            {
+                // The log messages are too verbose. Ignore them.
                 return;
             }
 

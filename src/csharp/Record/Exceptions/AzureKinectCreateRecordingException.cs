@@ -7,9 +7,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Microsoft.Azure.Kinect.Sensor.Record.Exceptions;
+using Microsoft.Azure.Kinect.Sensor.Record;
 
-namespace Microsoft.Azure.Kinect.Sensor
+namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
     /// <summary>
     /// Represents errors that occur when creating an Azure Kinect sensor recording.
@@ -90,8 +90,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         internal static void ThrowIfNotSuccess<T>(string fileName, Func<T> function)
             where T : System.Enum
         {
-            
-            using (LoggingTracer tracer = new LoggingTracer())
+
+            using (LoggingTracer tracer = new LoggingTracer(LogLevel.Warning, Logger.LogProvider, RecordLogger.LogProvider))
             {
                 T result = function();
                 if (!AzureKinectRecordException.IsSuccess(result))
