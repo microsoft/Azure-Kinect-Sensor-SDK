@@ -395,13 +395,13 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
 
     k4a_device_configuration_t s_config = default_config;
     s_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
-    s_config.depth_delay_off_color_usec = (int32_t)(2 * fps_in_usec * ((uint64_t)rand()) / RAND_MAX - fps_in_usec);
+    s_config.depth_delay_off_color_usec = (2 * fps_in_usec * rand() / RAND_MAX - fps_in_usec);
     s_config.subordinate_delay_off_master_usec = (uint32_t)(1 * fps_in_usec * rand() / RAND_MAX);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config));
 
     k4a_device_configuration_t m_config = default_config;
     m_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
-    m_config.depth_delay_off_color_usec = (int32_t)(2 * fps_in_usec * ((uint64_t)rand()) / RAND_MAX - fps_in_usec);
+    m_config.depth_delay_off_color_usec = (2 * fps_in_usec * rand() / RAND_MAX - fps_in_usec);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(master, &m_config));
 
     printf("Test Running with the following settings:\n");
