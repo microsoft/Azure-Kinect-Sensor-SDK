@@ -10,8 +10,10 @@ variables:
   value: '1.6.102075014'
 - name: 'windows_firmware_version'
   value: '1.6.102075014'
-- name: 'PackageVersion'
-  value: '1.2.0-alpha.10'
+- name: 'NuGetPackageVersion'
+  value: '1.3.0-beta.1'
+- name: 'OpenCVPath'
+  value: 'C:\OpenCV\Build\x64\vc14\'
 
 trigger:
   batch: false
@@ -36,6 +38,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: 'TRUE'
       VS2017_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -43,6 +46,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: 'TRUE'
       VS2017_x64-msvc_debug_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
@@ -50,6 +54,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: 'TRUE'
       VS2017_x64-msvc_rel_msbuild:
         CMakeArch: 'amd64'
         BuildGenerator: 'Visual Studio 15 2017 Win64'
@@ -57,6 +62,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: 'TRUE'
       VS2017_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -64,6 +70,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: 'FALSE'
       VS2017_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -71,6 +78,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: 'FALSE'
       VS2017_x86-msvc_debug_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
@@ -78,6 +86,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: 'FALSE'
       VS2017_x86-msvc_rel_msbuild:
         CMakeArch: 'x86'
         BuildGenerator: 'Visual Studio 15 2017'
@@ -85,6 +94,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
+        UsesOpenCV: 'FALSE'
       VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -92,6 +102,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
+        UsesOpenCV: 'TRUE'
       VS2019_x64-msvc_rel_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -99,6 +110,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
+        UsesOpenCV: 'TRUE'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'amd64'
@@ -121,6 +133,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
+        UsesOpenCV: 'FALSE'
       VS2019_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -128,6 +141,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
+        UsesOpenCV: 'FALSE'
       # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
       # VS2019_x86-pc-windows-msvc_debug_msbuild:
       #   CMakeArch: 'x86'
@@ -190,6 +204,10 @@ jobs:
       modifyEnvironment: true
     condition: and(succeeded(), eq(variables['vmImage'], 'windows-2019'))
 
+  - pwsh: '$(Build.SourcesDirectory)/scripts/install-opencv.ps1'
+    displayName: 'Install OpenCV'
+    condition: and(succeeded(), eq(variables['UsesOpenCV'], 'TRUE'))
+
   - powershell: |
       $ErrorActionPreference = "Stop"
 
@@ -235,7 +253,7 @@ jobs:
 
   - script: |
       set PATH=%PATH%;$(Build.BinariesDirectory)\nasmexe\nasm-2.14.02
-      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)"
+      cmake -G "$(BuildGenerator)" "-DCMAKE_VERBOSE_MAKEFILE=ON" "-DOpenCV_REQUIRED=$(UsesOpenCV)" "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DK4A_SOURCE_LINK=ON"
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
     env:
@@ -353,21 +371,26 @@ jobs:
   displayName: Linux
   pool:
     vmImage: 'ubuntu-16.04'
+  container: schultetwin1/akbuilder:0.0.2
   strategy:
     maxParallel: 100
     matrix:
       x64-clang_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'debug'
+        UsesOpenCV: 'TRUE'
       x64-gnu_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'debug'
+        UsesOpenCV: 'TRUE'
       x64-clang_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'relwithdebinfo'
+        UsesOpenCV: 'TRUE'
       x64-gnu_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'relwithdebinfo'
+        UsesOpenCV: 'TRUE'
 
       # 32-bit builds are currently broken
       # i386-unknown-linux-clang_debug_ninja:
@@ -390,11 +413,6 @@ jobs:
     persistCredentials: true
     submodules: true
 
-  - task: ShellScript@2
-    inputs:
-      scriptPath: '$(Build.SourcesDirectory)/scripts/bootstrap-ubuntu.sh'
-    displayName: 'Run bootstrap-ubuntu.sh'
-
   - script: |
        git add --renormalize . && git diff-index --quiet HEAD --
        if [ $? -ne 0 ]
@@ -405,7 +423,8 @@ jobs:
        fi
     displayName: 'Check Line Endings'
 
-  - script: 'cmake -GNinja -DCMAKE_VERBOSE_MAKEFILE=ON "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DCMAKE_TOOLCHAIN_FILE=$(Build.SourcesDirectory)/cmake/toolchains/$(CMakeLinuxTargetTriple).cmake"'
+    # OpenCV always required on Linux
+  - script: 'cmake -GNinja -DCMAKE_VERBOSE_MAKEFILE=ON -DOpenCV_REQUIRED=$(UsesOpenCV) "$(Build.SourcesDirectory)" "-DCMAKE_BUILD_TYPE=$(CMakeConfiguration)" "-DCMAKE_TOOLCHAIN_FILE=$(Build.SourcesDirectory)/cmake/toolchains/$(CMakeLinuxTargetTriple).cmake"'
     workingDirectory: '$(Build.BinariesDirectory)'
     displayName: 'CMake Configure'
 
@@ -548,7 +567,6 @@ jobs:
       filePath: '$(Build.SourcesDirectory)\doxygen\PublishDocs.ps1'
     condition: and(eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564'), and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')))
 
-
 - ${{ if eq(variables['System.CollectionId'], 'cb55739e-4afe-46a3-970f-1b49d8ee7564') }}:
   - job: WindowsFunctionalTests
     displayName: Windows Functional Test
@@ -585,12 +603,12 @@ jobs:
       displayName: "Get Azure Kinect NuGet Package"
       inputs: 
         command: custom 
-        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(PackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
+        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(NuGetPackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
 
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/debug artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/amd64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/lib/native/amd64/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/debug"
         flattenFolders: true
@@ -598,7 +616,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/release artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/amd64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/lib/native/amd64/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release"
         flattenFolders: true
@@ -606,7 +624,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into x86/debug artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/x86/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/lib/native/x86/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/x86/debug"
         flattenFolders: true
@@ -614,7 +632,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into x86/release artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/lib/native/x86/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/lib/native/x86/release/"
         contents: "depthengine*.dll"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/x86/release"
         flattenFolders: true
@@ -622,7 +640,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy AzureKinectDK_Fw_$(firmware_version).bin artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/firmware/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/firmware/"
         contents: "AzureKinectDK_Fw_$(firmware_version).bin"
         targetFolder: "$(System.ArtifactsDirectory)/firmware"
         flattenFolders: true
@@ -665,6 +683,11 @@ jobs:
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
       workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
       displayName: 'Run Functional Tests'
+      timeoutInMinutes: 15
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
@@ -716,7 +739,8 @@ jobs:
 
     # The account on the NUC does not currently give this user permission to install, so we have done so manually.
     # This captures the dependency NuGet has in this environment. We locally ran 'apt-get install mono-complete'
-    #- script: 'apt-get install mono'
+    # We also need opencv, so install that too
+    #- script: 'apt-get install mono libopencv-dev'
     #  workingDirectory: '$(System.ArtifactsDirectory)'
     #  displayName: "Ensure Mono is installed"
 
@@ -724,7 +748,7 @@ jobs:
       displayName: "Get Azure Kinect NuGet Package"
       inputs: 
         command: custom 
-        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(PackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
+        arguments: install Microsoft.Azure.Kinect.Sensor -prerelease -Version $(NuGetPackageVersion) -OutputDirectory $(System.ArtifactsDirectory)/NugetOutputDir
 
     - script: 'ls -alR'
       workingDirectory: '$(System.ArtifactsDirectory)/NugetOutputDir'
@@ -733,7 +757,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/debug artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/linux/lib/native/x64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/x64/release/"
         contents: "libdepthengine*"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug"
         flattenFolders: true
@@ -741,7 +765,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/release artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/linux/lib/native/x64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/x64/release/"
         contents: "libdepthengine*"
         targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release"
         flattenFolders: true
@@ -749,7 +773,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy AzureKinectDK_Fw_$(firmware_version).bin artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(PackageVersion)/firmware/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/firmware/"
         contents: "AzureKinectDK_Fw_$(firmware_version).bin"
         targetFolder: "$(System.ArtifactsDirectory)/firmware"
         flattenFolders: true
@@ -801,6 +825,11 @@ jobs:
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
       workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
       displayName: 'Run Functional Tests'
+      timeoutInMinutes: 15
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'

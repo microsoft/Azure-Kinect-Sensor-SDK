@@ -12,12 +12,12 @@ to efficient implementation on the GPU.
 
 ## Usage Info
 
-```shell
+```
 fastpointcloud.exe <output file>
 ```
 
 Example:
 
-```shell
+```
 fastpointcloud.exe pointcloud.ply
 ```

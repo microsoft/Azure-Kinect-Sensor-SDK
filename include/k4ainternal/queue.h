@@ -132,14 +132,14 @@ void queue_enable(queue_t queue_handle);
  */
 void queue_disable(queue_t queue_handle);
 
-/** Notify the queue that an error was detected for filling it
+/** Notify the queue that it needs to stop
  *
  * \param queue_handle [in]
  *  A queue handle
  *
- * An implicit disable occurs if an error is detected on filling the queue
+ * An implicit disable occurs if the queue is stopped
  */
-void queue_error(queue_t queue_handle);
+void queue_stop(queue_t queue_handle);
 
 #ifdef __cplusplus
 }

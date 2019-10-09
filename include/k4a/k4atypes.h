@@ -680,12 +680,15 @@ typedef enum
  */
 typedef enum
 {
-    K4A_CALIBRATION_LENS_DISTORTION_MODEL_UNKNOWN = 0,   /**< Calibration model is unknown */
-    K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA,         /**< Calibration model is Theta (arctan) */
-    K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K, /**< Calibration model Polynomial 3K */
-    K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT,  /**< Calibration model Rational 6KT */
-    K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY, /**< Calibration model Brown Conrady (compatible with OpenCV)
-                                                          */
+    K4A_CALIBRATION_LENS_DISTORTION_MODEL_UNKNOWN = 0, /**< Calibration model is unknown */
+    K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA, /**< Deprecated (not supported). Calibration model is Theta (arctan).
+                                                  */
+    K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K, /**< Deprecated (not supported). Calibration model is
+                                                            Polynomial 3K. */
+    K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT,  /**< Deprecated (only supported early internal devices).
+                                                            Calibration model is Rational 6KT. */
+    K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY, /**< Calibration model is Brown Conrady (compatible with
+                                                          * OpenCV) */
 } k4a_calibration_model_type_t;
 
 /** Firmware build type.

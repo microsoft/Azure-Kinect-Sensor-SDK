@@ -117,6 +117,7 @@ int main(int argc, char **argv)
 
         // release capture
         k4a_capture_release(capture);
+        fflush(stdout);
     }
 
     returnCode = 0;

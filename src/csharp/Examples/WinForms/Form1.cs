@@ -43,7 +43,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorResolution = ColorResolution.R1080p,
+                    ColorResolution = ColorResolution.R720p,
                     DepthMode = DepthMode.NFOV_2x2Binned,
                     SynchronizedImagesOnly = true,
                 });

@@ -9,12 +9,12 @@ This example also covers adding custom attachments and tags to a recording file.
 
 ## Usage Info
 
-```shell
+```
 k4arecord_custom_track.exe <output file>
 ```
 
 Example:
 
-```shell
+```
 k4arecord_custom_track.exe custom.mkv
 ```

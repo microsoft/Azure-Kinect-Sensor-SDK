@@ -1,6 +1,15 @@
 ## Change Log
 
-### v1.2.0 (not yet released)
+### v1.3.0
+
+* On Windows VS dependencies are now dynamically linked and require redistributables for
+[VS2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) or newer.
+* Error and Warning messages have been cleaned up to be less verbose.
+* Multi camera sync and capture green screen example added.
+* Added new k4a_calibration_color_2d_to_depth_2d API  to transform pixel from color image to depth image with searching on epipolar line
+* Added a capture::handle() method to the C++ wrapper, allowing access to the underlying k4a_capture_t when using the C++ wrapper.
+
+### v1.2.0
 
 * CSharp support added.
 * Depth Engine breaking changes to 2.0, SDK now relies on this new version.

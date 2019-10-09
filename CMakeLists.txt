@@ -21,10 +21,11 @@ if (NOT CMAKE_PROJECT_NAME)
 endif()
 
 project(K4A LANGUAGES C CXX
-    VERSION 1.2)
+    VERSION 1.3)
 
 option(K4A_BUILD_DOCS "Build K4A doxygen documentation" OFF)
 option(K4A_MTE_VERSION "Skip FW version check" OFF)
+option(K4A_SOURCE_LINK "Enable source linking on MSVC" OFF)
 
 include(GitCommands)
 
@@ -55,10 +56,27 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-# For code, link against the static crt on windows
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-    include(MSVCStaticCrt)
+    # Turn off incremental linking
     include(MSVCLinkerFlags)
+
+    # Enable source linking
+    # NOTE: Dependencies are not properly setup here.
+    #       Currently, CMake does not know to re-link if SOURCE_LINK_JSON changes
+    #       Currently, CMake does not re-generate SOURCE_LINK_JSON if git's HEAD changes
+    if (K4A_SOURCE_LINK)
+        if ("${CMAKE_C_COMPILER_VERSION}" VERSION_GREATER_EQUAL "19.20")
+            include(SourceLink)
+            file(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}/source_link.json" SOURCE_LINK_JSON)
+            source_link(${PROJECT_SOURCE_DIR} ${SOURCE_LINK_JSON})
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SOURCELINK:${SOURCE_LINK_JSON}")
+            set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SOURCELINK:${SOURCE_LINK_JSON}")
+        else()
+            message(WARNING "Disabling SourceLink due to old version of MSVC. Please update to VS2019!")
+        endif()
+    endif()
+
+    # Include hashes of source files in the PDB
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /ZH:SHA_256")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /ZH:SHA_256")
 endif()
@@ -73,6 +91,13 @@ endif()
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id")
+endif()
+
+# If using clang or GCC, set default visibilty to hidden
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_C_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 endif()
 
 # Find all dependencies
@@ -106,6 +131,33 @@ endif()
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     set(CMAKE_BUILD_WITH_INSTALL_RPATH YES)
     set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+endif()
+
+set(TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+
+# CMake doesn't set the target processor correctly for MSVC
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    if ("${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
+        set(K4A_BINARY_DIR_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+        set(K4A_BINARY_DIR_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    else()
+        set(K4A_BINARY_DIR_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
+        set(K4A_BINARY_DIR_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo)
+    endif()
+
+    # Check what architecture we are building for. This assumes all 64-bit architectures are amd64, which will break
+    # if we decide to support arm.
+    if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(TARGET_ARCH "amd64")
+        configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x64.props)
+        configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x64.xml)
+    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
+        set(TARGET_ARCH "x86")
+        configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x86.props)
+        configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x86.xml)
+    else()
+        message(FATAL_ERROR "Unknown architecture with size of void* = ${CMAKE_SIZEOF_VOID_P}")
+    endif()
 endif()
 
 add_subdirectory(examples)
@@ -224,31 +276,6 @@ endif()
 
 # Generate .NET Version file.
 configure_file(VersionInfo.cs.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/VersionInfo.cs)
-
-set(TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR})
-
-# CMake doesn't set the target processor correctly for MSVC
-if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-    if ("${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
-        set(K4A_BINARY_DIR_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-        set(K4A_BINARY_DIR_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    else()
-        set(K4A_BINARY_DIR_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
-        set(K4A_BINARY_DIR_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo)
-    endif()
-
-    if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(TARGET_ARCH "amd64")
-        configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x64.props)
-        configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x64.xml)
-    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
-        set(TARGET_ARCH "x86")
-        configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x86.props)
-        configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x86.xml)
-    else()
-        message(FATAL_ERROR "Unknown architecture with size of void* = ${CMAKE_SIZEOF_VOID_P}")
-    endif()
-endif()
 
 # Packaging support
 set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS

@@ -7,7 +7,7 @@ the most recent frames to the specified folder when notified by [Azure Kinect Fa
 
 ## Usage Info
 
-```shell
+```
 d:\fastcapture_streaming.exe /?
 * fastcapture_streaming.exe Usage Info *
 
@@ -21,4 +21,5 @@ Examples:
 
        2 - fastcapture_streaming.exe -DirectoryPath C:\data\ -PcmShift 5 -StreamingLength 1000 -ExposureValue -3
 
-       3 - fastcapture_streaming.exe -d C:\data\ -s 4 -l 60 -e -2```
+       3 - fastcapture_streaming.exe -d C:\data\ -s 4 -l 60 -e -2
+```

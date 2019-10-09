@@ -21,6 +21,12 @@ typedef void(k4a_init_once_function_t)(void);
 
 void global_init_once(k4a_init_once_t *init_once, k4a_init_once_function_t *init_function);
 
+#ifdef __cplusplus
+#define DEFAULT_INIT(type, field) field = type()
+#else
+#define DEFAULT_INIT(type, field) memset(&field, 0, sizeof(field))
+#endif
+
 /** Declares an initialized global context
  *
  * \param _global_type_
@@ -41,7 +47,7 @@ void global_init_once(k4a_init_once_t *init_once, k4a_init_once_function_t *init
     static _global_type_ _##_global_type_##_private;                                                                   \
     static void fn_##_global_type_##_init_function(void)                                                               \
     {                                                                                                                  \
-        memset(&_##_global_type_##_private, 0, sizeof(_##_global_type_##_private));                                    \
+        DEFAULT_INIT(_global_type_, _##_global_type_##_private);                                                       \
         _init_function_(&_##_global_type_##_private);                                                                  \
         return;                                                                                                        \
     }                                                                                                                  \

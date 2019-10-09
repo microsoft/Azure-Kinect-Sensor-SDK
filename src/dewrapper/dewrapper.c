@@ -500,7 +500,7 @@ void dewrapper_post_capture(k4a_result_t cb_result, k4a_capture_t capture_raw, v
     {
         LOG_WARNING("A streaming depth transfer failed", 0);
         dewrapper->capture_ready_cb(cb_result, capture, dewrapper->capture_ready_cb_context);
-        queue_error(dewrapper->queue);
+        queue_stop(dewrapper->queue);
     }
 }
 

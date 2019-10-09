@@ -1134,6 +1134,16 @@ k4a_result_t k4a_calibration_2d_to_2d(const k4a_calibration_t *calibration,
         calibration, source_point2d->v, source_depth_mm, source_camera, target_camera, target_point2d->v, valid));
 }
 
+k4a_result_t k4a_calibration_color_2d_to_depth_2d(const k4a_calibration_t *calibration,
+                                                  const k4a_float2_t *source_point2d,
+                                                  const k4a_image_t depth_image,
+                                                  k4a_float2_t *target_point2d,
+                                                  int *valid)
+{
+    return TRACE_CALL(
+        transformation_color_2d_to_depth_2d(calibration, source_point2d->v, depth_image, target_point2d->v, valid));
+}
+
 k4a_transformation_t k4a_transformation_create(const k4a_calibration_t *calibration)
 {
     return transformation_create(calibration, TRANSFORM_ENABLE_GPU_OPTIMIZATION);

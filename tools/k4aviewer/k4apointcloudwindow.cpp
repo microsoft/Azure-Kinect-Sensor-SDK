@@ -92,7 +92,7 @@ void K4APointCloudWindow::Show(K4AWindowPlacementInfo placementInfo)
     }
 
     ImGui::SameLine();
-    ImGui::VerticalSeparator();
+    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
     ImGui::SameLine();
     ImGui::TextDisabled("[Show Controls]");
     const char *controlsHelpMessage = "Rotate: [Left Mouse] + Drag\n"

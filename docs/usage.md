@@ -17,11 +17,12 @@ build from source.
 
 The latest stable binaries are available for download as MSIs.
 
-   Tag                                                                               | MSI
--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------
-  [v1.1.1](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.1) | [Azure Kinect SDK 1.1.1.msi](http://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/Azure%20Kinect%20SDK%201.1.1.msi)
-  [v1.1.0](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.0) | [Azure Kinect SDK 1.1.0.msi](http://download.microsoft.com/download/E/B/D/EBDBB3C1-ED3F-4236-96D6-2BCB352F3710/Azure%20Kinect%20SDK%201.1.0.msi)
-  [v1.0.2](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.0.2) | [Azure Kinect SDK 1.0.2.msi](http://download.microsoft.com/download/B/4/D/B4D26442-DDA5-40C2-9913-3B23AE84A806/Azure%20Kinect%20SDK%201.0.2.msi)
+   Tag                                                                               | MSI                                                                                                                                              | Firmware
+-------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------
+  [v1.2.0](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.2.0) | [Azure Kinect SDK 1.2.0.msi](http://download.microsoft.com/download/1/9/8/198048e8-63f2-45c6-8f96-1fd541d1b4bc/Azure%20Kinect%20SDK%201.2.0.msi) | [1.6.102075014](https://download.microsoft.com/download/1/9/8/198048e8-63f2-45c6-8f96-1fd541d1b4bc/AzureKinectDK_Fw_1.6.102075014.bin)
+  [v1.1.1](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.1) | [Azure Kinect SDK 1.1.1.msi](http://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/Azure%20Kinect%20SDK%201.1.1.msi) | [1.6.987014](https://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/AzureKinectDK_Fw_1.6.987014.bin)
+  [v1.1.0](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.0) | [Azure Kinect SDK 1.1.0.msi](http://download.microsoft.com/download/E/B/D/EBDBB3C1-ED3F-4236-96D6-2BCB352F3710/Azure%20Kinect%20SDK%201.1.0.msi) | [1.6.987014](https://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/AzureKinectDK_Fw_1.6.987014.bin)
+  [v1.0.2](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.0.2) | [Azure Kinect SDK 1.0.2.msi](http://download.microsoft.com/download/B/4/D/B4D26442-DDA5-40C2-9913-3B23AE84A806/Azure%20Kinect%20SDK%201.0.2.msi) | [1.6.987014](https://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/AzureKinectDK_Fw_1.6.987014.bin)
 
 The installer will put all the needed headers, binaries, and tools in the
 location you choose (by default this is `C:\Program Files\Azure Kinect SDK
@@ -36,7 +37,7 @@ Directly include the Sensor SDK in your project using
 
 We currently have debian packages available for Ubuntu 18.04. If you have
 need for a different debian distribution, please file an
-[issue](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/new?assignees=&labels=Enhancement&template=feature-request--enhancement-.md&title=).
+[enhancement request](https://aka.ms/azurekinectfeedback).
 
 Our packages are hosted in [Microsoft's Package
 Repository](https://packages.microsoft.com). Please follow [these
