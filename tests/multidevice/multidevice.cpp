@@ -16,7 +16,7 @@
 // event the test regresses.
 #define WAIT_TEST_INFINITE (5 * 60 * 1000)
 
-#define LLD(val) ((long long)val)
+#define LLD(val) ((int64_t)(val))
 #define NULL_IMAGE 0
 #define NULL_DEVICE 0
 
@@ -178,21 +178,39 @@ TEST_F(multidevice_ft, stream_two_2_then_1)
 #define RETURN_K4A_RESULT_LE(msg1, msg2, v1, v2)                                                                       \
     if (!(v1 <= v2))                                                                                                   \
     {                                                                                                                  \
-        printf("%s(%d): ERROR: expected %s <= %s\n %lld vs %lld\n", __FILE__, __LINE__, msg1, msg2, LLD(v1), LLD(v2)); \
+        printf("%s(%d): ERROR: expected %s <= %s\n %" PRId64 " vs %" PRId64 "\n",                                      \
+               __FILE__,                                                                                               \
+               __LINE__,                                                                                               \
+               msg1,                                                                                                   \
+               msg2,                                                                                                   \
+               LLD(v1),                                                                                                \
+               LLD(v2));                                                                                               \
         return K4A_RESULT_FAILED;                                                                                      \
     }
 
 #define RETURN_K4A_RESULT_EQ(msg1, msg2, v1, v2)                                                                       \
     if (!(v1 == v2))                                                                                                   \
     {                                                                                                                  \
-        printf("%s(%d): ERROR: expected %s == %s\n %lld vs %lld\n", __FILE__, __LINE__, msg1, msg2, LLD(v1), LLD(v2)); \
+        printf("%s(%d): ERROR: expected %s == %s\n %" PRId64 " vs %" PRId64 "\n",                                      \
+               __FILE__,                                                                                               \
+               __LINE__,                                                                                               \
+               msg1,                                                                                                   \
+               msg2,                                                                                                   \
+               LLD(v1),                                                                                                \
+               LLD(v2));                                                                                               \
         return K4A_RESULT_FAILED;                                                                                      \
     }
 
 #define RETURN_K4A_RESULT_NE(msg1, msg2, v1, v2)                                                                       \
     if (!(v1 != v2))                                                                                                   \
     {                                                                                                                  \
-        printf("%s(%d): ERROR: expected %s != %s\n %lld vs %lld\n", __FILE__, __LINE__, msg1, msg2, LLD(v1), LLD(v2)); \
+        printf("%s(%d): ERROR: expected %s != %s\n %" PRId64 " vs %" PRId64 "\n",                                      \
+               __FILE__,                                                                                               \
+               __LINE__,                                                                                               \
+               msg1,                                                                                                   \
+               msg2,                                                                                                   \
+               LLD(v1),                                                                                                \
+               LLD(v2));                                                                                               \
         return K4A_RESULT_FAILED;                                                                                      \
     }
 
@@ -298,19 +316,19 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
 
     ts_s_adj = ts_s - subordinate_delay_off_master_usec;
 
-    int64_t ts_delta = ts_m > ts_s_adj ? ts_m - ts_s_adj : ts_s_adj - ts_m;
+    int64_t ts_delta = std::abs(ts_m - ts_s_adj);
     while (ts_delta > MAX_SYNC_CAPTURE_DIFFERENCE_USEC)
     {
         // bail out if it never happens
-        R_EXPECT_LE(tries++, 1000);
+        R_EXPECT_LE(tries++, 100);
 
         if (ts_m < ts_s_adj)
         {
-            printf("Master too old m:%9lld s:%9lld adj sub:%9lld adj delta:%9lld\n",
-                   LLD(ts_m),
-                   LLD(ts_s),
-                   LLD(ts_s_adj),
-                   LLD(ts_delta));
+            printf("Master too old m:%9" PRId64 " s:%9" PRId64 " adj sub:%9" PRId64 " adj delta:%9" PRId64 "\n",
+                   ts_m,
+                   ts_s,
+                   ts_s_adj,
+                   ts_delta);
             k4a_capture_release(*cap_m);
             R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(master, cap_m, 10000));
             R_EXPECT_NE(NULL_IMAGE, (image_m = k4a_capture_get_color_image(*cap_m)));
@@ -319,11 +337,11 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
         }
         else
         {
-            printf("Sub    too old m:%9lld s:%9lld adj sub:%9lld adj delta:%9lld\n",
-                   LLD(ts_m),
-                   LLD(ts_s),
-                   LLD(ts_s_adj),
-                   LLD(ts_delta));
+            printf("Sub    too old m:%9" PRId64 " s:%9" PRId64 " adj sub:%9" PRId64 " adj delta:%9" PRId64 "\n",
+                   ts_m,
+                   ts_s,
+                   ts_s_adj,
+                   ts_delta);
             k4a_capture_release(*cap_s);
             R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(sub, cap_s, 10000));
             R_EXPECT_NE(NULL_IMAGE, (image_s = k4a_capture_get_color_image(*cap_s)));
@@ -332,15 +350,26 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
             k4a_image_release(image_s);
         }
 
-        ts_delta = ts_m > ts_s_adj ? ts_m - ts_s_adj : ts_s_adj - ts_m;
+        ts_delta = std::abs(ts_m - ts_s_adj);
     }
     return K4A_RESULT_SUCCEEDED;
 }
-static k4a_result_t verify_ts(uint64_t ts_1, uint64_t ts_2, uint64_t ts_offset)
+static k4a_result_t verify_ts(int64_t ts_1, int64_t ts_2, int64_t ts_offset, const char *error_message)
 {
-    ts_1 = ts_1 + ts_offset;
-    uint64_t ts_result = ts_1 > ts_2 ? ts_1 - ts_2 : ts_2 - ts_1;
-    R_EXPECT_LE(ts_result, MAX_SYNC_CAPTURE_DIFFERENCE_USEC);
+    int64_t ts_1_adjust = ts_1 + ts_offset;
+    int64_t ts_result = std::abs(ts_1_adjust - ts_2);
+    if (ts_result > MAX_SYNC_CAPTURE_DIFFERENCE_USEC)
+    {
+        printf("    ERROR timestamps are not within range.\n    TS1 + TS_Offset should be ~= TS2. %s\n    ts1=%" PRId64
+               " "
+               "ts2=%" PRId64 " ts_offset=%" PRId64 " diff=%" PRId64 "\n",
+               error_message,
+               ts_1,
+               ts_2,
+               ts_offset,
+               ts_result);
+        R_EXPECT_LE(ts_result, MAX_SYNC_CAPTURE_DIFFERENCE_USEC);
+    }
     return K4A_RESULT_SUCCEEDED;
 }
 
@@ -348,7 +377,7 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
 {
     k4a_device_t master, subordinate;
     k4a_fps_t frame_rate = K4A_FRAMES_PER_SECOND_30;
-    uint64_t fps_in_usec = 1000000 / k4a_convert_fps_to_uint(frame_rate);
+    int32_t fps_in_usec = 1000000 / (int32_t)k4a_convert_fps_to_uint(frame_rate);
 
     ASSERT_EQ(open_master_and_subordinate(&master, &subordinate), K4A_RESULT_SUCCEEDED);
 
@@ -367,7 +396,7 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     k4a_device_configuration_t s_config = default_config;
     s_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
     s_config.depth_delay_off_color_usec = (int32_t)(2 * fps_in_usec * ((uint64_t)rand()) / RAND_MAX - fps_in_usec);
-    s_config.subordinate_delay_off_master_usec = (int32_t)(1 * fps_in_usec * ((uint64_t)rand()) / RAND_MAX);
+    s_config.subordinate_delay_off_master_usec = (uint32_t)(1 * fps_in_usec * rand() / RAND_MAX);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config));
 
     k4a_device_configuration_t m_config = default_config;
@@ -392,28 +421,40 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   get_syncd_captures(master, subordinate, &cap_m, &cap_s, s_config.subordinate_delay_off_master_usec));
 
-        ASSERT_NE(NULL, (int64_t)(image_c_m = k4a_capture_get_color_image(cap_m)));
-        ASSERT_NE(NULL, (int64_t)(image_c_s = k4a_capture_get_color_image(cap_s)));
-        ASSERT_NE(NULL, (int64_t)(image_ir_m = k4a_capture_get_ir_image(cap_m)));
-        ASSERT_NE(NULL, (int64_t)(image_ir_s = k4a_capture_get_ir_image(cap_s)));
+        ASSERT_FALSE(NULL_IMAGE == (image_c_m = k4a_capture_get_color_image(cap_m)));
+        ASSERT_FALSE(NULL_IMAGE == (image_c_s = k4a_capture_get_color_image(cap_s)));
+        ASSERT_FALSE(NULL_IMAGE == (image_ir_m = k4a_capture_get_ir_image(cap_m)));
+        ASSERT_FALSE(NULL_IMAGE == (image_ir_s = k4a_capture_get_ir_image(cap_s)));
 
         ts_m_c = (int64_t)k4a_image_get_device_timestamp_usec(image_c_m);
         ts_s_c = (int64_t)k4a_image_get_device_timestamp_usec(image_c_s);
         ts_m_ir = (int64_t)k4a_image_get_device_timestamp_usec(image_ir_m);
         ts_s_ir = (int64_t)k4a_image_get_device_timestamp_usec(image_ir_s);
 
-        printf("%9lld, %9lld(%5lld), %9lld(%5lld), %9lld(%5lld)\n",
-               LLD(ts_m_c),
-               LLD(ts_m_ir),
-               LLD(ts_m_ir - ts_m_c),
-               LLD(ts_s_c),
-               LLD(ts_s_c - ts_m_c),
-               LLD(ts_s_ir),
-               LLD(ts_s_ir - ts_m_c));
+        printf("%9" PRId64 ", %9" PRId64 "(%5" PRId64 "), %9" PRId64 "(%5" PRId64 "), %9" PRId64 "(%5" PRId64 ")\n",
+               ts_m_c,
+               ts_m_ir,
+               ts_m_ir - ts_m_c,
+               ts_s_c,
+               ts_s_c - ts_m_c,
+               ts_s_ir,
+               ts_s_ir - ts_m_c);
 
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, verify_ts(ts_m_c, ts_m_ir, m_config.depth_delay_off_color_usec));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, verify_ts(ts_s_c, ts_s_ir, s_config.depth_delay_off_color_usec));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED, verify_ts(ts_m_c, ts_s_c, s_config.subordinate_delay_off_master_usec));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  verify_ts(ts_m_c,
+                            ts_m_ir,
+                            m_config.depth_delay_off_color_usec,
+                            "TS1 is Master Color, TS2 is Master Ir"));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  verify_ts(ts_s_c,
+                            ts_s_ir,
+                            s_config.depth_delay_off_color_usec,
+                            "TS1 is Subordinate Color, TS2 is Subordinate Ir"));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                  verify_ts(ts_m_c,
+                            ts_s_c,
+                            (int64_t)s_config.subordinate_delay_off_master_usec,
+                            "TS1 is Master Color, TS2 is Subordinate Color"));
 
         k4a_image_release(image_c_m);
         k4a_image_release(image_c_s);
