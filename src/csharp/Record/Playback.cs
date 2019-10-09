@@ -496,7 +496,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                     case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_FAILED:
                         throw new AzureKinectGetCaptureException();
                     case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_SUCCEEDED:
-                        return new Capture(captureHandle);
+                        return new Capture(true, captureHandle);
                 }
 
                 return null;
@@ -539,7 +539,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                     case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_FAILED:
                         throw new AzureKinectGetCaptureException();
                     case NativeMethods.k4a_stream_result_t.K4A_STREAM_RESULT_SUCCEEDED:
-                        return new Capture(captureHandle);
+                        return new Capture(true, captureHandle);
                 }
 
                 return null;
