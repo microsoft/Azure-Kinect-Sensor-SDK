@@ -462,9 +462,14 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public class k4a_capture_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
         {
-            public k4a_capture_t(IntPtr handle)
+            public k4a_capture_t(bool takeOwnership, IntPtr handle)
                 : base(true)
             {
+                if (!takeOwnership)
+                {
+                    NativeMethods.k4a_image_reference(handle);
+                }
+
                 this.handle = handle;
             }
 
@@ -492,6 +497,17 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         public class k4a_image_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
         {
+            public k4a_image_t(bool takeOwnership, IntPtr handle)
+                : base(true)
+            {
+                if (!takeOwnership)
+                {
+                    NativeMethods.k4a_image_reference(handle);
+                }
+
+                this.handle = handle;
+            }
+
             private k4a_image_t()
                 : base(true)
             {

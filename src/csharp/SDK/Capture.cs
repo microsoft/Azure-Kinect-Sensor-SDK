@@ -40,12 +40,14 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Initializes a new instance of the <see cref="Capture"/> class from an existing native handle.
         /// </summary>
-        /// <param name="handle">Native handle to a capture.</param>
+        /// <param name="takeOwnership">If false, the constructor will take a new reference on the handle.</param>
+        /// <param name="handle">Native handle to a k4a_capture_t.</param>
         /// <remarks>
-        /// This constructor will take ownership of the existing handle. Disposing this Capture will close the handle.
+        /// Disposing this Capture will always release a reference on the handle.
+        /// If <paramref name="takeOwnership"/> is true, the handle may not be owned by any existing Capture object.
         /// </remarks>
-        public Capture(IntPtr handle)
-            : this(new NativeMethods.k4a_capture_t(handle))
+        public Capture(bool takeOwnership, IntPtr handle)
+            : this(new NativeMethods.k4a_capture_t(takeOwnership, handle))
         {
         }
 
