@@ -1,13 +1,17 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectFlushException.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
-
     /// <summary>
-    /// Represents errors that occur when an error occurs during flushing
+    /// Represents errors that occur when an error occurs during flushing.
     /// </summary>
     [Serializable]
     public class AzureKinectFlushException : AzureKinectRecordException

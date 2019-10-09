@@ -5,8 +5,6 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
-using System.Globalization;
-using System.Linq.Expressions;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -16,6 +14,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
 #pragma warning disable IDE1006 // Naming Styles
 #pragma warning disable SA1600 // Elements should be documented
 #pragma warning disable SA1602 // Enumeration items should be documented
+#pragma warning disable CA2101 // Specify marshaling for P/Invoke string arguments
     internal static class NativeMethods
     {
         private const CallingConvention k4aCallingConvention = CallingConvention.Cdecl;
@@ -58,7 +57,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
         public static extern k4a_result_t k4a_record_create(string path, IntPtr device, k4a_device_configuration_t deviceConfiguration, out k4a_record_t handle);
-        
+
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
         public static extern k4a_result_t k4a_record_add_tag(k4a_record_t handle, string name, string value);
 
@@ -102,7 +101,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         public static extern k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, out Calibration calibration);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle, out k4a_record_configuration_t configuration);
+        public static extern k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle, [Out] k4a_record_configuration_t configuration);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern bool k4a_playback_check_track_exists(k4a_playback_t playback_handle, string track_name);
@@ -123,79 +122,86 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         public static extern k4a_buffer_result_t k4a_playback_track_get_codec_id(k4a_playback_t playback_handle, string track_name, StringBuilder codec_id, ref UIntPtr codec_id_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_buffer_result_t k4a_playback_track_get_codec_context(k4a_playback_t playback_handle,
-                                                                          string track_name,
-                                                                          byte[] codec_context,
-                                                                          ref UIntPtr codec_context_size);
+        public static extern k4a_buffer_result_t k4a_playback_track_get_codec_context(
+            k4a_playback_t playback_handle,
+            string track_name,
+            byte[] codec_context,
+            ref UIntPtr codec_context_size);
+
+        [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
+        public static extern k4a_buffer_result_t k4a_playback_get_tag(
+            k4a_playback_t playback_handle,
+            string track_name,
+            StringBuilder value,
+            ref UIntPtr codec_context_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_buffer_result_t k4a_playback_get_tag(k4a_playback_t playback_handle,
-                                                                      string track_name,
-                                                                      StringBuilder value,
-                                                                      ref UIntPtr codec_context_size);
+        public static extern k4a_result_t k4a_playback_set_color_conversion(
+            k4a_playback_t playback_handle,
+            ImageFormat target_format);
+
+        [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
+        public static extern k4a_buffer_result_t k4a_playback_get_attachment(
+            k4a_playback_t playback_handle,
+            string file_name,
+            byte[] data,
+            ref UIntPtr data_size);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_result_t k4a_playback_set_color_conversion(k4a_playback_t playback_handle,
-                                                                            ImageFormat target_format);
+        public static extern k4a_stream_result_t k4a_playback_get_next_capture(
+            k4a_playback_t playback_handle,
+            out IntPtr capture_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_buffer_result_t k4a_playback_get_attachment(k4a_playback_t playback_handle,
-                                                                      string file_name,
-                                                                      byte[] data,
-                                                                      ref UIntPtr data_size);
+        public static extern k4a_stream_result_t k4a_playback_get_previous_capture(
+            k4a_playback_t playback_handle,
+            out IntPtr capture_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_stream_result_t k4a_playback_get_next_capture(k4a_playback_t playback_handle,
-                                                                   out IntPtr capture_handle);
+        public static extern k4a_stream_result_t k4a_playback_get_next_imu_sample(
+            k4a_playback_t playback_handle,
+            [Out] k4a_imu_sample_t imu_sample);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_stream_result_t k4a_playback_get_previous_capture(k4a_playback_t playback_handle,
-                                                                       out IntPtr capture_handle);
-
-
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_stream_result_t k4a_playback_get_next_imu_sample(k4a_playback_t playback_handle,
-                                                                       [Out] k4a_imu_sample_t imu_sample);
+        public static extern k4a_stream_result_t k4a_playback_get_previous_imu_sample(
+            k4a_playback_t playback_handle,
+            [Out] k4a_imu_sample_t imu_sample);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_stream_result_t k4a_playback_get_previous_imu_sample(k4a_playback_t playback_handle,
-                                                                       [Out] k4a_imu_sample_t imu_sample);
+        public static extern k4a_stream_result_t k4a_playback_get_next_data_block(
+            k4a_playback_t playback_handle,
+            string track_name,
+            out k4a_playback_data_block_t data_block);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_stream_result_t k4a_playback_get_next_data_block(k4a_playback_t playback_handle,
-                                                                                   string track_name,
-                                                                                   out k4a_playback_data_block_t data_block);
-
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_stream_result_t k4a_playback_get_previous_data_block(k4a_playback_t playback_handle,
-                                                                          string track_name,
-                                                                          out k4a_playback_data_block_t data_block_handle);
+        public static extern k4a_stream_result_t k4a_playback_get_previous_data_block(
+            k4a_playback_t playback_handle,
+            string track_name,
+            out k4a_playback_data_block_t data_block_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern IntPtr k4a_playback_data_block_get_buffer(k4a_playback_data_block_t data_block_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern UInt64 k4a_playback_data_block_get_device_timestamp_usec(k4a_playback_data_block_t data_block_handle);
+        public static extern ulong k4a_playback_data_block_get_device_timestamp_usec(k4a_playback_data_block_t data_block_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern UInt64 k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_block_handle);
+        public static extern ulong k4a_playback_data_block_get_buffer_size(k4a_playback_data_block_t data_block_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern void k4a_playback_data_block_release(IntPtr data_block_handle);
 
+        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
+        public static extern k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle, ulong offset_usec, PlaybackSeekOrigin origin);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_result_t k4a_playback_seek_timestamp(k4a_playback_t playback_handle, UInt64 offset_usec, PlaybackSeekOrigin origin);
+        public static extern ulong k4a_playback_get_recording_length_usec(k4a_playback_t playback_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern UInt64 k4a_playback_get_recording_length_usec(k4a_playback_t playback_handle);
-
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern UInt64 k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle);
+        public static extern ulong k4a_playback_get_last_timestamp_usec(k4a_playback_t playback_handle);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern void k4a_playback_close(IntPtr playback_handle);
-
 
         [StructLayout(LayoutKind.Sequential)]
         public struct k4a_version_t
@@ -342,20 +348,23 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         [StructLayout(LayoutKind.Sequential)]
         public class k4a_record_configuration_t
         {
+#pragma warning disable SA1401 // Fields should be private
             public ImageFormat color_format;
             public ColorResolution color_resolution;
             public DepthMode depth_mode;
             public FPS camera_fps;
             public bool color_track_enabled;
             public bool depth_track_enabled;
+            public bool ir_track_enabled;
             public bool imu_track_enabled;
             public int depth_delay_off_color_usec;
             public WiredSyncMode wired_sync_mode;
             public uint subordinate_delay_off_master_usec;
             public uint start_timestamp_offset_usec;
+#pragma warning restore SA1401 // Fields should be private
         }
-
     }
+#pragma warning restore CA2101 // Specify marshaling for P/Invoke string arguments
 #pragma warning restore SA1602 // Enumeration items should be documented
 #pragma warning restore SA1600 // Elements should be documented
 #pragma warning restore IDE1006 // Naming Styles

@@ -7,7 +7,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Microsoft.Azure.Kinect.Sensor.Record;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
@@ -84,13 +83,12 @@ namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
         /// Throws an <see cref="AzureKinectCreateRecordingException"/> if the result of the function
         /// is not a success.
         /// </summary>
-        /// <param name="fileName">File name of the create</param>
+        /// <param name="fileName">File name of the create.</param>
         /// <param name="function">The native function to call.</param>
         /// <typeparam name="T">The type of result to expect from the function call.</typeparam>
         internal static void ThrowIfNotSuccess<T>(string fileName, Func<T> function)
             where T : System.Enum
         {
-
             using (LoggingTracer tracer = new LoggingTracer(LogLevel.Warning, Logger.LogProvider, RecordLogger.LogProvider))
             {
                 T result = function();
@@ -105,7 +103,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
         /// Throws an <see cref="AzureKinectCreateRecordingException"/> if the result of the function
         /// is not a success.
         /// </summary>
-        /// <param name="fileName">File name of the create</param>
+        /// <param name="fileName">File name of the create.</param>
         /// <param name="tracer">The tracer is that is capturing logging messages.</param>
         /// <param name="result">The result native function to call.</param>
         /// <typeparam name="T">The type of result to expect from the function call.</typeparam>

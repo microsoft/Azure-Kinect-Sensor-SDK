@@ -1,13 +1,17 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectAddCustomSubtitleTrackException.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
-
     /// <summary>
-    /// Represents errors that occur when adding a custom subtitle track
+    /// Represents errors that occur when adding a custom subtitle track.
     /// </summary>
     [Serializable]
     public class AzureKinectAddCustomSubtitleTrackException : AzureKinectRecordException

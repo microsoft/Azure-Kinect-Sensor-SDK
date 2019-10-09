@@ -51,7 +51,7 @@ namespace Tests
             };
 
 #pragma warning disable CA1508 // Avoid dead conditional code
-            using (Record record = Record.Create(this.recordingPath, null, deviceConfiguration))
+            using (Recorder record = Recorder.Create(this.recordingPath, null, deviceConfiguration))
 #pragma warning restore CA1508 // Avoid dead conditional code
             {
                 record.AddImuTrack();
@@ -187,7 +187,7 @@ namespace Tests
 
                     using (DataBlock videoBlock = playback.GetNextDataBlock("CUSTOM_VIDEO"))
                     {
-                        Assert.AreEqual(customData, videoBlock.Buffer);
+                        Assert.AreEqual(customData, videoBlock.Memory.ToArray());
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp), videoBlock.DeviceTimestamp);
                     }
 
@@ -198,7 +198,7 @@ namespace Tests
 
                     using (DataBlock subtitleBlock = playback.GetNextDataBlock("CUSTOM_SUBTITLE"))
                     {
-                        Assert.AreEqual(customData, subtitleBlock.Buffer);
+                        Assert.AreEqual(customData, subtitleBlock.Memory.ToArray());
                         Assert.AreEqual(TimeSpan.FromSeconds(timeStamp), subtitleBlock.DeviceTimestamp);
                     }
                 }

@@ -31,22 +31,21 @@ namespace Recording
                     DepthMode = DepthMode.NFOV_2x2Binned,
                     SynchronizedImagesOnly = true
                 };
-
                 using (Device device = Device.Open())
-                using (Record recording = Record.Create(path, device, configuration))
+                using (Recorder recorder = Recorder.Create(path, device, configuration))
                 {
 
                     device.StartCameras(configuration);
                     device.StartImu();
 
-                    recording.AddImuTrack();
-                    recording.WriteHeader();
+                    recorder.AddImuTrack();
+                    recorder.WriteHeader();
 
                     for (frame = 0; frame < 100; frame++)
                     {
                         using (Capture capture = device.GetCapture())
                         {
-                            recording.WriteCapture(capture);
+                            recorder.WriteCapture(capture);
                             Console.WriteLine($"Wrote capture ({capture.Color.DeviceTimestamp})");
                             try
                             {
@@ -55,7 +54,7 @@ namespace Recording
                                     // Throws TimeoutException when Imu sample is not available
                                     ImuSample sample = device.GetImuSample(TimeSpan.Zero);
 
-                                    recording.WriteImuSample(sample);
+                                    recorder.WriteImuSample(sample);
                                     Console.WriteLine($"Wrote imu ({sample.AccelerometerTimestamp})");
                                 }
                             }

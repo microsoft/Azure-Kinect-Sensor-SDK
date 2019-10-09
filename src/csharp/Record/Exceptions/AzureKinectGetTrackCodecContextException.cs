@@ -1,13 +1,17 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectGetTrackCodecContextException.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
-
     /// <summary>
-    /// Represents errors that occur when getting a codec context from a track
+    /// Represents errors that occur when getting a codec context from a track.
     /// </summary>
     [Serializable]
     public class AzureKinectGetTrackCodecContextException : AzureKinectRecordException

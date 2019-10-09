@@ -1,17 +1,25 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectRecordException.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
+    /// <summary>
+    /// Represents errors occuring during record or playback.
+    /// </summary>
     [Serializable]
     public abstract class AzureKinectRecordException : AzureKinectException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureKinectRecordException"/> class.
         /// </summary>
-        public AzureKinectRecordException()
+        protected AzureKinectRecordException()
         {
         }
 
@@ -20,7 +28,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
         /// with a specified error message.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public AzureKinectRecordException(string message)
+        protected AzureKinectRecordException(string message)
             : base(message)
         {
         }
@@ -37,7 +45,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
         /// The exception that is the cause of the current exception, or a null reference
         /// (Nothing in Visual Basic) if no inner exception is specified.
         /// </param>
-        public AzureKinectRecordException(string message, Exception innerException)
+        protected AzureKinectRecordException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
@@ -98,7 +106,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
                     throw new ArgumentException("Result is not of a recognized result type.", nameof(result));
             }
         }
-        
+
         /// <summary>
         /// Determines if the <see cref="NativeMethods.k4a_result_t"/> is a success.
         /// </summary>

@@ -11,7 +11,7 @@ using System.Runtime.Serialization;
 namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
     /// <summary>
-    /// Represents errors that occur when adding a tag to a recording
+    /// Represents errors that occur when adding a tag to a recording.
     /// </summary>
     [Serializable]
     public class AzureKinectAddTagException : AzureKinectRecordException

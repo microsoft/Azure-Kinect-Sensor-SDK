@@ -1,13 +1,17 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectWriteHeaderException.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
-
     /// <summary>
-    /// Represents errors that occur when writing the header
+    /// Represents errors that occur when writing the header.
     /// </summary>
     [Serializable]
     public class AzureKinectWriteHeaderException : AzureKinectRecordException
