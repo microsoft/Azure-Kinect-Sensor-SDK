@@ -16,6 +16,10 @@
 // event the test regresses.
 #define WAIT_TEST_INFINITE (5 * 60 * 1000)
 
+#define LLD(val) ((long long)val)
+#define NULL_IMAGE 0
+#define NULL_DEVICE 0
+
 // How close 2 timestamps should be to be considered accurately synchronized.
 const int MAX_SYNC_CAPTURE_DIFFERENCE_USEC = 100;
 
@@ -174,39 +178,21 @@ TEST_F(multidevice_ft, stream_two_2_then_1)
 #define RETURN_K4A_RESULT_LE(msg1, msg2, v1, v2)                                                                       \
     if (!(v1 <= v2))                                                                                                   \
     {                                                                                                                  \
-        printf("%s(%d): ERROR: expected %s <= %s\n %lld vs %lld\n",                                                    \
-               __FILE__,                                                                                               \
-               __LINE__,                                                                                               \
-               msg1,                                                                                                   \
-               msg2,                                                                                                   \
-               (int64_t)v1,                                                                                            \
-               (int64_t)v2);                                                                                           \
+        printf("%s(%d): ERROR: expected %s <= %s\n %lld vs %lld\n", __FILE__, __LINE__, msg1, msg2, LLD(v1), LLD(v2)); \
         return K4A_RESULT_FAILED;                                                                                      \
     }
 
 #define RETURN_K4A_RESULT_EQ(msg1, msg2, v1, v2)                                                                       \
     if (!(v1 == v2))                                                                                                   \
     {                                                                                                                  \
-        printf("%s(%d): ERROR: expected %s == %s\n %lld vs %lld\n",                                                    \
-               __FILE__,                                                                                               \
-               __LINE__,                                                                                               \
-               msg1,                                                                                                   \
-               msg2,                                                                                                   \
-               (int64_t)v1,                                                                                            \
-               (int64_t)v2);                                                                                           \
+        printf("%s(%d): ERROR: expected %s == %s\n %lld vs %lld\n", __FILE__, __LINE__, msg1, msg2, LLD(v1), LLD(v2)); \
         return K4A_RESULT_FAILED;                                                                                      \
     }
 
 #define RETURN_K4A_RESULT_NE(msg1, msg2, v1, v2)                                                                       \
     if (!(v1 != v2))                                                                                                   \
     {                                                                                                                  \
-        printf("%s(%d): ERROR: expected %s != %s\n %lld vs %lld\n",                                                    \
-               __FILE__,                                                                                               \
-               __LINE__,                                                                                               \
-               msg1,                                                                                                   \
-               msg2,                                                                                                   \
-               (int64_t)v1,                                                                                            \
-               (int64_t)v2);                                                                                           \
+        printf("%s(%d): ERROR: expected %s != %s\n %lld vs %lld\n", __FILE__, __LINE__, msg1, msg2, LLD(v1), LLD(v2)); \
         return K4A_RESULT_FAILED;                                                                                      \
     }
 
@@ -251,8 +237,8 @@ static k4a_result_t open_master_and_subordinate(k4a_device_t *master, k4a_device
         }
     }
 
-    R_EXPECT_NE(NULL, (int64_t)*master);
-    R_EXPECT_NE(NULL, (int64_t)*subordinate);
+    R_EXPECT_NE(NULL_DEVICE, *master);
+    R_EXPECT_NE(NULL_DEVICE, *subordinate);
     return K4A_RESULT_SUCCEEDED;
 }
 
@@ -303,8 +289,8 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
     R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(master, cap_m, timeout_ms));
     R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(sub, cap_s, timeout_ms));
 
-    R_EXPECT_NE(NULL, (int64_t)(image_m = k4a_capture_get_color_image(*cap_m)));
-    R_EXPECT_NE(NULL, (int64_t)(image_s = k4a_capture_get_color_image(*cap_s)));
+    R_EXPECT_NE(NULL_IMAGE, (image_m = k4a_capture_get_color_image(*cap_m)));
+    R_EXPECT_NE(NULL_IMAGE, (image_s = k4a_capture_get_color_image(*cap_s)));
     ts_m = (int64_t)k4a_image_get_device_timestamp_usec(image_m);
     ts_s = (int64_t)k4a_image_get_device_timestamp_usec(image_s);
     k4a_image_release(image_m);
@@ -320,19 +306,27 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
 
         if (ts_m < ts_s_adj)
         {
-            printf("Master too old m:%9lld s:%9lld adj sub:%9lld adj delta:%9lld\n", ts_m, ts_s, ts_s_adj, ts_delta);
+            printf("Master too old m:%9lld s:%9lld adj sub:%9lld adj delta:%9lld\n",
+                   LLD(ts_m),
+                   LLD(ts_s),
+                   LLD(ts_s_adj),
+                   LLD(ts_delta));
             k4a_capture_release(*cap_m);
             R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(master, cap_m, 10000));
-            R_EXPECT_NE(NULL, (int64_t)(image_m = k4a_capture_get_color_image(*cap_m)));
+            R_EXPECT_NE(NULL_IMAGE, (image_m = k4a_capture_get_color_image(*cap_m)));
             ts_m = (int64_t)k4a_image_get_device_timestamp_usec(image_m);
             k4a_image_release(image_m);
         }
         else
         {
-            printf("Sub    too old m:%9lld s:%9lld adj sub:%9lld adj delta:%9lld\n", ts_m, ts_s, ts_s_adj, ts_delta);
+            printf("Sub    too old m:%9lld s:%9lld adj sub:%9lld adj delta:%9lld\n",
+                   LLD(ts_m),
+                   LLD(ts_s),
+                   LLD(ts_s_adj),
+                   LLD(ts_delta));
             k4a_capture_release(*cap_s);
             R_EXPECT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(sub, cap_s, 10000));
-            R_EXPECT_NE(NULL, (int64_t)(image_s = k4a_capture_get_color_image(*cap_s)));
+            R_EXPECT_NE(NULL_IMAGE, (image_s = k4a_capture_get_color_image(*cap_s)));
             ts_s = (int64_t)k4a_image_get_device_timestamp_usec(image_s);
             ts_s_adj = ts_s - subordinate_delay_off_master_usec;
             k4a_image_release(image_s);
@@ -340,7 +334,6 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
 
         ts_delta = ts_m > ts_s_adj ? ts_m - ts_s_adj : ts_s_adj - ts_m;
     }
-    // printf("JUST RIGHT     m:%9lld s:%9lld adj sub:%9lld adj delta:%9lld\n", ts_m, ts_s, ts_s_adj, ts_delta); //????
     return K4A_RESULT_SUCCEEDED;
 }
 static k4a_result_t verify_ts(uint64_t ts_1, uint64_t ts_2, uint64_t ts_offset)
@@ -393,7 +386,7 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     for (int x = 0; x < 100; x++)
     {
         k4a_capture_t cap_m, cap_s;
-        uint64_t ts_m_c, ts_m_ir, ts_s_c, ts_s_ir;
+        int64_t ts_m_c, ts_m_ir, ts_s_c, ts_s_ir;
         k4a_image_t image_c_m, image_ir_m, image_c_s, image_ir_s;
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -410,13 +403,13 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
         ts_s_ir = (int64_t)k4a_image_get_device_timestamp_usec(image_ir_s);
 
         printf("%9lld, %9lld(%5lld), %9lld(%5lld), %9lld(%5lld)\n",
-               ts_m_c,
-               ts_m_ir,
-               ts_m_ir - ts_m_c,
-               ts_s_c,
-               ts_s_c - ts_m_c,
-               ts_s_ir,
-               ts_s_ir - ts_m_c);
+               LLD(ts_m_c),
+               LLD(ts_m_ir),
+               LLD(ts_m_ir - ts_m_c),
+               LLD(ts_s_c),
+               LLD(ts_s_c - ts_m_c),
+               LLD(ts_s_ir),
+               LLD(ts_s_ir - ts_m_c));
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, verify_ts(ts_m_c, ts_m_ir, m_config.depth_delay_off_color_usec));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, verify_ts(ts_s_c, ts_s_ir, s_config.depth_delay_off_color_usec));
