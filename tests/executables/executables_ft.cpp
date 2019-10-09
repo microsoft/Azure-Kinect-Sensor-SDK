@@ -38,19 +38,45 @@ static int run_and_record_executable(std::string shell_command_path, std::string
     std::string formatted_command = shell_command_path;
     if (!output_path.empty())
     {
-        formatted_command += " 2>&1 > " + output_path;
+        formatted_command += " > " + output_path + " 2>&1";
     }
     // In Linux, forking a process causes the under buffers to be forked, too. So, because popen uses fork under the
     // hood, there may have been a risk of printing something in both processes. I'm not sure if this could happen in
     // this situation, but better safe than sorry.
+    std::cout << "Running: " << formatted_command << std::endl;
     std::cout.flush();
     FILE *process_stream = POPEN(formatted_command.c_str(), "r");
     if (!process_stream)
     {
-        printf("process_stream is NULL\n");
+        std::cout << "process_stream is NULL" << std::endl;
         return EXIT_FAILURE; // if popen fails, it returns null, which is an error
     }
-    return PCLOSE(process_stream);
+    int return_code = PCLOSE(process_stream);
+    std::cout << "<==============================================" << std::endl;
+    try
+    {
+        if (!output_path.empty())
+        {
+            std::ifstream file(output_path);
+            if (file.is_open())
+            {
+                std::string line;
+                while (getline(file, line))
+                {
+                    // Using cout for these logs was causing cout to get into a bad state, which would stop delivering
+                    // output messages.
+                    printf("%s\n", line.c_str());
+                }
+                file.close();
+            }
+        }
+    }
+    catch (std::exception &e)
+    {
+        std::cout << "Dumping log file threw a std::exception: " << e.what() << std::endl;
+    }
+    std::cout << "==============================================>" << std::endl;
+    return return_code;
 }
 
 /*
@@ -114,6 +140,7 @@ protected:
     }
 };
 
+#if (USE_CUSTOM_TEST_CONFIGURATION == 0)
 TEST_F(executables_ft, calibration)
 {
     const std::string calibration_path = PATH_TO_BIN("calibration_info");
@@ -177,12 +204,22 @@ TEST_F(executables_ft, fastpointcloud)
     test_stream_against_regexes(&fastpointcloud_results, &regexes);
 }
 
+#ifdef USE_OPENCV
 TEST_F(executables_ft, opencv_compatibility)
 {
-    const std::string transformation_dir = TEST_TEMP_DIR;
-    const std::string transformation_path = PATH_TO_BIN("opencv_example");
-    ASSERT_EQ(run_and_record_executable(transformation_path, ""), EXIT_SUCCESS);
+    const std::string opencv_dir = TEST_TEMP_DIR;
+    const std::string opencv_path = PATH_TO_BIN("opencv_example");
+    const std::string opencv_out = TEST_TEMP_DIR + "/opencv-out.txt";
+    ASSERT_EQ(run_and_record_executable(opencv_path, opencv_out), EXIT_SUCCESS);
+
+    std::ifstream opencv_results(opencv_out);
+    ASSERT_TRUE(opencv_results.good());
+
+    std::vector<std::string> regexes{ "3d point:.*", "OpenCV projectPoints:.*", "k4a_calibration_3d_to_2d:.*" };
+
+    test_stream_against_regexes(&opencv_results, &regexes);
 }
+#endif
 
 TEST_F(executables_ft, streaming)
 {
@@ -241,6 +278,40 @@ TEST_F(executables_ft, undistort)
     // don't bother checking the csv file- just make sure it's there
     ASSERT_TRUE(undistort_results.good());
 }
+#endif // USE_CUSTOM_TEST_CONFIGURATION == 0
+
+#if (USE_CUSTOM_TEST_CONFIGURATION == 1)
+#ifdef USE_OPENCV
+TEST_F(executables_ft, green_screen_single_cam)
+#else
+TEST_F(executables_ft, DISABLED_green_screen_single_cam)
+#endif
+{
+    const std::string green_screen_path = PATH_TO_BIN("green_screen");
+    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-single-out.txt";
+    // Calibration timeout for this is 10min due to low light conditions in the lab and slow perf of
+    // cv::findChessboardCorners.
+    ASSERT_EQ(run_and_record_executable(green_screen_path + " 1 9 6 22 1000 4000 2 600 5", green_screen_out),
+              EXIT_SUCCESS);
+}
+
+#ifdef USE_OPENCV
+TEST_F(executables_ft, green_screen_double_cam)
+#else
+TEST_F(executables_ft, DISABLED_green_screen_double_cam)
+#endif
+{
+    const std::string green_screen_path = PATH_TO_BIN("green_screen");
+    const std::string green_screen_out = TEST_TEMP_DIR + "/green_screen-double-out.txt";
+    // Calibration timeout for this is 10min due to low light conditions in the lab and slow perf of
+    // cv::findChessboardCorners.
+    ASSERT_EQ(run_and_record_executable(green_screen_path + " 2 9 6 22 1000 4000 2 600 5", green_screen_out),
+              EXIT_SUCCESS);
+    std::ifstream results(green_screen_out.c_str());
+    std::vector<std::string> regexes{ "Finished calibrating!" };
+    test_stream_against_regexes(&results, &regexes);
+}
+#endif // USE_CUSTOM_TEST_CONFIGURATION == 1
 
 int main(int argc, char **argv)
 {

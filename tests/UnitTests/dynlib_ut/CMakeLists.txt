@@ -3,11 +3,16 @@
 
 add_executable(dynlib_ut dynlib.cpp)
 
+
 set(TEST_LIBRARY_NAME "test_dynlib")
-set(TEST_LIBRARY_MAJOR_VER 1)
-set(TEST_LIBRARY_MINOR_VER 2)
+set(TEST_LIBRARY_VERSION 1)
 
 add_library(${TEST_LIBRARY_NAME} SHARED testdynlib.c)
+
+include(GenerateExportHeader)
+generate_export_header(${TEST_LIBRARY_NAME})
+
+target_include_directories(${TEST_LIBRARY_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
@@ -15,7 +20,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         ${TEST_LIBRARY_NAME}
         PROPERTIES
             OUTPUT_NAME
-                "${TEST_LIBRARY_NAME}_${TEST_LIBRARY_MAJOR_VER}_${TEST_LIBRARY_MINOR_VER}")
+                "${TEST_LIBRARY_NAME}_${TEST_LIBRARY_VERSION}_0")
 
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
@@ -23,9 +28,9 @@ elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         ${TEST_LIBRARY_NAME}
         PROPERTIES
             VERSION
-                "${TEST_LIBRARY_MAJOR_VER}.${TEST_LIBRARY_MINOR_VER}"
+                "${TEST_LIBRARY_VERSION}.0"
             SOVERSION
-                "${TEST_LIBRARY_MAJOR_VER}")
+                "${TEST_LIBRARY_VERSION}")
 endif()
 
 target_link_libraries(dynlib_ut PRIVATE
@@ -33,8 +38,7 @@ target_link_libraries(dynlib_ut PRIVATE
     k4ainternal::dynlib
     k4ainternal::utcommon)
 
-target_compile_definitions(dynlib_ut PRIVATE TEST_LIBRARY_MAJOR_VER=${TEST_LIBRARY_MAJOR_VER})
-target_compile_definitions(dynlib_ut PRIVATE TEST_LIBRARY_MINOR_VER=${TEST_LIBRARY_MINOR_VER})
+target_compile_definitions(dynlib_ut PRIVATE TEST_LIBRARY_VERSION=${TEST_LIBRARY_VERSION})
 target_compile_definitions(dynlib_ut PRIVATE TEST_LIBRARY_NAME="${TEST_LIBRARY_NAME}")
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

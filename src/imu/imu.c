@@ -103,8 +103,8 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
     if (result != K4A_RESULT_SUCCEEDED)
     {
         LOG_WARNING("A streaming IMU transfer failed", 0);
-        // Notify queue of an error
-        queue_error(p_imu->queue);
+        // Stop the queue - this will notify users waiting for data.
+        queue_stop(p_imu->queue);
     }
 
     if (K4A_SUCCEEDED(result))
@@ -180,8 +180,8 @@ void imu_capture_ready(k4a_result_t result, k4a_image_t image, void *p_context)
                 {
                     if (p_imu->dropped_count != 0)
                     {
-                        LOG_WARNING("IMU startup dropped last %d samples, the timestamp is too large",
-                                    p_imu->dropped_count);
+                        LOG_INFO("IMU startup dropped last %d samples, the timestamp is too large",
+                                 p_imu->dropped_count);
                     }
                     p_imu->dropped_count = 0;
                     p_imu->wait_for_ts_reset = false;

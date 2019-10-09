@@ -723,6 +723,28 @@ struct calibration : public k4a_calibration_t
         return static_cast<bool>(valid);
     }
 
+    /** Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of the depth camera. This function
+     * searches along an epipolar line in the depth image to find the corresponding depth pixel.
+     * Returns false if the point is invalid in the target coordinate system (and therefore target_point2d should not be
+     * used) Throws error if calibration contains invalid data.
+     *
+     * \sa k4a_calibration_color_2d_to_depth_2d
+     */
+    bool convert_color_2d_to_depth_2d(const k4a_float2_t &source_point2d,
+                                      const image &depth_image,
+                                      k4a_float2_t *target_point2d) const
+    {
+        int valid = 0;
+        k4a_result_t result =
+            k4a_calibration_color_2d_to_depth_2d(this, &source_point2d, depth_image.handle(), target_point2d, &valid);
+
+        if (K4A_RESULT_SUCCEEDED != result)
+        {
+            throw error("Calibration contained invalid transformation parameters!");
+        }
+        return static_cast<bool>(valid);
+    }
+
     /** Get the camera calibration for a device from a raw calibration blob.
      * Throws error on failure.
      *
@@ -730,12 +752,15 @@ struct calibration : public k4a_calibration_t
      */
     static calibration get_from_raw(char *raw_calibration,
                                     size_t raw_calibration_size,
-                                    k4a_depth_mode_t depth_mode,
-                                    k4a_color_resolution_t color_resolution)
+                                    k4a_depth_mode_t target_depth_mode,
+                                    k4a_color_resolution_t target_color_resolution)
     {
         calibration calib;
-        k4a_result_t result =
-            k4a_calibration_get_from_raw(raw_calibration, raw_calibration_size, depth_mode, color_resolution, &calib);
+        k4a_result_t result = k4a_calibration_get_from_raw(raw_calibration,
+                                                           raw_calibration_size,
+                                                           target_depth_mode,
+                                                           target_color_resolution,
+                                                           &calib);
 
         if (K4A_RESULT_SUCCEEDED != result)
         {
@@ -751,13 +776,13 @@ struct calibration : public k4a_calibration_t
      */
     static calibration get_from_raw(uint8_t *raw_calibration,
                                     size_t raw_calibration_size,
-                                    k4a_depth_mode_t depth_mode,
-                                    k4a_color_resolution_t color_resolution)
+                                    k4a_depth_mode_t target_depth_mode,
+                                    k4a_color_resolution_t target_color_resolution)
     {
         return get_from_raw(reinterpret_cast<char *>(raw_calibration),
                             raw_calibration_size,
-                            depth_mode,
-                            color_resolution);
+                            target_depth_mode,
+                            target_color_resolution);
     }
 
     /** Get the camera calibration for a device from a raw calibration blob.
@@ -766,13 +791,13 @@ struct calibration : public k4a_calibration_t
      * \sa k4a_calibration_get_from_raw
      */
     static calibration get_from_raw(std::vector<uint8_t> &raw_calibration,
-                                    k4a_depth_mode_t depth_mode,
-                                    k4a_color_resolution_t color_resolution)
+                                    k4a_depth_mode_t target_depth_mode,
+                                    k4a_color_resolution_t target_color_resolution)
     {
         return get_from_raw(reinterpret_cast<char *>(raw_calibration.data()),
                             raw_calibration.size(),
-                            depth_mode,
-                            color_resolution);
+                            target_depth_mode,
+                            target_color_resolution);
     }
 };
 
@@ -1091,6 +1116,16 @@ public:
         return m_handle != nullptr;
     }
 
+    /** Returns the underlying k4a_device_t handle
+     *
+     * Note the k4a_device_t handle does not have a reference count will be destroyed when the C++ object is destroyed.
+     * The caller is responsible for ensuring the C++ object outlives this handle.
+     */
+    k4a_device_t handle() const noexcept
+    {
+        return m_handle;
+    }
+
     /** Closes a k4a device.
      *
      * \sa k4a_device_close
@@ -1127,6 +1162,16 @@ public:
         return true;
     }
 
+    /** Reads a sensor capture into cap.  Returns true if a capture was read, false if the read timed out.
+     * Throws error on failure. This API assumes an inifinate timeout.
+     *
+     * \sa k4a_device_get_capture
+     */
+    bool get_capture(capture *cap)
+    {
+        return get_capture(cap, std::chrono::milliseconds(K4A_WAIT_INFINITE));
+    }
+
     /** Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
      * Throws error on failure.
      *
@@ -1146,6 +1191,16 @@ public:
         }
 
         return true;
+    }
+
+    /** Reads an IMU sample.  Returns true if a sample was read, false if the read timed out.
+     * Throws error on failure. This API assumes an infinate timeout.
+     *
+     * \sa k4a_device_get_imu_sample
+     */
+    bool get_imu_sample(k4a_imu_sample_t *imu_sample)
+    {
+        return get_imu_sample(imu_sample, std::chrono::milliseconds(K4A_WAIT_INFINITE));
     }
 
     /** Starts the K4A device's cameras

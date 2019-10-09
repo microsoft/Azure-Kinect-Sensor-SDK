@@ -4,6 +4,7 @@ if (NOT TARGET turbojpeg)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_CRT_SECURE_NO_WARNINGS")
     endif()
 
+    set(WITH_CRT_DLL ON CACHE BOOL "Force libjpeg to dynamically link CRT" FORCE)
     set(ENABLE_STATIC ON CACHE BOOL "Force libjpeg to enable static lib" FORCE)
 
     include(CheckLanguage)

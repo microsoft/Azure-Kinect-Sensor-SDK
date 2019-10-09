@@ -48,7 +48,7 @@ public:
     k4a_device_t m_device2 = nullptr;
 };
 
-TEST_F(multidevice_ft, DISABLED_open_close_two)
+TEST_F(multidevice_ft, open_close_two)
 {
     ASSERT_LE((uint32_t)2, k4a_device_get_installed_count());
 
@@ -73,7 +73,7 @@ TEST_F(multidevice_ft, DISABLED_open_close_two)
     m_device2 = NULL;
 }
 
-TEST_F(multidevice_ft, DISABLED_stream_two_1_then_2)
+TEST_F(multidevice_ft, stream_two_1_then_2)
 {
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
@@ -115,7 +115,7 @@ TEST_F(multidevice_ft, DISABLED_stream_two_1_then_2)
     m_device2 = NULL;
 }
 
-TEST_F(multidevice_ft, DISABLED_stream_two_2_then_1)
+TEST_F(multidevice_ft, stream_two_2_then_1)
 {
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
@@ -157,7 +157,7 @@ TEST_F(multidevice_ft, DISABLED_stream_two_2_then_1)
     m_device1 = NULL;
 }
 
-TEST_F(multidevice_ft, DISABLED_ensure_color_camera_is_enabled)
+TEST_F(multidevice_ft, ensure_color_camera_is_enabled)
 {
     bool master_device_found = false;
     bool subordinate_device_found = false;

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#define _GNU_SOURCE // ldaddr() extention in dlfcn.h
+
 // This library
 #include <k4ainternal/dynlib.h>
 
@@ -21,13 +23,14 @@ typedef struct _dynlib_context_t
 } dynlib_context_t;
 
 K4A_DECLARE_CONTEXT(dynlib_t, dynlib_context_t);
-static char *generate_file_name(const char *name, uint32_t major_ver, uint32_t minor_ver)
+static char *generate_file_name(const char *name, uint32_t version)
 {
     const char *lib_prefix = "lib";
     const char *lib_suffix = "so";
-    size_t max_buffer_size = strlen(name) + strlen(TOSTRING(DYNLIB_MAX_MAJOR_VERSION)) +
-                             strlen(TOSTRING(DYNLIB_MAX_MINOR_VERSION)) + strlen(".") + strlen(".") +
-                             strlen(lib_suffix) + strlen(lib_prefix) + 1;
+    // Format of the depth engine name is: libdepthengine.so.<K4A_PLUGIN_VERSION>.0
+    //                                     libdepthengine.so.2.0
+    size_t max_buffer_size = strlen(name) + strlen(TOSTRING(DYNLIB_MAX_VERSION)) + strlen(".0") + strlen(".") +
+                             strlen(".") + strlen(lib_suffix) + strlen(lib_prefix) + 1;
 
     char *versioned_file_name = malloc(max_buffer_size);
     if (versioned_file_name == NULL)
@@ -36,37 +39,30 @@ static char *generate_file_name(const char *name, uint32_t major_ver, uint32_t m
         return NULL;
     }
     versioned_file_name[0] = '\0';
-    snprintf(versioned_file_name, max_buffer_size, "%s%s.%s.%u.%u", lib_prefix, name, lib_suffix, major_ver, minor_ver);
+    // NOTE: 0 is appended to the name for legacy reasons, a time when the depth engine plugin version was tracked with
+    // major and minor versions
+    snprintf(versioned_file_name, max_buffer_size, "%s%s.%s.%u.0", lib_prefix, name, lib_suffix, version);
 
     return versioned_file_name;
 }
 
-k4a_result_t dynlib_create(const char *name, uint32_t major_ver, uint32_t minor_ver, dynlib_t *dynlib_handle)
+k4a_result_t dynlib_create(const char *name, uint32_t version, dynlib_t *dynlib_handle)
 {
     // Note: A nullptr is allowed on linux systems for "name", however, this is
     // functionality we do not support
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, name == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, dynlib_handle == NULL);
 
-    if (major_ver > DYNLIB_MAX_MAJOR_VERSION)
+    if (version > DYNLIB_MAX_VERSION)
     {
-        LOG_ERROR("Failed to load dynamic library %s. major_ver %u is too large to load. Max is %u\n",
+        LOG_ERROR("Failed to load dynamic library %s. version %u is too large to load. Max is %u\n",
                   name,
-                  major_ver,
-                  DYNLIB_MAX_MAJOR_VERSION);
+                  version,
+                  DYNLIB_MAX_VERSION);
         return K4A_RESULT_FAILED;
     }
 
-    if (minor_ver > DYNLIB_MAX_MINOR_VERSION)
-    {
-        LOG_ERROR("Failed to load dynamic library %s. minor_ver %u is too large to load. Max is %u\n",
-                  name,
-                  minor_ver,
-                  DYNLIB_MAX_MINOR_VERSION);
-        return K4A_RESULT_FAILED;
-    }
-
-    char *versioned_name = generate_file_name(name, major_ver, minor_ver);
+    char *versioned_name = generate_file_name(name, version);
     if (versioned_name == NULL)
     {
         return K4A_RESULT_FAILED;
@@ -119,6 +115,19 @@ k4a_result_t dynlib_find_symbol(dynlib_t dynlib_handle, const char *symbol, void
     else
     {
         LOG_ERROR("Failed to find symbol %s in dynamic library. Error: ", symbol, dlerror());
+    }
+
+    if (K4A_SUCCEEDED(result))
+    {
+        Dl_info info;
+        if (dladdr(*address, &info) != 0)
+        {
+            LOG_INFO("Depth Engine loaded %s", info.dli_fname);
+        }
+        else
+        {
+            LOG_ERROR("Failed calling dladdr %x", dlerror());
+        }
     }
 
     return result;

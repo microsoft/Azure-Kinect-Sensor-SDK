@@ -44,6 +44,19 @@ if ((NOT K4A_TURNED_ON_GIT_SUBMODULES_RECURSE) OR
         endif()
     endif()
 endif()
+
+# Set default policies for CMP0063 to NEW
+#
+# This forces cmake to apply CMAKE_C_VISIBILITY_PRESET,
+# CMAKE_CXX_VISIBILITY_PRESET and VISIBILITY_INLINES_HIDDEN target properties
+# to all targets, not just SHARED libraries. We want this so that files
+# compiled into static libraries have the same visibility flags as those
+# compiled into shared libraries.
+#
+# NEW is the default for this policy except when cmake_minimum_required is
+# lower than CMake 3.3
+set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
+
 add_subdirectory(azure_c_shared)
 add_subdirectory(cjson)
 add_subdirectory(glfw)

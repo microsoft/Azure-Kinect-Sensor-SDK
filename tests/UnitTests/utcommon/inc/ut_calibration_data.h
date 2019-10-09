@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// We use BrownConrady for the depth camera and Rational6KT for the color camera to test both code paths.
-// BrownConrady uses 14 instead of 15 parameters.
+// We use BrownConrady for the depth camera and color camera.
 static char g_test_json[] = "{\
  \"CalibrationInformation\": { \
     \"Cameras\": [ \
@@ -70,7 +69,7 @@ static char g_test_json[] = "{\
       }, \
       { \
         \"Intrinsics\": { \
-          \"ModelParameterCount\": 15, \
+          \"ModelParameterCount\": 14, \
           \"ModelParameters\": [ \
             0.49626153707504272, \
             0.50453948974609375, \
@@ -82,13 +81,12 @@ static char g_test_json[] = "{\
             -1.1485179662704468, \
             -1.1924415826797485, \
             1.6220585107803345, \
-            0.0004822119080927223, \
-            -0.0069880066439509392, \
+            0, \
+            0, \
             -0.000012259531104064081, \
-            0.00069101608823984861, \
-            0.65614032745361328 \
+            0.00069101608823984861 \
           ], \
-          \"ModelType\": \"CALIBRATION_LensDistortionModelRational6KT\" \
+          \"ModelType\": \"CALIBRATION_LensDistortionModelBrownConrady\" \
         }, \
         \"Location\": \"CALIBRATION_CameraLocationPV0\", \
         \"Purpose\": \"CALIBRATION_CameraPurposePhotoVideo\", \

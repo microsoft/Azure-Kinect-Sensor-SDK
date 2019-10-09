@@ -8,6 +8,8 @@ The Azure Kinect repo has several categories of tests:
 
 * Unit tests
 * Functional tests
+  * Functional tests that only depends on 1 Azure Kinect
+  * Functional tests that have custom requirements.
 * Stress tests
 * Perf tests
 * Firmware tests
@@ -31,23 +33,34 @@ using the Google Test framework. For a basic example of writing a unit test
 please see
 [tests/UnitTests/queue_ut/queue.cpp](../tests/UnitTests/queue_ut/queue.cpp).
 
-After compiling, unit tests can be run using "ctest -L unit" in the build
+After compiling, unit tests can be run using `ctest -L unit` in the build
 directory. Unit tests are run as part of the CI system.
 
 **NOTE:** *These tests must succeed for a pull request to be merged.*
 
 ### Functional Tests
 
+#### Single Device
+
 Functional tests are tests which run on the test machine. They must be quick
 (~ <10s), be reproducible, and may require hardware. Functional tests are
 built using the Google Test framework. For a basic example of writing a
 functional test please see
-[tests/example/test.cpp](../tests/example/test.cpp). 
+[tests/example/test.cpp](../tests/example/test.cpp).
 
-After compiling, functional tests can be run using "ctest -L functional" in the build
-directory. Functional tests are run as part of the CI system.
+After compiling, functional tests can be run using `ctest -L "^functional$"`
+in the build directory. Functional tests are run as part of the CI system.
 
 **NOTE:** *These tests must succeed for a pull request to be merged.*
+
+#### Custom Configurations
+
+Not everyone will have access to multiple devices. So we have moved tests with
+extra dependencies into their own test label. Some tests require OpenCV,
+multiple devices, or even a known chessboard. The hope is that users running
+tests outside of automation will be less complacent to errors if tests that will
+fail outside automation are disabled in these workflows by default. To run these
+tests, use the command `ctest -L "functional_custom"`.
 
 ### Stress Tests
 
@@ -56,11 +69,10 @@ crashes while the host is under heavy load. These tests will be run on a rolling
 build and may require hardware. Stress tests are built using the Google Test
 framework.
 
-After compiling, stress tests can be run using "ctest -L stress"
-in the build directory.
+After compiling, stress tests can be run using `ctest -L stress` in the build directory.
 
-**NOTE:** *At the moment, the Azure Kinect SDK does not have any stress tests. However, 
-there are some 'stress-like' tests running as unit tests that run for several 
+**NOTE:** *At the moment, the Azure Kinect SDK does not have any stress tests. However,
+there are some 'stress-like' tests running as unit tests that run for several
 seconds to detect threading and timing related issues.*
 
 ### Perf Tests
@@ -69,7 +81,7 @@ Perf tests are tests who results are purely statistics and not Pass/Fail.
 These tests will be run on a rolling build and may require hardware. Perf
 tests are built using the Google Test framework.
 
-After compiling, perf tests can be run using "ctest -L perf" in the build directory.
+After compiling, perf tests can be run using `ctest -L perf` in the build directory.
 
 **NOTE:** *These tests are run on demand*
 
@@ -100,4 +112,4 @@ To run tests on separate build machine:
 
 * Copy the bin folder to the target machine.
 * Copy [RunTestList.py](../scripts/RunTestList.py) to the target machine.
-* Use \<xxx\>_test_list.txt files from bin folder as ```list``` input to the script.
+* Use \<xxx\>_test_list.txt files from bin folder as `list` input to the script.

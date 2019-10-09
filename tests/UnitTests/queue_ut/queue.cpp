@@ -812,7 +812,7 @@ TEST(queue_ut, queue_enable_disable)
     ASSERT_EQ(allocator_test_for_leaks(), 0);
 }
 
-TEST(queue_ut, queue_error)
+TEST(queue_ut, queue_stop)
 {
 
     queue_t queue;
@@ -822,9 +822,9 @@ TEST(queue_ut, queue_error)
 
     ASSERT_NE((capture = capture_manufacture(10)), (k4a_capture_t)NULL);
 
-    // error
+    // stop
     {
-        queue_error(queue);
+        queue_stop(queue);
         queue_push(queue, capture);
         queue_push(queue, capture);
         ASSERT_EQ(queue_pop(queue, 0, &capture_read), K4A_WAIT_RESULT_FAILED);
@@ -841,13 +841,13 @@ TEST(queue_ut, queue_error)
         ASSERT_EQ(queue_pop(queue, 0, &capture_read), K4A_WAIT_RESULT_TIMEOUT);
     }
 
-    // enabled, put captures in, error, veriry no captures, enable, verify still no captures
+    // enabled, put captures in, stop, veriry no captures, enable, verify still no captures
     {
         queue_enable(queue);
         queue_push(queue, capture);
         queue_push(queue, capture);
         queue_push(queue, capture);
-        queue_error(queue);
+        queue_stop(queue);
         ASSERT_EQ(queue_pop(queue, 0, &capture_read), K4A_WAIT_RESULT_FAILED);
 
         // the queue should have been purged when disabled;
@@ -857,7 +857,7 @@ TEST(queue_ut, queue_error)
 
     // disable, put captures in, enable, veriry no captures,
     {
-        queue_error(queue);
+        queue_stop(queue);
         queue_push(queue, capture);
         queue_push(queue, capture);
         queue_push(queue, capture);
@@ -865,7 +865,7 @@ TEST(queue_ut, queue_error)
         ASSERT_EQ(queue_pop(queue, 0, &capture_read), K4A_WAIT_RESULT_TIMEOUT);
 
         // the queue should have never received captures
-        queue_error(queue);
+        queue_stop(queue);
         ASSERT_EQ(queue_pop(queue, 0, &capture_read), K4A_WAIT_RESULT_FAILED);
     }
 

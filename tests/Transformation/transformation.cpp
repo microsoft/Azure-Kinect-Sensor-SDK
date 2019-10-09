@@ -24,8 +24,8 @@ protected:
         m_depth_point3d_reference[1] = -1.66107690f;
         m_depth_point3d_reference[2] = 1000.f;
 
-        m_color_point2d_reference[0] = 1835.68555f;
-        m_color_point2d_reference[1] = 1206.31128f;
+        m_color_point2d_reference[0] = 1835.689453f;
+        m_color_point2d_reference[1] = 1206.290039f;
 
         m_color_point3d_reference[0] = -37.6291695f;
         m_color_point3d_reference[1] = 63.3947754f;
@@ -309,6 +309,41 @@ TEST_F(transformation_ut, transformation_2d_to_2d)
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(valid, 1);
     ASSERT_EQ_FLT2(point2d, m_depth_point2d_reference);
+}
+
+TEST_F(transformation_ut, transformation_color_2d_to_depth_2d)
+{
+    float point2d[2] = { 0.f, 0.f };
+    int valid = 0;
+
+    int width = m_calibration.depth_camera_calibration.resolution_width;
+    int height = m_calibration.depth_camera_calibration.resolution_height;
+    k4a_image_t depth_image = NULL;
+    ASSERT_EQ(image_create(K4A_IMAGE_FORMAT_DEPTH16,
+                           width,
+                           height,
+                           width * (int)sizeof(uint16_t),
+                           ALLOCATION_SOURCE_USER,
+                           &depth_image),
+              K4A_RESULT_SUCCEEDED);
+    ASSERT_NE(depth_image, (k4a_image_t)NULL);
+
+    uint16_t *depth_image_buffer = (uint16_t *)(void *)image_get_buffer(depth_image);
+    for (int i = 0; i < width * height; i++)
+    {
+        depth_image_buffer[i] = (uint16_t)1000;
+    }
+
+    k4a_result_t result =
+        transformation_color_2d_to_depth_2d(&m_calibration, m_color_point2d_reference, depth_image, point2d, &valid);
+
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(valid, 1);
+
+    // Since the API is searching by step of 1 pixel on the epipolar line (better performance), we expect there is less
+    // than 1 pixel error for the computed depth point coordinates comparing to reference coodinates
+    ASSERT_LT(fabs(point2d[0] - m_depth_point2d_reference[0]), 1);
+    ASSERT_LT(fabs(point2d[1] - m_depth_point2d_reference[1]), 1);
 }
 
 TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
