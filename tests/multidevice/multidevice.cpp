@@ -237,13 +237,13 @@ static k4a_result_t open_master_and_subordinate(k4a_device_t *master, k4a_device
         R_EXPECT_EQ(K4A_RESULT_SUCCEEDED,
                     k4a_device_get_sync_jack(device, &sync_in_cable_present, &sync_out_cable_present));
 
-        if (sync_out_cable_present)
+        if (*master == NULL && sync_out_cable_present)
         {
             *master = device;
             device = NULL;
         }
 
-        if (sync_in_cable_present)
+        if (*subordinate == NULL && sync_in_cable_present)
         {
             *subordinate = device;
             device = NULL;
