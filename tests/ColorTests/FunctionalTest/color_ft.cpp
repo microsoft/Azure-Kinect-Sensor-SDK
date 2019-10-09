@@ -745,23 +745,6 @@ int32_t color_control_test::limit_exposure_to_fps_setting(int32_t value, bool si
 // returns true if the exposure setting on the read image has been updated.
 bool color_control_test::validate_image_exposure_setting(int test_value, bool sixty_hertz, k4a_fps_t fps)
 {
-    // TODO remove this if block to test 50Hz and values larger than 10,000us
-    // https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/448
-    // Fixed by firmware version 1.6.104
-    if ((!sixty_hertz && test_value >= 10000) /* Ignoring 50Hz setting  */)
-    {
-        return true;
-    }
-#ifndef _WIN32
-    // TODO remove this if block to test 60Hz and exposures of 8,330us and 16,670us
-    // https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/792
-    if (sixty_hertz && (test_value == 8330 || test_value == 16670 || test_value == 33330 || test_value == 41670 ||
-                        test_value == 66670 || test_value == 50000 || test_value == 83330 || test_value == 100000 ||
-                        test_value == 116670 || test_value == 133330))
-    {
-        return true;
-    }
-#endif
 
     test_value = limit_exposure_to_fps_setting(test_value, sixty_hertz, fps);
 
