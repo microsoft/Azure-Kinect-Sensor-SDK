@@ -1,11 +1,15 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectSetColorConversionException.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
-
     /// <summary>
     /// Represents errors that occur when setting a color conversion on playback.
     /// </summary>

@@ -1,12 +1,10 @@
 ﻿//------------------------------------------------------------------------------
-// <copyright file="Record.cs" company="Microsoft">
+// <copyright file="Recorder.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Azure.Kinect.Sensor.Record.Exceptions;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record
@@ -14,7 +12,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
     /// <summary>
     /// Represents a writable sensor recording.
     /// </summary>
-    public class Record : IDisposable
+    public class Recorder : IDisposable
     {
         // The native handle for this recording.
         private readonly NativeMethods.k4a_record_t handle;
@@ -22,7 +20,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         // To detect redundant calls to Dispose
         private bool disposedValue = false;
 
-        private Record(NativeMethods.k4a_record_t handle)
+        private Recorder(NativeMethods.k4a_record_t handle)
         {
             this.handle = handle;
         }
@@ -34,7 +32,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <param name="device">Device to get properties from. May be null for user-generated recordings.</param>
         /// <param name="deviceConfiguration">Parameters used to open the device.</param>
         /// <returns>A new recording object.</returns>
-        public static Record Create(string path, Device device, DeviceConfiguration deviceConfiguration)
+        public static Recorder Create(string path, Device device, DeviceConfiguration deviceConfiguration)
         {
             NativeMethods.k4a_record_t handle = null;
             if (device != null)
@@ -51,7 +49,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                 AzureKinectCreateRecordingException.ThrowIfNotSuccess(path, () => NativeMethods.k4a_record_create(path, IntPtr.Zero, NativeMethods.k4a_device_configuration_t.FromDeviceConfiguration(deviceConfiguration), out handle));
             }
 
-            return new Record(handle);
+            return new Recorder(handle);
         }
 
         /// <summary>
@@ -65,7 +63,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 AzureKinectAddTagException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_add_tag(this.handle, name, value));
@@ -81,7 +79,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 AzureKinectAddImuTrackException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_add_imu_track(this.handle));
@@ -99,7 +97,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 AzureKinectAddAttachmentException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_add_attachment(this.handle, attachmentName, buffer, (UIntPtr)buffer.Length));
@@ -110,23 +108,24 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// Adds custom video tracks to the recording.
         /// </summary>
         /// <param name="trackName">The name of the custom video track to be added.</param>
-        /// <param name="codecId">A UTF8 null terminated string containing the codec ID of the track. 
-        /// Some of the existing formats are listed here: https://www.matroska.org/technical/specs/codecid/index.html. 
+        /// <param name="codecId">A UTF8 null terminated string containing the codec ID of the track.
+        /// Some of the existing formats are listed here: https://www.matroska.org/technical/specs/codecid/index.html.
         /// The codec ID can also be custom defined by the user. Video codec ID's should start with 'V_'.</param>
         /// <param name="codecContext">The codec context is a codec-specific buffer that contains any required codec metadata that is only known to the codec. It is mapped to the matroska 'CodecPrivate' element.</param>
         /// <param name="trackSettings">Additional metadata for the video track such as resolution and framerate.</param>
         /// <remarks>
         /// Built-in video tracks like the DEPTH, IR, and COLOR tracks will be created automatically when the k4a_record_create()
         /// API is called.This API can be used to add additional video tracks to save custom data.
-        /// 
+        ///
         ///  Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
-        /// 
+        ///
         ///  All tracks need to be added before the recording header is written.
-        /// 
+        ///
         ///  Call k4a_record_write_custom_track_data() with the same track_name to write data to this track.
-        /// 
+        ///
         /// </remarks>
-        public void AddCustomVideoTrack(string trackName,
+        public void AddCustomVideoTrack(
+            string trackName,
             string codecId,
             byte[] codecContext,
             RecordVideoSettings trackSettings)
@@ -135,7 +134,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 AzureKinectAddCustomVideoTrackException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_add_custom_video_track(
@@ -152,7 +151,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// Adds custom subtitle tracks to the recording.
         /// </summary>
         /// <param name="trackName">The name of the custom subtitle track to be added.</param>
-        /// <param name="codecId">A UTF8 null terminated string containing the codec ID of the track. 
+        /// <param name="codecId">A UTF8 null terminated string containing the codec ID of the track.
         /// Some of the existing formats are listed here: https://www.matroska.org/technical/specs/codecid/index.html. The codec ID can also be custom defined by the user.
         /// Subtitle codec ID's should start with 'S_'.</param>
         /// <param name="codecContext">The codec context is a codec-specific buffer that contains any required codec metadata that is only known to the codec.It is mapped to the matroska 'CodecPrivate' element.</param>
@@ -160,13 +159,14 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <remarks>
         /// Built-in subtitle tracks like the IMU track will be created automatically when the k4a_record_add_imu_track() API is
         /// called.This API can be used to add additional subtitle tracks to save custom data.
-        /// 
+        ///
         /// Track names must be ALL CAPS and may only contain A-Z, 0-9, '-' and '_'.
-        /// 
+        ///
         /// All tracks need to be added before the recording header is written.
-        /// 
+        ///
         /// Call k4a_record_write_custom_track_data() with the same track_name to write data to this track.</remarks>
-        public void AddCustomSubtitleTrack(string trackName,
+        public void AddCustomSubtitleTrack(
+            string trackName,
             string codecId,
             byte[] codecContext,
             RecordSubtitleSettings trackSettings)
@@ -175,7 +175,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 AzureKinectAddCustomSubtitleTrackException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_add_custom_subtitle_track(
@@ -200,7 +200,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 AzureKinectWriteHeaderException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_write_header(this.handle));
@@ -213,7 +213,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <param name="capture">Capture containing data to write.</param>
         /// <remarks>
         /// Captures must be written in increasing order of timestamp, and the file's header must already be written.
-        /// 
+        ///
         /// k4a_record_write_capture() will write all images in the capture to the corresponding tracks in the recording file.
         /// If any of the images fail to write, other images will still be written before a failure is returned.
         /// </remarks>
@@ -223,7 +223,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 if (capture == null)
@@ -238,20 +238,24 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             }
         }
 
+        /// <summary>
+        /// Writes an IMU sample to the recording.
+        /// </summary>
+        /// <param name="imuSample">Sample with the IMU data.</param>
         public void WriteImuSample(ImuSample imuSample)
         {
             lock (this)
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 if (imuSample == null)
                 {
                     throw new ArgumentNullException(nameof(imuSample));
                 }
-                
+
                 NativeMethods.k4a_imu_sample_t sample = new NativeMethods.k4a_imu_sample_t()
                 {
                     temperature = imuSample.Temperature,
@@ -276,7 +280,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// When writing custom track data at the same time as captures or IMU data, the custom data should be within 1 second of
         /// the most recently written timestamp.
         /// </remarks>
-        public void WriteCustomTrackData(string trackName,
+        public void WriteCustomTrackData(
+            string trackName,
             TimeSpan deviceTimestamp,
             byte[] customData)
         {
@@ -284,7 +289,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 if (trackName == null)
@@ -297,7 +302,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                     throw new ArgumentNullException(nameof(customData));
                 }
 
-                AzureKinectWriteCustomTrackDataException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_write_custom_track_data(this.handle,
+                AzureKinectWriteCustomTrackDataException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_write_custom_track_data(
+                    this.handle,
                     trackName,
                     checked((ulong)deviceTimestamp.Ticks / 10),
                     customData,
@@ -316,7 +322,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             {
                 if (this.disposedValue)
                 {
-                    throw new ObjectDisposedException(nameof(Record));
+                    throw new ObjectDisposedException(nameof(Recorder));
                 }
 
                 AzureKinectFlushException.ThrowIfNotSuccess(() => NativeMethods.k4a_record_flush(this.handle));

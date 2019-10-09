@@ -5,9 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record
 {
@@ -55,13 +53,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <summary>
         /// Gets the interface for reading log messages.
         /// </summary>
-        public static ILoggingProvider LogProvider
-        {
-            get
-            {
-                return RecordLogger.LoggerProvider;
-            }
-        }
+        public static ILoggingProvider LogProvider => RecordLogger.LoggerProvider;
 
         /// <summary>
         /// Initializes the <see cref="RecordLogger"/> class to begin receiving messages from the Azure Kinect Sensor SDK.

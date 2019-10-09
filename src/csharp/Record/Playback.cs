@@ -1,10 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿//------------------------------------------------------------------------------
+// <copyright file="Playback.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Text;
 using Microsoft.Azure.Kinect.Sensor.Record.Exceptions;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record
 {
+    /// <summary>
+    /// Respresents a file being used to playback data from an Azure Kinect device.
+    /// </summary>
     public class Playback : IDisposable
     {
         // The native handle for this recording.
@@ -23,16 +31,117 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         }
 
         /// <summary>
+        /// Gets get the camera calibration for Azure Kinect device used during recording. The output struct is used as input to all transformation functions.
+        /// </summary>
+        /// <remarks>
+        /// The calibration may not exist if the device was not specified during recording.
+        /// </remarks>
+        public Calibration? Calibration
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (this.disposedValue)
+                    {
+                        throw new ObjectDisposedException(nameof(Playback));
+                    }
+
+                    if (!this.calibration.HasValue)
+                    {
+                        if (NativeMethods.k4a_playback_get_calibration(this.handle, out Calibration localCalibration) == NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED)
+                        {
+                            this.calibration = localCalibration;
+                        }
+                    }
+
+                    return this.calibration;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets get the device configuration used during recording.
+        /// </summary>
+        public RecordConfiguration RecordConfiguration
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (this.disposedValue)
+                    {
+                        throw new ObjectDisposedException(nameof(Playback));
+                    }
+
+                    if (this.recordConfiguration == null)
+                    {
+                        NativeMethods.k4a_record_configuration_t nativeConfig = new NativeMethods.k4a_record_configuration_t();
+
+                        if (NativeMethods.k4a_playback_get_record_configuration(this.handle, nativeConfig) == NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED)
+                        {
+                            this.recordConfiguration = RecordConfiguration.FromNative(nativeConfig);
+                        }
+                    }
+
+                    return this.recordConfiguration;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets get the number of tracks in a playback file.
+        /// </summary>
+        public int TrackCount
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (this.disposedValue)
+                    {
+                        throw new ObjectDisposedException(nameof(Playback));
+                    }
+
+                    return checked((int)NativeMethods.k4a_playback_get_track_count(this.handle));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the length of the recording in microseconds.
+        /// </summary>
+        /// <remarks>
+        /// The recording length, calculated as the difference between the first and last timestamp in the file.
+        ///
+        /// The recording length may be longer than an individual track if, for example, the IMU continues to run after the last
+        /// color image is recorded.
+        /// </remarks>
+        public TimeSpan RecordingLength
+        {
+            get
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Playback));
+                }
+
+                long length = checked((long)NativeMethods.k4a_playback_get_recording_length_usec(this.handle));
+                return TimeSpan.FromTicks(length * 10);
+            }
+        }
+
+        /// <summary>
         /// Opens an existing recording file for reading.
         /// </summary>
         /// <param name="path">Filesystem path of the existing recording.</param>
-        /// <returns></returns>
+        /// <returns>An object representing the file for playback.</returns>
         public static Playback Open(string path)
         {
             NativeMethods.k4a_playback_t handle = null;
-            
+
             AzureKinectOpenPlaybackException.ThrowIfNotSuccess(() => NativeMethods.k4a_playback_open(path, out handle));
-            
+
             return new Playback(handle);
         }
 
@@ -67,68 +176,10 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         }
 
         /// <summary>
-        /// Get the camera calibration for Azure Kinect device used during recording. The output struct is used as input to all transformation functions.
-        /// </summary>
-        /// <remarks>
-        /// The calibration may not exist if the device was not specified during recording.
-        /// </remarks>
-        public Calibration? Calibration
-        {
-            get
-            {
-                lock (this)
-                {
-                    if (this.disposedValue)
-                    {
-                        throw new ObjectDisposedException(nameof(Playback));
-                    }
-
-                    if (!this.calibration.HasValue)
-                    {
-                        Calibration localCalibration = new Calibration();
-                        if (NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED == NativeMethods.k4a_playback_get_calibration(this.handle, out localCalibration))
-                        {
-                            this.calibration = localCalibration;
-                        }
-                    }
-
-                    return this.calibration;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get the device configuration used during recording.
-        /// </summary>
-        public RecordConfiguration RecordConfiguration
-        {
-            get
-            {
-                lock (this)
-                {
-                    if (this.disposedValue)
-                    {
-                        throw new ObjectDisposedException(nameof(Playback));
-                    }
-
-                    if (this.recordConfiguration == null)
-                    {
-                        if (NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED == NativeMethods.k4a_playback_get_record_configuration(this.handle, out NativeMethods.k4a_record_configuration_t nativeConfig))
-                        {
-                            this.recordConfiguration = RecordConfiguration.FromNative(nativeConfig);
-                        }
-                    }
-
-                    return this.recordConfiguration;
-                }
-            }
-        }
-
-        /// <summary>
         /// Checks whether a track with the given track name exists in the playback file.
         /// </summary>
         /// <param name="trackName">The track name to be checked to see whether it exists or not.</param>
-        /// <returns></returns>
+        /// <returns>True if the track exists in the file.</returns>
         public bool CheckTrackExists(string trackName)
         {
             lock (this)
@@ -144,25 +195,6 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                 }
 
                 return NativeMethods.k4a_playback_check_track_exists(this.handle, trackName);
-            }
-        }
-
-        /// <summary>
-        /// Get the number of tracks in a playback file.
-        /// </summary>
-        public int TrackCount
-        {
-            get
-            {
-                lock (this)
-                {
-                    if (this.disposedValue)
-                    {
-                        throw new ObjectDisposedException(nameof(Playback));
-                    }
-
-                    return checked((int)NativeMethods.k4a_playback_get_track_count(this.handle));
-                }
             }
         }
 
@@ -257,8 +289,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <summary>
         /// Gets the codec id string for a particular track.
         /// </summary>
-        /// <param name="trackName"></param>
-        /// <returns>The track name to read the codec id from.</returns>
+        /// <param name="trackName">The track name to read the codec id from.</param>
+        /// <returns>Codec ID for the track.</returns>
         /// <remarks>
         /// The codec ID is a string that corresponds to the codec of the track's data. Some of the existing formats are listed
         /// here: https://www.matroska.org/technical/specs/codecid/index.html. It can also be custom defined by the user.
@@ -419,7 +451,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                 }
 
                 // Allocate a buffer
-                byte[] buffer= new byte[checked((int)size)];
+                byte[] buffer = new byte[checked((int)size)];
 
                 // Get the codec id
                 AzureKinectGetTrackNameException.ThrowIfNotSuccess(() => NativeMethods.k4a_playback_get_attachment(this.handle, fileName, buffer, ref size));
@@ -434,14 +466,14 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <returns>The next capture in the sequence, or null if at the end of the sequence.</returns>
         /// <remarks>
         /// <see cref="GetNextCapture"/> always returns the next capture in sequence after the most recently returned capture.
-        /// 
+        ///
         /// The first call to <see cref="GetNextCapture"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return the capture
         /// in the recording closest to the seek time with an image timestamp greater than or equal to the seek time.
-        /// 
+        ///
         /// If a call was made to <see cref="GetPreviousCapture"/> that returned null, the playback
         /// position is at the beginning of the stream and <see cref="GetNextCapture"/> will return the first capture in the
         /// recording.
-        /// 
+        ///
         /// Capture objects returned by the playback API will always contain at least one image, but may have images missing if
         /// frames were dropped in the original recording. When calling <see cref="Capture.Color"/>,
         /// <see cref="Capture.Depth"/>, or <see cref="Capture.IR"/>, the image should be checked for null.
@@ -477,14 +509,14 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <returns>The previous capture in the sequence, or null if at the beginning of the sequence.</returns>
         /// <remarks>
         /// <see cref="GetPreviousCapture"/> always returns the previous capture in sequence after the most recently returned capture.
-        /// 
+        ///
         /// The first call to <see cref="GetPreviousCapture"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return the capture
         /// in the recording closest to the seek time with all image timestamps less than the seek time.
-        /// 
+        ///
         /// If a call was made to <see cref="GetNextCapture"/> that returned null, the playback
         /// position is at the end of the stream and <see cref="GetPreviousCapture"/> will return the last capture in the
         /// recording.
-        /// 
+        ///
         /// Capture objects returned by the playback API will always contain at least one image, but may have images missing if
         /// frames were dropped in the original recording. When calling <see cref="Capture.Color"/>,
         /// <see cref="Capture.Depth"/>, or <see cref="Capture.IR"/>, the image should be checked for null.
@@ -520,10 +552,10 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <returns>The next IMU sample in the sequence, or null if at the end of the sequence.</returns>
         /// <remarks>
         /// <see cref="GetNextImuSample"/> always returns the next IMU sample in sequence after the most recently returned sample.
-        /// 
+        ///
         /// The first call to <see cref="GetNextImuSample"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return the sample
         /// in the recording closest to the seek time with a timestamp greater than or equal to the seek time.
-        /// 
+        ///
         /// If a call was made to <see cref="GetPreviousImuSample"/> that returned null, the playback
         /// position is at the beginning of the stream and <see cref="GetNextImuSample"/> will return the first sample in the
         /// recording.
@@ -536,6 +568,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                 {
                     throw new ObjectDisposedException(nameof(Playback));
                 }
+
                 NativeMethods.k4a_imu_sample_t imu_sample = new NativeMethods.k4a_imu_sample_t();
 
                 switch (NativeMethods.k4a_playback_get_next_imu_sample(this.handle, imu_sample))
@@ -558,10 +591,10 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <returns>The previous IMU sample in the sequence, or null if at the beginning of the sequence.</returns>
         /// <remarks>
         /// <see cref="GetPreviousImuSample"/> always returns the previous IMU sample in sequence before the most recently returned sample.
-        /// 
+        ///
         /// The first call to <see cref="GetPreviousImuSample"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return the sample
         /// in the recording closest to the seek time with a timestamp less than the seek time.
-        /// 
+        ///
         /// If a call was made to <see cref="GetNextImuSample"/> that returned null, the playback
         /// position is at the end of the stream and <see cref="GetPreviousImuSample"/> will return the last sample in the
         /// recording.
@@ -599,10 +632,10 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <remarks>
         /// <see cref="GetNextDataBlock(string)"/> always returns the next data block in sequence after the most recently returned data block
         /// for a particular track.
-        /// 
+        ///
         /// The first call to <see cref="GetNextDataBlock(string)"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return the data block
         /// in the recording closest to the seek time with a timestamp greater than or equal to the seek time.
-        /// 
+        ///
         /// If a call was made to <see cref="GetPreviousDataBlock(string)"/> that returned null for a particular track, the playback
         /// position is at the beginning of the stream and <see cref="GetNextDataBlock(string)"/> will return the first data block in the
         /// recording.
@@ -643,10 +676,10 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <remarks>
         /// <see cref="GetPreviousDataBlock(string)"/> always returns the previous data block in sequence after the most recently returned data block
         /// for a particular track.
-        /// 
+        ///
         /// The first call to <see cref="GetPreviousDataBlock(string)"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return the data block
         /// in the recording closest to the seek time with a timestamp less than the seek time.
-        /// 
+        ///
         /// If a call was made to <see cref="GetNextDataBlock(string)"/> that returned null for a particular track, the playback
         /// position is at the end of the stream and <see cref="GetPreviousDataBlock(string)"/> will return the last data block in the
         /// recording.
@@ -682,22 +715,22 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <summary>
         /// Seek to a specific timestamp within a recording.
         /// </summary>
-        /// <param name="offset">The timestamp offset to seek to, relative to <paramref name="origin"/></param>
+        /// <param name="offset">The timestamp offset to seek to, relative to <paramref name="origin"/>.</param>
         /// <param name="origin">Specifies how the given timestamp should be interpreted. Seek can be done relative to the beginning or end of the
         /// recording, or using an absolute device timestamp.</param>
         /// <remarks>
         /// The first device timestamp in a recording is usually non-zero. The recording file starts at the device timestamp
         /// defined by <see cref="RecordConfiguration.StartTimestampOffset"/>, which is accessible via <see cref="Playback.RecordConfiguration"/>.
-        /// 
+        ///
         /// The first call to <see cref="GetNextCapture"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return a capture containing an image
         /// timestamp greater than or equal to the seek time.
-        /// 
+        ///
         /// The first call to <see cref="GetPreviousCapture"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return a capture with
         /// all image timstamps less than the seek time.
-        /// 
+        ///
         /// The first call to <see cref="GetNextImuSample"/> and <see cref="GetNextDataBlock(string)"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return the
         /// first data with a timestamp greater than or equal to the seek time.
-        /// 
+        ///
         /// The first call to <see cref="GetPreviousImuSample"/> and <see cref="GetPreviousDataBlock(string)"/> after <see cref="Seek(TimeSpan, PlaybackSeekOrigin)"/> will return the
         /// first data with a timestamp less than the seek time.
         /// </remarks>
@@ -714,29 +747,6 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             }
         }
 
-        /// <summary>
-        /// Returns the length of the recording in microseconds.
-        /// </summary>
-        /// <remarks>
-        /// The recording length, calculated as the difference between the first and last timestamp in the file.
-        /// 
-        /// The recording length may be longer than an individual track if, for example, the IMU continues to run after the last
-        /// color image is recorded.
-        /// </remarks>
-        public TimeSpan RecordingLength
-        {
-            get
-            {
-                if (this.disposedValue)
-                {
-                    throw new ObjectDisposedException(nameof(Playback));
-                }
-
-                long length = checked((long)NativeMethods.k4a_playback_get_recording_length_usec(this.handle));
-                return TimeSpan.FromTicks(length * 10);
-            }
-        }
-        
         /// <inheritdoc/>
         public void Dispose()
         {

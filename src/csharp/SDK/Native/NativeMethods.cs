@@ -392,26 +392,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             IntPtr message_cb_context,
             LogLevel min_level);
 
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
-        [NativeReference]
-        public static extern k4a_result_t k4a_record_create([MarshalAs(UnmanagedType.LPStr)] string path, k4a_device_t device, k4a_device_configuration_t deviceConfiguration, out k4a_record_t handle);
-
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        [NativeReference]
-        public static extern void k4a_record_close(IntPtr handle);
-
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
-        [NativeReference]
-        public static extern k4a_result_t k4a_record_add_tag(k4a_record_t handle, string name, string value);
-
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        [NativeReference]
-        public static extern k4a_result_t k4a_record_write_header(k4a_record_t handle);
-
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        [NativeReference]
-        public static extern k4a_result_t k4a_record_write_capture(k4a_record_t handle, k4a_capture_t capture);
-
         [NativeReference]
         [StructLayout(LayoutKind.Sequential)]
         public struct k4a_version_t
@@ -546,20 +526,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             protected override bool ReleaseHandle()
             {
                 k4a_transformation_destroy(this.handle);
-                return true;
-            }
-        }
-
-        public class k4a_record_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
-        {
-            private k4a_record_t()
-                : base(true)
-            {
-            }
-
-            protected override bool ReleaseHandle()
-            {
-                NativeMethods.k4a_record_close(this.handle);
                 return true;
             }
         }

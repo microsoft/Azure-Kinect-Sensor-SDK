@@ -1,13 +1,17 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+// <copyright file="AzureKinectAddAttachmentException.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// </copyright>
+//------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
 {
-
     /// <summary>
-    /// Represents errors that occur when adding an attachment to a recording
+    /// Represents errors that occur when adding an attachment to a recording.
     /// </summary>
     [Serializable]
     public class AzureKinectAddAttachmentException : AzureKinectRecordException
