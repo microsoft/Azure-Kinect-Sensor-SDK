@@ -8,7 +8,7 @@
 #include <k4a/k4a.hpp>
 
 // This is the maximum difference between when we expected an image's timestamp to be and when it actually occurred.
-constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(50);
+constexpr std::chrono::microseconds MAX_ALLOWABLE_TIME_OFFSET_ERROR_FOR_IMAGE_TIMESTAMP(100);
 
 constexpr int64_t WAIT_FOR_SYNCHRONIZED_CAPTURE_TIMEOUT = 60000;
 

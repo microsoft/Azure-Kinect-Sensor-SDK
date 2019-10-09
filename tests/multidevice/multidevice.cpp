@@ -17,9 +17,7 @@
 #define WAIT_TEST_INFINITE (5 * 60 * 1000)
 
 // How close 2 timestamps should be to be considered accurately synchronized.
-// TODO restore to 50us
-// const int MAX_SYNC_CAPTURE_DIFFERENCE_USEC = 50;
-const int MAX_SYNC_CAPTURE_DIFFERENCE_USEC = 10000;
+const int MAX_SYNC_CAPTURE_DIFFERENCE_USEC = 100;
 
 int main(int argc, char **argv)
 {
@@ -659,4 +657,79 @@ TEST_F(multidevice_ft, close_parallel)
     }
 
     Lock_Deinit(lock);
+}
+
+// TODO https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/818
+TEST_F(multidevice_sync_ft, DISABLED_multi_sync_no_color)
+{
+    k4a_device_t master, subordinate;
+    k4a_fps_t frame_rate = K4A_FRAMES_PER_SECOND_30;
+
+    ASSERT_EQ(open_master_and_subordinate(&master, &subordinate), K4A_RESULT_SUCCEEDED);
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(master, 8330, 2));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(subordinate, 8330, 2));
+
+    k4a_device_configuration_t default_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
+    default_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
+    default_config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
+    default_config.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    default_config.camera_fps = frame_rate;
+    default_config.subordinate_delay_off_master_usec = 0;
+    default_config.depth_delay_off_color_usec = 0;
+    default_config.synchronized_images_only = true;
+
+    k4a_device_configuration_t s_config = default_config;
+    s_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
+    s_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
+    s_config.synchronized_images_only = false;
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config));
+
+    k4a_device_configuration_t m_config = default_config;
+    m_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(master, &m_config));
+
+    for (int x = 0; x < 20; x++)
+    {
+        k4a_capture_t capture;
+        ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(master, &capture, 10000));
+        k4a_capture_release(capture);
+        ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(subordinate, &capture, 10000));
+        k4a_capture_release(capture);
+    }
+
+    k4a_device_stop_cameras(master);
+    k4a_device_stop_cameras(subordinate);
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(master, &m_config));
+
+    for (int x = 0; x < 20; x++)
+    {
+        k4a_capture_t capture;
+        ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(master, &capture, 10000));
+        k4a_capture_release(capture);
+        ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(subordinate, &capture, 10000));
+        k4a_capture_release(capture);
+    }
+
+    // Reverse the stop order from above and then start again to ensure all starts as expected.
+    k4a_device_stop_cameras(subordinate);
+    k4a_device_stop_cameras(master);
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(master, &m_config));
+
+    for (int x = 0; x < 20; x++)
+    {
+        k4a_capture_t capture;
+        ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(master, &capture, 10000));
+        k4a_capture_release(capture);
+        ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(subordinate, &capture, 10000));
+        k4a_capture_release(capture);
+    }
+
+    // Close master first and make sure not hang or crashes.
+    k4a_device_close(master);
+    k4a_device_close(subordinate);
 }
