@@ -19,13 +19,14 @@
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/envvariable.h>
 #include <deque>
+#include <mutex>
 
 #ifndef _WIN32
 #include <time.h>
 #endif
 
-#define PTS_TO_MS(ts) ((long long)((ts) / 1))    // Device TS convertion to milliseconds
-#define STS_TO_MS(ts) ((long long)((ts) / 1000)) // System TS convertion to milliseconds
+#define PTS_TO_MS(ts) ((long long)((ts) / 1000))    // Device TS convertion to milliseconds
+#define STS_TO_MS(ts) ((long long)((ts) / 1000000)) // System TS convertion to milliseconds
 
 #define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
 
@@ -33,9 +34,8 @@ static bool g_skip_delay_off_color_validation = false;
 static int32_t g_depth_delay_off_color_usec = 0;
 static uint8_t g_device_index = K4A_DEVICE_DEFAULT;
 static k4a_wired_sync_mode_t g_wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
-static int g_capture_count = 10;
+static int g_capture_count = 50;
 static bool g_synchronized_images_only = false;
-// static bool g_no_imu = false;
 static bool g_no_startup_flush = false;
 static uint32_t g_subordinate_delay_off_master_usec = 0;
 static bool g_manual_exposure = false;
@@ -50,7 +50,9 @@ typedef struct _sys_pts_time_t
     uint64_t system;
 } sys_pts_time_t;
 
-std::deque<sys_pts_time_t> g_time;
+std::mutex g_lock_mutex;
+std::deque<sys_pts_time_t> g_time_c; // Color image copy of data
+std::deque<sys_pts_time_t> g_time_i; // Ir image copy of data
 
 struct latency_parameters
 {
@@ -82,6 +84,7 @@ public:
     {
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_open(g_device_index, &m_device)) << "Couldn't open device\n";
         ASSERT_NE(m_device, nullptr);
+        EXPECT_NE((FILE *)NULL, (m_file_handle = fopen("latency_testResults.csv", "a")));
     }
 
     virtual void TearDown()
@@ -91,9 +94,25 @@ public:
             k4a_device_close(m_device);
             m_device = nullptr;
         }
+        if (m_file_handle)
+        {
+            fclose(m_file_handle);
+        }
     }
 
+    void print_and_log(char *message, uint64_t ave, uint64_t min, uint64_t max);
+    void process_image(k4a_capture_t capture,
+                       uint64_t current_system_ts,
+                       bool process_color,
+                       bool *image_present,
+                       bool *image_first_pass,
+                       std::deque<uint64_t> *system_latency,
+                       std::deque<uint64_t> *system_latency_from_pts,
+                       uint64_t *system_ts_last,
+                       uint64_t *system_ts_from_pts_last);
+
     k4a_device_t m_device = nullptr;
+    FILE *m_file_handle;
 };
 
 static const char *get_string_from_color_format(k4a_image_format_t format)
@@ -236,6 +255,9 @@ static int _latency_imu_thread(void *param)
         return result;
     }
 
+    g_time_c.clear();
+    g_time_i.clear();
+
     while (data->exit == false)
     {
         k4a_wait_result_t wresult = k4a_device_get_imu_sample(data->device, &imu, 10);
@@ -257,7 +279,11 @@ static int _latency_imu_thread(void *param)
 
             EXPECT_EQ(imu.acc_timestamp_usec, imu.acc_timestamp_usec);
 
-            g_time.push_back(time);
+            // Save data to each of the queues
+            g_lock_mutex.lock();
+            g_time_c.push_back(time);
+            g_time_i.push_back(time);
+            g_lock_mutex.unlock();
         }
     };
 
@@ -265,38 +291,195 @@ static int _latency_imu_thread(void *param)
     return result;
 }
 
-static uint64_t lookup_system_ts(uint64_t pts_ts)
+// Drop the lock and sleep for Xms. This is to allow the queue to fill again. Return if we yield too long.
+#define YIELD_THREAD(lock_var, count, message)                                                                         \
+    lock_var.unlock();                                                                                                 \
+    printf("Lock dropped while %s", message);                                                                          \
+    ThreadAPI_Sleep(2);                                                                                                \
+    if (++count > 15)                                                                                                  \
+    {                                                                                                                  \
+        EXPECT_LT(count, 15);                                                                                          \
+        return 0;                                                                                                      \
+    }                                                                                                                  \
+    lock_var.lock();
+
+static uint64_t lookup_system_ts(uint64_t pts_ts, bool color)
 {
     sys_pts_time_t last_time;
-    last_time = g_time.front();
-    g_time.pop_front();
-    //__debugbreak();
-    for (int x = 0; x < g_time.size(); x++)
+    uint64_t start_time_nsec;
+    uint64_t current_time_nsec;
+    int count = 0;
+
+    bool found = false;
+
+    std::deque<sys_pts_time_t> *time_queue = &g_time_i;
+    if (color)
     {
-        // last_time = g_time.front();
-        sys_pts_time_t temp = g_time.front();
-        if (pts_ts > temp.pts)
+        time_queue = &g_time_c;
+    }
+
+    g_lock_mutex.lock();
+
+    // Record start time
+    if (get_system_time(&start_time_nsec) == 0)
+    {
+        printf("ERROR getting system time\n");
+        EXPECT_TRUE(0);
+        g_lock_mutex.unlock();
+        return 0;
+    }
+
+    int delay_count = 0;
+    while (time_queue->empty())
+    {
+        // Drop lock, wait, retake lock - Exit if taking too long
+        YIELD_THREAD(g_lock_mutex, delay_count, "Initializing")
+    }
+
+    last_time = time_queue->front();
+    time_queue->pop_front();
+
+    while (!found)
+    {
+        for (int x = 0; !time_queue->empty(); x++)
         {
-            // hold onto last_time for 1 more loop
-            last_time = g_time.front();
-            g_time.pop_front();
+            last_time = time_queue->front();
+            if (pts_ts > last_time.pts)
+            {
+                // Hold onto last_time for 1 more loop
+                last_time = time_queue->front();
+                time_queue->pop_front();
+            }
+            else
+            {
+                // We just found the first system time that is beyond the one we are looking for.
+                if ((pts_ts - last_time.pts) < (time_queue->front().pts - pts_ts))
+                {
+                    g_lock_mutex.unlock();
+                    found = true;
+                    return last_time.system;
+                }
+                uint64_t ret_time = time_queue->front().system;
+                g_lock_mutex.unlock();
+
+                found = true;
+                return ret_time;
+            }
+
+            if (get_system_time(&current_time_nsec) == 0)
+            {
+                printf("ERROR getting system time\n");
+                EXPECT_TRUE(0);
+                g_lock_mutex.unlock();
+                return 0;
+            }
+
+            if (STS_TO_MS(current_time_nsec - start_time_nsec) > 1000)
+            {
+                printf("Count for break is %d\n", count);
+                break; // Don't hold lock too long, run YIELD_THREAD below
+            }
+        }
+
+        // Queue is drained or we held the lock too long. We need to let the IMU thread catch up. Drop lock, wait,
+        // retake lock - Exit if taking too long
+        YIELD_THREAD(g_lock_mutex, delay_count, "walking list.");
+
+        // Update start time after the thread yield
+        if (get_system_time(&start_time_nsec) == 0)
+        {
+            printf("ERROR getting system time\n");
+            EXPECT_TRUE(0);
+            g_lock_mutex.unlock();
+            return 0;
+        }
+    }
+
+    // Should not happen
+    EXPECT_FALSE(1);
+    g_lock_mutex.unlock();
+    return 0;
+}
+
+void latency_perf::print_and_log(char *message, uint64_t ave, uint64_t min, uint64_t max)
+{
+    printf("    %30s: Ave=%" PRId64 " min=%" PRId64 " max=%" PRId64 "\n", message, ave, min, max);
+
+    if (m_file_handle)
+    {
+        char buffer[1024];
+        snprintf(
+            buffer, sizeof(buffer), "%s (min ave max),%" PRId64 ",%" PRId64 ",%" PRId64 ",", message, min, ave, max);
+        fputs(buffer, m_file_handle);
+    }
+}
+
+void latency_perf::process_image(k4a_capture_t capture,
+                                 uint64_t current_system_ts,
+                                 bool process_color,
+                                 bool *image_present,
+                                 bool *image_first_pass,
+                                 std::deque<uint64_t> *system_latency,
+                                 std::deque<uint64_t> *system_latency_from_pts,
+                                 uint64_t *system_ts_last,
+                                 uint64_t *system_ts_from_pts_last)
+{
+    k4a_image_t image;
+    if (process_color)
+    {
+        image = k4a_capture_get_color_image(capture);
+    }
+    else
+    {
+        image = k4a_capture_get_ir_image(capture);
+    }
+
+    if (image)
+    {
+        *image_present = true;
+        uint64_t system_ts = k4a_image_get_system_timestamp_nsec(image);
+        uint64_t system_ts_from_pts = lookup_system_ts(k4a_image_get_device_timestamp_usec(image), true);
+
+        // Time from center of exposure until given to us from the SDK; based on Host system time.
+        uint64_t system_ts_latency = current_system_ts - system_ts;
+
+        // Time from center of exposure PTS time (converted to system time based on low latency IMU data) until we
+        // read the frame; based on Host system time.
+        uint64_t system_ts_latency_from_pts = current_system_ts - system_ts_from_pts;
+        if (system_ts_from_pts > current_system_ts)
+        {
+            printf("calculated pts system time is less than our system time\n");
         }
         else
         {
-            // we just found the first system time that is beyond the one we are looking for.
-            if ((pts_ts - last_time.pts) < (g_time.front().pts - pts_ts))
+
+            if (!*image_first_pass)
             {
-                // printf("lower %lldnsec %lldusec\n", last_time.system, pts_ts);
-                return last_time.system;
+                system_latency->push_back(current_system_ts - system_ts);
+                system_latency_from_pts->push_back(system_ts_latency_from_pts);
+
+                printf("| %9" PRId64 " [%5" PRId64 "] [%5" PRId64 "] ",
+                       STS_TO_MS(system_ts),
+                       STS_TO_MS(system_ts_latency),
+                       STS_TO_MS(system_ts_latency_from_pts));
+
+                // TS should increase
+                EXPECT_GT(system_ts, *system_ts_last);
+                EXPECT_GT(system_ts_from_pts, *system_ts_from_pts_last);
             }
-            // printf("upper %lldnsec %lldusec\n", g_time.front().system, pts_ts);
-            return g_time.front().system;
+            *system_ts_last = system_ts;
+            *system_ts_from_pts_last = system_ts_from_pts;
+            *image_first_pass = false;
         }
+
+        k4a_image_release(image);
     }
-    // should not happen
-    EXPECT_FALSE(1);
-    return 0;
+    else
+    {
+        printf("|                           ");
+    }
 }
+
 TEST_P(latency_perf, testTest)
 {
     auto as = GetParam();
@@ -305,7 +488,7 @@ TEST_P(latency_perf, testTest)
     int capture_count = g_capture_count;
     uint64_t fps_in_usec = 0;
     bool failed = false;
-    FILE *file_handle = NULL;
+    // FILE *file_handle = NULL;
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     thread_data thread = { 0 };
     THREAD_HANDLE th1 = NULL;
@@ -368,11 +551,6 @@ TEST_P(latency_perf, testTest)
     config.wired_sync_mode = g_wired_sync_mode;
     config.synchronized_images_only = g_synchronized_images_only;
     config.subordinate_delay_off_master_usec = g_subordinate_delay_off_master_usec;
-    if (g_depth_delay_off_color_usec == 0)
-    {
-        // Create delay that can be +fps to -fps
-        config.depth_delay_off_color_usec = (int32_t)(2 * fps_in_usec * ((uint64_t)rand()) / RAND_MAX - fps_in_usec);
-    }
 
     printf("Config being used is:\n");
     printf("    color_format:%d\n", config.color_format);
@@ -387,11 +565,8 @@ TEST_P(latency_perf, testTest)
     printf("\n");
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
 
-    // if (!g_no_imu)
-    // {
     thread.device = m_device;
     ASSERT_EQ(THREADAPI_OK, ThreadAPI_Create(&th1, _latency_imu_thread, &thread));
-    // }
 
     if (!g_no_startup_flush)
     {
@@ -431,12 +606,19 @@ TEST_P(latency_perf, testTest)
         capture = NULL;
     }
 
-    // printf("All times in us\n");
-    // printf("+---------------------------+-------------------+-------------------+--------+\n");
-    // printf("|         Color Info        |     IR 16 Info    |   Depth16 Info    | TS Del |\n");
-    // printf("|  TS [Delta TS][Exposure]  |   TS [Delta TS]   |   TS [Delta TS]   | (C-D)  |\n");
-    // printf("+---------------------------+-------------------+-------------------+--------+\n");
-    printf("system ts | sys latency | sys latency from pts\n");
+    printf("Sys lat: is this difference in the system time recorded on the image and the system time when the image "
+           "was presented to the caller.\n");
+    printf(
+        "PTS lat: Similar to Sys lat, but instead of using the system time assigned to the image (which is recorded by "
+        "the Host PC), the image PTS (which is center of exposure in single camera mode) is used to "
+        "calculate a more accurate system time from when the same PTS arrived from the least latent sensor source, "
+        "IMU. The IMU data received is turned into a list of PTS values and associated system ts's for when each "
+        "sample arrived on system.\n");
+    printf("+---------------------------+---------------------------+\n");
+    printf("|         Color Info (ms)   |     IR 16 Info (ms)       |\n");
+    printf("|   system  [ sys ] [ PTS ] |   system  [ sys ] [ PTS ] |\n");
+    printf("|     ts    [ lat ] [ lat ] |     ts    [ lat ] [ lat ] |\n");
+    printf("+---------------------------+---------------------------+\n");
 
     thread.save_samples = true; // start saving IMU samples
     bool color_first_pass = true;
@@ -476,145 +658,28 @@ TEST_P(latency_perf, testTest)
             continue;
         }
 
-        k4a_image_t image;
+        process_image(capture,
+                      current_system_ts,
+                      TRUE,
+                      &color,
+                      &color_first_pass,
+                      &color_system_latency,
+                      &color_system_latency_from_pts,
+                      &color_system_ts_last,
+                      &color_system_ts_from_pts_last);
+        process_image(capture,
+                      current_system_ts,
+                      FALSE,
+                      &ir,
+                      &ir_first_pass,
+                      &ir_system_latency,
+                      &ir_system_latency_from_pts,
+                      &ir_system_ts_last,
+                      &ir_system_ts_from_pts_last);
 
-        printf("|");
+        printf("|\n"); // End of line
+    }                  // End capture loop
 
-        // Probe for a color image
-        image = k4a_capture_get_color_image(capture);
-        if (image)
-        {
-            color = true;
-            uint64_t system_ts = k4a_image_get_system_timestamp_nsec(image);
-            uint64_t system_ts_from_pts = lookup_system_ts(k4a_image_get_device_timestamp_usec(image));
-
-            // Time from center of exposure until we ready // the frame; based on Host system time.
-            uint64_t system_ts_latency = current_system_ts - system_ts;
-
-            // Time from center of exposure PTS time (converted to system time based on low latency IMU data) until we
-            // read the frame; based on Host system time.
-            uint64_t system_ts_latency_from_pts = current_system_ts - system_ts_from_pts;
-
-            if (!color_first_pass)
-            {
-                color_system_latency.push_back(current_system_ts - system_ts);
-                color_system_latency_from_pts.push_back(system_ts_latency_from_pts);
-
-                // adjusted_max_ts = std::max(ts, adjusted_max_ts);
-                // static_assert(sizeof(ts) == 8, "this should not be wrong");
-                printf(" %9lld[%6lld][%6lld]",
-                       STS_TO_MS(system_ts),
-                       STS_TO_MS(system_ts_latency),
-                       STS_TO_MS(system_ts_latency_from_pts));
-
-                printf("[pts %6lld] ", STS_TO_MS(system_ts_from_pts));
-
-                // TS should increase
-                EXPECT_GT(system_ts, color_system_ts_last);
-                EXPECT_GT(system_ts_from_pts, color_system_ts_from_pts_last);
-            }
-            color_system_ts_last = system_ts;
-            color_system_ts_from_pts_last = system_ts_from_pts;
-
-            k4a_image_release(image);
-            color_first_pass = false;
-        }
-        else
-        {
-            printf("                          ");
-        }
-        image = k4a_capture_get_ir_image(capture);
-        if (image)
-        {
-            ir = true;
-            uint64_t system_ts = k4a_image_get_system_timestamp_nsec(image);
-            uint64_t system_ts_from_pts = lookup_system_ts(k4a_image_get_device_timestamp_usec(image));
-
-            // Time from center of exposure until we ready // the frame; based on Host system time.
-            uint64_t system_ts_latency = current_system_ts - system_ts;
-
-            // Time from center of exposure PTS time (converted to system time based on low latency IMU data) until we
-            // read the frame; based on Host system time.
-            uint64_t system_ts_latency_from_pts = current_system_ts - system_ts_from_pts;
-
-            if (!ir_first_pass)
-            {
-                ir_system_latency.push_back(current_system_ts - system_ts);
-                ir_system_latency_from_pts.push_back(system_ts_latency_from_pts);
-
-                // adjusted_max_ts = std::max(ts, adjusted_max_ts);
-                // static_assert(sizeof(ts) == 8, "this should not be wrong");
-                printf(" %9lld[%6lld][%6lld]",
-                       STS_TO_MS(system_ts),
-                       STS_TO_MS(system_ts_latency),
-                       STS_TO_MS(system_ts_latency_from_pts));
-
-                printf("[pts %6lld] ", STS_TO_MS(system_ts_from_pts));
-
-                // TS should increase
-                EXPECT_GT(system_ts, ir_system_ts_last);
-                EXPECT_GT(system_ts_from_pts, ir_system_ts_from_pts_last);
-            }
-            ir_system_ts_last = system_ts;
-            ir_system_ts_from_pts_last = system_ts_from_pts;
-
-            k4a_image_release(image);
-            ir_first_pass = false;
-        }
-        else
-        {
-            printf("                          ");
-        }
-        printf("\n"); // End of line
-    }                 // End capture loop
-
-    //     EXPECT_NE(adjusted_max_ts, 0);
-    //     if (last_ts == UINT64_MAX)
-    //     {
-    //         last_ts = adjusted_max_ts;
-    //     }
-    //     else if (last_ts > adjusted_max_ts)
-    //     {
-    //         // This happens when one queue gets saturated and must drop samples early; i.e. the depth queue is full,
-    //         but
-    //         // the color image is delayed due to perf issues. When this happens we just ignore the sample because our
-    //         // time stamp logic has already moved beyond the time this sample was supposed to arrive at.
-    //     }
-    //     else if ((adjusted_max_ts - last_ts) >= (fps_in_usec * 15 / 10))
-    //     {
-    //         // Calc how many captures we didn't get. If the delta between the last two time stamps is more than 1.5
-    //         // * fps_in_usec then we count
-    //         int missed_this_period = ((int)((adjusted_max_ts - last_ts) / fps_in_usec));
-    //         missed_this_period--; // We got a new time stamp to do this math, so this count has 1 too many, remove
-    //                               // it
-    //         if (((adjusted_max_ts - last_ts) % fps_in_usec) > fps_in_usec / 2)
-    //         {
-    //             missed_this_period++;
-    //         }
-    //         printf("Missed %d captures before previous capture %lld %lld\n",
-    //                missed_this_period,
-    //                (long long)adjusted_max_ts,
-    //                (long long)last_ts);
-    //         if (missed_this_period > capture_count)
-    //         {
-    //             missed_count += capture_count;
-    //             capture_count = 0;
-    //         }
-    //         else
-    //         {
-    //             missed_count += missed_this_period;
-    //             capture_count -= missed_this_period;
-    //         }
-    //     }
-    //     last_ts = std::max(last_ts, adjusted_max_ts);
-
-    //     // release capture
-    //     if (wresult == K4A_WAIT_RESULT_SUCCEEDED)
-    //     {
-    //         k4a_capture_release(capture);
-    //     }
-    // }
-    // thread.enable_counting = false; // stop counting IMU samples
     thread.exit = true; // shut down IMU thread
     k4a_device_stop_cameras(m_device);
     if (capture)
@@ -626,128 +691,131 @@ TEST_P(latency_perf, testTest)
     ASSERT_EQ(THREADAPI_OK, ThreadAPI_Join(th1, &thread_result));
     ASSERT_EQ(thread_result, (int)K4A_RESULT_SUCCEEDED);
 
-    // failed = false;
-    printf("\nRESULTS\n");
+    printf("\nLatency Results:\n");
 
     {
-        uint64_t color_system_latency_ave = 0;
-        uint64_t color_system_latency_from_pts_ave = 0;
-        {
-            for (int x = 0; x < color_system_latency.size(); x++)
-            {
-                color_system_latency_ave += color_system_latency[x];
-            }
-            color_system_latency_ave = color_system_latency_ave / color_system_latency.size();
-            printf("    %lld", STS_TO_MS(color_system_latency_ave));
-        }
-        {
-            for (int x = 0; x < color_system_latency_from_pts.size(); x++)
-            {
-                color_system_latency_from_pts_ave += color_system_latency_from_pts[x];
-            }
-            color_system_latency_from_pts_ave = color_system_latency_from_pts_ave /
-                                                color_system_latency_from_pts.size();
-            printf("    %lld", STS_TO_MS(color_system_latency_from_pts_ave));
-        }
-        printf("\n"); // End of results
-
-        // {
-        //     bool criteria_failed = false;
-        //     if (abs(depth_count) > failure_threshold_count)
-        //     {
-        //         failed = true;
-        //         criteria_failed = true;
-        //     }
-        //     printf("      Depth Only:%d %s\n", depth_count, criteria_failed ? "FAILED" : "PASSED");
-        // }
-        // {
-        //     bool criteria_failed = false;
-        //     if (abs(color_count) > failure_threshold_count)
-        //     {
-        //         failed = true;
-        //         criteria_failed = true;
-        //     }
-        //     printf("      Color Only:%d %s\n", color_count, criteria_failed ? "FAILED" : "PASSED");
-        // }
-        // {
-        //     bool criteria_failed = false;
-        //     if (abs(missed_count) > failure_threshold_count)
-        //     {
-        //         failed = true;
-        //         criteria_failed = true;
-        //     }
-        //     printf(" Missed Captures:%d %s\n", missed_count, criteria_failed ? "FAILED" : "PASSED");
-        // }
-        // {
-        //     bool criteria_failed = false;
-        //     if (!g_no_imu)
-        //     {
-        //         if (imu_percent > failure_threshold_percent || imu_percent < -failure_threshold_percent)
-        //         {
-        //             failed = true;
-        //             criteria_failed = true;
-        //         }
-        //     }
-        //     printf("     Imu Samples:%d %0.01f%% of target(%d) %s\n",
-        //            thread.imu_samples,
-        //            (double)imu_percent,
-        //            target_imu_samples,
-        //            g_no_imu ? "Disabled" : (criteria_failed ? "FAILED" : "PASSED"));
-        // }
-        // {
-        //     bool criteria_failed = false;
-        //     if (not_synchronized_count > failure_threshold_count)
-        //     {
-        //         if (!g_skip_delay_off_color_validation)
-        //         {
-        //             failed = true;
-        //         }
-        //         criteria_failed = true;
-        //     }
-        //     printf("   TS not sync'd:%d %s\n", not_synchronized_count, criteria_failed ? "FAILED" : "PASSED");
-        // }
-        // printf("  Total captures:%d\n\n", both_count + depth_count + color_count + missed_count);
-
-        file_handle = fopen("latency_testResults.csv", "a");
-        if (file_handle != 0)
+        // init CSV line
+        if (m_file_handle != 0)
         {
             std::time_t date_time = std::time(NULL);
             char buffer_date_time[100];
             std::strftime(buffer_date_time, sizeof(buffer_date_time), "%c", localtime(&date_time));
 
-            const char *user_name = environment_get_variable("USERNAME");
             const char *computer_name = environment_get_variable("COMPUTERNAME");
+            const char *disable_synchronization = environment_get_variable("K4A_DISABLE_SYNCHRONIZATION");
 
             char buffer[1024];
             snprintf(buffer,
                      sizeof(buffer),
-                     "%s, %s, %s, %s, %s, %s, %s, fps, %d, %s, captures, %d,",
+                     "%s, %s, %s, %s,%s, %s, fps, %d, %s, captures, %d,",
                      buffer_date_time,
-                     failed ? "FAILED" : "PASSED",
-                     computer_name ? computer_name : "compture name not set",
-                     user_name ? user_name : "user name not set",
+                     computer_name ? computer_name : "computer name not set",
                      as.test_name,
+                     disable_synchronization ? disable_synchronization : "0",
                      get_string_from_color_format(as.color_format),
                      get_string_from_color_resolution(as.color_resolution),
                      k4a_convert_fps_to_uint(as.fps),
                      get_string_from_depth_mode(as.depth_mode),
                      g_capture_count);
-            fputs(buffer, file_handle);
-            snprintf(buffer,
-                     sizeof(buffer),
-                     "%lld, %lld\n",
-                     STS_TO_MS(color_system_latency_ave),
-                     STS_TO_MS(color_system_latency_from_pts_ave));
-            fputs(buffer, file_handle);
-            fclose(file_handle);
+            fputs(buffer, m_file_handle);
         }
-
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  k4a_device_set_color_control(m_device,
-                                               K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-                                               K4A_COLOR_CONTROL_MODE_AUTO,
-                                               0));
     }
+    {
+        uint64_t color_system_latency_ave = 0;
+        uint64_t min = MAXUINT64;
+        uint64_t max = 0;
+        for (int x = 0; x < color_system_latency.size(); x++)
+        {
+            color_system_latency_ave += color_system_latency[x];
+            if (color_system_latency[x] < min)
+            {
+                min = color_system_latency[x];
+            }
+            if (color_system_latency[x] > max)
+            {
+                max = color_system_latency[x];
+            }
+        }
+        color_system_latency_ave = color_system_latency_ave / color_system_latency.size();
+        print_and_log("Color System Time Latency", STS_TO_MS(color_system_latency_ave), STS_TO_MS(min), STS_TO_MS(max));
+    }
+    {
+        uint64_t color_system_latency_from_pts_ave = 0;
+        uint64_t min = MAXUINT64;
+        uint64_t max = 0;
+        for (int x = 0; x < color_system_latency_from_pts.size(); x++)
+        {
+            color_system_latency_from_pts_ave += color_system_latency_from_pts[x];
+            if (color_system_latency_from_pts[x] < min)
+            {
+                min = color_system_latency_from_pts[x];
+            }
+            if (color_system_latency_from_pts[x] > max)
+            {
+                max = color_system_latency_from_pts[x];
+            }
+        }
+        color_system_latency_from_pts_ave = color_system_latency_from_pts_ave / color_system_latency_from_pts.size();
+        print_and_log("Color System Time PTS Latency",
+                      STS_TO_MS(color_system_latency_from_pts_ave),
+                      STS_TO_MS(min),
+                      STS_TO_MS(max));
+    }
+    {
+        uint64_t ir_system_latency_ave = 0;
+        uint64_t min = MAXUINT64;
+        uint64_t max = 0;
+        for (int x = 0; x < ir_system_latency.size(); x++)
+        {
+            ir_system_latency_ave += ir_system_latency[x];
+            if (ir_system_latency[x] < min)
+            {
+                min = ir_system_latency[x];
+            }
+            if (ir_system_latency[x] > max)
+            {
+                max = ir_system_latency[x];
+            }
+        }
+        ir_system_latency_ave = ir_system_latency_ave / ir_system_latency.size();
+        print_and_log("   IR System Time Latency", STS_TO_MS(ir_system_latency_ave), STS_TO_MS(min), STS_TO_MS(max));
+    }
+    {
+        uint64_t ir_system_latency_from_pts_ave = 0;
+        uint64_t min = MAXUINT64;
+        uint64_t max = 0;
+        for (int x = 0; x < ir_system_latency_from_pts.size(); x++)
+        {
+            ir_system_latency_from_pts_ave += ir_system_latency_from_pts[x];
+            if (ir_system_latency_from_pts[x] < min)
+            {
+                min = ir_system_latency_from_pts[x];
+            }
+            if (ir_system_latency_from_pts[x] > max)
+            {
+                max = ir_system_latency_from_pts[x];
+            }
+        }
+        ir_system_latency_from_pts_ave = ir_system_latency_from_pts_ave / ir_system_latency_from_pts.size();
+        print_and_log("   IR System Time PTS",
+                      STS_TO_MS(ir_system_latency_from_pts_ave),
+                      STS_TO_MS(min),
+                      STS_TO_MS(max));
+    }
+
+    printf("\n");
+    if (m_file_handle != 0)
+    {
+        // Terminate line
+        fputs("\n", m_file_handle);
+    }
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+              k4a_device_set_color_control(m_device,
+                                           K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                                           K4A_COLOR_CONTROL_MODE_AUTO,
+                                           0));
+
     ASSERT_EQ(failed, false);
     return;
 }
@@ -757,33 +825,33 @@ TEST_P(latency_perf, testTest)
 // clang-format off
 static struct latency_parameters tests_30fps[] = {
     {  0, "FPS_30_MJPEG_2160P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    {  1, "FPS_30_MJPEG_2160P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    {  1, "FPS_30_MJPEG_2160P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     {  2, "FPS_30_MJPEG_2160P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    {  3, "FPS_30_MJPEG_2160P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_PASSIVE_IR},
+    {  3, "FPS_30_MJPEG_2160P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_PASSIVE_IR},
     {  4, "FPS_30_MJPEG_1536P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    {  5, "FPS_30_MJPEG_1536P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    {  5, "FPS_30_MJPEG_1536P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     {  6, "FPS_30_MJPEG_1536P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    {  7, "FPS_30_MJPEG_1536P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_PASSIVE_IR},
+    {  7, "FPS_30_MJPEG_1536P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_PASSIVE_IR},
     {  8, "FPS_30_MJPEG_1440P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    {  9, "FPS_30_MJPEG_1440P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    {  9, "FPS_30_MJPEG_1440P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 10, "FPS_30_MJPEG_1440P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 11, "FPS_30_MJPEG_1440P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_PASSIVE_IR},
+    { 11, "FPS_30_MJPEG_1440P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 12, "FPS_30_MJPEG_1080P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 13, "FPS_30_MJPEG_1080P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 13, "FPS_30_MJPEG_1080P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 14, "FPS_30_MJPEG_1080P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 15, "FPS_30_MJPEG_1080P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_PASSIVE_IR},
+    { 15, "FPS_30_MJPEG_1080P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 16, "FPS_30_MJPEG_0720P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 17, "FPS_30_MJPEG_0720P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 17, "FPS_30_MJPEG_0720P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 18, "FPS_30_MJPEG_0720P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 19, "FPS_30_MJPEG_0720P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
+    { 19, "FPS_30_MJPEG_0720P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_MJPG,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
     { 20, "FPS_30_NV12__0720P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_NV12,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 21, "FPS_30_NV12__0720P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_NV12,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 21, "FPS_30_NV12__0720P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_NV12,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 22, "FPS_30_NV12__0720P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_NV12,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 23, "FPS_30_NV12__0720P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_NV12,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
+    { 23, "FPS_30_NV12__0720P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_NV12,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
     { 24, "FPS_30_YUY2__0720P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_YUY2,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 25, "FPS_30_YUY2__0720P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_YUY2,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 25, "FPS_30_YUY2__0720P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_YUY2,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 26, "FPS_30_YUY2__0720P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_YUY2,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 27, "FPS_30_YUY2__0720P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_YUY2,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
+    { 27, "FPS_30_YUY2__0720P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_YUY2,  K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
 
     // RGB modes use one of the above modes and performs a conversion, so we don't test EVERY combination
     { 28, "FPS_30_BGRA32_2160P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_30, K4A_IMAGE_FORMAT_COLOR_BGRA32, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_UNBINNED},
@@ -797,90 +865,90 @@ INSTANTIATE_TEST_CASE_P(30FPS_TESTS, latency_perf, ValuesIn(tests_30fps));
 
 static struct latency_parameters tests_15fps[] = {
     {  0, "FPS_15_MJPEG_3072P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    {  1, "FPS_15_MJPEG_3072P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    {  1, "FPS_15_MJPEG_3072P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     {  2, "FPS_15_MJPEG_3072P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    {  3, "FPS_15_MJPEG_3072P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    {  4, "FPS_15_MJPEG_3072P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_PASSIVE_IR},
+    {  3, "FPS_15_MJPEG_3072P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    {  4, "FPS_15_MJPEG_3072P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_PASSIVE_IR},
     {  5, "FPS_15_MJPEG_2160P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    {  6, "FPS_15_MJPEG_2160P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    {  6, "FPS_15_MJPEG_2160P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     {  7, "FPS_15_MJPEG_2160P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    {  8, "FPS_15_MJPEG_2160P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    {  9, "FPS_15_MJPEG_2160P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_PASSIVE_IR},
+    {  8, "FPS_15_MJPEG_2160P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    {  9, "FPS_15_MJPEG_2160P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 10, "FPS_15_MJPEG_1536P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 11, "FPS_15_MJPEG_1536P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 11, "FPS_15_MJPEG_1536P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 12, "FPS_15_MJPEG_1536P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 13, "FPS_15_MJPEG_1536P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 14, "FPS_15_MJPEG_1536P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_PASSIVE_IR},
+    { 13, "FPS_15_MJPEG_1536P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 14, "FPS_15_MJPEG_1536P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 15, "FPS_15_MJPEG_1440P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 16, "FPS_15_MJPEG_1440P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 16, "FPS_15_MJPEG_1440P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 17, "FPS_15_MJPEG_1440P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 18, "FPS_15_MJPEG_1440P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 19, "FPS_15_MJPEG_1440P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_PASSIVE_IR},
+    { 18, "FPS_15_MJPEG_1440P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 19, "FPS_15_MJPEG_1440P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 20, "FPS_15_MJPEG_1080P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 21, "FPS_15_MJPEG_1080P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 21, "FPS_15_MJPEG_1080P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 22, "FPS_15_MJPEG_1080P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 23, "FPS_15_MJPEG_1080P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 24, "FPS_15_MJPEG_1080P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_PASSIVE_IR},
+    { 23, "FPS_15_MJPEG_1080P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 24, "FPS_15_MJPEG_1080P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 25, "FPS_15_MJPEG_0720P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 26, "FPS_15_MJPEG_0720P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 26, "FPS_15_MJPEG_0720P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 27, "FPS_15_MJPEG_0720P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 28, "FPS_15_MJPEG_0720P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 29, "FPS_15_MJPEG_0720P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
+    { 28, "FPS_15_MJPEG_0720P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 29, "FPS_15_MJPEG_0720P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
     { 30, "FPS_15_NV12__0720P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 31, "FPS_15_NV12__0720P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 31, "FPS_15_NV12__0720P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 32, "FPS_15_NV12__0720P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 33, "FPS_15_NV12__0720P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 34, "FPS_15_NV12__0720P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
+    { 33, "FPS_15_NV12__0720P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 34, "FPS_15_NV12__0720P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
     { 35, "FPS_15_YUY2__0720P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 36, "FPS_15_YUY2__0720P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 36, "FPS_15_YUY2__0720P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 37, "FPS_15_YUY2__0720P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 38, "FPS_15_YUY2__0720P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 39, "FPS_15_YUY2__0720P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
+    { 38, "FPS_15_YUY2__0720P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 39, "FPS_15_YUY2__0720P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_15, K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
 };
 
 INSTANTIATE_TEST_CASE_P(15FPS_TESTS, latency_perf, ValuesIn(tests_15fps));
 
 static struct latency_parameters tests_5fps[] = {
     {  0, "FPS_05_MJPEG_3072P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    {  1, "FPS_05_MJPEG_3072P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    {  1, "FPS_05_MJPEG_3072P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     {  2, "FPS_05_MJPEG_3072P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    {  3, "FPS_05_MJPEG_3072P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    {  4, "FPS_05_MJPEG_3072P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_PASSIVE_IR},
+    {  3, "FPS_05_MJPEG_3072P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    {  4, "FPS_05_MJPEG_3072P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_3072P, K4A_DEPTH_MODE_PASSIVE_IR},
     {  5, "FPS_05_MJPEG_2160P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    {  6, "FPS_05_MJPEG_2160P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    {  6, "FPS_05_MJPEG_2160P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     {  7, "FPS_05_MJPEG_2160P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    {  8, "FPS_05_MJPEG_2160P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    {  9, "FPS_05_MJPEG_2160P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_PASSIVE_IR},
+    {  8, "FPS_05_MJPEG_2160P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    {  9, "FPS_05_MJPEG_2160P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_2160P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 10, "FPS_05_MJPEG_1536P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 11, "FPS_05_MJPEG_1536P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 11, "FPS_05_MJPEG_1536P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 12, "FPS_05_MJPEG_1536P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 13, "FPS_05_MJPEG_1536P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 14, "FPS_05_MJPEG_1536P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_PASSIVE_IR},
+    { 13, "FPS_05_MJPEG_1536P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 14, "FPS_05_MJPEG_1536P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1536P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 15, "FPS_05_MJPEG_1440P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 16, "FPS_05_MJPEG_1440P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 16, "FPS_05_MJPEG_1440P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 17, "FPS_05_MJPEG_1440P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 18, "FPS_05_MJPEG_1440P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 19, "FPS_05_MJPEG_1440P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_PASSIVE_IR},
+    { 18, "FPS_05_MJPEG_1440P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 19, "FPS_05_MJPEG_1440P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1440P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 20, "FPS_05_MJPEG_1080P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 21, "FPS_05_MJPEG_1080P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 21, "FPS_05_MJPEG_1080P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 22, "FPS_05_MJPEG_1080P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 23, "FPS_05_MJPEG_1080P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 24, "FPS_05_MJPEG_1080P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_PASSIVE_IR},
+    { 23, "FPS_05_MJPEG_1080P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 24, "FPS_05_MJPEG_1080P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_1080P, K4A_DEPTH_MODE_PASSIVE_IR},
     { 25, "FPS_05_MJPEG_0720P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 26, "FPS_05_MJPEG_0720P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 26, "FPS_05_MJPEG_0720P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 27, "FPS_05_MJPEG_0720P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 28, "FPS_05_MJPEG_0720P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 29, "FPS_05_MJPEG_0720P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
+    { 28, "FPS_05_MJPEG_0720P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 29, "FPS_05_MJPEG_0720P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_MJPG, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
     { 30, "FPS_05_NV12__0720P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 31, "FPS_05_NV12__0720P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 31, "FPS_05_NV12__0720P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 32, "FPS_05_NV12__0720P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 33, "FPS_05_NV12__0720P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 34, "FPS_05_NV12__0720P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
+    { 33, "FPS_05_NV12__0720P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 34, "FPS_05_NV12__0720P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_NV12, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
     { 35, "FPS_05_YUY2__0720P_NFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_2X2BINNED},
-    { 36, "FPS_05_YUY2__0720P_NFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
+    { 36, "FPS_05_YUY2__0720P_NFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_NFOV_UNBINNED},
     { 37, "FPS_05_YUY2__0720P_WFOV_2X2BINNED", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_2X2BINNED},
-    { 38, "FPS_05_YUY2__0720P_WFOV_UNBINNED",  K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
-    { 39, "FPS_05_YUY2__0720P_PASSIVE_IR",     K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
+    { 38, "FPS_05_YUY2__0720P_WFOV_UNBINNED ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_WFOV_UNBINNED},
+    { 39, "FPS_05_YUY2__0720P_PASSIVE_IR    ", K4A_FRAMES_PER_SECOND_5,  K4A_IMAGE_FORMAT_COLOR_YUY2, K4A_COLOR_RESOLUTION_720P,  K4A_DEPTH_MODE_PASSIVE_IR},
 };
 // clang-format on
 
@@ -890,8 +958,6 @@ int main(int argc, char **argv)
 {
     bool error = false;
     k4a_unittest_init();
-
-    srand((unsigned int)time(0)); // use current time as seed for random generator
 
     ::testing::InitGoogleTest(&argc, argv);
 
@@ -921,10 +987,6 @@ int main(int argc, char **argv)
         {
             g_skip_delay_off_color_validation = true;
         }
-        // else if (strcmp(argument, "--no_imu") == 0)
-        // {
-        //     g_no_imu = true;
-        // }
         else if (strcmp(argument, "--master") == 0)
         {
             g_wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
@@ -1038,8 +1100,6 @@ int main(int argc, char **argv)
         printf("      Run device in subordinate mode\n");
         printf("  --index\n");
         printf("      The device index to target when calling k4a_device_open()\n");
-        printf("  --no_imu\n");
-        printf("      Disables IMU in the test.\n");
         printf("  --capture_count\n");
         printf("      The number of captures the test should read; default is 100\n");
         printf("  --synchronized_images_only\n");
