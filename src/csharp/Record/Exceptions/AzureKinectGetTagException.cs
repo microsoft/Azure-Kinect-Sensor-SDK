@@ -97,5 +97,21 @@ namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
                 }
             }
         }
+
+        /// <summary>
+        /// Throws an <see cref="AzureKinectGetTagException"/> if the result of the function is not
+        /// a success.
+        /// </summary>
+        /// <param name="tracer">The tracer is that is capturing logging messages.</param>
+        /// <param name="result">The result native function to call.</param>
+        /// <typeparam name="T">The type of result to expect from the function call.</typeparam>
+        internal static void ThrowIfNotSuccess<T>(LoggingTracer tracer, T result)
+            where T : System.Enum
+        {
+            if (!AzureKinectRecordException.IsSuccess(result))
+            {
+                throw new AzureKinectGetTagException($"result = {result}", tracer.LogMessages);
+            }
+        }
     }
 }
