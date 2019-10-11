@@ -14,7 +14,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
     /// Represents errors that occur when creating an Azure Kinect sensor recording.
     /// </summary>
     [Serializable]
-    public class AzureKinectCreateRecordingException : AzureKinectException
+    public class AzureKinectCreateRecordingException : AzureKinectRecordException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureKinectCreateRecordingException"/> class.
