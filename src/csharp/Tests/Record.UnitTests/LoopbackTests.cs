@@ -50,15 +50,14 @@ namespace Tests
                 WiredSyncMode = WiredSyncMode.Subordinate,
             };
 
-#pragma warning disable CA1508 // Avoid dead conditional code
             using (Recorder record = Recorder.Create(this.recordingPath, null, deviceConfiguration))
 #pragma warning restore CA1508 // Avoid dead conditional code
             {
                 record.AddImuTrack();
                 record.AddCustomVideoTrack("CUSTOM_VIDEO", "V_CUSTOM1", new byte[] { 1, 2, 3 }, new RecordVideoSettings() { FrameRate = 1, Height = 10, Width = 20 });
                 record.AddCustomSubtitleTrack("CUSTOM_SUBTITLE", "S_CUSTOM1", new byte[] { 4, 5, 6, 7 }, new RecordSubtitleSettings() { HighFrequencyData = false });
-                record.AddTag("MyTag1", "one");
-                record.AddTag("MyTag2", "two");
+                record.AddTag("MYTAG1", "one");
+                record.AddTag("MYTAG2", "two");
 
                 record.WriteHeader();
 
@@ -129,6 +128,15 @@ namespace Tests
                 Assert.IsTrue(playback.CheckTrackExists("CUSTOM_SUBTITLE"));
                 Assert.AreEqual("V_CUSTOM1", playback.GetTrackCodecId("CUSTOM_VIDEO"));
                 Assert.AreEqual(new byte[] { 1, 2, 3 }, playback.GetTrackCodecContext("CUSTOM_VIDEO"));
+
+                Assert.AreEqual("one", playback.GetTag("MYTAG1"));
+                Assert.AreEqual("two", playback.GetTag("MYTAG2"));
+
+                Assert.AreEqual(FPS.FPS30, playback.RecordConfiguration.CameraFPS);
+                Assert.AreEqual(ImageFormat.ColorNV12, playback.RecordConfiguration.ColorFormat);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(456), playback.RecordConfiguration.SubordinateDelayOffMaster);
+
+                Assert.IsFalse(playback.Calibration.HasValue);
 
                 for (int i = 0; i < 10; i++)
                 {

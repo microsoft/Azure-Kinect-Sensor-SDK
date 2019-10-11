@@ -78,7 +78,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                     {
                         NativeMethods.k4a_record_configuration_t nativeConfig = new NativeMethods.k4a_record_configuration_t();
 
-                        if (NativeMethods.k4a_playback_get_record_configuration(this.handle, nativeConfig) == NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED)
+                        if (NativeMethods.k4a_playback_get_record_configuration(this.handle, ref nativeConfig) == NativeMethods.k4a_result_t.K4A_RESULT_SUCCEEDED)
                         {
                             this.recordConfiguration = RecordConfiguration.FromNative(nativeConfig);
                         }
@@ -387,7 +387,21 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
 
                 // Determine the required string size
                 UIntPtr size = new UIntPtr(0);
-                if (NativeMethods.k4a_playback_get_tag(this.handle, name, null, ref size) != NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL)
+                NativeMethods.k4a_buffer_result_t result;
+
+#pragma warning disable CA1508 // Avoid dead conditional code
+                using (LoggingTracer tracer = new LoggingTracer(LogLevel.Warning, Logger.LogProvider, RecordLogger.LogProvider))
+#pragma warning restore CA1508 // Avoid dead conditional code
+                {
+                    result = NativeMethods.k4a_playback_get_tag(this.handle, name, null, ref size);
+
+                    if (result == NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_FAILED)
+                    {
+                        AzureKinectGetTagException.ThrowIfNotSuccess(tracer, result);
+                    }
+                }
+
+                if (result != NativeMethods.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL)
                 {
                     throw new AzureKinectException($"Unexpected internal state calling {nameof(NativeMethods.k4a_playback_get_track_name)}");
                 }

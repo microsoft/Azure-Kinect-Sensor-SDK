@@ -34,19 +34,30 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         /// <returns>A new recording object.</returns>
         public static Recorder Create(string path, Device device, DeviceConfiguration deviceConfiguration)
         {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (deviceConfiguration == null)
+            {
+                throw new ArgumentNullException(nameof(deviceConfiguration));
+            }
+
             NativeMethods.k4a_record_t handle = null;
+            NativeMethods.k4a_device_configuration_t configuration = NativeMethods.k4a_device_configuration_t.FromDeviceConfiguration(deviceConfiguration);
             if (device != null)
             {
                 // If a device was specified, lock that device to avoid disposal while in use.
                 // Device.Dispose will take the same lock.
                 lock (device)
                 {
-                    AzureKinectCreateRecordingException.ThrowIfNotSuccess(path, () => NativeMethods.k4a_record_create(path, device.Handle, NativeMethods.k4a_device_configuration_t.FromDeviceConfiguration(deviceConfiguration), out handle));
+                    AzureKinectCreateRecordingException.ThrowIfNotSuccess(path, () => NativeMethods.k4a_record_create(path, device.Handle, configuration, out handle));
                 }
             }
             else
             {
-                AzureKinectCreateRecordingException.ThrowIfNotSuccess(path, () => NativeMethods.k4a_record_create(path, IntPtr.Zero, NativeMethods.k4a_device_configuration_t.FromDeviceConfiguration(deviceConfiguration), out handle));
+                AzureKinectCreateRecordingException.ThrowIfNotSuccess(path, () => NativeMethods.k4a_record_create(path, IntPtr.Zero, configuration, out handle));
             }
 
             return new Recorder(handle);

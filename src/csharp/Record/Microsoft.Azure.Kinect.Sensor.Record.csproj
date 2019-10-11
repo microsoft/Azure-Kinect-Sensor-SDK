@@ -8,6 +8,7 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\AzureKinectSensorSDK.ruleset</CodeAnalysisRuleSet>
     <OutputPath Condition="'$(BaseOutputPath)' != ''">$(BaseOutputPath)\$(AssemblyName)\</OutputPath>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>

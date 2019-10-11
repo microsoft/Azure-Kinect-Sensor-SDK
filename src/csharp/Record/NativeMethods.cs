@@ -101,7 +101,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
         public static extern k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, out Calibration calibration);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle, [Out] k4a_record_configuration_t configuration);
+        public static extern k4a_result_t k4a_playback_get_record_configuration(k4a_playback_t playback_handle, ref k4a_record_configuration_t configuration);
 
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
         public static extern bool k4a_playback_check_track_exists(k4a_playback_t playback_handle, string track_name);
@@ -277,6 +277,23 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             }
         }
 
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct k4a_record_configuration_t
+        {
+            public ImageFormat color_format;
+            public ColorResolution color_resolution;
+            public DepthMode depth_mode;
+            public FPS camera_fps;
+            public byte color_track_enabled;
+            public byte depth_track_enabled;
+            public byte ir_track_enabled;
+            public byte imu_track_enabled;
+            public int depth_delay_off_color_usec;
+            public WiredSyncMode wired_sync_mode;
+            public uint subordinate_delay_off_master_usec;
+            public uint start_timestamp_offset_usec;
+        }
+
         public class k4a_record_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
         {
             private k4a_record_t()
@@ -343,25 +360,6 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                     GyroTimestamp = TimeSpan.FromTicks(checked((long)this.gyro_timestamp_usec) * 10),
                 };
             }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public class k4a_record_configuration_t
-        {
-#pragma warning disable SA1401 // Fields should be private
-            public ImageFormat color_format;
-            public ColorResolution color_resolution;
-            public DepthMode depth_mode;
-            public FPS camera_fps;
-            public bool color_track_enabled;
-            public bool depth_track_enabled;
-            public bool ir_track_enabled;
-            public bool imu_track_enabled;
-            public int depth_delay_off_color_usec;
-            public WiredSyncMode wired_sync_mode;
-            public uint subordinate_delay_off_master_usec;
-            public uint start_timestamp_offset_usec;
-#pragma warning restore SA1401 // Fields should be private
         }
     }
 #pragma warning restore CA2101 // Specify marshaling for P/Invoke string arguments

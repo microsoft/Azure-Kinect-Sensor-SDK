@@ -383,7 +383,10 @@ k4a_result_t k4a_record_add_tag(const k4a_record_t recording_handle, const char 
         return K4A_RESULT_FAILED;
     }
 
-    add_tag(context, name, value);
+    if (NULL == add_tag(context, name, value))
+    {
+        return K4A_RESULT_FAILED;
+    }
 
     return K4A_RESULT_SUCCEEDED;
 }
