@@ -73,8 +73,8 @@ static bool transformation_compare_image_descriptors(const k4a_transformation_im
         descriptor1->stride_bytes != descriptor2->stride_bytes || descriptor1->format != descriptor2->format)
     {
         LOG_ERROR("Unexpected image descriptor. "
-                  "Expected width_pixels: %d, height_pixels: %d, stride_bytes: %d, format: %d. "
-                  "Actual width_pixels: %d, height_pixels: %d, stride_bytes: %d, format: %d. ",
+                  "Descriptor 1: width_pixels: %d, height_pixels: %d, stride_bytes: %d, format: %d. "
+                  "Descriptor 2: width_pixels: %d, height_pixels: %d, stride_bytes: %d, format: %d. ",
                   descriptor1->width_pixels,
                   descriptor1->height_pixels,
                   descriptor1->stride_bytes,
