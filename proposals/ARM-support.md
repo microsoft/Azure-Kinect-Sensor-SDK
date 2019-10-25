@@ -1,7 +1,7 @@
 
 # Support for ARM
 
-* [x] Proposed
+* [x] Proposed //WES: I think we should add dates to these statuses when they get checked. Over time it will help to inform us how current / stale the doc is.
 * [ ] Prototype: Not Started
 * [ ] Implementation: Not Started
 * [ ] Specification: Not Started
@@ -29,12 +29,16 @@ We are considering to use 2 kinds of Jetson boards for the ARM support:
 
 ## Implementation
 
-There are several large adjustments need to be implemented:
+There are several large adjustments need to be implemented: //WES: there are 4 repo's that need to be modified, SDK, BT, Depth, and packaging.
 
 - Changes to both Sensor SDK and Body Tracking SDK to make them run on ARM
 - Changes to the build process for Sensor SDK, Depth Engine and Body Tracking SDK
 - Changes to the test system for Sensor SDK, Depth Engine and Body Tracking SDK
-- Changes to the release process for both Linux and Windows
+- Changes to the release process for both Linux and Windows //WES: i think we only need to update the release process for Windows.
+
+//WES: Questions - should we target release ARM binaries for Windows and Linux? or Just Linux? I am leaning toward just Ubuntu 18.04.
+// WES: there is code in the depth engine that uses SSE instructions. This has been worked around with software equivalents. We should have an item to evaluate if we need to address it before release or not.
+
 
 ## Packaging
 
