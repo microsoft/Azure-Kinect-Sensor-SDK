@@ -104,9 +104,14 @@ need for building, but is required running the SDK*
 
 2. Run CMake from that directory. The preferred build is ninja. All other
     generators are untested.
-
+    
+    Release Build:
     ```
     cmake .. -GNinja
+    ```
+    Debug Build:
+    ```
+    cmake .. -GNinja -DCMAKE_BUILD_TYPE=Debug
     ```
 
 3. Run the build (ninja).
