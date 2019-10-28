@@ -128,6 +128,9 @@ endif()
 # executable for shared objects. This is done on Linux to emulate the default
 # behavior of the Windows loader, which searches for DLLs in the path of the
 # executable.
+#
+# We only set RPATH for build since our libs and executables are put in the
+# same folder.
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     set(CMAKE_BUILD_RPATH "\$ORIGIN")
 endif()
