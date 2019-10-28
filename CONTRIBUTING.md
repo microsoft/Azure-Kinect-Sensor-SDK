@@ -24,12 +24,25 @@ When opening a new issue be sure to document:
 
 ### Requesting new features
 
-Please review the list of open Issues to see if one is already open. Please review all categories, Bugs and 
-Enhancements. Also check for Closed Issues before opening a new one.
+Please review the list of open Issues to see if one is already open. Please review all categories, Bugs and enhancements. Also check for Closed Issues before opening a new one.
+If you have a small enhancement that is well defined, please create a new feature request on GitHub.
+
+If you have a larger idea for the new feature please share it with us on [User Voce](https://feedback.azure.com/forums/920053) where the rest of the community can vote for it as well. We will review the idea and assign the appropriate status:
+
+| Process step                                  | Customer Voice status|
+|-----------------------------------------------|----------------------|
+| Idea- doesn't have enough details or needs community support | Need Feedback        |
+| Proposal- proposal is created and in review   | Under Review         |
+| Approved to get started                       | Planned              |
+| Work started                                  | Started              |
+| Feature is released                           | Completed            |
+
+Once an idea is well defined and reached the popularity vote, the proposal( is coming soon...) for implementation will be created on GitHub for community to add comments and participate in the design process. Once the proposal is completed and approved by both community and Microsoft team, the implementation will start.
+We will consider all of the ideas, but some we will decline to implement due to the restrictions of the product.
 
 ## Finding issues you can help with
 
-Looking for something to work on? Issues marked [``Good First Issue``](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/labels/good%20first%20issue) 
+Looking for something to work on? Issues marked [``Good First Issue``](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/labels/good%20first%20issue)
 are a good place to start.
 
 You can also check the [``Help Wanted``](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/labels/help%20wanted) tag to 
