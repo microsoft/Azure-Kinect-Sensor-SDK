@@ -41,7 +41,26 @@ Below is our list of possible status states we may assign to the request:
 | Completed                             | Feature is released               |
 | Declined                                 | We have decided not to make this change |
 
-Once an idea is well defined and reached the popularity vote, a written proposal( is coming soon...) for implementation will be created on GitHub for all members of the community to review and provide feedback on the specific implementation to ensure it covers their needs. Once the the implementation of the feature is approved by both community and Microsoft team, the implementation will start.
+#### <blank>
+This is a new request that we have not yet seen. Within a week we should have reviewed the request and assigned it an initial state.
+
+#### Needs Feedback
+The Azure Kinect team uses this state to ask for more information about this issue. We may need more information from the issue filer as we don't completely understand the request. We might also use this status because we are waiting for more community feedback on the proposal; either in the form or spec feedback or up voting. 
+
+#### Under Review
+The team is actively reviewing the proposals and determine what the next actions should be. We may ask for more information, iterate on the proposal, or move to planned state while we wait for resources. We will also need to carefully consider not only the work to implement the request but the work needed to be invested our build and test infrastructure to ensure quality of the code remains high.
+
+#### Planned
+The quested issue have been planned but not yet started. We may stay in this state indefinitely if we don't have resources to complete the request.
+
+#### Started
+Work on the feature, new tests, and possible infrastructure changes have begun.
+
+#### Completed
+The requested issue has been checked into develop branch and we are done. The feature however, may not yet be part of a release.
+
+#### Declined
+We have consider the request and have decided not to implement it. This may be because we don't have the resources, because the feature doesn't align with company goals, <more?>
 We will consider all of the ideas, but some we will be declined to implement due to the restrictions of the product.
 
 ## Finding issues you can help with
