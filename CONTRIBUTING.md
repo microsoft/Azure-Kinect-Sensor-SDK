@@ -38,6 +38,7 @@ Below is our list of possible status states we may assign to the request:
 | Planned                               | Approved to get the work started  |
 | Started                               | Work started                      |
 | Completed                             | Feature is released               |
+| Declined                                 | We have decided not to make this change |
 
 Once an idea is well defined and reached the popularity vote, a written proposal( is coming soon...) for implementation will be created on GitHub for all members of the community to review and provide feedback on the specific implementation to ensure it covers their needs. Once the the implementation of the feature is approved by both community and Microsoft team, the implementation will start.
 We will consider all of the ideas, but some we will be declined to implement due to the restrictions of the product.
