@@ -61,7 +61,6 @@ The requested issue has been checked into develop branch and we are done. The fe
 
 #### Declined
 We have consider the request and have decided not to implement it. This may be because we don't have the resources, because the feature doesn't align with company goals, <more?>
-We will consider all of the ideas, but some we will be declined to implement due to the restrictions of the product.
 
 ## Finding issues you can help with
 
