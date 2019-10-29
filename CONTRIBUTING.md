@@ -33,42 +33,56 @@ Below is our list of possible status states we may assign to the request:
 
 | Microsoft Azure Feedback Forums status| Process steps definition
 |---------------------------------------|---------------------------------------|
-| <blank>                                    | New issue we have not looked at yet |
+| No status                                 | New issue we have not looked at yet |
 | Need Feedback                         | Idea- doesn't have enough details or needs community support |
 | Under Review                          | Proposal for the new feature is created and in review |
 | Planned                               | Approved to get the work started  |
 | Started                               | Work started                      |
 | Completed                             | Feature is released               |
-| Declined                                 | We have decided not to make this change |
-| Moved                                            | Issue which has been moved to GitHub | 
+| Declined                              | We have decided not to make this change |
+| Moved                                 | Issue which has been moved to GitHub |
+| Archived                              | Feature not possible to implement on current HW. |
+| Triaged                               | Request has been seen and is under internal discussion |
 
-| Archived                                         | Feature not possible to implement on current HW. | 
-| Triaged                                           | Request has been seen and is under internal discussion. | 
-| Archived                                         | Feature not possible to implement on current HW. | 
-| Triaged                                           | Request has been seen and is under internal discussion. | 
-| Archived                                         | Feature not possible to implement on current HW. | 
-| Triaged                                           | Request has been seen and is under internal discussion. | 
+#### No status
 
-#### <blank>
 This is a new request that we have not yet seen. Within a week we should have reviewed the request and assigned it an initial state.
 
 #### Needs Feedback
-The Azure Kinect team uses this state to ask for more information about this issue. We may need more information from the issue filer as we don't completely understand the request. We might also use this status because we are waiting for more community feedback on the proposal; either in the form or spec feedback or up voting. 
+
+The Azure Kinect team uses this state to ask for more information about this issue. We may need more information from the issue filer as we don't completely understand the request. We might also use this status because we are waiting for more community feedback on the proposal; either in the form or spec feedback or up voting.
 
 #### Under Review
-The team is actively reviewing the proposals and determine what the next actions should be. We may ask for more information, iterate on the proposal, or move to planned state while we wait for resources. We will also need to carefully consider not only the work to implement the request but the work needed to be invested our build and test infrastructure to ensure quality of the code remains high.
+
+The team is actively reviewing the proposal and determine what the next actions should be. We may ask for more information, iterate on the proposal, or move to planned state while we wait for resources. We will also need to carefully consider not only the work to implement the request but the work needed to be invested our build and test infrastructure to ensure quality of the code remains high.
 
 #### Planned
+
 The quested issue have been planned but not yet started. We may stay in this state indefinitely if we don't have resources to complete the request.
 
 #### Started
+
 Work on the feature, new tests, and possible infrastructure changes have begun.
 
 #### Completed
+
 The requested issue has been checked into develop branch and we are done. The feature however, may not yet be part of a release.
 
 #### Declined
-We have consider the request and have decided not to implement it. This may be because we don't have the resources, because the feature doesn't align with company goals, <more?>
+
+We have consider the request and have decided not to implement it due to various reasons.
+
+#### Moved
+
+Issue has been moved to GitHub for tracking.
+
+#### Archived
+
+We will archive the idea if it doesn't fit for the current hardware.
+
+#### Triaged
+
+We use the this status to indicate that request has been seen and is under internal discussion.
 
 ## Finding issues you can help with
 
