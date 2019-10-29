@@ -42,6 +42,8 @@ Below is our list of possible status states we may assign to the request:
 | Declined                                 | We have decided not to make this change |
 | Archived                                         | Feature not possible to implement on current HW. | 
 | Triaged                                           | Request has been seen and is under internal discussion. | 
+| Archived                                         | Feature not possible to implement on current HW. | 
+| Triaged                                           | Request has been seen and is under internal discussion. | 
 
 #### <blank>
 This is a new request that we have not yet seen. Within a week we should have reviewed the request and assigned it an initial state.
