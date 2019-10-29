@@ -27,7 +27,7 @@ When opening a new issue be sure to document:
 Please review the list of open Issues to see if one is already open. Please review all categories, Bugs and enhancements. Also check for Closed Issues before opening a new one.
 If you have a small enhancement that is well defined, please create a new feature request on GitHub.
 
-If you have a larger idea for the new feature please share it with us on [Microsoft Azure Feedback Forums](https://feedback.azure.com/forums/920053) where the rest of the community can up vote it too. We will review the submitted ideas at least once a week, usually twice weekly. 
+If you have a larger idea for the new feature please share it with us on [Microsoft Azure Feedback Forums](https://feedback.azure.com/forums/920053) where the rest of the community can up vote it too. We will review the submitted ideas very frequently, usually twice weekly. 
 
 Below is our list of possible status states we may assign to the request:
 
