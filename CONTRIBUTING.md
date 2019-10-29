@@ -40,6 +40,8 @@ Below is our list of possible status states we may assign to the request:
 | Started                               | Work started                      |
 | Completed                             | Feature is released               |
 | Declined                                 | We have decided not to make this change |
+| Moved                                            | Issue which has been moved to GitHub | 
+
 | Archived                                         | Feature not possible to implement on current HW. | 
 | Triaged                                           | Request has been seen and is under internal discussion. | 
 | Archived                                         | Feature not possible to implement on current HW. | 
