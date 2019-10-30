@@ -58,7 +58,7 @@ The team is actively reviewing the proposal and determine what the next actions 
 
 #### Planned
 
-The quested issue have been planned but not yet started. We may stay in this state indefinitely if we don't have resources to complete the request.
+The quested issue has been planned but not yet started. We may stay in this state indefinitely if we don't have resources to complete the request.
 
 #### Started
 
