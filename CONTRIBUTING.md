@@ -70,7 +70,7 @@ The requested issue has been checked into develop branch and we are done. The fe
 
 #### Declined
 
-We have consider the request and have decided not to implement it due to various reasons. For example, the idea cannot be implemented with the current hardware set up or the idea doesn't fit the Microsoft direction.
+We have consider the request and have decided not to implement it due to various reasons. For example, the idea cannot be implemented with the current hardware.
 
 #### Moved
 
