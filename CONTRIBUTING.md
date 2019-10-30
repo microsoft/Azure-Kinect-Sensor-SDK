@@ -34,7 +34,7 @@ Below is our list of possible status states we may assign to the request:
 | Microsoft Azure Feedback Forums status| Process steps definition
 |---------------------------------------|---------------------------------------|
 | No status                                 | New issue we have not looked at yet |
-| Need Feedback                         | Idea doesn't have enough details or needs community support |
+| Need Feedback                         | Idea doesn't have enough details or needs more community support |
 | Under Review                          | Proposal for the new feature is created and in review |
 | Planned                               | Approved to get the work started  |
 | Started                               | Work started                      |
