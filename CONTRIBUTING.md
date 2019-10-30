@@ -50,7 +50,7 @@ This is a new request that we have not yet seen. Within a week we should have re
 
 #### Needs Feedback
 
-The Azure Kinect team uses this state to ask for more information about this issue. We may need more information from the issue filer as we don't completely understand the request. We might also use this status because we are waiting for more community feedback on the proposal; either in the form or spec feedback or up voting.
+The Azure Kinect team uses this state to ask for more information about this issue. We may need more information from the issue filer as we don't completely understand the request. We might also use this status because we are waiting for more community feedback on the proposal; either in the form of spec feedback or up voting.
 
 #### Under Review
 
