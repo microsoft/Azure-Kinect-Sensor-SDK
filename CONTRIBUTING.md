@@ -27,14 +27,14 @@ When opening a new issue be sure to document:
 Please review the list of open Issues to see if one is already open. Please review all categories, Bugs and enhancements. Also check for Closed Issues before opening a new one.
 If you have a small enhancement that is well defined, please create a new feature request on GitHub.
 
-If you have a larger idea for the new feature please share it with us on [Microsoft Azure Feedback Forums](https://feedback.azure.com/forums/920053) where the rest of the community can up vote it too. We will review the submitted ideas very frequently, usually twice weekly. 
+If you have a larger idea for a new feature please share it with us on [Microsoft Azure Feedback Forums](https://feedback.azure.com/forums/920053) where the rest of the community can up vote it too. We will review the submitted ideas very frequently, usually twice weekly. 
 
 Below is our list of possible status states we may assign to the request:
 
 | Microsoft Azure Feedback Forums status| Process steps definition
 |---------------------------------------|---------------------------------------|
 | No status                                 | New issue we have not looked at yet |
-| Need Feedback                         | Idea- doesn't have enough details or needs community support |
+| Need Feedback                         | Idea doesn't have enough details or needs more community support |
 | Under Review                          | Proposal for the new feature is created and in review |
 | Planned                               | Approved to get the work started  |
 | Started                               | Work started                      |
@@ -50,7 +50,7 @@ This is a new request that we have not yet seen. Within a week we should have re
 
 #### Needs Feedback
 
-The Azure Kinect team uses this state to ask for more information about this issue. We may need more information from the issue filer as we don't completely understand the request. We might also use this status because we are waiting for more community feedback on the proposal; either in the form or spec feedback or up voting.
+The Azure Kinect team uses this state to ask for more information about this issue. We may need more information from the issue filer as we don't completely understand the request. We might also use this status because we are waiting for more community feedback on the proposal; either in the form of spec feedback or up voting.
 
 #### Under Review
 
@@ -58,7 +58,7 @@ The team is actively reviewing the proposal and determine what the next actions 
 
 #### Planned
 
-The quested issue have been planned but not yet started. We may stay in this state indefinitely if we don't have resources to complete the request.
+The requested issue has been planned but not yet started. It may stay in this state indefinitely if we don't have resources to complete the request.
 
 #### Started
 
@@ -78,7 +78,7 @@ Issue has been moved to GitHub for tracking.
 
 #### Archived
 
-We will archive the idea if it doesn't fit for the current hardware.
+We will archive the idea if the current hardware can't support the request.
 
 #### Triaged
 
