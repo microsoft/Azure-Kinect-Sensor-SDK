@@ -78,7 +78,7 @@ Issue has been moved to GitHub for tracking.
 
 #### Archived
 
-We will archive the idea if it doesn't fit for the current hardware.
+We will archive the idea if the current hardware can't support the request.
 
 #### Triaged
 
