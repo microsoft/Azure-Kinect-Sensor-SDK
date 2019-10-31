@@ -1,7 +1,7 @@
 
 # Support for ARM
 
-* [x] Proposed
+* [x] Proposed 10/31/2019
 * [ ] Prototype: Not Started
 * [ ] Implementation: Not Started
 * [ ] Specification: Not Started
@@ -10,13 +10,13 @@
 
 Support the Sensor and Body Tracking SDKs on ARM based boards.
 
-## Why we are doing this
+## Feature Scenario
 
-Support for ARM is the most asked feature on customer voice and because you asked, we want to add it to our list of supported platforms!
+Support for ARM enables our customers to build more stand along solutions utilizing mini- PC platforms. This unlocks more scenarios around robotics, manufacturing and healthcare where an Azure Kinect DK should be more mobile. The feature is also the most asked feature on customer voice.
 
 ## Supported Hardware
 
-We are considering to use 2 kinds of Jetson boards for the ARM support:
+We are considering to use 2 kinds of Jetson boards for the ARM support since most of our customers prefer these boards:
 
 - Jetson Nano
     - GPU: Custom 128 CUDA Core GPU
@@ -29,12 +29,15 @@ We are considering to use 2 kinds of Jetson boards for the ARM support:
 
 ## Implementation
 
-There are several large adjustments need to be implemented:
+There are several large adjustments need to be implemented: //WES: there are 4 repo's that need to be modified, SDK, BT, Depth, and packaging.
 
-- Changes to both Sensor SDK and Body Tracking SDK to make them run on ARM
+- Changes to Sensor SDK, Depth Engine, Body Tracking SDK and packaging repo's
 - Changes to the build process for Sensor SDK, Depth Engine and Body Tracking SDK
 - Changes to the test system for Sensor SDK, Depth Engine and Body Tracking SDK
-- Changes to the release process for both Linux and Windows
+- Changes to the release process for both Linux and Windows.
+- Evaluate and make changes if needed to the depth engine code that uses SSE instructions.
+
+We will target releasing ARM binaries for Windows and Linux.
 
 ## Packaging
 
