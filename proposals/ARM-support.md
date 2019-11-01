@@ -53,4 +53,4 @@ We will target releasing ARM binaries for Windows and Linux.
 
 - Microsoft installer (MSI)
 - Nuget package (For Windows)
-- Deb package
+- Deb package (For Ubuntu 18.04)
