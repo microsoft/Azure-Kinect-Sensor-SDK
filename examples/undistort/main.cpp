@@ -128,7 +128,7 @@ static pinhole_t create_pinhole_from_xy_range(const k4a_calibration_t *calibrati
     }
 
     float x_min = 0, x_max = 0, y_min = 0, y_max = 0;
-    compute_xy_range(calibration, K4A_CALIBRATION_TYPE_DEPTH, width, height, x_min, x_max, y_min, y_max);
+    compute_xy_range(calibration, camera, width, height, x_min, x_max, y_min, y_max);
 
     pinhole_t pinhole;
 
