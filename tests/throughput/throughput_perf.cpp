@@ -501,7 +501,7 @@ TEST_P(throughput_perf, testTest)
         {
             // Calc how many captures we didn't get. If the delta between the last two time stamps is more than 1.5
             // * fps_in_usec then we count
-            int missed_this_period = ((int)((adjusted_max_ts - last_ts) / fps_in_usec));
+            int32_t missed_this_period = ((int32_t)((adjusted_max_ts - last_ts) / fps_in_usec));
             missed_this_period--; // We got a new time stamp to do this math, so this count has 1 too many, remove
                                   // it
             if (((adjusted_max_ts - last_ts) % ((unsigned)fps_in_usec)) > ((unsigned)fps_in_usec) / 2)
