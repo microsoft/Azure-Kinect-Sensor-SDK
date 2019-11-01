@@ -20,6 +20,8 @@
 #define NULL_IMAGE 0
 #define NULL_DEVICE 0
 
+const int SAMPLES_TO_STABILIZE = 10;
+
 // How close 2 timestamps should be to be considered accurately synchronized.
 const int MAX_SYNC_CAPTURE_DIFFERENCE_USEC = 100;
 
@@ -377,8 +379,23 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
 {
     k4a_device_t master, subordinate;
     k4a_fps_t frame_rate = K4A_FRAMES_PER_SECOND_30;
-    int32_t fps_in_usec = 1000000 / (int32_t)k4a_convert_fps_to_uint(frame_rate);
 
+    int frame_rate_rand = rand(); // Throw away first rand() result
+    frame_rate_rand = RAND_VALUE(0, 2);
+    switch (frame_rate_rand)
+    {
+    case 0:
+        frame_rate = K4A_FRAMES_PER_SECOND_5;
+        break;
+    case 1:
+        frame_rate = K4A_FRAMES_PER_SECOND_15;
+        break;
+    default:
+        frame_rate = K4A_FRAMES_PER_SECOND_30;
+        break;
+    }
+
+    int32_t fps_in_usec = 1000000 / (int32_t)k4a_convert_fps_to_uint(frame_rate);
     ASSERT_EQ(open_master_and_subordinate(&master, &subordinate), K4A_RESULT_SUCCEEDED);
 
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(master, 8330, 2));
@@ -395,23 +412,26 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
 
     k4a_device_configuration_t s_config = default_config;
     s_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
-    s_config.depth_delay_off_color_usec = (2 * fps_in_usec * rand() / RAND_MAX - fps_in_usec);
-    s_config.subordinate_delay_off_master_usec = (uint32_t)(1 * fps_in_usec * rand() / RAND_MAX);
+    s_config.depth_delay_off_color_usec = RAND_VALUE(-fps_in_usec, fps_in_usec);
+    s_config.subordinate_delay_off_master_usec = RAND_VALUE(0, fps_in_usec);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config));
 
     k4a_device_configuration_t m_config = default_config;
     m_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
-    m_config.depth_delay_off_color_usec = (2 * fps_in_usec * rand() / RAND_MAX - fps_in_usec);
+    m_config.depth_delay_off_color_usec = RAND_VALUE(-fps_in_usec, fps_in_usec);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(master, &m_config));
 
     printf("Test Running with the following settings:\n");
+    printf("                             Frame Rate: %s\n",
+           frame_rate == K4A_FRAMES_PER_SECOND_5 ? "5" : (frame_rate == K4A_FRAMES_PER_SECOND_15 ? "15" : "30"));
     printf("      Master depth_delay_off_color_usec: %d\n", m_config.depth_delay_off_color_usec);
     printf("         Sub depth_delay_off_color_usec: %d\n", s_config.depth_delay_off_color_usec);
     printf("  Sub subordinate_delay_off_master_usec: %d\n", s_config.subordinate_delay_off_master_usec);
 
-    printf("\nDelta = Time off master color.\n");
+    printf("\nDelta = Time off master color. All times in usec\n");
     printf("Master Color, Master IR(Delta), Sub Color(Delta), Sub IR(Delta)\n");
     printf("---------------------------------------------------------------\n");
+
     for (int x = 0; x < 100; x++)
     {
         k4a_capture_t cap_m, cap_s;
@@ -431,30 +451,34 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
         ts_m_ir = (int64_t)k4a_image_get_device_timestamp_usec(image_ir_m);
         ts_s_ir = (int64_t)k4a_image_get_device_timestamp_usec(image_ir_s);
 
-        printf("%9" PRId64 ", %9" PRId64 "(%5" PRId64 "), %9" PRId64 "(%5" PRId64 "), %9" PRId64 "(%5" PRId64 ")\n",
+        printf("%9" PRId64 ", %9" PRId64 "(%5" PRId64 "), %9" PRId64 "(%5" PRId64 "), %9" PRId64 "(%5" PRId64 ") %s\n",
                ts_m_c,
                ts_m_ir,
                ts_m_ir - ts_m_c,
                ts_s_c,
                ts_s_c - ts_m_c,
                ts_s_ir,
-               ts_s_ir - ts_m_c);
+               ts_s_ir - ts_s_c,
+               x > SAMPLES_TO_STABILIZE ? "Validating" : "Stabilizing");
 
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  verify_ts(ts_m_c,
-                            ts_m_ir,
-                            m_config.depth_delay_off_color_usec,
-                            "TS1 is Master Color, TS2 is Master Ir"));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  verify_ts(ts_s_c,
-                            ts_s_ir,
-                            s_config.depth_delay_off_color_usec,
-                            "TS1 is Subordinate Color, TS2 is Subordinate Ir"));
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  verify_ts(ts_m_c,
-                            ts_s_c,
-                            (int64_t)s_config.subordinate_delay_off_master_usec,
-                            "TS1 is Master Color, TS2 is Subordinate Color"));
+        if (x > SAMPLES_TO_STABILIZE)
+        {
+            ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                      verify_ts(ts_m_c,
+                                ts_m_ir,
+                                m_config.depth_delay_off_color_usec,
+                                "TS1 is Master Color, TS2 is Master Ir"));
+            ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                      verify_ts(ts_s_c,
+                                ts_s_ir,
+                                s_config.depth_delay_off_color_usec,
+                                "TS1 is Subordinate Color, TS2 is Subordinate Ir"));
+            ASSERT_EQ(K4A_RESULT_SUCCEEDED,
+                      verify_ts(ts_m_c,
+                                ts_s_c,
+                                (int64_t)s_config.subordinate_delay_off_master_usec,
+                                "TS1 is Master Color, TS2 is Subordinate Color"));
+        }
 
         k4a_image_release(image_c_m);
         k4a_image_release(image_c_s);

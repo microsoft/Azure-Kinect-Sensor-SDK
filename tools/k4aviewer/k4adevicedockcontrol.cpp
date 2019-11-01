@@ -588,6 +588,13 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
         // clang-format on
 
+        if (ImGui::Button("Refresh"))
+        {
+            LoadColorSettingsCache();
+        }
+
+        ImGui::SameLine();
+
         if (ImGui::Button("Reset to default##RGB"))
         {
             ApplyDefaultColorSettings();

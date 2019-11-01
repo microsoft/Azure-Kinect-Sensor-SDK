@@ -234,7 +234,7 @@ TEST_P(throughput_perf, testTest)
     int missed_count = 0;
     int not_synchronized_count = 0;
     uint64_t last_ts = UINT64_MAX;
-    uint64_t fps_in_usec = 0;
+    int32_t fps_in_usec = 0;
     uint64_t last_color_ts = 0;
     uint64_t last_depth16_ts = 0;
     uint64_t last_ir16_ts = 0;
@@ -301,7 +301,7 @@ TEST_P(throughput_perf, testTest)
     if (g_depth_delay_off_color_usec == 0)
     {
         // Create delay that can be +fps to -fps
-        config.depth_delay_off_color_usec = (int32_t)(2 * fps_in_usec * ((uint64_t)rand()) / RAND_MAX - fps_in_usec);
+        config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
     }
 
     printf("Config being used is:\n");
@@ -497,14 +497,14 @@ TEST_P(throughput_perf, testTest)
             // the color image is delayed due to perf issues. When this happens we just ignore the sample because our
             // time stamp logic has already moved beyond the time this sample was supposed to arrive at.
         }
-        else if ((adjusted_max_ts - last_ts) >= (fps_in_usec * 15 / 10))
+        else if ((adjusted_max_ts - last_ts) >= ((unsigned)(fps_in_usec * 15 / 10)))
         {
             // Calc how many captures we didn't get. If the delta between the last two time stamps is more than 1.5
             // * fps_in_usec then we count
             int missed_this_period = ((int)((adjusted_max_ts - last_ts) / fps_in_usec));
             missed_this_period--; // We got a new time stamp to do this math, so this count has 1 too many, remove
                                   // it
-            if (((adjusted_max_ts - last_ts) % fps_in_usec) > fps_in_usec / 2)
+            if (((adjusted_max_ts - last_ts) % ((unsigned)fps_in_usec)) > ((unsigned)fps_in_usec) / 2)
             {
                 missed_this_period++;
             }
