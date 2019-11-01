@@ -29,7 +29,7 @@ We are considering to use 2 kinds of Jetson boards for the ARM support since mos
 
 ## Implementation
 
-There are several large adjustments need to be implemented: //WES: there are 4 repo's that need to be modified, SDK, BT, Depth, and packaging.
+There are several large adjustments need to be implemented:
 
 - Changes to Sensor SDK, Depth Engine, Body Tracking SDK and packaging repo's
 - Changes to the build process for Sensor SDK, Depth Engine and Body Tracking SDK
