@@ -50,5 +50,5 @@ We will target releasing ARM binaries for Windows and Linux.
 ### Body Tracking SDK
 
 - Microsoft installer (MSI)
-- Nuget package
+- Nuget package (For Windows)
 - Deb package
