@@ -264,7 +264,7 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
         {
             // Timestamps at the start of streaming are tricky, they will get reset to zero when the color camera is
             // started. This code protects against the depth timestamps from being reported before the reset happens.
-            if (ts_raw_capture / sync->fps_period > 15)
+            if (ts_raw_capture / sync->fps_period > 10)
             {
                 sync->depth_captures_dropped++;
                 result = K4A_RESULT_FAILED; // Not an error, just a graceful exit
