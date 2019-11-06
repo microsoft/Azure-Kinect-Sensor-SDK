@@ -268,7 +268,6 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
             {
                 sync->depth_captures_dropped++;
                 result = K4A_RESULT_FAILED; // Not an error, just a graceful exit
-                LOG_WARNING("Dropped %d depth captures waiting for time stamps to stabilize",
                             sync->depth_captures_dropped);
             }
             else
