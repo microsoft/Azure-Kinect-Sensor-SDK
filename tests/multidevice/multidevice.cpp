@@ -244,8 +244,7 @@ static k4a_result_t open_master_and_subordinate(k4a_device_t *master, k4a_device
             *master = device;
             device = NULL;
         }
-
-        if (*subordinate == NULL && sync_in_cable_present)
+        else if (*subordinate == NULL && sync_in_cable_present)
         {
             *subordinate = device;
             device = NULL;
@@ -363,8 +362,7 @@ static k4a_result_t verify_ts(int64_t ts_1, int64_t ts_2, int64_t ts_offset, con
     if (ts_result > MAX_SYNC_CAPTURE_DIFFERENCE_USEC)
     {
         printf("    ERROR timestamps are not within range.\n    TS1 + TS_Offset should be ~= TS2. %s\n    ts1=%" PRId64
-               " "
-               "ts2=%" PRId64 " ts_offset=%" PRId64 " diff=%" PRId64 "\n",
+               " ts2=%" PRId64 " ts_offset=%" PRId64 " diff=%" PRId64 "\n",
                error_message,
                ts_1,
                ts_2,
