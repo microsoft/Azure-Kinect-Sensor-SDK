@@ -651,17 +651,12 @@ k4a_result_t calibration_create_from_raw(char *raw_calibration,
         result = K4A_RESULT_FROM_BOOL(setlocale(LC_ALL, "C") != NULL);
     }
 
-#else
+#else // NOT _WIN32
 
     locale_t thread_locale = newlocale(LC_ALL_MASK, "C", (locale_t)0);
     locale_t previous_locale = uselocale(thread_locale);
 
 #endif
-
-    if (K4A_SUCCEEDED(result))
-    {
-        setlocale(LC_ALL, "C");
-    }
 
     if (K4A_SUCCEEDED(result) && depth_calibration != NULL)
     {
@@ -695,15 +690,12 @@ k4a_result_t calibration_create_from_raw(char *raw_calibration,
             result = K4A_RESULT_FAILED;
         }
     }
-#else
-    if (previous_locale != NULL)
+#else // NOT _WIN32
+    if ((previous_locale != NULL) && (K4A_FAILED(K4A_RESULT_FROM_BOOL(uselocale(previous_locale) != NULL))))
     {
-        if (K4A_FAILED(K4A_RESULT_FROM_BOOL(uselocale(previous_locale) != NULL)))
-        {
-            // Only set result to failed, don't let this call succeed and clear a failure that might have happened
-            // already.
-            result = K4A_RESULT_FAILED;
-        }
+        // Only set result to failed, don't let this call succeed and clear a failure that might have happened
+        // already.
+        result = K4A_RESULT_FAILED;
     }
     if (thread_locale)
     {
