@@ -379,7 +379,7 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     k4a_fps_t frame_rate = K4A_FRAMES_PER_SECOND_30;
 
     int frame_rate_rand = rand(); // Throw away first rand() result
-    frame_rate_rand = RAND_VALUE(0, 2);
+    frame_rate_rand = (int)RAND_VALUE(0, 2);
     switch (frame_rate_rand)
     {
     case 0:
@@ -410,13 +410,13 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
 
     k4a_device_configuration_t s_config = default_config;
     s_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
-    s_config.depth_delay_off_color_usec = RAND_VALUE(-fps_in_usec, fps_in_usec);
-    s_config.subordinate_delay_off_master_usec = RAND_VALUE(0, fps_in_usec);
+    s_config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
+    s_config.subordinate_delay_off_master_usec = (uint32_t)RAND_VALUE(0, fps_in_usec);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config));
 
     k4a_device_configuration_t m_config = default_config;
     m_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
-    m_config.depth_delay_off_color_usec = RAND_VALUE(-fps_in_usec, fps_in_usec);
+    m_config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(master, &m_config));
 
     printf("Test Running with the following settings:\n");
