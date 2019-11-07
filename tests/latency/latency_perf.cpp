@@ -212,16 +212,20 @@ static bool get_system_time(uint64_t *time_nsec)
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 #ifdef _WIN32
-    LARGE_INTEGER qpc = { 0 }, freq = { 0 };
+    LARGE_INTEGER qpc = { 0 };
+    static LARGE_INTEGER freq = { 0 };
     result = K4A_RESULT_FROM_BOOL(QueryPerformanceCounter(&qpc) != 0);
     if (K4A_FAILED(result))
     {
         return false;
     }
-    result = K4A_RESULT_FROM_BOOL(QueryPerformanceFrequency(&freq) != 0);
-    if (K4A_FAILED(result))
+    if (freq.QuadPart == 0)
     {
-        return false;
+        result = K4A_RESULT_FROM_BOOL(QueryPerformanceFrequency(&freq) != 0);
+        if (K4A_FAILED(result))
+        {
+            return false;
+        }
     }
 
     // Calculate seconds in such a way we minimize overflow.
@@ -294,7 +298,7 @@ static int _latency_imu_thread(void *param)
 // Drop the lock and sleep for Xms. This is to allow the queue to fill again. Return if we yield too long.
 #define YIELD_THREAD(lock_var, count, message)                                                                         \
     lock_var.unlock();                                                                                                 \
-    printf("Lock dropped while %s", message);                                                                          \
+    printf("Lock dropped while %s\n", message);                                                                        \
     ThreadAPI_Sleep(2);                                                                                                \
     if (++count > 15)                                                                                                  \
     {                                                                                                                  \
@@ -341,7 +345,8 @@ static uint64_t lookup_system_ts(uint64_t pts_ts, bool color)
 
     while (!found)
     {
-        for (int x = 0; !time_queue->empty(); x++)
+        int x;
+        for (x = 0; !time_queue->empty(); x++)
         {
             last_time = time_queue->front();
             if (pts_ts > last_time.pts)
@@ -438,6 +443,7 @@ void latency_perf::process_image(k4a_capture_t capture,
     {
         *image_present = true;
         uint64_t system_ts = k4a_image_get_system_timestamp_nsec(image);
+
         uint64_t system_ts_from_pts = lookup_system_ts(k4a_image_get_device_timestamp_usec(image), true);
 
         // Time from center of exposure until given to us from the SDK; based on Host system time.
@@ -448,7 +454,13 @@ void latency_perf::process_image(k4a_capture_t capture,
         uint64_t system_ts_latency_from_pts = current_system_ts - system_ts_from_pts;
         if (system_ts_from_pts > current_system_ts)
         {
-            printf("calculated pts system time is less than our system time\n");
+            printf("calculated %s pts system time is after our arrival system time %" PRId64 " %" PRId64 " %" PRId64
+                   "\n",
+                   process_color ? "color" : "IR",
+                   system_ts_from_pts,
+                   current_system_ts,
+                   system_ts_from_pts - current_system_ts);
+            ASSERT_FALSE(1);
         }
         else
         {
@@ -541,7 +553,7 @@ TEST_P(latency_perf, testTest)
         printf("Auto Exposure\n");
     }
 
-    fps_in_usec = 1000000 / k4a_convert_fps_to_uint(as.fps);
+    fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(as.fps));
 
     config.color_format = as.color_format;
     config.color_resolution = as.color_resolution;

@@ -36,6 +36,10 @@ typedef struct _guid_t
 #define MAX_SERIAL_NUMBER_LENGTH                                                                                       \
     (13 * 2) // Current schema is for 12 digits plus NULL, the extra size is in case that grows in the future.
 
+#define HZ_TO_PERIOD_MS(Hz) (1000 / Hz)
+#define HZ_TO_PERIOD_US(Hz) (1000000 / Hz)
+#define HZ_TO_PERIOD_NS(Hz) (1000000000 / Hz)
+
 inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
 {
     uint32_t fps_int;

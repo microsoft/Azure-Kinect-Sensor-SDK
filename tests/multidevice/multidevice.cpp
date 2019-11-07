@@ -377,7 +377,7 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
 {
     k4a_device_t master, subordinate;
     k4a_fps_t frame_rate = K4A_FRAMES_PER_SECOND_30;
-    int32_t fps_in_usec = 1000000 / (int32_t)k4a_convert_fps_to_uint(frame_rate);
+    int32_t fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(frame_rate));
 
     ASSERT_EQ(open_master_and_subordinate(&master, &subordinate), K4A_RESULT_SUCCEEDED);
 

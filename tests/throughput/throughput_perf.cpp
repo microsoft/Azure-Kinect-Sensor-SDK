@@ -288,7 +288,7 @@ TEST_P(throughput_perf, testTest)
         printf("Auto Exposure\n");
     }
 
-    fps_in_usec = 1000000 / k4a_convert_fps_to_uint(as.fps);
+    fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(as.fps));
 
     config.color_format = as.color_format;
     config.color_resolution = as.color_resolution;
