@@ -396,8 +396,8 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     int32_t fps_in_usec = 1000000 / (int32_t)k4a_convert_fps_to_uint(frame_rate);
     ASSERT_EQ(open_master_and_subordinate(&master, &subordinate), K4A_RESULT_SUCCEEDED);
 
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(master, 8330, 2));
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(subordinate, 8330, 2));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(master, 8330, 2)) << "Master Device";
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(subordinate, 8330, 2)) << "Subordinate Device";
 
     k4a_device_configuration_t default_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     default_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
@@ -412,12 +412,12 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     s_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
     s_config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
     s_config.subordinate_delay_off_master_usec = (uint32_t)RAND_VALUE(0, fps_in_usec);
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config)) << "Subordinate Device";
 
     k4a_device_configuration_t m_config = default_config;
     m_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
     m_config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(master, &m_config));
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(master, &m_config)) << "Master Device";
 
     printf("Test Running with the following settings:\n");
     printf("                             Frame Rate: %s\n",
