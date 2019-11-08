@@ -17,6 +17,9 @@ std::ostream &operator<<(std::ostream &s, const k4a_buffer_result_t &val);
 
 extern "C" {
 
+// Generate a Random number between min and max and is inclive of both min and max
+#define RAND_VALUE(min, max) (((int64_t)((max) - (min) + 1) * (int64_t)(rand()) / (int64_t)RAND_MAX) + min)
+
 // Initialize default k4a specific unittest behavior
 void k4a_unittest_init();
 void k4a_unittest_deinit();
