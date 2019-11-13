@@ -9,11 +9,15 @@
 
 extern std::atomic_bool exiting;
 
+static const int32_t defaultExposureAuto = -12;
+static const int32_t defaultGainAuto = -1;
+
 int do_recording(uint8_t device_index,
                  char *recording_filename,
                  int recording_length,
                  k4a_device_configuration_t *device_config,
                  bool record_imu,
-                 int32_t absoluteExposureValue);
+                 int32_t absoluteExposureValue,
+                 int32_t gain);
 
 #endif /* RECORDER_H */
