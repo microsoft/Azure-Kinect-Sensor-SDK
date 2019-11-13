@@ -45,19 +45,10 @@ static bool verify_plugin(const k4a_plugin_t *plugin)
 {
     RETURN_VALUE_IF_ARG(false, plugin == NULL);
 
-    LOG_INFO("Loaded K4A Plugin with version: %u.%u.%u",
+    LOG_INFO("Loaded Depth Engine version: %u.%u.%u",
              plugin->version.major,
              plugin->version.minor,
              plugin->version.patch);
-
-    // Major versions must match
-    if (plugin->version.major != K4A_PLUGIN_MAJOR_VERSION)
-    {
-        LOG_ERROR("Plugin Major Version Mismatch. Expected %u. Found %u",
-                  K4A_PLUGIN_MAJOR_VERSION,
-                  plugin->version.major);
-        return false;
-    }
 
     // All function pointers must be non NULL
     RETURN_VALUE_IF_ARG(false, plugin->depth_engine_create_and_initialize == NULL);
@@ -77,10 +68,7 @@ static void deloader_init_once(deloader_global_context_t *global)
 {
     // All members are initialized to zero
 
-    k4a_result_t result = dynlib_create(K4A_PLUGIN_DYNAMIC_LIBRARY_NAME,
-                                        K4A_PLUGIN_MAJOR_VERSION,
-                                        K4A_PLUGIN_MINOR_VERSION,
-                                        &global->handle);
+    k4a_result_t result = dynlib_create(K4A_PLUGIN_DYNAMIC_LIBRARY_NAME, K4A_PLUGIN_VERSION, &global->handle);
     if (K4A_FAILED(result))
     {
         LOG_ERROR("Failed to Load Depth Engine Plugin (%s). Depth functionality will not work",

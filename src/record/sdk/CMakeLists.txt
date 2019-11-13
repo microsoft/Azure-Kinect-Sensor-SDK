@@ -124,6 +124,7 @@ install(
 install(
     FILES
         ${K4A_INCLUDE_DIR}/k4arecord/record.h
+        ${K4A_INCLUDE_DIR}/k4arecord/record.hpp
         ${K4A_INCLUDE_DIR}/k4arecord/playback.h
         ${K4A_INCLUDE_DIR}/k4arecord/playback.hpp
         ${K4A_INCLUDE_DIR}/k4arecord/types.h

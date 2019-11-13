@@ -19,6 +19,7 @@ The latest stable binaries are available for download as MSIs.
 
    Tag                                                                               | MSI                                                                                                                                              | Firmware
 -------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------
+  [v1.3.0](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.3.0) | [Azure Kinect SDK 1.3.0.exe](https://download.microsoft.com/download/e/6/6/e66482b2-b6c1-4e34-bfee-95294163fc40/Azure%20Kinect%20SDK%201.3.0.exe) | [1.6.102075014](https://download.microsoft.com/download/1/9/8/198048e8-63f2-45c6-8f96-1fd541d1b4bc/AzureKinectDK_Fw_1.6.102075014.bin)
   [v1.2.0](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.2.0) | [Azure Kinect SDK 1.2.0.msi](http://download.microsoft.com/download/1/9/8/198048e8-63f2-45c6-8f96-1fd541d1b4bc/Azure%20Kinect%20SDK%201.2.0.msi) | [1.6.102075014](https://download.microsoft.com/download/1/9/8/198048e8-63f2-45c6-8f96-1fd541d1b4bc/AzureKinectDK_Fw_1.6.102075014.bin)
   [v1.1.1](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.1) | [Azure Kinect SDK 1.1.1.msi](http://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/Azure%20Kinect%20SDK%201.1.1.msi) | [1.6.987014](https://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/AzureKinectDK_Fw_1.6.987014.bin)
   [v1.1.0](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.0) | [Azure Kinect SDK 1.1.0.msi](http://download.microsoft.com/download/E/B/D/EBDBB3C1-ED3F-4236-96D6-2BCB352F3710/Azure%20Kinect%20SDK%201.1.0.msi) | [1.6.987014](https://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/AzureKinectDK_Fw_1.6.987014.bin)
@@ -54,8 +55,8 @@ to the following packages:
 Please note that "\<major\>" and "\<minor\>" refer to the major and minor
 portion of the version of the SDK you would like to target. For example, at the writing of these instructions the following packages are available
 
-* libk4a1.2
-* libk4a1.2-dev
+* libk4a1.3
+* libk4a1.3-dev
 * k4a-tools
 
 Each package contains different elements.

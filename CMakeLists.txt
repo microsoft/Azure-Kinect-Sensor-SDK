@@ -21,7 +21,7 @@ if (NOT CMAKE_PROJECT_NAME)
 endif()
 
 project(K4A LANGUAGES C CXX
-    VERSION 1.3)
+    VERSION 1.4)
 
 option(K4A_BUILD_DOCS "Build K4A doxygen documentation" OFF)
 option(K4A_MTE_VERSION "Skip FW version check" OFF)
@@ -128,9 +128,11 @@ endif()
 # executable for shared objects. This is done on Linux to emulate the default
 # behavior of the Windows loader, which searches for DLLs in the path of the
 # executable.
+#
+# We only set RPATH for build since our libs and executables are put in the
+# same folder.
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH YES)
-    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+    set(CMAKE_BUILD_RPATH "\$ORIGIN")
 endif()
 
 set(TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR})

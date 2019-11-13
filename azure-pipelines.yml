@@ -7,13 +7,13 @@ variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
 - name: 'linux_firmware_version'
-  value: '1.6.102075014'
+  value: '1.6.104075014'
 - name: 'windows_firmware_version'
-  value: '1.6.102075014'
+  value: '1.6.104075014'
 - name: 'NuGetPackageVersion'
-  value: '1.2.0'
+  value: '1.4.0-alpha.0'
 - name: 'OpenCVPath'
-  value: 'C:\OpenCV\Build\x64\vc14\'
+  value: 'C:\OpenCV\Build\x64\vc15\'
 
 trigger:
   batch: false
@@ -371,7 +371,7 @@ jobs:
   displayName: Linux
   pool:
     vmImage: 'ubuntu-16.04'
-  container: schultetwin1/akbuilder:0.0.2
+  container: mcr.microsoft.com/akbuilder-linux:v3
   strategy:
     maxParallel: 100
     matrix:
