@@ -18,7 +18,213 @@
 namespace k4a
 {
 
-/** \class playback playback.hpp
+/** \class data_block playback.hpp <k4arecord/playback.hpp>
+ * Wrapper for \ref k4a_playback_data_block_t
+ *
+ * \sa k4a_playback_data_block_t
+ */
+class data_block
+{
+private:
+    class data_block_ref
+    {
+    public:
+        data_block_ref(k4a_playback_data_block_t handle) : m_handle(handle){};
+        ~data_block_ref()
+        {
+            reset();
+        }
+
+        void reset()
+        {
+            if (m_handle != nullptr)
+            {
+                k4a_playback_data_block_release(m_handle);
+                m_handle = nullptr;
+            }
+        }
+
+        k4a_playback_data_block_t get_handle()
+        {
+            if (m_handle != nullptr)
+            {
+                return m_handle;
+            }
+            return nullptr;
+        }
+
+        /** Returns true if two data_block_ref's refer to the same k4a_playback_data_block_t, false otherwise
+         */
+        bool operator==(const data_block_ref &other) const noexcept
+        {
+            return m_handle == other.m_handle;
+        }
+
+        /** Returns false if the data_block_ref is valid, true otherwise
+         */
+        bool operator==(std::nullptr_t) const noexcept
+        {
+            return m_handle == nullptr;
+        }
+
+        /** Returns true if two data_block_ref wrap different k4a_playback_data_block_t instances, false otherwise
+         */
+        bool operator!=(const data_block_ref &other) const noexcept
+        {
+            return m_handle != other.m_handle;
+        }
+
+        /** Returns true if the k4a_playback_data_block_t is valid, false otherwise
+         */
+        bool operator!=(std::nullptr_t) const noexcept
+        {
+            return m_handle != nullptr;
+        }
+
+    private:
+        k4a_playback_data_block_t m_handle;
+    };
+
+public:
+    /** Creates a data_block from a k4a_playback_data_block_t
+     * Takes ownership of the handle, you should not call k4a_playback_data_block_release? on the handle after
+     * giving it to the data_block; the data_block will take care of that.
+     */
+    data_block(k4a_playback_data_block_t handle = nullptr)
+    {
+        m_handle = std::make_shared<data_block_ref>(handle);
+        if (m_handle == nullptr)
+        {
+            throw error("Failed std::make_shared for data_block");
+        }
+    }
+
+    /** Creates a shallow copy of another data_block
+     */
+    data_block(const data_block &other) noexcept : m_handle(other.m_handle)
+    {
+        m_handle.reset();
+    }
+
+    /** Moves another data_block into a new data_block
+     */
+    data_block(data_block &&other) noexcept : m_handle(other.m_handle)
+    {
+        other.m_handle = nullptr;
+    }
+
+    ~data_block()
+    {
+        reset();
+    }
+
+    /** Sets data_block to a shallow copy of the other
+     */
+    data_block &operator=(const data_block &other) noexcept
+    {
+        if (this != &other)
+        {
+            reset();
+            m_handle = other.m_handle;
+        }
+        return *this;
+    }
+
+    /** Moves another data_block into this data_block; other is set to invalid
+     */
+    data_block &operator=(data_block &&other) noexcept
+    {
+        if (this != &other)
+        {
+            reset();
+            m_handle = other.m_handle;
+            other.m_handle = nullptr;
+        }
+        return *this;
+    }
+
+    /** Invalidates this data_block
+     */
+    data_block &operator=(std::nullptr_t) noexcept
+    {
+        reset();
+        return *this;
+    }
+
+    /** Returns true if two data_blocks refer to the same k4a_playback_data_block_t, false otherwise
+     */
+    bool operator==(const data_block &other) const noexcept
+    {
+        return m_handle == other.m_handle;
+    }
+
+    /** Returns false if the data_block is valid, true otherwise
+     */
+    bool operator==(std::nullptr_t) const noexcept
+    {
+        return m_handle == nullptr;
+    }
+
+    /** Returns true if two data_blocks wrap different k4a_playback_data_block_t instances, false otherwise
+     */
+    bool operator!=(const data_block &other) const noexcept
+    {
+        return m_handle != other.m_handle;
+    }
+
+    /** Returns true if the k4a_playback_data_block_t is valid, false otherwise
+     */
+    bool operator!=(std::nullptr_t) const noexcept
+    {
+        return m_handle != nullptr;
+    }
+
+    /** Returns true if the data_block is valid, false otherwise
+     */
+    operator bool() const noexcept
+    {
+        return m_handle != nullptr;
+    }
+
+    /** Releases the underlying k4a_playback_data_block_t; the data_block is set to invalid.
+     */
+    void reset() noexcept
+    {
+        m_handle.reset();
+    }
+
+    /** Get the color image associated with the data_block
+     *
+     * \sa k4a_data_block_get_color_image
+     */
+    std::chrono::microseconds get_device_timestamp_usec() const noexcept
+    {
+        return std::chrono::microseconds(k4a_playback_data_block_get_device_timestamp_usec(m_handle->get_handle()));
+    }
+
+    /** Get the size of the data_block buffer.
+     *
+     * \sa k4a_playback_data_block_get_buffer_size
+     */
+    size_t get_buffer_size() const noexcept
+    {
+        return k4a_playback_data_block_get_buffer_size(m_handle->get_handle());
+    }
+
+    /** Get the data_block buffer.
+     *
+     * \sa k4a_playback_data_block_get_buffer
+     */
+    const uint8_t *get_buffer() const noexcept
+    {
+        return k4a_playback_data_block_get_buffer(m_handle->get_handle());
+    }
+
+private:
+    std::shared_ptr<data_block_ref> m_handle;
+};
+
+/** \class playback playback.hpp <k4arecord/playback.hpp>
  * Wrapper for \ref k4a_playback_t
  *
  * Wraps a handle for a playback object
@@ -68,6 +274,34 @@ public:
     /** Returns true if the k4a::playback is valid, false otherwise
      */
     operator bool() const noexcept
+    {
+        return m_handle != nullptr;
+    }
+
+    /** Returns true if two playback objects refer to the same k4a_playback_t, false otherwise
+     */
+    bool operator==(const playback &other) const noexcept
+    {
+        return m_handle == other.m_handle;
+    }
+
+    /** Returns false if the playback object is valid, true otherwise
+     */
+    bool operator==(std::nullptr_t) const noexcept
+    {
+        return m_handle == nullptr;
+    }
+
+    /** Returns true if two playback objects wrap different k4a_playback_t instances, false otherwise
+     */
+    bool operator!=(const playback &other) const noexcept
+    {
+        return m_handle != other.m_handle;
+    }
+
+    /** Returns true if the playback object is valid, false otherwise
+     */
+    bool operator!=(std::nullptr_t) const noexcept
     {
         return m_handle != nullptr;
     }
@@ -145,8 +379,8 @@ public:
         return config;
     }
 
-    /** Get the next capture in the recording
-     * Returns true if a capture was available, false if there are none left
+    /** Get the next capture in the recording.
+     * Returns true if a capture was available, false if there are none left.
      * Throws error on failure.
      *
      * \sa k4a_playback_get_next_capture
@@ -169,8 +403,8 @@ public:
         throw error("Failed to get next capture!");
     }
 
-    /** Get the next capture in the recording
-     * Returns true if a capture was available, false if there are none left
+    /** Get the previous capture in the recording.
+     * Returns true if a capture was available, false if there are none left.
      * Throws error on failure.
      *
      * \sa k4a_playback_get_previous_capture
@@ -190,7 +424,7 @@ public:
             return false;
         }
 
-        throw error("Failed to get next capture!");
+        throw error("Failed to get previous capture!");
     }
 
     /** Reads the value of a tag from the recording
@@ -202,7 +436,7 @@ public:
     {
         std::string tag;
         size_t buffer = 0;
-        k4a_buffer_result_t result = k4a_playback_get_tag(m_handle, name, &tag[0], &buffer);
+        k4a_buffer_result_t result = k4a_playback_get_tag(m_handle, name, nullptr, &buffer);
 
         if (result == K4A_BUFFER_RESULT_TOO_SMALL && buffer > 0)
         {
@@ -227,8 +461,8 @@ public:
         return true;
     }
 
-    /** Get the next IMU sample in the recording
-     * Returns true if a sample was available, false if there are none left
+    /** Get the next IMU sample in the recording.
+     * Returns true if a sample was available, false if there are none left.
      * Throws error on failure.
      *
      * \sa k4a_playback_get_next_imu_sample
@@ -249,8 +483,8 @@ public:
         throw error("Failed to get next IMU sample!");
     }
 
-    /** Get the previous IMU sample in the recording
-     * Returns true if a sample was available, false if there are none left
+    /** Get the previous IMU sample in the recording.
+     * Returns true if a sample was available, false if there are none left.
      * Throws error on failure.
      *
      * \sa k4a_playback_get_previous_imu_sample
@@ -310,6 +544,77 @@ public:
         {
             throw error("Failed to set color conversion!");
         }
+    }
+
+    /** Get the next data block in the recording.
+     * Returns true if a block was available, false if there are none left.
+     * Throws error on failure.
+     *
+     * \sa k4a_playback_get_next_data_block
+     */
+    bool get_next_data_block(std::string *track, data_block *block)
+    {
+        k4a_playback_data_block_t block_handle;
+        k4a_stream_result_t result = k4a_playback_get_next_data_block(m_handle, track->c_str(), &block_handle);
+
+        if (K4A_STREAM_RESULT_SUCCEEDED == result)
+        {
+            *block = data_block(block_handle);
+            return true;
+        }
+        else if (K4A_STREAM_RESULT_EOF == result)
+        {
+            return false;
+        }
+
+        throw error("Failed to get next data block!");
+    }
+
+    /** Get the previous data block from the recording.
+     * Returns true if a block was available, false if there are none left.
+     * Throws error on failure.
+     *
+     * \sa k4a_playback_get_previous_data_block
+     */
+    bool get_previous_data_block(std::string *track, data_block *block)
+    {
+        k4a_playback_data_block_t block_handle;
+        k4a_stream_result_t result = k4a_playback_get_previous_data_block(m_handle, track->c_str(), &block_handle);
+
+        if (K4A_STREAM_RESULT_SUCCEEDED == result)
+        {
+            *block = data_block(block_handle);
+            return true;
+        }
+        else if (K4A_STREAM_RESULT_EOF == result)
+        {
+            return false;
+        }
+
+        throw error("Failed to get previous data block!");
+    }
+
+    /** Get the attachment block from the recording.
+     * Returns true if the attachment was available, false if it was not found.
+     * Throws error on failure.
+     *
+     * \sa k4a_playback_get_previous_data_block
+     */
+    bool get_attachment(std::string *attachment, std::vector<uint8_t> *data)
+    {
+        size_t data_size = 0;
+        k4a_buffer_result_t result = k4a_playback_get_attachment(m_handle, attachment->c_str(), nullptr, &data_size);
+        if (result == K4A_BUFFER_RESULT_TOO_SMALL)
+        {
+            data->resize(data_size);
+            result = k4a_playback_get_attachment(m_handle, attachment->c_str(), &(*data)[0], &data_size);
+            if (result != K4A_BUFFER_RESULT_SUCCEEDED)
+            {
+                throw error("Failed to read attachment!");
+            }
+            return true;
+        }
+        return false;
     }
 
     /** Opens a K4A recording for playback.
