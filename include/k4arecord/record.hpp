@@ -130,9 +130,9 @@ public:
      *
      * \sa k4a_record_add_tag
      */
-    void add_tag(const char *name, const char *value)
+    void add_tag(const char *name, const std::string &value)
     {
-        k4a_result_t result = k4a_record_add_tag(m_handle, name, value);
+        k4a_result_t result = k4a_record_add_tag(m_handle, name, value.c_str());
 
         if (K4A_FAILED(result))
         {
@@ -160,9 +160,9 @@ public:
      *
      * \sa k4a_record_add_attachment
      */
-    void add_attachment(std::string *attachment_name, const uint8_t *buffer, size_t buffer_size)
+    void add_attachment(const char *attachment_name, const uint8_t *buffer, size_t buffer_size)
     {
-        k4a_result_t result = k4a_record_add_attachment(m_handle, attachment_name->c_str(), buffer, buffer_size);
+        k4a_result_t result = k4a_record_add_attachment(m_handle, attachment_name, buffer, buffer_size);
 
         if (K4A_FAILED(result))
         {
@@ -238,7 +238,7 @@ public:
      *
      * \sa k4a_record_write_capture
      */
-    void write_capture(capture capture)
+    void write_capture(const capture &capture)
     {
         k4a_result_t result = k4a_record_write_capture(m_handle, capture.handle());
 
@@ -253,9 +253,9 @@ public:
      *
      * \sa k4a_record_write_imu_sample
      */
-    void write_imu_sample(k4a_imu_sample_t *imu_sample)
+    void write_imu_sample(const k4a_imu_sample_t &imu_sample)
     {
-        k4a_result_t result = k4a_record_write_imu_sample(m_handle, *imu_sample);
+        k4a_result_t result = k4a_record_write_imu_sample(m_handle, imu_sample);
 
         if (K4A_FAILED(result))
         {
@@ -269,7 +269,7 @@ public:
      * \sa k4a_record_write_custom_track_data
      */
     void write_custom_track_data(const char *track_name,
-                                 std::chrono::microseconds device_timestamp_usec,
+                                 const std::chrono::microseconds device_timestamp_usec,
                                  uint8_t *custom_data,
                                  size_t custom_data_size)
     {
@@ -290,10 +290,10 @@ public:
      *
      * \sa k4a_record_create
      */
-    static record create(const char *path, device *device, k4a_device_configuration_t *device_configuration)
+    static record create(const char *path, const device &device, const k4a_device_configuration_t &device_configuration)
     {
         k4a_record_t handle = nullptr;
-        k4a_result_t result = k4a_record_create(path, device->handle(), *device_configuration, &handle);
+        k4a_result_t result = k4a_record_create(path, device.handle(), device_configuration, &handle);
 
         if (K4A_FAILED(result))
         {

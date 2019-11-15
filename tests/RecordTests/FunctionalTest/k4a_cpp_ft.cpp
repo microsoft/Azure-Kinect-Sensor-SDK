@@ -7,10 +7,6 @@
 
 #include <gtest/gtest.h>
 
-//#include <azure_c_shared_utility/lock.h>
-//#include <azure_c_shared_utility/threadapi.h>
-//#include <azure_c_shared_utility/condition.h>
-
 using namespace k4a;
 
 int main(int argc, char **argv)
@@ -205,9 +201,9 @@ TEST_F(k4a_cpp_ft, record)
     kinect.start_cameras(&config);
     kinect.start_imu();
 
-    record recorder = record::create("./k4a_cpp_ft.mkv", &kinect, &config);
+    record recorder = record::create("./k4a_cpp_ft.mkv", kinect, config);
     {
-        record recorder2 = record::create("./k4a_cpp_ft_2.mkv", &kinect, &config);
+        record recorder2 = record::create("./k4a_cpp_ft_2.mkv", kinect, config);
         ASSERT_TRUE(recorder != recorder2);
         ASSERT_FALSE(recorder == recorder2);
 
@@ -223,17 +219,17 @@ TEST_F(k4a_cpp_ft, record)
     recorder.add_imu_track();
 
     std::string k4a_cpp_ft_attachment = "K4A_CPP_FT_ADD_ATTACHMENT";
-    recorder.add_attachment(&k4a_cpp_ft_attachment,
+    recorder.add_attachment(k4a_cpp_ft_attachment.c_str(),
                             (uint8_t *)k4a_cpp_ft_attachment.data(),
                             k4a_cpp_ft_attachment.size());
 
     k4a_record_video_settings_t vid_settings = { 1920, 1080, 30 };
     std::string k4a_cpp_ft_custom_vid_track = "K4A_CPP_FT_CUSTOM_VID_TRACK";
-    recorder.add_custom_video_track(k4a_cpp_ft_custom_vid_track.data(), "V_MPEG1", nullptr, 0, &vid_settings);
+    recorder.add_custom_video_track(k4a_cpp_ft_custom_vid_track.c_str(), "V_MPEG1", nullptr, 0, &vid_settings);
 
     k4a_record_subtitle_settings_t st_track = { false };
     std::string k4a_cpp_ft_custom_subtitle_track = "CUSTOM_K4A_SUBTITLE_TRACE";
-    recorder.add_custom_subtitle_track(k4a_cpp_ft_custom_subtitle_track.data(), "V_MPEG1", nullptr, 0, &st_track);
+    recorder.add_custom_subtitle_track(k4a_cpp_ft_custom_subtitle_track.c_str(), "V_MPEG1", nullptr, 0, &st_track);
 
     recorder.write_header();
 
@@ -247,17 +243,17 @@ TEST_F(k4a_cpp_ft, record)
         }
         while (kinect.get_imu_sample(&imu, std::chrono::milliseconds(0)))
         {
-            recorder.write_imu_sample(&imu);
+            recorder.write_imu_sample(imu);
         }
         image color = capture.get_color_image();
-        recorder.write_custom_track_data(k4a_cpp_ft_custom_vid_track.data(),
+        recorder.write_custom_track_data(k4a_cpp_ft_custom_vid_track.c_str(),
                                          color.get_device_timestamp(),
                                          color.get_buffer(),
                                          color.get_size());
         color.reset();
 
         image depth = capture.get_depth_image();
-        recorder.write_custom_track_data(k4a_cpp_ft_custom_subtitle_track.data(),
+        recorder.write_custom_track_data(k4a_cpp_ft_custom_subtitle_track.c_str(),
                                          depth.get_device_timestamp(),
                                          depth.get_buffer(),
                                          depth.get_size());
@@ -339,12 +335,12 @@ TEST_F(k4a_cpp_ft, playback)
             imu_count_forward++;
         }
 
-        while (pback.get_next_data_block(&k4a_cpp_ft_custom_vid_track, &block))
+        while (pback.get_next_data_block(k4a_cpp_ft_custom_vid_track.c_str(), &block))
         {
             vid_block_count_forwards++;
         }
 
-        while (pback.get_next_data_block(&k4a_cpp_ft_custom_subtitle_track, &block))
+        while (pback.get_next_data_block(k4a_cpp_ft_custom_subtitle_track.c_str(), &block))
         {
             subtitle_block_count_forwards++;
         }
@@ -372,12 +368,12 @@ TEST_F(k4a_cpp_ft, playback)
             imu_count_backward++;
         }
 
-        while (pback.get_previous_data_block(&k4a_cpp_ft_custom_vid_track, &block))
+        while (pback.get_previous_data_block(k4a_cpp_ft_custom_vid_track.c_str(), &block))
         {
             vid_block_count_backwards++;
         }
 
-        while (pback.get_previous_data_block(&k4a_cpp_ft_custom_subtitle_track, &block))
+        while (pback.get_previous_data_block(k4a_cpp_ft_custom_subtitle_track.c_str(), &block))
         {
             subtitle_block_count_backwards++;
         }
@@ -414,7 +410,7 @@ TEST_F(k4a_cpp_ft, playback)
             imu_count++;
         }
 
-        while (pback.get_next_data_block(&k4a_cpp_ft_custom_vid_track, &block))
+        while (pback.get_next_data_block(k4a_cpp_ft_custom_vid_track.c_str(), &block))
         {
             vid_block_count++;
             ASSERT_NE(block.get_device_timestamp_usec().count(), 0);
@@ -432,7 +428,7 @@ TEST_F(k4a_cpp_ft, playback)
             }
         }
 
-        while (pback.get_next_data_block(&k4a_cpp_ft_custom_subtitle_track, &block))
+        while (pback.get_next_data_block(k4a_cpp_ft_custom_subtitle_track.c_str(), &block))
         {
             subtitle_block_count++;
         }
@@ -447,8 +443,8 @@ TEST_F(k4a_cpp_ft, playback)
     std::string bad_attachment_name = "BAD_ATTACHMENT_NAME";
 
     std::vector<uint8_t> data;
-    ASSERT_FALSE(pback.get_attachment(&bad_attachment_name, &data));
-    ASSERT_TRUE(pback.get_attachment(&k4a_cpp_ft_attachment, &data));
+    ASSERT_FALSE(pback.get_attachment(bad_attachment_name.c_str(), &data));
+    ASSERT_TRUE(pback.get_attachment(k4a_cpp_ft_attachment.c_str(), &data));
     ASSERT_EQ(data.size(), k4a_cpp_ft_attachment.size());
     ASSERT_TRUE(memcmp(&data[0], k4a_cpp_ft_attachment.data(), data.size()) == 0);
 }

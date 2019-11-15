@@ -552,10 +552,10 @@ public:
      *
      * \sa k4a_playback_get_next_data_block
      */
-    bool get_next_data_block(std::string *track, data_block *block)
+    bool get_next_data_block(const char *track, data_block *block)
     {
         k4a_playback_data_block_t block_handle;
-        k4a_stream_result_t result = k4a_playback_get_next_data_block(m_handle, track->c_str(), &block_handle);
+        k4a_stream_result_t result = k4a_playback_get_next_data_block(m_handle, track, &block_handle);
 
         if (K4A_STREAM_RESULT_SUCCEEDED == result)
         {
@@ -576,10 +576,10 @@ public:
      *
      * \sa k4a_playback_get_previous_data_block
      */
-    bool get_previous_data_block(std::string *track, data_block *block)
+    bool get_previous_data_block(const char *track, data_block *block)
     {
         k4a_playback_data_block_t block_handle;
-        k4a_stream_result_t result = k4a_playback_get_previous_data_block(m_handle, track->c_str(), &block_handle);
+        k4a_stream_result_t result = k4a_playback_get_previous_data_block(m_handle, track, &block_handle);
 
         if (K4A_STREAM_RESULT_SUCCEEDED == result)
         {
@@ -600,14 +600,14 @@ public:
      *
      * \sa k4a_playback_get_previous_data_block
      */
-    bool get_attachment(std::string *attachment, std::vector<uint8_t> *data)
+    bool get_attachment(const char *attachment, std::vector<uint8_t> *data)
     {
         size_t data_size = 0;
-        k4a_buffer_result_t result = k4a_playback_get_attachment(m_handle, attachment->c_str(), nullptr, &data_size);
+        k4a_buffer_result_t result = k4a_playback_get_attachment(m_handle, attachment, nullptr, &data_size);
         if (result == K4A_BUFFER_RESULT_TOO_SMALL)
         {
             data->resize(data_size);
-            result = k4a_playback_get_attachment(m_handle, attachment->c_str(), &(*data)[0], &data_size);
+            result = k4a_playback_get_attachment(m_handle, attachment, &(*data)[0], &data_size);
             if (result != K4A_BUFFER_RESULT_SUCCEEDED)
             {
                 throw error("Failed to read attachment!");
