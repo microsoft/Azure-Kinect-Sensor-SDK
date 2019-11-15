@@ -53,6 +53,8 @@ TEST_F(k4a_cpp_ft, k4a)
     {
         // should not throw exception
         calibration cal = kinect.get_calibration(K4A_DEPTH_MODE_NFOV_2X2BINNED, K4A_COLOR_RESOLUTION_1440P);
+        calibration cal2 = cal;
+        ASSERT_EQ(cal.color_resolution, cal2.color_resolution);
     }
 
     {
@@ -62,6 +64,7 @@ TEST_F(k4a_cpp_ft, k4a)
                                   raw_cal.size(),
                                   K4A_DEPTH_MODE_NFOV_2X2BINNED,
                                   K4A_COLOR_RESOLUTION_1080P);
+        ASSERT_EQ(cal.color_resolution, K4A_COLOR_RESOLUTION_1080P);
     }
 
     {

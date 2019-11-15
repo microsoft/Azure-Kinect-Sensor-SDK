@@ -14,6 +14,7 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace k4a
 {
