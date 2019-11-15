@@ -2,6 +2,7 @@
 
 ### v1.4.0
 * On Windows Opencv-4.1.1 is now being used and tested.
+* Fixed small error in transformation functions
 
 ### v1.3.0
 
