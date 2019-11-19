@@ -9,6 +9,8 @@
 
 using namespace k4a;
 
+const std::string MKV_FILE_NAME("./k4a_cpp_ft.mkv");
+
 int main(int argc, char **argv)
 {
     return k4a_test_common_main(argc, argv);
@@ -17,14 +19,36 @@ int main(int argc, char **argv)
 class k4a_cpp_ft : public ::testing::Test
 {
 public:
-    virtual void SetUp() {}
+    virtual void SetUp()
+    {
+        std::remove("*.mkv"); // remove old test files in the event of a crash
+    }
 
     virtual void TearDown() {}
 };
 
+void use_device_in_a_function(const device &kinect)
+{
+    k4a_hardware_version_t version = kinect.get_version();
+    ASSERT_GE(version.rgb.major, (uint32_t)1);
+    ASSERT_GE(version.rgb.minor, (uint32_t)6);
+    ASSERT_GE(version.depth.major, (uint32_t)1);
+    ASSERT_GE(version.depth.minor, (uint32_t)6);
+    ASSERT_GE(version.audio.major, (uint32_t)1);
+    ASSERT_GE(version.audio.minor, (uint32_t)6);
+    ASSERT_EQ(version.firmware_build, K4A_FIRMWARE_BUILD_RELEASE);
+    ASSERT_EQ(version.firmware_signature, K4A_FIRMWARE_SIGNATURE_MSFT);
+}
+
 TEST_F(k4a_cpp_ft, k4a)
 {
     device kinect = device::open(0);
+    ASSERT_TRUE(kinect);
+
+    {
+        device kinect2;
+        ASSERT_FALSE(kinect2);
+    }
 
     ASSERT_THROW(device kinect2 = device::open(0), error);
     kinect.close();
@@ -35,15 +59,10 @@ TEST_F(k4a_cpp_ft, k4a)
     }
 
     {
-        k4a_hardware_version_t version = kinect.get_version();
-        ASSERT_GE(version.rgb.major, (uint32_t)1);
-        ASSERT_GE(version.rgb.minor, (uint32_t)6);
-        ASSERT_GE(version.depth.major, (uint32_t)1);
-        ASSERT_GE(version.depth.minor, (uint32_t)6);
-        ASSERT_GE(version.audio.major, (uint32_t)1);
-        ASSERT_GE(version.audio.minor, (uint32_t)6);
-        ASSERT_EQ(version.firmware_build, K4A_FIRMWARE_BUILD_RELEASE);
-        ASSERT_EQ(version.firmware_signature, K4A_FIRMWARE_SIGNATURE_MSFT);
+        // assignment operation deleted, make sure we can still pass
+        use_device_in_a_function(kinect);
+
+        // device kinect3 = kinect; // This assignment operator is deleted.
     }
 
     // should not throw exception
@@ -60,10 +79,12 @@ TEST_F(k4a_cpp_ft, k4a)
     {
         std::vector<uint8_t> raw_cal = kinect.get_raw_calibration();
         calibration cal = kinect.get_calibration(K4A_DEPTH_MODE_NFOV_2X2BINNED, K4A_COLOR_RESOLUTION_1440P);
-        calibration::get_from_raw(raw_cal.data(),
-                                  raw_cal.size(),
-                                  K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                                  K4A_COLOR_RESOLUTION_1080P);
+        ASSERT_EQ(cal.color_resolution, K4A_COLOR_RESOLUTION_1440P);
+
+        cal = calibration::get_from_raw(raw_cal.data(),
+                                        raw_cal.size(),
+                                        K4A_DEPTH_MODE_NFOV_2X2BINNED,
+                                        K4A_COLOR_RESOLUTION_1080P);
         ASSERT_EQ(cal.color_resolution, K4A_COLOR_RESOLUTION_1080P);
     }
 
@@ -105,18 +126,21 @@ TEST_F(k4a_cpp_ft, k4a)
 
         {
             capture shallow_copy;
-            capture deep_copy;
+            capture moved_copy;
             shallow_copy = cap1;               // test = operator
             ASSERT_TRUE(shallow_copy == cap1); // test == operator
 
-            deep_copy = std::move(cap1);       // test = (&&) operator
-            ASSERT_TRUE(cap1 == nullptr);      // test == nullptr_t operator
-            ASSERT_TRUE(cap1 == cap1);         // test == operator
-            ASSERT_TRUE(deep_copy != nullptr); // test != nullptr_t operator
-            ASSERT_TRUE(deep_copy != cap2);    // test != operator
+            moved_copy = std::move(cap1);       // test = (&&) operator
+            ASSERT_TRUE(cap1 == nullptr);       // test == nullptr_t operator
+            ASSERT_TRUE(cap1 == cap1);          // test == operator
+            ASSERT_TRUE(moved_copy != nullptr); // test != nullptr_t operator
+            ASSERT_TRUE(moved_copy != cap2);    // test != operator
+
+            ASSERT_EQ(0, moved_copy.get_temperature_c()); // use moved copy
+            moved_copy.set_temperature_c(10.0f);          // use moved copy
 
             // restore cap1
-            cap1 = std::move(deep_copy); // test = (&&) operator
+            cap1 = std::move(moved_copy); // test = (&&) operator
         }
 
         image color, ir, depth;
@@ -128,18 +152,18 @@ TEST_F(k4a_cpp_ft, k4a)
 
         {
             image shallow_copy;
-            image deep_copy;
+            image moved_copy;
             shallow_copy = color;               // test = operator
             ASSERT_TRUE(shallow_copy == color); // test == operator
 
-            deep_copy = std::move(color);      // test = (&&) operator
-            ASSERT_TRUE(color == nullptr);     // test == nullptr_t operator
-            ASSERT_TRUE(color == color);       // test == operator
-            ASSERT_TRUE(deep_copy != nullptr); // test != nullptr_t operator
-            ASSERT_TRUE(deep_copy != ir);      // test != operator
+            moved_copy = std::move(color);      // test = (&&) operator
+            ASSERT_TRUE(color == nullptr);      // test == nullptr_t operator
+            ASSERT_TRUE(color == color);        // test == operator
+            ASSERT_TRUE(moved_copy != nullptr); // test != nullptr_t operator
+            ASSERT_TRUE(moved_copy != ir);      // test != operator
 
             // restore color
-            color = std::move(deep_copy); // test = (&&) operator
+            color = std::move(moved_copy); // test = (&&) operator
         }
 
         {
@@ -194,7 +218,7 @@ TEST_F(k4a_cpp_ft, k4a)
     }
 }
 
-TEST_F(k4a_cpp_ft, record)
+void test_record(void)
 {
     device kinect = device::open(0);
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
@@ -204,18 +228,25 @@ TEST_F(k4a_cpp_ft, record)
     kinect.start_cameras(&config);
     kinect.start_imu();
 
-    record recorder = record::create("./k4a_cpp_ft.mkv", kinect, config);
+    record recorder = record::create(MKV_FILE_NAME.c_str(), kinect, config);
+    ASSERT_TRUE(recorder);
+
     {
-        record recorder2 = record::create("./k4a_cpp_ft_2.mkv", kinect, config);
+        std::string second_file("./k4a_cpp_ft_2.mkv");
+        record recorder2 = record::create(second_file.c_str(), kinect, config);
+        ASSERT_TRUE(recorder2);
+
+        record recorder_empty;
+        ASSERT_FALSE(recorder_empty);
+
         ASSERT_TRUE(recorder != recorder2);
         ASSERT_FALSE(recorder == recorder2);
 
-        record recorder4 = std::move(recorder2); // deep copy
-        ASSERT_TRUE(recorder4 != nullptr);
-        ASSERT_FALSE(recorder4 == nullptr);
+        record recorder_moved = std::move(recorder2);
 
-        recorder2.close();
-        recorder4.close();
+        recorder_empty.close();
+        recorder_moved.close();
+        std::remove(second_file.c_str());
     }
 
     recorder.add_tag("K4A_CPP_FT_ADD_TAG", "K4A_CPP_FT_ADD_TAG");
@@ -244,9 +275,15 @@ TEST_F(k4a_cpp_ft, record)
         {
             recorder.write_capture(capture);
         }
+
+        std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::high_resolution_clock::now();
         while (kinect.get_imu_sample(&imu, std::chrono::milliseconds(0)))
         {
             recorder.write_imu_sample(imu);
+            if (std::chrono::high_resolution_clock::now() - start < std::chrono::milliseconds(100))
+            {
+                break;
+            }
         }
         image color = capture.get_color_image();
         recorder.write_custom_track_data(k4a_cpp_ft_custom_vid_track.c_str(),
@@ -267,26 +304,39 @@ TEST_F(k4a_cpp_ft, record)
     kinect.stop_imu();
 }
 
-TEST_F(k4a_cpp_ft, playback)
+void test_playback(void)
 {
-    playback pb = playback::open("./k4a_cpp_ft.mkv");
-    playback pb_empty;
-    ASSERT_TRUE(pb);             // bool operation
-    ASSERT_TRUE(pb != nullptr);  //!= nullptr
-    ASSERT_FALSE(pb == nullptr); // == nullptr
-    ASSERT_TRUE(pb != pb_empty);
-    ASSERT_FALSE(pb == pb_empty);
+    playback pb = playback::open(MKV_FILE_NAME.c_str());
+    ASSERT_TRUE(pb); // bool operation
 
-    // Deep copy
-    playback pback = std::move(pb);
-    ASSERT_TRUE(pback != nullptr);
-    ASSERT_TRUE(pb == nullptr);
+    {
+        playback pb_missing_file;
+        ASSERT_THROW(pb_missing_file = playback::open("./This_file_is_not_here.mkv"), error);
+
+        playback pb_empty;
+        ASSERT_TRUE(pb);               // bool operation
+        ASSERT_FALSE(pb_empty);        // bool operation
+        ASSERT_FALSE(pb_missing_file); // bool operation
+        ASSERT_TRUE(pb != pb_empty);
+        ASSERT_FALSE(pb == pb_empty);
+    }
+
+    {
+        // playback pb_empty = pb; // deleted operation
+    }
+
+    playback pback;
+    ASSERT_TRUE(pb);     // bool operation
+    ASSERT_FALSE(pback); // bool operation
+    pback = std::move(pb);
+    ASSERT_FALSE(pb);   // bool operation
+    ASSERT_TRUE(pback); // bool operation
 
     std::vector<uint8_t> raw_cal = pback.get_raw_calibration();
     std::cout << "calibration is : ";
-    for (std::vector<uint8_t>::const_iterator i = raw_cal.begin(); i != raw_cal.end(); ++i)
+    for (const uint8_t data_char : raw_cal)
     {
-        std::cout << *i;
+        std::cout << data_char;
     }
     std::cout << "\n\n";
 
@@ -313,17 +363,16 @@ TEST_F(k4a_cpp_ft, playback)
     int imu_count_forward = 0;
     int capture_count_backward = 0;
     int imu_count_backward = 0;
-    int vid_block_count_forwards = 0;
-    int subtitle_block_count_forwards = 0;
-    int vid_block_count_backwards = 0;
-    int subtitle_block_count_backwards = 0;
+    int vid_block_count_forward = 0;
+    int subtitle_block_count_forward = 0;
+    int vid_block_count_backward = 0;
+    int subtitle_block_count_backward = 0;
     std::string k4a_cpp_ft_custom_vid_track = "K4A_CPP_FT_CUSTOM_VID_TRACK";
     std::string k4a_cpp_ft_custom_subtitle_track = "CUSTOM_K4A_SUBTITLE_TRACE";
 
     // walk the file forward
     {
         pback.seek_timestamp(std::chrono::microseconds(0), K4A_PLAYBACK_SEEK_BEGIN);
-
         capture cap;
         data_block block;
         k4a_imu_sample_t imu;
@@ -340,19 +389,19 @@ TEST_F(k4a_cpp_ft, playback)
 
         while (pback.get_next_data_block(k4a_cpp_ft_custom_vid_track.c_str(), &block))
         {
-            vid_block_count_forwards++;
+            vid_block_count_forward++;
         }
 
         while (pback.get_next_data_block(k4a_cpp_ft_custom_subtitle_track.c_str(), &block))
         {
-            subtitle_block_count_forwards++;
+            subtitle_block_count_forward++;
         }
 
         ASSERT_GT(capture_count_forward, 0);
         ASSERT_GT(imu_count_forward, 0);
-        ASSERT_GT(imu_count_forward, capture_count_forward);
-        ASSERT_EQ(capture_count_forward, vid_block_count_forwards);
-        ASSERT_EQ(capture_count_forward, subtitle_block_count_forwards);
+        ASSERT_EQ(imu_count_forward, capture_count_forward);
+        ASSERT_EQ(capture_count_forward, vid_block_count_forward);
+        ASSERT_EQ(capture_count_forward, subtitle_block_count_forward);
     }
 
     // walk the file backwards
@@ -373,19 +422,19 @@ TEST_F(k4a_cpp_ft, playback)
 
         while (pback.get_previous_data_block(k4a_cpp_ft_custom_vid_track.c_str(), &block))
         {
-            vid_block_count_backwards++;
+            vid_block_count_backward++;
         }
 
         while (pback.get_previous_data_block(k4a_cpp_ft_custom_subtitle_track.c_str(), &block))
         {
-            subtitle_block_count_backwards++;
+            subtitle_block_count_backward++;
         }
 
         ASSERT_GT(capture_count_backward, 0);
         ASSERT_GT(imu_count_backward, 0);
-        ASSERT_GT(imu_count_backward, capture_count_backward);
-        ASSERT_EQ(capture_count_backward, vid_block_count_backwards);
-        ASSERT_EQ(capture_count_backward, subtitle_block_count_backwards);
+        ASSERT_EQ(imu_count_backward, capture_count_backward);
+        ASSERT_EQ(capture_count_backward, vid_block_count_backward);
+        ASSERT_EQ(capture_count_backward, subtitle_block_count_backward);
     }
 
     ASSERT_EQ(capture_count_forward, capture_count_backward);
@@ -417,17 +466,18 @@ TEST_F(k4a_cpp_ft, playback)
         {
             vid_block_count++;
             ASSERT_NE(block.get_device_timestamp_usec().count(), 0);
-            ASSERT_NE(block.get_buffer_size(), 0);
+            ASSERT_NE(block.get_buffer_size(), (size_t)0);
             ASSERT_NE(block.get_buffer(), nullptr);
 
             {
                 // Test data_block
-                data_block copy_same = block;
+                // data_block copy_same = block; // Copy not allowed - deleted
                 data_block copy_null = NULL;
-                ASSERT_TRUE(block == copy_same);
-                ASSERT_FALSE(block != copy_same);
                 ASSERT_FALSE(block == copy_null);
                 ASSERT_TRUE(block != copy_null);
+                data_block copy_empty;
+                ASSERT_FALSE(block == copy_empty);
+                ASSERT_TRUE(block != copy_empty);
             }
         }
 
@@ -450,4 +500,12 @@ TEST_F(k4a_cpp_ft, playback)
     ASSERT_TRUE(pback.get_attachment(k4a_cpp_ft_attachment.c_str(), &data));
     ASSERT_EQ(data.size(), k4a_cpp_ft_attachment.size());
     ASSERT_TRUE(memcmp(&data[0], k4a_cpp_ft_attachment.data(), data.size()) == 0);
+}
+
+TEST_F(k4a_cpp_ft, record_and_playback)
+{
+    test_record();
+    test_playback();
+
+    ASSERT_FALSE(std::remove(MKV_FILE_NAME.c_str()));
 }
