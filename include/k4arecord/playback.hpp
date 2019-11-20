@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -139,10 +138,8 @@ public:
 
     /** Moves another k4a::playback into a new k4a::playback
      */
-    playback(playback &&other) noexcept
+    playback(playback &&other) noexcept : m_handle(other.m_handle)
     {
-        close();
-        m_handle = other.m_handle;
         other.m_handle = nullptr;
     }
 
