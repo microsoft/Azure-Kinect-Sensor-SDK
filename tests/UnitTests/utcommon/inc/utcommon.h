@@ -29,8 +29,6 @@ void k4a_unittest_init_logging_with_processid();
 #endif
 
 int k4a_test_common_main(int argc, char **argv);
-
-int64_t k4a_unittest_get_max_sync_delay(k4a_fps_t fps);
 }
 
 #endif

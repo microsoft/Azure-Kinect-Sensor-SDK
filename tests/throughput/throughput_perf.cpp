@@ -246,7 +246,6 @@ TEST_P(throughput_perf, testTest)
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     thread_data thread = { 0 };
     THREAD_HANDLE th1 = NULL;
-    int64_t max_sync_delay = 0;
 
     printf("Capturing %d frames for test: %s\n", g_capture_count, as.test_name);
 
@@ -305,8 +304,6 @@ TEST_P(throughput_perf, testTest)
         // Create delay that can be +fps to -fps
         config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
     }
-
-    max_sync_delay = k4a_unittest_get_max_sync_delay(as.fps);
 
     printf("Config being used is:\n");
     printf("    color_format:%d\n", config.color_format);
@@ -468,9 +465,11 @@ TEST_P(throughput_perf, testTest)
             printf(" | %6" PRId64, delta);
 
             delta -= config.depth_delay_off_color_usec;
-            delta = std::abs(delta);
-
-            if (delta > max_sync_delay)
+            if (delta < 0)
+            {
+                delta *= -1;
+            }
+            if (delta > 1000)
             {
                 not_synchronized_count++;
             }
