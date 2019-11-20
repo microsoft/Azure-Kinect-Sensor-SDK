@@ -15,7 +15,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 namespace k4a
 {
@@ -173,34 +172,6 @@ public:
     /** Returns true if the k4a::playback is valid, false otherwise
      */
     operator bool() const noexcept
-    {
-        return m_handle != nullptr;
-    }
-
-    /** Returns true if two playback objects refer to the same k4a_playback_t, false otherwise
-     */
-    bool operator==(const playback &other) const noexcept
-    {
-        return m_handle == other.m_handle;
-    }
-
-    /** Returns false if the playback object is valid, true otherwise
-     */
-    bool operator==(std::nullptr_t) const noexcept
-    {
-        return m_handle == nullptr;
-    }
-
-    /** Returns true if two playback objects wrap different k4a_playback_t instances, false otherwise
-     */
-    bool operator!=(const playback &other) const noexcept
-    {
-        return m_handle != other.m_handle;
-    }
-
-    /** Returns true if the playback object is valid, false otherwise
-     */
-    bool operator!=(std::nullptr_t) const noexcept
     {
         return m_handle != nullptr;
     }

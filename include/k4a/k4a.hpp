@@ -109,7 +109,7 @@ public:
         reset();
     }
 
-    /** Sets image to a shallow copy of the other
+    /** Sets image to a shallow copy of the other image
      */
     image &operator=(const image &other) noexcept
     {
@@ -436,7 +436,7 @@ public:
         reset();
     }
 
-    /** Sets capture to a shallow copy of the other
+    /** Sets capture to a shallow copy of the other image
      */
     capture &operator=(const capture &other) noexcept
     {
