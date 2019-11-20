@@ -60,9 +60,25 @@ public:
     virtual void SetUp()
     {
         srand((unsigned int)time(0)); // use current time as seed for random generator
+        ASSERT_EQ(m_master, nullptr);
+        ASSERT_EQ(m_subordinate, nullptr);
     }
 
-    virtual void TearDown() {}
+    virtual void TearDown()
+    {
+        if (m_master != nullptr)
+        {
+            k4a_device_close(m_master);
+            m_master = nullptr;
+        }
+        if (m_subordinate != nullptr)
+        {
+            k4a_device_close(m_subordinate);
+            m_subordinate = nullptr;
+        }
+    }
+    k4a_device_t m_master = nullptr;
+    k4a_device_t m_subordinate = nullptr;
 };
 
 TEST_F(multidevice_ft, open_close_two)
@@ -375,7 +391,6 @@ verify_ts(int64_t ts_1, int64_t ts_2, int64_t ts_offset, int64_t max_sync_delay,
 
 TEST_F(multidevice_sync_ft, multi_sync_validation)
 {
-    k4a_device_t master, subordinate;
     k4a_fps_t frame_rate = K4A_FRAMES_PER_SECOND_30;
 
     int frame_rate_rand = rand(); // Throw away first rand() result
@@ -394,10 +409,10 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     }
 
     int32_t fps_in_usec = 1000000 / (int32_t)k4a_convert_fps_to_uint(frame_rate);
-    ASSERT_EQ(open_master_and_subordinate(&master, &subordinate), K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(open_master_and_subordinate(&m_master, &m_subordinate), K4A_RESULT_SUCCEEDED);
 
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(master, 8330, 2)) << "Master Device";
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(subordinate, 8330, 2)) << "Subordinate Device";
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(m_master, 8330, 2)) << "Master Device";
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, set_power_and_exposure(m_subordinate, 8330, 2)) << "Subordinate Device";
 
     k4a_device_configuration_t default_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     default_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
@@ -412,12 +427,12 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     s_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
     s_config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
     s_config.subordinate_delay_off_master_usec = (uint32_t)RAND_VALUE(0, fps_in_usec);
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config)) << "Subordinate Device";
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_subordinate, &s_config)) << "Subordinate Device";
 
     k4a_device_configuration_t m_config = default_config;
     m_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
     m_config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
-    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(master, &m_config)) << "Master Device";
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_master, &m_config)) << "Master Device";
 
     printf("Test Running with the following settings:\n");
     printf("                             Frame Rate: %s\n",
@@ -438,8 +453,12 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
         int64_t max_sync_delay = k4a_unittest_get_max_sync_delay(frame_rate);
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  get_syncd_captures(
-                      master, subordinate, &cap_m, &cap_s, s_config.subordinate_delay_off_master_usec, max_sync_delay));
+                  get_syncd_captures(m_master,
+                                     m_subordinate,
+                                     &cap_m,
+                                     &cap_s,
+                                     s_config.subordinate_delay_off_master_usec,
+                                     max_sync_delay));
 
         ASSERT_FALSE(NULL_IMAGE == (image_c_m = k4a_capture_get_color_image(cap_m)));
         ASSERT_FALSE(NULL_IMAGE == (image_c_s = k4a_capture_get_color_image(cap_s)));
@@ -491,8 +510,10 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
         k4a_capture_release(cap_m);
         k4a_capture_release(cap_s);
     }
-    k4a_device_close(master);
-    k4a_device_close(subordinate);
+    k4a_device_close(m_master);
+    m_master = nullptr;
+    k4a_device_close(m_subordinate);
+    m_subordinate = nullptr;
 }
 
 TEST_F(multidevice_ft, ensure_color_camera_is_enabled)
