@@ -27,7 +27,7 @@ public:
     virtual void TearDown() {}
 };
 
-void use_device_in_a_function(const device &kinect)
+static void use_device_in_a_function(const device &kinect)
 {
     k4a_hardware_version_t version = kinect.get_version();
     ASSERT_GE(version.rgb.major, (uint32_t)1);
@@ -218,7 +218,7 @@ TEST_F(k4a_cpp_ft, k4a)
     }
 }
 
-void test_record(void)
+static void test_record(void)
 {
     device kinect = device::open(0);
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
@@ -254,7 +254,7 @@ void test_record(void)
 
     std::string k4a_cpp_ft_attachment = "K4A_CPP_FT_ADD_ATTACHMENT";
     recorder.add_attachment(k4a_cpp_ft_attachment.c_str(),
-                            (uint8_t *)k4a_cpp_ft_attachment.data(),
+                            (const uint8_t *)k4a_cpp_ft_attachment.data(),
                             k4a_cpp_ft_attachment.size());
 
     k4a_record_video_settings_t vid_settings = { 1920, 1080, 30 };
@@ -304,7 +304,7 @@ void test_record(void)
     kinect.stop_imu();
 }
 
-void test_playback(void)
+static void test_playback(void)
 {
     playback pb = playback::open(MKV_FILE_NAME.c_str());
     ASSERT_TRUE(pb); // bool operation

@@ -130,9 +130,9 @@ public:
      *
      * \sa k4a_record_add_tag
      */
-    void add_tag(const char *name, const std::string &value)
+    void add_tag(const char *name, const char *value)
     {
-        k4a_result_t result = k4a_record_add_tag(m_handle, name, value.c_str());
+        k4a_result_t result = k4a_record_add_tag(m_handle, name, value);
 
         if (K4A_FAILED(result))
         {
@@ -275,7 +275,8 @@ public:
     {
         k4a_result_t result = k4a_record_write_custom_track_data(m_handle,
                                                                  track_name,
-                                                                 device_timestamp_usec.count(),
+                                                                 internal::clamp_cast<uint64_t>(
+                                                                     device_timestamp_usec.count()),
                                                                  custom_data,
                                                                  custom_data_size);
 
