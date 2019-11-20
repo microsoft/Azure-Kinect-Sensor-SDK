@@ -309,7 +309,7 @@ static k4a_result_t transformation_unproject_internal(const k4a_calibration_came
     float yy = xy[1] * xy[1];
 
     xy[0] -= (yy + 3.f * xx) * p2 + two_xy * p1;
-    xy[1] -= (xx + 3.f * xx) * p1 + two_xy * p2;
+    xy[1] -= (xx + 3.f * yy) * p1 + two_xy * p2;
 
     // add on center of distortion
     xy[0] += codx;

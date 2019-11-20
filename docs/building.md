@@ -125,10 +125,6 @@ need for building, but is required running the SDK*
 Visual Studio 2017 supports opening CMake based projects directly.
 Use File / Open / CMake ... to open the root CMakeLists.txt in the project.
 
-To cross compile for Linux on Windows you can run a pre-configured
-[docker container](../docker/DOCKER.md) with the tools needed for Visual
-Studio.
-
 ### C# Wrapper
 
 The C# Wrapper is not included in the primary CMake build systems, it is built using the standard
