@@ -267,6 +267,12 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
             if (ts_raw_capture / sync->fps_period > 10)
             {
                 sync->depth_captures_dropped++;
+                if ((sync->depth_captures_dropped % 10) == 0)
+                {
+                    LOG_ERROR("Dropping %d depth captures waiting for time stamps to stabilize",
+                              sync->depth_captures_dropped);
+                }
+
                 result = K4A_RESULT_FAILED; // Not an error, just a graceful exit
             }
             else
@@ -503,6 +509,7 @@ k4a_result_t capturesync_start(capturesync_t capturesync_handle, const k4a_devic
         sync->fps_1_quarter_period = sync->fps_period / 4;
         sync->depth_delay_off_color_usec = config->depth_delay_off_color_usec;
         sync->sync_captures = true;
+        sync->depth_captures_dropped = 0;
 
         if (config->color_resolution == K4A_COLOR_RESOLUTION_OFF || config->depth_mode == K4A_DEPTH_MODE_OFF)
         {
@@ -517,7 +524,7 @@ k4a_result_t capturesync_start(capturesync_t capturesync_handle, const k4a_devic
         queue_enable(sync->depth_ir.queue);
         queue_enable(sync->sync_queue);
 
-        // Not taking the lock as we don't need to syncronize this on start
+        // Not taking the lock as we don't need to synchronize this on start
         sync->running = true;
     }
 

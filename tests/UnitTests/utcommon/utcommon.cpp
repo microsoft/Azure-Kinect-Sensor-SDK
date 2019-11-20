@@ -107,4 +107,25 @@ int k4a_test_common_main(int argc, char **argv)
 
     return ret;
 }
+
+int64_t k4a_unittest_get_max_sync_delay(k4a_fps_t fps)
+{
+    int64_t max_delay = 0;
+    switch (fps)
+    {
+    case K4A_FRAMES_PER_SECOND_5:
+        max_delay = 660;
+        break;
+    case K4A_FRAMES_PER_SECOND_15:
+        max_delay = 220;
+        break;
+    case K4A_FRAMES_PER_SECOND_30:
+        max_delay = 110;
+        break;
+    default:
+        max_delay = 0;
+        break;
+    }
+    return max_delay;
+}
 }

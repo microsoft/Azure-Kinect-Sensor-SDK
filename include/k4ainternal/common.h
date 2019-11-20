@@ -140,6 +140,52 @@ inline static bool k4a_convert_depth_mode_to_width_height(k4a_depth_mode_t mode,
     return true;
 }
 
+inline static bool k4a_is_version_greater_or_equal(k4a_version_t *fw_version_l, k4a_version_t *fw_version_r)
+{
+    typedef enum
+    {
+        FW_OK,
+        FW_TOO_LOW,
+        FW_UNKNOWN
+    } fw_check_state_t;
+
+    fw_check_state_t fw = FW_UNKNOWN;
+
+    // Check major version
+    if (fw_version_l->major > fw_version_r->major)
+    {
+        fw = FW_OK;
+    }
+    else if (fw_version_l->major < fw_version_r->major)
+    {
+        fw = FW_TOO_LOW;
+    }
+
+    // Check minor version
+    if (fw == FW_UNKNOWN)
+    {
+        if (fw_version_l->minor > fw_version_r->minor)
+        {
+            fw = FW_OK;
+        }
+        else if (fw_version_l->minor < fw_version_r->minor)
+        {
+            fw = FW_TOO_LOW;
+        }
+    }
+
+    // Check iteration version
+    if (fw == FW_UNKNOWN)
+    {
+        fw = FW_TOO_LOW;
+        if (fw_version_l->iteration >= fw_version_r->iteration)
+        {
+            fw = FW_OK;
+        }
+    }
+
+    return (fw == FW_OK);
+}
 #ifdef __cplusplus
 }
 #endif

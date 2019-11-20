@@ -22,9 +22,6 @@
 
 const int SAMPLES_TO_STABILIZE = 10;
 
-// How close 2 timestamps should be to be considered accurately synchronized.
-const int MAX_SYNC_CAPTURE_DIFFERENCE_USEC = 100;
-
 int main(int argc, char **argv)
 {
     return k4a_test_common_main(argc, argv);
@@ -298,7 +295,8 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
                                        k4a_device_t sub,
                                        k4a_capture_t *cap_m,
                                        k4a_capture_t *cap_s,
-                                       uint32_t subordinate_delay_off_master_usec)
+                                       uint32_t subordinate_delay_off_master_usec,
+                                       int64_t max_sync_delay)
 {
     const int timeout_ms = 10000;
     int64_t ts_m, ts_s, ts_s_adj;
@@ -318,7 +316,7 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
     ts_s_adj = ts_s - subordinate_delay_off_master_usec;
 
     int64_t ts_delta = std::abs(ts_m - ts_s_adj);
-    while (ts_delta > MAX_SYNC_CAPTURE_DIFFERENCE_USEC)
+    while (ts_delta > max_sync_delay)
     {
         // bail out if it never happens
         R_EXPECT_LE(tries++, 100);
@@ -355,11 +353,13 @@ static k4a_result_t get_syncd_captures(k4a_device_t master,
     }
     return K4A_RESULT_SUCCEEDED;
 }
-static k4a_result_t verify_ts(int64_t ts_1, int64_t ts_2, int64_t ts_offset, const char *error_message)
+
+static k4a_result_t
+verify_ts(int64_t ts_1, int64_t ts_2, int64_t ts_offset, int64_t max_sync_delay, const char *error_message)
 {
     int64_t ts_1_adjust = ts_1 + ts_offset;
     int64_t ts_result = std::abs(ts_1_adjust - ts_2);
-    if (ts_result > MAX_SYNC_CAPTURE_DIFFERENCE_USEC)
+    if (ts_result > max_sync_delay)
     {
         printf("    ERROR timestamps are not within range.\n    TS1 + TS_Offset should be ~= TS2. %s\n    ts1=%" PRId64
                " ts2=%" PRId64 " ts_offset=%" PRId64 " diff=%" PRId64 "\n",
@@ -368,7 +368,7 @@ static k4a_result_t verify_ts(int64_t ts_1, int64_t ts_2, int64_t ts_offset, con
                ts_2,
                ts_offset,
                ts_result);
-        R_EXPECT_LE(ts_result, MAX_SYNC_CAPTURE_DIFFERENCE_USEC);
+        R_EXPECT_LE(ts_result, max_sync_delay);
     }
     return K4A_RESULT_SUCCEEDED;
 }
@@ -435,9 +435,11 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
         k4a_capture_t cap_m, cap_s;
         int64_t ts_m_c, ts_m_ir, ts_s_c, ts_s_ir;
         k4a_image_t image_c_m, image_ir_m, image_c_s, image_ir_s;
+        int64_t max_sync_delay = k4a_unittest_get_max_sync_delay(frame_rate);
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  get_syncd_captures(master, subordinate, &cap_m, &cap_s, s_config.subordinate_delay_off_master_usec));
+                  get_syncd_captures(
+                      master, subordinate, &cap_m, &cap_s, s_config.subordinate_delay_off_master_usec, max_sync_delay));
 
         ASSERT_FALSE(NULL_IMAGE == (image_c_m = k4a_capture_get_color_image(cap_m)));
         ASSERT_FALSE(NULL_IMAGE == (image_c_s = k4a_capture_get_color_image(cap_s)));
@@ -465,16 +467,19 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
                       verify_ts(ts_m_c,
                                 ts_m_ir,
                                 m_config.depth_delay_off_color_usec,
+                                max_sync_delay,
                                 "TS1 is Master Color, TS2 is Master Ir"));
             ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                       verify_ts(ts_s_c,
                                 ts_s_ir,
                                 s_config.depth_delay_off_color_usec,
+                                max_sync_delay,
                                 "TS1 is Subordinate Color, TS2 is Subordinate Ir"));
             ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                       verify_ts(ts_m_c,
                                 ts_s_c,
                                 (int64_t)s_config.subordinate_delay_off_master_usec,
+                                max_sync_delay,
                                 "TS1 is Master Color, TS2 is Subordinate Color"));
         }
 

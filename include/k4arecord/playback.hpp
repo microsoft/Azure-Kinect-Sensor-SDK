@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <memory>
 #include <string>
 #include <vector>
 #include <memory>
@@ -26,91 +27,23 @@ namespace k4a
  */
 class data_block
 {
-private:
-    class data_block_ref
-    {
-    public:
-        data_block_ref(k4a_playback_data_block_t handle) : m_handle(handle){};
-        ~data_block_ref()
-        {
-            reset();
-        }
-
-        void reset()
-        {
-            if (m_handle != nullptr)
-            {
-                k4a_playback_data_block_release(m_handle);
-                m_handle = nullptr;
-            }
-        }
-
-        k4a_playback_data_block_t get_handle()
-        {
-            if (m_handle != nullptr)
-            {
-                return m_handle;
-            }
-            return nullptr;
-        }
-
-        /** Returns true if two data_block_ref's refer to the same k4a_playback_data_block_t, false otherwise
-         */
-        bool operator==(const data_block_ref &other) const noexcept
-        {
-            return m_handle == other.m_handle;
-        }
-
-        /** Returns false if the data_block_ref is valid, true otherwise
-         */
-        bool operator==(std::nullptr_t) const noexcept
-        {
-            return m_handle == nullptr;
-        }
-
-        /** Returns true if two data_block_ref wrap different k4a_playback_data_block_t instances, false otherwise
-         */
-        bool operator!=(const data_block_ref &other) const noexcept
-        {
-            return m_handle != other.m_handle;
-        }
-
-        /** Returns true if the k4a_playback_data_block_t is valid, false otherwise
-         */
-        bool operator!=(std::nullptr_t) const noexcept
-        {
-            return m_handle != nullptr;
-        }
-
-    private:
-        k4a_playback_data_block_t m_handle;
-    };
-
 public:
     /** Creates a data_block from a k4a_playback_data_block_t
-     * Takes ownership of the handle, you should not call k4a_playback_data_block_release? on the handle after
+     * Takes ownership of the handle, you should not call k4a_playback_data_block_release on the handle after
      * giving it to the data_block; the data_block will take care of that.
      */
-    data_block(k4a_playback_data_block_t handle = nullptr)
-    {
-        m_handle = std::make_shared<data_block_ref>(handle);
-        if (m_handle == nullptr)
-        {
-            throw error("Failed std::make_shared for data_block");
-        }
-    }
+    data_block(k4a_playback_data_block_t handle = nullptr) noexcept : m_handle(handle) {}
 
-    /** Creates a shallow copy of another data_block
-     */
-    data_block(const data_block &other) noexcept : m_handle(other.m_handle)
-    {
-        m_handle.reset();
-    }
+    // No Copies allowed
+    data_block(const data_block &) = delete;
+    data_block &operator=(const data_block &) = delete;
 
     /** Moves another data_block into a new data_block
      */
     data_block(data_block &&other) noexcept : m_handle(other.m_handle)
     {
+        reset();
+        m_handle = other.m_handle;
         other.m_handle = nullptr;
     }
 
@@ -119,25 +52,13 @@ public:
         reset();
     }
 
-    /** Sets data_block to a shallow copy of the other
-     */
-    data_block &operator=(const data_block &other) noexcept
-    {
-        if (this != &other)
-        {
-            reset();
-            m_handle = other.m_handle;
-        }
-        return *this;
-    }
-
     /** Moves another data_block into this data_block; other is set to invalid
      */
     data_block &operator=(data_block &&other) noexcept
     {
+        reset();
         if (this != &other)
         {
-            reset();
             m_handle = other.m_handle;
             other.m_handle = nullptr;
         }
@@ -148,36 +69,7 @@ public:
      */
     data_block &operator=(std::nullptr_t) noexcept
     {
-        reset();
         return *this;
-    }
-
-    /** Returns true if two data_blocks refer to the same k4a_playback_data_block_t, false otherwise
-     */
-    bool operator==(const data_block &other) const noexcept
-    {
-        return m_handle == other.m_handle;
-    }
-
-    /** Returns false if the data_block is valid, true otherwise
-     */
-    bool operator==(std::nullptr_t) const noexcept
-    {
-        return m_handle == nullptr;
-    }
-
-    /** Returns true if two data_blocks wrap different k4a_playback_data_block_t instances, false otherwise
-     */
-    bool operator!=(const data_block &other) const noexcept
-    {
-        return m_handle != other.m_handle;
-    }
-
-    /** Returns true if the k4a_playback_data_block_t is valid, false otherwise
-     */
-    bool operator!=(std::nullptr_t) const noexcept
-    {
-        return m_handle != nullptr;
     }
 
     /** Returns true if the data_block is valid, false otherwise
@@ -191,16 +83,20 @@ public:
      */
     void reset() noexcept
     {
-        m_handle.reset();
+        if (m_handle)
+        {
+            k4a_playback_data_block_release(m_handle);
+            m_handle = nullptr;
+        }
     }
 
-    /** Get the color image associated with the data_block
+    /** Get the time stamp in micro seconds for the given data_block
      *
-     * \sa k4a_data_block_get_color_image
+     * \sa k4a_playback_data_block_get_device_timestamp_usec
      */
     std::chrono::microseconds get_device_timestamp_usec() const noexcept
     {
-        return std::chrono::microseconds(k4a_playback_data_block_get_device_timestamp_usec(m_handle->get_handle()));
+        return std::chrono::microseconds(k4a_playback_data_block_get_device_timestamp_usec(m_handle));
     }
 
     /** Get the size of the data_block buffer.
@@ -209,7 +105,7 @@ public:
      */
     size_t get_buffer_size() const noexcept
     {
-        return k4a_playback_data_block_get_buffer_size(m_handle->get_handle());
+        return k4a_playback_data_block_get_buffer_size(m_handle);
     }
 
     /** Get the data_block buffer.
@@ -218,11 +114,11 @@ public:
      */
     const uint8_t *get_buffer() const noexcept
     {
-        return k4a_playback_data_block_get_buffer(m_handle->get_handle());
+        return k4a_playback_data_block_get_buffer(m_handle);
     }
 
 private:
-    std::shared_ptr<data_block_ref> m_handle;
+    k4a_playback_data_block_t m_handle;
 };
 
 /** \class playback playback.hpp <k4arecord/playback.hpp>
@@ -244,8 +140,10 @@ public:
 
     /** Moves another k4a::playback into a new k4a::playback
      */
-    playback(playback &&other) noexcept : m_handle(other.m_handle)
+    playback(playback &&other) noexcept
     {
+        close();
+        m_handle = other.m_handle;
         other.m_handle = nullptr;
     }
 
@@ -329,7 +227,7 @@ public:
     {
         std::vector<uint8_t> calibration;
         size_t buffer = 0;
-        k4a_buffer_result_t result = k4a_playback_get_raw_calibration(m_handle, &calibration[0], &buffer);
+        k4a_buffer_result_t result = k4a_playback_get_raw_calibration(m_handle, nullptr, &buffer);
 
         if (result == K4A_BUFFER_RESULT_TOO_SMALL && buffer > 1)
         {
@@ -530,8 +428,8 @@ public:
         return std::chrono::microseconds(k4a_playback_get_recording_length_usec(m_handle));
     }
 
-    /** Set the image format that color captures will be converted to. By default the conversion format will be the same
-     * as the image format stored in the recording file, and no conversion will occur.
+    /** Set the image format that color captures will be converted to. By default the conversion format will be the
+     * same as the image format stored in the recording file, and no conversion will occur.
      *
      * Throws error on failure.
      *
@@ -599,7 +497,7 @@ public:
      * Returns true if the attachment was available, false if it was not found.
      * Throws error on failure.
      *
-     * \sa k4a_playback_get_previous_data_block
+     * \sa k4a_playback_get_attachment
      */
     bool get_attachment(const char *attachment, std::vector<uint8_t> *data)
     {
