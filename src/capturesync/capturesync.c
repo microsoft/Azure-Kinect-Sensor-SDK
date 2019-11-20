@@ -267,12 +267,6 @@ void capturesync_add_capture(capturesync_t capturesync_handle,
             if (ts_raw_capture / sync->fps_period > 10)
             {
                 sync->depth_captures_dropped++;
-                if ((sync->depth_captures_dropped % 10) == 0)
-                {
-                    LOG_ERROR("Dropping %d depth captures waiting for time stamps to stabilize",
-                              sync->depth_captures_dropped);
-                }
-
                 result = K4A_RESULT_FAILED; // Not an error, just a graceful exit
             }
             else
