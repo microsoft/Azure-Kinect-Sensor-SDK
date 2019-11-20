@@ -176,7 +176,14 @@ public:
 
     /** Returns true if the image is valid, false otherwise
      */
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
+    {
+        return m_handle != nullptr;
+    }
+
+    /** Returns true if the image is valid, false otherwise
+     */
+    bool good() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -503,7 +510,14 @@ public:
 
     /** Returns true if the capture is valid, false otherwise
      */
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
+    {
+        return m_handle != nullptr;
+    }
+
+    /** Returns true if the capture is valid, false otherwise
+     */
+    bool good() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -1111,7 +1125,14 @@ public:
 
     /** Returns true if the device is valid, false otherwise
      */
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
+    {
+        return m_handle != nullptr;
+    }
+
+    /** Returns true if the device is valid, false otherwise
+     */
+    bool good() const noexcept
     {
         return m_handle != nullptr;
     }

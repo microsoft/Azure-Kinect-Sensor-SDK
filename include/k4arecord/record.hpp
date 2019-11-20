@@ -62,35 +62,14 @@ public:
 
     /** Returns true if the k4a::record is valid, false otherwise
      */
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
     {
         return m_handle != nullptr;
     }
 
-    /** Returns true if two recorder objects refer to the same k4a_record_t, false otherwise
+    /** Returns true if the k4a::record is valid, false otherwise
      */
-    bool operator==(const record &other) const noexcept
-    {
-        return m_handle == other.m_handle;
-    }
-
-    /** Returns false if the record object is valid, true otherwise
-     */
-    bool operator==(std::nullptr_t) const noexcept
-    {
-        return m_handle == nullptr;
-    }
-
-    /** Returns true if two record objects wrap different k4a_record_t instances, false otherwise
-     */
-    bool operator!=(const record &other) const noexcept
-    {
-        return m_handle != other.m_handle;
-    }
-
-    /** Returns true if the record object is valid, false otherwise
-     */
-    bool operator!=(std::nullptr_t) const noexcept
+    bool good() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -101,7 +80,7 @@ public:
      */
     void close() noexcept
     {
-        if (m_handle != nullptr)
+        if (good())
         {
             k4a_record_close(m_handle);
             m_handle = nullptr;

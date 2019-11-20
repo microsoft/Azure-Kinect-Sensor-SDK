@@ -10,6 +10,7 @@
 using namespace k4a;
 
 const std::string MKV_FILE_NAME("./k4a_cpp_ft.mkv");
+const std::string MKV_FILE_NAME_2ND("./k4a_cpp_ft_2.mkv");
 
 int main(int argc, char **argv)
 {
@@ -21,7 +22,9 @@ class k4a_cpp_ft : public ::testing::Test
 public:
     virtual void SetUp()
     {
-        std::remove("*.mkv"); // remove old test files in the event of a crash
+        // remove old test files, incase old test run crashed
+        std::remove(MKV_FILE_NAME.c_str());
+        std::remove(MKV_FILE_NAME_2ND.c_str());
     }
 
     virtual void TearDown() {}
@@ -44,6 +47,14 @@ TEST_F(k4a_cpp_ft, k4a)
 {
     device kinect = device::open(0);
     ASSERT_TRUE(kinect);
+    ASSERT_TRUE(kinect.good());
+    kinect.close();
+    ASSERT_FALSE(kinect);
+    ASSERT_FALSE(kinect.good());
+
+    kinect = device::open(0);
+    ASSERT_TRUE(kinect);
+    ASSERT_TRUE(kinect.good());
 
     {
         device kinect2;
@@ -167,11 +178,30 @@ TEST_F(k4a_cpp_ft, k4a)
         }
 
         {
-            // test .reset
+            // Capture class bool operation, good(), and reset()
+            ASSERT_TRUE(cap1);
+            ASSERT_TRUE(cap1.good());
+            cap1.reset();
+            ASSERT_FALSE(cap1);
+            ASSERT_FALSE(cap1.good());
+            cap1.reset(); // should not crash
+            ASSERT_FALSE(cap1);
+            ASSERT_FALSE(cap1.good());
+        }
+
+        {
+            // test reset(), bool operator, good()
             image im = image::create(K4A_IMAGE_FORMAT_COLOR_NV12, 1024, 768, 1024 * 3);
+            ASSERT_TRUE(im);
+            ASSERT_TRUE(im.good());
             im.reset();
             ASSERT_TRUE(im == nullptr);
-            im.reset(); // should be safe
+            ASSERT_FALSE(im);
+            ASSERT_FALSE(im.good());
+            im.reset(); // should not crash
+            ASSERT_TRUE(im == nullptr);
+            ASSERT_FALSE(im);
+            ASSERT_FALSE(im.good());
         }
 
         {
@@ -220,6 +250,7 @@ TEST_F(k4a_cpp_ft, k4a)
 
 static void test_record(void)
 {
+    record recorder;
     device kinect = device::open(0);
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
@@ -228,25 +259,34 @@ static void test_record(void)
     kinect.start_cameras(&config);
     kinect.start_imu();
 
-    record recorder = record::create(MKV_FILE_NAME.c_str(), kinect, config);
+    {
+        // Test bool operator, close(), good()
+        recorder = record::create(MKV_FILE_NAME.c_str(), kinect, config);
+        ASSERT_TRUE(recorder);
+        ASSERT_TRUE(recorder.good());
+        recorder.close();
+        ASSERT_FALSE(recorder);
+        ASSERT_FALSE(recorder.good());
+        recorder.close(); // should not crash
+        ASSERT_FALSE(recorder);
+        ASSERT_FALSE(recorder.good());
+    }
+
+    recorder = record::create(MKV_FILE_NAME.c_str(), kinect, config);
     ASSERT_TRUE(recorder);
 
     {
-        std::string second_file("./k4a_cpp_ft_2.mkv");
-        record recorder2 = record::create(second_file.c_str(), kinect, config);
+        record recorder2 = record::create(MKV_FILE_NAME_2ND.c_str(), kinect, config);
         ASSERT_TRUE(recorder2);
 
         record recorder_empty;
         ASSERT_FALSE(recorder_empty);
 
-        ASSERT_TRUE(recorder != recorder2);
-        ASSERT_FALSE(recorder == recorder2);
-
         record recorder_moved = std::move(recorder2);
 
         recorder_empty.close();
         recorder_moved.close();
-        std::remove(second_file.c_str());
+        std::remove(MKV_FILE_NAME_2ND.c_str());
     }
 
     recorder.add_tag("K4A_CPP_FT_ADD_TAG", "K4A_CPP_FT_ADD_TAG");
@@ -308,17 +348,22 @@ static void test_playback(void)
 {
     playback pb = playback::open(MKV_FILE_NAME.c_str());
     ASSERT_TRUE(pb); // bool operation
+    ASSERT_TRUE(pb.good());
 
     {
         playback pb_missing_file;
         ASSERT_THROW(pb_missing_file = playback::open("./This_file_is_not_here.mkv"), error);
 
         playback pb_empty;
-        ASSERT_TRUE(pb);               // bool operation
-        ASSERT_FALSE(pb_empty);        // bool operation
+        ASSERT_FALSE(pb_empty); // bool operation
+        ASSERT_FALSE(pb_empty.good());
         ASSERT_FALSE(pb_missing_file); // bool operation
-        ASSERT_TRUE(pb != pb_empty);
-        ASSERT_FALSE(pb == pb_empty);
+        ASSERT_FALSE(pb_missing_file.good());
+
+        pb.close();
+        ASSERT_FALSE(pb); // bool operation
+        ASSERT_FALSE(pb.good());
+        pb = playback::open(MKV_FILE_NAME.c_str());
     }
 
     {
@@ -334,7 +379,7 @@ static void test_playback(void)
 
     std::vector<uint8_t> raw_cal = pback.get_raw_calibration();
     std::cout << "calibration is : ";
-    for (const uint8_t data_char : raw_cal)
+    for (const uint8_t &data_char : raw_cal)
     {
         std::cout << data_char;
     }
@@ -395,6 +440,12 @@ static void test_playback(void)
         while (pback.get_next_data_block(k4a_cpp_ft_custom_subtitle_track.c_str(), &block))
         {
             subtitle_block_count_forward++;
+
+            ASSERT_TRUE(block);
+            ASSERT_TRUE(block.good());
+            block.reset();
+            ASSERT_FALSE(block);
+            ASSERT_FALSE(block.good());
         }
 
         ASSERT_GT(capture_count_forward, 0);
@@ -468,17 +519,6 @@ static void test_playback(void)
             ASSERT_NE(block.get_device_timestamp_usec().count(), 0);
             ASSERT_NE(block.get_buffer_size(), (size_t)0);
             ASSERT_NE(block.get_buffer(), nullptr);
-
-            {
-                // Test data_block
-                // data_block copy_same = block; // Copy not allowed - deleted
-                data_block copy_null = NULL;
-                ASSERT_FALSE(block == copy_null);
-                ASSERT_TRUE(block != copy_null);
-                data_block copy_empty;
-                ASSERT_FALSE(block == copy_empty);
-                ASSERT_TRUE(block != copy_empty);
-            }
         }
 
         while (pback.get_next_data_block(k4a_cpp_ft_custom_subtitle_track.c_str(), &block))

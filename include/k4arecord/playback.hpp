@@ -54,25 +54,25 @@ public:
      */
     data_block &operator=(data_block &&other) noexcept
     {
-        reset();
         if (this != &other)
         {
+            reset();
             m_handle = other.m_handle;
             other.m_handle = nullptr;
         }
         return *this;
     }
 
-    /** Invalidates this data_block
+    /** Returns true if the data_block is valid, false otherwise
      */
-    data_block &operator=(std::nullptr_t) noexcept
+    explicit operator bool() const noexcept
     {
-        return *this;
+        return m_handle != nullptr;
     }
 
     /** Returns true if the data_block is valid, false otherwise
      */
-    operator bool() const noexcept
+    bool good() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -168,7 +168,14 @@ public:
 
     /** Returns true if the k4a::playback is valid, false otherwise
      */
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
+    {
+        return m_handle != nullptr;
+    }
+
+    /** Returns true if the k4a::playback is valid, false otherwise
+     */
+    bool good() const noexcept
     {
         return m_handle != nullptr;
     }
