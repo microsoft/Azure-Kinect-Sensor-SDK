@@ -276,7 +276,7 @@ void test_record(void)
             recorder.write_capture(capture);
         }
 
-        std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::high_resolution_clock::now();
+        auto start = std::chrono::high_resolution_clock::now();
         while (kinect.get_imu_sample(&imu, std::chrono::milliseconds(0)))
         {
             recorder.write_imu_sample(imu);
