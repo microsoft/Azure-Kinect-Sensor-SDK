@@ -47,14 +47,14 @@ TEST_F(k4a_cpp_ft, k4a)
 {
     device kinect = device::open(0);
     ASSERT_TRUE(kinect);
-    ASSERT_TRUE(kinect.good());
+    ASSERT_TRUE(kinect.is_valid());
     kinect.close();
     ASSERT_FALSE(kinect);
-    ASSERT_FALSE(kinect.good());
+    ASSERT_FALSE(kinect.is_valid());
 
     kinect = device::open(0);
     ASSERT_TRUE(kinect);
-    ASSERT_TRUE(kinect.good());
+    ASSERT_TRUE(kinect.is_valid());
 
     {
         device kinect2;
@@ -178,30 +178,30 @@ TEST_F(k4a_cpp_ft, k4a)
         }
 
         {
-            // Capture class bool operation, good(), and reset()
+            // Capture class bool operation, is_valid(), and reset()
             ASSERT_TRUE(cap1);
-            ASSERT_TRUE(cap1.good());
+            ASSERT_TRUE(cap1.is_valid());
             cap1.reset();
             ASSERT_FALSE(cap1);
-            ASSERT_FALSE(cap1.good());
+            ASSERT_FALSE(cap1.is_valid());
             cap1.reset(); // should not crash
             ASSERT_FALSE(cap1);
-            ASSERT_FALSE(cap1.good());
+            ASSERT_FALSE(cap1.is_valid());
         }
 
         {
-            // test reset(), bool operator, good()
+            // test reset(), bool operator, is_valid()
             image im = image::create(K4A_IMAGE_FORMAT_COLOR_NV12, 1024, 768, 1024 * 3);
             ASSERT_TRUE(im);
-            ASSERT_TRUE(im.good());
+            ASSERT_TRUE(im.is_valid());
             im.reset();
             ASSERT_TRUE(im == nullptr);
             ASSERT_FALSE(im);
-            ASSERT_FALSE(im.good());
+            ASSERT_FALSE(im.is_valid());
             im.reset(); // should not crash
             ASSERT_TRUE(im == nullptr);
             ASSERT_FALSE(im);
-            ASSERT_FALSE(im.good());
+            ASSERT_FALSE(im.is_valid());
         }
 
         {
@@ -246,6 +246,8 @@ TEST_F(k4a_cpp_ft, k4a)
         color.set_white_balance(500);
         color.set_iso_speed(500);
     }
+
+    kinect.close();
 }
 
 static void test_record(void)
@@ -260,16 +262,16 @@ static void test_record(void)
     kinect.start_imu();
 
     {
-        // Test bool operator, close(), good()
+        // Test bool operator, close(), is_valid()
         recorder = record::create(MKV_FILE_NAME.c_str(), kinect, config);
         ASSERT_TRUE(recorder);
-        ASSERT_TRUE(recorder.good());
+        ASSERT_TRUE(recorder.is_valid());
         recorder.close();
         ASSERT_FALSE(recorder);
-        ASSERT_FALSE(recorder.good());
+        ASSERT_FALSE(recorder.is_valid());
         recorder.close(); // should not crash
         ASSERT_FALSE(recorder);
-        ASSERT_FALSE(recorder.good());
+        ASSERT_FALSE(recorder.is_valid());
     }
 
     recorder = record::create(MKV_FILE_NAME.c_str(), kinect, config);
@@ -348,7 +350,7 @@ static void test_playback(void)
 {
     playback pb = playback::open(MKV_FILE_NAME.c_str());
     ASSERT_TRUE(pb); // bool operation
-    ASSERT_TRUE(pb.good());
+    ASSERT_TRUE(pb.is_valid());
 
     {
         playback pb_missing_file;
@@ -356,13 +358,13 @@ static void test_playback(void)
 
         playback pb_empty;
         ASSERT_FALSE(pb_empty); // bool operation
-        ASSERT_FALSE(pb_empty.good());
+        ASSERT_FALSE(pb_empty.is_valid());
         ASSERT_FALSE(pb_missing_file); // bool operation
-        ASSERT_FALSE(pb_missing_file.good());
+        ASSERT_FALSE(pb_missing_file.is_valid());
 
         pb.close();
         ASSERT_FALSE(pb); // bool operation
-        ASSERT_FALSE(pb.good());
+        ASSERT_FALSE(pb.is_valid());
         pb = playback::open(MKV_FILE_NAME.c_str());
     }
 
@@ -442,10 +444,10 @@ static void test_playback(void)
             subtitle_block_count_forward++;
 
             ASSERT_TRUE(block);
-            ASSERT_TRUE(block.good());
+            ASSERT_TRUE(block.is_valid());
             block.reset();
             ASSERT_FALSE(block);
-            ASSERT_FALSE(block.good());
+            ASSERT_FALSE(block.is_valid());
         }
 
         ASSERT_GT(capture_count_forward, 0);

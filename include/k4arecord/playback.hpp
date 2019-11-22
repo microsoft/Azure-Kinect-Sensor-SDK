@@ -38,9 +38,8 @@ public:
 
     /** Moves another data_block into a new data_block
      */
-    data_block(data_block &&other) noexcept : m_handle(other.m_handle)
+    data_block(data_block &&other) noexcept
     {
-        reset();
         m_handle = other.m_handle;
         other.m_handle = nullptr;
     }
@@ -67,12 +66,12 @@ public:
      */
     explicit operator bool() const noexcept
     {
-        return m_handle != nullptr;
+        return is_valid();
     }
 
     /** Returns true if the data_block is valid, false otherwise
      */
-    bool good() const noexcept
+    bool is_valid() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -170,12 +169,12 @@ public:
      */
     explicit operator bool() const noexcept
     {
-        return m_handle != nullptr;
+        return is_valid();
     }
 
     /** Returns true if the k4a::playback is valid, false otherwise
      */
-    bool good() const noexcept
+    bool is_valid() const noexcept
     {
         return m_handle != nullptr;
     }

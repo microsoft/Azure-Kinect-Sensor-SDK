@@ -64,12 +64,12 @@ public:
      */
     explicit operator bool() const noexcept
     {
-        return m_handle != nullptr;
+        return is_valid();
     }
 
     /** Returns true if the k4a::record is valid, false otherwise
      */
-    bool good() const noexcept
+    bool is_valid() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -80,7 +80,7 @@ public:
      */
     void close() noexcept
     {
-        if (good())
+        if (is_valid())
         {
             k4a_record_close(m_handle);
             m_handle = nullptr;
