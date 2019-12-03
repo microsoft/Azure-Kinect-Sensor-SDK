@@ -306,7 +306,7 @@ TEST_P(throughput_perf, testTest)
         config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
     }
 
-    max_sync_delay = k4a_unittest_get_max_sync_delay(as.fps);
+    max_sync_delay = k4a_unittest_get_max_sync_delay_ms(as.fps);
 
     printf("Config being used is:\n");
     printf("    color_format:%d\n", config.color_format);

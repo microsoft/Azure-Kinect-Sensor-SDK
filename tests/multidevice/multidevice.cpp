@@ -450,7 +450,7 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
         k4a_capture_t cap_m, cap_s;
         int64_t ts_m_c, ts_m_ir, ts_s_c, ts_s_ir;
         k4a_image_t image_c_m, image_ir_m, image_c_s, image_ir_s;
-        int64_t max_sync_delay = k4a_unittest_get_max_sync_delay(frame_rate);
+        int64_t max_sync_delay = k4a_unittest_get_max_sync_delay_ms(frame_rate);
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   get_syncd_captures(m_master,
