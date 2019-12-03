@@ -12,6 +12,7 @@ var searchData=
   ['ir_5ftrack_5fenabled',['ir_track_enabled',['../structk4a__record__configuration__t_ad2612d1ad9582d25fd1332b4fed3937d.html#ad2612d1ad9582d25fd1332b4fed3937d',1,'k4a_record_configuration_t']]],
   ['is_5fsync_5fin_5fconnected',['is_sync_in_connected',['../classk4a_1_1device_acaba6c5d8a28965882a4703e8806810a.html#acaba6c5d8a28965882a4703e8806810a',1,'k4a::device']]],
   ['is_5fsync_5fout_5fconnected',['is_sync_out_connected',['../classk4a_1_1device_aec0191ecf75549f650af7ac61d0afbef.html#aec0191ecf75549f650af7ac61d0afbef',1,'k4a::device']]],
+  ['is_5fvalid',['is_valid',['../classk4a_1_1image.html#a94f398595ba9086533e9d6afe74b38b5',1,'k4a::image::is_valid()'],['../classk4a_1_1capture.html#ab35642daed5d6d74f44b69806665573e',1,'k4a::capture::is_valid()'],['../classk4a_1_1device.html#aece422ef7b2e662ceccebb4a990ed613',1,'k4a::device::is_valid()'],['../classk4a_1_1data__block.html#aade4e3e5a826c6c1a8642450c7100fae',1,'k4a::data_block::is_valid()'],['../classk4a_1_1playback.html#a2f0e0f327e268a484ad4313863495476',1,'k4a::playback::is_valid()'],['../classk4a_1_1record.html#aa63a7d677f29f9f5c8a5af110be90645',1,'k4a::record::is_valid()']]],
   ['isospeed',['ISOSpeed',['../class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_image_a9d04b5a8393b8aa3f06c296747785320.html#a9d04b5a8393b8aa3f06c296747785320',1,'Microsoft::Azure::Kinect::Sensor::Image']]],
   ['iteration',['iteration',['../structk4a__version__t_a9f3ec6a118f81533c7748b9080f68acf.html#a9f3ec6a118f81533c7748b9080f68acf',1,'k4a_version_t']]]
 ];

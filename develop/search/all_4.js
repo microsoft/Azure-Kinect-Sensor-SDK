@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['data_5fblock',['data_block',['../classk4a_1_1data__block.html',1,'k4a::data_block'],['../classk4a_1_1data__block.html#a16ece871ad5a276a799b1205b6c3fa1b',1,'k4a::data_block::data_block(k4a_playback_data_block_t handle=nullptr) noexcept'],['../classk4a_1_1data__block.html#ab7cd6bea75fbc6ca08bb295ab93e40c8',1,'k4a::data_block::data_block(data_block &amp;&amp;other) noexcept']]],
   ['debug',['Debug',['../namespace_microsoft_1_1_azure_1_1_kinect_1_1_sensor_adaeebe967d3e4a16ba1b3295c431f5ba.html#adaeebe967d3e4a16ba1b3295c431f5baaa603905470e2a5b8c13e96b579ef0dba',1,'Microsoft::Azure::Kinect::Sensor']]],
   ['definitions',['Definitions',['../group___definitions.html',1,'']]],
   ['deprecated_20list',['Deprecated List',['../deprecated.html',1,'']]],
