@@ -62,7 +62,14 @@ public:
 
     /** Returns true if the k4a::record is valid, false otherwise
      */
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
+    {
+        return is_valid();
+    }
+
+    /** Returns true if the k4a::record is valid, false otherwise
+     */
+    bool is_valid() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -73,7 +80,7 @@ public:
      */
     void close() noexcept
     {
-        if (m_handle)
+        if (is_valid())
         {
             k4a_record_close(m_handle);
             m_handle = nullptr;
@@ -90,7 +97,7 @@ public:
         {
             k4a_result_t result = k4a_record_flush(m_handle);
 
-            if (K4A_RESULT_SUCCEEDED != result)
+            if (K4A_FAILED(result))
             {
                 throw error("Failed to flush!");
             }
@@ -106,7 +113,7 @@ public:
     {
         k4a_result_t result = k4a_record_add_tag(m_handle, name, value);
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to add tag!");
         }
@@ -121,7 +128,7 @@ public:
     {
         k4a_result_t result = k4a_record_add_imu_track(m_handle);
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to add imu_track!");
         }
@@ -136,7 +143,7 @@ public:
     {
         k4a_result_t result = k4a_record_add_attachment(m_handle, attachment_name, buffer, buffer_size);
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to add attachment!");
         }
@@ -160,7 +167,7 @@ public:
                                                                 codec_context_size,
                                                                 track_settings);
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to add custom video track!");
         }
@@ -184,7 +191,7 @@ public:
                                                                    codec_context_size,
                                                                    track_settings);
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to add custom subtitle track!");
         }
@@ -199,7 +206,7 @@ public:
     {
         k4a_result_t result = k4a_record_write_header(m_handle);
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to write header!");
         }
@@ -210,11 +217,11 @@ public:
      *
      * \sa k4a_record_write_capture
      */
-    void write_capture(capture &capture)
+    void write_capture(const capture &capture)
     {
         k4a_result_t result = k4a_record_write_capture(m_handle, capture.handle());
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to write capture!");
         }
@@ -225,11 +232,11 @@ public:
      *
      * \sa k4a_record_write_imu_sample
      */
-    void write_imu_sample(k4a_imu_sample_t &imu_sample)
+    void write_imu_sample(const k4a_imu_sample_t &imu_sample)
     {
         k4a_result_t result = k4a_record_write_imu_sample(m_handle, imu_sample);
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to write imu sample!");
         }
@@ -241,17 +248,18 @@ public:
      * \sa k4a_record_write_custom_track_data
      */
     void write_custom_track_data(const char *track_name,
-                                 uint64_t device_timestamp_usec,
+                                 const std::chrono::microseconds device_timestamp_usec,
                                  uint8_t *custom_data,
                                  size_t custom_data_size)
     {
         k4a_result_t result = k4a_record_write_custom_track_data(m_handle,
                                                                  track_name,
-                                                                 device_timestamp_usec,
+                                                                 internal::clamp_cast<uint64_t>(
+                                                                     device_timestamp_usec.count()),
                                                                  custom_data,
                                                                  custom_data_size);
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to write custom track data!");
         }
@@ -262,12 +270,12 @@ public:
      *
      * \sa k4a_record_create
      */
-    static record create(const char *path, device &device, k4a_device_configuration_t &device_configuration)
+    static record create(const char *path, const device &device, const k4a_device_configuration_t &device_configuration)
     {
         k4a_record_t handle = nullptr;
         k4a_result_t result = k4a_record_create(path, device.handle(), device_configuration, &handle);
 
-        if (K4A_RESULT_SUCCEEDED != result)
+        if (K4A_FAILED(result))
         {
             throw error("Failed to create recorder!");
         }
