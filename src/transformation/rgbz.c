@@ -8,9 +8,11 @@
 #include <limits.h>
 #include <math.h>
 
+#ifdef __SSE4_1__
 #include <emmintrin.h> // SSE2
 #include <tmmintrin.h> // SSE3
 #include <smmintrin.h> // SSE4.1
+#endif
 
 typedef struct _k4a_transformation_input_image_t
 {
@@ -1057,37 +1059,38 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
 
 // This is the same function as transformation_depth_to_xyz without the SSE
 // instructions. This code is kept here for readability.
-// static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
-//                                         const void *depth_image_data,
-//                                         void *xyz_image_data)
-// {
-//     const uint16_t *depth_image_data_uint16 = (const uint16_t *)depth_image_data;
-//     int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
-//     int16_t x, y, z;
+#ifndef __SSE4_1__
+static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
+                                        const void *depth_image_data,
+                                        void *xyz_image_data)
+{
+    const uint16_t *depth_image_data_uint16 = (const uint16_t *)depth_image_data;
+    int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
+    int16_t x, y, z;
 
-//      for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
-//     {
-//         float x_tab = xy_tables->x_table[i];
+     for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
+    {
+        float x_tab = xy_tables->x_table[i];
 
-//          if (!isnan(x_tab))
-//         {
-//             z = (int16_t)depth_image_data_uint16[i];
-//             x = (int16_t)(floorf(x_tab * (float)z + 0.5f));
-//             y = (int16_t)(floorf(xy_tables->y_table[i] * (float)z + 0.5f));
-//         }
-//         else
-//         {
-//             x = 0;
-//             y = 0;
-//             z = 0;
-//         }
+         if (!isnan(x_tab))
+        {
+             z = (int16_t)depth_image_data_uint16[i];
+             x = (int16_t)(floorf(x_tab * (float)z + 0.5f));
+             y = (int16_t)(floorf(xy_tables->y_table[i] * (float)z + 0.5f));
+         }
+         else
+         {
+             x = 0;
+             y = 0;
+             z = 0;
+         }
 
-//          xyz_data_int16[3 * i + 0] = x;
-//         xyz_data_int16[3 * i + 1] = y;
-//         xyz_data_int16[3 * i + 2] = z;
-//     }
-// }
-
+          xyz_data_int16[3 * i + 0] = x;
+         xyz_data_int16[3 * i + 1] = y;
+         xyz_data_int16[3 * i + 2] = z;
+     }
+ }
+#else
 static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_tables,
                                             const void *depth_image_data,
                                             void *xyz_image_data)
@@ -1159,6 +1162,7 @@ static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_t
         *xyz_data_m128i++ = _mm_blend_epi16(_mm_blend_epi16(x, y, 0x49), z, 0x92);
     }
 }
+#endif
 
 k4a_buffer_result_t
 transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_t *xy_tables,
@@ -1207,7 +1211,11 @@ transformation_depth_image_to_point_cloud_internal(k4a_transformation_xy_tables_
         return K4A_BUFFER_RESULT_FAILED;
     }
 
+#ifdef __SSE4_1__
     transformation_depth_to_xyz_sse(xy_tables, (const void *)depth_image_data, (void *)xyz_image_data);
+#else
+    transformation_depth_to_xyz(xy_tables, (const void *)depth_image_data, (void *)xyz_image_data);
+#endif
 
     return K4A_BUFFER_RESULT_SUCCEEDED;
 }
