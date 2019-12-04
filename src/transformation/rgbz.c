@@ -1068,28 +1068,28 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
     int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
     int16_t x, y, z;
 
-     for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
+    for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
     {
         float x_tab = xy_tables->x_table[i];
 
-         if (!isnan(x_tab))
+        if (!isnan(x_tab))
         {
-             z = (int16_t)depth_image_data_uint16[i];
-             x = (int16_t)(floorf(x_tab * (float)z + 0.5f));
-             y = (int16_t)(floorf(xy_tables->y_table[i] * (float)z + 0.5f));
-         }
-         else
-         {
-             x = 0;
-             y = 0;
-             z = 0;
-         }
+            z = (int16_t)depth_image_data_uint16[i];
+            x = (int16_t)(floorf(x_tab * (float)z + 0.5f));
+            y = (int16_t)(floorf(xy_tables->y_table[i] * (float)z + 0.5f));
+        }
+        else
+        {
+            x = 0;
+            y = 0;
+            z = 0;
+        }
 
-          xyz_data_int16[3 * i + 0] = x;
-         xyz_data_int16[3 * i + 1] = y;
-         xyz_data_int16[3 * i + 2] = z;
-     }
- }
+        xyz_data_int16[3 * i + 0] = x;
+        xyz_data_int16[3 * i + 1] = y;
+        xyz_data_int16[3 * i + 2] = z;
+    }
+}
 #else
 static void transformation_depth_to_xyz_sse(k4a_transformation_xy_tables_t *xy_tables,
                                             const void *depth_image_data,
