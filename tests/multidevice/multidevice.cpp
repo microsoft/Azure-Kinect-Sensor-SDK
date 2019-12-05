@@ -627,12 +627,7 @@ static int parallel_start_thread(void *param)
     return result;
 }
 
-#ifdef _WIN32
 TEST_F(multidevice_ft, start_parallel)
-#else
-// GitHub: #769 https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/769
-TEST_F(multidevice_ft, DISABLED_start_parallel)
-#endif
 {
     LOCK_HANDLE lock;
     THREAD_HANDLE th1, th2;
