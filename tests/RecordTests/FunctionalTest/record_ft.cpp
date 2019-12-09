@@ -24,8 +24,8 @@ public:
 
     virtual void TearDown()
     {
-        // std::remove(MKV_MJPEG_FILE_NAME.c_str());
-        // std::remove(MKV_BGRA32_FILE_NAME.c_str());
+        std::remove(MKV_MJPEG_FILE_NAME.c_str());
+        std::remove(MKV_BGRA32_FILE_NAME.c_str());
     }
 };
 
