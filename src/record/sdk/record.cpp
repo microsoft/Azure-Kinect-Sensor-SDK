@@ -11,18 +11,24 @@
 #include <k4ainternal/logging.h>
 #include <k4ainternal/common.h>
 
+#include <turbojpeg.h>
+
+// With this quality the generated MKV file from a BGRA stream is approximately the same as the MJPEG stream
+const int JPEG_QUALITY = 94;
+
 using namespace k4arecord;
 using namespace LIBMATROSKA_NAMESPACE;
 
 k4a_result_t k4a_record_create(const char *path,
                                k4a_device_t device,
-                               const k4a_device_configuration_t device_config,
+                               const k4a_device_configuration_t user_device_config,
                                k4a_record_t *recording_handle)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, path == NULL);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, recording_handle == NULL);
     k4a_record_context_t *context = NULL;
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    k4a_device_configuration_t *device_config = nullptr;
 
     context = k4a_record_t_create(recording_handle);
     result = K4A_RESULT_FROM_BOOL(context != NULL);
@@ -44,10 +50,11 @@ k4a_result_t k4a_record_create(const char *path,
 
     if (K4A_SUCCEEDED(result))
     {
-        context->device_config = device_config;
+        context->device_config = user_device_config;
+        device_config = &context->device_config;
 
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
-        context->camera_fps = k4a_convert_fps_to_uint(device_config.camera_fps);
+        context->camera_fps = k4a_convert_fps_to_uint(device_config->camera_fps);
         if (context->camera_fps == 0)
         {
             // Set camera FPS to 30 if no cameras are enabled so IMU can still be written.
@@ -57,11 +64,11 @@ k4a_result_t k4a_record_create(const char *path,
 
     uint32_t color_width = 0;
     uint32_t color_height = 0;
-    if (K4A_SUCCEEDED(result) && device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF)
+    if (K4A_SUCCEEDED(result) && device_config->color_resolution != K4A_COLOR_RESOLUTION_OFF)
     {
-        if (!k4a_convert_resolution_to_width_height(device_config.color_resolution, &color_width, &color_height))
+        if (!k4a_convert_resolution_to_width_height(device_config->color_resolution, &color_width, &color_height))
         {
-            LOG_ERROR("Unsupported color_resolution specified in recording: %d", device_config.color_resolution);
+            LOG_ERROR("Unsupported color_resolution specified in recording: %d", device_config->color_resolution);
             result = K4A_RESULT_FAILED;
         }
     }
@@ -69,9 +76,9 @@ k4a_result_t k4a_record_create(const char *path,
     std::ostringstream color_mode_str;
     if (K4A_SUCCEEDED(result))
     {
-        if (device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF)
+        if (device_config->color_resolution != K4A_COLOR_RESOLUTION_OFF)
         {
-            switch (device_config.color_format)
+            switch (device_config->color_format)
             {
             case K4A_IMAGE_FORMAT_COLOR_NV12:
                 color_mode_str << "NV12_" << color_height << "P";
@@ -79,11 +86,15 @@ k4a_result_t k4a_record_create(const char *path,
             case K4A_IMAGE_FORMAT_COLOR_YUY2:
                 color_mode_str << "YUY2_" << color_height << "P";
                 break;
+            case K4A_IMAGE_FORMAT_COLOR_BGRA32:
+                /* BGRA32 gets saved in the MKV as MJPEG format */
+                device_config->color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
+                /* FALL THROUGH */
             case K4A_IMAGE_FORMAT_COLOR_MJPG:
                 color_mode_str << "MJPG_" << color_height << "P";
                 break;
             default:
-                LOG_ERROR("Unsupported color_format specified in recording: %d", device_config.color_format);
+                LOG_ERROR("Unsupported color_format specified in recording: %d", device_config->color_format);
                 result = K4A_RESULT_FAILED;
             }
         }
@@ -98,15 +109,15 @@ k4a_result_t k4a_record_create(const char *path,
     uint32_t depth_height = 0;
     if (K4A_SUCCEEDED(result))
     {
-        if (device_config.depth_mode != K4A_DEPTH_MODE_OFF)
+        if (device_config->depth_mode != K4A_DEPTH_MODE_OFF)
         {
             for (size_t i = 0; i < arraysize(depth_modes); i++)
             {
-                if (device_config.depth_mode == depth_modes[i].first)
+                if (device_config->depth_mode == depth_modes[i].first)
                 {
                     if (!k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
                     {
-                        LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode);
+                        LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config->depth_mode);
                         result = K4A_RESULT_FAILED;
                     }
                     depth_mode_str = depth_modes[i].second.c_str();
@@ -115,7 +126,7 @@ k4a_result_t k4a_record_create(const char *path,
             }
             if (depth_width == 0 || depth_height == 0)
             {
-                LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode);
+                LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config->depth_mode);
                 result = K4A_RESULT_FAILED;
             }
         }
@@ -141,11 +152,11 @@ k4a_result_t k4a_record_create(const char *path,
         tags.EnableChecksum();
     }
 
-    if (K4A_SUCCEEDED(result) && device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF)
+    if (K4A_SUCCEEDED(result) && device_config->color_resolution != K4A_COLOR_RESOLUTION_OFF)
     {
         BITMAPINFOHEADER codec_info = {};
         result = TRACE_CALL(
-            populate_bitmap_info_header(&codec_info, color_width, color_height, device_config.color_format));
+            populate_bitmap_info_header(&codec_info, color_width, color_height, device_config->color_format));
 
         context->color_track = add_track(context,
                                          K4A_TRACK_NAME_COLOR,
@@ -172,11 +183,11 @@ k4a_result_t k4a_record_create(const char *path,
 
     if (K4A_SUCCEEDED(result))
     {
-        if (device_config.depth_mode == K4A_DEPTH_MODE_PASSIVE_IR)
+        if (device_config->depth_mode == K4A_DEPTH_MODE_PASSIVE_IR)
         {
             add_tag(context, "K4A_DEPTH_MODE", depth_mode_str);
         }
-        else if (device_config.depth_mode != K4A_DEPTH_MODE_OFF)
+        else if (device_config->depth_mode != K4A_DEPTH_MODE_OFF)
         {
             // Depth track
             BITMAPINFOHEADER codec_info = {};
@@ -207,7 +218,7 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    if (K4A_SUCCEEDED(result) && device_config.depth_mode != K4A_DEPTH_MODE_OFF)
+    if (K4A_SUCCEEDED(result) && device_config->depth_mode != K4A_DEPTH_MODE_OFF)
     {
         // IR Track
         BITMAPINFOHEADER codec_info = {};
@@ -229,7 +240,7 @@ k4a_result_t k4a_record_create(const char *path,
             add_tag(context, "K4A_IR_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
             add_tag(context,
                     "K4A_IR_MODE",
-                    device_config.depth_mode == K4A_DEPTH_MODE_PASSIVE_IR ? "PASSIVE" : "ACTIVE",
+                    device_config->depth_mode == K4A_DEPTH_MODE_PASSIVE_IR ? "PASSIVE" : "ACTIVE",
                     TAG_TARGET_TYPE_TRACK,
                     track_uid);
         }
@@ -240,17 +251,17 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    if (K4A_SUCCEEDED(result) && device_config.color_resolution != K4A_COLOR_RESOLUTION_OFF &&
-        device_config.depth_mode != K4A_DEPTH_MODE_OFF)
+    if (K4A_SUCCEEDED(result) && device_config->color_resolution != K4A_COLOR_RESOLUTION_OFF &&
+        device_config->depth_mode != K4A_DEPTH_MODE_OFF)
     {
         std::ostringstream delay_str;
-        delay_str << device_config.depth_delay_off_color_usec * 1000;
+        delay_str << device_config->depth_delay_off_color_usec * 1000;
         add_tag(context, "K4A_DEPTH_DELAY_NS", delay_str.str().c_str());
     }
 
     if (K4A_SUCCEEDED(result))
     {
-        switch (device_config.wired_sync_mode)
+        switch (device_config->wired_sync_mode)
         {
         case K4A_WIRED_SYNC_MODE_STANDALONE:
             add_tag(context, "K4A_WIRED_SYNC_MODE", "STANDALONE");
@@ -262,7 +273,7 @@ k4a_result_t k4a_record_create(const char *path,
             add_tag(context, "K4A_WIRED_SYNC_MODE", "SUBORDINATE");
 
             std::ostringstream delay_str;
-            delay_str << device_config.subordinate_delay_off_master_usec * 1000;
+            delay_str << device_config->subordinate_delay_off_master_usec * 1000;
             add_tag(context, "K4A_SUBORDINATE_DELAY_NS", delay_str.str().c_str());
             break;
         }
@@ -627,13 +638,14 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
             uint8_t *image_buffer = k4a_image_get_buffer(images[i]);
             if (image_buffer != NULL && buffer_size > 0)
             {
+                DataBuffer *data_buffer = nullptr;
                 k4a_image_format_t image_format = k4a_image_get_format(images[i]);
+
                 if (image_format == expected_formats[i])
                 {
                     // Create a copy of the image buffer for writing to file.
                     assert(buffer_size <= UINT32_MAX);
-                    DataBuffer *data_buffer = new (std::nothrow)
-                        DataBuffer(image_buffer, (uint32)buffer_size, NULL, true);
+                    data_buffer = new (std::nothrow) DataBuffer(image_buffer, (uint32)buffer_size, NULL, true);
                     if (image_format == K4A_IMAGE_FORMAT_DEPTH16 || image_format == K4A_IMAGE_FORMAT_IR16)
                     {
                         // 16 bit grayscale needs to be converted to big-endian in the file.
@@ -644,7 +656,53 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
                             data_buffer_raw[j] = swap_bytes_16(data_buffer_raw[j]);
                         }
                     }
+                }
+                else if (image_format == K4A_IMAGE_FORMAT_COLOR_BGRA32)
+                {
+                    unsigned long jpeg_size = 0;
+                    unsigned char *jpeg_buffer = nullptr;
+                    if (context->compress_handle == nullptr)
+                    {
+                        context->compress_handle = tjInitCompress();
+                        if (context->compress_handle == nullptr)
+                        {
+                            LOG_ERROR("Unable to create compress handle", 0);
+                            result = K4A_RESULT_FAILED;
+                        }
+                    }
+                    if (-1 == tjCompress2(context->compress_handle,
+                                          image_buffer,
+                                          k4a_image_get_width_pixels(images[i]),
+                                          0,
+                                          k4a_image_get_height_pixels(images[i]),
+                                          //   TJPF_RGB,
+                                          TJPF_BGRA,
+                                          &jpeg_buffer,
+                                          &jpeg_size,
+                                          TJSAMP_444,
+                                          JPEG_QUALITY,
+                                          TJFLAG_FASTDCT))
+                    {
+                        LOG_ERROR("Unable to compress image", 0);
+                        result = K4A_RESULT_FAILED;
+                    }
+                    else
+                    {
+                        data_buffer = new (std::nothrow) DataBuffer(jpeg_buffer, (uint32)jpeg_size, NULL, true);
+                    }
+                    if (jpeg_buffer)
+                    {
+                        tjFree(jpeg_buffer);
+                    }
+                }
+                else
+                {
+                    LOG_ERROR("Tried to write capture with unexpected image format.", 0);
+                    result = K4A_RESULT_FAILED;
+                }
 
+                if (data_buffer != nullptr)
+                {
                     uint64_t timestamp_ns = k4a_image_get_device_timestamp_usec(images[i]) * 1000;
                     k4a_result_t tmp_result = TRACE_CALL(
                         write_track_data(context, tracks[i], timestamp_ns, data_buffer));
@@ -655,11 +713,6 @@ k4a_result_t k4a_record_write_capture(const k4a_record_t recording_handle, k4a_c
                         data_buffer->FreeBuffer(*data_buffer);
                         delete data_buffer;
                     }
-                }
-                else
-                {
-                    LOG_ERROR("Tried to write capture with unexpected image format.", 0);
-                    result = K4A_RESULT_FAILED;
                 }
             }
             k4a_image_release(images[i]);
@@ -912,6 +965,12 @@ void k4a_record_close(const k4a_record_t recording_handle)
         catch (std::ios_base::failure &e)
         {
             LOG_ERROR("Failed to close recording '%s': %s", context->file_path, e.what());
+        }
+
+        if (context->compress_handle)
+        {
+            tjDestroy(context->compress_handle);
+            context->compress_handle = nullptr;
         }
     }
     k4a_record_t_destroy(recording_handle);

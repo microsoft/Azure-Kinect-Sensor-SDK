@@ -9,3 +9,13 @@ target_link_libraries(k4a_cpp_ft PRIVATE
 )
 
 k4a_add_tests(TARGET k4a_cpp_ft TEST_TYPE FUNCTIONAL)
+
+
+add_executable(record_ft record_ft.cpp)
+
+target_link_libraries(record_ft PRIVATE
+    k4ainternal::utcommon
+    k4a::k4arecord
+)
+
+k4a_add_tests(TARGET record_ft TEST_TYPE FUNCTIONAL)
