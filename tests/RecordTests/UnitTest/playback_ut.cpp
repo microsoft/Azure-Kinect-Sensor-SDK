@@ -987,6 +987,41 @@ TEST_F(playback_ut, open_depth_only_file)
     k4a_playback_close(handle);
 }
 
+TEST_F(playback_ut, open_bgra_color_file)
+{
+    k4a_playback_t handle = NULL;
+    k4a_result_t result = k4a_playback_open("record_test_bgra_color.mkv", &handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    // Read recording configuration
+    k4a_record_configuration_t config;
+    result = k4a_playback_get_record_configuration(handle, &config);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+    ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_BGRA32);
+    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_OFF);
+    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_TRUE(config.color_track_enabled);
+    ASSERT_FALSE(config.depth_track_enabled);
+    ASSERT_FALSE(config.ir_track_enabled);
+    ASSERT_FALSE(config.imu_track_enabled);
+    ASSERT_EQ(config.depth_delay_off_color_usec, 0);
+    ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_STANDALONE);
+    ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)0);
+    ASSERT_EQ(config.start_timestamp_offset_usec, (uint32_t)0);
+
+    uint64_t timestamps[3] = { 0, 0, 0 };
+
+    k4a_capture_t capture = NULL;
+    k4a_stream_result_t stream_result = k4a_playback_get_next_capture(handle, &capture);
+    ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
+    ASSERT_TRUE(
+        validate_test_capture(capture, timestamps, config.color_format, config.color_resolution, config.depth_mode));
+    k4a_capture_release(capture);
+
+    k4a_playback_close(handle);
+}
+
 int main(int argc, char **argv)
 {
     k4a_unittest_init();

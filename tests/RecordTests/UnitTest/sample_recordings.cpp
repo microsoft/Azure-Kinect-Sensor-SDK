@@ -35,6 +35,10 @@ void SampleRecordings::SetUp()
     k4a_device_configuration_t record_config_depth_only = record_config_full;
     record_config_depth_only.color_resolution = K4A_COLOR_RESOLUTION_OFF;
 
+    k4a_device_configuration_t record_config_bgra_color = record_config_full;
+    record_config_bgra_color.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
+    record_config_bgra_color.depth_mode = K4A_DEPTH_MODE_OFF;
+
     {
         k4a_record_t handle = NULL;
         k4a_result_t result = k4a_record_create("record_test_empty.mkv", NULL, record_config_empty, &handle);
@@ -307,6 +311,28 @@ void SampleRecordings::SetUp()
 
         k4a_record_close(handle);
     }
+    { // Create a recording file with BGRA color
+        k4a_record_t handle = NULL;
+        k4a_result_t result = k4a_record_create("record_test_bgra_color.mkv", NULL, record_config_bgra_color, &handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        result = k4a_record_write_header(handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        uint64_t timestamps[3] = { 0, 0, 0 };
+        k4a_capture_t capture = create_test_capture(timestamps,
+                                                    record_config_bgra_color.color_format,
+                                                    record_config_bgra_color.color_resolution,
+                                                    record_config_bgra_color.depth_mode);
+        result = k4a_record_write_capture(handle, capture);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        k4a_capture_release(capture);
+
+        result = k4a_record_flush(handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        k4a_record_close(handle);
+    }
 }
 
 void SampleRecordings::TearDown()
@@ -319,6 +345,7 @@ void SampleRecordings::TearDown()
     ASSERT_EQ(std::remove("record_test_offset.mkv"), 0);
     ASSERT_EQ(std::remove("record_test_color_only.mkv"), 0);
     ASSERT_EQ(std::remove("record_test_depth_only.mkv"), 0);
+    ASSERT_EQ(std::remove("record_test_bgra_color.mkv"), 0);
 }
 
 void CustomTrackRecordings::SetUp()

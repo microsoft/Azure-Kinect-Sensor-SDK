@@ -474,11 +474,23 @@ static void matroska_writer_thread(k4a_record_context_t *context)
             if (!context->pending_clusters.empty())
             {
                 oldest_cluster = context->pending_clusters.front();
-                if (oldest_cluster->time_end_ns + CLUSTER_WRITE_DELAY_NS < context->most_recent_timestamp)
+                if (context->most_recent_timestamp >= oldest_cluster->time_end_ns)
                 {
-                    assert(oldest_cluster->time_start_ns >= context->last_written_timestamp);
-                    context->pending_clusters.pop_front();
-                    context->last_written_timestamp = oldest_cluster->time_end_ns;
+                    uint64_t age = context->most_recent_timestamp - oldest_cluster->time_end_ns;
+                    if (age > CLUSTER_WRITE_DELAY_NS)
+                    {
+                        assert(oldest_cluster->time_start_ns >= context->last_written_timestamp);
+                        context->pending_clusters.pop_front();
+                        context->last_written_timestamp = oldest_cluster->time_end_ns;
+                        if (age > CLUSTER_WRITE_QUEUE_WARNING_NS)
+                        {
+                            LOG_ERROR("Disk write speed is too low, write queue is filling up.", 0);
+                        }
+                    }
+                    else
+                    {
+                        oldest_cluster = NULL;
+                    }
                 }
                 else
                 {
