@@ -57,7 +57,7 @@ void depthmcu_depth_capture_ready(k4a_result_t status, k4a_image_t image_handle,
 
 k4a_result_t depthmcu_create(uint32_t device_index, depthmcu_t *depthmcu_handle)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device_index >= 10);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, device_index >= 100);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, depthmcu_handle == NULL);
 
     depthmcu_context_t *depthmcu = depthmcu_t_create(depthmcu_handle);

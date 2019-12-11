@@ -712,7 +712,7 @@ static k4a_result_t usb_cmd_io(usbcmd_t usbcmd_handle,
                     (response_packet.packet_type != USB_CMD_PACKET_TYPE_RESPONSE))
                 {
                     LOG_ERROR("Command(%08X) sequence ended in failure, "
-                              "transationId %08X == %08X "
+                              "TransactionId %08X == %08X "
                               "Response size 0x%08X == 0x%08X "
                               "Packet status 0x%08x == 0x%08x "
                               "Packet type 0x%08x == 0x%08x",

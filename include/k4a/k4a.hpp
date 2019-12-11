@@ -109,7 +109,7 @@ public:
         reset();
     }
 
-    /** Sets image to a shallow copy of other
+    /** Sets image to a shallow copy of the other image
      */
     image &operator=(const image &other) noexcept
     {
@@ -176,7 +176,14 @@ public:
 
     /** Returns true if the image is valid, false otherwise
      */
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
+    {
+        return is_valid();
+    }
+
+    /** Returns true if the image is valid, false otherwise
+     */
+    bool is_valid() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -436,7 +443,7 @@ public:
         reset();
     }
 
-    /** Sets capture to a shallow copy of other
+    /** Sets capture to a shallow copy of the other image
      */
     capture &operator=(const capture &other) noexcept
     {
@@ -503,7 +510,14 @@ public:
 
     /** Returns true if the capture is valid, false otherwise
      */
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
+    {
+        return is_valid();
+    }
+
+    /** Returns true if the capture is valid, false otherwise
+     */
+    bool is_valid() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -1111,7 +1125,14 @@ public:
 
     /** Returns true if the device is valid, false otherwise
      */
-    operator bool() const noexcept
+    explicit operator bool() const noexcept
+    {
+        return is_valid();
+    }
+
+    /** Returns true if the device is valid, false otherwise
+     */
+    bool is_valid() const noexcept
     {
         return m_handle != nullptr;
     }
@@ -1318,7 +1339,7 @@ public:
     {
         std::vector<uint8_t> calibration;
         size_t buffer = 0;
-        k4a_buffer_result_t result = k4a_device_get_raw_calibration(m_handle, &calibration[0], &buffer);
+        k4a_buffer_result_t result = k4a_device_get_raw_calibration(m_handle, nullptr, &buffer);
 
         if (result == K4A_BUFFER_RESULT_TOO_SMALL && buffer > 1)
         {

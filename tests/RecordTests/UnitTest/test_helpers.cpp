@@ -96,6 +96,10 @@ bool validate_test_capture(k4a_capture_t capture,
             {
                 color_stride = width * 2;
             }
+            else if (color_format == K4A_IMAGE_FORMAT_COLOR_BGRA32)
+            {
+                color_stride = width * 4;
+            }
 
             k4a_image_t color_image = k4a_capture_get_color_image(capture);
             if (color_image == NULL)

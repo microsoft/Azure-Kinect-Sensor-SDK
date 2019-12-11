@@ -685,9 +685,10 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             if (config->subordinate_delay_off_master_usec > fps_in_usec)
             {
                 result = K4A_RESULT_FAILED;
-                LOG_ERROR(
-                    "The configured subordinate device delay from the master device cannot exceed one frame interval.",
-                    0);
+                LOG_ERROR("The configured subordinate device delay from the master device cannot exceed one frame "
+                          "interval of %d. User requested %d",
+                          fps_in_usec,
+                          config->subordinate_delay_off_master_usec);
             }
         }
 
@@ -719,7 +720,10 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             if (config->depth_delay_off_color_usec < -fps || config->depth_delay_off_color_usec > fps)
             {
                 result = K4A_RESULT_FAILED;
-                LOG_ERROR("The configured depth_delay_off_color_usec must be within +/- one frame interval.", 0);
+                LOG_ERROR("The configured depth_delay_off_color_usec must be within +/- one frame interval of %d. User "
+                          "requested %d",
+                          fps,
+                          config->depth_delay_off_color_usec);
             }
         }
         else if (!depth_enabled && !color_enabled)

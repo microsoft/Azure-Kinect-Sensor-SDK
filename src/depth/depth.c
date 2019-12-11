@@ -26,13 +26,10 @@ static k4a_version_t g_min_fw_version_rgb = { 1, 5, 92 };                  // 1.
 static k4a_version_t g_min_fw_version_depth = { 1, 5, 66 };                // 1.5.66
 static k4a_version_t g_min_fw_version_audio = { 1, 5, 14 };                // 1.5.14
 static k4a_version_t g_min_fw_version_depth_config = { 5006, 27, 0 };      // 5006.27 (iteration is not used, set to 0)
-static k4a_version_t g_suggested_fw_version_rgb = { 1, 6, 102 };           // 1.6.102
+static k4a_version_t g_suggested_fw_version_rgb = { 1, 6, 104 };           // 1.6.104
 static k4a_version_t g_suggested_fw_version_depth = { 1, 6, 75 };          // 1.6.75
 static k4a_version_t g_suggested_fw_version_audio = { 1, 6, 14 };          // 1.6.14
 static k4a_version_t g_suggested_fw_version_depth_config = { 6109, 7, 0 }; // 6109.7 (iteration is not used, set to 0)
-
-#define MINOR_VERSION_OFFSET_1 100 // Some variants of development FW offset minor version with 100
-#define MINOR_VERSION_OFFSET_2 200 // Some variants of development FW offset minor version with 200
 
 typedef struct _depth_context_t
 {
@@ -64,59 +61,9 @@ bool is_fw_version_compatable(const char *fw_type,
 
 bool is_fw_version_compatable(const char *fw_type, k4a_version_t *fw_version, k4a_version_t *fw_min_version, bool error)
 {
-    typedef enum
-    {
-        FW_OK,
-        FW_TOO_LOW,
-        FW_UNKNOWN
-    } fw_check_state_t;
+    bool fw_version_good = k4a_is_version_greater_or_equal(fw_version, fw_min_version);
 
-    fw_check_state_t fw = FW_UNKNOWN;
-
-    // Check major version
-    if (fw_version->major > fw_min_version->major)
-    {
-        fw = FW_OK;
-    }
-    else if (fw_version->major < fw_min_version->major)
-    {
-        fw = FW_TOO_LOW;
-    }
-
-    // Check minor version
-    if (fw == FW_UNKNOWN)
-    {
-        uint32_t minor = fw_version->minor;
-        if (fw_version->minor > MINOR_VERSION_OFFSET_2)
-        {
-            minor = fw_version->minor - MINOR_VERSION_OFFSET_2;
-        }
-        else if (fw_version->minor > MINOR_VERSION_OFFSET_1)
-        {
-            minor = fw_version->minor - MINOR_VERSION_OFFSET_1;
-        }
-
-        if (minor > fw_min_version->minor)
-        {
-            fw = FW_OK;
-        }
-        else if (minor < fw_min_version->minor)
-        {
-            fw = FW_TOO_LOW;
-        }
-    }
-
-    // Check iteration version
-    if (fw == FW_UNKNOWN)
-    {
-        fw = FW_TOO_LOW;
-        if (fw_version->iteration >= fw_min_version->iteration)
-        {
-            fw = FW_OK;
-        }
-    }
-
-    if (fw != FW_OK)
+    if (!fw_version_good)
     {
         if (error)
         {
@@ -141,7 +88,7 @@ bool is_fw_version_compatable(const char *fw_type, k4a_version_t *fw_version, k4
                         fw_min_version->iteration);
         }
     }
-    return (fw == FW_OK);
+    return (fw_version_good);
 }
 
 k4a_result_t depth_create(depthmcu_t depthmcu,
