@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 #include <utcommon.h>
+#include <iostream>
 
 // Module being tested
 #include <k4ainternal/matroska_write.h>
@@ -131,6 +132,9 @@ TEST_F(record_ut, new_cluster_out_of_order)
     ASSERT_EQ(context->pending_clusters.size(), 3u);
 }
 
+// This test's goal is to fill up the write queue by saturating disk write.
+// It should trigger the write speed warning message in the logs.
+// Since this test is unlikely to complete, and needs to be manually run, it is disabled.
 TEST_F(record_ut, DISABLED_bgra_color_max_disk_write)
 {
     k4a_device_configuration_t record_config = {};
@@ -138,6 +142,16 @@ TEST_F(record_ut, DISABLED_bgra_color_max_disk_write)
     record_config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
     record_config.depth_mode = K4A_DEPTH_MODE_OFF;
     record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+
+    std::cout
+        << "A 'Disk write speed is too low, write queue is filling up.' log message is expected after about 4 seconds."
+        << std::endl;
+    std::cout
+        << "If the test completes without this log message, the check may be broken, or the test disk may be too fast."
+        << std::endl;
+    std::cout
+        << "If the test crashes due to an out-of-memory condition without logging a disk warning, the check is broken."
+        << std::endl;
 
     k4a_record_t handle = NULL;
     k4a_result_t result = k4a_record_create("record_test_bgra_color.mkv", NULL, record_config, &handle);
