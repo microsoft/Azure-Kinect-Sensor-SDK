@@ -25,8 +25,9 @@
 #include <time.h>
 #endif
 
-#define PTS_TO_MS(ts) ((long long)((ts) / 1000))    // Device TS convertion to milliseconds
-#define STS_TO_MS(ts) ((long long)((ts) / 1000000)) // System TS convertion to milliseconds
+#define LLD(val) ((int64_t)(val))
+#define PTS_TO_MS(ts) (LLD((ts) / 1000))    // Device TS convertion to milliseconds
+#define STS_TO_MS(ts) (LLD((ts) / 1000000)) // System TS convertion to milliseconds
 
 #define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
 
@@ -100,11 +101,10 @@ public:
         }
     }
 
-    void print_and_log(char *message, uint64_t ave, uint64_t min, uint64_t max);
+    void print_and_log(const char *message, uint64_t ave, uint64_t min, uint64_t max);
     void process_image(k4a_capture_t capture,
                        uint64_t current_system_ts,
                        bool process_color,
-                       bool *image_present,
                        bool *image_first_pass,
                        std::deque<uint64_t> *system_latency,
                        std::deque<uint64_t> *system_latency_from_pts,
@@ -406,7 +406,7 @@ static uint64_t lookup_system_ts(uint64_t pts_ts, bool color)
     return 0;
 }
 
-void latency_perf::print_and_log(char *message, uint64_t ave, uint64_t min, uint64_t max)
+void latency_perf::print_and_log(const char *message, uint64_t ave, uint64_t min, uint64_t max)
 {
     printf("    %30s: Ave=%" PRId64 " min=%" PRId64 " max=%" PRId64 "\n", message, ave, min, max);
 
@@ -422,7 +422,6 @@ void latency_perf::print_and_log(char *message, uint64_t ave, uint64_t min, uint
 void latency_perf::process_image(k4a_capture_t capture,
                                  uint64_t current_system_ts,
                                  bool process_color,
-                                 bool *image_present,
                                  bool *image_first_pass,
                                  std::deque<uint64_t> *system_latency,
                                  std::deque<uint64_t> *system_latency_from_pts,
@@ -441,10 +440,9 @@ void latency_perf::process_image(k4a_capture_t capture,
 
     if (image)
     {
-        *image_present = true;
         uint64_t system_ts = k4a_image_get_system_timestamp_nsec(image);
 
-        uint64_t system_ts_from_pts = lookup_system_ts(k4a_image_get_device_timestamp_usec(image), true);
+        uint64_t system_ts_from_pts = lookup_system_ts(k4a_image_get_device_timestamp_usec(image), process_color);
 
         // Time from center of exposure until given to us from the SDK; based on Host system time.
         uint64_t system_ts_latency = current_system_ts - system_ts;
@@ -484,6 +482,26 @@ void latency_perf::process_image(k4a_capture_t capture,
             *image_first_pass = false;
         }
 
+        // if (!process_color)
+        // {
+        //     k4a_image_t color = k4a_capture_get_color_image(capture);
+        //     int64_t diff_STS = k4a_image_get_system_timestamp_nsec(color) -
+        //     k4a_image_get_system_timestamp_nsec(image); int64_t diff_STS_C = current_system_ts -
+        //     k4a_image_get_system_timestamp_nsec(color); int64_t diff_PTS_C = current_system_ts - system_ts_from_pts;
+        //     int64_t diff_STS_I = current_system_ts - k4a_image_get_system_timestamp_nsec(image);
+        //     int64_t diff_pts = k4a_image_get_device_timestamp_usec(color) -
+        //     k4a_image_get_device_timestamp_usec(image);
+        //     // diff = diff >= 0 ? diff : diff * -1;
+        //     printf("| OS STS %9" PRId64 " C arrived %5" PRId64 "ms ago (STS)] C arrived %5" PRId64
+        //            "ms ago(STS_via_PTS) I[%5" PRId64 "] PTS DEL[%5" PRId64 "]",
+        //            STS_TO_MS(diff_STS),
+        //            STS_TO_MS(diff_STS_C),
+        //            STS_TO_MS(diff_PTS_C),
+        //            STS_TO_MS(diff_STS_I),
+        //            PTS_TO_MS(diff_pts));
+        //     k4a_image_release(color);
+        // }
+
         k4a_image_release(image);
     }
     else
@@ -498,9 +516,7 @@ TEST_P(latency_perf, testTest)
     const int32_t TIMEOUT_IN_MS = 1000;
     k4a_capture_t capture = NULL;
     int capture_count = g_capture_count;
-    uint64_t fps_in_usec = 0;
     bool failed = false;
-    // FILE *file_handle = NULL;
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     thread_data thread = { 0 };
     THREAD_HANDLE th1 = NULL;
@@ -508,7 +524,8 @@ TEST_P(latency_perf, testTest)
     std::deque<uint64_t> color_system_latency_from_pts;
     std::deque<uint64_t> ir_system_latency;
     std::deque<uint64_t> ir_system_latency_from_pts;
-    uint64_t current_system_ts = 0, color_system_ts_last = 0, color_system_ts_from_pts_last = 0;
+    uint64_t current_system_ts = 0;
+    uint64_t color_system_ts_last = 0, color_system_ts_from_pts_last = 0;
     uint64_t ir_system_ts_last = 0, ir_system_ts_from_pts_last = 0;
 
     printf("Capturing %d frames for test: %s\n", g_capture_count, as.test_name);
@@ -552,8 +569,6 @@ TEST_P(latency_perf, testTest)
                                                0));
         printf("Auto Exposure\n");
     }
-
-    fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(as.fps));
 
     config.color_format = as.color_format;
     config.color_resolution = as.color_resolution;
@@ -638,9 +653,6 @@ TEST_P(latency_perf, testTest)
     capture_count++; // to account for dropping the first sample
     while (capture_count-- > 0)
     {
-        bool color = false;
-        bool ir = false;
-
         if (capture)
         {
             k4a_capture_release(capture);
@@ -672,8 +684,7 @@ TEST_P(latency_perf, testTest)
 
         process_image(capture,
                       current_system_ts,
-                      TRUE,
-                      &color,
+                      true, // Color Image
                       &color_first_pass,
                       &color_system_latency,
                       &color_system_latency_from_pts,
@@ -681,14 +692,32 @@ TEST_P(latency_perf, testTest)
                       &color_system_ts_from_pts_last);
         process_image(capture,
                       current_system_ts,
-                      FALSE,
-                      &ir,
+                      false, // IR Image
                       &ir_first_pass,
                       &ir_system_latency,
                       &ir_system_latency_from_pts,
                       &ir_system_ts_last,
                       &ir_system_ts_from_pts_last);
 
+        // {
+        //     k4a_image_t color = k4a_capture_get_color_image(capture);
+        //     k4a_image_t ir = k4a_capture_get_ir_image(capture);
+        //     int64_t c_STS_FROM_PTS = lookup_system_ts(k4a_image_get_device_timestamp_usec(color), true);
+        //     int64_t i_STS_FROM_PTS = lookup_system_ts(k4a_image_get_device_timestamp_usec(ir), false);
+
+        //     int64_t c_STS = k4a_image_get_system_timestamp_nsec(color);
+        //     int64_t i_STS = k4a_image_get_system_timestamp_nsec(ir);
+
+        //     printf("| Age STS C[%5" PRId64 "] I[%5" PRId64 "]      Age STS_FROM_PTS C[%5" PRId64 "] I[%5" PRId64
+        //            "]   PTS DEL[%5" PRId64 "]",
+        //            STS_TO_MS(current_system_ts - c_STS),
+        //            STS_TO_MS(current_system_ts - i_STS),
+        //            STS_TO_MS(current_system_ts - c_STS_FROM_PTS),
+        //            STS_TO_MS(current_system_ts - i_STS_FROM_PTS),
+        //            PTS_TO_MS(k4a_image_get_device_timestamp_usec(color) - k4a_image_get_device_timestamp_usec(ir)));
+        //     k4a_image_release(color);
+        //     k4a_image_release(ir);
+        // }
         printf("|\n"); // End of line
     }                  // End capture loop
 
@@ -734,9 +763,9 @@ TEST_P(latency_perf, testTest)
     }
     {
         uint64_t color_system_latency_ave = 0;
-        uint64_t min = MAXUINT64;
+        uint64_t min = (uint64_t)-1;
         uint64_t max = 0;
-        for (int x = 0; x < color_system_latency.size(); x++)
+        for (size_t x = 0; x < color_system_latency.size(); x++)
         {
             color_system_latency_ave += color_system_latency[x];
             if (color_system_latency[x] < min)
@@ -753,9 +782,9 @@ TEST_P(latency_perf, testTest)
     }
     {
         uint64_t color_system_latency_from_pts_ave = 0;
-        uint64_t min = MAXUINT64;
+        uint64_t min = (uint64_t)-1;
         uint64_t max = 0;
-        for (int x = 0; x < color_system_latency_from_pts.size(); x++)
+        for (size_t x = 0; x < color_system_latency_from_pts.size(); x++)
         {
             color_system_latency_from_pts_ave += color_system_latency_from_pts[x];
             if (color_system_latency_from_pts[x] < min)
@@ -775,9 +804,9 @@ TEST_P(latency_perf, testTest)
     }
     {
         uint64_t ir_system_latency_ave = 0;
-        uint64_t min = MAXUINT64;
+        uint64_t min = (uint64_t)-1;
         uint64_t max = 0;
-        for (int x = 0; x < ir_system_latency.size(); x++)
+        for (size_t x = 0; x < ir_system_latency.size(); x++)
         {
             ir_system_latency_ave += ir_system_latency[x];
             if (ir_system_latency[x] < min)
@@ -794,9 +823,9 @@ TEST_P(latency_perf, testTest)
     }
     {
         uint64_t ir_system_latency_from_pts_ave = 0;
-        uint64_t min = MAXUINT64;
+        uint64_t min = (uint64_t)-1;
         uint64_t max = 0;
-        for (int x = 0; x < ir_system_latency_from_pts.size(); x++)
+        for (size_t x = 0; x < ir_system_latency_from_pts.size(); x++)
         {
             ir_system_latency_from_pts_ave += ir_system_latency_from_pts[x];
             if (ir_system_latency_from_pts[x] < min)
