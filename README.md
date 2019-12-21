@@ -81,6 +81,8 @@ email to ensure we received your original message. Further information, includin
 [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the
 [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
 
-## License
+## License and Microsoft Support for Azure Kinect Sensor SDK
 
 [MIT License](LICENSE)
+
+[Microsoft Support for Azure Kinect Sensor SDK](microsoft-support.md)
