@@ -1026,7 +1026,7 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
         LOG_ERROR("List too large", 0);
         return K4A_RESULT_FAILED;
     }
-    if (count == 0)
+    if (count <= 0)
     {
         LOG_ERROR("No devices found", 0);
         return K4A_RESULT_FAILED;
