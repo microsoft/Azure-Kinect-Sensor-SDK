@@ -6,6 +6,7 @@ var BRANCHES = [
     "feature/transformation-custom-image-support",
     "master",
     "refs/pull/1024/merge",
+    "refs/pull/1026/merge",
     "refs/pull/413/merge",
     "refs/pull/469/merge",
     "refs/pull/516/merge",
