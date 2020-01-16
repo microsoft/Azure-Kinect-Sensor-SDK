@@ -46,7 +46,8 @@ def main(argv):
             gtestfullargs = [output_arg] + gtestargs
 
         print("Running test " + test)
-        print(' '.join([test] + gtestfullargs))
+        print(' '.join([test] + gtestfullargs)+" <end>")
+        print("Running test w/ args " + test)
         sys.stdout.flush()
 
         env = os.environ.copy()
@@ -54,6 +55,9 @@ def main(argv):
             env["K4A_LOG_LEVEL"] = "I"
         if "K4A_ENABLE_LOG_TO_STDOUT" not in env.keys():
             env["K4A_ENABLE_LOG_TO_STDOUT"] = "1"
+        if "K4A_ENABLE_TS_LOGGING" not in env.keys():
+            env["K4A_ENABLE_TS_LOGGING"] = "1"
+
         returncode = subprocess.call([os.path.abspath(test)] + gtestfullargs, stdout=sys.stdout, env=env, cwd=args.bin)
         # abspath is to avoid requiring './' on Linux
         if (returncode != 0):
