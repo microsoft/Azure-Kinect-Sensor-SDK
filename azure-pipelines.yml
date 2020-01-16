@@ -686,16 +686,97 @@ jobs:
 #      displayName: 'Run Functional Tests'
 #      timeoutInMinutes: 15
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--gtest_filter=-*ONBOARDING* --fps 30"'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
       workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
-      displayName: 'Run Custom Functional Tests1'
+      displayName: 'Run Custom Functional Tests1.1'
       timeoutInMinutes: 15
       env:
         K4A_LOG_LEVEL: 'I'
         K4A_ENABLE_TS_LOGGING: '1'
         K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--gtest_filter=-*ONBOARDING* --fps 30 --m_depth_delay -7395 --s_depth_delay -177716 --subordinate_delay 16066"'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests1.2'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests1.3'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests1.4'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests1.5'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests1.6'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests1.7'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests1.8'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests1.9'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests1.10'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30 --m_depth_delay -7395 --s_depth_delay -177716 --subordinate_delay 16066"'
       workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
       displayName: 'Run Custom Functional Tests2'
       timeoutInMinutes: 15
@@ -851,16 +932,97 @@ jobs:
 #      displayName: 'Run Functional Tests'
 #     timeoutInMinutes: 15
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--gtest_filter=-*ONBOARDING* --fps 30"'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
       workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
-      displayName: 'Run Custom Functional Tests1'
+      displayName: 'Run Custom Functional Tests1.1'
       timeoutInMinutes: 15
       env:
         K4A_LOG_LEVEL: 'I'
         K4A_ENABLE_TS_LOGGING: '1'
         K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--gtest_filter=-*ONBOARDING* --fps 30 --m_depth_delay -7395 --s_depth_delay -177716 --subordinate_delay 16066"'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests1.2'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests1.3'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests1.4'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests1.5'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests1.6'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests1.7'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests1.8'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests1.9'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30"'
+      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      displayName: 'Run Custom Functional Tests1.10'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--fps 30 --m_depth_delay -7395 --s_depth_delay -177716 --subordinate_delay 16066"'
       workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
       displayName: 'Run Custom Functional Tests2'
       timeoutInMinutes: 15
@@ -869,7 +1031,7 @@ jobs:
         K4A_ENABLE_TS_LOGGING: '1'
         K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--gtest_filter=*multi_sync_validation --fps 30 --m_depth_delay -7395 --s_depth_delay -177716 --subordinate_delay 16066"'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--gtest_filter="*multi_sync_validation" --fps 30 --m_depth_delay -7395 --s_depth_delay -177716 --subordinate_delay 16066"'
       workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
       displayName: 'Run Custom Functional Tests3'
       timeoutInMinutes: 15
