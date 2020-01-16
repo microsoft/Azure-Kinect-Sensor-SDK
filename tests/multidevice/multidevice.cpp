@@ -22,7 +22,7 @@
 
 const int SAMPLES_TO_STABILIZE = 10;
 
-static int32_t g_subordinate_delay = 0;
+static uint32_t g_subordinate_delay = 0;
 static int32_t g_m_depth_delay = 0;
 static int32_t g_s_depth_delay = 0;
 static k4a_fps_t g_frame_rate = (k4a_fps_t)-1;
@@ -75,8 +75,8 @@ int main(int argc, char **argv)
         {
             if (i + 1 <= argc)
             {
-                g_subordinate_delay = (int32_t)strtol(argv[i + 1], NULL, 10);
-                printf("Setting g_subordinate_delay = %d\n", g_subordinate_delay);
+                g_subordinate_delay = (uint32_t)strtol(argv[i + 1], NULL, 10);
+                printf("Setting g_subordinate_delay = %u\n", g_subordinate_delay);
                 i++;
             }
             else
@@ -548,7 +548,7 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     }
     if (g_subordinate_delay == 0)
     {
-        g_subordinate_delay = (int32_t)RAND_VALUE(0, fps_in_usec);
+        g_subordinate_delay = (uint32_t)RAND_VALUE(0, fps_in_usec);
     }
 
     ASSERT_EQ(open_master_and_subordinate(&m_master, &m_subordinate), K4A_RESULT_SUCCEEDED);
