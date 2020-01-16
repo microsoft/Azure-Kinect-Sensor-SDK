@@ -695,6 +695,24 @@ jobs:
         K4A_ENABLE_TS_LOGGING: '1'
         K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
 
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml "--gtest_filter=-*ONBOARDING*"'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      displayName: 'Run Custom Functional Tests'
+      timeoutInMinutes: 15
+      env:
+        K4A_LOG_LEVEL: 'I'
+        K4A_ENABLE_TS_LOGGING: '1'
+        K4A_ENABLE_LOG_TO_A_FILE: 'k4a.log'
+
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtestargs "--gtest_filter=*ONBOARDING*"'
       workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
       displayName: 'Run Functional Tests - Onboarding'
