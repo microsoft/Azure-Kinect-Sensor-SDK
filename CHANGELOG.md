@@ -1,13 +1,15 @@
 ## Change Log
 
-### v1.4.0
+### v1.4.0 (alpha quality)
 
 * On Windows Opencv-4.1.1 is now being used and tested.
 * CPP; Adding record.hpp, updated playback.hpp
 * Fixed small error in transformation functions
-* Updated K4aRecorder to allow setting manual exposure based on exposure time.
+* Updated K4aRecorder allow:
+  * Setting manual exposure based on exposure time.
+  * Record BGRA32 format.
 
-### v1.3.0
+### v1.3.0 
 
 * On Windows VS dependencies are now dynamically linked and require redistributables for
 [VS2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) or newer.
