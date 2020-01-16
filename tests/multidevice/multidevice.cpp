@@ -548,7 +548,7 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     }
     if (g_subordinate_delay == 0)
     {
-        g_subordinate_delay = (uint32_t)RAND_VALUE(0, fps_in_usec);
+        g_subordinate_delay = (int32_t)RAND_VALUE(0, fps_in_usec);
     }
 
     ASSERT_EQ(open_master_and_subordinate(&m_master, &m_subordinate), K4A_RESULT_SUCCEEDED);
