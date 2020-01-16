@@ -22,10 +22,10 @@
 
 const int SAMPLES_TO_STABILIZE = 10;
 
-int32_t g_subordinate_delay = 0;
-int32_t g_m_depth_delay = 0;
-int32_t g_s_depth_delay = 0;
-k4a_fps_t g_frame_rate = (k4a_fps_t)-1;
+static int32_t g_subordinate_delay = 0;
+static int32_t g_m_depth_delay = 0;
+static int32_t g_s_depth_delay = 0;
+static k4a_fps_t g_frame_rate = (k4a_fps_t)-1;
 
 int main(int argc, char **argv)
 {
