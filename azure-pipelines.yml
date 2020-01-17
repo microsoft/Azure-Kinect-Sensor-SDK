@@ -686,7 +686,7 @@ jobs:
 #      displayName: 'Run Functional Tests'
 #      timeoutInMinutes: 15
 
-    - script: 'for i in {1..10};do python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --fps 30;done'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --fps 30'
       workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
       displayName: 'Run Custom Functional Tests1.1'
       timeoutInMinutes: 15
@@ -920,7 +920,7 @@ jobs:
 #      displayName: 'Run Functional Tests'
 #     timeoutInMinutes: 15
 
-    - script: 'for i in {1..10}; do python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING* --fps 30;done'
+    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING* --fps 30'
       workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
       displayName: 'Run Custom Functional Tests1.1'
       timeoutInMinutes: 15
