@@ -512,7 +512,7 @@ verify_ts(int64_t ts_1, int64_t ts_2, int64_t ts_offset, int64_t max_sync_delay,
                ts_2,
                ts_offset,
                ts_result);
-        // R_EXPECT_LE(ts_result, max_sync_delay);
+        R_EXPECT_LE(ts_result, max_sync_delay);
     }
     return K4A_RESULT_SUCCEEDED;
 }

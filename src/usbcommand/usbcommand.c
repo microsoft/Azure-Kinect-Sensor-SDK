@@ -323,7 +323,7 @@ static k4a_result_t find_libusb_device(uint32_t device_index,
                 {
                     char container_id_string[UUID_STR_LENGTH];
                     uuid_to_string(&usbcmd->container_id, container_id_string, sizeof(container_id_string));
-                    LOG_WARNING("Found non matching Container ID: %s ", container_id_string);
+                    LOG_INFO("Found non matching Container ID: %s ", container_id_string);
                 }
             }
 
