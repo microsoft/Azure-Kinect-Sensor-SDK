@@ -571,8 +571,6 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     s_config.subordinate_delay_off_master_usec = g_subordinate_delay;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_subordinate, &s_config)) << "Subordinate Device";
 
-    ThreadAPI_Sleep(2000);
-
     k4a_device_configuration_t m_config = default_config;
     m_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
     m_config.depth_delay_off_color_usec = g_m_depth_delay;
