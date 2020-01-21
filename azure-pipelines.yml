@@ -369,9 +369,6 @@ jobs:
 
 - job: LinuxK4ABuildTest
   displayName: Linux
-  pool:
-    vmImage: 'ubuntu-16.04'
-  container: mcr.microsoft.com/akbuilder-linux:v3
   strategy:
     maxParallel: 100
     matrix:
@@ -379,18 +376,40 @@ jobs:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'debug'
         UsesOpenCV: 'TRUE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-amd64'
       x64-gnu_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'debug'
         UsesOpenCV: 'TRUE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-amd64'
       x64-clang_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'relwithdebinfo'
         UsesOpenCV: 'TRUE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-amd64'
       x64-gnu_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'relwithdebinfo'
         UsesOpenCV: 'TRUE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-amd64'
+      # arm64-clang_debug_ninja:
+      #   CMakeLinuxTargetTriple: 'arm64-linux-clang'
+      #   CMakeConfiguration: 'debug'
+      #   UsesOpenCV: 'FALSE'
+      arm64-gnu_debug_ninja:
+        CMakeLinuxTargetTriple: 'arm64-linux-gnu'
+        CMakeConfiguration: 'debug'
+        UsesOpenCV: 'FALSE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-arm64'
+      # arm64-clang_rel_ninja:
+      #   CMakeLinuxTargetTriple: 'arm64-linux-clang'
+      #   CMakeConfiguration: 'relwithdebinfo'
+      #   UsesOpenCV: 'FALSE'
+      arm64-gnu_rel_ninja:
+        CMakeLinuxTargetTriple: 'arm64-linux-gnu'
+        CMakeConfiguration: 'relwithdebinfo'
+        UsesOpenCV: 'FALSE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-arm64'
 
       # 32-bit builds are currently broken
       # i386-unknown-linux-clang_debug_ninja:
@@ -405,6 +424,9 @@ jobs:
       # i386-unknown-linux-gnu_relwithdebinfo_ninja:
       #   CMakeLinuxTargetTriple: 'i386-linux-gnu'
       #   CMakeConfiguration: 'relwithdebinfo'
+  pool:
+    vmImage: 'ubuntu-18.04'
+  container: $[ variables['container'] ]
 
   steps:
   - checkout: self
