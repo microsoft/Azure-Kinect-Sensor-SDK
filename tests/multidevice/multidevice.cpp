@@ -22,6 +22,7 @@
 
 const int SAMPLES_TO_STABILIZE = 10;
 
+static int32_t g_sample_count = 100;
 static uint32_t g_subordinate_delay = 0;
 static int32_t g_m_depth_delay = 0;
 static int32_t g_s_depth_delay = 0;
@@ -592,9 +593,9 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     printf("---------------------------------------------------------------\n");
 
     int64_t ts_m_c_old = 0;
-    float dropped_frames = 0;
+    float sequential_frames = 0;
 
-    for (int x = 0; x < 100; x++)
+    for (int x = 0; x < g_sample_count; x++)
     {
         k4a_capture_t cap_m, cap_s;
         int64_t ts_m_c, ts_m_ir, ts_s_c, ts_s_ir;
@@ -629,16 +630,17 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
                ts_s_ir - ts_s_c,
                x > SAMPLES_TO_STABILIZE ? "Validating" : "Stabilizing");
 
-        if (x > SAMPLES_TO_STABILIZE)
+        if (x >= SAMPLES_TO_STABILIZE)
         {
-            if (std::abs(ts_m_c - ts_m_c_old) > (fps_in_usec * 15 / 10))
+            if (std::abs(ts_m_c - ts_m_c_old) < (fps_in_usec * 11 / 10))
+            {
+                // If we are within 110% of expected FPS we count that as 2 back to back frames
+                sequential_frames++;
+            }
+            else
             {
                 float dropped = (float)(std::abs(ts_m_c - ts_m_c_old) / fps_in_usec);
-                dropped_frames += dropped;
-                printf("    ERROR %.1f frames were dropped, %.1f in total have been dropped.\n",
-                       dropped,
-                       dropped_frames);
-                ASSERT_LE(dropped_frames, 5);
+                printf("    WARNING %.1f frames were dropped\n", dropped);
             }
 
             ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -674,6 +676,11 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     m_master = nullptr;
     k4a_device_close(m_subordinate);
     m_subordinate = nullptr;
+
+    // Ensure 90% frames are arriving in the required amount of time - this is a sanity check that the FW is
+    // capable of meeting the demands of the frame rate for 2 devices. If for some reason we were only running at a
+    // fraction of the framerate this would fail.
+    ASSERT_GE(sequential_frames, ((g_sample_count - SAMPLES_TO_STABILIZE) * 9 / 10));
 }
 
 TEST_F(multidevice_ft, ensure_color_camera_is_enabled)
