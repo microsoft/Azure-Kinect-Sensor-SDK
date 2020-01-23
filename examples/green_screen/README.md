@@ -60,7 +60,7 @@ use while calibrating the cameras. If you don't have one, print one out. You can
 number of squares). The example requires the calibration board to be in view for both devices' color cameras for many
 frames, so make sure it's visible to both cameras.
 
-Checked into this folder is chessboard.png. It is 10 x 7. To OpenCV it is 9 x 6 and 22 mm if printed in landscape, at 100%, and with normal margins.
+Checked into this folder is chessboard.png. It is 10 x 7. To OpenCV it is 9 x 6 and 22 mm if printed in landscape, at 100%, and with normal margins. on diferent platforms the printing experience can be different. When printing from the Mac, choose "print entire image" option.
 
 Also, DO NOT move the cameras during or after calibration! Changing that translation will cause the backup camera to
 provide inaccurate information.
