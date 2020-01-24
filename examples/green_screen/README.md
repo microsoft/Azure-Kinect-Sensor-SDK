@@ -5,7 +5,7 @@ emphasis on synchronization and calibration (the 'green screen' code is only a s
 particular, the green screen application showcases a physical limitation of the hardware and how it can be mostly
 addressed using another device.
 
-## What does this application *do*?
+## What does this application *do*
 
 The green screen example displays the scene as observed by one of the cameras (the 'main' camera). Using the camera's
 depth, it will paint over anything beyond its depth threshold with a still image of the background (as seen when the app
@@ -13,7 +13,7 @@ was started), allowing people and things to "appear" suddenly when they walk wit
 user. It will fill in missing details with the 'backup' camera, if possible, resulting in a better green screen than the
 main camera could achieve alone.
 
-## Why use two cameras? Isn't one good enough?
+## Why to use two cameras
 
 First of all, you can use one camera if you like. The first option to the `green_screen` command is the number of
 devices you'd like to use (1 or 2).
@@ -23,6 +23,8 @@ camera (either by using the single-camera mode, or just covering the backup came
 closer to the camera than something else in the scene (for example, if you hold out an arm), you should see a "shadow"
 of on the further-away object near the edge of the obstructing object.
 
+   ![Shadow](./shadow.png)
+
 Why? The answer comes back to the physical construction of the Azure Kinect. The color camera and the depth camera are
 physically offset. Therefore, it's possible for the color camera to be able to see something that the depth camera
 cannot. If the depth camera cannot see a section of the image that the color camera can, when the depth image is
@@ -30,6 +32,8 @@ transformed into the color camera space, segments of the transformed image that 
 'invalid' pixels are set to 0. However, using another camera's perspective, some of those missing values can be filled
 in using the secondary depth camera, which can (hopefully) see those parts of an object that are occluded from the main
 depth camera.
+
+   ![No shadow](./noshadow.png)
 
 ## Installation instructions
 
@@ -84,7 +88,9 @@ example will take a picture of what it saw when it first started and display it 
 threshold distance will be shown as it moves in real time, but anything too far away will be replaced with the
 background.
 
-# Potential reasons for failure
+  ![Green screen example](./hands.png)
+
+## Potential reasons for failure
 
 - If you're having weird runtime errors, sometimes disconnecting and reconnecting the cameras can help.
 
