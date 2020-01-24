@@ -10,7 +10,7 @@ addressed using another device.
 The green screen example displays the scene as observed by one of the cameras (the 'main' camera). Using the camera's depth, it will paint over anything beyond its depth threshold with a still image of the background (as seen when the app was started), allowing people and things to "appear" suddenly when they walk within the depth threshold specified by the
 user. It will fill in missing details with the 'backup' camera, if possible, resulting in a better green screen than the main camera could achieve alone.
 
-## Why to use two cameras
+## Why would more than 1 camera be used
 
 First of all, you can use one camera if you like. The first option to the `green_screen` command is the number of devices you'd like to use (1 or 2).
 
