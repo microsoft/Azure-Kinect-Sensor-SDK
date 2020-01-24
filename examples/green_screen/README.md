@@ -1,6 +1,6 @@
 # Green Screen Example
 
-The goal of the green screen example is to demonstrate best practices for using multiple Azure Kinect devices, with an
+The goal of the green screen example is to demonstrate best practices for using multiple Azure Kinect DK devices, with an
 emphasis on synchronization and calibration (the 'green screen' code is only a small portion of the logic). In
 particular, the green screen application showcases a physical limitation of the hardware and how it can be mostly
 addressed using another device.
@@ -88,7 +88,7 @@ example will take a picture of what it saw when it first started and display it 
 threshold distance will be shown as it moves in real time, but anything too far away will be replaced with the
 background.
 
-  ![Green screen example](./hands.png)
+  ![Green screen example](./hands.PNG)
 
 ## Potential reasons for failure
 
