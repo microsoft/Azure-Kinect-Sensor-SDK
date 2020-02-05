@@ -1,5 +1,6 @@
 var BRANCHES = [
     "develop",
+    "feature/arm64",
     "feature/csharp",
     "feature/publishdocs",
     "feature/support-custom-track-record-playback",
