@@ -281,8 +281,6 @@ static int _latency_imu_thread(void *param)
                 break;
             }
 
-            EXPECT_EQ(imu.acc_timestamp_usec, imu.acc_timestamp_usec);
-
             // Save data to each of the queues
             g_lock_mutex.lock();
             g_time_c.push_back(time);
