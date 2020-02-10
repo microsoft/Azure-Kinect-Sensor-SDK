@@ -22,9 +22,139 @@
 
 const int SAMPLES_TO_STABILIZE = 10;
 
+static int32_t g_sample_count = 100;
+static uint32_t g_subordinate_delay = 0;
+static int32_t g_m_depth_delay = 0;
+static int32_t g_s_depth_delay = 0;
+static k4a_fps_t g_frame_rate = (k4a_fps_t)-1;
+
 int main(int argc, char **argv)
 {
-    return k4a_test_common_main(argc, argv);
+    bool error = false;
+    k4a_unittest_init();
+
+    srand((unsigned int)time(0)); // use current time as seed for random generator
+
+    ::testing::InitGoogleTest(&argc, argv);
+
+    for (int i = 1; i < argc; ++i)
+    {
+        char *argument = argv[i];
+        for (int j = 0; argument[j]; j++)
+        {
+            argument[j] = (char)tolower(argument[j]);
+        }
+        if (strcmp(argument, "--m_depth_delay") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_m_depth_delay = (int32_t)strtol(argv[i + 1], NULL, 10);
+                printf("Setting g_m_depth_delay = %d\n", g_m_depth_delay);
+                i++;
+            }
+            else
+            {
+                printf("Error: g_m_depth_delay parameter missing\n");
+                error = true;
+            }
+        }
+        else if (strcmp(argument, "--s_depth_delay") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_s_depth_delay = (int32_t)strtol(argv[i + 1], NULL, 10);
+                printf("Setting g_s_depth_delay = %d\n", g_s_depth_delay);
+                i++;
+            }
+            else
+            {
+                printf("Error: g_s_depth_delay parameter missing\n");
+                error = true;
+            }
+        }
+        else if (strcmp(argument, "--subordinate_delay") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                g_subordinate_delay = (uint32_t)strtol(argv[i + 1], NULL, 10);
+                printf("Setting g_subordinate_delay = %u\n", g_subordinate_delay);
+                i++;
+            }
+            else
+            {
+                printf("Error: g_subordinate_delay parameter missing\n");
+                error = true;
+            }
+        }
+        else if (strcmp(argument, "--fps") == 0)
+        {
+            if (i + 1 <= argc)
+            {
+                int32_t frame_rate;
+                frame_rate = (int32_t)strtol(argv[i + 1], NULL, 10);
+                if (frame_rate == 5)
+                {
+                    g_frame_rate = K4A_FRAMES_PER_SECOND_5;
+                }
+                else if (frame_rate == 15)
+                {
+                    g_frame_rate = K4A_FRAMES_PER_SECOND_15;
+                }
+                else if (frame_rate == 30)
+                {
+                    g_frame_rate = K4A_FRAMES_PER_SECOND_30;
+                }
+                else if (frame_rate == K4A_FRAMES_PER_SECOND_5 || frame_rate == K4A_FRAMES_PER_SECOND_15 ||
+                         frame_rate == K4A_FRAMES_PER_SECOND_30)
+                {
+                    g_frame_rate = (k4a_fps_t)frame_rate;
+                }
+                else
+                {
+                    printf("Error: --fps parameter invalid: %d\n", frame_rate);
+                    error = true;
+                }
+                if (!error)
+                {
+                    printf("Setting frame_rate = %d\n", g_frame_rate);
+                    i++;
+                }
+            }
+            else
+            {
+                printf("Error: frame_rate parameter missing\n");
+                error = true;
+            }
+        }
+        else
+        {
+            error = true;
+            printf("Error: Command %s unknown\n", argument);
+        }
+
+        if ((strcmp(argument, "-h") == 0) || (strcmp(argument, "/h") == 0) || (strcmp(argument, "-?") == 0) ||
+            (strcmp(argument, "/?") == 0))
+        {
+            error = true;
+        }
+    }
+
+    if (error)
+    {
+        printf("\n\nOptional Custom Test Settings:\n");
+        printf("  --m_depth_delay <+/- microseconds>\n");
+        printf("      This is the depth capture delay off of the color capture for the master Kinect.\n");
+        printf("  --s_depth_delay <+/- microseconds>\n");
+        printf("      This is the depth capture delay off of the color capture for the subordinate Kinect.\n");
+        printf("  --subordinate_delay  <+ microseconds>\n");
+        printf("      This is the subordinate delay off of the master Kinect\n");
+        printf("  --fps  <5,15,30 FPS\n");
+        printf("      This is the frame rate to run the test at\n");
+        return 1; // Indicates an error or warning
+    }
+    int results = RUN_ALL_TESTS();
+    k4a_unittest_deinit();
+    return results;
 }
 
 class multidevice_ft : public ::testing::Test
@@ -59,7 +189,6 @@ class multidevice_sync_ft : public ::testing::Test
 public:
     virtual void SetUp()
     {
-        srand((unsigned int)time(0)); // use current time as seed for random generator
         ASSERT_EQ(m_master, nullptr);
         ASSERT_EQ(m_subordinate, nullptr);
     }
@@ -391,22 +520,36 @@ verify_ts(int64_t ts_1, int64_t ts_2, int64_t ts_offset, int64_t max_sync_delay,
 
 TEST_F(multidevice_sync_ft, multi_sync_validation)
 {
-    k4a_fps_t frame_rate = K4A_FRAMES_PER_SECOND_30;
-    int32_t fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(frame_rate));
-
-    int frame_rate_rand = rand(); // Throw away first rand() result
-    frame_rate_rand = (int)RAND_VALUE(0, 2);
-    switch (frame_rate_rand)
+    if (g_frame_rate != K4A_FRAMES_PER_SECOND_5 && g_frame_rate != K4A_FRAMES_PER_SECOND_15 &&
+        g_frame_rate != K4A_FRAMES_PER_SECOND_30)
     {
-    case 0:
-        frame_rate = K4A_FRAMES_PER_SECOND_5;
-        break;
-    case 1:
-        frame_rate = K4A_FRAMES_PER_SECOND_15;
-        break;
-    default:
-        frame_rate = K4A_FRAMES_PER_SECOND_30;
-        break;
+        int frame_rate_rand = (int)RAND_VALUE(0, 2);
+        switch (frame_rate_rand)
+        {
+        case 0:
+            g_frame_rate = K4A_FRAMES_PER_SECOND_5;
+            break;
+        case 1:
+            g_frame_rate = K4A_FRAMES_PER_SECOND_15;
+            break;
+        default:
+            g_frame_rate = K4A_FRAMES_PER_SECOND_30;
+            break;
+        }
+    }
+
+    int32_t fps_in_usec = 1000000 / (int32_t)k4a_convert_fps_to_uint(g_frame_rate);
+    if (g_m_depth_delay == 0)
+    {
+        g_m_depth_delay = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
+    }
+    if (g_s_depth_delay == 0)
+    {
+        g_s_depth_delay = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
+    }
+    if (g_subordinate_delay == 0)
+    {
+        g_subordinate_delay = (uint32_t)RAND_VALUE(0, fps_in_usec);
     }
 
     ASSERT_EQ(open_master_and_subordinate(&m_master, &m_subordinate), K4A_RESULT_SUCCEEDED);
@@ -418,25 +561,29 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     default_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
     default_config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
     default_config.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    default_config.camera_fps = frame_rate;
+    default_config.camera_fps = g_frame_rate;
     default_config.subordinate_delay_off_master_usec = 0;
     default_config.depth_delay_off_color_usec = 0;
     default_config.synchronized_images_only = true;
 
     k4a_device_configuration_t s_config = default_config;
     s_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
-    s_config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
-    s_config.subordinate_delay_off_master_usec = (uint32_t)RAND_VALUE(0, fps_in_usec);
+    s_config.depth_delay_off_color_usec = g_s_depth_delay;
+    s_config.subordinate_delay_off_master_usec = g_subordinate_delay;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_subordinate, &s_config)) << "Subordinate Device";
 
     k4a_device_configuration_t m_config = default_config;
     m_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_MASTER;
-    m_config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
+    m_config.depth_delay_off_color_usec = g_m_depth_delay;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_master, &m_config)) << "Master Device";
 
     printf("Test Running with the following settings:\n");
     printf("                             Frame Rate: %s\n",
-           frame_rate == K4A_FRAMES_PER_SECOND_5 ? "5" : (frame_rate == K4A_FRAMES_PER_SECOND_15 ? "15" : "30"));
+           g_frame_rate == K4A_FRAMES_PER_SECOND_5 ?
+               "5" :
+               (g_frame_rate == K4A_FRAMES_PER_SECOND_15 ?
+                    "15" :
+                    (g_frame_rate == K4A_FRAMES_PER_SECOND_30 ? "30" : "Unknown")));
     printf("      Master depth_delay_off_color_usec: %d\n", m_config.depth_delay_off_color_usec);
     printf("         Sub depth_delay_off_color_usec: %d\n", s_config.depth_delay_off_color_usec);
     printf("  Sub subordinate_delay_off_master_usec: %d\n", s_config.subordinate_delay_off_master_usec);
@@ -445,12 +592,15 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     printf("Master Color, Master IR(Delta), Sub Color(Delta), Sub IR(Delta)\n");
     printf("---------------------------------------------------------------\n");
 
-    for (int x = 0; x < 100; x++)
+    int64_t ts_m_c_old = 0;
+    float sequential_frames = 0;
+
+    for (int x = 0; x < g_sample_count; x++)
     {
         k4a_capture_t cap_m, cap_s;
         int64_t ts_m_c, ts_m_ir, ts_s_c, ts_s_ir;
         k4a_image_t image_c_m, image_ir_m, image_c_s, image_ir_s;
-        int64_t max_sync_delay = k4a_unittest_get_max_sync_delay_ms(frame_rate);
+        int64_t max_sync_delay = k4a_unittest_get_max_sync_delay_ms(g_frame_rate);
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   get_syncd_captures(m_master,
@@ -480,8 +630,19 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
                ts_s_ir - ts_s_c,
                x > SAMPLES_TO_STABILIZE ? "Validating" : "Stabilizing");
 
-        if (x > SAMPLES_TO_STABILIZE)
+        if (x >= SAMPLES_TO_STABILIZE)
         {
+            if (std::abs(ts_m_c - ts_m_c_old) < (fps_in_usec * 11 / 10))
+            {
+                // If we are within 110% of expected FPS we count that as 2 back to back frames
+                sequential_frames++;
+            }
+            else
+            {
+                float dropped = (float)(std::abs(ts_m_c - ts_m_c_old) / fps_in_usec);
+                printf("    WARNING %.1f frames were dropped\n", dropped);
+            }
+
             ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                       verify_ts(ts_m_c,
                                 ts_m_ir,
@@ -501,6 +662,7 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
                                 max_sync_delay,
                                 "TS1 is Master Color, TS2 is Subordinate Color"));
         }
+        ts_m_c_old = ts_m_c;
 
         k4a_image_release(image_c_m);
         k4a_image_release(image_c_s);
@@ -514,6 +676,11 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
     m_master = nullptr;
     k4a_device_close(m_subordinate);
     m_subordinate = nullptr;
+
+    // Ensure 90% frames are arriving in the required amount of time - this is a sanity check that the FW is
+    // capable of meeting the demands of the frame rate for 2 devices. If for some reason we were only running at a
+    // fraction of the framerate this would fail.
+    ASSERT_GE(sequential_frames, ((g_sample_count - SAMPLES_TO_STABILIZE) * 9 / 10));
 }
 
 TEST_F(multidevice_ft, ensure_color_camera_is_enabled)

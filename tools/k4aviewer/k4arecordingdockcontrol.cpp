@@ -92,6 +92,9 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     {
         colorFormatSS << m_recordConfiguration.color_format;
         colorResolutionSS << m_recordConfiguration.color_resolution;
+
+        recording.set_color_conversion(K4A_IMAGE_FORMAT_COLOR_BGRA32);
+        m_recordConfiguration.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
     }
     else
     {
@@ -474,12 +477,10 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         try
         {
             k4a::calibration calibration = m_playbackThreadState.Recording.get_calibration();
-            bool colorPointCloudAvailable = m_recordConfiguration.color_track_enabled &&
-                                            m_recordConfiguration.color_format == K4A_IMAGE_FORMAT_COLOR_BGRA32;
             K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
                                                 std::move(calibration),
                                                 &m_playbackThreadState.CaptureDataSource,
-                                                colorPointCloudAvailable);
+                                                m_recordConfiguration.color_track_enabled);
         }
         catch (const k4a::error &e)
         {

@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     if (x.IsAlive)
                     {
                         buffer = (byte[])x.Target;
-                        if (buffer.Length >= minimumLength)
+                        if (buffer != null && buffer.Length >= minimumLength)
                         {
                             _ = this.pool.Remove(x);
                             return buffer;
