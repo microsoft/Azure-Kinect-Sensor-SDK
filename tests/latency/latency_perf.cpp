@@ -26,10 +26,7 @@
 #endif
 
 #define LLD(val) ((int64_t)(val))
-#define PTS_TO_MS(ts) (LLD((ts) / 1000))    // Device TS convertion to milliseconds
 #define STS_TO_MS(ts) (LLD((ts) / 1000000)) // System TS convertion to milliseconds
-
-#define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
 
 static bool g_skip_delay_off_color_validation = false;
 static int32_t g_depth_delay_off_color_usec = 0;
@@ -462,7 +459,6 @@ void latency_perf::process_image(k4a_capture_t capture,
                    STS_TO_MS(system_ts_from_pts),
                    STS_TO_MS(current_system_ts),
                    STS_TO_MS(system_ts_from_pts - current_system_ts));
-            // ASSERT_FALSE(1);
 
             // Update values anyway
             *system_ts_last = system_ts;
@@ -489,26 +485,6 @@ void latency_perf::process_image(k4a_capture_t capture,
             *system_ts_from_pts_last = system_ts_from_pts;
             *image_first_pass = false;
         }
-
-        // if (!process_color)
-        // {
-        //     k4a_image_t color = k4a_capture_get_color_image(capture);
-        //     int64_t diff_STS = k4a_image_get_system_timestamp_nsec(color) -
-        //     k4a_image_get_system_timestamp_nsec(image); int64_t diff_STS_C = current_system_ts -
-        //     k4a_image_get_system_timestamp_nsec(color); int64_t diff_PTS_C = current_system_ts - system_ts_from_pts;
-        //     int64_t diff_STS_I = current_system_ts - k4a_image_get_system_timestamp_nsec(image);
-        //     int64_t diff_pts = k4a_image_get_device_timestamp_usec(color) -
-        //     k4a_image_get_device_timestamp_usec(image);
-        //     // diff = diff >= 0 ? diff : diff * -1;
-        //     printf("| OS STS %9" PRId64 " C arrived %5" PRId64 "ms ago (STS)] C arrived %5" PRId64
-        //            "ms ago(STS_via_PTS) I[%5" PRId64 "] PTS DEL[%5" PRId64 "]",
-        //            STS_TO_MS(diff_STS),
-        //            STS_TO_MS(diff_STS_C),
-        //            STS_TO_MS(diff_PTS_C),
-        //            STS_TO_MS(diff_STS_I),
-        //            PTS_TO_MS(diff_pts));
-        //     k4a_image_release(color);
-        // }
 
         k4a_image_release(image);
     }
@@ -719,25 +695,6 @@ TEST_P(latency_perf, testTest)
                       &ir_system_ts_last,
                       &ir_system_ts_from_pts_last);
 
-        // {
-        //     k4a_image_t color = k4a_capture_get_color_image(capture);
-        //     k4a_image_t ir = k4a_capture_get_ir_image(capture);
-        //     int64_t c_STS_FROM_PTS = lookup_system_ts(k4a_image_get_device_timestamp_usec(color), true);
-        //     int64_t i_STS_FROM_PTS = lookup_system_ts(k4a_image_get_device_timestamp_usec(ir), false);
-
-        //     int64_t c_STS = k4a_image_get_system_timestamp_nsec(color);
-        //     int64_t i_STS = k4a_image_get_system_timestamp_nsec(ir);
-
-        //     printf("| Age STS C[%5" PRId64 "] I[%5" PRId64 "]      Age STS_FROM_PTS C[%5" PRId64 "] I[%5" PRId64
-        //            "]   PTS DEL[%5" PRId64 "]",
-        //            STS_TO_MS(current_system_ts - c_STS),
-        //            STS_TO_MS(current_system_ts - i_STS),
-        //            STS_TO_MS(current_system_ts - c_STS_FROM_PTS),
-        //            STS_TO_MS(current_system_ts - i_STS_FROM_PTS),
-        //            PTS_TO_MS(k4a_image_get_device_timestamp_usec(color) - k4a_image_get_device_timestamp_usec(ir)));
-        //     k4a_image_release(color);
-        //     k4a_image_release(ir);
-        // }
         printf("|\n"); // End of line
     }                  // End capture loop
 

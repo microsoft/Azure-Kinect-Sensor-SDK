@@ -150,13 +150,13 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
             if (wresult == K4A_WAIT_RESULT_SUCCEEDED)
             {
                 k4a_image_t image = k4a_capture_get_color_image(capture);
-                int64_t ts_c_dev = k4a_image_get_device_timestamp_usec(image);
+                int64_t ts_c_dev = (int64_t)k4a_image_get_device_timestamp_usec(image);
                 EXPECT_LT(std::abs(ts_c_dev - (int64_t)imu_sample.gyro_timestamp_usec), (int64_t)fps_period_us * 4);
                 EXPECT_LT(std::abs(ts_c_dev - (int64_t)imu_sample.acc_timestamp_usec), (int64_t)fps_period_us * 4);
                 k4a_image_release(image);
 
                 image = k4a_capture_get_ir_image(capture);
-                int64_t ts_ir_dev = k4a_image_get_device_timestamp_usec(image);
+                int64_t ts_ir_dev = (int64_t)k4a_image_get_device_timestamp_usec(image);
                 EXPECT_LT(std::abs(ts_ir_dev - (int64_t)imu_sample.gyro_timestamp_usec), (int64_t)fps_period_us * 4);
                 EXPECT_LT(std::abs(ts_ir_dev - (int64_t)imu_sample.acc_timestamp_usec), (int64_t)fps_period_us * 4);
                 k4a_image_release(image);
