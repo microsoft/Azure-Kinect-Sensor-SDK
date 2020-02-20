@@ -51,9 +51,9 @@ typedef struct _sys_pts_time_t
     uint64_t system;
 } sys_pts_time_t;
 
-std::mutex g_lock_mutex;
-std::deque<sys_pts_time_t> g_time_c; // Color image copy of data
-std::deque<sys_pts_time_t> g_time_i; // Ir image copy of data
+static std::mutex g_lock_mutex;
+static std::deque<sys_pts_time_t> g_time_c; // Color image copy of data
+static std::deque<sys_pts_time_t> g_time_i; // Ir image copy of data
 
 struct latency_parameters
 {
@@ -101,7 +101,7 @@ public:
         }
     }
 
-    void print_and_log(const char *message, const char *mode, uint64_t ave, uint64_t min, uint64_t max);
+    void print_and_log(const char *message, const char *mode, int64_t ave, int64_t min, int64_t max);
     void process_image(k4a_capture_t capture,
                        uint64_t current_system_ts,
                        bool process_color,
@@ -404,7 +404,7 @@ static uint64_t lookup_system_ts(uint64_t pts_ts, bool color)
     return 0;
 }
 
-void latency_perf::print_and_log(const char *message, const char *mode, uint64_t ave, uint64_t min, uint64_t max)
+void latency_perf::print_and_log(const char *message, const char *mode, int64_t ave, int64_t min, int64_t max)
 {
     printf("    %30s %30s: Ave=%" PRId64 " min=%" PRId64 " max=%" PRId64 "\n", message, mode, ave, min, max);
 
