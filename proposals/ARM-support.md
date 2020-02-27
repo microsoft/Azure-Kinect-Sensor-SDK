@@ -4,9 +4,9 @@
 ## Proposal State
 
 * [x] Proposed 10/31/2019
-* [ ] Prototype: Not Started
-* [ ] Implementation: Not Started
-* [ ] Specification: Not Started
+* [x] Prototype: Skipped
+* [x] Implementation Started: 1/1/2020
+* [ ] Feature Complete
 
 ## Summary
 
