@@ -829,7 +829,12 @@ jobs:
       displayName: 'Add execution property to binary files'
 
       # Set the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
-    - script: 'echo "##vso[task.setvariable variable=DISPLAY]:0"'
+    - script: |
+        if [ $(EdenArch) == "arm64" ]; then
+          echo "##vso[task.setvariable variable=DISPLAY]:1"
+        else
+          echo "##vso[task.setvariable variable=DISPLAY]:0"
+        fi
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'set DISPLAY variable'
 
