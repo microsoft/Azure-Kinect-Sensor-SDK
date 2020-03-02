@@ -108,6 +108,15 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
+        public static extern k4a_result_t k4a_calibration_color_2d_to_depth_2d(
+            [In] ref Calibration calibration,
+            ref Vector2 source_point2d,
+            ref Image detph,
+            out Vector2 target_point2d,
+            out bool valid);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
         public static extern k4a_result_t k4a_calibration_get_from_raw(
             byte[] raw_calibration,
             UIntPtr raw_calibration_size,
