@@ -761,7 +761,7 @@ jobs:
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
       inputs:
-        artifactName: 'x86_64-linux-clang-RelWithDebInfo'
+        artifactName: '$(CMakeLinuxTargetTriple)-RelWithDebInfo'
         parallelizationLimit: 8
         
     - task: NuGetToolInstaller@0
@@ -821,10 +821,10 @@ jobs:
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
         contents: "libdepthengine.so*"
-        targetFolder: "$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo/bin/"
+        targetFolder: "$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/"
         flattenFolders: true
 
-    - script: 'chmod +x ./x86_64-linux-clang-relwithdebinfo/bin/*'
+    - script: 'chmod +x ./$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/*'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Add execution property to binary files'
 
@@ -842,34 +842,34 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check openGL version'
 
-    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
+    - script: './$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
       env:
         K4A_LOG_LEVEL: 'I'
 
-    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
+    - script: './$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
       env:
         K4A_LOG_LEVEL: 'I'
 
-    - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
+    - script: './$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/enumerate_devices'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check Device Health'
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo'
       displayName: 'Run Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo'
       displayName: 'Run Custom Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtest_filter=*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo'
       displayName: 'Run Functional Tests - Onboarding'
       timeoutInMinutes: 15
       continueOnError: true
