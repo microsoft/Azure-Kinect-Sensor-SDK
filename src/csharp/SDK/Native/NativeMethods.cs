@@ -132,6 +132,17 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
+        public static extern k4a_result_t k4a_transformation_depth_image_to_color_camera_custom(
+            k4a_transformation_t transformation_handle,
+            k4a_image_t depth_image,
+            k4a_image_t custom_image,
+            k4a_image_t transformed_depth_image,
+            k4a_image_t transformed_custom_image,
+            TransformationInterpolationType interpolation_type,
+            uint invalid_custom_value);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
         public static extern k4a_result_t k4a_transformation_color_image_to_depth_camera(
             k4a_transformation_t transformation_handle,
             k4a_image_t depth_image,
