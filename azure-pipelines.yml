@@ -741,7 +741,7 @@ jobs:
       matrix:
         x86_64:
           CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
-          EdenArch: 'X64'
+          EdenArch: 'x64'
         arm64:
           CMakeLinuxTargetTriple: 'arm64-linux-gnu'
           EdenArch: 'arm64'
@@ -819,7 +819,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into Build Artifacts"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/($EdenArch)/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/$(EdenArch)/release/"
         contents: "libdepthengine.so*"
         targetFolder: "$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/"
         flattenFolders: true
