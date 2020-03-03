@@ -788,17 +788,17 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/debug artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/x64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/($EdenArch)/release/"
         contents: "libdepthengine*"
-        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/($EdenArch)/debug"
         flattenFolders: true
 
     - task: CopyFiles@2
       displayName: "Copy DepthEngine into amd64/release artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/x64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/($EdenArch)/release/"
         contents: "libdepthengine*"
-        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/($EdenArch)/release"
         flattenFolders: true
 
     - task: CopyFiles@2
@@ -819,7 +819,7 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into Build Artifacts"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/($EdenArch)/release/"
         contents: "libdepthengine.so*"
         targetFolder: "$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/"
         flattenFolders: true
