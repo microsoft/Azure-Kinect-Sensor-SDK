@@ -841,6 +841,7 @@ jobs:
     - script: 'env && which xauth && glxinfo | grep "OpenGL"'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check openGL version'
+      timeoutInMinutes: 5
 
     - script: './$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
@@ -863,7 +864,11 @@ jobs:
       displayName: 'Run Functional Tests'
       timeoutInMinutes: 15
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*'
+    - script: |
+        # skip testing on ARM64 Jetson Nano doesn't like 2 USB devices running at once.
+        if [ $(EdenArch) == "x64" ]; then
+          python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*
+        fi
       workingDirectory: '$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo'
       displayName: 'Run Custom Functional Tests'
       timeoutInMinutes: 15
