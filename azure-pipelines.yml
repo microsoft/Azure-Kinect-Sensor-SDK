@@ -492,7 +492,7 @@ jobs:
       ArtifactName: '$(CMakeLinuxTargetTriple)-$(CMakeConfiguration)'
       parallel: true
       parallelCount: 8
-    condition: and(succeeded(), contains(variables['CMakeLinuxTargetTriple'], 'clang'))
+    condition: and(succeeded(), contains(variables['CMakeLinuxTargetTriple'], 'gnu'))
 
 - job: DocumentationBuild
   displayName: Documentation Build
@@ -679,7 +679,7 @@ jobs:
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
         contents: "depthengine*.dll"
-        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
+        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo/bin"
         flattenFolders: true
 
     - task: CopyFiles@2
@@ -687,33 +687,33 @@ jobs:
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
         contents: "depthengine*.dll"
-        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
+        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
         flattenFolders: true
 
-    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -r'
+    - script: '.\amd64-windows-msvc-relwithdebinfo\bin\AzureKinectFirmwareTool.exe -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
 
-    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
+    - script: '.\amd64-windows-msvc-relwithdebinfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
 
-    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\enumerate_devices.exe'
+    - script: '.\amd64-windows-msvc-relwithdebinfo\bin\enumerate_devices.exe'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check Device Health'
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo'
       displayName: 'Run Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo'
       displayName: 'Run Custom Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtest_filter=*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo'
       displayName: 'Run Functional Tests - Onboarding'
       timeoutInMinutes: 15
       continueOnError: true
@@ -761,7 +761,7 @@ jobs:
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
       inputs:
-        artifactName: '$(CMakeLinuxTargetTriple)-RelWithDebInfo'
+        artifactName: '$(CMakeLinuxTargetTriple)-relwithdebinfo'
         parallelizationLimit: 8
         
     - task: NuGetToolInstaller@0
