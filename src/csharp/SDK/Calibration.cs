@@ -198,7 +198,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Transform a 2D pixel coordinate with an associated depth value of the source camera into a 2D pixel coordinate of the depth camera.
+        /// Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of the depth camera.
         /// </summary>
         /// <param name="sourcePoint2D">The 2D pixel color camera coordinates.</param>
         /// <param name="depth">The depth image.</param>
