@@ -805,6 +805,7 @@ jobs:
     - script: 'env && which xauth && glxinfo | grep "OpenGL"'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check openGL version'
+      timeoutInMinutes: 5
 
     - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
