@@ -681,7 +681,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
         if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE &&
             config->subordinate_delay_off_master_usec != 0)
         {
-            uint32_t fps_in_usec = 1000000 / k4a_convert_fps_to_uint(config->camera_fps);
+            uint32_t fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->camera_fps));
             if (config->subordinate_delay_off_master_usec > fps_in_usec)
             {
                 result = K4A_RESULT_FAILED;
@@ -716,7 +716,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
         if (depth_enabled && color_enabled)
         {
-            int64_t fps = 1000000 / k4a_convert_fps_to_uint(config->camera_fps);
+            int64_t fps = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->camera_fps));
             if (config->depth_delay_off_color_usec < -fps || config->depth_delay_off_color_usec > fps)
             {
                 result = K4A_RESULT_FAILED;

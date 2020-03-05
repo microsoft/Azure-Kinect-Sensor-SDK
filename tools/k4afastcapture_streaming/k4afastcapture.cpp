@@ -206,7 +206,7 @@ void K4AFastCapture::Run(int streamingLength)
     }
     k4a_capture_release(m_capture);
 
-    int32_t timeout_ms = 1000 / camera_fps;
+    int32_t timeout_ms = HZ_TO_PERIOD_MS(camera_fps);
     std::cout << "[Streaming Service] Streaming from sensors..." << std::endl;
     while (remainingFrames-- > 0 && m_streaming)
     {

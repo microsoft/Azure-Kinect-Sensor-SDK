@@ -716,7 +716,7 @@ int32_t color_control_test::map_manual_exposure(int32_t value, bool sixty_hertz)
 // Limit exposure setting based on FPS setting.
 int32_t color_control_test::limit_exposure_to_fps_setting(int32_t value, bool sixty_hertz, k4a_fps_t fps)
 {
-    int fps_usec = 1000000 / k4a_convert_fps_to_uint(fps);
+    int fps_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(fps));
     int last_exposure;
 
     if (value < fps_usec)

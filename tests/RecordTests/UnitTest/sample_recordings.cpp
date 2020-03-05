@@ -65,7 +65,7 @@ void SampleRecordings::SetUp()
 
         uint64_t timestamps[3] = { 0, 1000, 1000 }; // Offset the Depth and IR tracks by 1ms to test
         uint64_t imu_timestamp = 1150;
-        uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_full.camera_fps);
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_full.camera_fps));
         k4a_capture_t capture = NULL;
         for (size_t i = 0; i < test_frame_count; i++)
         {
@@ -108,7 +108,7 @@ void SampleRecordings::SetUp()
         uint64_t timestamps[3] = { 0,
                                    (uint64_t)record_config_delay.depth_delay_off_color_usec,
                                    (uint64_t)record_config_delay.depth_delay_off_color_usec };
-        uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_delay.camera_fps);
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_delay.camera_fps));
         k4a_capture_t capture = NULL;
         for (size_t i = 0; i < test_frame_count; i++)
         {
@@ -169,7 +169,7 @@ void SampleRecordings::SetUp()
         }
 
         uint64_t timestamps[3] = { 1000000, 1001000, 1001000 }; // Start recording at 1s
-        uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_full.camera_fps);
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_full.camera_fps));
         for (size_t i = 0; i < test_frame_count; i++)
         {
             // Create a known pattern of dropped / missing frames that can be tested against
@@ -235,7 +235,7 @@ void SampleRecordings::SetUp()
 
         uint64_t timestamps[3] = { 1000000, 1000000, 1000000 };
         uint64_t imu_timestamp = 1001150;
-        uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_delay.camera_fps);
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_delay.camera_fps));
         k4a_capture_t capture = NULL;
         for (size_t i = 0; i < test_frame_count; i++)
         {
