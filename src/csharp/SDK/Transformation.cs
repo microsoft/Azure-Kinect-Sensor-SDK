@@ -143,12 +143,12 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Transforms an Image and an Custom Image from the depth camera perspective to the color camera perspective.
+        /// Transforms a depth Image and a custom Image from the depth camera perspective to the color camera perspective.
         /// </summary>
         /// <param name="depth">Depth image to transform.</param>
         /// <param name="custom">Custom image to transform.</param>
-        /// <param name="interpolationType">Parameter that controls how pixels in custom_image should be interpolated when transformed to color camera space.</param>
-        /// <param name="invalidCustomValue">Defines the custom image pixel value that should be written to \p transformed_custom_image in case the corresponding.</param>
+        /// <param name="interpolationType">Parameter that controls how pixels in custom image should be interpolated when transformed to color camera space.</param>
+        /// <param name="invalidCustomValue">Defines the custom image pixel value that should be written to transformedCustom in case the corresponding depth pixel can not be transformed into the color camera space.</param>
         /// <returns>A depth image transformed in to the color camera perspective.</returns>
         /// <returns>A custom image transformed in to the color camera perspective.</returns>
         public (Image transformedDepth, Image transformedCustom) DepthImageToColorCameraCustom(Image depth, Image custom, TransformationInterpolationType interpolationType, uint invalidCustomValue)
@@ -200,14 +200,14 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
-        /// Transforms an Image and an Custom Image from the depth camera perspective to the color camera perspective.
+        /// Transforms a depth Image and a custom Image from the depth camera perspective to the color camera perspective.
         /// </summary>
         /// <param name="depth">Depth image to transform.</param>
         /// <param name="custom">Custom image to transform.</param>
-        /// <param name="transformedDepth">An transformed deth image to hold the output.</param>
+        /// <param name="transformedDepth">An transformed depth image to hold the output.</param>
         /// <param name="transformedCustom">An transformed custom image to hold the output.</param>
         /// <param name="interpolationType">Parameter that controls how pixels in custom image should be interpolated when transformed to color camera space.</param>
-        /// <param name="invalidCustomValue">Defines the custom image pixel value that should be written to transformedCustom image in case the corresponding.</param>
+        /// <param name="invalidCustomValue">Defines the custom image pixel value that should be written to transformedCustom in case the corresponding depth pixel can not be transformed into the color camera space.</param>
         /// <remarks>
         /// The <paramref name="transformedDepth"/> Image must be of the resolution of the color camera, and
         /// of the pixel format of the depth image.

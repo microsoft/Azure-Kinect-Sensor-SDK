@@ -111,7 +111,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         public static extern k4a_result_t k4a_calibration_color_2d_to_depth_2d(
             [In] ref Calibration calibration,
             ref Vector2 source_point2d,
-            k4a_image_t detph,
+            k4a_image_t detph_image,
             out Vector2 target_point2d,
             out bool valid);
 
