@@ -236,6 +236,21 @@ namespace Microsoft.Azure.Kinect.Sensor
                 throw new ArgumentNullException(nameof(transformedCustom));
             }
 
+            if (custom.Format != ImageFormat.Custom8 && custom.Format != ImageFormat.Custom16)
+            {
+                throw new NotSupportedException("Failed to support this format of custom image!");
+            }
+
+            if (transformedCustom.Format != ImageFormat.Custom8 && transformedCustom.Format != ImageFormat.Custom16)
+            {
+                throw new NotSupportedException("Failed to support this format of transformed custom image!");
+            }
+
+            if (custom.Format != transformedCustom.Format)
+            {
+                throw new NotSupportedException("Failed to support this different format of custom image and transformed custom image!!");
+            }
+
             lock (this)
             {
                 // Create a new reference to the Image objects so that they cannot be disposed while
