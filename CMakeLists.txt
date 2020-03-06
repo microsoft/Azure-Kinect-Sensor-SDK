@@ -135,7 +135,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     set(CMAKE_BUILD_RPATH "\$ORIGIN")
 endif()
 
-set(TARGET_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+include(DetermineTargetArch)
+determine_target_arch(TARGET_ARCH)
 
 # CMake doesn't set the target processor correctly for MSVC
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
@@ -149,16 +150,14 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 
     # Check what architecture we are building for. This assumes all 64-bit architectures are amd64, which will break
     # if we decide to support arm.
-    if ("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-        set(TARGET_ARCH "amd64")
+    if ("${TARGET_ARCH}" STREQUAL "x86_64")
         configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x64.props)
         configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x64.xml)
-    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
-        set(TARGET_ARCH "x86")
+    elseif("${TARGET_ARCH}" STREQUAL "i686")
         configure_file(k4a.props.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/k4a.x86.props)
         configure_file(StubGenerator.xml.in ${CMAKE_CURRENT_SOURCE_DIR}/src/csharp/StubGenerator.x86.xml)
     else()
-        message(FATAL_ERROR "Unknown architecture with size of void* = ${CMAKE_SIZEOF_VOID_P}")
+        message(FATAL_ERROR "Unknown architecture for MSVC: ${TARGET_ARCH}")
     endif()
 endif()
 
