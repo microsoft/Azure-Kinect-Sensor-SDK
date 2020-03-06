@@ -369,9 +369,6 @@ jobs:
 
 - job: LinuxK4ABuildTest
   displayName: Linux
-  pool:
-    vmImage: 'ubuntu-16.04'
-  container: mcr.microsoft.com/akbuilder-linux:v3
   strategy:
     maxParallel: 100
     matrix:
@@ -379,18 +376,40 @@ jobs:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'debug'
         UsesOpenCV: 'TRUE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-amd64'
       x64-gnu_debug_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'debug'
         UsesOpenCV: 'TRUE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-amd64'
       x64-clang_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-clang'
         CMakeConfiguration: 'relwithdebinfo'
         UsesOpenCV: 'TRUE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-amd64'
       x64-gnu_rel_ninja:
         CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
         CMakeConfiguration: 'relwithdebinfo'
         UsesOpenCV: 'TRUE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-amd64'
+      # arm64-clang_debug_ninja:
+      #   CMakeLinuxTargetTriple: 'arm64-linux-clang'
+      #   CMakeConfiguration: 'debug'
+      #   UsesOpenCV: 'FALSE'
+      arm64-gnu_debug_ninja:
+        CMakeLinuxTargetTriple: 'arm64-linux-gnu'
+        CMakeConfiguration: 'debug'
+        UsesOpenCV: 'FALSE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-arm64'
+      # arm64-clang_rel_ninja:
+      #   CMakeLinuxTargetTriple: 'arm64-linux-clang'
+      #   CMakeConfiguration: 'relwithdebinfo'
+      #   UsesOpenCV: 'FALSE'
+      arm64-gnu_rel_ninja:
+        CMakeLinuxTargetTriple: 'arm64-linux-gnu'
+        CMakeConfiguration: 'relwithdebinfo'
+        UsesOpenCV: 'FALSE'
+        container: 'mcr.microsoft.com/akbuilder-linux:v5-arm64'
 
       # 32-bit builds are currently broken
       # i386-unknown-linux-clang_debug_ninja:
@@ -405,6 +424,9 @@ jobs:
       # i386-unknown-linux-gnu_relwithdebinfo_ninja:
       #   CMakeLinuxTargetTriple: 'i386-linux-gnu'
       #   CMakeConfiguration: 'relwithdebinfo'
+  pool:
+    vmImage: 'ubuntu-18.04'
+  container: $[ variables['container'] ]
 
   steps:
   - checkout: self
@@ -470,7 +492,7 @@ jobs:
       ArtifactName: '$(CMakeLinuxTargetTriple)-$(CMakeConfiguration)'
       parallel: true
       parallelCount: 8
-    condition: and(succeeded(), contains(variables['CMakeLinuxTargetTriple'], 'clang'))
+    condition: and(succeeded(), contains(variables['CMakeLinuxTargetTriple'], 'gnu'))
 
 - job: DocumentationBuild
   displayName: Documentation Build
@@ -657,7 +679,7 @@ jobs:
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
         contents: "depthengine*.dll"
-        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin"
+        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo/bin"
         flattenFolders: true
 
     - task: CopyFiles@2
@@ -665,33 +687,33 @@ jobs:
       inputs:
         sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/windows/amd64/release/"
         contents: "depthengine*.dll"
-        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
+        targetFolder: "$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo/bin/Release/Microsoft.AzureKinect.FunctionalTests/netcoreapp2.1/"
         flattenFolders: true
 
-    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -r'
+    - script: '.\amd64-windows-msvc-relwithdebinfo\bin\AzureKinectFirmwareTool.exe -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
 
-    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
+    - script: '.\amd64-windows-msvc-relwithdebinfo\bin\AzureKinectFirmwareTool.exe -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
 
-    - script: '.\amd64-windows-msvc-RelWithDebInfo\bin\enumerate_devices.exe'
+    - script: '.\amd64-windows-msvc-relwithdebinfo\bin\enumerate_devices.exe'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check Device Health'
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo'
       displayName: 'Run Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo'
       displayName: 'Run Custom Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtest_filter=*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-RelWithDebInfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/amd64-windows-msvc-relwithdebinfo'
       displayName: 'Run Functional Tests - Onboarding'
       timeoutInMinutes: 15
       continueOnError: true
@@ -714,10 +736,19 @@ jobs:
     dependsOn: LinuxK4ABuildTest
     variables:
       firmware_version: "$(linux_firmware_version)"
+    strategy:
+      maxParallel: 100
+      matrix:
+        x86_64:
+          CMakeLinuxTargetTriple: 'x86_64-linux-gnu'
+          EdenArch: 'x64'
+        arm64:
+          CMakeLinuxTargetTriple: 'arm64-linux-gnu'
+          EdenArch: 'arm64'
     pool:
       name: Analog-FwConnected
       demands:
-      - Eden
+      - EdenArch -equals $(EdenArch)
       - Agent.OS -equals Linux
 
     steps:
@@ -730,7 +761,7 @@ jobs:
     - task: DownloadBuildArtifacts@0
       displayName: 'Download Build Artifacts'
       inputs:
-        artifactName: 'x86_64-linux-clang-RelWithDebInfo'
+        artifactName: '$(CMakeLinuxTargetTriple)-relwithdebinfo'
         parallelizationLimit: 8
         
     - task: NuGetToolInstaller@0
@@ -755,19 +786,19 @@ jobs:
       displayName: "Temp List files"
 
     - task: CopyFiles@2
-      displayName: "Copy DepthEngine into amd64/debug artifacts folder"
+      displayName: "Copy DepthEngine into $(EdenArch)/debug artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/x64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/$(EdenArch)/release/"
         contents: "libdepthengine*"
-        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/debug"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/$(EdenArch)/debug"
         flattenFolders: true
 
     - task: CopyFiles@2
-      displayName: "Copy DepthEngine into amd64/release artifacts folder"
+      displayName: "Copy DepthEngine into $(EdenArch)/release artifacts folder"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/x64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/NugetOutputDir/Microsoft.Azure.Kinect.Sensor.$(NuGetPackageVersion)/linux/lib/native/$(EdenArch)/release/"
         contents: "libdepthengine*"
-        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release"
+        targetFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/$(EdenArch)/release"
         flattenFolders: true
 
     - task: CopyFiles@2
@@ -788,17 +819,22 @@ jobs:
     - task: CopyFiles@2
       displayName: "Copy DepthEnginePlugin into Build Artifacts"
       inputs:
-        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/x86_64/release/"
+        sourceFolder: "$(System.ArtifactsDirectory)/depthengineplugin/linux/$(EdenArch)/release/"
         contents: "libdepthengine.so*"
-        targetFolder: "$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo/bin/"
+        targetFolder: "$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/"
         flattenFolders: true
 
-    - script: 'chmod +x ./x86_64-linux-clang-relwithdebinfo/bin/*'
+    - script: 'chmod +x ./$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/*'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Add execution property to binary files'
 
       # Set the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
-    - script: 'echo "##vso[task.setvariable variable=DISPLAY]:0"'
+    - script: |
+        if [ $(EdenArch) == "arm64" ]; then
+          echo "##vso[task.setvariable variable=DISPLAY]:1"
+        else
+          echo "##vso[task.setvariable variable=DISPLAY]:0"
+        fi
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'set DISPLAY variable'
 
@@ -807,34 +843,38 @@ jobs:
       displayName: 'Check openGL version'
       timeoutInMinutes: 5
 
-    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
+    - script: './$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/AzureKinectFirmwareTool -r'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Reset K4A Device'
       env:
         K4A_LOG_LEVEL: 'I'
 
-    - script: './x86_64-linux-clang-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
+    - script: './$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/AzureKinectFirmwareTool -u firmware/AzureKinectDK_Fw_$(firmware_version).bin'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Update Device'
       env:
         K4A_LOG_LEVEL: 'I'
 
-    - script: './x86_64-linux-clang-relwithdebinfo/bin/enumerate_devices'
+    - script: './$(CMakeLinuxTargetTriple)-relwithdebinfo/bin/enumerate_devices'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check Device Health'
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo'
       displayName: 'Run Functional Tests'
       timeoutInMinutes: 15
 
-    - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+    - script: |
+        # skip testing on ARM64 Jetson Nano doesn't like 2 USB devices running at once.
+        if [ $(EdenArch) == "x64" ]; then
+          python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_custom_test_list.txt --bin bin/ --output=xml --gtest_filter=-*ONBOARDING*
+        fi
+      workingDirectory: '$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo'
       displayName: 'Run Custom Functional Tests'
       timeoutInMinutes: 15
 
     - script: 'python $(Build.SourcesDirectory)/scripts/RunTestList.py --list bin/functional_test_list.txt --bin bin/ --output=xml --gtest_filter=*ONBOARDING*'
-      workingDirectory: '$(System.ArtifactsDirectory)/x86_64-linux-clang-relwithdebinfo'
+      workingDirectory: '$(System.ArtifactsDirectory)/$(CMakeLinuxTargetTriple)-relwithdebinfo'
       displayName: 'Run Functional Tests - Onboarding'
       timeoutInMinutes: 15
       continueOnError: true
