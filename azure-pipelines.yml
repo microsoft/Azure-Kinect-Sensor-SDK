@@ -769,9 +769,8 @@ jobs:
         versionSpec: '>=5.1.0' 
 
     # The account on the NUC does not currently give this user permission to install, so we have done so manually.
-    # This captures the dependency NuGet has in this environment. We locally ran 'apt-get install mono-complete'
-    # We also need opencv, so install that too
-    #- script: 'apt-get install mono libopencv-dev'
+    # Mono has a bug, so we need a newer version. Version 6.8 is working well for both AMD64 and ARM64.
+    #- script: 'apt-get install mono-complete python git-lfs openssh-server ufw libopencv-dev'
     #  workingDirectory: '$(System.ArtifactsDirectory)'
     #  displayName: "Ensure Mono is installed"
 
