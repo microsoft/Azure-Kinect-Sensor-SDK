@@ -903,8 +903,7 @@ TEST_F(multidevice_ft, close_parallel)
     Lock_Deinit(lock);
 }
 
-// TODO https://github.com/microsoft/Azure-Kinect-Sensor-SDK/issues/818
-TEST_F(multidevice_sync_ft, DISABLED_multi_sync_no_color)
+TEST_F(multidevice_sync_ft, multi_sync_no_color)
 {
     k4a_device_t master, subordinate;
     k4a_fps_t frame_rate = K4A_FRAMES_PER_SECOND_30;
