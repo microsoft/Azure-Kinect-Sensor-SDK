@@ -143,6 +143,144 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
+        /// Transforms a depth Image and a custom Image from the depth camera perspective to the color camera perspective.
+        /// </summary>
+        /// <param name="depth">Depth image to transform.</param>
+        /// <param name="custom">Custom image to transform.</param>
+        /// <param name="interpolationType">Parameter that controls how pixels in custom image should be interpolated when transformed to color camera space.</param>
+        /// <param name="invalidCustomValue">Defines the custom image pixel value that should be written to transformedCustom in case the corresponding depth pixel can not be transformed into the color camera space.</param>
+        /// <returns>A depth image transformed in to the color camera perspective.</returns>
+        /// <returns>A custom image transformed in to the color camera perspective.</returns>
+        public (Image transformedDepth, Image transformedCustom) DepthImageToColorCameraCustom(Image depth, Image custom, TransformationInterpolationType interpolationType, uint invalidCustomValue)
+        {
+            if (depth == null)
+            {
+                throw new ArgumentNullException(nameof(depth));
+            }
+
+            if (custom == null)
+            {
+                throw new ArgumentNullException(nameof(custom));
+            }
+
+            Image transformedDepth = new Image(
+                ImageFormat.Depth16,
+                this.calibration.ColorCameraCalibration.ResolutionWidth,
+                this.calibration.ColorCameraCalibration.ResolutionHeight,
+                this.calibration.ColorCameraCalibration.ResolutionWidth * sizeof(short))
+            {
+                DeviceTimestamp = depth.DeviceTimestamp,
+            };
+
+            int bytesPerPixel;
+            switch (custom.Format)
+            {
+                case ImageFormat.Custom8:
+                    bytesPerPixel = sizeof(byte);
+                    break;
+                case ImageFormat.Custom16:
+                    bytesPerPixel = sizeof(short);
+                    break;
+                default:
+                    throw new NotSupportedException("Failed to support this format of custom image!");
+            }
+
+            Image transformedCustom = new Image(
+                custom.Format,
+                this.calibration.ColorCameraCalibration.ResolutionWidth,
+                this.calibration.ColorCameraCalibration.ResolutionHeight,
+                this.calibration.ColorCameraCalibration.ResolutionWidth * bytesPerPixel)
+            {
+                DeviceTimestamp = custom.DeviceTimestamp,
+            };
+
+            this.DepthImageToColorCameraCustom(depth, custom, transformedDepth, transformedCustom, interpolationType, invalidCustomValue);
+
+            return (transformedDepth, transformedCustom);
+        }
+
+        /// <summary>
+        /// Transforms a depth Image and a custom Image from the depth camera perspective to the color camera perspective.
+        /// </summary>
+        /// <param name="depth">Depth image to transform.</param>
+        /// <param name="custom">Custom image to transform.</param>
+        /// <param name="transformedDepth">An transformed depth image to hold the output.</param>
+        /// <param name="transformedCustom">An transformed custom image to hold the output.</param>
+        /// <param name="interpolationType">Parameter that controls how pixels in custom image should be interpolated when transformed to color camera space.</param>
+        /// <param name="invalidCustomValue">Defines the custom image pixel value that should be written to transformedCustom in case the corresponding depth pixel can not be transformed into the color camera space.</param>
+        /// <remarks>
+        /// The <paramref name="transformedDepth"/> Image must be of the resolution of the color camera, and
+        /// of the pixel format of the depth image.
+        /// The <paramref name="transformedCustom"/> Image must be of the resolution of the color camera, and
+        /// of the pixel format of the custom image.
+        /// </remarks>
+        public void DepthImageToColorCameraCustom(Image depth, Image custom, Image transformedDepth, Image transformedCustom, TransformationInterpolationType interpolationType, uint invalidCustomValue)
+        {
+            if (depth == null)
+            {
+                throw new ArgumentNullException(nameof(depth));
+            }
+
+            if (custom == null)
+            {
+                throw new ArgumentNullException(nameof(custom));
+            }
+
+            if (transformedDepth == null)
+            {
+                throw new ArgumentNullException(nameof(transformedDepth));
+            }
+
+            if (transformedCustom == null)
+            {
+                throw new ArgumentNullException(nameof(transformedCustom));
+            }
+
+            if (custom.Format != ImageFormat.Custom8 && custom.Format != ImageFormat.Custom16)
+            {
+                throw new NotSupportedException("Failed to support this format of custom image!");
+            }
+
+            if (transformedCustom.Format != ImageFormat.Custom8 && transformedCustom.Format != ImageFormat.Custom16)
+            {
+                throw new NotSupportedException("Failed to support this format of transformed custom image!");
+            }
+
+            if (custom.Format != transformedCustom.Format)
+            {
+                throw new NotSupportedException("Failed to support this different format of custom image and transformed custom image!!");
+            }
+
+            lock (this)
+            {
+                // Create a new reference to the Image objects so that they cannot be disposed while
+                // we are performing the transformation
+                using (Image depthReference = depth.Reference())
+                using (Image customReference = custom.Reference())
+                using (Image transformedDepthReference = transformedDepth.Reference())
+                using (Image transformedCustomReference = transformedCustom.Reference())
+                {
+                    // Ensure changes made to the managed memory are visible to the native layer
+                    depthReference.FlushMemory();
+                    customReference.FlushMemory();
+
+                    AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_transformation_depth_image_to_color_camera_custom(
+                        this.handle,
+                        depthReference.DangerousGetHandle(),
+                        customReference.DangerousGetHandle(),
+                        transformedDepthReference.DangerousGetHandle(),
+                        transformedCustom.DangerousGetHandle(),
+                        interpolationType,
+                        invalidCustomValue));
+
+                    // Copy the native memory back to managed memory if required
+                    transformedDepthReference.InvalidateMemory();
+                    transformedCustom.InvalidateMemory();
+                }
+            }
+        }
+
+        /// <summary>
         /// Transforms an Image from the color camera perspective to the depth camera perspective.
         /// </summary>
         /// <param name="capture">Capture containing depth and color images.</param>
