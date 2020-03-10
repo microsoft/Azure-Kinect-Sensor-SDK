@@ -1,8 +1,8 @@
-# Bus 002 Device 116: ID 045e:097a Microsoft Corp. 
-# Bus 001 Device 015: ID 045e:097b Microsoft Corp. 
-# Bus 002 Device 118: ID 045e:097c Microsoft Corp. 
-# Bus 002 Device 117: ID 045e:097d Microsoft Corp. 
-# Bus 001 Device 016: ID 045e:097e Microsoft Corp. 
+# Bus 002 Device 116: ID 045e:097a Microsoft Corp.  - Generic Superspeed USB Hub
+# Bus 001 Device 015: ID 045e:097b Microsoft Corp.  - Generic USB Hub
+# Bus 002 Device 118: ID 045e:097c Microsoft Corp.  - Azure Kinect Depth Camera
+# Bus 002 Device 117: ID 045e:097d Microsoft Corp.  - Azure Kinect 4K Camera
+# Bus 001 Device 016: ID 045e:097e Microsoft Corp.  - Azure Kinect Microphone Array
 
 BUS!="usb", ACTION!="add", SUBSYSTEM!=="usb_device", GOTO="k4a_logic_rules_end"
 
