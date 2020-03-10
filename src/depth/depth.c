@@ -26,8 +26,8 @@ static k4a_version_t g_min_fw_version_rgb = { 1, 5, 92 };                  // 1.
 static k4a_version_t g_min_fw_version_depth = { 1, 5, 66 };                // 1.5.66
 static k4a_version_t g_min_fw_version_audio = { 1, 5, 14 };                // 1.5.14
 static k4a_version_t g_min_fw_version_depth_config = { 5006, 27, 0 };      // 5006.27 (iteration is not used, set to 0)
-static k4a_version_t g_suggested_fw_version_rgb = { 1, 6, 104 };           // 1.6.104
-static k4a_version_t g_suggested_fw_version_depth = { 1, 6, 75 };          // 1.6.75
+static k4a_version_t g_suggested_fw_version_rgb = { 1, 6, 108 };           // 1.6.108
+static k4a_version_t g_suggested_fw_version_depth = { 1, 6, 79 };          // 1.6.79
 static k4a_version_t g_suggested_fw_version_audio = { 1, 6, 14 };          // 1.6.14
 static k4a_version_t g_suggested_fw_version_depth_config = { 6109, 7, 0 }; // 6109.7 (iteration is not used, set to 0)
 
