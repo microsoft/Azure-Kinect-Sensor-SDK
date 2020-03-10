@@ -1,13 +1,15 @@
 ## Change Log
 
-### v1.4.0 (alpha quality)
+### v1.4.0
 
+* Added ARM64 Suport.
 * On Windows Opencv-4.1.1 is now being used and tested.
 * CPP; Adding record.hpp, updated playback.hpp
 * Fixed small error in transformation functions
 * Updated K4aRecorder allow:
   * Setting manual exposure based on exposure time.
   * Record BGRA32 format.
+* Added transformation API's to CSharp
 
 ### v1.3.0 
 
