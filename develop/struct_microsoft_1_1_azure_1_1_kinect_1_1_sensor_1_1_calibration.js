@@ -7,6 +7,7 @@ var struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration =
     [ "GetHashCode", "struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration.html#adc922bb35a142de780fc13113a86650c", null ],
     [ "operator!=", "struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration_afefb52f21ad2b25a665f572879111c13.html#afefb52f21ad2b25a665f572879111c13", null ],
     [ "operator==", "struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration_a522329cba0e7c5f85d862a5585c56842.html#a522329cba0e7c5f85d862a5585c56842", null ],
+    [ "TransformColor2DToDepth2D", "struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration_a5d760a93e637ba6f21f5102e2b638e97.html#a5d760a93e637ba6f21f5102e2b638e97", null ],
     [ "TransformTo2D", "struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration_a98a3bfa4fb4f6b2e50cfa8a2d8f2f0fa.html#a98a3bfa4fb4f6b2e50cfa8a2d8f2f0fa", null ],
     [ "TransformTo2D", "struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration_a31828fb182a5386b6ca6c72e4c08dea6.html#a31828fb182a5386b6ca6c72e4c08dea6", null ],
     [ "TransformTo3D", "struct_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_calibration_a9d130a33c38c01e54f2fa8633c2b8a3d.html#a9d130a33c38c01e54f2fa8633c2b8a3d", null ],

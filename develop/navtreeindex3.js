@@ -1,5 +1,8 @@
 var NAVTREEINDEX3 =
 {
+"structk4a__record__configuration__t.html":[2,1,5,11],
+"structk4a__record__configuration__t.html#ae304ee1fd5d29f61fb8717d9fb3d6bd1":[2,1,5,11,11],
+"structk4a__record__configuration__t_a26d517a14ee493076a73071146013236.html#a26d517a14ee493076a73071146013236":[2,1,5,11,4],
 "structk4a__record__configuration__t_a38edea1057f5ff44622bc012637a3df1.html#a38edea1057f5ff44622bc012637a3df1":[2,1,5,11,3],
 "structk4a__record__configuration__t_a5745ac8b1dd557c6504c53c64533ed12.html#a5745ac8b1dd557c6504c53c64533ed12":[2,1,5,11,7],
 "structk4a__record__configuration__t_a9566f1dc53e148f8e7170ba85f16a136.html#a9566f1dc53e148f8e7170ba85f16a136":[2,1,5,11,9],
