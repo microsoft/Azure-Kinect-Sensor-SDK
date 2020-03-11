@@ -290,7 +290,7 @@ TEST_P(throughput_perf, testTest)
         printf("Auto Exposure\n");
     }
 
-    fps_in_usec = 1000000 / k4a_convert_fps_to_uint(as.fps);
+    fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(as.fps));
 
     config.color_format = as.color_format;
     config.color_resolution = as.color_resolution;
@@ -636,7 +636,7 @@ TEST_P(throughput_perf, testTest)
                  "only, %d, missing capture periods, %d, imu %%, %0.01f, not_synchronized, %d, %d\n",
                  buffer_date_time,
                  failed ? "FAILED" : "PASSED",
-                 computer_name ? computer_name : "compture name not set",
+                 computer_name ? computer_name : "computer name not set",
                  user_name ? user_name : "user name not set",
                  as.test_name,
                  get_string_from_color_format(as.color_format),

@@ -198,6 +198,33 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         /// <summary>
+        /// Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of the depth camera.
+        /// </summary>
+        /// <param name="sourcePoint2D">The 2D pixel color camera coordinates.</param>
+        /// <param name="depth">The depth image.</param>
+        /// <returns>The 2D pixel in depth camera coordinates, or null if the source point is not valid in the depth camera coordinate system.</returns>
+        public Vector2? TransformColor2DToDepth2D(Vector2 sourcePoint2D, Image depth)
+        {
+            if (depth == null)
+            {
+                throw new ArgumentNullException(nameof(depth));
+            }
+
+            using (LoggingTracer tracer = new LoggingTracer())
+            using (Image depthReference = depth.Reference())
+            {
+                AzureKinectException.ThrowIfNotSuccess(tracer, NativeMethods.k4a_calibration_color_2d_to_depth_2d(
+                ref this,
+                ref sourcePoint2D,
+                depthReference.DangerousGetHandle(),
+                out Vector2 target_point2d,
+                out bool valid));
+
+                return valid ? (Vector2?)target_point2d : null;
+            }
+        }
+
+        /// <summary>
         /// Creates a Transformation object from this calibration.
         /// </summary>
         /// <returns>A new Transformation object.</returns>

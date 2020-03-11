@@ -12,6 +12,7 @@
 //**************Symbolic Constant Macros (defines)  *************
 #define STREAM_RUN_TIME_SEC 4
 #define ERROR_START_STREAM_TIME 10000
+#define SECOND_TO_MICROSECONDS(sec) (sec * 1000 * 1000)
 
 // Total ACC range is +/- 147.15 m/s^2.
 #define MIN_ACC_READING -15.0f
@@ -85,6 +86,10 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     tickcounter_ms_t end_ms;
     tickcounter_ms_t delta_ms;
     uint32_t error_tolerance;
+    int first_sample_inspected = 0;
+    uint64_t fps_period_us;
+    uint32_t imu_cnt = 0;
+    uint32_t image_cnt = 0;
 
     stream_count = STREAM_RUN_TIME_SEC * expected_fps;
     tick_count = tickcounter_create();
@@ -95,7 +100,10 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
     config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.synchronized_images_only = true;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
+
+    fps_period_us = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config.camera_fps));
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(device));
@@ -114,7 +122,17 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     {
         // get frames as available
         ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_imu_sample(device, &imu_sample, timeout_ms));
-
+        imu_cnt++;
+        if (!first_sample_inspected)
+        {
+            // Time stamps should not go backwards and the first time stamps should be around zero as the color camera
+            // staring will device time stamps reset to zero.
+            ASSERT_LT(imu_sample.acc_timestamp_usec, SECOND_TO_MICROSECONDS(2));
+            ASSERT_LT(imu_sample.gyro_timestamp_usec, SECOND_TO_MICROSECONDS(2));
+            std::cout << "Initial Timestamps are: " << imu_sample.gyro_timestamp_usec << " and "
+                      << imu_sample.gyro_timestamp_usec << "\n";
+            first_sample_inspected = 1;
+        }
         ASSERT_GT(imu_sample.acc_timestamp_usec, last_acc_dev_ts);
         last_acc_dev_ts = imu_sample.acc_timestamp_usec;
         ASSERT_GT(imu_sample.gyro_timestamp_usec, last_gyro_dev_ts);
@@ -127,6 +145,43 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
         ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.x, MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_X"));
         ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.y, MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_Y"));
         ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.z, MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_Z"));
+
+        {
+            k4a_capture_t capture;
+            k4a_wait_result_t wresult;
+            ASSERT_NE(wresult = k4a_device_get_capture(device, &capture, 0), K4A_WAIT_RESULT_FAILED);
+            if (wresult == K4A_WAIT_RESULT_SUCCEEDED)
+            {
+                image_cnt++;
+                k4a_image_t image = k4a_capture_get_color_image(capture);
+                int64_t ts_c_dev = (int64_t)k4a_image_get_device_timestamp_usec(image);
+                EXPECT_LT(std::abs(ts_c_dev - (int64_t)imu_sample.gyro_timestamp_usec), (int64_t)fps_period_us * 4)
+                    << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_c_dev
+                    << " gyro TS: " << (int64_t)imu_sample.gyro_timestamp_usec << "\n";
+                EXPECT_LT(std::abs(ts_c_dev - (int64_t)imu_sample.acc_timestamp_usec), (int64_t)fps_period_us * 4)
+                    << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_c_dev
+                    << " Acc TS: " << (int64_t)imu_sample.acc_timestamp_usec << "\n";
+                k4a_image_release(image);
+
+                image = k4a_capture_get_ir_image(capture);
+                int64_t ts_ir_dev = (int64_t)k4a_image_get_device_timestamp_usec(image);
+                EXPECT_LT(std::abs(ts_ir_dev - (int64_t)imu_sample.gyro_timestamp_usec), (int64_t)fps_period_us * 4)
+                    << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_ir_dev
+                    << " gyro TS: " << (int64_t)imu_sample.gyro_timestamp_usec << "\n";
+                EXPECT_LT(std::abs(ts_ir_dev - (int64_t)imu_sample.acc_timestamp_usec), (int64_t)fps_period_us * 4)
+                    << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_ir_dev
+                    << " Acc TS: " << (int64_t)imu_sample.acc_timestamp_usec << "\n";
+                k4a_image_release(image);
+
+                // printf("IMU PTS delta %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " \n",
+                //        (int64_t)imu_sample.gyro_timestamp_usec - ts_c_dev,
+                //        (int64_t)imu_sample.acc_timestamp_usec - ts_c_dev,
+                //        (int64_t)imu_sample.gyro_timestamp_usec - ts_ir_dev,
+                //        (int64_t)imu_sample.acc_timestamp_usec - ts_ir_dev);
+
+                k4a_capture_release(capture);
+            }
+        }
 
         stream_count--;
     };
