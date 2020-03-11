@@ -827,6 +827,7 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Add execution property to binary files'
 
+    # Set and verify the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
     - script: |
         echo
         echo Checking OpenGL version on DISPLAY=:0
