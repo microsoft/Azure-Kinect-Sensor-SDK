@@ -828,14 +828,14 @@ jobs:
       displayName: 'Add execution property to binary files'
 
       # Set the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
-#    - script: |
+    - script: |
 #        if [ $(EdenArch) == "arm64" ]; then
 #          echo "##vso[task.setvariable variable=DISPLAY]:1"
 #        else
 #          echo "##vso[task.setvariable variable=DISPLAY]:0"
 #        fi
-#      workingDirectory: '$(System.ArtifactsDirectory)'
-#      displayName: 'set DISPLAY variable'
+      workingDirectory: '$(System.ArtifactsDirectory)'
+      displayName: 'set DISPLAY variable'
 
 #    - script: 'env && which xauth && glxinfo | grep "OpenGL"'
 #      workingDirectory: '$(System.ArtifactsDirectory)'
@@ -844,18 +844,24 @@ jobs:
 
     - script: |
         echo "##vso[task.setvariable variable=DISPLAY]:0"
-        env 
-        which xauth
+        echo set via VSO line
         DISPLAY=:0
         echo
         echo Checking OpenGL version on DISPLAY=:0
+        env | grep DISPLAY
+        env 
+        which xauth
         glxinfo | grep "OpenGL"
         if [ $? -ne 0 ] ; then 
           echo
           echo Checking OpenGL version on DISPLAY=:1
           echo "##vso[task.setvariable variable=DISPLAY]:1"
-          DISPLAY=:1
-          env
+          echo set via VSO line
+          export DISPLAY=:1
+          echo set via Display
+          env | grep DISPLAY
+          env 
+          which xauth
           glxinfo | grep "OpenGL"
         fi
       workingDirectory: '$(System.ArtifactsDirectory)'
