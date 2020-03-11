@@ -1,0 +1,27 @@
+var class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device =
+[
+    [ "Dispose", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device.html#ab9d67554475f6d6d0fa0163cf1c8646c", null ],
+    [ "Dispose", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_aaed479ad77ebcdc9036e82624b694cfc.html#aaed479ad77ebcdc9036e82624b694cfc", null ],
+    [ "GetCalibration", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a95a4a47bbd95d3f2667b7e763151db09.html#a95a4a47bbd95d3f2667b7e763151db09", null ],
+    [ "GetCalibration", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a47bce8849a9537abdf728e7e64e9b757.html#a47bce8849a9537abdf728e7e64e9b757", null ],
+    [ "GetCapture", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a8cb0d8d9859eaf2190d9ff32ffbe4f53.html#a8cb0d8d9859eaf2190d9ff32ffbe4f53", null ],
+    [ "GetCapture", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a5ca520906eff4c53bb0b66b08ca4b0ec.html#a5ca520906eff4c53bb0b66b08ca4b0ec", null ],
+    [ "GetColorControl", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a044a047ee083d027e6bf03283b7b6ab0.html#a044a047ee083d027e6bf03283b7b6ab0", null ],
+    [ "GetColorControl", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_aeacae8443681f65116964642e490bc86.html#aeacae8443681f65116964642e490bc86", null ],
+    [ "GetImuSample", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a0d66b1a86a97395c8883d10df98954ff.html#a0d66b1a86a97395c8883d10df98954ff", null ],
+    [ "GetImuSample", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a65d3851f9341c1a54db8ac20fd7207c5.html#a65d3851f9341c1a54db8ac20fd7207c5", null ],
+    [ "GetInstalledCount", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_ae6638ba057e6125026541c5c628d15e5.html#ae6638ba057e6125026541c5c628d15e5", null ],
+    [ "GetRawCalibration", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a778355ad3587a014d4712567477d6230.html#a778355ad3587a014d4712567477d6230", null ],
+    [ "Open", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a8f7cb48cd412067cbf06461764e260a5.html#a8f7cb48cd412067cbf06461764e260a5", null ],
+    [ "SetColorControl", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a1be646a4d57dc940f83f5c23c87ed4bc.html#a1be646a4d57dc940f83f5c23c87ed4bc", null ],
+    [ "StartCameras", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a2be041f58a89a2a31832eb1f10a1715c.html#a2be041f58a89a2a31832eb1f10a1715c", null ],
+    [ "StartImu", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a9cf120d028a94cfdab39d5c5704e71c9.html#a9cf120d028a94cfdab39d5c5704e71c9", null ],
+    [ "StopCameras", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a0ce6f965d79bab799ac2c8c87497c8fa.html#a0ce6f965d79bab799ac2c8c87497c8fa", null ],
+    [ "StopImu", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a08739e8772b4808388767d2303f1ead6.html#a08739e8772b4808388767d2303f1ead6", null ],
+    [ "CurrentColorResolution", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a09b2902103bbcdd97f602b6db1f4039b.html#a09b2902103bbcdd97f602b6db1f4039b", null ],
+    [ "CurrentDepthMode", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_ad0e3d02c557274bfa4a081cdf53a607c.html#ad0e3d02c557274bfa4a081cdf53a607c", null ],
+    [ "SerialNum", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_af3d54b95525de30d2b3aa0d2b15d40b8.html#af3d54b95525de30d2b3aa0d2b15d40b8", null ],
+    [ "SyncInJackConnected", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_a742a6280ec6ac62ee3f19d870ca6616c.html#a742a6280ec6ac62ee3f19d870ca6616c", null ],
+    [ "SyncOutJackConnected", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_ad68128771e348311c18beacd7bce0e59.html#ad68128771e348311c18beacd7bce0e59", null ],
+    [ "Version", "class_microsoft_1_1_azure_1_1_kinect_1_1_sensor_1_1_device_afe9affd862fbdd05ae46c92270e2123a.html#afe9affd862fbdd05ae46c92270e2123a", null ]
+];
