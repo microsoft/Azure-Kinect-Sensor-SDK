@@ -845,7 +845,7 @@ jobs:
     - script: |
         echo "##vso[task.setvariable variable=DISPLAY]:0"
         echo set via VSO line
-        DISPLAY=:0
+        export DISPLAY=:0
         echo
         echo Checking OpenGL version on DISPLAY=:0
         env | grep DISPLAY
