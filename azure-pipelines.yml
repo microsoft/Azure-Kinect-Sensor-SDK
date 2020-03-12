@@ -769,9 +769,8 @@ jobs:
         versionSpec: '>=5.1.0' 
 
     # The account on the NUC does not currently give this user permission to install, so we have done so manually.
-    # This captures the dependency NuGet has in this environment. We locally ran 'apt-get install mono-complete'
-    # We also need opencv, so install that too
-    #- script: 'apt-get install mono libopencv-dev'
+    # Mono has a bug, so we need a newer version. Version 6.8 is working well for both AMD64 and ARM64.
+    #- script: 'apt-get install mono-complete python git-lfs openssh-server ufw libopencv-dev'
     #  workingDirectory: '$(System.ArtifactsDirectory)'
     #  displayName: "Ensure Mono is installed"
 
@@ -828,17 +827,24 @@ jobs:
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Add execution property to binary files'
 
-      # Set the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
+    # Set and verify the DISPLAY variable since DepthEngine needs to open a display window (even there is no visual display).
     - script: |
-        if [ $(EdenArch) == "arm64" ]; then
+        echo
+        echo Checking OpenGL version on DISPLAY=:0
+        echo "##vso[task.setvariable variable=DISPLAY]:0"
+        export DISPLAY=:0
+        env | grep DISPLAY
+        which xauth
+        glxinfo | grep "OpenGL"
+        if [ $? -ne 0 ] ; then 
+          echo
+          echo Checking OpenGL version on DISPLAY=:1
           echo "##vso[task.setvariable variable=DISPLAY]:1"
-        else
-          echo "##vso[task.setvariable variable=DISPLAY]:0"
+          export DISPLAY=:1
+          env | grep DISPLAY
+          which xauth
+          glxinfo | grep "OpenGL"
         fi
-      workingDirectory: '$(System.ArtifactsDirectory)'
-      displayName: 'set DISPLAY variable'
-
-    - script: 'env && which xauth && glxinfo | grep "OpenGL"'
       workingDirectory: '$(System.ArtifactsDirectory)'
       displayName: 'Check openGL version'
       timeoutInMinutes: 5
