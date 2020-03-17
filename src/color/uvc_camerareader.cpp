@@ -1244,6 +1244,17 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
             uint64_t ts = (uint64_t)frame->capture_time_finished.tv_sec * 1000000000;
             ts += (uint64_t)frame->capture_time_finished.tv_nsec;
             image_set_system_timestamp_nsec(image, ts);
+            {
+                struct timespec ts_time;
+                result = K4A_RESULT_FROM_BOOL(clock_gettime(CLOCK_MONOTONIC, &ts_time) == 0);
+                if (K4A_SUCCEEDED(result))
+                {
+                    // Rollover happens about ~136 years after boot.
+                    image->sys_timestamp_nsec = (uint64_t)ts_time.tv_sec * 1000000000 + (uint64_t)ts_time.tv_nsec;
+                }
+                LOG_ERROR("Time Delta from system TS %d\n", ts_time - ts);
+            }
+
             image_set_device_timestamp_usec(image, K4A_90K_HZ_TICK_TO_USEC(framePTS));
             image_set_exposure_usec(image, exposure_time);
             image_set_iso_speed(image, iso_speed);
