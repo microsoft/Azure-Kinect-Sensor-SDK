@@ -1,0 +1,166 @@
+
+
+body, table, div, p, html, dl
+{
+	font-family: Segoe UI,SegoeUI,Segoe WP,Helvetica Neue,Helvetica,Tahoma,Arial,sans-serif;
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 25.33px;
+}
+
+#projectlogo
+{
+	padding: 5px;
+}
+
+.memtitle
+{
+	font-family: Segoe UI,SegoeUI,Segoe WP,Helvetica Neue,Helvetica,Tahoma,Arial,sans-serif;
+	font-size: 40px;
+	font-weight: 600;
+	line-height: 52px;
+	background-image: none;
+	background-color: transparent;
+	border: none;
+	margin-bottom: 30px;
+}
+
+
+div.memproto
+{
+	
+	border-color: rgb(227, 227, 227);
+	border-width: 1px;
+	border-style: solid;
+	background-color: rgb(250, 250, 250);
+}
+
+.memproto table{
+	font-family: monospace, monospace;
+	font-size: 13.93px;
+	font-weight: 400;
+	line-height: 16.5px;
+}
+
+.ui-resizable-e {
+	background-image: none;
+	background-color: #f9fafc;
+}
+.memproto table table
+{
+	padding: 16px;
+}
+
+#nav-tree
+{
+	background-color: transparent;
+	background-image: none;
+}
+
+#nav-tree .label
+{
+	font-family: Segoe UI,SegoeUI,Segoe WP,Helvetica Neue,Helvetica,Tahoma,Arial,sans-serif;
+	font-size: 13.93px;
+	font-weight: 400;
+	line-height: 25.33px;
+	padding-left: 16px;
+	padding-bottom: 2px;
+	padding-top: 2px;
+	color: black;
+}
+#nav-tree .label a
+{
+	color: black;
+}
+
+.navpath ul{
+	background-image: none;
+}
+
+.arrow
+{
+	color: black;
+	content: "\FF34" !important;
+}
+
+.sm-dox
+{
+	background-image: none;
+	text-shadow: none;
+
+	border-bottom-color: rgb(83, 115, 180);
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+}
+
+
+.memdoc
+{
+	border: none;
+	box-shadow: none;
+}
+
+dl.params dt, dl.section dt
+{
+	font-family: Segoe UI,SegoeUI,Segoe WP,Helvetica Neue,Helvetica,Tahoma,Arial,sans-serif;
+	font-size: 28px;
+	font-weight: 600;
+	line-height: 36.4px;
+	margin-bottom: 12px;
+	margin-top: 32px;
+}
+
+dl.section dd
+{
+	margin-left: 0px;
+	margin-bottom: 8px;
+}
+
+div.contents
+{
+	margin: 30px;
+}
+
+.params {
+	font-weight: 500;
+}
+.memproto td, .memproto
+{
+	padding: 0px;
+}
+
+a.el{
+	color: rgb(1,1,253);
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+a.el a:visited{
+	color: rgb(1,1,253);
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+.el{
+	color: rgb(1,1,253);
+	font-weight: normal;
+}
+
+.paramname{
+	color: unset;
+}
+
+.paramtype{
+	color: rgb(1,1,253);
+}
+
+table.memname
+{
+	font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
+}
+
+.permalink
+{
+	display: none;
+}
+
