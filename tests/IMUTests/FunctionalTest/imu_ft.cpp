@@ -11,6 +11,7 @@
 
 //**************Symbolic Constant Macros (defines)  *************
 #define STREAM_RUN_TIME_SEC 4
+#define STARTUP_DELAY_5S_IN_USEC (5 * 1000 * 1000)
 #define ERROR_START_STREAM_TIME 10000
 #define SECOND_TO_MICROSECONDS(sec) (sec * 1000 * 1000)
 
@@ -22,7 +23,6 @@
 #define MIN_GYRO_READING -0.1f
 #define MAX_GYRO_READING 0.1f
 //************************ Typedefs *****************************
-#define STARTUP_DELAY_5S_IN_USEC (5 * 1000 * 1000)
 
 //************ Declarations (Statics and globals) ***************
 
