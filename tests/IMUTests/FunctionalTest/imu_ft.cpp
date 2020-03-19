@@ -96,7 +96,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
 
     tick_count = tickcounter_create();
 
-
     {
         // Delay start of test upto 5 sec - IMU / Color camera firmware take a couple seconds to zero out timestamps.
         // The SDK's color module may not properly filter out timestamps that will go backwards if started while the
@@ -128,13 +127,27 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(device));
 
-    // allow stream start time
+    // Allow stream start time by tossing out first 'n' samples
     timeout_ms = ERROR_START_STREAM_TIME;
-    ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_imu_sample(device, &imu_sample, timeout_ms));
+    stream_count = 0;
+    while (wresult != K4A_WAIT_RESULT_FAILED && stream_count < 10)
+    {
+        k4a_capture_t capture;
+        // Toss out the first n samples
+        ASSERT_NE(wresult = k4a_device_get_capture(device, &capture, timeout_ms), K4A_WAIT_RESULT_FAILED);
+        k4a_capture_release(capture);
+        stream_count++;
+    }
+
+    // Drain IMU queue
+    while (wresult == K4A_WAIT_RESULT_SUCCEEDED)
+    {
+        ASSERT_NE(wresult = k4a_device_get_imu_sample(device, &imu_sample, 0), K4A_WAIT_RESULT_FAILED);
+    }
 
     // Start clock on getting frames
     tickcounter_get_current_ms(tick_count, &start_ms);
-    timeout_ms = 2000;
+
     stream_count = STREAM_RUN_TIME_SEC * expected_fps;
 
     uint64_t last_gyro_dev_ts = 0;
