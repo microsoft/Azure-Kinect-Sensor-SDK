@@ -23,6 +23,7 @@
 #define MAX_GYRO_READING 0.1f
 //************************ Typedefs *****************************
 #define STARTUP_DELAY_5S_IN_USEC (5 * 1000 * 1000)
+
 //************ Declarations (Statics and globals) ***************
 
 //******************* Function Prototypes ***********************
@@ -51,19 +52,19 @@ public:
     k4a_device_t m_device = nullptr;
 };
 
-// static bool is_float_in_range(float value, float min, float max, const char *description)
-// {
-//     if (min < value && value < max)
-//     {
-//         return true;
-//     }
-//     printf("%s is out of range value:%4.4f min:%4.4f max:%4.4f\n",
-//            description,
-//            (double)value,
-//            (double)min,
-//            (double)max);
-//     return false;
-// }
+static bool is_float_in_range(float value, float min, float max, const char *description)
+{
+    if (min < value && value < max)
+    {
+        return true;
+    }
+    printf("%s is out of range value:%4.4f min:%4.4f max:%4.4f\n",
+           description,
+           (double)value,
+           (double)min,
+           (double)max);
+    return false;
+}
 
 /**
  *  Utility to configure the sensor and run the sensor at the configuration.
@@ -91,13 +92,13 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     uint32_t imu_cnt = 0;
     uint32_t image_cnt = 0;
     k4a_wait_result_t wresult = K4A_WAIT_RESULT_SUCCEEDED;
+    k4a_device_configuration_t config;
 
     tick_count = tickcounter_create();
 
-    k4a_device_configuration_t config;
 
     {
-        // Delay Start of test upto 5 sec - IMU / Color camera firmware take a couple seconds to zero out timestamps.
+        // Delay start of test upto 5 sec - IMU / Color camera firmware take a couple seconds to zero out timestamps.
         // The SDK's color module may not properly filter out timestamps that will go backwards if started while the
         // free running timestamp on the firmware is under 5s from the previous start. This is directly related to how
         // the IMU module uses "color_camera_start_tick"
@@ -143,8 +144,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
         // get frames as available
         ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_imu_sample(device, &imu_sample, timeout_ms));
         imu_cnt++;
-        // printf("IMU# %d PTS %" PRId64 "\n", imu_cnt, (int64_t)imu_sample.gyro_timestamp_usec);
-
         if (!first_sample_inspected)
         {
             // Time stamps should not go backwards and the first time stamps should be around zero as the color camera
@@ -161,13 +160,12 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
         last_gyro_dev_ts = imu_sample.gyro_timestamp_usec;
 
         ASSERT_NE(imu_sample.temperature, 0);
-        // ASSERT_EQ(true, is_float_in_range(imu_sample.acc_sample.xyz.x, MIN_ACC_READING, MAX_ACC_READING, "ACC_X"));
-        // ASSERT_EQ(true, is_float_in_range(imu_sample.acc_sample.xyz.y, MIN_ACC_READING, MAX_ACC_READING, "ACC_Y"));
-        // ASSERT_EQ(true, is_float_in_range(imu_sample.acc_sample.xyz.z, MIN_ACC_READING, MAX_ACC_READING, "ACC_Z"));
-        // ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.x, MIN_GYRO_READING, MAX_GYRO_READING,
-        // "GYRO_X")); ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.y, MIN_GYRO_READING,
-        // MAX_GYRO_READING, "GYRO_Y")); ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.z,
-        // MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_Z"));
+        ASSERT_EQ(true, is_float_in_range(imu_sample.acc_sample.xyz.x, MIN_ACC_READING, MAX_ACC_READING, "ACC_X"));
+        ASSERT_EQ(true, is_float_in_range(imu_sample.acc_sample.xyz.y, MIN_ACC_READING, MAX_ACC_READING, "ACC_Y"));
+        ASSERT_EQ(true, is_float_in_range(imu_sample.acc_sample.xyz.z, MIN_ACC_READING, MAX_ACC_READING, "ACC_Z"));
+        ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.x, MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_X"));
+        ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.y, MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_Y"));
+        ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.z, MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_Z"));
 
         {
             k4a_capture_t capture;
@@ -179,8 +177,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
                 if (image)
                 {
                     int64_t ts_c_dev = (int64_t)k4a_image_get_device_timestamp_usec(image);
-                    // printf("IMU# %d PTS %" PRId64 "\n", imu_cnt, (int64_t)imu_sample.gyro_timestamp_usec);
-                    // printf("image# %d PTS %" PRId64 "\n", image_cnt, (int64_t)ts_c_dev);
                     EXPECT_LT(std::abs(ts_c_dev - (int64_t)imu_sample.gyro_timestamp_usec), (int64_t)fps_period_us * 4)
                         << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_c_dev
                         << " gyro TS: " << (int64_t)imu_sample.gyro_timestamp_usec << "\n";
@@ -194,8 +190,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
                 if (image)
                 {
                     int64_t ts_ir_dev = (int64_t)k4a_image_get_device_timestamp_usec(image);
-                    // printf("IMU# %d PTS %" PRId64 "\n", imu_cnt, (int64_t)imu_sample.gyro_timestamp_usec);
-                    // printf("image# %d PTS %" PRId64 "\n", image_cnt, (int64_t)ts_ir_dev);
                     EXPECT_LT(std::abs(ts_ir_dev - (int64_t)imu_sample.gyro_timestamp_usec), (int64_t)fps_period_us * 4)
                         << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_ir_dev
                         << " gyro TS: " << (int64_t)imu_sample.gyro_timestamp_usec << "\n";
