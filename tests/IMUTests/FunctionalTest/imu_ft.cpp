@@ -89,18 +89,17 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     uint32_t error_tolerance;
     int first_sample_inspected = 0;
     uint64_t fps_period_us;
-    uint32_t imu_cnt = 0;
-    uint32_t image_cnt = 0;
     k4a_wait_result_t wresult = K4A_WAIT_RESULT_SUCCEEDED;
     k4a_device_configuration_t config;
 
     tick_count = tickcounter_create();
 
     {
-        // Delay start of test upto 5 sec - IMU / Color camera firmware take a couple seconds to zero out timestamps.
-        // The SDK's color module may not properly filter out timestamps that will go backwards if started while the
-        // free running timestamp on the firmware is under 5s from the previous start. This is directly related to how
-        // the IMU module uses "color_camera_start_tick"
+        // Typically this code only causes a delay when k4a_device_start_cameras was called less than
+        // STARTUP_DELAY_5S_IN_USEC seconds ago. Delay start of test upto 5 sec - IMU / Color camera firmware take a
+        // couple seconds to zero out timestamps. The SDK's color module may not properly filter out timestamps that
+        // will go backwards if started while the free running timestamp on the firmware is under 5s from the previous
+        // start. This is directly related to how the IMU module uses "color_camera_start_tick"
         config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         config.depth_mode = K4A_DEPTH_MODE_PASSIVE_IR;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
@@ -156,7 +155,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     {
         // get frames as available
         ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_imu_sample(device, &imu_sample, timeout_ms));
-        imu_cnt++;
         if (!first_sample_inspected)
         {
             // Time stamps should not go backwards and the first time stamps should be around zero as the color camera
@@ -167,9 +165,17 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
                       << imu_sample.gyro_timestamp_usec << "\n";
             first_sample_inspected = 1;
         }
+        else
+        {
+            // Make sure not more than 10 samples were dropped.
+            ASSERT_LT(imu_sample.acc_timestamp_usec - last_acc_dev_ts, 10 * 1000000 / K4A_IMU_SAMPLE_RATE)
+                << " Last Sample " << last_acc_dev_ts << " Current Sample " << imu_sample.acc_timestamp_usec << "\n";
+            ASSERT_LT(imu_sample.gyro_timestamp_usec - last_gyro_dev_ts, 10 * 1000000 / K4A_IMU_SAMPLE_RATE)
+                << " Last Sample " << last_gyro_dev_ts << " Current Sample " << imu_sample.gyro_timestamp_usec << "\n";
+        }
         ASSERT_GT(imu_sample.acc_timestamp_usec, last_acc_dev_ts);
-        last_acc_dev_ts = imu_sample.acc_timestamp_usec;
         ASSERT_GT(imu_sample.gyro_timestamp_usec, last_gyro_dev_ts);
+        last_acc_dev_ts = imu_sample.acc_timestamp_usec;
         last_gyro_dev_ts = imu_sample.gyro_timestamp_usec;
 
         ASSERT_NE(imu_sample.temperature, 0);
@@ -180,46 +186,17 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
         ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.y, MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_Y"));
         ASSERT_EQ(true, is_float_in_range(imu_sample.gyro_sample.xyz.z, MIN_GYRO_READING, MAX_GYRO_READING, "GYRO_Z"));
 
+        k4a_capture_t capture;
+        ASSERT_NE(wresult = k4a_device_get_capture(device, &capture, 0), K4A_WAIT_RESULT_FAILED);
+        if (wresult == K4A_WAIT_RESULT_SUCCEEDED)
         {
-            k4a_capture_t capture;
-            ASSERT_NE(wresult = k4a_device_get_capture(device, &capture, 0), K4A_WAIT_RESULT_FAILED);
-            if (wresult == K4A_WAIT_RESULT_SUCCEEDED)
-            {
-                image_cnt++;
-                k4a_image_t image = k4a_capture_get_color_image(capture);
-                if (image)
-                {
-                    int64_t ts_c_dev = (int64_t)k4a_image_get_device_timestamp_usec(image);
-                    EXPECT_LT(std::abs(ts_c_dev - (int64_t)imu_sample.gyro_timestamp_usec), (int64_t)fps_period_us * 4)
-                        << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_c_dev
-                        << " gyro TS: " << (int64_t)imu_sample.gyro_timestamp_usec << "\n";
-                    EXPECT_LT(std::abs(ts_c_dev - (int64_t)imu_sample.acc_timestamp_usec), (int64_t)fps_period_us * 4)
-                        << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_c_dev
-                        << " Acc TS: " << (int64_t)imu_sample.acc_timestamp_usec << "\n";
-                    k4a_image_release(image);
-                }
+            // printf("IMU PTS delta %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " \n",
+            //        (int64_t)imu_sample.gyro_timestamp_usec - ts_c_dev,
+            //        (int64_t)imu_sample.acc_timestamp_usec - ts_c_dev,
+            //        (int64_t)imu_sample.gyro_timestamp_usec - ts_ir_dev,
+            //        (int64_t)imu_sample.acc_timestamp_usec - ts_ir_dev);
 
-                image = k4a_capture_get_ir_image(capture);
-                if (image)
-                {
-                    int64_t ts_ir_dev = (int64_t)k4a_image_get_device_timestamp_usec(image);
-                    EXPECT_LT(std::abs(ts_ir_dev - (int64_t)imu_sample.gyro_timestamp_usec), (int64_t)fps_period_us * 4)
-                        << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_ir_dev
-                        << " gyro TS: " << (int64_t)imu_sample.gyro_timestamp_usec << "\n";
-                    EXPECT_LT(std::abs(ts_ir_dev - (int64_t)imu_sample.acc_timestamp_usec), (int64_t)fps_period_us * 4)
-                        << " IMU CNT: " << imu_cnt << " image cnt: " << image_cnt << " Image Dev TS: " << ts_ir_dev
-                        << " Acc TS: " << (int64_t)imu_sample.acc_timestamp_usec << "\n";
-                    k4a_image_release(image);
-                }
-
-                // printf("IMU PTS delta %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " \n",
-                //        (int64_t)imu_sample.gyro_timestamp_usec - ts_c_dev,
-                //        (int64_t)imu_sample.acc_timestamp_usec - ts_c_dev,
-                //        (int64_t)imu_sample.gyro_timestamp_usec - ts_ir_dev,
-                //        (int64_t)imu_sample.acc_timestamp_usec - ts_ir_dev);
-
-                k4a_capture_release(capture);
-            }
+            k4a_capture_release(capture);
         }
 
         stream_count--;
