@@ -88,7 +88,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     tickcounter_ms_t delta_ms;
     uint32_t error_tolerance;
     int first_sample_inspected = 0;
-    uint64_t fps_period_us;
     k4a_wait_result_t wresult = K4A_WAIT_RESULT_SUCCEEDED;
     k4a_device_configuration_t config;
 
@@ -120,8 +119,6 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config.synchronized_images_only = false;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
-
-    fps_period_us = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config.camera_fps));
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(device));
