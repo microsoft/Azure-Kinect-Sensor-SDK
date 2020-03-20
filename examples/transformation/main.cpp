@@ -120,7 +120,7 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
 {
     int returnCode = 1;
     k4a_device_t device = NULL;
-    const int32_t TIMEOUT_IN_MS = 1000;
+    const int32_t TIMEOUT_IN_MS = 10000;
     k4a_transformation_t transformation = NULL;
     k4a_transformation_t transformation_color_downscaled = NULL;
     k4a_capture_t capture = NULL;
