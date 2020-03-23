@@ -41,9 +41,12 @@ need for a different debian distribution, please file an
 [enhancement request](https://aka.ms/azurekinectfeedback).
 
 Our packages are hosted in [Microsoft's Package
-Repository](https://packages.microsoft.com). Please follow [these
+Repository](https://packages.microsoft.com). 
+* **AMD64** users, please follow [these
 instructions](https://docs.microsoft.com/en-us/windows-server/administration/linux-package-repository-for-microsoft-software)
 to configure Microsoft's Package Repository on your machine.
+* **ARM64** users, please use the same instructions, but use https://packages.microsoft.com/ubuntu/18.04/multiarch/prod for the repository path instead of the default ~~https://packages.microsoft.com/ubuntu/18.04/prod~~.
+
 
 Once you have configured Microsoft's Package Repository you should have access
 to the following packages:
@@ -53,7 +56,7 @@ to the following packages:
 * k4a-tools (Tools package)
 
 Please note that "\<major\>" and "\<minor\>" refer to the major and minor
-portion of the version of the SDK you would like to target. For example, at the writing of these instructions the following packages are available
+portion of the version of the SDK you would like to target. For example, at the writing of these instructions the following packages are available.
 
 * libk4a1.3
 * libk4a1.3-dev
