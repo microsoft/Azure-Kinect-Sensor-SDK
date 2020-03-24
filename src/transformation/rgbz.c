@@ -13,6 +13,9 @@
 #include <emmintrin.h> // SSE2
 #include <tmmintrin.h> // SSE3
 #include <smmintrin.h> // SSE4.1
+#elif defined(__aarch64__) || defined(_M_ARM64)
+#define K4A_USING_NEON
+#include <arm_neon.h>
 #endif
 
 typedef struct _k4a_transformation_input_image_t
@@ -1058,7 +1061,7 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
     return K4A_BUFFER_RESULT_SUCCEEDED;
 }
 
-#if !defined(K4A_USING_SSE)
+#if !defined(K4A_USING_SSE) && !defined(K4A_USING_NEON)
 // This is the same function as transformation_depth_to_xyz without the SSE
 // instructions. This code is kept here for readability.
 static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
@@ -1092,7 +1095,65 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
     }
 }
 
-#else
+#elif defined(K4A_USING_NEON)
+// convert from float to int using NEON is round to zero
+// make separate function to do floor
+static inline int32x4_t neon_floor(float32x4_t v)
+{
+        int32x4_t v0 = vcvtq_s32_f32(v);
+        int32x4_t a0 = vreinterpretq_s32_u32(vcgtq_f32(vcvtq_f32_s32(v0), v));
+        return vaddq_s32(v0, a0);
+}
+
+static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
+                                        const void *depth_image_data,
+                                        void *xyz_image_data)
+{
+    float* x_tab = (float*)xy_tables->x_table;
+    float* y_tab = (float*)xy_tables->y_table;
+    const uint16_t *depth_image_data_uint16 = (const uint16_t *)depth_image_data;
+    int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
+    float32x4_t half = vdupq_n_f32(0.5f);
+
+    for (int i = 0; i < xy_tables->width * xy_tables->height / 8; i++)
+    {
+        // 8 elements in 1 loop
+        int offset = i * 8;
+        float32x4_t x_tab_lo = vld1q_f32(x_tab + offset);
+        float32x4_t x_tab_hi = vld1q_f32(x_tab + offset + 4);
+        // equivalent to isnan
+        uint32x4_t valid_lo = vceqq_f32(x_tab_lo, x_tab_lo);
+        uint32x4_t valid_hi = vceqq_f32(x_tab_hi, x_tab_hi);
+        // each element in valid is a mask which corresponds to isnan
+        uint16x8_t valid = vcombine_u16(vmovn_u32(valid_lo), vmovn_u32(valid_hi));
+        // v_z corresponds to z in naive code
+        int16x8_t v_z = vreinterpretq_s16_u16(vandq_u16(vld1q_u16(depth_image_data_uint16), valid));
+        float32x4_t v_z_lo = vcvtq_f32_u32(vmovl_u16(vget_low_u16 (vreinterpretq_u16_s16(v_z))));
+        float32x4_t v_z_hi = vcvtq_f32_u32(vmovl_u16(vget_high_u16(vreinterpretq_u16_s16(v_z))));
+        // load x_table and y_table
+        float32x4_t t_x_lo = vld1q_f32(x_tab + offset);
+        float32x4_t t_x_hi = vld1q_f32(x_tab + offset + 4);
+        float32x4_t t_y_lo = vld1q_f32(y_tab + offset);
+        float32x4_t t_y_hi = vld1q_f32(y_tab + offset + 4);
+        // half stands for 0.5f
+        int32x4_t v_x_lo = neon_floor(vaddq_f32(vmulq_f32(v_z_lo, t_x_lo), half));
+        int32x4_t v_x_hi = neon_floor(vaddq_f32(vmulq_f32(v_z_hi, t_x_hi), half));
+        int32x4_t v_y_lo = neon_floor(vaddq_f32(vmulq_f32(v_z_lo, t_y_lo), half));
+        int32x4_t v_y_hi = neon_floor(vaddq_f32(vmulq_f32(v_z_hi, t_y_hi), half));
+
+        int16x8_t v_x = vcombine_s16(vmovn_s32(v_x_lo), vmovn_s32(v_x_hi));
+        int16x8_t v_y = vcombine_s16(vmovn_s32(v_y_lo), vmovn_s32(v_y_hi));
+        // use scatter store instruction
+        int16x8x3_t store;
+        store.val[0] = v_x; // x0 x1 .. x14 x15
+        store.val[1] = v_y; // y0 y1 .. y14 y15
+        store.val[2] = v_z; // z0 z1 .. z14 z15
+        // x0 y0 z0 x1 y1 z1 .. x15 y15 z15
+        vst3q_s16(xyz_data_int16 + offset * 3, store);
+    }
+}
+
+#else /* defined(K4A_USING_SSE) */
 
 static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
                                         const void *depth_image_data,
