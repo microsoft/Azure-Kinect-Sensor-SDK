@@ -1100,17 +1100,17 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
 // make separate function to do floor
 static inline int32x4_t neon_floor(float32x4_t v)
 {
-        int32x4_t v0 = vcvtq_s32_f32(v);
-        int32x4_t a0 = vreinterpretq_s32_u32(vcgtq_f32(vcvtq_f32_s32(v0), v));
-        return vaddq_s32(v0, a0);
+    int32x4_t v0 = vcvtq_s32_f32(v);
+    int32x4_t a0 = vreinterpretq_s32_u32(vcgtq_f32(vcvtq_f32_s32(v0), v));
+    return vaddq_s32(v0, a0);
 }
 
 static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
                                         const void *depth_image_data,
                                         void *xyz_image_data)
 {
-    float* x_tab = (float*)xy_tables->x_table;
-    float* y_tab = (float*)xy_tables->y_table;
+    float *x_tab = (float *)xy_tables->x_table;
+    float *y_tab = (float *)xy_tables->y_table;
     const uint16_t *depth_image_data_uint16 = (const uint16_t *)depth_image_data;
     int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
     float32x4_t half = vdupq_n_f32(0.5f);
@@ -1128,7 +1128,7 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
         uint16x8_t valid = vcombine_u16(vmovn_u32(valid_lo), vmovn_u32(valid_hi));
         // v_z corresponds to z in naive code
         int16x8_t v_z = vreinterpretq_s16_u16(vandq_u16(vld1q_u16(depth_image_data_uint16), valid));
-        float32x4_t v_z_lo = vcvtq_f32_u32(vmovl_u16(vget_low_u16 (vreinterpretq_u16_s16(v_z))));
+        float32x4_t v_z_lo = vcvtq_f32_u32(vmovl_u16(vget_low_u16(vreinterpretq_u16_s16(v_z))));
         float32x4_t v_z_hi = vcvtq_f32_u32(vmovl_u16(vget_high_u16(vreinterpretq_u16_s16(v_z))));
         // load x_table and y_table
         float32x4_t t_x_lo = vld1q_f32(x_tab + offset);
