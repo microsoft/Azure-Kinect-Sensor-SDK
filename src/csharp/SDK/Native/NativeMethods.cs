@@ -108,6 +108,15 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
+        public static extern k4a_result_t k4a_calibration_color_2d_to_depth_2d(
+            [In] ref Calibration calibration,
+            ref Vector2 source_point2d,
+            k4a_image_t depth_image,
+            out Vector2 target_point2d,
+            out bool valid);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
         public static extern k4a_result_t k4a_calibration_get_from_raw(
             byte[] raw_calibration,
             UIntPtr raw_calibration_size,
@@ -129,6 +138,17 @@ namespace Microsoft.Azure.Kinect.Sensor
             k4a_transformation_t transformation_handle,
             k4a_image_t depth_image,
             k4a_image_t transformed_depth_image);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_transformation_depth_image_to_color_camera_custom(
+            k4a_transformation_t transformation_handle,
+            k4a_image_t depth_image,
+            k4a_image_t custom_image,
+            k4a_image_t transformed_depth_image,
+            k4a_image_t transformed_custom_image,
+            TransformationInterpolationType interpolation_type,
+            uint invalid_custom_value);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]

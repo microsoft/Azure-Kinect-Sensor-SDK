@@ -15,7 +15,8 @@
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/envvariable.h>
 
-#define TS_TO_MS(ts) ((long long)((ts) / 1)) // TS convertion to milliseconds
+#define LLD(val) ((int64_t)(val))
+#define TS_TO_MS(ts) (LLD((ts) / 1)) // TS convertion to milliseconds
 
 #define K4A_IMU_SAMPLE_RATE 1666 // +/- 2%
 
@@ -234,7 +235,7 @@ TEST_P(throughput_perf, testTest)
     int missed_count = 0;
     int not_synchronized_count = 0;
     uint64_t last_ts = UINT64_MAX;
-    uint64_t fps_in_usec = 0;
+    int32_t fps_in_usec = 0;
     uint64_t last_color_ts = 0;
     uint64_t last_depth16_ts = 0;
     uint64_t last_ir16_ts = 0;
@@ -245,6 +246,7 @@ TEST_P(throughput_perf, testTest)
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     thread_data thread = { 0 };
     THREAD_HANDLE th1 = NULL;
+    int64_t max_sync_delay = 0;
 
     printf("Capturing %d frames for test: %s\n", g_capture_count, as.test_name);
 
@@ -288,7 +290,7 @@ TEST_P(throughput_perf, testTest)
         printf("Auto Exposure\n");
     }
 
-    fps_in_usec = 1000000 / k4a_convert_fps_to_uint(as.fps);
+    fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(as.fps));
 
     config.color_format = as.color_format;
     config.color_resolution = as.color_resolution;
@@ -301,8 +303,10 @@ TEST_P(throughput_perf, testTest)
     if (g_depth_delay_off_color_usec == 0)
     {
         // Create delay that can be +fps to -fps
-        config.depth_delay_off_color_usec = (int32_t)(2 * fps_in_usec * ((uint64_t)rand()) / RAND_MAX - fps_in_usec);
+        config.depth_delay_off_color_usec = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);
     }
+
+    max_sync_delay = k4a_unittest_get_max_sync_delay_ms(as.fps);
 
     printf("Config being used is:\n");
     printf("    color_format:%d\n", config.color_format);
@@ -391,10 +395,10 @@ TEST_P(throughput_perf, testTest)
                 ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts, adjusted_max_ts);
                 static_assert(sizeof(ts) == 8, "this should not be wrong");
-                printf(" %9lld[%6lld][%6lld]",
+                printf(" %9" PRId64 "[%6" PRId64 "][%6" PRId64 "]",
                        TS_TO_MS(ts),
                        TS_TO_MS(ts - last_color_ts),
-                       (long long int)k4a_image_get_exposure_usec(image));
+                       LLD(k4a_image_get_exposure_usec(image)));
 
                 // TS should increase
                 EXPECT_GT(ts, last_color_ts);
@@ -414,7 +418,7 @@ TEST_P(throughput_perf, testTest)
                 depth = true;
                 ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
-                printf(" | %9lld[%6lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
+                printf(" | %9" PRId64 "[%6" PRId64 "]", TS_TO_MS(ts), TS_TO_MS(ts - last_ir16_ts));
 
                 // TS should increase
                 EXPECT_GT(ts, last_ir16_ts);
@@ -433,7 +437,7 @@ TEST_P(throughput_perf, testTest)
             {
                 ts = k4a_image_get_device_timestamp_usec(image);
                 adjusted_max_ts = std::max(ts - (uint64_t)config.depth_delay_off_color_usec, adjusted_max_ts);
-                printf(" | %9lld[%6lld]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
+                printf(" | %9" PRId64 "[%6" PRId64 "]", TS_TO_MS(ts), TS_TO_MS(ts - last_depth16_ts));
 
                 // TS should increase
                 EXPECT_GT(ts, last_depth16_ts);
@@ -464,11 +468,9 @@ TEST_P(throughput_perf, testTest)
             printf(" | %6" PRId64, delta);
 
             delta -= config.depth_delay_off_color_usec;
-            if (delta < 0)
-            {
-                delta *= -1;
-            }
-            if (delta > 1000)
+            delta = std::abs(delta);
+
+            if (delta > max_sync_delay)
             {
                 not_synchronized_count++;
             }
@@ -497,21 +499,21 @@ TEST_P(throughput_perf, testTest)
             // the color image is delayed due to perf issues. When this happens we just ignore the sample because our
             // time stamp logic has already moved beyond the time this sample was supposed to arrive at.
         }
-        else if ((adjusted_max_ts - last_ts) >= (fps_in_usec * 15 / 10))
+        else if ((adjusted_max_ts - last_ts) >= ((unsigned)(fps_in_usec * 15 / 10)))
         {
             // Calc how many captures we didn't get. If the delta between the last two time stamps is more than 1.5
             // * fps_in_usec then we count
-            int missed_this_period = ((int)((adjusted_max_ts - last_ts) / fps_in_usec));
+            int32_t missed_this_period = (int32_t)(adjusted_max_ts - last_ts) / fps_in_usec;
             missed_this_period--; // We got a new time stamp to do this math, so this count has 1 too many, remove
                                   // it
-            if (((adjusted_max_ts - last_ts) % fps_in_usec) > fps_in_usec / 2)
+            if (((adjusted_max_ts - last_ts) % ((unsigned)fps_in_usec)) > ((unsigned)fps_in_usec) / 2)
             {
                 missed_this_period++;
             }
-            printf("Missed %d captures before previous capture %lld %lld\n",
+            printf("Missed %d captures before previous capture %" PRId64 " %" PRId64 "\n",
                    missed_this_period,
-                   (long long)adjusted_max_ts,
-                   (long long)last_ts);
+                   LLD(adjusted_max_ts),
+                   LLD(last_ts));
             if (missed_this_period > capture_count)
             {
                 missed_count += capture_count;
@@ -634,7 +636,7 @@ TEST_P(throughput_perf, testTest)
                  "only, %d, missing capture periods, %d, imu %%, %0.01f, not_synchronized, %d, %d\n",
                  buffer_date_time,
                  failed ? "FAILED" : "PASSED",
-                 computer_name ? computer_name : "compture name not set",
+                 computer_name ? computer_name : "computer name not set",
                  user_name ? user_name : "user name not set",
                  as.test_name,
                  get_string_from_color_format(as.color_format),

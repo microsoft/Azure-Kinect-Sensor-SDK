@@ -9,6 +9,7 @@ add_executable(playback_perf playback_perf.cpp test_helpers.cpp)
 target_link_libraries(record_ut PRIVATE
     k4ainternal::utcommon
     k4ainternal::record
+    k4a::k4arecord
 )
 
 target_link_libraries(playback_ut PRIVATE

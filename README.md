@@ -1,8 +1,6 @@
 # Azure Kinect SDK (K4A)
 
-Welcome to the Azure Kinect DK Sensor SDK! While devices and the Body Tracking SDK will be available this
-summer, we wanted to share the Sensor SDK now. We hope you can use this interim period to get familiar with
-our SDK, ask questions, and provide feedback. See [Azure.com/Kinect](https://Azure.com/kinect) for device
+Welcome to the Azure Kinect Sensor SDK! We hope you can use it to build many great applications and participate in the project. Don't be shy to ask questions, and provide feedback. See [Azure.com/Kinect](https://Azure.com/kinect) for device
 info and available documentation.
 
 [![Build Status
@@ -83,6 +81,8 @@ email to ensure we received your original message. Further information, includin
 [MSRC PGP](https://technet.microsoft.com/en-us/security/dn606155) key, can be found in the
 [Security TechCenter](https://technet.microsoft.com/en-us/security/default).
 
-## License
+## License and Microsoft Support for Azure Kinect Sensor SDK
 
 [MIT License](LICENSE)
+
+[Microsoft Support for Azure Kinect Sensor SDK](microsoft-support.md)

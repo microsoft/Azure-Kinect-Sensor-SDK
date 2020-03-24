@@ -35,6 +35,10 @@ void SampleRecordings::SetUp()
     k4a_device_configuration_t record_config_depth_only = record_config_full;
     record_config_depth_only.color_resolution = K4A_COLOR_RESOLUTION_OFF;
 
+    k4a_device_configuration_t record_config_bgra_color = record_config_full;
+    record_config_bgra_color.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
+    record_config_bgra_color.depth_mode = K4A_DEPTH_MODE_OFF;
+
     {
         k4a_record_t handle = NULL;
         k4a_result_t result = k4a_record_create("record_test_empty.mkv", NULL, record_config_empty, &handle);
@@ -61,7 +65,7 @@ void SampleRecordings::SetUp()
 
         uint64_t timestamps[3] = { 0, 1000, 1000 }; // Offset the Depth and IR tracks by 1ms to test
         uint64_t imu_timestamp = 1150;
-        uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_full.camera_fps);
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_full.camera_fps));
         k4a_capture_t capture = NULL;
         for (size_t i = 0; i < test_frame_count; i++)
         {
@@ -104,7 +108,7 @@ void SampleRecordings::SetUp()
         uint64_t timestamps[3] = { 0,
                                    (uint64_t)record_config_delay.depth_delay_off_color_usec,
                                    (uint64_t)record_config_delay.depth_delay_off_color_usec };
-        uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_delay.camera_fps);
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_delay.camera_fps));
         k4a_capture_t capture = NULL;
         for (size_t i = 0; i < test_frame_count; i++)
         {
@@ -165,7 +169,7 @@ void SampleRecordings::SetUp()
         }
 
         uint64_t timestamps[3] = { 1000000, 1001000, 1001000 }; // Start recording at 1s
-        uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_full.camera_fps);
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_full.camera_fps));
         for (size_t i = 0; i < test_frame_count; i++)
         {
             // Create a known pattern of dropped / missing frames that can be tested against
@@ -231,7 +235,7 @@ void SampleRecordings::SetUp()
 
         uint64_t timestamps[3] = { 1000000, 1000000, 1000000 };
         uint64_t imu_timestamp = 1001150;
-        uint32_t timestamp_delta = 1000000 / k4a_convert_fps_to_uint(record_config_delay.camera_fps);
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_delay.camera_fps));
         k4a_capture_t capture = NULL;
         for (size_t i = 0; i < test_frame_count; i++)
         {
@@ -307,6 +311,28 @@ void SampleRecordings::SetUp()
 
         k4a_record_close(handle);
     }
+    { // Create a recording file with BGRA color
+        k4a_record_t handle = NULL;
+        k4a_result_t result = k4a_record_create("record_test_bgra_color.mkv", NULL, record_config_bgra_color, &handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        result = k4a_record_write_header(handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        uint64_t timestamps[3] = { 0, 0, 0 };
+        k4a_capture_t capture = create_test_capture(timestamps,
+                                                    record_config_bgra_color.color_format,
+                                                    record_config_bgra_color.color_resolution,
+                                                    record_config_bgra_color.depth_mode);
+        result = k4a_record_write_capture(handle, capture);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        k4a_capture_release(capture);
+
+        result = k4a_record_flush(handle);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        k4a_record_close(handle);
+    }
 }
 
 void SampleRecordings::TearDown()
@@ -319,6 +345,7 @@ void SampleRecordings::TearDown()
     ASSERT_EQ(std::remove("record_test_offset.mkv"), 0);
     ASSERT_EQ(std::remove("record_test_color_only.mkv"), 0);
     ASSERT_EQ(std::remove("record_test_depth_only.mkv"), 0);
+    ASSERT_EQ(std::remove("record_test_bgra_color.mkv"), 0);
 }
 
 void CustomTrackRecordings::SetUp()

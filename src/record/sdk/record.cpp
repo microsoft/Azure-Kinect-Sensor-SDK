@@ -82,6 +82,9 @@ k4a_result_t k4a_record_create(const char *path,
             case K4A_IMAGE_FORMAT_COLOR_MJPG:
                 color_mode_str << "MJPG_" << color_height << "P";
                 break;
+            case K4A_IMAGE_FORMAT_COLOR_BGRA32:
+                color_mode_str << "BGRA_" << color_height << "P";
+                break;
             default:
                 LOG_ERROR("Unsupported color_format specified in recording: %d", device_config.color_format);
                 result = K4A_RESULT_FAILED;

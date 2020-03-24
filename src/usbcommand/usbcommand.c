@@ -319,6 +319,12 @@ static k4a_result_t find_libusb_device(uint32_t device_index,
                     // We have a container ID match
                     found = true;
                 }
+                else
+                {
+                    char container_id_string[UUID_STR_LENGTH];
+                    uuid_to_string(&usbcmd->container_id, container_id_string, sizeof(container_id_string));
+                    LOG_INFO("Found non matching Container ID: %s ", container_id_string);
+                }
             }
 
             if (!found)
@@ -712,7 +718,7 @@ static k4a_result_t usb_cmd_io(usbcmd_t usbcmd_handle,
                     (response_packet.packet_type != USB_CMD_PACKET_TYPE_RESPONSE))
                 {
                     LOG_ERROR("Command(%08X) sequence ended in failure, "
-                              "transationId %08X == %08X "
+                              "TransactionId %08X == %08X "
                               "Response size 0x%08X == 0x%08X "
                               "Packet status 0x%08x == 0x%08x "
                               "Packet type 0x%08x == 0x%08x",
@@ -1026,7 +1032,7 @@ k4a_result_t usb_cmd_get_device_count(uint32_t *p_device_count)
         LOG_ERROR("List too large", 0);
         return K4A_RESULT_FAILED;
     }
-    if (count == 0)
+    if (count <= 0)
     {
         LOG_ERROR("No devices found", 0);
         return K4A_RESULT_FAILED;

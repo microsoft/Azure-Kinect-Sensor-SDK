@@ -511,32 +511,32 @@ void CMFCameraReader::Stop()
         if (SUCCEEDED(hr = m_spSourceReader->Flush((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM)))
         {
             m_flushing = true;
+
+            lock.Unlock(); // Wait without lock
+            do
+            {
+                // Wait until async operations are terminated for 10 sec
+                switch (WaitForSingleObject(m_hStreamFlushed, 10000))
+                {
+                case WAIT_OBJECT_0:
+                    // Flushing completed
+                    return;
+                case WAIT_TIMEOUT:
+                    LOG_ERROR("Timeout waiting for m_hStreamFlushed");
+                    break;
+                case WAIT_FAILED:
+                    LOG_ERROR("WaitForSingleObject on m_hStreamFlushed failed (%d)", GetLastError());
+                    assert(false);
+                    break;
+                default:
+                    break;
+                }
+            } while (1);
         }
         else
         {
             LOG_ERROR("Failed to request flush for stop: 0x%08x", hr);
         }
-
-        lock.Unlock(); // Wait without lock
-        do
-        {
-            // Wait until async operations are terminated for 10 sec
-            switch (WaitForSingleObject(m_hStreamFlushed, 10000))
-            {
-            case WAIT_OBJECT_0:
-                // Flushing completed
-                return;
-            case WAIT_TIMEOUT:
-                LOG_ERROR("Timeout waiting for m_hStreamFlushed");
-                break;
-            case WAIT_FAILED:
-                LOG_ERROR("WaitForSingleObject on m_hStreamFlushed failed (%d)", GetLastError());
-                assert(false);
-                break;
-            default:
-                break;
-            }
-        } while (1);
     }
 }
 

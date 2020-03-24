@@ -39,10 +39,13 @@ target_include_directories(k4arecord PUBLIC
 target_link_libraries(k4arecord PRIVATE
     k4ainternal::record
     k4ainternal::playback
-    k4a::k4a
     k4ainternal::logging
     ebml::ebml
     matroska::matroska
+)
+
+target_link_libraries(k4arecord PUBLIC
+    k4a::k4a
 )
 
 # Define alias for k4arecord
@@ -121,6 +124,7 @@ install(
 install(
     FILES
         ${K4A_INCLUDE_DIR}/k4arecord/record.h
+        ${K4A_INCLUDE_DIR}/k4arecord/record.hpp
         ${K4A_INCLUDE_DIR}/k4arecord/playback.h
         ${K4A_INCLUDE_DIR}/k4arecord/playback.hpp
         ${K4A_INCLUDE_DIR}/k4arecord/types.h

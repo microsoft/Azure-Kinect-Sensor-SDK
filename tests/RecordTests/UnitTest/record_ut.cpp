@@ -2,9 +2,12 @@
 // Licensed under the MIT License.
 
 #include <utcommon.h>
+#include <iostream>
 
 // Module being tested
 #include <k4ainternal/matroska_write.h>
+#include <k4arecord/record.h>
+#include <k4a/k4a.h>
 
 #include <ebml/MemIOCallback.h>
 #include <matroska/KaxSegment.h>
@@ -127,6 +130,81 @@ TEST_F(record_ut, new_cluster_out_of_order)
     }
 
     ASSERT_EQ(context->pending_clusters.size(), 3u);
+}
+
+// This test's goal is to fill up the write queue by saturating disk write.
+// It should trigger the write speed warning message in the logs.
+// Since this test is unlikely to complete, and needs to be manually run, it is disabled.
+TEST_F(record_ut, DISABLED_bgra_color_max_disk_write)
+{
+    k4a_device_configuration_t record_config = {};
+    record_config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
+    record_config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
+    record_config.depth_mode = K4A_DEPTH_MODE_OFF;
+    record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+
+    std::cout
+        << "A 'Disk write speed is too low, write queue is filling up.' log message is expected after about 4 seconds."
+        << std::endl;
+    std::cout
+        << "If the test completes without this log message, the check may be broken, or the test disk may be too fast."
+        << std::endl;
+    std::cout
+        << "If the test crashes due to an out-of-memory condition without logging a disk warning, the check is broken."
+        << std::endl;
+
+    k4a_record_t handle = NULL;
+    k4a_result_t result = k4a_record_create("record_test_bgra_color.mkv", NULL, record_config, &handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    result = k4a_record_write_header(handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    uint64_t timestamp_ns = 0;
+    for (int i = 0; i < 1000; i++)
+    {
+        k4a_capture_t capture = NULL;
+        result = k4a_capture_create(&capture);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        uint32_t width = 3840;
+        uint32_t height = 2160;
+        uint32_t stride = width * 4;
+        size_t buffer_size = height * stride;
+        uint8_t *buffer = new uint8_t[height * stride];
+        memset(buffer, 0xFF, height * stride);
+
+        k4a_image_t color_image = NULL;
+        result = k4a_image_create_from_buffer(record_config.color_format,
+                                              (int)width,
+                                              (int)height,
+                                              (int)stride,
+                                              buffer,
+                                              buffer_size,
+                                              [](void *_buffer, void *ctx) {
+                                                  delete[](uint8_t *) _buffer;
+                                                  (void)ctx;
+                                              },
+                                              NULL,
+                                              &color_image);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+        k4a_image_set_device_timestamp_usec(color_image, timestamp_ns / 1000);
+        k4a_capture_set_color_image(capture, color_image);
+        k4a_image_release(color_image);
+
+        result = k4a_record_write_capture(handle, capture);
+        ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+        k4a_capture_release(capture);
+        timestamp_ns += 1_s / 30;
+    }
+
+    result = k4a_record_flush(handle);
+    ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
+
+    k4a_record_close(handle);
+
+    ASSERT_EQ(std::remove("record_test_bgra_color.mkv"), 0);
 }
 
 int main(int argc, char **argv)

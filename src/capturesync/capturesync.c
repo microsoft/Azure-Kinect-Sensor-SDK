@@ -59,8 +59,6 @@ K4A_DECLARE_CONTEXT(capturesync_t, capturesync_context_t);
 #define DEPTH_CAPTURE (false)
 #define COLOR_CAPTURE (true)
 
-#define MICRO_SECONDS(seconds) (seconds * 1000000)
-
 /**
  * This function is responsible for updating the information in either capturesync_context_t->depth_ir or in
  * capturesync_context_t->color. capturesync_context_t holds the capture, image, and ts for the sample we are currenly
@@ -488,40 +486,31 @@ k4a_result_t capturesync_start(capturesync_t capturesync_handle, const k4a_devic
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, capturesync_t, capturesync_handle);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, config == NULL);
     capturesync_context_t *sync = capturesync_t_get_context(capturesync_handle);
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     // Reset frames to drop
     sync->waiting_for_clean_depth_ts = true;
     sync->synchronized_images_only = config->synchronized_images_only;
 
-    uint32_t camera_fps = k4a_convert_fps_to_uint(config->camera_fps);
+    sync->fps_period = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->camera_fps));
+    sync->fps_1_quarter_period = sync->fps_period / 4;
+    sync->depth_delay_off_color_usec = config->depth_delay_off_color_usec;
+    sync->sync_captures = true;
+    sync->depth_captures_dropped = 0;
 
-    result = K4A_RESULT_FROM_BOOL(camera_fps > 0);
-    if (K4A_SUCCEEDED(result))
+    if (config->color_resolution == K4A_COLOR_RESOLUTION_OFF || config->depth_mode == K4A_DEPTH_MODE_OFF)
     {
-        sync->fps_period = MICRO_SECONDS(1) / camera_fps;
-        sync->fps_1_quarter_period = sync->fps_period / 4;
-        sync->depth_delay_off_color_usec = config->depth_delay_off_color_usec;
-        sync->sync_captures = true;
-
-        if (config->color_resolution == K4A_COLOR_RESOLUTION_OFF || config->depth_mode == K4A_DEPTH_MODE_OFF)
-        {
-            // Only 1 sensor is running, disable synchronization
-            sync->sync_captures = false;
-        }
+        // Only 1 sensor is running, disable synchronization
+        sync->sync_captures = false;
     }
 
-    if (K4A_SUCCEEDED(result))
-    {
-        queue_enable(sync->color.queue);
-        queue_enable(sync->depth_ir.queue);
-        queue_enable(sync->sync_queue);
+    queue_enable(sync->color.queue);
+    queue_enable(sync->depth_ir.queue);
+    queue_enable(sync->sync_queue);
 
-        // Not taking the lock as we don't need to syncronize this on start
-        sync->running = true;
-    }
+    // Not taking the lock as we don't need to synchronize this on start
+    sync->running = true;
 
-    return result;
+    return K4A_RESULT_SUCCEEDED;
 }
 
 void capturesync_stop(capturesync_t capturesync_handle)

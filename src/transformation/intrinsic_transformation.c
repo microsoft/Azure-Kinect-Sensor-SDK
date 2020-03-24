@@ -6,6 +6,11 @@
 
 #include <float.h>
 
+// We don't like globals if we can help it. This one is for reducing critical logging noise when recorded files are used
+// with Rational 6KT calibration. Production devices never had this calibration but recordings were made with this
+// calibration. So we fire the warning 1 time instead of every time a transformation call is made
+static int g_deprecated_6kt_message_fired = false;
+
 static k4a_result_t transformation_project_internal(const k4a_calibration_camera_t *camera_calibration,
                                                     const float xy[2],
                                                     float uv[2],
@@ -32,8 +37,10 @@ static k4a_result_t transformation_project_internal(const k4a_calibration_camera
         return K4A_RESULT_FAILED;
     }
 
-    if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT)
+    if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT &&
+        g_deprecated_6kt_message_fired == false)
     {
+        g_deprecated_6kt_message_fired = true;
         LOG_CRITICAL("Rational 6KT is deprecated (only supported early internal devices). Please replace your Azure "
                      "Kinect with a retail device.",
                      0);
@@ -248,8 +255,10 @@ static k4a_result_t transformation_unproject_internal(const k4a_calibration_came
         return K4A_RESULT_FAILED;
     }
 
-    if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT)
+    if (camera_calibration->intrinsics.type == K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT &&
+        g_deprecated_6kt_message_fired == false)
     {
+        g_deprecated_6kt_message_fired = true;
         LOG_CRITICAL("Rational 6KT is deprecated (only supported early internal devices). Please replace your Azure "
                      "Kinect with a retail device.",
                      0);
@@ -309,7 +318,7 @@ static k4a_result_t transformation_unproject_internal(const k4a_calibration_came
     float yy = xy[1] * xy[1];
 
     xy[0] -= (yy + 3.f * xx) * p2 + two_xy * p1;
-    xy[1] -= (xx + 3.f * xx) * p1 + two_xy * p2;
+    xy[1] -= (xx + 3.f * yy) * p1 + two_xy * p2;
 
     // add on center of distortion
     xy[0] += codx;

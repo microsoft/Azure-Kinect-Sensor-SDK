@@ -135,7 +135,7 @@ static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
     assert(dewrapper->calibration_memory != NULL);
 
     // Max comput time is the configured FPS
-    *depth_engine_max_compute_time_ms = 1000 / k4a_convert_fps_to_uint(fps);
+    *depth_engine_max_compute_time_ms = HZ_TO_PERIOD_MS(k4a_convert_fps_to_uint(fps));
     result = K4A_RESULT_FROM_BOOL(*depth_engine_max_compute_time_ms != 0);
 
     if (K4A_SUCCEEDED(result))

@@ -50,7 +50,8 @@ int do_recording(uint8_t device_index,
                  int recording_length,
                  k4a_device_configuration_t *device_config,
                  bool record_imu,
-                 int32_t absoluteExposureValue)
+                 int32_t absoluteExposureValue,
+                 int32_t gain)
 {
     const uint32_t installed_devices = k4a_device_get_installed_count();
     if (device_index >= installed_devices)
@@ -91,14 +92,14 @@ int do_recording(uint8_t device_index,
         return 1;
     }
 
-    if (absoluteExposureValue != 0)
+    if (absoluteExposureValue != defaultExposureAuto)
     {
         if (K4A_FAILED(k4a_device_set_color_control(device,
                                                     K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
                                                     K4A_COLOR_CONTROL_MODE_MANUAL,
                                                     absoluteExposureValue)))
         {
-            std::cerr << "Runtime error: k4a_device_set_color_control() failed " << std::endl;
+            std::cerr << "Runtime error: k4a_device_set_color_control() for manual exposure failed " << std::endl;
         }
     }
     else
@@ -108,7 +109,23 @@ int do_recording(uint8_t device_index,
                                                     K4A_COLOR_CONTROL_MODE_AUTO,
                                                     0)))
         {
-            std::cerr << "Runtime error: k4a_device_set_color_control() failed " << std::endl;
+            std::cerr << "Runtime error: k4a_device_set_color_control() for auto exposure failed " << std::endl;
+        }
+    }
+
+    if (gain != defaultGainAuto)
+    {
+        if (K4A_FAILED(
+                k4a_device_set_color_control(device, K4A_COLOR_CONTROL_GAIN, K4A_COLOR_CONTROL_MODE_MANUAL, gain)))
+        {
+            std::cerr << "Runtime error: k4a_device_set_color_control() for manual gain failed " << std::endl;
+        }
+    }
+    else
+    {
+        if (K4A_FAILED(k4a_device_set_color_control(device, K4A_COLOR_CONTROL_GAIN, K4A_COLOR_CONTROL_MODE_AUTO, 0)))
+        {
+            std::cerr << "Runtime error: k4a_device_set_color_control() for auto gain failed " << std::endl;
         }
     }
 
