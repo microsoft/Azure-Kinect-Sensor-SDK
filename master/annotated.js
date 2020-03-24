@@ -3,10 +3,12 @@ var annotated =
     [ "k4a", null, [
       [ "calibration", "structk4a_1_1calibration.html", "structk4a_1_1calibration" ],
       [ "capture", "classk4a_1_1capture.html", "classk4a_1_1capture" ],
+      [ "data_block", "classk4a_1_1data__block.html", "classk4a_1_1data__block" ],
       [ "device", "classk4a_1_1device.html", "classk4a_1_1device" ],
       [ "error", "classk4a_1_1error.html", null ],
       [ "image", "classk4a_1_1image.html", "classk4a_1_1image" ],
       [ "playback", "classk4a_1_1playback.html", "classk4a_1_1playback" ],
+      [ "record", "classk4a_1_1record.html", "classk4a_1_1record" ],
       [ "transformation", "classk4a_1_1transformation.html", "classk4a_1_1transformation" ]
     ] ],
     [ "Microsoft", "namespace_microsoft.html", "namespace_microsoft" ],

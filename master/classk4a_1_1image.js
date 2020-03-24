@@ -19,6 +19,7 @@ var classk4a_1_1image =
     [ "get_white_balance", "classk4a_1_1image_a98fc61c44d56d183125ddd1f519f4cc8.html#a98fc61c44d56d183125ddd1f519f4cc8", null ],
     [ "get_width_pixels", "classk4a_1_1image_a2ed85b2247946a21251c790071612904.html#a2ed85b2247946a21251c790071612904", null ],
     [ "handle", "classk4a_1_1image_a88a5e67e8dd75677502e2421b3ba7c2c.html#a88a5e67e8dd75677502e2421b3ba7c2c", null ],
+    [ "is_valid", "classk4a_1_1image.html#a94f398595ba9086533e9d6afe74b38b5", null ],
     [ "operator bool", "classk4a_1_1image.html#a32b1ba1b4dc1f1190fa456250ee0e4a0", null ],
     [ "operator!=", "classk4a_1_1image.html#aa000850be81fbda9b9bbfdde0283ec7a", null ],
     [ "operator!=", "classk4a_1_1image.html#a76be4cef7e6661f3940f9b9adcc16840", null ],

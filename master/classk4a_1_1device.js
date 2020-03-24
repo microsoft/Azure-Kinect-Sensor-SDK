@@ -18,6 +18,7 @@ var classk4a_1_1device =
     [ "handle", "classk4a_1_1device_a67c4cbd2cf6113228b5dfed56fef987b.html#a67c4cbd2cf6113228b5dfed56fef987b", null ],
     [ "is_sync_in_connected", "classk4a_1_1device_acaba6c5d8a28965882a4703e8806810a.html#acaba6c5d8a28965882a4703e8806810a", null ],
     [ "is_sync_out_connected", "classk4a_1_1device_aec0191ecf75549f650af7ac61d0afbef.html#aec0191ecf75549f650af7ac61d0afbef", null ],
+    [ "is_valid", "classk4a_1_1device.html#aece422ef7b2e662ceccebb4a990ed613", null ],
     [ "open", "classk4a_1_1device_a0094acf44bc68ab3d48f0851619d3467.html#a0094acf44bc68ab3d48f0851619d3467", null ],
     [ "operator bool", "classk4a_1_1device.html#a015a45ab5362697ef77ec4be2f387e31", null ],
     [ "operator=", "classk4a_1_1device.html#af20f4c5988b3b4a8053bd63c3930b331", null ],
