@@ -19,6 +19,7 @@ The latest stable binaries are available for download as MSIs.
 
    Tag                                                                               | MSI                                                                                                                                              | Firmware
 -------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------
+  [v1.4.0](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.4.0) | [Azure Kinect SDK 1.4.0.exe](https://download.microsoft.com/download/4/5/a/45aa3917-45bf-4f24-b934-5cff74df73e1/Azure%20Kinect%20SDK%201.4.0.exe) | [1.6.108079014](https://download.microsoft.com/download/4/5/a/45aa3917-45bf-4f24-b934-5cff74df73e1/Firmware/AzureKinectDK_Fw_1.6.108079014.bin)
   [v1.3.0](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.3.0) | [Azure Kinect SDK 1.3.0.exe](https://download.microsoft.com/download/e/6/6/e66482b2-b6c1-4e34-bfee-95294163fc40/Azure%20Kinect%20SDK%201.3.0.exe) | [1.6.102075014](https://download.microsoft.com/download/1/9/8/198048e8-63f2-45c6-8f96-1fd541d1b4bc/AzureKinectDK_Fw_1.6.102075014.bin)
   [v1.2.0](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.2.0) | [Azure Kinect SDK 1.2.0.msi](http://download.microsoft.com/download/1/9/8/198048e8-63f2-45c6-8f96-1fd541d1b4bc/Azure%20Kinect%20SDK%201.2.0.msi) | [1.6.102075014](https://download.microsoft.com/download/1/9/8/198048e8-63f2-45c6-8f96-1fd541d1b4bc/AzureKinectDK_Fw_1.6.102075014.bin)
   [v1.1.1](https://github.com/Microsoft/Azure-Kinect-Sensor-SDK/releases/tag/v1.1.1) | [Azure Kinect SDK 1.1.1.msi](http://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/Azure%20Kinect%20SDK%201.1.1.msi) | [1.6.987014](https://download.microsoft.com/download/4/9/0/490A8EB2-FFCA-4BAD-B0AD-0581CCE438FC/AzureKinectDK_Fw_1.6.987014.bin)
@@ -41,9 +42,12 @@ need for a different debian distribution, please file an
 [enhancement request](https://aka.ms/azurekinectfeedback).
 
 Our packages are hosted in [Microsoft's Package
-Repository](https://packages.microsoft.com). Please follow [these
+Repository](https://packages.microsoft.com). 
+* **AMD64** users, please follow [these
 instructions](https://docs.microsoft.com/en-us/windows-server/administration/linux-package-repository-for-microsoft-software)
 to configure Microsoft's Package Repository on your machine.
+* **ARM64** users, please use the same instructions, but use https://packages.microsoft.com/ubuntu/18.04/multiarch/prod for the repository path instead of the default ~~https://packages.microsoft.com/ubuntu/18.04/prod~~.
+
 
 Once you have configured Microsoft's Package Repository you should have access
 to the following packages:
@@ -53,7 +57,7 @@ to the following packages:
 * k4a-tools (Tools package)
 
 Please note that "\<major\>" and "\<minor\>" refer to the major and minor
-portion of the version of the SDK you would like to target. For example, at the writing of these instructions the following packages are available
+portion of the version of the SDK you would like to target. For example, at the writing of these instructions the following packages are available.
 
 * libk4a1.3
 * libk4a1.3-dev
