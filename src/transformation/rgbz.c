@@ -1126,21 +1126,22 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
         uint32x4_t valid_hi = vceqq_f32(x_tab_hi, x_tab_hi);
         // each element in valid is a mask which corresponds to isnan
         uint16x8_t valid = vcombine_u16(vmovn_u32(valid_lo), vmovn_u32(valid_hi));
+        uint16x8_t v_0 = vandq_u16(vld1q_u16(depth_image_data_uint16 + offset), valid);
         // v_z corresponds to z in naive code
-        int16x8_t v_z = vreinterpretq_s16_u16(vandq_u16(vld1q_u16(depth_image_data_uint16), valid));
-        float32x4_t v_z_lo = vcvtq_f32_u32(vmovl_u16(vget_low_u16(vreinterpretq_u16_s16(v_z))));
-        float32x4_t v_z_hi = vcvtq_f32_u32(vmovl_u16(vget_high_u16(vreinterpretq_u16_s16(v_z))));
+        int16x8_t v_z = vreinterpretq_s16_u16(v_0);
+        // expand v_z to compute x and y
+        float32x4_t v_z_lo = vcvtq_f32_u32(vmovl_u16(vget_low_u16(v_0)));
+        float32x4_t v_z_hi = vcvtq_f32_u32(vmovl_u16(vget_high_u16(v_0)));
         // load x_table and y_table
         float32x4_t t_x_lo = vld1q_f32(x_tab + offset);
         float32x4_t t_x_hi = vld1q_f32(x_tab + offset + 4);
         float32x4_t t_y_lo = vld1q_f32(y_tab + offset);
         float32x4_t t_y_hi = vld1q_f32(y_tab + offset + 4);
-        // half stands for 0.5f
-        int32x4_t v_x_lo = neon_floor(vaddq_f32(vmulq_f32(v_z_lo, t_x_lo), half));
-        int32x4_t v_x_hi = neon_floor(vaddq_f32(vmulq_f32(v_z_hi, t_x_hi), half));
-        int32x4_t v_y_lo = neon_floor(vaddq_f32(vmulq_f32(v_z_lo, t_y_lo), half));
-        int32x4_t v_y_hi = neon_floor(vaddq_f32(vmulq_f32(v_z_hi, t_y_hi), half));
-
+        // main computation of x and y
+        int32x4_t v_x_lo = neon_floor(vmlaq_f32(half, v_z_lo, t_x_lo));
+        int32x4_t v_x_hi = neon_floor(vmlaq_f32(half, v_z_hi, t_x_hi));
+        int32x4_t v_y_lo = neon_floor(vmlaq_f32(half, v_z_lo, t_y_lo));
+        int32x4_t v_y_hi = neon_floor(vmlaq_f32(half, v_z_hi, t_y_hi));
         int16x8_t v_x = vcombine_s16(vmovn_s32(v_x_lo), vmovn_s32(v_x_hi));
         int16x8_t v_y = vcombine_s16(vmovn_s32(v_y_lo), vmovn_s32(v_y_hi));
         // use scatter store instruction
