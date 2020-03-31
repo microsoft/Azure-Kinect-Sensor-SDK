@@ -411,16 +411,19 @@ TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
     {
         // Are we compiled for the correct instruction type
 #if defined(__amd64__) || defined(_M_AMD64) || defined(__i386__) || defined(_M_X86)
-#define SPECIAL_INSTRUCTION_OPTIMIZATION "SSE\0\0"
+#define SPECIAL_INSTRUCTION_OPTIMIZATION "SSE\0"
 #elif defined(__aarch64__) || defined(_M_ARM64)
-#define SPECIAL_INSTRUCTION_OPTIMIZATION "NEON\0"
+#define SPECIAL_INSTRUCTION_OPTIMIZATION "NEON"
 #else
-#define SPECIAL_INSTRUCTION_OPTIMIZATION "None\0"
+// Omit defining this when not SSE or NEON. Should result in a build break. We are either SSE or Neon.
+//#define SPECIAL_INSTRUCTION_OPTIMIZATION "None"
 #endif
         char *compile_type = transformation_get_instruction_type();
         ASSERT_NE(compile_type, (char *)nullptr);
         ASSERT_NE(compile_type[0], '\0');
         std::cout << "*** K4A Sensor SDK Compile type is: " << compile_type << " ***\n";
+        ASSERT_TRUE(memcmp(compile_type, SPECIAL_INSTRUCTION_OPTIMIZATION, strlen(compile_type)) == 0)
+            << "Expecting " << SPECIAL_INSTRUCTION_OPTIMIZATION << " but compiled for " << compile_type << "\n";
         ASSERT_TRUE(memcmp(compile_type, SPECIAL_INSTRUCTION_OPTIMIZATION, strlen(compile_type)) == 0)
             << "Expecting " << SPECIAL_INSTRUCTION_OPTIMIZATION << " but compiled for " << compile_type << "\n";
         ASSERT_EQ(strlen(compile_type), strlen(SPECIAL_INSTRUCTION_OPTIMIZATION));

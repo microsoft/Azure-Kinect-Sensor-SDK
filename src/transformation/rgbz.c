@@ -64,15 +64,11 @@ typedef struct _k4a_bounding_box_t
 static char g_transformation_instruction_type[5] = { 0 };
 
 // Share g_transformation_instruction_type with tests to confirm this is built correctly.
+char *transformation_get_instruction_type();
 char *transformation_get_instruction_type()
 {
     return g_transformation_instruction_type;
 }
-
-// g_transformation_instruction_type settings
-#define SPECIAL_INSTRUCTION_OPTIMIZATION_SSE "SSE"
-#define SPECIAL_INSTRUCTION_OPTIMIZATION_NEON "NEON"
-#define SPECIAL_INSTRUCTION_OPTIMIZATION_NONE "None"
 
 // Set the special instruction
 static void set_special_instruction_optimization(char *opt)
@@ -1098,7 +1094,7 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
     int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
     int16_t x, y, z;
 
-    set_special_instruction_optimization(SPECIAL_INSTRUCTION_OPTIMIZATION_NONE);
+    set_special_instruction_optimization("None");
 
     for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
     {
@@ -1143,7 +1139,7 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
     int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
     float32x4_t half = vdupq_n_f32(0.5f);
 
-    set_special_instruction_optimization(SPECIAL_INSTRUCTION_OPTIMIZATION_NEON);
+    set_special_instruction_optimization("NEON");
 
     for (int i = 0; i < xy_tables->width * xy_tables->height / 8; i++)
     {
@@ -1202,7 +1198,7 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
     __m128 *y_table_m128 = (__m128 *)y_table;
     __m128i *xyz_data_m128i = (__m128i *)xyz_image_data;
 
-    set_special_instruction_optimization(SPECIAL_INSTRUCTION_OPTIMIZATION_SSE);
+    set_special_instruction_optimization("SSE");
 
     const int16_t pos0 = 0x0100;
     const int16_t pos1 = 0x0302;
