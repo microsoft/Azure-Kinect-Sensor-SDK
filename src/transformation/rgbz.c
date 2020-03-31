@@ -8,7 +8,7 @@
 #include <limits.h>
 #include <math.h>
 
-#if defined(__amd64__) || defined(_M_AMD64) || defined(__i386__) || defined(_M_X86)
+#if defined(__amd64__) || defined(_M_AMD64) || defined(__i386__) || defined(_M_IX86)
 #define K4A_USING_SSE
 #include <emmintrin.h> // SSE2
 #include <tmmintrin.h> // SSE3
@@ -64,8 +64,8 @@ typedef struct _k4a_bounding_box_t
 static char g_transformation_instruction_type[5] = { 0 };
 
 // Share g_transformation_instruction_type with tests to confirm this is built correctly.
-char *transformation_get_instruction_type();
-char *transformation_get_instruction_type()
+char *transformation_get_instruction_type(void);
+char *transformation_get_instruction_type(void)
 {
     return g_transformation_instruction_type;
 }

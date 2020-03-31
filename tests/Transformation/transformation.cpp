@@ -410,7 +410,7 @@ TEST_F(transformation_ut, transformation_depth_image_to_point_cloud)
 
     {
         // Are we compiled for the correct instruction type
-#if defined(__amd64__) || defined(_M_AMD64) || defined(__i386__) || defined(_M_X86)
+#if defined(__amd64__) || defined(_M_AMD64) || defined(__i386__) || defined(_M_IX86)
 #define SPECIAL_INSTRUCTION_OPTIMIZATION "SSE\0"
 #elif defined(__aarch64__) || defined(_M_ARM64)
 #define SPECIAL_INSTRUCTION_OPTIMIZATION "NEON"
