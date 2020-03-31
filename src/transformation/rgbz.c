@@ -60,6 +60,32 @@ typedef struct _k4a_bounding_box_t
     int bottom_right[2];
 } k4a_bounding_box_t;
 
+// g_transformation_instruction_type is set to SSE, NEON, None, or NULL
+static char g_transformation_instruction_type[5] = { 0 };
+
+// Share g_transformation_instruction_type with tests to confirm this is built correctly.
+char *transformation_get_instruction_type()
+{
+    return g_transformation_instruction_type;
+}
+
+// g_transformation_instruction_type settings
+#define SPECIAL_INSTRUCTION_OPTIMIZATION_SSE "SSE"
+#define SPECIAL_INSTRUCTION_OPTIMIZATION_NEON "NEON"
+#define SPECIAL_INSTRUCTION_OPTIMIZATION_NONE "None"
+
+// Set the special instruction
+static void set_special_instruction_optimization(char *opt)
+{
+    // Only set this once
+    if (g_transformation_instruction_type[0] == '\0')
+    {
+        size_t sz = MIN(sizeof(opt), sizeof(g_transformation_instruction_type) - 1);
+        memcpy(g_transformation_instruction_type, opt, sz);
+        LOG_INFO("Compiled special instruction type is: %s\n", opt);
+    }
+}
+
 static k4a_transformation_image_descriptor_t
 transformation_init_image_descriptor(int width, int height, int stride, k4a_image_format_t format)
 {
@@ -1072,6 +1098,8 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
     int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
     int16_t x, y, z;
 
+    set_special_instruction_optimization(SPECIAL_INSTRUCTION_OPTIMIZATION_NONE);
+
     for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
     {
         float x_tab = xy_tables->x_table[i];
@@ -1114,6 +1142,8 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
     const uint16_t *depth_image_data_uint16 = (const uint16_t *)depth_image_data;
     int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
     float32x4_t half = vdupq_n_f32(0.5f);
+
+    set_special_instruction_optimization(SPECIAL_INSTRUCTION_OPTIMIZATION_NEON);
 
     for (int i = 0; i < xy_tables->width * xy_tables->height / 8; i++)
     {
@@ -1171,6 +1201,8 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
     __m128 *x_table_m128 = (__m128 *)x_table;
     __m128 *y_table_m128 = (__m128 *)y_table;
     __m128i *xyz_data_m128i = (__m128i *)xyz_image_data;
+
+    set_special_instruction_optimization(SPECIAL_INSTRUCTION_OPTIMIZATION_SSE);
 
     const int16_t pos0 = 0x0100;
     const int16_t pos1 = 0x0302;
