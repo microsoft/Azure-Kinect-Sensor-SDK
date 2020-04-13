@@ -2135,9 +2135,9 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_color_camera(k4a_trans
  * or k4a_image_create_from_buffer().
  *
  * \remarks
- * Using linear interpolation could create new values to \p transformed_custom_image which do no exist in \p
- * custom_image. Setting \p use_linear_interpolation to false will prevent this from happenning but will result in less
- * smooth image.
+ * Using ::K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR for \p interpolation_type could create new values to \p
+ * transformed_custom_image which do no exist in \p custom_image. Using ::K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST
+ * will prevent this from happenning but will result in a less smooth image.
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p transformed_depth_image and \p transformed_custom_image were successfully written and
