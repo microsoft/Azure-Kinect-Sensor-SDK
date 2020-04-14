@@ -3,6 +3,68 @@
 
 name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 
+schedules:
+- cron: "30 8 * * *"
+  displayName: Daily 12:30 AM PST build : 8:30AM UTC
+  branches:
+    include:
+    - develop
+  always: true
+- cron: "00 9 * * *"
+  displayName: Daily 1:00 AM PST build : 9:00AM UTC
+  branches:
+    include:
+    - develop
+  always: true
+- cron: "30 9 * * *"
+  displayName: Daily 1:30 AM PST build : 9:30AM UTC
+  branches:
+    include:
+    - develop
+  always: true
+- cron: "00 10 * * *"
+  displayName: Daily 2:00 AM PST build : 10:00AM UTC
+  branches:
+    include:
+    - develop
+  always: true
+- cron: "30 10 * * *"
+  displayName: Daily 2:30 AM PST build : 10:30AM UTC
+  branches:
+    include:
+    - develop
+  always: true
+- cron: "00 11 * * *"
+  displayName: Daily 3:00 AM PST build : 11:00AM UTC
+  branches:
+    include:
+    - develop
+  always: true
+- cron: "30 11 * * *"
+  displayName: Daily 3:30 AM PST build : 11:30AM UTC
+  branches:
+    include:
+    - develop
+  always: true
+- cron: "00 12 * * *"
+  displayName: Daily 4:00 AM PST build : 12:00AM UTC
+  branches:
+    include:
+    - develop
+  always: true
+- cron: "30 12 * * *"
+  displayName: Daily 4:30 AM PST build : 12:30PM UTC
+  branches:
+    include:
+    - develop
+  always: true
+- cron: "30 13 * * *"
+  displayName: Daily 5:00 AM PST build : 1:00PM UTC
+  branches:
+    include:
+    - develop
+  always: true
+    
 variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
