@@ -7,11 +7,11 @@ variables:
 - name: 'skipComponentGovernaceDetection'
   value: true
 - name: 'linux_firmware_version'
-  value: '1.6.108079014'
+  value: '1.6.110079014'
 - name: 'windows_firmware_version'
-  value: '1.6.108079014'
+  value: '1.6.110079014'
 - name: 'NuGetPackageVersion'
-  value: '1.4.0-alpha.4'
+  value: '1.4.1-alpha.0'
 - name: 'OpenCVPath'
   value: 'C:\OpenCV\Build\x64\vc15\'
 
