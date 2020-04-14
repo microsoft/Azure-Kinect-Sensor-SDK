@@ -1083,12 +1083,12 @@ k4a_buffer_result_t transformation_color_image_to_depth_camera_internal(
     return K4A_BUFFER_RESULT_SUCCEEDED;
 }
 
-#if !defined(K4A_USING_SSE) && !defined(K4A_USING_NEON)
 // This is the same function as transformation_depth_to_xyz without the SSE
 // instructions. This code is kept here for readability.
-static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
-                                        const void *depth_image_data,
-                                        void *xyz_image_data)
+static void transformation_depth_to_xyz_plain(k4a_transformation_xy_tables_t *xy_tables,
+                                              const void *depth_image_data,
+                                              void *xyz_image_data,
+                                              int start)
 {
     const uint16_t *depth_image_data_uint16 = (const uint16_t *)depth_image_data;
     int16_t *xyz_data_int16 = (int16_t *)xyz_image_data;
@@ -1096,7 +1096,7 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
 
     set_special_instruction_optimization("None");
 
-    for (int i = 0; i < xy_tables->width * xy_tables->height; i++)
+    for (int i = start; i < xy_tables->width * xy_tables->height; i++)
     {
         float x_tab = xy_tables->x_table[i];
 
@@ -1117,6 +1117,16 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
         xyz_data_int16[3 * i + 1] = y;
         xyz_data_int16[3 * i + 2] = z;
     }
+}
+
+#if !defined(K4A_USING_SSE) && !defined(K4A_USING_NEON)
+// This is the same function as transformation_depth_to_xyz without the SSE
+// instructions. This code is kept here for readability.
+static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_tables,
+                                        const void *depth_image_data,
+                                        void *xyz_image_data)
+{
+    transformation_depth_to_xyz_plain(xy_tables, depth_image_data, xyz_image_data, 0);
 }
 
 #elif defined(K4A_USING_NEON)
@@ -1141,7 +1151,8 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
 
     set_special_instruction_optimization("NEON");
 
-    for (int i = 0; i < xy_tables->width * xy_tables->height / 8; i++)
+    int i = 0;
+    for (i = 0; i < xy_tables->width * xy_tables->height / 8; i++)
     {
         // 8 elements in 1 loop
         int offset = i * 8;
@@ -1178,6 +1189,8 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
         // x0 y0 z0 x1 y1 z1 .. x15 y15 z15
         vst3q_s16(xyz_data_int16 + offset * 3, store);
     }
+    // process remainder
+    transformation_depth_to_xyz_plain(xy_tables, depth_image_data, xyz_image_data, i);
 }
 
 #else /* defined(K4A_USING_SSE) */
@@ -1218,7 +1231,8 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
 
     __m128i valid_shuffle = _mm_setr_epi16(pos0, pos2, pos4, pos6, pos0, pos2, pos4, pos6);
 
-    for (int i = 0; i < xy_tables->width * xy_tables->height / 8; i++)
+    int i = 0;
+    for (i = 0; i < xy_tables->width * xy_tables->height / 8; i++)
     {
         __m128i z = *depth_image_data_m128i++;
 
@@ -1254,6 +1268,8 @@ static void transformation_depth_to_xyz(k4a_transformation_xy_tables_t *xy_table
         // y5, z5, x6, y6, z6, x7, y7, z7
         *xyz_data_m128i++ = _mm_blend_epi16(_mm_blend_epi16(x, y, 0x49), z, 0x92);
     }
+    // process remainder
+    transformation_depth_to_xyz_plain(xy_tables, depth_image_data, xyz_image_data, i);
 }
 #endif
 
