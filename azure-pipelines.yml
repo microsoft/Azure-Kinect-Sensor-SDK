@@ -5,7 +5,7 @@ name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 
 schedules:
 - cron: "*/30 08-13 * * *"
-  displayName: Daily Builds starting at 8:00AM UTC (12:00AM PST) every 30 min - last build 13:30AM (5:30AM PST)
+  displayName: 'Daily Builds starting at 8:00AM UTC (12:00AM PST) every 30 min - last build 13:30AM (5:30AM PST)'
   branches:
     include:
     - develop
