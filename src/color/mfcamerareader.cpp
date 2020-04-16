@@ -484,6 +484,10 @@ k4a_result_t CMFCameraReader::Start(const UINT32 width,
         LOG_WARNING("Start request in started state", 0);
     }
 
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failing with HRESULT:%08X", hr);
+    }
     return k4aResultFromHRESULT(hr);
 }
 
@@ -691,6 +695,10 @@ k4a_result_t CMFCameraReader::GetCameraControlCapabilities(const k4a_color_contr
         capabilities->valid = true;
     }
 
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failing command %u with HRESULT:%08X", command, hr);
+    }
     return k4aResultFromHRESULT(hr);
 }
 
@@ -819,6 +827,10 @@ k4a_result_t CMFCameraReader::GetCameraControl(const k4a_color_control_command_t
         *pValue = (int32_t)propertyValue;
     }
 
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failing command %u with HRESULT:%08X", command, hr);
+    }
     return k4aResultFromHRESULT(hr);
 }
 
@@ -925,9 +937,14 @@ k4a_result_t CMFCameraReader::SetCameraControl(const k4a_color_control_command_t
     }
     break;
     default:
+        LOG_ERROR("Failing, unknown command %u", command);
         return K4A_RESULT_FAILED;
     }
 
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Failing command %u with HRESULT:%08X", command, hr);
+    }
     return k4aResultFromHRESULT(hr);
 }
 
