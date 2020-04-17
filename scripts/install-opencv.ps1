@@ -35,6 +35,7 @@ Do
 {
     Write-Host "Attempting to download OpenCV, try #$retry"
 
+    $opencv_exe = "path_to_non_existant_file"
     try
     {    
         # Download OpenCV
