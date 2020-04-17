@@ -30,9 +30,9 @@ function Download-ToTemp
     return $path
 }
 
-# Total timeout is 5 minutes
+# Total timeout is 20 minutes
 $delay_in_seconds = 15
-$max_retry_attempts = 20
+$max_retry_attempts = 80
 $url = "https://sourceforge.net/projects/opencvlibrary/files/4.1.1/opencv-4.1.1-vc14_vc15.exe/download"
 $filename = "opencv-4.1.1-vc14_vc15.exe"
 
