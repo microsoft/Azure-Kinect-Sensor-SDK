@@ -39,6 +39,8 @@ $filename = "opencv-4.1.1-vc14_vc15.exe"
 $retry = 1;
 Do
 {
+    Write-Host
+    Write-Host
     Write-Host "Attempting to download OpenCV, try #$retry"
 
     $opencv_exe = "error_Download-ToTemp_did_not_return_a_file" # default value incase of exception
@@ -58,11 +60,12 @@ Do
     $retry+=1
     if (-not(Test-Path $opencv_exe))
     {
-        if ($retry -lt $max_retry_attempts)
+        if ($retry -gt $max_retry_attempts)
         {
             Write-Host "ERROR: Retries exhausted!"
             exit 1
         }
+        Write-Host "Retry in $delay_in_seconds seconds ..."
         Start-Sleep -s $delay_in_seconds
     }
 }While (-not (Test-Path $opencv_exe))
