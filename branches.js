@@ -14,6 +14,7 @@ var BRANCHES = [
     "refs/pull/1110/merge",
     "refs/pull/1124/merge",
     "refs/pull/1150/merge",
+    "refs/pull/1180/merge",
     "refs/pull/413/merge",
     "refs/pull/469/merge",
     "refs/pull/516/merge",
