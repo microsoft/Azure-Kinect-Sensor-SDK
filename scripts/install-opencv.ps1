@@ -30,10 +30,30 @@ function Download-ToTemp
     return $path
 }
 
-# Download OpenCV
-$url = "https://sourceforge.net/projects/opencvlibrary/files/4.1.1/opencv-4.1.1-vc14_vc15.exe/download"
-$filename = "opencv-4.1.1-vc14_vc15.exe"
-$opencv_exe = Download-ToTemp -url $url -filename $filename
+$retry = 1;
+Do
+{
+    Write-Host "Attempting to download OpenCV, try #$retry"
+
+    try
+    {    
+        # Download OpenCV
+        $url = "https://sourceforge.net/projects/opencvlibrary/files/4.1.1/opencv-4.1.1-vc14_vc15.exe/download"
+        $filename = "opencv-4.1.1-vc14_vc15.exe"
+        $opencv_exe = Download-ToTemp -url $url -filename $filename
+    }
+    catch
+    {
+        Write-Host "An exception was thrown"
+        Write-Host  "##vso[task.LogIssue type=error;]An exception was thrown"
+    }
+
+    if (-not(Test-Path $opencv_exe))
+    {
+        Start-Sleep -s 15
+    }
+    $retry+=1
+}While ((-not (Test-Path $opencv_exe)) -and ($retry -lt 20))
 
 Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
 Write-Host "OpenCV installed."
