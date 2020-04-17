@@ -42,10 +42,12 @@ Do
         $filename = "opencv-4.1.1-vc14_vc15.exe"
         $opencv_exe = Download-ToTemp -url $url -filename $filename
     }
-    trap
+    catch
     {
         Write-Host "An exception was thrown: $($PSItem.ToString())"
     }
+
+    Write-Host "Processing downloaded file"
 
     if (-not(Test-Path $opencv_exe))
     {
