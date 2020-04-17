@@ -81,7 +81,7 @@ Windows PC is setup properly.*
 
 The list of libraries and tools that must be installed is maintained in a Dockerfile
 used by our CI system. Extract and run the install list from the 
-[Dockerfile](../scripts/Dockerfile) to ensure your machine has required dependencies.
+[Dockerfile](../scripts/docker/Dockerfile) to ensure your machine has required dependencies.
 
 The depth engine is needed as well. The depth engine (DE) is a closed source
 binary shipped with the Linux Debian package. As an example, run `apt install
