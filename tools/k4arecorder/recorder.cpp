@@ -121,13 +121,6 @@ int do_recording(uint8_t device_index,
             std::cerr << "Runtime error: k4a_device_set_color_control() for manual gain failed " << std::endl;
         }
     }
-    else
-    {
-        if (K4A_FAILED(k4a_device_set_color_control(device, K4A_COLOR_CONTROL_GAIN, K4A_COLOR_CONTROL_MODE_AUTO, 0)))
-        {
-            std::cerr << "Runtime error: k4a_device_set_color_control() for auto gain failed " << std::endl;
-        }
-    }
 
     CHECK(k4a_device_start_cameras(device, device_config), device);
     if (record_imu)
