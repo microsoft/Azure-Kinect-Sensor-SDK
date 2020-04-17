@@ -23,39 +23,49 @@ function Download-ToTemp
     $tempDir = [System.IO.Path]::GetTempPath()
     $path = Join-Path -Path $tempDir -ChildPath $filename
 
-    Write-Host -NoNewline "Downloading $url to $path..."
+    Write-Host "Downloading $url to $path..."
     Invoke-WebRequest -Uri $url -OutFile $path -UserAgent "NativeClient" -MaximumRetryCount 5 -RetryIntervalSec 60
-    Write-Host "Done"
+    Write-Host "Downloading Done"
 
     return $path
 }
+
+# Total timeout is 5 minutes
+$delay_in_seconds = 15
+$max_retry_attempts = 20
+$url = "https://sourceforge.net/projects/opencvlibrary/files/4.1.1/opencv-4.1.1-vc14_vc15.exe/download"
+$filename = "opencv-4.1.1-vc14_vc15.exe"
 
 $retry = 1;
 Do
 {
     Write-Host "Attempting to download OpenCV, try #$retry"
 
-    $opencv_exe = "path_to_non_existant_file"
+    $opencv_exe = "error_Download-ToTemp_did_not_return_a_file" # default value incase of exception
     try
     {    
         # Download OpenCV
-        $url = "https://sourceforge.net/projects/opencvlibrary/files/4.1.1/opencv-4.1.1-vc14_vc15.exe/download"
-        $filename = "opencv-4.1.1-vc14_vc15.exe"
         $opencv_exe = Download-ToTemp -url $url -filename $filename
     }
     catch
     {
+        Write-Host
         Write-Host "An exception was thrown: $($PSItem.ToString())"
     }
 
-    Write-Host "Processing downloaded file"
+    Write-Host "Processing downloaded file: $opencv_exe"
 
+    $retry+=1
     if (-not(Test-Path $opencv_exe))
     {
-        Start-Sleep -s 15
+        if ($retry -lt $max_retry_attempts)
+        {
+            Write-Host "ERROR: Retries exhausted!"
+            exit 1
+        }
+        Start-Sleep -s $delay_in_seconds
     }
-    $retry+=1
-}While ((-not (Test-Path $opencv_exe)) -and ($retry -lt 20))
+}While (-not (Test-Path $opencv_exe))
 
 Start-Process -Wait $opencv_exe -ArgumentList -o"C:\",-y
 Write-Host "OpenCV installed."
