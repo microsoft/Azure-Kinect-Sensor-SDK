@@ -8,7 +8,7 @@ camera into pixel-coordinates of the depth camera. We then show how the same ope
 OpenCV function projectPoints().
 
 If the user has OpenCV installed, the OpenCV-specific code can be enabled by uncommenting the HAVE_OPENCV pound define. The 
-OpenCV code has been tested using OpenCV 4.0.1.
+OpenCV code has been tested using OpenCV 4.1.1.
 
 ## Usage Info
 
