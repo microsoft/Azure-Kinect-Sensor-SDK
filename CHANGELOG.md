@@ -1,7 +1,9 @@
 ## Change Log
 
 ### v1.4.1
+
 * Added NEON for ARM64
+* Failed conversion of MJPEG to BGRA is a warning - no long an error.
 
 ### v1.4.0
 
