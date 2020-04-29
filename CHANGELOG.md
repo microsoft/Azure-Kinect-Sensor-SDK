@@ -1,5 +1,8 @@
 ## Change Log
 
+### v1.4.1
+* Added NEON for ARM64
+
 ### v1.4.0
 
 * Added ARM64 Suport.
