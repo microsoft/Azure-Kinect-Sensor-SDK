@@ -120,6 +120,16 @@ k4a_result_t UVCCameraReader::Start(const uint32_t width,
         m_output_image_format = imageFormat;
         m_input_image_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
 
+        if (m_decoder == nullptr)
+        {
+            m_decoder = tjInitDecompress();
+            if (m_decoder == nullptr)
+            {
+                LOG_ERROR("MJPEG decoder initialization failed\n", 0);
+                return K4A_RESULT_FAILED;
+            }
+        }
+
         frameFormat = UVC_COLOR_FORMAT_MJPEG;
         break;
     default:
@@ -1121,6 +1131,7 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
         uint32_t iso_speed = 0;
         uint32_t white_balance = 0;
         bool decodeMJPEG = false;
+        bool drop_image = false;
 
         // Parse metadata
         size_t bufferLeft = (size_t)frame->metadata_bytes;
@@ -1204,6 +1215,10 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
             {
                 // Decode MJPG into BRGA32
                 result = DecodeMJPEGtoBGRA32((uint8_t *)frame->data, frame->data_bytes, buffer, buffer_size);
+                if (K4A_FAILED(result))
+                {
+                    drop_image = true;
+                }
             }
             else
             {
@@ -1253,8 +1268,11 @@ void UVCCameraReader::Callback(uvc_frame_t *frame)
             capture_set_color_image(capture, image);
         }
 
-        // Calback to color
-        m_pCallback(result, capture, m_pCallbackContext);
+        if (!drop_image)
+        {
+            // Calback to color
+            m_pCallback(result, capture, m_pCallbackContext);
+        }
 
         if (image)
         {
@@ -1275,16 +1293,6 @@ UVCCameraReader::DecodeMJPEGtoBGRA32(uint8_t *in_buf, const size_t in_size, uint
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, m_width_pixels * m_height_pixels * 4 > out_size);
 
-    if (m_decoder == nullptr)
-    {
-        m_decoder = tjInitDecompress();
-        if (m_decoder == nullptr)
-        {
-            LOG_ERROR("MJPEG decoder initialization failed\n", 0);
-            return K4A_RESULT_FAILED;
-        }
-    }
-
     int decompressStatus = tjDecompress2(m_decoder,
                                          in_buf,
                                          (unsigned long)in_size,
@@ -1297,7 +1305,10 @@ UVCCameraReader::DecodeMJPEGtoBGRA32(uint8_t *in_buf, const size_t in_size, uint
 
     if (decompressStatus != 0)
     {
-        LOG_ERROR("MJPEG decode failed: %d", decompressStatus);
+        // This can happen when the host PC is not reading data off the camera fast enough. We also have the option to
+        // move the use of libjpeg-turbo to a more recent version and use tjGetErrorCode() to get a better understanding
+        // of the status returned.
+        LOG_WARNING("MJPEG decode failed, dropping image: %d", decompressStatus);
         return K4A_RESULT_FAILED;
     }
 
