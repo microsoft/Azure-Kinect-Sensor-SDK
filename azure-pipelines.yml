@@ -4,11 +4,18 @@
 name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 
 schedules:
-- cron: "*/30 08-13 * * *"
-  displayName: 'Daily Builds starting at 8:00AM UTC (12:00AM PST) every 30 min, last build 13:30AM (5:30AM PST)'
+# Every 30 minutes from 08:00 UTC (00:00 PST/01:00 PDT) to 10:00 UTC (02:00 PST/03:00 PDT)
+- cron: "*/30 08-10 * * *"
+  displayName: 'Nightly Builds - Develop'
   branches:
     include:
-    - master
+    - develop
+  always: true
+# Every 30 minutes from 11:00 UTC (03:00 PST/04:00 PDT) to 13:00 UTC (05:00 PST/06:00 PDT)
+- cron: "*/30 10-13 * * *"
+  displayName: 'Nightly Builds - Master'
+  branches:
+    include:
     - develop
   always: true
 
@@ -89,22 +96,6 @@ jobs:
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
         UsesOpenCV: 'FALSE'
-      VS2017_x86-msvc_debug_msbuild:
-        CMakeArch: 'x86'
-        BuildGenerator: 'Visual Studio 15 2017'
-        CMakeConfiguration: 'debug'
-        MSBuildPlatform: 'x86'
-        MSBuildConfiguration: 'Debug'
-        vmImage: 'vs2017-win2016'
-        UsesOpenCV: 'FALSE'
-      VS2017_x86-msvc_rel_msbuild:
-        CMakeArch: 'x86'
-        BuildGenerator: 'Visual Studio 15 2017'
-        CMakeConfiguration: 'relwithdebinfo'
-        MSBuildPlatform: 'x86'
-        MSBuildConfiguration: 'Release'
-        vmImage: 'vs2017-win2016'
-        UsesOpenCV: 'FALSE'
       VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
@@ -121,52 +112,6 @@ jobs:
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
         UsesOpenCV: 'TRUE'
-      # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
-      # VS2019_x86_64-pc-windows-msvc_debug_msbuild:
-      #   CMakeArch: 'amd64'
-      #   BuildGenerator: 'Visual Studio 16 2019'
-      #   CMakeConfiguration: 'debug'
-      #   MSBuildPlatform: 'x64'
-      #   MSBuildConfiguration: 'Debug'
-      #   vmImage: 'windows-2019'
-      # VS2019_x86_64-pc-windows-msvc_relwithdebinfo_msbuild:
-      #   CMakeArch: 'amd64'
-      #   BuildGenerator: 'Visual Studio 16 2019'
-      #   CMakeConfiguration: 'relwithdebinfo'
-      #   MSBuildPlatform: 'x64'
-      #   MSBuildConfiguration: 'Release'
-      #   vmImage: 'windows-2019'
-      VS2019_x86-msvc_debug_ninja:
-        CMakeArch: 'x86'
-        BuildGenerator: 'Ninja'
-        CMakeConfiguration: 'debug'
-        MSBuildPlatform: 'x86'
-        MSBuildConfiguration: 'Debug'
-        vmImage: 'windows-2019'
-        UsesOpenCV: 'FALSE'
-      VS2019_x86-msvc_rel_ninja:
-        CMakeArch: 'x86'
-        BuildGenerator: 'Ninja'
-        CMakeConfiguration: 'relwithdebinfo'
-        MSBuildPlatform: 'x86'
-        MSBuildConfiguration: 'Release'
-        vmImage: 'windows-2019'
-        UsesOpenCV: 'FALSE'
-      # VS2019 msbuild generators blocked by issue Microsoft/azure-pipelines-image-generation#754
-      # VS2019_x86-pc-windows-msvc_debug_msbuild:
-      #   CMakeArch: 'x86'
-      #   BuildGenerator: 'Visual Studio 16 2019'
-      #   CMakeConfiguration: 'debug'
-      #   MSBuildPlatform: 'x86'
-      #   MSBuildConfiguration: 'Debug'
-      #   vmImage: 'windows-2019'
-      # VS2019_x86-pc-windows-msvc_relwithdebinfo_msbuild:
-      #   CMakeArch: 'x86'
-      #   BuildGenerator: 'Visual Studio 16 2019'
-      #   CMakeConfiguration: 'relwithdebinfo'
-      #   MSBuildPlatform: 'x86'
-      #   MSBuildConfiguration: 'Release'
-      #   vmImage: 'windows-2019'
   pool:
     vmImage: $(vmImage)
 
