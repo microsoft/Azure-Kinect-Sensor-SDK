@@ -16,7 +16,7 @@ schedules:
   displayName: 'Nightly Builds - Master'
   branches:
     include:
-    - develop
+    - master
   always: true
 
     
