@@ -12,7 +12,7 @@ schedules:
     - develop
   always: true
 # Every 30 minutes from 11:00 UTC (03:00 PST/04:00 PDT) to 13:00 UTC (05:00 PST/06:00 PDT)
-- cron: "*/30 10-13 * * *"
+- cron: "*/30 11-13 * * *"
   displayName: 'Nightly Builds - Master'
   branches:
     include:
