@@ -543,7 +543,7 @@ k4a_result_t k4a_record_write_header(const k4a_record_t recording_handle)
             EbmlHead file_head;
 
             GetChild<EDocType>(file_head).SetValue("matroska");
-            GetChild<EDocTypeVersion>(file_head).SetValue(MATROSKA_VERSION);
+            GetChild<EDocTypeVersion>(file_head).SetValue(2);
             GetChild<EDocTypeReadVersion>(file_head).SetValue(2);
 
             file_head.Render(*context->ebml_file, true);
