@@ -1,4 +1,4 @@
-/** \file k4atypes.h
+﻿/** \file k4atypes.h
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
  * Kinect For Azure SDK Type definitions.
@@ -271,6 +271,7 @@ typedef enum
     K4A_LOG_LEVEL_OFF,          /**< No logging is performed */
 } k4a_log_level_t;
 
+// TODO: move to modes.h?  and rename k4a_depth_mode_unused_t?
 /** Depth sensor capture modes.
  *
  * \remarks
@@ -298,8 +299,10 @@ typedef enum
     K4A_DEPTH_MODE_WFOV_2X2BINNED, /**< Depth captured at 512x512. Passive IR is also captured at 512x512. */
     K4A_DEPTH_MODE_WFOV_UNBINNED,  /**< Depth captured at 1024x1024. Passive IR is also captured at 1024x1024. */
     K4A_DEPTH_MODE_PASSIVE_IR,     /**< Passive IR only, captured at 1024x1024. */
+    K4A_DEPTH_MODE_COUNT,
 } k4a_depth_mode_t;
 
+// TODO: move to modes.h?  and rename k4a_depth_mode_unused_t?
 /** Color sensor resolutions.
  *
  * \xmlonly
@@ -318,6 +321,7 @@ typedef enum
     K4A_COLOR_RESOLUTION_1536P,   /**< 2048 * 1536 4:3  */
     K4A_COLOR_RESOLUTION_2160P,   /**< 3840 * 2160 16:9 */
     K4A_COLOR_RESOLUTION_3072P,   /**< 4096 * 3072 4:3  */
+    K4A_COLOR_RESOLUTION_COUNT,
 } k4a_color_resolution_t;
 
 /** Image format type.
@@ -465,6 +469,7 @@ typedef enum
     K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,      /**< Linear interpolation */
 } k4a_transformation_interpolation_type_t;
 
+// TODO: move to modes.h?  and rename k4a_depth_mode_unused_t?
 /** Color and depth sensor frame rate.
  *
  * \remarks
@@ -483,6 +488,7 @@ typedef enum
     K4A_FRAMES_PER_SECOND_5 = 0, /**< 5 FPS */
     K4A_FRAMES_PER_SECOND_15,    /**< 15 FPS */
     K4A_FRAMES_PER_SECOND_30,    /**< 30 FPS */
+    K4A_FRAMES_PER_SECOND_COUNT,
 } k4a_fps_t;
 
 /** Color sensor control commands
@@ -906,6 +912,57 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
  * @{
  */
 
+/**
+    TODO: add comments
+*/
+
+typedef enum
+{
+    ​​​​​​K4A_CAPABILITY_DEPTH = 1,
+    K4A_CAPABILITY_COLOR = 2,
+    K4A_CAPABILITY_IMU = 4
+} device_capabilities​​;
+
+typedef struct _k4a_device_info_t
+{
+    uint32_t struct_size;
+    uint32_t struct_version;
+    uint32_t vendor_id;    /**< 0 to 65535 : reserved for registered USB VID numbers. */
+    uint32_t device_id;    /**< Vendor specific device ID. */
+    uint32_t capabilities; /**< Binary combination of capability flags. */
+} k4a_device_info_t;
+
+typedef struct _k4a_color_mode_info_t
+{
+    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_color_mode_t). */
+    uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
+    uint32_t mode_id;        /**< Mode identifier to use to select this mode. 0 is reserved for disabling color */
+    uint32_t width;          /**< Image width. */
+    uint32_t height;         /**< Image height. */
+    k4a_image_format_t native_format; /**< Image format. */
+    float horizontal_fov;             /**< Approximate horizontal field of view. */
+    float vertical_fov;               /**< Approximate vertical field of view. */
+    int min_fps;                      /**< Minimum supported framerate. */
+    int max_fps;                      /**< Maximum supported ramerate. */
+} k4a_color_mode_info_t;
+
+typedef struct _k4a_depth_mode_info_t
+{
+    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_depth_mode_t). */
+    uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
+    uint32_t mode_id;        /**< Mode identifier to use to select this mode. 0 is reserved for disabling depth. */
+    bool passive_ir_only;    /**< True if only capturing passive IR. */
+    uint32_t width;          /**< Image width. */
+    uint32_t height;         /**< Image height. */
+    k4a_image_format_t native_format; /**< Image format. */
+    float horizontal_fov;             /**< Approximate horizontal field of view. */
+    float vertical_fov;               /**< Approximate vertical field of view. */
+    int min_fps;                      /**< Minimum supported framerate. */
+    int max_fps;                      /**< Maximum supported ramerate. */
+} k4a_depth_mode_info_t;
+
+// TODO: add struct size and version; remove color_resolution and depth_mode; and, replace camera_fps with a float for
+// fps?
 /** Configuration parameters for an Azure Kinect device.
  *
  * \remarks
@@ -926,10 +983,12 @@ typedef struct _k4a_device_configuration_t
     k4a_image_format_t color_format;
 
     /** Image resolution to capture with the color camera. */
-    k4a_color_resolution_t color_resolution;
+    // k4a_color_resolution_t color_resolution;
+    uint32_t color_mode_id;
 
     /** Capture mode for the depth camera. */
-    k4a_depth_mode_t depth_mode;
+    // k4a_depth_mode_t depth_mode;
+    uint32_t depth_mode_id;
 
     /** Desired frame rate for the color and depth camera. */
     k4a_fps_t camera_fps;
