@@ -166,8 +166,8 @@ TEST_F(color_ut, streaming)
 
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     // test color_start()
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, color_start(color_handle, &config));
@@ -194,8 +194,8 @@ TEST_F(color_ut, exposure_control)
 
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     // set exposure to 500 uSec
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,

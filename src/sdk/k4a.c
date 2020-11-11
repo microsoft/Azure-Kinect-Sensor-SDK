@@ -1285,6 +1285,8 @@ k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transformation_t 
                                                                 &xyz_image_descriptor));
 }
 
+
+
 /**
     TODO: add comments
 */
@@ -1300,13 +1302,15 @@ struct _device_color_modes
     float vertical_fov;
     int min_fps;
     int max_fps;
-} device_color_modes[] = { { 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 }, // color mode will be turned off
-                           { 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                           { 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                           { 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                           { 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
-                           { 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                           { 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 } };
+} device_color_modes[] = {
+    { 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 }, // color mode will be turned off
+    { 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+    { 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+    { 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+    { 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
+    { 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+    { 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 }
+};
 
 struct _device_depth_modes
 {
@@ -1318,16 +1322,17 @@ struct _device_depth_modes
     float vertical_fov;
     int min_fps;
     int max_fps;
-} device_depth_modes[] = { { false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0 }, // depth mode will be turned off
-                           { false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30 },
-                           { false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30 },
-                           { false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
-                           { false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
-                           { true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 } };
+} device_depth_modes[] = {
+    { false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0 }, // depth mode will be turned off
+    { false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30 },
+    { false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30 },
+    { false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
+    { false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
+    { true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 }
+};
 
 // TODO: get vender and device ids from MS or use 0, 0 because MS is alpha
-k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info)
-{
+k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t* device_info) {
     if (!device_info)
     {
         return K4A_RESULT_FAILED;
@@ -1340,11 +1345,13 @@ k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4a_device_info_t info = { sizeof(k4a_device_info_t),
-                               K4A_ABI_VERSION,
-                               0,
-                               0,
-                               ​​​​​​K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU };
+    k4a_device_info_t info = {
+        sizeof(k4a_device_info_t),
+        K4A_ABI_VERSION,
+        0,
+        0,
+        ​​​​​​K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU
+    };
 
     SAFE_COPY_STRUCT(device_info, &info);
 
@@ -1411,11 +1418,11 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4a_depth_mode_info_t depth_mode_info = {
+    k4a_depth_mode_info_t depth_mode_info = { 
         sizeof(k4a_depth_mode_info_t),
         K4A_ABI_VERSION,
-        mode_index,
-        device_depth_modes[mode_index].passive_ir_only,
+        mode_index, 
+        device_depth_modes[mode_index].passive_ir_only, 
         device_depth_modes[mode_index].width,
         device_depth_modes[mode_index].height,
         device_depth_modes[mode_index].native_format,
@@ -1425,10 +1432,12 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
         device_depth_modes[mode_index].max_fps,
     };
 
-    SAFE_COPY_STRUCT(mode_info, &depth_mode_info);
+    SAFE_COPY_STRUCT(mode_info, &depth_mode_info); 
 
     return result;
 }
+
+
 
 #ifdef __cplusplus
 }

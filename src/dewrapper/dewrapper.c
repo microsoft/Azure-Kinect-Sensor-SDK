@@ -528,7 +528,7 @@ k4a_result_t dewrapper_start(dewrapper_t dewrapper_handle,
 
         // NOTE: do not copy config ptr, it may be freed after this call
         dewrapper->fps = config->camera_fps;
-        dewrapper->depth_mode = config->depth_mode;
+        dewrapper->depth_mode = config->depth_mode_id;
         dewrapper->thread_stop = false;
         dewrapper->thread_started = false;
 

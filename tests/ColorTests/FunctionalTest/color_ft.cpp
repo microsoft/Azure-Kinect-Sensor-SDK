@@ -126,8 +126,8 @@ TEST_P(color_functional_test, color_streaming_test)
     // Configure the stream
     config.camera_fps = as.color_rate;
     config.color_format = as.color_format;
-    config.color_resolution = as.color_resolution;
-    config.depth_mode = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = as.color_resolution;
+    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
@@ -501,13 +501,13 @@ TEST_F(color_functional_test, colorModeChange)
     //
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     config2.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config2.color_format = K4A_IMAGE_FORMAT_COLOR_YUY2;
-    config2.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config2.depth_mode = K4A_DEPTH_MODE_OFF;
+    config2.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config2.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     // Start device in first mode and check frame size
     //
@@ -569,8 +569,8 @@ TEST_F(color_functional_test, colorExposureTest)
     //
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     // Exposure set test
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -787,8 +787,8 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
         config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         config.camera_fps = K4A_FRAMES_PER_SECOND_5;
         config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
-        config.depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
+        config.color_mode_id = K4A_COLOR_RESOLUTION_1080P;
+        config.depth_mode_id = K4A_DEPTH_MODE_WFOV_2X2BINNED;
         config.synchronized_images_only = true;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
         std::cout << "control_test_worker: k4a_device_start_cameras called\n";
