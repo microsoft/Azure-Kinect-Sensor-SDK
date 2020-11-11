@@ -146,12 +146,12 @@ int main(int argc, char **argv)
         goto Exit;
     }
 
-    config.depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
+    config.depth_mode_id = K4A_DEPTH_MODE_WFOV_2X2BINNED;
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
 
     k4a_calibration_t calibration;
     if (K4A_RESULT_SUCCEEDED !=
-        k4a_device_get_calibration(device, config.depth_mode, config.color_resolution, &calibration))
+        k4a_device_get_calibration(device, config.depth_mode_id, config.color_mode_id, &calibration))
     {
         printf("Failed to get calibration\n");
         goto Exit;

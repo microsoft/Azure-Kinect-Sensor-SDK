@@ -85,8 +85,8 @@ int do_recording(uint8_t device_index,
 
     uint32_t camera_fps = k4a_convert_fps_to_uint(device_config->camera_fps);
 
-    if (camera_fps <= 0 || (device_config->color_resolution == K4A_COLOR_RESOLUTION_OFF &&
-                            device_config->depth_mode == K4A_DEPTH_MODE_OFF))
+    if (camera_fps <= 0 || (device_config->color_mode_id == K4A_COLOR_RESOLUTION_OFF &&
+                            device_config->depth_mode_id == K4A_DEPTH_MODE_OFF))
     {
         std::cerr << "Either the color or depth modes must be enabled to record." << std::endl;
         return 1;

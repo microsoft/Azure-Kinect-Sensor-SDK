@@ -86,8 +86,8 @@ bool K4AFastCapture::Configure(const char *fileDirectory, int32_t exposureValue,
     }
 
     m_deviceConfig.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    m_deviceConfig.color_resolution = K4A_COLOR_RESOLUTION_3072P;
-    m_deviceConfig.depth_mode = K4A_DEPTH_MODE_PASSIVE_IR;
+    m_deviceConfig.color_mode_id = K4A_COLOR_RESOLUTION_3072P;
+    m_deviceConfig.depth_mode_id = K4A_DEPTH_MODE_PASSIVE_IR;
     m_deviceConfig.camera_fps = K4A_FRAMES_PER_SECOND_15;
     m_deviceConfig.synchronized_images_only = true;
 
@@ -240,7 +240,7 @@ void K4AFastCapture::Run(int streamingLength)
         if (0 == result)
 #endif
         {
-            if (m_deviceConfig.depth_mode == K4A_DEPTH_MODE_PASSIVE_IR)
+            if (m_deviceConfig.depth_mode_id == K4A_DEPTH_MODE_PASSIVE_IR)
             {
                 // for the passive IR mode, there is no depth image. Only IR image is available in the capture.
                 ir_image = k4a_capture_get_ir_image(m_capture);

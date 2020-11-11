@@ -210,8 +210,8 @@ static CLI_STATUS k4a_record_depth(int Argc, char **Argv)
 #endif
         // start the stream
         config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
-        config.depth_mode = mode;
+        config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+        config.depth_mode_id = mode;
         config.camera_fps = fps;
 
         // start streaming.

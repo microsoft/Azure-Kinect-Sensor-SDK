@@ -497,7 +497,7 @@ k4a_result_t capturesync_start(capturesync_t capturesync_handle, const k4a_devic
     sync->sync_captures = true;
     sync->depth_captures_dropped = 0;
 
-    if (config->color_resolution == K4A_COLOR_RESOLUTION_OFF || config->depth_mode == K4A_DEPTH_MODE_OFF)
+    if (config->color_mode_id == K4A_COLOR_RESOLUTION_OFF || config->depth_mode_id == K4A_DEPTH_MODE_OFF)
     {
         // Only 1 sensor is running, disable synchronization
         sync->sync_captures = false;

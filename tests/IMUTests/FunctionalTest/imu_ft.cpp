@@ -100,7 +100,7 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
         // will go backwards if started while the free running timestamp on the firmware is under 5s from the previous
         // start. This is directly related to how the IMU module uses "color_camera_start_tick"
         config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.depth_mode = K4A_DEPTH_MODE_PASSIVE_IR;
+        config.depth_mode_id = K4A_DEPTH_MODE_PASSIVE_IR;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(device));
         ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_imu_sample(device, &imu_sample, timeout_ms));
@@ -114,8 +114,8 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
 
     config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
-    config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
+    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config.synchronized_images_only = false;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
@@ -241,8 +241,8 @@ TEST_F(imu_ft, imu_start)
     k4a_device_configuration_t config_all_running = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
     config_all_running.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config_all_running.color_resolution = K4A_COLOR_RESOLUTION_2160P;
-    config_all_running.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    config_all_running.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
+    config_all_running.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
     config_all_running.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config = config_all_running;
 
@@ -279,7 +279,7 @@ TEST_F(imu_ft, imu_start)
 
     // Start only if running depth camera
     config = config_all_running;
-    config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(m_device));
     k4a_device_stop_cameras(m_device);
@@ -287,7 +287,7 @@ TEST_F(imu_ft, imu_start)
 
     // Start only if running color camera
     config = config_all_running;
-    config.depth_mode = K4A_DEPTH_MODE_OFF;
+    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(m_device));
     k4a_device_stop_cameras(m_device);
