@@ -1579,6 +1579,7 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
                                                               uint8_t *data,
                                                               size_t *data_size);
 
+// TODO: update comments
 /** Get the camera calibration for the entire Azure Kinect device.
  *
  * \param device_handle
@@ -1619,8 +1620,8 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle,
-                                                   const k4a_depth_mode_t depth_mode,
-                                                   const k4a_color_resolution_t color_resolution,
+                                                   const uint32_t depth_mode_id,
+                                                   const uint32_t color_mode_id,
                                                    k4a_calibration_t *calibration);
 
 /** Get the device jack status for the synchronization in and synchronization out connectors.
@@ -1703,8 +1704,8 @@ K4A_EXPORT k4a_result_t k4a_device_get_sync_jack(k4a_device_t device_handle,
  */
 K4A_EXPORT k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
                                                      size_t raw_calibration_size,
-                                                     const k4a_depth_mode_t depth_mode,
-                                                     const k4a_color_resolution_t color_resolution,
+                                                     const uint32_t depth_mode_id,
+                                                     const uint32_t color_resolution_id,
                                                      k4a_calibration_t *calibration);
 
 /** Transform a 3D point of a source coordinate system into a 3D point of the target coordinate system
@@ -2265,6 +2266,20 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
                                                                       const k4a_image_t depth_image,
                                                                       const k4a_calibration_type_t camera,
                                                                       k4a_image_t xyz_image);
+
+/**
+    TODO: add comments
+*/
+
+k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info);
+
+int k4a_device_get_color_mode_count(k4a_device_t device_handle);
+
+k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_index, k4a_color_mode_info_t *mode_info);
+
+int k4a_device_get_depth_mode_count(k4a_device_t device_handle);
+
+k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_index, k4a_depth_mode_info_t *mode_info);
 
 /**
  * @}
