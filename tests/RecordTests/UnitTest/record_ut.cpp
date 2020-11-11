@@ -139,8 +139,8 @@ TEST_F(record_ut, DISABLED_bgra_color_max_disk_write)
 {
     k4a_device_configuration_t record_config = {};
     record_config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-    record_config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
-    record_config.depth_mode = K4A_DEPTH_MODE_OFF;
+    record_config.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
+    record_config.depth_mode_id = K4A_DEPTH_MODE_OFF;
     record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
 
     std::cout

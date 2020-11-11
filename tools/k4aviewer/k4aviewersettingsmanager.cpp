@@ -281,8 +281,8 @@ k4a_device_configuration_t K4ADeviceConfiguration::ToK4ADeviceConfiguration() co
     k4a_device_configuration_t deviceConfig;
 
     deviceConfig.color_format = ColorFormat;
-    deviceConfig.color_resolution = EnableColorCamera ? ColorResolution : K4A_COLOR_RESOLUTION_OFF;
-    deviceConfig.depth_mode = EnableDepthCamera ? DepthMode : K4A_DEPTH_MODE_OFF;
+    deviceConfig.color_mode_id = EnableColorCamera ? ColorResolution : K4A_COLOR_RESOLUTION_OFF;
+    deviceConfig.depth_mode_id = EnableDepthCamera ? DepthMode : K4A_DEPTH_MODE_OFF;
     deviceConfig.camera_fps = Framerate;
 
     deviceConfig.depth_delay_off_color_usec = DepthDelayOffColorUsec;

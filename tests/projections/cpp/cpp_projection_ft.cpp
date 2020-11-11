@@ -108,11 +108,11 @@ void test_camera(k4a::device *device, camera_type type)
     if (type == camera_type::color)
     {
         config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-        config.color_resolution = K4A_COLOR_RESOLUTION_720P;
+        config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
     }
     if (type == camera_type::depth)
     {
-        config.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+        config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
     }
     config.camera_fps = K4A_FRAMES_PER_SECOND_15;
 

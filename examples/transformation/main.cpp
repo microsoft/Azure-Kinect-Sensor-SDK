@@ -146,14 +146,14 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
     }
 
     config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-    config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config.synchronized_images_only = true; // ensures that depth and color images are both available in the capture
 
     k4a_calibration_t calibration;
     if (K4A_RESULT_SUCCEEDED !=
-        k4a_device_get_calibration(device, config.depth_mode, config.color_resolution, &calibration))
+        k4a_device_get_calibration(device, config.depth_mode_id, config.color_mode_id, &calibration))
     {
         printf("Failed to get calibration\n");
         goto Exit;

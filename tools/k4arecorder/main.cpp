@@ -417,8 +417,8 @@ int main(int argc, char **argv)
 
     k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     device_config.color_format = recording_color_format;
-    device_config.color_resolution = recording_color_resolution;
-    device_config.depth_mode = recording_depth_mode;
+    device_config.color_mode_id = recording_color_resolution;
+    device_config.depth_mode_id = recording_depth_mode;
     device_config.camera_fps = recording_rate;
     device_config.wired_sync_mode = wired_sync_mode;
     device_config.depth_delay_off_color_usec = depth_delay_off_color_usec;
