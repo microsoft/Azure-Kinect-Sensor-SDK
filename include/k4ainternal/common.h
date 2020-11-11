@@ -40,6 +40,34 @@ typedef struct _guid_t
 #define HZ_TO_PERIOD_US(Hz) (1000000 / Hz)
 #define HZ_TO_PERIOD_NS(Hz) (1000000000 / Hz)
 
+// TODO: add comments
+
+static const int32_t K4A_ABI_VERSION = 1;
+
+/* Copy struct to a result pointer, not exceeding the size specified in the result pointer
+Assumes size comes before version */
+#define SAFE_COPY_STRUCT(result, temp)                                                                                 \
+    {                                                                                                                  \
+        size_t offset = ((char *)(&(temp)->struct_version) - (char *)(temp)) + sizeof((temp)->struct_version);         \
+        size_t size = sizeof(*temp);                                                                                   \
+        if (size > (result)->struct_size)                                                                              \
+            size = (result)->struct_size;                                                                              \
+        if (size > offset)                                                                                             \
+        {                                                                                                              \
+            memcpy((char *)result + offset, (char *)(temp) + offset, size - offset);                                   \
+        }                                                                                                              \
+    }
+
+/* Macro for checking if a struct member is within the limits set by size */
+#define HAS_MEMBER(S, M) (((char *)(&((S)->M)) - (char *)(S)) + sizeof((S)->M) <= (S)->struct_size)
+
+/* Safe setting a value in a struct */
+#define SAFE_SET_MEMBER(S, M, NEW_VALUE)                                                                               \
+    if (HAS_MEMBER(S, M))                                                                                              \
+        (S)->M = (NEW_VALUE);
+/* Safe getting a value from a struct */
+#define SAFE_GET_MEMBER(S, M, DEFAULT_VALUE) (HAS_MEMBER(S, M) ? ((S)->M) : (DEFAULT_VALUE));
+
 inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
 {
     uint32_t fps_int;

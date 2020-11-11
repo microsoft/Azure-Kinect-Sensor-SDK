@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 // This library
@@ -594,8 +594,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->color_resolution < K4A_COLOR_RESOLUTION_OFF ||
-            config->color_resolution > K4A_COLOR_RESOLUTION_3072P)
+        if (config->color_mode_id < K4A_COLOR_RESOLUTION_OFF || config->color_mode_id > K4A_COLOR_RESOLUTION_3072P)
         {
             result = K4A_RESULT_FAILED;
             LOG_ERROR("The configured color_resolution is not a valid k4a_color_resolution_t value.", 0);
@@ -604,7 +603,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->depth_mode < K4A_DEPTH_MODE_OFF || config->depth_mode > K4A_DEPTH_MODE_PASSIVE_IR)
+        if (config->depth_mode_id < K4A_DEPTH_MODE_OFF || config->depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR)
         {
             result = K4A_RESULT_FAILED;
             LOG_ERROR("The configured depth_mode is not a valid k4a_depth_mode_t value.", 0);
@@ -663,7 +662,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
                                   0);
                     }
 
-                    if (config->color_resolution == K4A_COLOR_RESOLUTION_OFF)
+                    if (config->color_mode_id == K4A_COLOR_RESOLUTION_OFF)
                     {
                         result = K4A_RESULT_FAILED;
                         LOG_ERROR(
@@ -704,12 +703,12 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->depth_mode != K4A_DEPTH_MODE_OFF)
+        if (config->depth_mode_id != K4A_DEPTH_MODE_OFF)
         {
             depth_enabled = true;
         }
 
-        if (config->color_resolution != K4A_COLOR_RESOLUTION_OFF)
+        if (config->color_mode_id != K4A_COLOR_RESOLUTION_OFF)
         {
             color_enabled = true;
         }
@@ -770,7 +769,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             bool depth_fps_and_mode_supported = false;
             for (unsigned int x = 0; x < COUNTOF(supported_depth_configs); x++)
             {
-                if (supported_depth_configs[x].mode == config->depth_mode &&
+                if (supported_depth_configs[x].mode == (k4a_depth_mode_t)config->depth_mode_id &&
                     supported_depth_configs[x].max_fps >= config->camera_fps)
                 {
                     depth_fps_and_mode_supported = true;
@@ -782,7 +781,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             {
                 result = K4A_RESULT_FAILED;
                 LOG_ERROR("The configured depth_mode %s does not support the configured camera_fps %s.",
-                          k4a_depth_mode_to_string(config->depth_mode),
+                          k4a_depth_mode_to_string((k4a_depth_mode_t)config->depth_mode_id),
                           k4a_fps_to_string(config->camera_fps));
             }
         }
@@ -817,7 +816,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             bool color_fps_and_res_and_format_supported = false;
             for (unsigned int x = 0; x < COUNTOF(supported_color_configs); x++)
             {
-                if (supported_color_configs[x].res == config->color_resolution &&
+                if (supported_color_configs[x].res == (k4a_color_resolution_t)config->color_mode_id &&
                     supported_color_configs[x].max_fps >= config->camera_fps &&
                     supported_color_configs[x].format == config->color_format)
                 {
@@ -831,7 +830,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
                 result = K4A_RESULT_FAILED;
                 LOG_ERROR("The combination of color_resolution at %s, color_format at %s, and camera_fps at %s is not "
                           "supported.",
-                          k4a_color_resolution_to_string(config->color_resolution),
+                          k4a_color_resolution_to_string((k4a_color_resolution_t)config->color_mode_id),
                           k4a_image_format_to_string(config->color_format),
                           k4a_fps_to_string(config->camera_fps));
             }
@@ -867,8 +866,8 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, const k4a_devi
     {
         LOG_INFO("Starting camera's with the following config.", 0);
         LOG_INFO("    color_format:%d", config->color_format);
-        LOG_INFO("    color_resolution:%d", config->color_resolution);
-        LOG_INFO("    depth_mode:%d", config->depth_mode);
+        LOG_INFO("    color_resolution:%d", config->color_mode_id);
+        LOG_INFO("    depth_mode:%d", config->depth_mode_id);
         LOG_INFO("    camera_fps:%d", config->camera_fps);
         LOG_INFO("    synchronized_images_only:%d", config->synchronized_images_only);
         LOG_INFO("    depth_delay_off_color_usec:%d", config->depth_delay_off_color_usec);
@@ -890,7 +889,7 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->depth_mode != K4A_DEPTH_MODE_OFF)
+        if (config->depth_mode_id != K4A_DEPTH_MODE_OFF)
         {
             result = TRACE_CALL(depth_start(device->depth, config));
         }
@@ -902,7 +901,7 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->color_resolution != K4A_COLOR_RESOLUTION_OFF)
+        if (config->color_mode_id != K4A_COLOR_RESOLUTION_OFF)
         {
             // NOTE: Color must be started before depth and IMU as it triggers the sync of PTS. If it starts after
             // depth or IMU, the user will see timestamps reset back to zero when the color camera is started.
@@ -1284,6 +1283,151 @@ k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transformation_t 
                                                                 camera,
                                                                 xyz_image_buffer,
                                                                 &xyz_image_descriptor));
+}
+
+/**
+    TODO: add comments
+*/
+
+// TODO: place color_modes and depth_modes structs in a more appropriate file?
+
+struct _device_color_modes
+{
+    uint32_t width;
+    uint32_t height;
+    k4a_image_format_t native_format;
+    float horizontal_fov;
+    float vertical_fov;
+    int min_fps;
+    int max_fps;
+} device_color_modes[] = { { 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 }, // color mode will be turned off
+                           { 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                           { 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                           { 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                           { 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
+                           { 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                           { 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 } };
+
+struct _device_depth_modes
+{
+    bool passive_ir_only;
+    uint32_t width;
+    uint32_t height;
+    k4a_image_format_t native_format;
+    float horizontal_fov;
+    float vertical_fov;
+    int min_fps;
+    int max_fps;
+} device_depth_modes[] = { { false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0 }, // depth mode will be turned off
+                           { false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30 },
+                           { false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30 },
+                           { false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
+                           { false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
+                           { true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 } };
+
+// TODO: get vender and device ids from MS or use 0, 0 because MS is alpha
+k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info)
+{
+    if (!device_info)
+    {
+        return K4A_RESULT_FAILED;
+    }
+    if (device_info->struct_version != (uint32_t)K4A_ABI_VERSION)
+    {
+        return K4A_RESULT_UNSUPPORTED;
+    }
+
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
+    k4a_device_info_t info = { sizeof(k4a_device_info_t),
+                               K4A_ABI_VERSION,
+                               0,
+                               0,
+                               ​​​​​​K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU };
+
+    SAFE_COPY_STRUCT(device_info, &info);
+
+    return result;
+}
+
+int k4a_device_get_color_mode_count(k4a_device_t device_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+
+    return sizeof(device_color_modes) / sizeof(k4a_color_mode_info_t);
+}
+
+k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_index, k4a_color_mode_info_t *mode_info)
+{
+    if (!mode_info)
+    {
+        return K4A_RESULT_FAILED;
+    }
+    if (mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
+    {
+        return K4A_RESULT_UNSUPPORTED;
+    }
+
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
+    k4a_color_mode_info_t color_mode_info = {
+        sizeof(k4a_color_mode_info_t),
+        K4A_ABI_VERSION,
+        mode_index,
+        device_color_modes[mode_index].width,
+        device_color_modes[mode_index].height,
+        device_color_modes[mode_index].native_format,
+        device_color_modes[mode_index].horizontal_fov,
+        device_color_modes[mode_index].vertical_fov,
+        device_color_modes[mode_index].min_fps,
+        device_color_modes[mode_index].max_fps,
+    };
+
+    SAFE_COPY_STRUCT(mode_info, &color_mode_info);
+
+    return result;
+}
+
+int k4a_device_get_depth_mode_count(k4a_device_t device_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+
+    return sizeof(device_depth_modes) / sizeof(k4a_depth_mode_info_t);
+}
+
+k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_index, k4a_depth_mode_info_t *mode_info)
+{
+    if (!mode_info)
+    {
+        return K4A_RESULT_FAILED;
+    }
+    if (mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
+    {
+        return K4A_RESULT_UNSUPPORTED;
+    }
+
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
+    k4a_depth_mode_info_t depth_mode_info = {
+        sizeof(k4a_depth_mode_info_t),
+        K4A_ABI_VERSION,
+        mode_index,
+        device_depth_modes[mode_index].passive_ir_only,
+        device_depth_modes[mode_index].width,
+        device_depth_modes[mode_index].height,
+        device_depth_modes[mode_index].native_format,
+        device_depth_modes[mode_index].horizontal_fov,
+        device_depth_modes[mode_index].vertical_fov,
+        device_depth_modes[mode_index].min_fps,
+        device_depth_modes[mode_index].max_fps,
+    };
+
+    SAFE_COPY_STRUCT(mode_info, &depth_mode_info);
+
+    return result;
 }
 
 #ifdef __cplusplus
