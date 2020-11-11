@@ -612,8 +612,8 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->camera_fps != K4A_FRAMES_PER_SECOND_5 && config->camera_fps != K4A_FRAMES_PER_SECOND_15 &&
-            config->camera_fps != K4A_FRAMES_PER_SECOND_30)
+        if (config->fps_mode_id != K4A_FRAMES_PER_SECOND_5 && config->fps_mode_id != K4A_FRAMES_PER_SECOND_15 &&
+            config->fps_mode_id != K4A_FRAMES_PER_SECOND_30)
         {
             result = K4A_RESULT_FAILED;
             LOG_ERROR("The configured camera_fps is not a valid k4a_fps_t value.", 0);
@@ -680,7 +680,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
         if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE &&
             config->subordinate_delay_off_master_usec != 0)
         {
-            uint32_t fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->camera_fps));
+            uint32_t fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->fps_mode_id));
             if (config->subordinate_delay_off_master_usec > fps_in_usec)
             {
                 result = K4A_RESULT_FAILED;
@@ -715,7 +715,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
         if (depth_enabled && color_enabled)
         {
-            int64_t fps = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->camera_fps));
+            int64_t fps = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->fps_mode_id));
             if (config->depth_delay_off_color_usec < -fps || config->depth_delay_off_color_usec > fps)
             {
                 result = K4A_RESULT_FAILED;
@@ -770,7 +770,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             for (unsigned int x = 0; x < COUNTOF(supported_depth_configs); x++)
             {
                 if (supported_depth_configs[x].mode == (k4a_depth_mode_t)config->depth_mode_id &&
-                    supported_depth_configs[x].max_fps >= config->camera_fps)
+                    supported_depth_configs[x].max_fps >= (k4a_fps_t)config->fps_mode_id)
                 {
                     depth_fps_and_mode_supported = true;
                     break;
@@ -782,7 +782,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
                 result = K4A_RESULT_FAILED;
                 LOG_ERROR("The configured depth_mode %s does not support the configured camera_fps %s.",
                           k4a_depth_mode_to_string((k4a_depth_mode_t)config->depth_mode_id),
-                          k4a_fps_to_string(config->camera_fps));
+                          k4a_fps_to_string(config->fps_mode_id));
             }
         }
     }
@@ -817,7 +817,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
             for (unsigned int x = 0; x < COUNTOF(supported_color_configs); x++)
             {
                 if (supported_color_configs[x].res == (k4a_color_resolution_t)config->color_mode_id &&
-                    supported_color_configs[x].max_fps >= config->camera_fps &&
+                    supported_color_configs[x].max_fps >= (k4a_fps_t)config->fps_mode_id &&
                     supported_color_configs[x].format == config->color_format)
                 {
                     color_fps_and_res_and_format_supported = true;
@@ -832,7 +832,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
                           "supported.",
                           k4a_color_resolution_to_string((k4a_color_resolution_t)config->color_mode_id),
                           k4a_image_format_to_string(config->color_format),
-                          k4a_fps_to_string(config->camera_fps));
+                          k4a_fps_to_string(config->fps_mode_id));
             }
         }
     }
@@ -868,7 +868,7 @@ k4a_result_t k4a_device_start_cameras(k4a_device_t device_handle, const k4a_devi
         LOG_INFO("    color_format:%d", config->color_format);
         LOG_INFO("    color_resolution:%d", config->color_mode_id);
         LOG_INFO("    depth_mode:%d", config->depth_mode_id);
-        LOG_INFO("    camera_fps:%d", config->camera_fps);
+        LOG_INFO("    camera_fps:%d", config->fps_mode_id);
         LOG_INFO("    synchronized_images_only:%d", config->synchronized_images_only);
         LOG_INFO("    depth_delay_off_color_usec:%d", config->depth_delay_off_color_usec);
         LOG_INFO("    wired_sync_mode:%d", config->wired_sync_mode);

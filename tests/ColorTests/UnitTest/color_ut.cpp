@@ -164,7 +164,7 @@ TEST_F(color_ut, streaming)
               color_create(tick, &guid_FakeGoodContainerId, str_FakeGoodSerialNumber, NULL, NULL, &color_handle));
     ASSERT_NE(color_handle, (color_t)NULL);
 
-    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
     config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
     config.depth_mode_id = K4A_DEPTH_MODE_OFF;
@@ -192,7 +192,7 @@ TEST_F(color_ut, exposure_control)
               color_create(tick, &guid_FakeGoodContainerId, str_FakeGoodSerialNumber, NULL, NULL, &color_handle));
     ASSERT_NE(color_handle, (color_t)NULL);
 
-    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
     config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
     config.depth_mode_id = K4A_DEPTH_MODE_OFF;

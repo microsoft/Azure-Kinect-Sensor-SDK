@@ -147,7 +147,7 @@ int main(int argc, char **argv)
     }
 
     config.depth_mode_id = K4A_DEPTH_MODE_WFOV_2X2BINNED;
-    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
 
     k4a_calibration_t calibration;
     if (K4A_RESULT_SUCCEEDED !=

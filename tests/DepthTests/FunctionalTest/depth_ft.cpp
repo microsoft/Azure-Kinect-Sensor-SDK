@@ -139,7 +139,7 @@ static void RunStreamConfig(k4a_device_t device,
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
     config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
     config.depth_mode_id = depth_mode;
-    config.camera_fps = depth_fps;
+    config.fps_mode_id = depth_fps;
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
@@ -489,12 +489,12 @@ TEST_F(depth_ft, depthModeChange)
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
     config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
     config.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    config.camera_fps = K4A_FRAMES_PER_SECOND_15;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
 
     config2.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
     config2.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
     config2.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    config2.camera_fps = K4A_FRAMES_PER_SECOND_15;
+    config2.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
 
     // Start device in first mode and check frame size
     //

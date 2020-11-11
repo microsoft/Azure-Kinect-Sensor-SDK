@@ -61,7 +61,7 @@ static void print_calibration()
         deviceConfig.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
         deviceConfig.color_mode_id = K4A_COLOR_RESOLUTION_1080P;
         deviceConfig.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
-        deviceConfig.camera_fps = K4A_FRAMES_PER_SECOND_30;
+        deviceConfig.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
         deviceConfig.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
         deviceConfig.synchronized_images_only = true;
 

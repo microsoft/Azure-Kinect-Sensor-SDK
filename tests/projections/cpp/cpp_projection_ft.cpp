@@ -114,7 +114,7 @@ void test_camera(k4a::device *device, camera_type type)
     {
         config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
     }
-    config.camera_fps = K4A_FRAMES_PER_SECOND_15;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
 
     device->start_cameras(&config);
 
