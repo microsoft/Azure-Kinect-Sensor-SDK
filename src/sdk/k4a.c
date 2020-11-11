@@ -1328,8 +1328,15 @@ struct _device_depth_modes
     { false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30 },
     { false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
     { false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
-    { true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 }
-};
+    { true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 } };
+
+struct _device_fps_modes
+{
+    int fps;
+} device_fps_modes[] = { 
+    { 5 }, 
+    { 15 },
+    { 30 } };
 
 // TODO: get vender and device ids from MS or use 0, 0 because MS is alpha
 k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t* device_info) {
@@ -1433,6 +1440,39 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
     };
 
     SAFE_COPY_STRUCT(mode_info, &depth_mode_info); 
+
+    return result;
+}
+
+int k4a_device_get_fps_mode_count(k4a_device_t device_handle)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+
+    return sizeof(device_fps_modes) / sizeof(k4a_fps_mode_info_t);
+}
+
+k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_index, k4a_fps_mode_info_t *mode_info)
+{
+    if (!mode_info)
+    {
+        return K4A_RESULT_FAILED;
+    }
+    if (mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
+    {
+        return K4A_RESULT_UNSUPPORTED;
+    }
+
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
+    k4a_fps_mode_info_t fps_mode_info = {
+        sizeof(k4a_fps_mode_info_t),
+        K4A_ABI_VERSION,
+        mode_index,
+        device_fps_modes[mode_index].fps,
+    };
+
+    SAFE_COPY_STRUCT(mode_info, &fps_mode_info);
 
     return result;
 }
