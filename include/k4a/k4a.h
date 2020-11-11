@@ -2281,6 +2281,10 @@ int k4a_device_get_depth_mode_count(k4a_device_t device_handle);
 
 k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_index, k4a_depth_mode_info_t *mode_info);
 
+int k4a_device_get_fps_mode_count(k4a_device_t device_handle);
+
+k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_index, k4a_fps_mode_info_t *mode_info);
+
 /**
  * @}
  */
