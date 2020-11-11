@@ -934,7 +934,7 @@ typedef struct _k4a_device_info_t
 
 typedef struct _k4a_color_mode_info_t
 {
-    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_color_mode_t). */
+    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_color_mode_info_t). */
     uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
     uint32_t mode_id;        /**< Mode identifier to use to select this mode. 0 is reserved for disabling color */
     uint32_t width;          /**< Image width. */
@@ -948,7 +948,7 @@ typedef struct _k4a_color_mode_info_t
 
 typedef struct _k4a_depth_mode_info_t
 {
-    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_depth_mode_t). */
+    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_depth_mode_info_t). */
     uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
     uint32_t mode_id;        /**< Mode identifier to use to select this mode. 0 is reserved for disabling depth. */
     bool passive_ir_only;    /**< True if only capturing passive IR. */
@@ -961,8 +961,15 @@ typedef struct _k4a_depth_mode_info_t
     int max_fps;                      /**< Maximum supported ramerate. */
 } k4a_depth_mode_info_t;
 
-// TODO: add struct size and version; remove color_resolution and depth_mode; and, replace camera_fps with a float for
-// fps?
+typedef struct _k4a_fps_mode_info_t
+{
+    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_fps_mode_info_t). */
+    uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
+    uint32_t mode_id;        /**< Mode identifier to use to select this mode. */
+    int fps;
+} k4a_fps_mode_info_t;
+
+// TODO: clean up old code that is temp commented out in this struct
 /** Configuration parameters for an Azure Kinect device.
  *
  * \remarks
@@ -991,7 +998,8 @@ typedef struct _k4a_device_configuration_t
     uint32_t depth_mode_id;
 
     /** Desired frame rate for the color and depth camera. */
-    k4a_fps_t camera_fps;
+    //k4a_fps_t camera_fps;
+    uint32_t fps_mode_id;
 
     /** Only produce k4a_capture_t objects if they contain synchronized color and depth images.
      *
