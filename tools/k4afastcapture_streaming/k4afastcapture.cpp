@@ -88,7 +88,7 @@ bool K4AFastCapture::Configure(const char *fileDirectory, int32_t exposureValue,
     m_deviceConfig.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
     m_deviceConfig.color_mode_id = K4A_COLOR_RESOLUTION_3072P;
     m_deviceConfig.depth_mode_id = K4A_DEPTH_MODE_PASSIVE_IR;
-    m_deviceConfig.camera_fps = K4A_FRAMES_PER_SECOND_15;
+    m_deviceConfig.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
     m_deviceConfig.synchronized_images_only = true;
 
     if (K4A_RESULT_SUCCEEDED != k4a_device_start_cameras(m_device, &m_deviceConfig))
@@ -191,7 +191,7 @@ void K4AFastCapture::Run(int streamingLength)
     k4a_image_t depth_image = NULL;
     k4a_image_t color_image = NULL;
 
-    uint32_t camera_fps = k4a_convert_fps_to_uint(m_deviceConfig.camera_fps);
+    uint32_t camera_fps = k4a_convert_fps_to_uint((k4a_fps_t)m_deviceConfig.fps_mode_id);
     uint32_t remainingFrames = UINT32_MAX;
     if (streamingLength >= 0)
     {

@@ -32,7 +32,7 @@ int main()
         // Start the device
         //
         k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+        config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
         config.depth_mode_id = K4A_DEPTH_MODE_WFOV_2X2BINNED;
         config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
         config.color_mode_id = K4A_COLOR_RESOLUTION_720P;

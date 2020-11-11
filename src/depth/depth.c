@@ -400,7 +400,7 @@ k4a_result_t depth_start(depth_t depth_handle, const k4a_device_configuration_t 
 
     if (K4A_SUCCEEDED(result))
     {
-        result = TRACE_CALL(depthmcu_depth_set_fps(depth->depthmcu, config->camera_fps));
+        result = TRACE_CALL(depthmcu_depth_set_fps(depth->depthmcu, config->fps_mode_id));
     }
 
     if (K4A_SUCCEEDED(result))

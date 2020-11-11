@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
     k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     device_config.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    device_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    device_config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
 
     k4a_device_t device;
     VERIFY(k4a_device_open(0, &device));
