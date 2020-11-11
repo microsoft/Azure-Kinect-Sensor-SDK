@@ -47,7 +47,7 @@ k4a_result_t k4a_record_create(const char *path,
         context->device_config = device_config;
 
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
-        context->camera_fps = k4a_convert_fps_to_uint(device_config.camera_fps);
+        context->camera_fps = k4a_convert_fps_to_uint((k4a_fps_t)device_config.fps_mode_id);
         if (context->camera_fps == 0)
         {
             // Set camera FPS to 30 if no cameras are enabled so IMU can still be written.

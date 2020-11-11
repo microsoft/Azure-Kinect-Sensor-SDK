@@ -116,7 +116,7 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
     config.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
     config.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     config.synchronized_images_only = false;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
 
@@ -243,7 +243,7 @@ TEST_F(imu_ft, imu_start)
     config_all_running.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
     config_all_running.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
     config_all_running.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    config_all_running.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config_all_running.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     config = config_all_running;
 
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_start_imu(m_device)); // Sensor not running

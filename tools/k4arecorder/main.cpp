@@ -419,7 +419,7 @@ int main(int argc, char **argv)
     device_config.color_format = recording_color_format;
     device_config.color_mode_id = recording_color_resolution;
     device_config.depth_mode_id = recording_depth_mode;
-    device_config.camera_fps = recording_rate;
+    device_config.fps_mode_id = recording_rate;
     device_config.wired_sync_mode = wired_sync_mode;
     device_config.depth_delay_off_color_usec = depth_delay_off_color_usec;
     device_config.subordinate_delay_off_master_usec = subordinate_delay_off_master_usec;
