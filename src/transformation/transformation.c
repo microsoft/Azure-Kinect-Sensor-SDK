@@ -71,8 +71,8 @@ k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_
         }
     }
 
-    calibration->depth_mode = depth_mode;
-    calibration->color_resolution = color_resolution;
+    calibration->depth_mode_id = depth_mode;
+    calibration->color_mode_id = color_resolution;
 
     return K4A_RESULT_SUCCEEDED;
 }
@@ -85,12 +85,12 @@ static k4a_result_t transformation_possible(const k4a_calibration_t *camera_cali
         LOG_ERROR("Unexpected camera calibration type %d.", camera);
         return K4A_RESULT_FAILED;
     }
-    if (camera == K4A_CALIBRATION_TYPE_DEPTH && camera_calibration->depth_mode == K4A_DEPTH_MODE_OFF)
+    if (camera == K4A_CALIBRATION_TYPE_DEPTH && camera_calibration->depth_mode_id == K4A_DEPTH_MODE_OFF)
     {
         LOG_ERROR("Expect depth camera is running to perform transformation.", 0);
         return K4A_RESULT_FAILED;
     }
-    if (camera == K4A_CALIBRATION_TYPE_COLOR && camera_calibration->color_resolution == K4A_COLOR_RESOLUTION_OFF)
+    if (camera == K4A_CALIBRATION_TYPE_COLOR && camera_calibration->color_mode_id == K4A_COLOR_RESOLUTION_OFF)
     {
         LOG_ERROR("Expect color camera is running to perform transformation.", 0);
         return K4A_RESULT_FAILED;
@@ -113,7 +113,7 @@ static k4a_result_t transformation_create_depth_camera_pinhole(const k4a_calibra
                                                                k4a_transformation_pinhole_t *pinhole)
 {
     float fov_degrees[2];
-    switch (calibration->depth_mode)
+    switch (calibration->depth_mode_id)
     {
     case K4A_DEPTH_MODE_NFOV_2X2BINNED:
     case K4A_DEPTH_MODE_NFOV_UNBINNED:
@@ -609,9 +609,9 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration,
     }
 
     transformation_context->enable_gpu_optimization = gpu_optimization;
-    transformation_context->enable_depth_color_transform = transformation_context->calibration.color_resolution !=
+    transformation_context->enable_depth_color_transform = transformation_context->calibration.color_mode_id !=
                                                                K4A_COLOR_RESOLUTION_OFF &&
-                                                           transformation_context->calibration.depth_mode !=
+                                                           transformation_context->calibration.depth_mode_id !=
                                                                K4A_DEPTH_MODE_OFF;
     if (transformation_context->enable_gpu_optimization && transformation_context->enable_depth_color_transform)
     {
