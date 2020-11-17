@@ -194,6 +194,18 @@ K4A_DECLARE_HANDLE(k4a_image_t);
  */
 K4A_DECLARE_HANDLE(k4a_transformation_t);
 
+
+
+// TODO: add comments
+static const int32_t K4A_ABI_VERSION = 1;
+
+// TODO: comment
+#define K4A_INIT_STRUCT(T, S)                                                                                          \
+    T S{};                                                                                                             \
+    S.struct_size = sizeof(T);                                                                                                \
+    S.struct_version = K4A_ABI_VERSION;
+
+
 /**
  *
  * @}
