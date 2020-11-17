@@ -41,10 +41,6 @@ typedef struct _guid_t
 #define HZ_TO_PERIOD_US(Hz) (1000000 / Hz)
 #define HZ_TO_PERIOD_NS(Hz) (1000000000 / Hz)
 
-// TODO: add comments
-
-static const int32_t K4A_ABI_VERSION = 1;
-
 /* Copy struct to a result pointer, not exceeding the size specified in the result pointer
 Assumes size comes before version */
 #define SAFE_COPY_STRUCT(result, temp)                                                                                 \

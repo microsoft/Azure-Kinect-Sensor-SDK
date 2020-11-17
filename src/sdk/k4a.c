@@ -1444,6 +1444,8 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
     return result;
 }
 
+// TODO: return to this and talk with Dmitry about doing this differently
+
 int k4a_device_get_fps_mode_count(k4a_device_t device_handle)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
