@@ -1449,6 +1449,61 @@ public:
         return k4a_device_get_installed_count();
     }
 
+
+    // TODO: add comments
+    k4a_device_info_t get_info()
+    {
+        K4A_INIT_STRUCT(k4a_device_info_t, info);
+        k4a_device_get_info(m_handle, &info);
+
+        return info;
+    } 
+    
+    // TODO: add comments
+    std::vector<k4a_color_mode_info_t> get_color_modes()
+    {
+        K4A_INIT_STRUCT(k4a_color_mode_info_t, mode);
+
+        std::vector<k4a_color_mode_info_t> modes;
+        modes.reserve(k4a_device_get_color_mode_count(m_handle));
+        for (int i = 0; k4a_device_get_color_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+        {
+            modes.push_back(mode);
+        }
+
+        return modes;
+    } 
+    
+    // TODO: add comments
+    std::vector<k4a_depth_mode_info_t> get_depth_modes()
+    {
+        K4A_INIT_STRUCT(k4a_depth_mode_info_t, mode);
+
+        std::vector<k4a_depth_mode_info_t> modes;
+        modes.reserve(k4a_device_get_depth_mode_count(m_handle));
+        for (int i = 0; k4a_device_get_depth_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+        {
+            modes.push_back(mode);
+        }
+        
+        return modes;
+    }
+
+    // TODO: add comments
+    std::vector<k4a_fps_mode_info_t> get_fps_modes()
+    {
+        K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
+
+        std::vector<k4a_fps_mode_info_t> modes;
+        modes.reserve(k4a_device_get_fps_mode_count(m_handle));
+        for (int i = 0; k4a_device_get_fps_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+        {
+            modes.push_back(mode);
+        }
+
+        return modes;
+    } 
+
 private:
     k4a_device_t m_handle;
 };
