@@ -146,9 +146,9 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
     }
 
     config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    config.color_mode_id = 1; // K4A_COLOR_RESOLUTION_720P
+    config.depth_mode_id = 2; // K4A_DEPTH_MODE_NFOV_UNBINNED
+    config.fps_mode_id = 2; // K4A_FRAMES_PER_SECOND_30
     config.synchronized_images_only = true; // ensures that depth and color images are both available in the capture
 
     k4a_calibration_t calibration;
