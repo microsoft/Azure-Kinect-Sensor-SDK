@@ -40,9 +40,9 @@ int main(int argc, char **argv)
 
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
-    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    config.color_mode_id = 5; // K4A_COLOR_RESOLUTION_2160P
+    config.depth_mode_id = 2; // K4A_DEPTH_MODE_NFOV_UNBINNED
+    config.fps_mode_id = 2; // K4A_FRAMES_PER_SECOND_30
 
     if (K4A_RESULT_SUCCEEDED != k4a_device_start_cameras(device, &config))
     {

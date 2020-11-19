@@ -906,7 +906,7 @@ typedef struct _k4a_fps_mode_info_t
     int fps;
 } k4a_fps_mode_info_t;
 
-// TODO: clean up old code that is temp commented out in this struct
+// TODO: redo comments for color, depth and fps?
 /** Configuration parameters for an Azure Kinect device.
  *
  * \remarks
@@ -927,15 +927,12 @@ typedef struct _k4a_device_configuration_t
     k4a_image_format_t color_format;
 
     /** Image resolution to capture with the color camera. */
-    // k4a_color_resolution_t color_resolution;
     uint32_t color_mode_id;
 
     /** Capture mode for the depth camera. */
-    // k4a_depth_mode_t depth_mode;
     uint32_t depth_mode_id;
 
     /** Desired frame rate for the color and depth camera. */
-    //k4a_fps_t camera_fps;
     uint32_t fps_mode_id;
 
     /** Only produce k4a_capture_t objects if they contain synchronized color and depth images.
@@ -1266,9 +1263,9 @@ typedef struct _k4a_imu_sample_t
  * \endxmlonly
  */
 static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = { K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                                               0,
-                                                                               0,
-                                                                               2,
+                                                                               0, // K4A_COLOR_RESOLUTION_OFF
+                                                                               0, // K4A_DEPTH_MODE_OFF
+                                                                               2, // K4A_FRAMES_PER_SECOND_30
                                                                                false,
                                                                                0,
                                                                                K4A_WIRED_SYNC_MODE_STANDALONE,
