@@ -32,10 +32,10 @@ int main()
         // Start the device
         //
         k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
-        config.depth_mode_id = K4A_DEPTH_MODE_WFOV_2X2BINNED;
+        config.fps_mode_id = 2; // K4A_FRAMES_PER_SECOND_30
+        config.depth_mode_id = 3; // K4A_DEPTH_MODE_WFOV_2X2BINNED
         config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-        config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+        config.color_mode_id = 1; // K4A_COLOR_RESOLUTION_720P
 
         // This means that we'll only get captures that have both color and
         // depth images, so we don't need to check if the capture contains
@@ -57,8 +57,8 @@ int main()
 
         // Textures we can give to OpenGL / the viewer window to render.
         //
-        Texture depthTexture = window.CreateTexture(GetDepthDimensions((k4a_depth_mode_t)config.depth_mode_id));
-        Texture colorTexture = window.CreateTexture(GetColorDimensions((k4a_color_resolution_t)config.color_mode_id));
+        Texture depthTexture = window.CreateTexture(GetDepthDimensions(config.depth_mode_id));
+        Texture colorTexture = window.CreateTexture(GetColorDimensions(config.color_mode_id));
 
         // A buffer containing a BGRA color representation of the depth image.
         // This is what we'll end up giving to depthTexture as an image source.
@@ -97,7 +97,7 @@ int main()
                 //
                 ColorizeDepthImage(depthImage,
                                    K4ADepthPixelColorizer::ColorizeBlueToRed,
-                                   GetDepthModeRange((k4a_depth_mode_t)config.depth_mode_id),
+                                   GetDepthModeRange(config.depth_mode_id),
                                    &depthTextureBuffer);
                 depthTexture.Update(&depthTextureBuffer[0]);
 
