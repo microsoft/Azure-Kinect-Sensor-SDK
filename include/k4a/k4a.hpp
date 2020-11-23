@@ -1465,10 +1465,15 @@ public:
         K4A_INIT_STRUCT(k4a_color_mode_info_t, mode);
 
         std::vector<k4a_color_mode_info_t> modes;
-        modes.reserve(k4a_device_get_color_mode_count(m_handle));
-        for (int i = 0; k4a_device_get_color_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+        int mode_count;
+        k4a_result_t result = k4a_device_get_color_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
         {
-            modes.push_back(mode);
+            modes.reserve(mode_count);
+            for (int i = 0; k4a_device_get_color_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+            {
+                modes.push_back(mode);
+            }
         }
 
         return modes;
@@ -1480,10 +1485,15 @@ public:
         K4A_INIT_STRUCT(k4a_depth_mode_info_t, mode);
 
         std::vector<k4a_depth_mode_info_t> modes;
-        modes.reserve(k4a_device_get_depth_mode_count(m_handle));
-        for (int i = 0; k4a_device_get_depth_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+        int mode_count;
+        k4a_result_t result = k4a_device_get_depth_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
         {
-            modes.push_back(mode);
+            modes.reserve(mode_count);
+            for (int i = 0; k4a_device_get_depth_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+            {
+                modes.push_back(mode);
+            }
         }
         
         return modes;
@@ -1495,10 +1505,15 @@ public:
         K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
 
         std::vector<k4a_fps_mode_info_t> modes;
-        modes.reserve(k4a_device_get_fps_mode_count(m_handle));
-        for (int i = 0; k4a_device_get_fps_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+        int mode_count;
+        k4a_result_t result = k4a_device_get_fps_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
         {
-            modes.push_back(mode);
+            modes.reserve(mode_count);
+            for (int i = 0; k4a_device_get_fps_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+            {
+                modes.push_back(mode);
+            }
         }
 
         return modes;

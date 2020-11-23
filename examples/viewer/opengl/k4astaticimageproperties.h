@@ -15,89 +15,148 @@ namespace viewer
 // Gets the dimensions of the color images that the color camera will produce for a
 // given color resolution
 //
-inline std::pair<int, int> GetColorDimensions(const k4a_color_resolution_t resolution)
+inline std::pair<int, int> GetColorDimensions(k4a_device_t device_handle, int mode_index)
 {
-    switch (resolution)
+    // TODO: comment
+    int color_mode_count;
+    k4a_result_t color_mode_count_result = k4a_device_get_color_mode_count(device_handle, &color_mode_count);
+    if (color_mode_count_result == K4A_RESULT_SUCCEEDED)
     {
-    case K4A_COLOR_RESOLUTION_720P:
-        return { 1280, 720 };
-    case K4A_COLOR_RESOLUTION_2160P:
-        return { 3840, 2160 };
-    case K4A_COLOR_RESOLUTION_1440P:
-        return { 2560, 1440 };
-    case K4A_COLOR_RESOLUTION_1080P:
-        return { 1920, 1080 };
-    case K4A_COLOR_RESOLUTION_3072P:
-        return { 4096, 3072 };
-    case K4A_COLOR_RESOLUTION_1536P:
-        return { 2048, 1536 };
-
-    default:
-        throw std::logic_error("Invalid color dimensions value!");
+        if (mode_index >= 0 && mode_index < color_mode_count)
+        {
+            k4a_color_mode_info_t color_mode_info;
+            k4a_result_t color_mode_result = k4a_device_get_color_mode(device_handle, mode_index, &color_mode_info);
+            // TODO: improve error handling
+            if (color_mode_result == K4A_RESULT_SUCCEEDED)
+            {
+                return { (int)color_mode_info.width, (int)color_mode_info.height };
+            }
+            else
+            {
+                throw std::logic_error("Invalid color dimensions value!");
+            }
+        }
+        else
+        {
+            throw std::logic_error("Invalid color dimensions value!");
+        }
+    }
+    else
+    {
+        throw std::logic_error("Invalid device handle!");
     }
 }
 
 // Gets the dimensions of the depth images that the depth camera will produce for a
 // given depth mode
 //
-inline std::pair<int, int> GetDepthDimensions(const k4a_depth_mode_t depthMode)
+inline std::pair<int, int> GetDepthDimensions(k4a_device_t device_handle, int mode_index)
 {
-    switch (depthMode)
+    int depth_mode_count;
+    k4a_result_t depth_mode_count_result = k4a_device_get_depth_mode_count(device_handle, &depth_mode_count);
+    if (depth_mode_count_result == K4A_RESULT_SUCCEEDED)
     {
-    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-        return { 320, 288 };
-    case K4A_DEPTH_MODE_NFOV_UNBINNED:
-        return { 640, 576 };
-    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-        return { 512, 512 };
-    case K4A_DEPTH_MODE_WFOV_UNBINNED:
-        return { 1024, 1024 };
-    case K4A_DEPTH_MODE_PASSIVE_IR:
-        return { 1024, 1024 };
-
-    default:
-        throw std::logic_error("Invalid depth dimensions value!");
+        if (mode_index >= 0 && mode_index < depth_mode_count)
+        {
+            k4a_depth_mode_info_t depth_mode_info;
+            k4a_result_t color_mode_result = k4a_device_get_depth_mode(device_handle, mode_index, &depth_mode_info);
+            // TODO: improve error handling
+            if (color_mode_result == K4A_RESULT_SUCCEEDED)
+            {
+                return { (int)depth_mode_info.width, (int)depth_mode_info.height };
+            }
+            else
+            {
+                throw std::logic_error("Invalid depth dimensions value!");
+            }
+        }
+        else
+        {
+            throw std::logic_error("Invalid depth dimensions value!");
+        }
+    }
+    else
+    {
+        throw std::logic_error("Invalid device handle!");
     }
 }
 
 // Gets the range of values that we expect to see from the depth camera
 // when using a given depth mode, in millimeters
 //
-inline std::pair<uint16_t, uint16_t> GetDepthModeRange(const k4a_depth_mode_t depthMode)
+inline std::pair<uint16_t, uint16_t> GetDepthModeRange(k4a_device_t device_handle, int mode_index)
 {
-    switch (depthMode)
+    switch (mode_index)
     {
-    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-        return { (uint16_t)500, (uint16_t)5800 };
-    case K4A_DEPTH_MODE_NFOV_UNBINNED:
-        return { (uint16_t)500, (uint16_t)4000 };
-    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-        return { (uint16_t)250, (uint16_t)3000 };
-    case K4A_DEPTH_MODE_WFOV_UNBINNED:
-        return { (uint16_t)250, (uint16_t)2500 };
-
-    case K4A_DEPTH_MODE_PASSIVE_IR:
+    case 5: // K4A_DEPTH_MODE_PASSIVE_IR
     default:
-        throw std::logic_error("Invalid depth mode!");
+        int depth_mode_count;
+        k4a_result_t depth_mode_count_result = k4a_device_get_depth_mode_count(device_handle, &depth_mode_count);
+        if (depth_mode_count_result == K4A_RESULT_SUCCEEDED)
+        {
+            if (mode_index >= 0 && mode_index < depth_mode_count)
+            {
+                k4a_depth_mode_info_t depth_mode_info;
+                k4a_result_t depth_mode_result = k4a_device_get_depth_mode(device_handle, mode_index, &depth_mode_info);
+                // TODO: improve error handling
+                if (depth_mode_result == K4A_RESULT_SUCCEEDED)
+                {
+                    return { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range };
+                }
+                else
+                {
+                    throw std::logic_error("Invalid depth mode!");
+                }
+            }
+            else
+            {
+                throw std::logic_error("Invalid depth mode!");
+            }
+        }
+        else
+        {
+            throw std::logic_error("Invalid device handle!");
+        }
     }
 }
 
 // Gets the expected min/max IR brightness levels that we expect to see
 // from the IR camera when using a given depth mode
 //
-inline std::pair<uint16_t, uint16_t> GetIrLevels(const k4a_depth_mode_t depthMode)
+inline std::pair<uint16_t, uint16_t> GetIrLevels(k4a_device_t device_handle, int mode_index)
 {
-    switch (depthMode)
+    if (mode_index == 0) // K4A_DEPTH_MODE_OFF
     {
-    case K4A_DEPTH_MODE_PASSIVE_IR:
-        return { (uint16_t)0, (uint16_t)100 };
-
-    case K4A_DEPTH_MODE_OFF:
         throw std::logic_error("Invalid depth mode!");
-
-    default:
+    }
+    else if (mode_index == 5) // K4A_DEPTH_MODE_PASSIVE_IR
+    {
+        int depth_mode_count;
+        k4a_result_t depth_mode_count_result = k4a_device_get_depth_mode_count(device_handle, &depth_mode_count);
+        if (depth_mode_count_result == K4A_RESULT_SUCCEEDED)
+        {
+            k4a_depth_mode_info_t depth_mode_info;
+            k4a_result_t result = k4a_device_get_depth_mode(device_handle, mode_index, &depth_mode_info);
+            // TODO: improve error handling
+            if (result == K4A_RESULT_SUCCEEDED)
+            {
+                return { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range };
+            }
+            else
+            {
+                throw std::logic_error("Invalid depth mode!");
+            }
+        }
+        else
+        {
+            throw std::logic_error("Invalid device handle!");
+        }
+    }
+    else
+    {
         return { (uint16_t)0, (uint16_t)1000 };
     }
+
 }
 } // namespace viewer
 

@@ -1322,13 +1322,15 @@ struct _device_depth_modes
     float vertical_fov;
     int min_fps;
     int max_fps;
+    int min_range;
+    int max_range;
 } device_depth_modes[] = {
-    { false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0 }, // depth mode will be turned off
-    { false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30 },
-    { false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30 },
-    { false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
-    { false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 },
-    { true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30 } };
+    { false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 }, // depth mode will be turned off
+    { false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800 },
+    { false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 },
+    { false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000 },
+    { false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500 },
+    { true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100 } };
 
 struct _device_fps_modes
 {
@@ -1365,11 +1367,14 @@ k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t* 
     return result;
 }
 
-int k4a_device_get_color_mode_count(k4a_device_t device_handle)
+k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    return sizeof(device_color_modes) / sizeof(k4a_color_mode_info_t);
+    *mode_count = sizeof(device_color_modes) / sizeof(k4a_color_mode_info_t);
+
+    return result;
 }
 
 k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_index, k4a_color_mode_info_t *mode_info)
@@ -1404,11 +1409,14 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_inde
     return result;
 }
 
-int k4a_device_get_depth_mode_count(k4a_device_t device_handle)
+k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    return sizeof(device_depth_modes) / sizeof(k4a_depth_mode_info_t);
+    *mode_count = sizeof(device_depth_modes) / sizeof(k4a_depth_mode_info_t);
+
+    return result;
 }
 
 k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_index, k4a_depth_mode_info_t *mode_info)
@@ -1437,6 +1445,8 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
         device_depth_modes[mode_index].vertical_fov,
         device_depth_modes[mode_index].min_fps,
         device_depth_modes[mode_index].max_fps,
+        device_depth_modes[mode_index].min_range,
+        device_depth_modes[mode_index].max_range,
     };
 
     SAFE_COPY_STRUCT(mode_info, &depth_mode_info); 
@@ -1445,12 +1455,14 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
 }
 
 // TODO: return to this and talk with Dmitry about doing this differently
-
-int k4a_device_get_fps_mode_count(k4a_device_t device_handle)
+k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    return sizeof(device_fps_modes) / sizeof(k4a_fps_mode_info_t);
+    *mode_count = sizeof(device_fps_modes) / sizeof(k4a_fps_mode_info_t);
+
+    return result;
 }
 
 k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_index, k4a_fps_mode_info_t *mode_info)
