@@ -433,7 +433,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         frame_period_ns = context->color_track->frame_period_ns;
 
         RETURN_IF_ERROR(read_bitmap_info_header(context->color_track));
-        context->record_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
+        context->record_config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
         for (size_t i = 0; i < arraysize(color_resolutions); i++)
         {
             uint32_t width, height;
@@ -441,13 +441,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             {
                 if (context->color_track->width == width && context->color_track->height == height)
                 {
-                    context->record_config.color_resolution = color_resolutions[i];
+                    context->record_config.color_mode_id = color_resolutions[i];
                     break;
                 }
             }
         }
 
-        if (context->record_config.color_resolution == K4A_COLOR_RESOLUTION_OFF)
+        if (context->record_config.color_mode_id == K4A_COLOR_RESOLUTION_OFF)
         {
             LOG_WARNING("The color resolution is not officially supported: %dx%d. You cannot get the calibration "
                         "information for this color resolution",
@@ -461,7 +461,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     }
     else
     {
-        context->record_config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
+        context->record_config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
         // Set to a default color format if color track is disabled.
         context->record_config.color_format = K4A_IMAGE_FORMAT_CUSTOM;
         context->color_format_conversion = K4A_IMAGE_FORMAT_CUSTOM;
@@ -477,7 +477,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     std::string depth_mode_str;
     uint32_t depth_width = 0;
     uint32_t depth_height = 0;
-    context->record_config.depth_mode = K4A_DEPTH_MODE_OFF;
+    context->record_config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     if (depth_mode_tag != NULL)
     {
@@ -488,13 +488,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             {
                 if (k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
                 {
-                    context->record_config.depth_mode = depth_modes[i].first;
+                    context->record_config.depth_mode_id = depth_modes[i].first;
                     break;
                 }
             }
         }
 
-        if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
+        if (context->record_config.depth_mode_id == K4A_DEPTH_MODE_OFF)
         {
             // Try to find the mode matching strings in the legacy modes
             for (size_t i = 0; i < arraysize(legacy_depth_modes); i++)
@@ -505,13 +505,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                                                                &depth_width,
                                                                &depth_height))
                     {
-                        context->record_config.depth_mode = legacy_depth_modes[i].first;
+                        context->record_config.depth_mode_id = legacy_depth_modes[i].first;
                         break;
                     }
                 }
             }
         }
-        if (context->record_config.depth_mode == K4A_DEPTH_MODE_OFF)
+        if (context->record_config.depth_mode_id == K4A_DEPTH_MODE_OFF)
         {
             LOG_ERROR("Unsupported depth mode: %s", depth_mode_str.c_str());
             return K4A_RESULT_FAILED;
@@ -609,13 +609,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         switch (1_s / frame_period_ns)
         {
         case 5:
-            context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_5;
+            context->record_config.fps_mode_id = K4A_FRAMES_PER_SECOND_5;
             break;
         case 15:
-            context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_15;
+            context->record_config.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
             break;
         case 30:
-            context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+            context->record_config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
             break;
         default:
             LOG_ERROR("Unsupported recording frame period: %llu ns (%llu fps)",
@@ -627,7 +627,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     else
     {
         // Default to 30 fps if no video tracks are enabled.
-        context->record_config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+        context->record_config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     }
 
     // Read depth_delay_off_color_usec and set offsets for each builtin track accordingly.
