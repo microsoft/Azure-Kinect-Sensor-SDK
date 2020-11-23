@@ -62,7 +62,7 @@ inline std::pair<uint16_t, uint16_t> GetDepthModeRange(k4a::device device, int m
         if (size > 0 && mode_index < size)
         {
             k4a_depth_mode_info_t mode = depth_modes[mode_index];
-            return { mode.min_range, mode.max_range };
+            return { (uint16_t)mode.min_range, (uint16_t)mode.max_range };
         }
         else
         {
@@ -87,7 +87,7 @@ inline std::pair<uint16_t, uint16_t> GetIrLevels(k4a::device device, int mode_in
         if (size > 0 && mode_index < size)
         {
             k4a_depth_mode_info_t mode = depth_modes[mode_index];
-            return { mode.min_range, mode.max_range };
+            return { (uint16_t)mode.min_range, (uint16_t)mode.max_range };
         }
         else
         {
