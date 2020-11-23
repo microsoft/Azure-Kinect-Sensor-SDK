@@ -2271,19 +2271,25 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
     TODO: add comments
 */
 
-k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info);
+K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info);
 
-k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count);
+K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count);
 
-k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_index, k4a_color_mode_info_t *mode_info);
+K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
+                                                  int mode_index,
+                                                  k4a_color_mode_info_t *mode_info);
 
-k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count);
+K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count);
 
-k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_index, k4a_depth_mode_info_t *mode_info);
+K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
+                                                  int mode_index,
+                                                  k4a_depth_mode_info_t *mode_info);
 
-k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count);
+K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count);
 
-k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_index, k4a_fps_mode_info_t *mode_info);
+K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
+                                                int mode_index,
+                                                k4a_fps_mode_info_t *mode_info);
 
 /**
  * @}
