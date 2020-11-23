@@ -57,8 +57,8 @@ int main()
 
         // Textures we can give to OpenGL / the viewer window to render.
         //
-        Texture depthTexture = window.CreateTexture(GetDepthDimensions(config.depth_mode_id));
-        Texture colorTexture = window.CreateTexture(GetColorDimensions(config.color_mode_id));
+        Texture depthTexture = window.CreateTexture(GetDepthDimensions(dev.handle(), config.depth_mode_id));
+        Texture colorTexture = window.CreateTexture(GetColorDimensions(dev.handle(), config.color_mode_id));
 
         // A buffer containing a BGRA color representation of the depth image.
         // This is what we'll end up giving to depthTexture as an image source.
@@ -97,7 +97,7 @@ int main()
                 //
                 ColorizeDepthImage(depthImage,
                                    K4ADepthPixelColorizer::ColorizeBlueToRed,
-                                   GetDepthModeRange(config.depth_mode_id),
+                                   GetDepthModeRange(dev.handle(), config.depth_mode_id),
                                    &depthTextureBuffer);
                 depthTexture.Update(&depthTextureBuffer[0]);
 
