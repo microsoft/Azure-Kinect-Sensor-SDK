@@ -41,7 +41,7 @@ K4ADockControlStatus K4ASourceSelectionDockControl::Show()
                                      "(No available devices)",
                                      ImGuiComboFlags_None,
                                      m_connectedDevices,
-                                     &m_selectedDevice);
+                                     &SelectedDevice);
 
         if (ImGui::Button("Refresh Devices"))
         {
@@ -79,9 +79,11 @@ K4ADockControlStatus K4ASourceSelectionDockControl::Show()
     return K4ADockControlStatus::Ok;
 }
 
+int K4ASourceSelectionDockControl::SelectedDevice = -1;
+
 void K4ASourceSelectionDockControl::RefreshDevices()
 {
-    m_selectedDevice = -1;
+    SelectedDevice = -1;
 
     const uint32_t installedDevices = k4a_device_get_installed_count();
 
@@ -105,7 +107,7 @@ void K4ASourceSelectionDockControl::RefreshDevices()
 
     if (!m_connectedDevices.empty())
     {
-        m_selectedDevice = m_connectedDevices[0].first;
+        SelectedDevice = m_connectedDevices[0].first;
     }
 
     const int audioRefreshStatus = K4AAudioManager::Instance().RefreshDevices();
@@ -123,13 +125,13 @@ void K4ASourceSelectionDockControl::OpenDevice()
 {
     try
     {
-        if (m_selectedDevice < 0)
+        if (SelectedDevice < 0)
         {
             K4AViewerErrorManager::Instance().SetErrorStatus("No device selected!");
             return;
         }
 
-        k4a::device device = k4a::device::open(static_cast<uint32_t>(m_selectedDevice));
+        k4a::device device = k4a::device::open(static_cast<uint32_t>(SelectedDevice));
         K4AWindowManager::Instance().PushLeftDockControl(std14::make_unique<K4ADeviceDockControl>(std::move(device)));
     }
     catch (const k4a::error &e)
