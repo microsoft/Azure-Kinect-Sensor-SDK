@@ -111,9 +111,9 @@ int main(int argc, char **argv)
     int device_index = 0;
     int recording_length = -1;
     k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    k4a_color_resolution_t recording_color_resolution = K4A_COLOR_RESOLUTION_1080P;
-    k4a_depth_mode_t recording_depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    k4a_fps_t recording_rate = K4A_FRAMES_PER_SECOND_30;
+    uint32_t recording_color_resolution = 2; // 2 = K4A_COLOR_RESOLUTION_1080P
+    uint32_t recording_depth_mode = 2;       // 2 = K4A_DEPTH_MODE_NFOV_UNBINNED
+    uint32_t recording_rate = 2;             // 2 = K4A_FRAMES_PER_SECOND_30
     bool recording_rate_set = false;
     bool recording_imu_enabled = true;
     k4a_wired_sync_mode_t wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
@@ -153,45 +153,45 @@ int main(int argc, char **argv)
                               [&](const std::vector<char *> &args) {
                                   if (string_compare(args[0], "3072p") == 0)
                                   {
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_3072P;
+                                      recording_color_resolution = 6; // 6 = K4A_COLOR_RESOLUTION_3072P
                                   }
                                   else if (string_compare(args[0], "2160p") == 0)
                                   {
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_2160P;
+                                      recording_color_resolution = 5; // 5 = K4A_COLOR_RESOLUTION_2160P
                                   }
                                   else if (string_compare(args[0], "1536p") == 0)
                                   {
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_1536P;
+                                      recording_color_resolution = 4; // 4 = K4A_COLOR_RESOLUTION_1536P
                                   }
                                   else if (string_compare(args[0], "1440p") == 0)
                                   {
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_1440P;
+                                      recording_color_resolution = 3; // 3 = K4A_COLOR_RESOLUTION_1440P
                                   }
                                   else if (string_compare(args[0], "1080p") == 0)
                                   {
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_1080P;
+                                      recording_color_resolution = 2; // 2 = K4A_COLOR_RESOLUTION_1080P
                                   }
                                   else if (string_compare(args[0], "720p") == 0)
                                   {
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
+                                      recording_color_resolution = 1; // 1 = K4A_COLOR_RESOLUTION_720P
                                   }
                                   else if (string_compare(args[0], "720p_NV12") == 0)
                                   {
                                       recording_color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
+                                      recording_color_resolution = 1; // 1 = K4A_COLOR_RESOLUTION_720P
                                   }
                                   else if (string_compare(args[0], "720p_YUY2") == 0)
                                   {
                                       recording_color_format = K4A_IMAGE_FORMAT_COLOR_YUY2;
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_720P;
+                                      recording_color_resolution = 1; // 1 = K4A_COLOR_RESOLUTION_720P
                                   }
                                   else if (string_compare(args[0], "off") == 0)
                                   {
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_OFF;
+                                      recording_color_resolution = 0; // 0 = K4A_COLOR_RESOLUTION_OFF
                                   }
                                   else
                                   {
-                                      recording_color_resolution = K4A_COLOR_RESOLUTION_OFF;
+                                      recording_color_resolution = 0; // 0 = K4A_COLOR_RESOLUTION_OFF
 
                                       std::ostringstream str;
                                       str << "Unknown color mode specified: " << args[0];
@@ -205,27 +205,27 @@ int main(int argc, char **argv)
                               [&](const std::vector<char *> &args) {
                                   if (string_compare(args[0], "NFOV_2X2BINNED") == 0)
                                   {
-                                      recording_depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+                                      recording_depth_mode = 1; // 1 = K4A_DEPTH_MODE_NFOV_2X2BINNED
                                   }
                                   else if (string_compare(args[0], "NFOV_UNBINNED") == 0)
                                   {
-                                      recording_depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+                                      recording_depth_mode = 2; // 2 = K4A_DEPTH_MODE_NFOV_UNBINNED
                                   }
                                   else if (string_compare(args[0], "WFOV_2X2BINNED") == 0)
                                   {
-                                      recording_depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
+                                      recording_depth_mode = 3; // 3 = K4A_DEPTH_MODE_WFOV_2X2BINNED
                                   }
                                   else if (string_compare(args[0], "WFOV_UNBINNED") == 0)
                                   {
-                                      recording_depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED;
+                                      recording_depth_mode = 4; // 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
                                   }
                                   else if (string_compare(args[0], "PASSIVE_IR") == 0)
                                   {
-                                      recording_depth_mode = K4A_DEPTH_MODE_PASSIVE_IR;
+                                      recording_depth_mode = 5; // 5 = K4A_DEPTH_MODE_PASSIVE_IR
                                   }
                                   else if (string_compare(args[0], "off") == 0)
                                   {
-                                      recording_depth_mode = K4A_DEPTH_MODE_OFF;
+                                      recording_depth_mode = 0; // 0 = K4A_DEPTH_MODE_OFF
                                   }
                                   else
                                   {
@@ -251,15 +251,15 @@ int main(int argc, char **argv)
                                   recording_rate_set = true;
                                   if (string_compare(args[0], "30") == 0)
                                   {
-                                      recording_rate = K4A_FRAMES_PER_SECOND_30;
+                                      recording_rate = 2; // 2 = K4A_FRAMES_PER_SECOND_30
                                   }
                                   else if (string_compare(args[0], "15") == 0)
                                   {
-                                      recording_rate = K4A_FRAMES_PER_SECOND_15;
+                                      recording_rate = 1; // 1 = K4A_FRAMES_PER_SECOND_15
                                   }
                                   else if (string_compare(args[0], "5") == 0)
                                   {
-                                      recording_rate = K4A_FRAMES_PER_SECOND_5;
+                                      recording_rate = 0; // 0 = K4A_FRAMES_PER_SECOND_5
                                   }
                                   else
                                   {
@@ -375,14 +375,13 @@ int main(int argc, char **argv)
         cmd_parser.PrintOptions();
         return 0;
     }
-
-    if (recording_rate == K4A_FRAMES_PER_SECOND_30 && (recording_depth_mode == K4A_DEPTH_MODE_WFOV_UNBINNED ||
-                                                       recording_color_resolution == K4A_COLOR_RESOLUTION_3072P))
+   
+    if (recording_rate == 2 && (recording_depth_mode == 4 || recording_color_resolution == 6)) // 2 = K4A_FRAMES_PER_SECOND_30, 4 = K4A_DEPTH_MODE_WFOV_UNBINNED, 6 = K4A_COLOR_RESOLUTION_3072P
     {
         if (!recording_rate_set)
         {
             // Default to max supported frame rate
-            recording_rate = K4A_FRAMES_PER_SECOND_15;
+            recording_rate = 2; // 2 = K4A_FRAMES_PER_SECOND_15
         }
         else
         {
