@@ -49,20 +49,20 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     //
     m_recordConfiguration = recording.get_record_configuration();
     std::stringstream fpsSS;
-    fpsSS << m_recordConfiguration.camera_fps;
+    fpsSS << m_recordConfiguration.fps_mode_id;
     m_fpsLabel = fpsSS.str();
 
-    switch (m_recordConfiguration.camera_fps)
+    switch (m_recordConfiguration.fps_mode_id)
     {
-    case K4A_FRAMES_PER_SECOND_5:
+    case 0:  // 0 = K4A_FRAMES_PER_SECOND_5
         m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 5));
         break;
 
-    case K4A_FRAMES_PER_SECOND_15:
+    case 1: // 1 = K4A_FRAMES_PER_SECOND_15
         m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 15));
         break;
 
-    case K4A_FRAMES_PER_SECOND_30:
+    case 2:  // 2 = K4A_FRAMES_PER_SECOND_30
     default:
         m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 30));
         break;
@@ -77,7 +77,7 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     std::stringstream depthSS;
     if (m_recordingHasDepth || m_recordingHasIR)
     {
-        depthSS << m_recordConfiguration.depth_mode;
+        depthSS << m_recordConfiguration.depth_mode_id;
     }
     else
     {
@@ -91,7 +91,7 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     if (m_recordingHasColor)
     {
         colorFormatSS << m_recordConfiguration.color_format;
-        colorResolutionSS << m_recordConfiguration.color_resolution;
+        colorResolutionSS << m_recordConfiguration.color_mode_id;
 
         recording.set_color_conversion(K4A_IMAGE_FORMAT_COLOR_BGRA32);
         m_recordConfiguration.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
@@ -467,10 +467,10 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
                                          imuDataSource,
                                          nullptr, // Audio source - sound is not supported in recordings
                                          m_recordingHasDepth || m_recordingHasIR,
-                                         m_recordConfiguration.depth_mode,
+                                         m_recordConfiguration.depth_mode_id,
                                          m_recordingHasColor,
                                          m_recordConfiguration.color_format,
-                                         m_recordConfiguration.color_resolution);
+                                         m_recordConfiguration.color_mode_id);
         break;
 
     case K4AWindowSet::ViewType::PointCloudViewer:

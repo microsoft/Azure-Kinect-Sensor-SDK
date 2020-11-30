@@ -177,7 +177,7 @@ K4APointCloudVisualizer::K4APointCloudVisualizer(const bool enableColorPointClou
     m_enableColorPointCloud(enableColorPointCloud),
     m_calibrationData(calibrationData)
 {
-    m_expectedValueRange = GetDepthModeRange(m_calibrationData.depth_mode);
+    m_expectedValueRange = GetDepthModeRange(m_calibrationData.depth_mode_id);
     m_transformation = k4a::transformation(m_calibrationData);
 
     glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer.Id());

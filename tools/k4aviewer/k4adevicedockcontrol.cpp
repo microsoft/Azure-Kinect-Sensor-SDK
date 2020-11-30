@@ -343,28 +343,15 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         const bool depthSettingsEditable = !deviceIsStarted && m_config.EnableDepthCamera;
         auto *pDepthMode = reinterpret_cast<int *>(&m_config.DepthMode);
         ImGui::Text("Depth mode");
-        depthModeUpdated |= ImGuiExtensions::K4ARadioButton("NFOV Binned",
-                                                            pDepthMode,
-                                                            K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                                                            depthSettingsEditable);
+        depthModeUpdated |= ImGuiExtensions::K4ARadioButton("NFOV Binned", pDepthMode, 1, depthSettingsEditable); // 1 = K4A_DEPTH_MODE_NFOV_2X2BINNED
         ImGui::SameLine();
-        depthModeUpdated |= ImGuiExtensions::K4ARadioButton("NFOV Unbinned  ",
-                                                            pDepthMode,
-                                                            K4A_DEPTH_MODE_NFOV_UNBINNED,
-                                                            depthSettingsEditable);
+        depthModeUpdated |= ImGuiExtensions::K4ARadioButton("NFOV Unbinned  ", pDepthMode, 2, depthSettingsEditable); // 2 = K4A_DEPTH_MODE_NFOV_UNBINNED
         // New line
-        depthModeUpdated |= ImGuiExtensions::K4ARadioButton("WFOV Binned",
-                                                            pDepthMode,
-                                                            K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                                                            depthSettingsEditable);
+        depthModeUpdated |= ImGuiExtensions::K4ARadioButton("WFOV Binned", pDepthMode, 3, depthSettingsEditable); // 3 = K4A_DEPTH_MODE_WFOV_2X2BINNED
         ImGui::SameLine();
-        depthModeUpdated |= ImGuiExtensions::K4ARadioButton("WFOV Unbinned  ",
-                                                            pDepthMode,
-                                                            K4A_DEPTH_MODE_WFOV_UNBINNED,
-                                                            depthSettingsEditable);
+        depthModeUpdated |= ImGuiExtensions::K4ARadioButton("WFOV Unbinned  ", pDepthMode, 4, depthSettingsEditable); // 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
         // New line
-        depthModeUpdated |=
-            ImGuiExtensions::K4ARadioButton("Passive IR", pDepthMode, K4A_DEPTH_MODE_PASSIVE_IR, depthSettingsEditable);
+        depthModeUpdated |= ImGuiExtensions::K4ARadioButton("Passive IR", pDepthMode, 5, depthSettingsEditable); //  5 = K4A_DEPTH_MODE_PASSIVE_IR
 
         ImGui::TreePop();
     }
@@ -409,7 +396,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         {
             if (!imageFormatSupportsHighResolution)
             {
-                m_config.ColorResolution = K4A_COLOR_RESOLUTION_720P;
+                m_config.ColorResolution = 1;  // 1 = K4A_COLOR_RESOLUTION_720P
             }
         }
 
@@ -419,48 +406,25 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         ImGui::Indent();
         ImGui::Text("16:9");
         ImGui::Indent();
-        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton(" 720p",
-                                                                  pColorResolution,
-                                                                  K4A_COLOR_RESOLUTION_720P,
-                                                                  colorSettingsEditable);
+        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton(" 720p", pColorResolution, 1, colorSettingsEditable); // 1 = K4A_COLOR_RESOLUTION_720P
         ImGui::SameLine();
-        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1080p",
-                                                                  pColorResolution,
-                                                                  K4A_COLOR_RESOLUTION_1080P,
-                                                                  colorSettingsEditable &&
-                                                                      imageFormatSupportsHighResolution);
+        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1080p", pColorResolution, 2, colorSettingsEditable && imageFormatSupportsHighResolution); // 2 = K4A_COLOR_RESOLUTION_1080P
         ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
         // New line
-        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1440p",
-                                                                  pColorResolution,
-                                                                  K4A_COLOR_RESOLUTION_1440P,
-                                                                  colorSettingsEditable &&
-                                                                      imageFormatSupportsHighResolution);
+        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1440p", pColorResolution, 3, colorSettingsEditable && imageFormatSupportsHighResolution); // 3 = K4A_COLOR_RESOLUTION_1440P
         ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
         ImGui::SameLine();
-        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("2160p",
-                                                                  pColorResolution,
-                                                                  K4A_COLOR_RESOLUTION_2160P,
-                                                                  colorSettingsEditable &&
-                                                                      imageFormatSupportsHighResolution);
+        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("2160p", pColorResolution, 4, colorSettingsEditable && imageFormatSupportsHighResolution); // 4 = K4A_COLOR_RESOLUTION_2160P
         ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
         ImGui::Unindent();
         ImGui::Text("4:3");
         ImGui::Indent();
 
-        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1536p",
-                                                                  pColorResolution,
-                                                                  K4A_COLOR_RESOLUTION_1536P,
-                                                                  colorSettingsEditable &&
-                                                                      imageFormatSupportsHighResolution);
+        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1536p", pColorResolution, 5, colorSettingsEditable && imageFormatSupportsHighResolution); // 5 = K4A_COLOR_RESOLUTION_1536P
         ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
 
         ImGui::SameLine();
-        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("3072p",
-                                                                  pColorResolution,
-                                                                  K4A_COLOR_RESOLUTION_3072P,
-                                                                  colorSettingsEditable &&
-                                                                      imageFormatSupportsHighResolution);
+        colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("3072p", pColorResolution, 6, colorSettingsEditable && imageFormatSupportsHighResolution); // 6 = K4A_COLOR_RESOLUTION_3072P
         ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
 
         ImGui::Unindent();
@@ -606,40 +570,34 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     if (colorResolutionUpdated || m_firstRun)
     {
-        if (m_config.ColorResolution == K4A_COLOR_RESOLUTION_3072P)
+        if (m_config.ColorResolution == 6) // 6 = K4A_COLOR_RESOLUTION_3072P
         {
             // 4K supports up to 15FPS
             //
-            m_config.Framerate = K4A_FRAMES_PER_SECOND_15;
+            m_config.Framerate = 2;  // 2 = K4A_FRAMES_PER_SECOND_15
         }
     }
     if (depthModeUpdated || m_firstRun)
     {
-        if (m_config.DepthMode == K4A_DEPTH_MODE_WFOV_UNBINNED)
+        if (m_config.DepthMode == 4) // 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
         {
-            m_config.Framerate = K4A_FRAMES_PER_SECOND_15;
+            m_config.Framerate = 2;  // 2 = K4A_FRAMES_PER_SECOND_15
         }
     }
 
-    const bool supports30fps = !(m_config.EnableColorCamera &&
-                                 m_config.ColorResolution == K4A_COLOR_RESOLUTION_3072P) &&
-                               !(m_config.EnableDepthCamera && m_config.DepthMode == K4A_DEPTH_MODE_WFOV_UNBINNED);
+    const bool supports30fps = !(m_config.EnableColorCamera && m_config.ColorResolution == 6) && !(m_config.EnableDepthCamera && m_config.DepthMode == 4); // 6 = K4A_COLOR_RESOLUTION_3072P, 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
 
     const bool enableFramerate = !deviceIsStarted && (m_config.EnableColorCamera || m_config.EnableDepthCamera);
 
     ImGui::Text("Framerate");
     auto *pFramerate = reinterpret_cast<int *>(&m_config.Framerate);
     bool framerateUpdated = false;
-    framerateUpdated |= ImGuiExtensions::K4ARadioButton("30 FPS",
-                                                        pFramerate,
-                                                        K4A_FRAMES_PER_SECOND_30,
-                                                        enableFramerate && supports30fps);
+    framerateUpdated |= ImGuiExtensions::K4ARadioButton("30 FPS", pFramerate, 2, enableFramerate && supports30fps); // 2 = K4A_FRAMES_PER_SECOND_30
     ImGuiExtensions::K4AShowTooltip("Not supported with WFOV Unbinned or 3072p!", !supports30fps);
     ImGui::SameLine();
-    framerateUpdated |=
-        ImGuiExtensions::K4ARadioButton("15 FPS", pFramerate, K4A_FRAMES_PER_SECOND_15, enableFramerate);
+    framerateUpdated |= ImGuiExtensions::K4ARadioButton("15 FPS", pFramerate, 1, enableFramerate); // 1 = K4A_FRAMES_PER_SECOND_15
     ImGui::SameLine();
-    framerateUpdated |= ImGuiExtensions::K4ARadioButton(" 5 FPS", pFramerate, K4A_FRAMES_PER_SECOND_5, enableFramerate);
+    framerateUpdated |= ImGuiExtensions::K4ARadioButton(" 5 FPS", pFramerate, 0, enableFramerate); // 0 = K4A_FRAMES_PER_SECOND_5
 
     ImGuiExtensions::K4ACheckbox("Disable streaming LED", &m_config.DisableStreamingIndicator, !deviceIsStarted);
 
@@ -688,13 +646,13 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             int maxDepthDelay = 0;
             switch (m_config.Framerate)
             {
-            case K4A_FRAMES_PER_SECOND_30:
+            case 2:  // 2 = K4A_FRAMES_PER_SECOND_30
                 maxDepthDelay = std::micro::den / 30;
                 break;
-            case K4A_FRAMES_PER_SECOND_15:
+            case 1:  // 1 = K4A_FRAMES_PER_SECOND_15
                 maxDepthDelay = std::micro::den / 15;
                 break;
-            case K4A_FRAMES_PER_SECOND_5:
+            case 0: // 0 = K4A_FRAMES_PER_SECOND_5
                 maxDepthDelay = std::micro::den / 5;
                 break;
             default:
@@ -825,8 +783,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
         ImGui::Separator();
 
-        const bool pointCloudViewerAvailable = m_config.EnableDepthCamera &&
-                                               m_config.DepthMode != K4A_DEPTH_MODE_PASSIVE_IR && m_camerasStarted;
+        const bool pointCloudViewerAvailable = m_config.EnableDepthCamera && m_config.DepthMode != 5 && m_camerasStarted; // 5 = K4A_DEPTH_MODE_PASSIVE_IR
 
         K4AWindowSet::ShowModeSelector(&m_currentViewType,
                                        true,

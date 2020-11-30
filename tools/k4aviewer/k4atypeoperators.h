@@ -31,14 +31,15 @@ std::ostream &operator<<(std::ostream &s, const k4a_color_control_command_t &val
 std::ostream &operator<<(std::ostream &s, const k4a_wired_sync_mode_t &val);
 std::istream &operator>>(std::istream &s, k4a_wired_sync_mode_t &val);
 
-std::ostream &operator<<(std::ostream &s, const k4a_fps_t &val);
-std::istream &operator>>(std::istream &s, k4a_fps_t &val);
-
-std::ostream &operator<<(std::ostream &s, const k4a_depth_mode_t &val);
-std::istream &operator>>(std::istream &s, k4a_depth_mode_t &val);
-
-std::ostream &operator<<(std::ostream &s, const k4a_color_resolution_t &val);
-std::istream &operator>>(std::istream &s, k4a_color_resolution_t &val);
+// TODO: remove?
+//std::ostream &operator<<(std::ostream &s, const k4a_fps_t &val);
+//std::istream &operator>>(std::istream &s, k4a_fps_t &val);
+//
+//std::ostream &operator<<(std::ostream &s, const k4a_depth_mode_t &val);
+//std::istream &operator>>(std::istream &s, k4a_depth_mode_t &val);
+//
+//std::ostream &operator<<(std::ostream &s, const k4a_color_resolution_t &val);
+//std::istream &operator>>(std::istream &s, k4a_color_resolution_t &val);
 
 std::ostream &operator<<(std::ostream &s, const k4a_image_format_t &val);
 std::istream &operator>>(std::istream &s, k4a_image_format_t &val);
