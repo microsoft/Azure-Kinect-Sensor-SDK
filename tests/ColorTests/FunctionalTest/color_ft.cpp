@@ -57,8 +57,8 @@ struct color_mode_parameter
 {
     uint32_t test_index;
     k4a_image_format_t color_format;
-    k4a_color_resolution_t color_resolution;
-    k4a_fps_t color_rate;
+    uint32_t color_mode_id;
+    uint32_t color_rate;
     size_t expected_image_size;
     uint32_t expected_fps;
 
@@ -126,8 +126,8 @@ TEST_P(color_functional_test, color_streaming_test)
     // Configure the stream
     config.fps_mode_id = as.color_rate;
     config.color_format = as.color_format;
-    config.color_mode_id = as.color_resolution;
-    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = as.color_mode_id;
+    config.depth_mode_id = 0; // 0 = K4A_DEPTH_MODE_OFF
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
@@ -232,250 +232,250 @@ INSTANTIATE_TEST_CASE_P(color_streaming,
                         color_functional_test,
                         ::testing::Values(
                             // 30 fps tests
-                            color_mode_parameter{ 0,
-                                                  K4A_IMAGE_FORMAT_COLOR_NV12,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_30,
-                                                  K4A_COLOR_MODE_NV12_720P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                            color_mode_parameter{ 0, 
+                                                  K4A_IMAGE_FORMAT_COLOR_NV12, 
+                                                  1,  
+                                                  2,  
+                                                  K4A_COLOR_MODE_NV12_720P_EXPECTED_SIZE, 
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 1 = K4A_COLOR_RESOLUTION_720P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 1,
                                                   K4A_IMAGE_FORMAT_COLOR_YUY2,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  1,
+                                                  2,
                                                   K4A_COLOR_MODE_YUY2_720P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 1 = K4A_COLOR_RESOLUTION_720P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 2,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_2160P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  5,
+                                                  2,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 5 = K4A_COLOR_RESOLUTION_2160P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 3,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_1440P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  3,
+                                                  2,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 3 = K4A_COLOR_RESOLUTION_1440P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 4,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_1080P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  2,
+                                                  2,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 2 = K4A_COLOR_RESOLUTION_1080P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 5,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  1,
+                                                  2,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 1 = K4A_COLOR_RESOLUTION_720P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 6,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_1536P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  4,
+                                                  2,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 4 = K4A_COLOR_RESOLUTION_1536P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 7,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_2160P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  5,
+                                                  2,
                                                   K4A_COLOR_MODE_RGB_2160P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 5 = K4A_COLOR_RESOLUTION_2160P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 8,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_1440P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  3,
+                                                  2,
                                                   K4A_COLOR_MODE_RGB_1440P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 3 = K4A_COLOR_RESOLUTION_1440P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 9,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_1080P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  2,
+                                                  2,
                                                   K4A_COLOR_MODE_RGB_1080P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 2 = K4A_COLOR_RESOLUTION_1080P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 10,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  1,
+                                                  2,
                                                   K4A_COLOR_MODE_RGB_720P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 1 = K4A_COLOR_RESOLUTION_720P, 2 = K4A_FRAMES_PER_SECOND_30
                             color_mode_parameter{ 11,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_1536P,
-                                                  K4A_FRAMES_PER_SECOND_30,
+                                                  4,
+                                                  2,
                                                   K4A_COLOR_MODE_RGB_1536P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_30 }, // 4 = K4A_COLOR_RESOLUTION_1536P, 2 = K4A_FRAMES_PER_SECOND_30
 
                             // 15 fps tests
                             color_mode_parameter{ 12,
                                                   K4A_IMAGE_FORMAT_COLOR_NV12,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  1,
+                                                  1,
                                                   K4A_COLOR_MODE_NV12_720P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 1 = K4A_COLOR_RESOLUTION_720P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 13,
                                                   K4A_IMAGE_FORMAT_COLOR_YUY2,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  1,
+                                                  1,
                                                   K4A_COLOR_MODE_YUY2_720P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 1 = K4A_COLOR_RESOLUTION_720P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 14,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_2160P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  5,
+                                                  1,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 5 = K4A_COLOR_RESOLUTION_2160P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 15,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_1440P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  3,
+                                                  1,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 3 = K4A_COLOR_RESOLUTION_1440P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 16,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_1080P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  2,
+                                                  1,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 2 = K4A_COLOR_RESOLUTION_1080P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 17,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  1,
+                                                  1,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 1 = K4A_COLOR_RESOLUTION_720P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 18,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_3072P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  6,
+                                                  1,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 6 = K4A_COLOR_RESOLUTION_3072P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 19,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_1536P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  4,
+                                                  1,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 4 = K4A_COLOR_RESOLUTION_1536P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 20,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_2160P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  5,
+                                                  1,
                                                   K4A_COLOR_MODE_RGB_2160P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 5 = K4A_COLOR_RESOLUTION_2160P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 21,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_1440P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  3,
+                                                  1,
                                                   K4A_COLOR_MODE_RGB_1440P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 3 = K4A_COLOR_RESOLUTION_1440P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 22,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_1080P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  2,
+                                                  1,
                                                   K4A_COLOR_MODE_RGB_1080P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 2 = K4A_COLOR_RESOLUTION_1080P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 23,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  1,
+                                                  1,
                                                   K4A_COLOR_MODE_RGB_720P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 1 = K4A_COLOR_RESOLUTION_720P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 24,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_3072P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  6,
+                                                  1,
                                                   K4A_COLOR_MODE_RGB_3072P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 6 = K4A_COLOR_RESOLUTION_3072P, 1 = K4A_FRAMES_PER_SECOND_15
                             color_mode_parameter{ 25,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_1536P,
-                                                  K4A_FRAMES_PER_SECOND_15,
+                                                  4,
+                                                  1,
                                                   K4A_COLOR_MODE_RGB_1536P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_15 }, // 4 = K4A_COLOR_RESOLUTION_1536P, 1 = K4A_FRAMES_PER_SECOND_15
 
                             // 5 fps tests
                             color_mode_parameter{ 26,
                                                   K4A_IMAGE_FORMAT_COLOR_NV12,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_5,
-                                                  K4A_COLOR_MODE_NV12_720P_EXPECTED_SIZE,
+                                                  1,
+                                                  0,
+                                                  K4A_COLOR_MODE_NV12_720P_EXPECTED_SIZE, // 1 = K4A_COLOR_RESOLUTION_720P, 0 = K4A_FRAMES_PER_SECOND_5
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
                             color_mode_parameter{ 27,
                                                   K4A_IMAGE_FORMAT_COLOR_YUY2,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  1,
+                                                  0,
                                                   K4A_COLOR_MODE_YUY2_720P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 1 = K4A_COLOR_RESOLUTION_720P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 28,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_2160P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  5,
+                                                  0,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 5 = K4A_COLOR_RESOLUTION_2160P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 29,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_1440P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  3,
+                                                  0,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 3 = K4A_COLOR_RESOLUTION_1440P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 30,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_1080P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  2,
+                                                  0,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 2 = K4A_COLOR_RESOLUTION_1080P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 31,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  1,
+                                                  0,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 1 = K4A_COLOR_RESOLUTION_720P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 32,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_3072P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  6,
+                                                  0,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 6 = K4A_COLOR_RESOLUTION_3072P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 33,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                  K4A_COLOR_RESOLUTION_1536P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  4,
+                                                  0,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 4 = K4A_COLOR_RESOLUTION_1536P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 34,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_2160P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  5,
+                                                  0,
                                                   K4A_COLOR_MODE_RGB_2160P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 5 = K4A_COLOR_RESOLUTION_2160P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 35,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_1440P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  3,
+                                                  0,
                                                   K4A_COLOR_MODE_RGB_1440P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 3 = K4A_COLOR_RESOLUTION_1440P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 36,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_1080P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  2,
+                                                  0,
                                                   K4A_COLOR_MODE_RGB_1080P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 2 = K4A_COLOR_RESOLUTION_1080P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 37,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_720P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  1,
+                                                  0,
                                                   K4A_COLOR_MODE_RGB_720P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 1 = K4A_COLOR_RESOLUTION_720P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 38,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_3072P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  6,
+                                                  0,
                                                   K4A_COLOR_MODE_RGB_3072P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 },
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }, // 6 = K4A_COLOR_RESOLUTION_3072P, 0 = K4A_FRAMES_PER_SECOND_5
                             color_mode_parameter{ 39,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                                                  K4A_COLOR_RESOLUTION_1536P,
-                                                  K4A_FRAMES_PER_SECOND_5,
+                                                  4,
+                                                  0,
                                                   K4A_COLOR_MODE_RGB_1536P_EXPECTED_SIZE,
-                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 }));
+                                                  K4A_COLOR_MODE_EXPECTED_FPS_5 })); // 4 = K4A_COLOR_RESOLUTION_1536P, 0 = K4A_FRAMES_PER_SECOND_5
 
 /**
  *  Functional test for verifying that changing modes actually causes data to be returned in the right mode
@@ -499,15 +499,15 @@ TEST_F(color_functional_test, colorModeChange)
 
     // Create two valid configs that are expected to yield different-sized color payloads
     //
-    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    config.fps_mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
+    config.depth_mode_id = 0; // = K4A_DEPTH_MODE_OFF
 
-    config2.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    config2.fps_mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
     config2.color_format = K4A_IMAGE_FORMAT_COLOR_YUY2;
-    config2.color_mode_id = K4A_COLOR_RESOLUTION_720P;
-    config2.depth_mode_id = K4A_DEPTH_MODE_OFF;
+    config2.color_mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
+    config2.depth_mode_id = 0; // 0 = K4A_DEPTH_MODE_OFF
 
     // Start device in first mode and check frame size
     //
@@ -567,10 +567,10 @@ TEST_F(color_functional_test, colorExposureTest)
 
     // Create two valid configs that are expected to yield different-sized color payloads
     //
-    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    config.fps_mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
+    config.depth_mode_id = 0; // 0 = K4A_DEPTH_MODE_OFF
 
     // Exposure set test
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -785,10 +785,10 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
     if ((rand() * 2 / RAND_MAX) >= 1)
     {
         config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.fps_mode_id = K4A_FRAMES_PER_SECOND_5;
+        config.fps_mode_id = 0; // 0 = K4A_FRAMES_PER_SECOND_5
         config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        config.color_mode_id = K4A_COLOR_RESOLUTION_1080P;
-        config.depth_mode_id = K4A_DEPTH_MODE_WFOV_2X2BINNED;
+        config.color_mode_id = 2; // 2 = K4A_COLOR_RESOLUTION_1080P
+        config.depth_mode_id = 3; // 3 = K4A_DEPTH_MODE_WFOV_2X2BINNED
         config.synchronized_images_only = true;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
         std::cout << "control_test_worker: k4a_device_start_cameras called\n";
@@ -826,8 +826,7 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
 
     if (supports_auto)
     {
-        ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                  k4a_device_set_color_control(m_device, command, K4A_COLOR_CONTROL_MODE_AUTO, 0));
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, command, K4A_COLOR_CONTROL_MODE_AUTO, 0));
     }
     else
     {
@@ -904,8 +903,7 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
         for (int32_t testValue = min_value; testValue <= max_value; testValue += step_value)
         {
             // Set test value
-            ASSERT_EQ(K4A_RESULT_SUCCEEDED,
-                      k4a_device_set_color_control(m_device, command, K4A_COLOR_CONTROL_MODE_MANUAL, testValue));
+            ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_set_color_control(m_device, command, K4A_COLOR_CONTROL_MODE_MANUAL, testValue));
             ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_control(m_device, command, &current_mode, &value));
             ASSERT_EQ(current_mode, K4A_COLOR_CONTROL_MODE_MANUAL);
             ASSERT_EQ(value, testValue);
