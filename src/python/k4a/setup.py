@@ -21,7 +21,7 @@ setup(
     ],
     package_data={
         'k4a': [
-                'lib/*',
+                '_lib/*',
         ]
     },
     install_requires=[
