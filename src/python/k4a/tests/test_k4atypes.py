@@ -4,11 +4,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 '''
 
 import unittest
-
-# Add top-level k4a directory to path.
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     
 import k4a
 
@@ -145,7 +140,4 @@ class TestEnums(unittest.TestCase):
             self.assertEqual(e.value, next(enum_values))
 
 if __name__ == '__main__':
-    
-    
-
     unittest.main()
