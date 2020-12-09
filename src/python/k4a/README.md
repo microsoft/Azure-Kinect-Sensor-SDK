@@ -1,19 +1,15 @@
-# Azure Kinect SDK (K4A)
+# Azure Kinect Python API(K4A)
 
-Welcome to the Azure Kinect Sensor SDK! We hope you can use it to build many great applications and participate in the project. Don't be shy to ask questions, and provide feedback. See [Azure.com/Kinect](https://Azure.com/kinect) for device
+Welcome to the Azure Kinect Python API! We hope you can use it to build many great applications and participate in the project. Don't be shy to ask questions, and provide feedback. See [Azure.com/Kinect](https://Azure.com/kinect) for device
 info and available documentation.
-
-[![Build Status
-(develop)](https://dev.azure.com/ms/Azure-Kinect-Sensor-SDK/_apis/build/status/Microsoft.Azure-Kinect-Sensor-SDK%20(Public)?branchName=develop)](https://dev.azure.com/ms/Azure-Kinect-Sensor-SDK/_build/latest?definitionId=133&branchName=develop)
-[![Nuget](https://img.shields.io/nuget/vpre/Microsoft.Azure.Kinect.Sensor.svg)](https://www.nuget.org/packages/Microsoft.Azure.Kinect.Sensor/)
 
 ## Introduction
 
-**Azure Kinect SDK** is a cross platform (Linux and Windows) user mode SDK to read data from your Azure Kinect device.
+**K4A** is a Python user mode API to read data from your Azure Kinect device.
 
-## Why use the Azure Kinect SDK
+## Why use K4A
 
-The Azure Kinect SDK enables you to get the most out of your Azure Kinect camera. Features include:
+K4A enables you to get the most out of your Azure Kinect camera. Features include:
 
 * Depth camera access
 * RGB camera access and control (e.g. exposure and white balance)
@@ -23,22 +19,22 @@ The Azure Kinect SDK enables you to get the most out of your Azure Kinect camera
 * Camera frame meta-data access for image resolution, timestamp and temperature
 * Device calibration data access
 
+All image data is encapsulated in numpy arrays, allowing Python users to easily use the data in OpenCV
+and other packages that work with numpy arrays.
+
 ## Installation
 
-To use the SDK, please refer to the installation instructions in [usage](docs/usage.md)
+To use the Python API, please refer to the installation instructions in [usage](docs/usage.md)
 
 ## Documentation
 
-API documentation is avaliable [here](https://microsoft.github.io/Azure-Kinect-Sensor-SDK/).
+API documentation is available [here]().
 
 ## Building
 
-Azure Kinect SDK uses CMake to build. For instructions on how to build this SDK please see
+K4A uses Python's setuptools to build a wheel file for distribution. 
+For instructions on how to build this distributable, please see
 [building](docs/building.md).
-
-## Versioning
-
-The Azure Kinect SDK uses semantic versioning, please see [versioning.md](docs/versioning.md) for more information.
 
 ## Testing
 
@@ -46,7 +42,7 @@ For information on writing or running tests, please see [testing.md](docs/testin
 
 ## Contribute
 
-We welcome your contributions! Please see the [contribution guidelines](CONTRIBUTING.md).
+We welcome your contributions! Please see the [contribution guidelines](../../../CONTRIBUTING.md).
 
 ## Feedback
 
@@ -56,8 +52,7 @@ For SDK feedback or to report a bug, please file a [GitHub Issue](https://github
 
 There are several places where the sample code can be found.
 
-- In this repository: [Azure-Kinect-Sensor-SDK\examples](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/tree/develop/examples)- each example has a readme page that describes it and the steps to set it up.
-- [Azure-Kinect-Samples](https://github.com/microsoft/Azure-Kinect-Samples) repository. There are multiple examples of how to use both Sensor and Body tracking SDKs.
+- In this repository: [K4A\examples](examples)- each example has a readme page that describes it and the steps to set it up.
 
 ## Q&A
 
@@ -83,6 +78,6 @@ email to ensure we received your original message. Further information, includin
 
 ## License and Microsoft Support for Azure Kinect Sensor SDK
 
-[MIT License](LICENSE)
+[MIT License](../../../LICENSE)
 
-[Microsoft Support for Azure Kinect Sensor SDK](microsoft-support.md)
+[Microsoft Support for Azure Kinect Sensor SDK](../../../microsoft-support.md)
