@@ -1470,9 +1470,12 @@ public:
         if (result == K4A_RESULT_SUCCEEDED)
         {
             modes.reserve(mode_count);
-            for (int i = 0; k4a_device_get_color_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+            for (int i = 0; i <= mode_count; i++)
             {
-                modes.push_back(mode);
+                if (k4a_device_get_color_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    modes.push_back(mode);
+                }
             }
         }
 
@@ -1490,9 +1493,12 @@ public:
         if (result == K4A_RESULT_SUCCEEDED)
         {
             modes.reserve(mode_count);
-            for (int i = 0; k4a_device_get_depth_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+            for (int i = 0; i <= mode_count; i++)
             {
-                modes.push_back(mode);
+                if (k4a_device_get_depth_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    modes.push_back(mode);
+                }
             }
         }
         
@@ -1510,9 +1516,12 @@ public:
         if (result == K4A_RESULT_SUCCEEDED)
         {
             modes.reserve(mode_count);
-            for (int i = 0; k4a_device_get_fps_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED; ++i)
+            for (int i = 0; i <= mode_count; i++)
             {
-                modes.push_back(mode);
+                if (k4a_device_get_fps_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    modes.push_back(mode);
+                }
             }
         }
 
