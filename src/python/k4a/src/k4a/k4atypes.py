@@ -7,11 +7,14 @@ These enums defined here are analogous to those defined in k4a.h.
 Copyright (C) Microsoft Corporation. All rights reserved.
 '''
 
-from enum import IntEnum, unique, auto
+from enum import IntEnum as _IntEnum
+from enum import unique as _unique
+from enum import auto as _auto
+import ctypes as _ctypes
 
 
-@unique
-class k4a_result_t(IntEnum):
+@_unique
+class k4a_result_t(_IntEnum):
     """
     Result code returned by Azure Kinect APIs.
 
@@ -23,11 +26,11 @@ class k4a_result_t(IntEnum):
     ================================ ==========================================
     """
     K4A_RESULT_SUCCEEDED = 0
-    K4A_RESULT_FAILED = auto()
+    K4A_RESULT_FAILED = _auto()
 
 
-@unique
-class k4a_buffer_result_t(IntEnum):
+@_unique
+class k4a_buffer_result_t(_IntEnum):
     """
     Result code returned by Azure Kinect APIs.
 
@@ -40,12 +43,12 @@ class k4a_buffer_result_t(IntEnum):
     ================================ ==========================================
     """
     K4A_BUFFER_RESULT_SUCCEEDED = 0
-    K4A_BUFFER_RESULT_FAILED = auto()
-    K4A_BUFFER_RESULT_TOO_SMALL = auto()
+    K4A_BUFFER_RESULT_FAILED = _auto()
+    K4A_BUFFER_RESULT_TOO_SMALL = _auto()
 
 
-@unique
-class k4a_wait_result_t(IntEnum):
+@_unique
+class k4a_wait_result_t(_IntEnum):
     """
     Result code returned by Azure Kinect APIs.
 
@@ -58,12 +61,12 @@ class k4a_wait_result_t(IntEnum):
     ================================ ==========================================
     """
     K4A_WAIT_RESULT_SUCCEEDED = 0
-    K4A_WAIT_RESULT_FAILED = auto()
-    K4A_WAIT_RESULT_TIMEOUT = auto()
+    K4A_WAIT_RESULT_FAILED = _auto()
+    K4A_WAIT_RESULT_TIMEOUT = _auto()
 
 
-@unique
-class k4a_log_level_t(IntEnum):
+@_unique
+class k4a_log_level_t(_IntEnum):
     """
     Verbosity levels of debug messaging.
 
@@ -79,15 +82,15 @@ class k4a_log_level_t(IntEnum):
     ================================ ==========================================
     """
     K4A_LOG_LEVEL_CRITICAL = 0
-    K4A_LOG_LEVEL_ERROR = auto()
-    K4A_LOG_LEVEL_WARNING = auto()
-    K4A_LOG_LEVEL_INFO = auto()
-    K4A_LOG_LEVEL_TRACE = auto()
-    K4A_LOG_LEVEL_OFF = auto()
+    K4A_LOG_LEVEL_ERROR = _auto()
+    K4A_LOG_LEVEL_WARNING = _auto()
+    K4A_LOG_LEVEL_INFO = _auto()
+    K4A_LOG_LEVEL_TRACE = _auto()
+    K4A_LOG_LEVEL_OFF = _auto()
 
 
-@unique
-class k4a_depth_mode_t(IntEnum):
+@_unique
+class k4a_depth_mode_t(_IntEnum):
     """
     Depth sensor capture modes.
 
@@ -121,15 +124,15 @@ class k4a_depth_mode_t(IntEnum):
     ================================ ==========================================
     """
     K4A_DEPTH_MODE_OFF = 0
-    K4A_DEPTH_MODE_NFOV_2X2BINNED = auto()
-    K4A_DEPTH_MODE_NFOV_UNBINNED = auto()
-    K4A_DEPTH_MODE_WFOV_2X2BINNED = auto()
-    K4A_DEPTH_MODE_WFOV_UNBINNED = auto()
-    K4A_DEPTH_MODE_PASSIVE_IR = auto()
+    K4A_DEPTH_MODE_NFOV_2X2BINNED = _auto()
+    K4A_DEPTH_MODE_NFOV_UNBINNED = _auto()
+    K4A_DEPTH_MODE_WFOV_2X2BINNED = _auto()
+    K4A_DEPTH_MODE_WFOV_UNBINNED = _auto()
+    K4A_DEPTH_MODE_PASSIVE_IR = _auto()
 
 
-@unique
-class k4a_color_resolution_t(IntEnum):
+@_unique
+class k4a_color_resolution_t(_IntEnum):
     """
     Color sensor resolutions.
 
@@ -145,15 +148,15 @@ class k4a_color_resolution_t(IntEnum):
     ================================ ==========================================
     """
     K4A_COLOR_RESOLUTION_OFF = 0
-    K4A_COLOR_RESOLUTION_720P = auto()
-    K4A_COLOR_RESOLUTION_1080P = auto()
-    K4A_COLOR_RESOLUTION_1440P = auto()
-    K4A_COLOR_RESOLUTION_1536P = auto()
-    K4A_COLOR_RESOLUTION_2160P = auto()
+    K4A_COLOR_RESOLUTION_720P = _auto()
+    K4A_COLOR_RESOLUTION_1080P = _auto()
+    K4A_COLOR_RESOLUTION_1440P = _auto()
+    K4A_COLOR_RESOLUTION_1536P = _auto()
+    K4A_COLOR_RESOLUTION_2160P = _auto()
 
 
-@unique
-class k4a_image_format_t(IntEnum):
+@_unique
+class k4a_image_format_t(_IntEnum):
     """
     Image format type.
     
@@ -252,18 +255,18 @@ class k4a_image_format_t(IntEnum):
     ============================= =============================================
     """
     K4A_IMAGE_FORMAT_COLOR_MJPG = 0
-    K4A_IMAGE_FORMAT_COLOR_NV12 = auto()
-    K4A_IMAGE_FORMAT_COLOR_YUY2 = auto()
-    K4A_IMAGE_FORMAT_COLOR_BGRA32 = auto()
-    K4A_IMAGE_FORMAT_DEPTH16 = auto()
-    K4A_IMAGE_FORMAT_IR16 = auto()
-    K4A_IMAGE_FORMAT_CUSTOM8 = auto()
-    K4A_IMAGE_FORMAT_CUSTOM16 = auto()
-    K4A_IMAGE_FORMAT_CUSTOM = auto()
+    K4A_IMAGE_FORMAT_COLOR_NV12 = _auto()
+    K4A_IMAGE_FORMAT_COLOR_YUY2 = _auto()
+    K4A_IMAGE_FORMAT_COLOR_BGRA32 = _auto()
+    K4A_IMAGE_FORMAT_DEPTH16 = _auto()
+    K4A_IMAGE_FORMAT_IR16 = _auto()
+    K4A_IMAGE_FORMAT_CUSTOM8 = _auto()
+    K4A_IMAGE_FORMAT_CUSTOM16 = _auto()
+    K4A_IMAGE_FORMAT_CUSTOM = _auto()
 
 
-@unique
-class k4a_transformation_interpolation_type_t(IntEnum):
+@_unique
+class k4a_transformation_interpolation_type_t(_IntEnum):
     """
     Transformation interpolation type.
 
@@ -278,11 +281,11 @@ class k4a_transformation_interpolation_type_t(IntEnum):
     ============================================= =============================
     """
     K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST = 0
-    K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR = auto()
+    K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR = _auto()
 
 
-@unique
-class k4a_fps_t(IntEnum):
+@_unique
+class k4a_fps_t(_IntEnum):
     """
     Color and depth sensor frame rate.
 
@@ -300,12 +303,12 @@ class k4a_fps_t(IntEnum):
     ================================ ==========================================
     """
     K4A_FRAMES_PER_SECOND_5 = 0
-    K4A_FRAMES_PER_SECOND_15 = auto()
-    K4A_FRAMES_PER_SECOND_30 = auto()
+    K4A_FRAMES_PER_SECOND_15 = _auto()
+    K4A_FRAMES_PER_SECOND_30 = _auto()
 
 
-@unique
-class k4a_color_control_command_t(IntEnum):
+@_unique
+class k4a_color_control_command_t(_IntEnum):
     """
     Color sensor control commands
 
@@ -320,7 +323,7 @@ class k4a_color_control_command_t(IntEnum):
     Name                                     Definition
     ======================================== ==========================================
     K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE Exposure time setting.
-                                             - May be set to K4A_COLOR_CONTROL_MODE_AUTO
+                                             - May be set to K4A_COLOR_CONTROL_MODE__auto
                                              or K4A_COLOR_CONTROL_MODE_MANUAL.
                                              - The Azure Kinect supports a limited number 
                                              of fixed expsore settings. When setting this, 
@@ -338,7 +341,7 @@ class k4a_color_control_command_t(IntEnum):
                                              https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/src/color/color_priv.h
                                              - Exposure time is measured in microseconds.
 
-    K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY Exposure or Framerate priority setting.
+    K4A_COLOR_CONTROL__auto_EXPOSURE_PRIORITY Exposure or Framerate priority setting.
                                              - May only be set to ::K4A_COLOR_CONTROL_MODE_MANUAL.
                                              - Value of 0 means framerate priority. 
                                              Value of 1 means exposure priority.
@@ -361,7 +364,7 @@ class k4a_color_control_command_t(IntEnum):
                                              - May only be set to ::K4A_COLOR_CONTROL_MODE_MANUAL.
 
     K4A_COLOR_CONTROL_WHITEBALANCE           White balance setting.
-                                             - May be set to K4A_COLOR_CONTROL_MODE_AUTO 
+                                             - May be set to K4A_COLOR_CONTROL_MODE__auto 
                                              or K4A_COLOR_CONTROL_MODE_MANUAL.
                                              - The unit is degrees Kelvin. The setting must be set
                                              to a value evenly divisible by 10 degrees.
@@ -381,19 +384,19 @@ class k4a_color_control_command_t(IntEnum):
     ======================================== ==========================================
     """
     K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE = 0
-    K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY = auto()
-    K4A_COLOR_CONTROL_BRIGHTNESS = auto()
-    K4A_COLOR_CONTROL_CONTRAST = auto()
-    K4A_COLOR_CONTROL_SATURATION = auto()
-    K4A_COLOR_CONTROL_SHARPNESS = auto()
-    K4A_COLOR_CONTROL_WHITEBALANCE = auto()
-    K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION = auto()
-    K4A_COLOR_CONTROL_GAIN = auto()
-    K4A_COLOR_CONTROL_POWERLINE_FREQUENCY = auto()
+    K4A_COLOR_CONTROL__auto_EXPOSURE_PRIORITY = _auto()
+    K4A_COLOR_CONTROL_BRIGHTNESS = _auto()
+    K4A_COLOR_CONTROL_CONTRAST = _auto()
+    K4A_COLOR_CONTROL_SATURATION = _auto()
+    K4A_COLOR_CONTROL_SHARPNESS = _auto()
+    K4A_COLOR_CONTROL_WHITEBALANCE = _auto()
+    K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION = _auto()
+    K4A_COLOR_CONTROL_GAIN = _auto()
+    K4A_COLOR_CONTROL_POWERLINE_FREQUENCY = _auto()
 
 
-@unique
-class k4a_color_control_mode_t(IntEnum):
+@_unique
+class k4a_color_control_mode_t(_IntEnum):
     """
     Color sensor control mode
 
@@ -403,16 +406,16 @@ class k4a_color_control_mode_t(IntEnum):
     ================================ ==========================================
     Name                             Definition
     ================================ ==========================================
-    K4A_COLOR_CONTROL_MODE_AUTO      Set k4a_color_control_command_t to auto.
+    K4A_COLOR_CONTROL_MODE__auto      Set k4a_color_control_command_t to _auto.
     K4A_COLOR_CONTROL_MODE_MANUAL    Set k4a_color_control_command_t to manual.
     ================================ ==========================================
     """
-    K4A_COLOR_CONTROL_MODE_AUTO = 0
-    K4A_COLOR_CONTROL_MODE_MANUAL = auto()
+    K4A_COLOR_CONTROL_MODE__auto = 0
+    K4A_COLOR_CONTROL_MODE_MANUAL = _auto()
 
 
-@unique
-class k4a_wired_sync_mode_t(IntEnum):
+@_unique
+class k4a_wired_sync_mode_t(_IntEnum):
     """
     Synchronization mode when connecting two or more devices together.
 
@@ -438,12 +441,12 @@ class k4a_wired_sync_mode_t(IntEnum):
     ================================ ==========================================
     """
     K4A_WIRED_SYNC_MODE_STANDALONE = 0
-    K4A_WIRED_SYNC_MODE_MASTER = auto()
-    K4A_WIRED_SYNC_MODE_SUBORDINATE = auto()
+    K4A_WIRED_SYNC_MODE_MASTER = _auto()
+    K4A_WIRED_SYNC_MODE_SUBORDINATE = _auto()
 
 
-@unique
-class k4a_calibration_type_t(IntEnum):
+@_unique
+class k4a_calibration_type_t(_IntEnum):
     """
     Calibration types.
 
@@ -461,15 +464,15 @@ class k4a_calibration_type_t(IntEnum):
     ================================ ==========================================
     """
     K4A_CALIBRATION_TYPE_UNKNOWN = 0
-    K4A_CALIBRATION_TYPE_DEPTH = auto()
-    K4A_CALIBRATION_TYPE_COLOR = auto()
-    K4A_CALIBRATION_TYPE_GYRO = auto()
-    K4A_CALIBRATION_TYPE_ACCEL = auto()
-    K4A_CALIBRATION_TYPE_NUM = auto()
+    K4A_CALIBRATION_TYPE_DEPTH = _auto()
+    K4A_CALIBRATION_TYPE_COLOR = _auto()
+    K4A_CALIBRATION_TYPE_GYRO = _auto()
+    K4A_CALIBRATION_TYPE_ACCEL = _auto()
+    K4A_CALIBRATION_TYPE_NUM = _auto()
 
 
-@unique
-class k4a_calibration_model_type_t(IntEnum):
+@_unique
+class k4a_calibration_model_type_t(_IntEnum):
     """
     Calibration model type.
 
@@ -494,14 +497,14 @@ class k4a_calibration_model_type_t(IntEnum):
     =================================================== ==========================================
     """
     K4A_CALIBRATION_LENS_DISTORTION_MODEL_UNKNOWN = 0
-    K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA = auto()
-    K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K = auto()
-    K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT = auto()
-    K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY = auto()
+    K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA = _auto()
+    K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K = _auto()
+    K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT = _auto()
+    K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY = _auto()
 
 
-@unique
-class k4a_firmware_build_t(IntEnum):
+@_unique
+class k4a_firmware_build_t(_IntEnum):
     """
     Firmware build type.
 
@@ -513,11 +516,11 @@ class k4a_firmware_build_t(IntEnum):
     ================================ ==========================================
     """
     K4A_FIRMWARE_BUILD_RELEASE = 0
-    K4A_FIRMWARE_BUILD_DEBUG = auto()
+    K4A_FIRMWARE_BUILD_DEBUG = _auto()
 
 
-@unique
-class k4a_firmware_signature_t(IntEnum):
+@_unique
+class k4a_firmware_signature_t(_IntEnum):
     """
     Firmware signature type.
 
@@ -530,5 +533,208 @@ class k4a_firmware_signature_t(IntEnum):
     ================================ ==========================================
     """
     K4A_FIRMWARE_SIGNATURE_MSFT = 0
-    K4A_FIRMWARE_SIGNATURE_TEST = auto()
-    K4A_FIRMWARE_SIGNATURE_UNSIGNED = auto()
+    K4A_FIRMWARE_SIGNATURE_TEST = _auto()
+    K4A_FIRMWARE_SIGNATURE_UNSIGNED = _auto()
+
+
+#define K4A_SUCCEEDED(_result_) (_result_ == K4A_RESULT_SUCCEEDED)
+def K4A_SUCCEEDED(result):
+    return result == k4a_result_t.K4A_RESULT_SUCCEEDED
+
+
+#define K4A_FAILED(_result_) (!K4A_SUCCEEDED(_result_))
+def K4A_FAILED(result):
+    return not K4A_SUCCEEDED(result)
+
+
+
+# K4A_DECLARE_HANDLE(k4a_device_t);
+class _handle_k4a_device_t(_ctypes.Structure):
+     _fields_= [
+        ("_rsvd", _ctypes.c_size_t),
+    ]
+k4a_device_t = _ctypes.POINTER(_handle_k4a_device_t)
+'''k4a_device_t
+
+A device handle that points to an an opaque device.
+It is passed in to functions that require a device handle.
+
+Do not delete or destroy this handle before calling Close()
+on the device.
+'''
+
+
+# K4A_DECLARE_HANDLE(k4a_capture_t);
+class _handle_k4a_capture_t(_ctypes.Structure):
+     _fields_= [
+        ("_rsvd", _ctypes.c_size_t),
+    ]
+k4a_capture_t = _ctypes.POINTER(_handle_k4a_capture_t)
+
+
+# K4A_DECLARE_HANDLE(k4a_image_t);
+class _handle_k4a_image_t(_ctypes.Structure):
+     _fields_= [
+        ("_rsvd", _ctypes.c_size_t),
+    ]
+k4a_image_t = _ctypes.POINTER(_handle_k4a_image_t)
+
+
+# K4A_DECLARE_HANDLE(k4a_transformation_t);
+class _handle_k4a_transformation_t(_ctypes.Structure):
+     _fields_= [
+        ("_rsvd", _ctypes.c_size_t),
+    ]
+k4a_transformation_t = _ctypes.POINTER(_handle_k4a_transformation_t)
+
+
+class k4a_device_configuration_t(_ctypes.Structure):
+    _fields_= [
+        ("color_format", _ctypes.c_int),
+        ("color_resolution", _ctypes.c_int),
+        ("depth_mode", _ctypes.c_int),
+        ("camera_fps", _ctypes.c_int),
+        ("synchronized_images_only", _ctypes.c_bool),
+        ("depth_delay_off_color_usec", _ctypes.c_int32),
+        ("wired_sync_mode", _ctypes.c_int),
+        ("subordinate_delay_off_master_usec", _ctypes.c_uint32),
+        ("disable_streaming_indicator", _ctypes.c_bool),
+    ]
+
+
+class k4a_calibration_extrinsics_t(_ctypes.Structure):
+    _fields_= [
+        ("rotation", _ctypes.c_float * 9),
+        ("translation", _ctypes.c_float * 3),
+    ]
+
+
+class _k4a_calibration_intrinsic_param(_ctypes.Structure):
+    _fields_ = [
+        ("cx", _ctypes.c_float),
+        ("cy", _ctypes.c_float),
+        ("fx", _ctypes.c_float),
+        ("fy", _ctypes.c_float),
+        ("k1", _ctypes.c_float),
+        ("k2", _ctypes.c_float),
+        ("k3", _ctypes.c_float),
+        ("k4", _ctypes.c_float),
+        ("k5", _ctypes.c_float),
+        ("k6", _ctypes.c_float),
+        ("codx", _ctypes.c_float),
+        ("cody", _ctypes.c_float),
+        ("p2", _ctypes.c_float),
+        ("p1", _ctypes.c_float),
+        ("metric_radius", _ctypes.c_float),
+    ]
+
+class _k4a_calibration_intrinsic_parameters_t(_ctypes.Union):
+    _fields_= [
+        ("param", _k4a_calibration_intrinsic_param),
+        ("v", _ctypes.c_float * 15),
+    ]
+
+
+class k4a_calibration_intrinsics_t(_ctypes.Structure):
+    _fields_= [
+        ("type", _ctypes.c_int),
+        ("parameter_count", _ctypes.c_uint),
+        ("parameters", _k4a_calibration_intrinsic_parameters_t),
+    ]
+
+
+class k4a_calibration_camera_t(_ctypes.Structure):
+    _fields_= [
+        ("extrinsics", k4a_calibration_extrinsics_t),
+        ("intrinsics", k4a_calibration_intrinsics_t),
+        ("resolution_width", _ctypes.c_int),
+        ("resolution_height", _ctypes.c_int),
+        ("metric_radius", _ctypes.c_float),
+    ]
+
+
+class k4a_calibration_t(_ctypes.Structure):
+    _fields_= [
+        ("depth_camera_calibration", k4a_calibration_camera_t),
+        ("color_camera_calibration", k4a_calibration_camera_t),
+        ("extrinsics", (k4a_calibration_extrinsics_t * k4a_calibration_type_t.K4A_CALIBRATION_TYPE_NUM) * k4a_calibration_type_t.K4A_CALIBRATION_TYPE_NUM),
+        ("depth_mode", _ctypes.c_int),
+        ("color_resolution", _ctypes.c_int),
+    ]
+
+
+class k4a_version_t(_ctypes.Structure):
+    _fields_= [
+        ("major", _ctypes.c_uint32),
+        ("minor", _ctypes.c_uint32),
+        ("iteration", _ctypes.c_uint32),
+    ]
+
+
+class k4a_hardware_version_t(_ctypes.Structure):
+    _fields_= [
+        ("rgb", k4a_version_t),
+        ("depth", k4a_version_t),
+        ("audio", k4a_version_t),
+        ("depth_sensor", k4a_version_t),
+        ("firmware_build", _ctypes.c_int),
+        ("firmware_signature", _ctypes.c_int),
+    ]
+
+
+class _k4a_xy(_ctypes.Structure):
+    _fields_= [
+        ("x", _ctypes.c_float),
+        ("y", _ctypes.c_float),
+    ]
+
+
+class _k4a_float2_t(_ctypes.Union):
+   _fields_= [
+        ("xy", _k4a_xy),
+        ("v", _ctypes.c_float * 2)
+    ]
+
+
+class _k4a_xyz(_ctypes.Structure):
+    _fields_= [
+        ("x", _ctypes.c_float),
+        ("y", _ctypes.c_float),
+        ("z", _ctypes.c_float),
+    ]
+
+
+class _k4a_float3_t(_ctypes.Union):
+   _fields_= [
+        ("xyz", _k4a_xyz),
+        ("v", _ctypes.c_float * 3)
+    ]
+
+
+class k4a_imu_sample_t(_ctypes.Structure):
+    _fields_= [
+        ("temperature", _ctypes.c_float),
+        ("acc_sample", _k4a_float3_t),
+        ("acc_timestamp_usec", _ctypes.c_uint64),
+        ("gyro_sample", _k4a_float3_t),
+        ("gyro_timestamp_usec", _ctypes.c_uint64),
+    ]
+
+
+# A static instance of a device configuration where everything is disabled.
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = k4a_device_configuration_t()
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.color_format = k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_MJPG
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.color_resolution = k4a_color_resolution_t.K4A_COLOR_RESOLUTION_OFF
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.depth_mode = k4a_depth_mode_t.K4A_DEPTH_MODE_OFF
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.camera_fps = k4a_fps_t.K4A_FRAMES_PER_SECOND_30
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.synchronized_images_only = False
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.depth_delay_off_color_usec = 0
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.wired_sync_mode = k4a_wired_sync_mode_t.K4A_WIRED_SYNC_MODE_STANDALONE
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.subordinate_delay_off_master_usec = 0
+K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.disable_streaming_indicator = False
+
+
+del _IntEnum
+del _unique
+del _auto
+del _ctypes
