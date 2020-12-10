@@ -4,8 +4,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 '''
 
 import unittest
+import ctypes
     
 import k4a
+from k4a import k4atypes
 
 
 def get_enum_values(n):
@@ -145,6 +147,107 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.k4a_firmware_signature_t.K4A_FIRMWARE_SIGNATURE_MSFT, next(enum_values))
         self.assertEqual(k4a.k4a_firmware_signature_t.K4A_FIRMWARE_SIGNATURE_TEST, next(enum_values))
         self.assertEqual(k4a.k4a_firmware_signature_t.K4A_FIRMWARE_SIGNATURE_UNSIGNED, next(enum_values))
+
+    def test_K4A_SUCCEEDED_True(self):
+        self.assertTrue(k4a.K4A_SUCCEEDED(k4a.k4a_result_t.K4A_RESULT_SUCCEEDED))
+
+    def test_K4A_SUCCEEDED_False(self):
+        self.assertFalse(k4a.K4A_SUCCEEDED(k4a.k4a_result_t.K4A_RESULT_FAILED))
+
+
+class TestStructs(unittest.TestCase):
+    '''Test struct instantiation and values to ensure they are not broken.
+    '''
+
+    @classmethod
+    def setUpClass(cls):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_k4a_device_t(self):
+        device_handle = k4a.k4a_device_t()
+        self.assertIsInstance(device_handle, ctypes.POINTER(k4atypes._handle_k4a_device_t))
+
+    def test_k4a_capture_t(self):
+        capture_handle = k4a.k4a_capture_t()
+        self.assertIsInstance(capture_handle, ctypes.POINTER(k4atypes._handle_k4a_capture_t))
+
+    def test_k4a_image_t(self):
+        image_handle = k4a.k4a_image_t()
+        self.assertIsInstance(image_handle, ctypes.POINTER(k4atypes._handle_k4a_image_t))
+
+    def test_k4a_transformation_t(self):
+        transformation_handle = k4a.k4a_transformation_t()
+        self.assertIsInstance(transformation_handle, ctypes.POINTER(k4atypes._handle_k4a_transformation_t))
+
+    def test_k4a_device_configuration_t(self):
+        device_config = k4a.k4a_device_configuration_t()
+        self.assertIsNotNone(device_config)
+        self.assertEqual(len(device_config._fields_), 9)
+
+    def test_k4a_calibration_extrinsics_t(self):
+        calibration_extrinsics = k4a.k4a_calibration_extrinsics_t()
+        self.assertIsNotNone(calibration_extrinsics)
+        self.assertEqual(len(calibration_extrinsics._fields_), 2)
+
+    def test__k4a_calibration_intrinsic_param(self):
+        calib_intrinsic = k4atypes._k4a_calibration_intrinsic_param()
+        self.assertIsNotNone(calib_intrinsic)
+        self.assertEqual(len(calib_intrinsic._fields_), 15)
+
+    def test_k4a_calibration_intrinsics_t(self):
+        calib_intrinsic = k4a.k4a_calibration_intrinsics_t()
+        self.assertIsNotNone(calib_intrinsic)
+        self.assertEqual(len(calib_intrinsic._fields_), 3)
+
+    def test_k4a_calibration_camera_t(self):
+        camera_calibration = k4a.k4a_calibration_camera_t()
+        self.assertIsNotNone(camera_calibration)
+        self.assertEqual(len(camera_calibration._fields_), 5)
+
+    def test_k4a_calibration_t(self):
+        calibration = k4a.k4a_calibration_t()
+        self.assertIsNotNone(calibration)
+        self.assertEqual(len(calibration._fields_), 5)
+
+    def test_k4a_version_t(self):
+        version = k4a.k4a_version_t()
+        self.assertIsNotNone(version)
+        self.assertEqual(len(version._fields_), 3)
+
+    def test_k4a_hardware_version_t(self):
+        version = k4a.k4a_hardware_version_t()
+        self.assertIsNotNone(version)
+        self.assertEqual(len(version._fields_), 6)
+
+    def test__k4a_xy(self):
+        xy = k4atypes._k4a_xy()
+        self.assertIsNotNone(xy)
+        self.assertEqual(len(xy._fields_), 2)
+
+    def test_k4a_float2_t(self):
+        xy = k4atypes.k4a_float2_t()
+        self.assertIsNotNone(xy)
+        self.assertEqual(len(xy._fields_), 2)
+
+    def test__k4a_xyz(self):
+        xyz = k4atypes._k4a_xyz()
+        self.assertIsNotNone(xyz)
+        self.assertEqual(len(xyz._fields_), 3)
+
+    def test_k4a_float3_t(self):
+        xyz = k4atypes.k4a_float3_t()
+        self.assertIsNotNone(xyz)
+        self.assertEqual(len(xyz._fields_), 2)
+
+    def test_k4a_imu_sample_t(self):
+        imu = k4a.k4a_imu_sample_t()
+        self.assertIsNotNone(imu)
+        self.assertEqual(len(imu._fields_), 5)
+
 
 if __name__ == '__main__':
     unittest.main()

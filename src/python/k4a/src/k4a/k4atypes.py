@@ -548,6 +548,25 @@ def K4A_FAILED(result):
     return not K4A_SUCCEEDED(result)
 
 
+#typedef void(k4a_logging_message_cb_t)(void *context,
+#                                       k4a_log_level_t level,
+#                                       const char *file,
+#                                       const int line,
+#                                       const char *message);
+k4a_logging_message_cb_t = _ctypes.CFUNCTYPE(
+    _ctypes.c_void_p, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char), 
+    _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char))
+
+
+#typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
+k4a_memory_destroy_cb_t = _ctypes.CFUNCTYPE(
+    None, _ctypes.c_void_p, _ctypes.c_void_p)
+
+
+#typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
+k4a_memory_allocate_cb_t = _ctypes.CFUNCTYPE(
+    _ctypes.c_uint8, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_void_p))
+
 
 # K4A_DECLARE_HANDLE(k4a_device_t);
 class _handle_k4a_device_t(_ctypes.Structure):
@@ -555,14 +574,6 @@ class _handle_k4a_device_t(_ctypes.Structure):
         ("_rsvd", _ctypes.c_size_t),
     ]
 k4a_device_t = _ctypes.POINTER(_handle_k4a_device_t)
-'''k4a_device_t
-
-A device handle that points to an an opaque device.
-It is passed in to functions that require a device handle.
-
-Do not delete or destroy this handle before calling Close()
-on the device.
-'''
 
 
 # K4A_DECLARE_HANDLE(k4a_capture_t);
@@ -838,7 +849,7 @@ class _k4a_xy(_ctypes.Structure):
         return ''.join(['x=%f, ', 'y=%f']) % (self.x, self.y)
 
 
-class _k4a_float2_t(_ctypes.Union):
+class k4a_float2_t(_ctypes.Union):
     _fields_= [
         ("xy", _k4a_xy),
         ("v", _ctypes.c_float * 2),
@@ -859,7 +870,7 @@ class _k4a_xyz(_ctypes.Structure):
         return ''.join(['x=%f, ', 'y=%f, ', 'z=%f']) % (self.x, self.y, self.z)
 
 
-class _k4a_float3_t(_ctypes.Union):
+class k4a_float3_t(_ctypes.Union):
     _fields_= [
         ("xyz", _k4a_xyz),
         ("v", _ctypes.c_float * 3)
@@ -872,9 +883,9 @@ class _k4a_float3_t(_ctypes.Union):
 class k4a_imu_sample_t(_ctypes.Structure):
     _fields_= [
         ("temperature", _ctypes.c_float),
-        ("acc_sample", _k4a_float3_t),
+        ("acc_sample", k4a_float3_t),
         ("acc_timestamp_usec", _ctypes.c_uint64),
-        ("gyro_sample", _k4a_float3_t),
+        ("gyro_sample", k4a_float3_t),
         ("gyro_timestamp_usec", _ctypes.c_uint64),
     ]
 
