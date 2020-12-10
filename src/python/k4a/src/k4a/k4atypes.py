@@ -11,6 +11,7 @@ from enum import IntEnum as _IntEnum
 from enum import unique as _unique
 from enum import auto as _auto
 import ctypes as _ctypes
+from os import linesep as _newline
 
 
 @_unique
@@ -601,12 +602,50 @@ class k4a_device_configuration_t(_ctypes.Structure):
         ("disable_streaming_indicator", _ctypes.c_bool),
     ]
 
+    def __repr__(self):
+        return ''.join(['<%s.%s object at %s>:',
+            _newline,
+            'color_format=%d, ',
+            'color_resolution=%d, ',
+            'depth_mode=%d, ',
+            'camera_fps=%d, ',
+            'synchronized_images_only=%s, ',
+            'depth_delay_off_color_usec=%d, ',
+            'wired_sync_mode=%d, ',
+            'subordinate_delay_off_master_usec=%d, ',
+            'disable_streaming_indicator=%s']) % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            hex(id(self)),
+            self.color_format,
+            self.color_resolution,
+            self.depth_mode,
+            self.camera_fps,
+            self.synchronized_images_only,
+            self.depth_delay_off_color_usec,
+            self.wired_sync_mode,
+            self.subordinate_delay_off_master_usec,
+            self.disable_streaming_indicator)
+
 
 class k4a_calibration_extrinsics_t(_ctypes.Structure):
     _fields_= [
         ("rotation", _ctypes.c_float * 9),
         ("translation", _ctypes.c_float * 3),
     ]
+
+    def __repr__(self):
+        return ''.join(['<%s.%s object at %s>:',
+            _newline,
+            'rotation=[[%f,%f,%f][%f,%f,%f][%f,%f,%f]] ',
+            'translation=[%f,%f,%f]']) % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            hex(id(self)),
+            self.rotation[0], self.rotation[1], self.rotation[2],
+            self.rotation[3], self.rotation[4], self.rotation[5],
+            self.rotation[6], self.rotation[7], self.rotation[8],
+            self.translation[0], self.translation[1], self.translation[2])
 
 
 class _k4a_calibration_intrinsic_param(_ctypes.Structure):
@@ -628,11 +667,33 @@ class _k4a_calibration_intrinsic_param(_ctypes.Structure):
         ("metric_radius", _ctypes.c_float),
     ]
 
+    def __repr__(self):
+        return ''.join(['<%s.%s object at %s>:',
+            _newline,
+            'cx=%f, cy=%f, ',
+            'fx=%f, fy=%f, ',
+            'k1=%f, k2=%f, k3=%f, k4=%f, k5=%f, k6=%f, ',
+            'codx=%f, cody=%f, ',
+            'p2=%f, p1=%f, ',
+            'metric_radius=%f']) % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            hex(id(self)),
+            self.cx, self.cy,
+            self.fx, self.fy,
+            self.k1, self.k2, self.k3, self.k4, self.k5, self.k6,
+            self.codx, self.cody,
+            self.p2, self.p1,
+            self.metric_radius)
+
 class _k4a_calibration_intrinsic_parameters_t(_ctypes.Union):
     _fields_= [
         ("param", _k4a_calibration_intrinsic_param),
         ("v", _ctypes.c_float * 15),
     ]
+
+    def __repr__(self):
+        return self.param.__repr__()
 
 
 class k4a_calibration_intrinsics_t(_ctypes.Structure):
@@ -641,6 +702,19 @@ class k4a_calibration_intrinsics_t(_ctypes.Structure):
         ("parameter_count", _ctypes.c_uint),
         ("parameters", _k4a_calibration_intrinsic_parameters_t),
     ]
+
+    def __repr__(self):
+        return ''.join(['<%s.%s object at %s>:',
+            _newline,
+            'type=%d, ',
+            'parameter_count=%d, ',
+            'parameters=%s']) % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            hex(id(self)),
+            self.type,
+            self.parameter_count,
+            self.parameters.__repr__())
 
 
 class k4a_calibration_camera_t(_ctypes.Structure):
@@ -652,6 +726,23 @@ class k4a_calibration_camera_t(_ctypes.Structure):
         ("metric_radius", _ctypes.c_float),
     ]
 
+    def __repr__(self):
+        return ''.join(['<%s.%s object at %s>:',
+            _newline,
+            'extrinsics=%s, ',
+            'intrinsics=%s, ',
+            'resolution_width=%d, ',
+            'resolution_height=%d, ',
+            'metric_radius=%f',]) % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            hex(id(self)),
+            self.extrinsics.__repr__(),
+            self.intrinsics.__repr__(),
+            self.resolution_width,
+            self.resolution_height,
+            self.metric_radius)
+
 
 class k4a_calibration_t(_ctypes.Structure):
     _fields_= [
@@ -662,6 +753,31 @@ class k4a_calibration_t(_ctypes.Structure):
         ("color_resolution", _ctypes.c_int),
     ]
 
+    def __repr__(self):
+        s = ''.join(['<%s.%s object at %s>:',
+            _newline,
+            'depth_camera_calibration=%s, ',
+            'color_camera_calibration=%s, ']) % (
+                self.__class__.__module__,
+                self.__class__.__name__,
+                hex(id(self)),
+                self.depth_camera_calibration.__repr__(),
+                self.color_camera_calibration.__repr__(),
+            )
+        
+        for r in range(k4a_calibration_type_t.K4A_CALIBRATION_TYPE_NUM):
+            for c in range(k4a_calibration_type_t.K4A_CALIBRATION_TYPE_NUM):
+                s = ''.join([s, 'extrinsics[%d][%d]=%s, ']) % (r, c, self.extrinsics[r][c].__repr__())
+
+        s = ''.join([s,
+            'depth_mode=%d, ',
+            'color_resolution=%d']) % (
+                self.depth_mode,
+                self.color_resolution
+            )
+
+        return s
+
 
 class k4a_version_t(_ctypes.Structure):
     _fields_= [
@@ -669,6 +785,18 @@ class k4a_version_t(_ctypes.Structure):
         ("minor", _ctypes.c_uint32),
         ("iteration", _ctypes.c_uint32),
     ]
+
+    def __repr__(self):
+        return ''.join(['<%s.%s object at %s>:',
+            'major=%d, ',
+            'minor=%d, ',
+            'iteration=%d']) % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            hex(id(self)),
+            self.major,
+            self.minor,
+            self.iteration)
 
 
 class k4a_hardware_version_t(_ctypes.Structure):
@@ -681,19 +809,43 @@ class k4a_hardware_version_t(_ctypes.Structure):
         ("firmware_signature", _ctypes.c_int),
     ]
 
+    def __repr__(self):
+        return ''.join(['<%s.%s object at %s>:', _newline,
+            'rgb=%s, ', _newline,
+            'depth=%s, ', _newline,
+            'audio=%s, ', _newline,
+            'depth_sensor=%s, ', _newline,
+            'firmware_build=%d, ',
+            'firmware_signature=%d']) % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            hex(id(self)),
+            self.rgb,
+            self.depth,
+            self.audio,
+            self.depth_sensor,
+            self.firmware_build,
+            self.firmware_signature)
+
 
 class _k4a_xy(_ctypes.Structure):
     _fields_= [
         ("x", _ctypes.c_float),
         ("y", _ctypes.c_float),
-    ]
+        ]
+
+    def __repr__(self):
+        return ''.join(['x=%f, ', 'y=%f']) % (self.x, self.y)
 
 
 class _k4a_float2_t(_ctypes.Union):
-   _fields_= [
+    _fields_= [
         ("xy", _k4a_xy),
-        ("v", _ctypes.c_float * 2)
-    ]
+        ("v", _ctypes.c_float * 2),
+        ]
+
+    def __repr__(self):
+        return self.xy.__repr__()
 
 
 class _k4a_xyz(_ctypes.Structure):
@@ -703,12 +855,18 @@ class _k4a_xyz(_ctypes.Structure):
         ("z", _ctypes.c_float),
     ]
 
+    def __repr__(self):
+        return ''.join(['x=%f, ', 'y=%f, ', 'z=%f']) % (self.x, self.y, self.z)
+
 
 class _k4a_float3_t(_ctypes.Union):
-   _fields_= [
+    _fields_= [
         ("xyz", _k4a_xyz),
         ("v", _ctypes.c_float * 3)
     ]
+
+    def __repr__(self):
+        return self.xyz.__repr__()
 
 
 class k4a_imu_sample_t(_ctypes.Structure):
@@ -719,6 +877,23 @@ class k4a_imu_sample_t(_ctypes.Structure):
         ("gyro_sample", _k4a_float3_t),
         ("gyro_timestamp_usec", _ctypes.c_uint64),
     ]
+
+    def __repr__(self):
+        return ''.join(['<%s.%s object at %s>:',
+            _newline,
+            'temperature=%f, ',
+            'acc_sample=%s, ',
+            'acc_timestamp_usec=%lu, ',
+            'gyro_sample=%s, ',
+            'gyro_timestamp_usec=%lu']) % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            hex(id(self)),
+            self.temperature,
+            self.acc_sample.__repr__(),
+            self.acc_timestamp_usec,
+            self.gyro_sample.__repr__(),
+            self.gyro_timestamp_usec)
 
 
 # A static instance of a device configuration where everything is disabled.
