@@ -341,7 +341,7 @@ class k4a_color_control_command_t(_IntEnum):
                                              https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/src/color/color_priv.h
                                              - Exposure time is measured in microseconds.
 
-    K4A_COLOR_CONTROL__auto_EXPOSURE_PRIORITY Exposure or Framerate priority setting.
+    K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY Exposure or Framerate priority setting.
                                              - May only be set to ::K4A_COLOR_CONTROL_MODE_MANUAL.
                                              - Value of 0 means framerate priority. 
                                              Value of 1 means exposure priority.
@@ -384,7 +384,7 @@ class k4a_color_control_command_t(_IntEnum):
     ======================================== ==========================================
     """
     K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE = 0
-    K4A_COLOR_CONTROL__auto_EXPOSURE_PRIORITY = _auto()
+    K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY = _auto()
     K4A_COLOR_CONTROL_BRIGHTNESS = _auto()
     K4A_COLOR_CONTROL_CONTRAST = _auto()
     K4A_COLOR_CONTROL_SATURATION = _auto()
@@ -406,11 +406,11 @@ class k4a_color_control_mode_t(_IntEnum):
     ================================ ==========================================
     Name                             Definition
     ================================ ==========================================
-    K4A_COLOR_CONTROL_MODE__auto      Set k4a_color_control_command_t to _auto.
+    K4A_COLOR_CONTROL_MODE_AUTO      Set k4a_color_control_command_t to auto.
     K4A_COLOR_CONTROL_MODE_MANUAL    Set k4a_color_control_command_t to manual.
     ================================ ==========================================
     """
-    K4A_COLOR_CONTROL_MODE__auto = 0
+    K4A_COLOR_CONTROL_MODE_AUTO = 0
     K4A_COLOR_CONTROL_MODE_MANUAL = _auto()
 
 
