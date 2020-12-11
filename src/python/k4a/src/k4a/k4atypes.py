@@ -553,18 +553,18 @@ def K4A_FAILED(result):
 #                                       const char *file,
 #                                       const int line,
 #                                       const char *message);
-k4a_logging_message_cb_t = _ctypes.CFUNCTYPE(
+k4a_logging_message_cb_t = _ctypes.WINFUNCTYPE(None,
     _ctypes.c_void_p, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char), 
     _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char))
 
 
 #typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
-k4a_memory_destroy_cb_t = _ctypes.CFUNCTYPE(
+k4a_memory_destroy_cb_t = _ctypes.WINFUNCTYPE(
     None, _ctypes.c_void_p, _ctypes.c_void_p)
 
 
 #typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
-k4a_memory_allocate_cb_t = _ctypes.CFUNCTYPE(
+k4a_memory_allocate_cb_t = _ctypes.WINFUNCTYPE(
     _ctypes.c_uint8, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_void_p))
 
 

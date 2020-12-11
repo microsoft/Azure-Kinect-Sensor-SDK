@@ -38,6 +38,7 @@ except Exception as e:
 #K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
 k4a_device_get_installed_count = _k4a_dll.k4a_device_get_installed_count
 k4a_device_get_installed_count.restype = _ctypes.c_uint32
+k4a_device_get_installed_count.argtypes = None
 
 
 #K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *message_cb,
@@ -45,7 +46,7 @@ k4a_device_get_installed_count.restype = _ctypes.c_uint32
 #                                                      k4a_log_level_t min_level);
 k4a_set_debug_message_handler = _k4a_dll.k4a_set_debug_message_handler
 k4a_set_debug_message_handler.restype = k4a_result_t
-k4a_set_debug_message_handler.argtypes = (k4a_logging_message_cb_t, _ctypes.c_void_p, _ctypes.c_int)
+k4a_set_debug_message_handler.argtypes = (_ctypes.POINTER(k4a_logging_message_cb_t), _ctypes.c_void_p, _ctypes.c_int)
 
 
 #K4A_EXPORT k4a_result_t k4a_device_open(uint32_t index, k4a_device_t *device_handle);
@@ -56,6 +57,7 @@ k4a_device_open.argtypes = (_ctypes.c_uint32, _ctypes.POINTER(k4a_device_t))
 
 #K4A_EXPORT void k4a_device_close(k4a_device_t device_handle);
 k4a_device_close = _k4a_dll.k4a_device_close
+k4a_device_close.restype = None
 k4a_device_close.argtypes = (k4a_device_t,)
 
 
@@ -83,11 +85,13 @@ k4a_capture_create.argtypes = (_ctypes.POINTER(k4a_capture_t),)
 
 #K4A_EXPORT void k4a_capture_release(k4a_capture_t capture_handle);
 k4a_capture_release = _k4a_dll.k4a_capture_release
+k4a_capture_release.restype = None
 k4a_capture_release.argtypes = (k4a_capture_t,)
 
 
 #K4A_EXPORT void k4a_capture_reference(k4a_capture_t capture_handle);
 k4a_capture_reference = _k4a_dll.k4a_capture_reference
+k4a_capture_reference.restype = None
 k4a_capture_reference.argtypes = (k4a_capture_t,)
 
 
@@ -111,21 +115,25 @@ k4a_capture_get_ir_image.argtypes=(k4a_capture_t,)
 
 #K4A_EXPORT void k4a_capture_set_color_image(k4a_capture_t capture_handle, k4a_image_t image_handle);
 k4a_capture_set_color_image = _k4a_dll.k4a_capture_set_color_image
+k4a_capture_set_color_image.restype = None
 k4a_capture_set_color_image.argtypes=(k4a_capture_t, k4a_image_t)
 
 
 #K4A_EXPORT void k4a_capture_set_depth_image(k4a_capture_t capture_handle, k4a_image_t image_handle);
 k4a_capture_set_depth_image = _k4a_dll.k4a_capture_set_depth_image
+k4a_capture_set_depth_image.restype = None
 k4a_capture_set_depth_image.argtypes=(k4a_capture_t, k4a_image_t)
 
 
 #K4A_EXPORT void k4a_capture_set_ir_image(k4a_capture_t capture_handle, k4a_image_t image_handle);
 k4a_capture_set_ir_image = _k4a_dll.k4a_capture_set_ir_image
+k4a_capture_set_ir_image.restype = None
 k4a_capture_set_ir_image.argtypes=(k4a_capture_t, k4a_image_t)
 
 
 #K4A_EXPORT void k4a_capture_set_temperature_c(k4a_capture_t capture_handle, float temperature_c);
 k4a_capture_set_temperature_c = _k4a_dll.k4a_capture_set_temperature_c
+k4a_capture_set_temperature_c.restype = None
 k4a_capture_set_temperature_c.argtypes=(k4a_capture_t, _ctypes.c_float)
 
 
@@ -145,6 +153,7 @@ k4a_image_create.restype = k4a_result_t
 k4a_image_create.argtypes=(_ctypes.c_int, _ctypes.c_int, _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(k4a_image_t))
 
 
+
 #K4A_EXPORT k4a_result_t k4a_image_create_from_buffer(k4a_image_format_t format,
 #                                                     int width_pixels,
 #                                                     int height_pixels,
@@ -161,9 +170,10 @@ k4a_image_create_from_buffer.argtypes=(
     _ctypes.c_ulonglong, k4a_memory_destroy_cb_t, _ctypes.c_void_p, _ctypes.POINTER(k4a_image_t))
 
 
+
 #K4A_EXPORT uint8_t *k4a_image_get_buffer(k4a_image_t image_handle);
 k4a_image_get_buffer = _k4a_dll.k4a_image_get_buffer
-k4a_image_get_buffer.restype = _ctypes.c_uint8
+k4a_image_get_buffer.restype = _ctypes.POINTER(_ctypes.c_uint8)
 k4a_image_get_buffer.argtypes=(k4a_image_t,)
 
 
@@ -229,36 +239,43 @@ k4a_image_get_iso_speed.argtypes=(k4a_image_t,)
 
 #K4A_EXPORT void k4a_image_set_device_timestamp_usec(k4a_image_t image_handle, uint64_t timestamp_usec);
 k4a_image_set_device_timestamp_usec = _k4a_dll.k4a_image_set_device_timestamp_usec
+k4a_image_set_device_timestamp_usec.restype = None
 k4a_image_set_device_timestamp_usec.argtypes=(k4a_image_t, _ctypes.c_uint64)
 
 
 #K4A_EXPORT void k4a_image_set_system_timestamp_nsec(k4a_image_t image_handle, uint64_t timestamp_nsec);
 k4a_image_set_system_timestamp_nsec = _k4a_dll.k4a_image_set_system_timestamp_nsec
+k4a_image_set_system_timestamp_nsec.restype = None
 k4a_image_set_system_timestamp_nsec.argtypes=(k4a_image_t, _ctypes.c_uint64)
 
 
 #K4A_EXPORT void k4a_image_set_exposure_usec(k4a_image_t image_handle, uint64_t exposure_usec);
 k4a_image_set_exposure_usec = _k4a_dll.k4a_image_set_exposure_usec
+k4a_image_set_exposure_usec.restype = None
 k4a_image_set_exposure_usec.argtypes=(k4a_image_t, _ctypes.c_uint64)
 
 
 #K4A_EXPORT void k4a_image_set_white_balance(k4a_image_t image_handle, uint32_t white_balance);
 k4a_image_set_white_balance = _k4a_dll.k4a_image_set_white_balance
+k4a_image_set_white_balance.restype = None
 k4a_image_set_white_balance.argtypes=(k4a_image_t, _ctypes.c_uint32)
 
 
 #K4A_EXPORT void k4a_image_set_iso_speed(k4a_image_t image_handle, uint32_t iso_speed);
 k4a_image_set_iso_speed = _k4a_dll.k4a_image_set_iso_speed
+k4a_image_set_iso_speed.restype = None
 k4a_image_set_iso_speed.argtypes=(k4a_image_t, _ctypes.c_uint32)
 
 
 #K4A_EXPORT void k4a_image_reference(k4a_image_t image_handle);
 k4a_image_reference = _k4a_dll.k4a_image_reference
+k4a_image_reference.restype = None
 k4a_image_reference.argtypes=(k4a_image_t,)
 
 
 #K4A_EXPORT void k4a_image_release(k4a_image_t image_handle);
 k4a_image_release = _k4a_dll.k4a_image_release
+k4a_image_release.restype = None
 k4a_image_release.argtypes=(k4a_image_t,)
 
 
@@ -270,6 +287,7 @@ k4a_device_start_cameras.argtypes = (k4a_device_t, _ctypes.POINTER(k4a_device_co
 
 #K4A_EXPORT void k4a_device_stop_cameras(k4a_device_t device_handle);
 k4a_device_stop_cameras = _k4a_dll.k4a_device_stop_cameras
+k4a_device_stop_cameras.restype = None
 k4a_device_stop_cameras.argtypes=(k4a_device_t,)
 
 
@@ -281,6 +299,7 @@ k4a_device_start_imu.argtypes = (k4a_device_t,)
 
 #K4A_EXPORT void k4a_device_stop_imu(k4a_device_t device_handle);
 k4a_device_stop_imu = _k4a_dll.k4a_device_stop_imu
+k4a_device_stop_imu.restype = None
 k4a_device_stop_imu.argtypes = (k4a_device_t,)
 
 
@@ -379,7 +398,7 @@ k4a_calibration_3d_to_3d = _k4a_dll.k4a_calibration_3d_to_3d
 k4a_calibration_3d_to_3d.restype = k4a_result_t
 k4a_calibration_3d_to_3d.argtypes = (
     _ctypes.POINTER(k4a_calibration_t), _ctypes.POINTER(k4a_float3_t),
-    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(k4a_float_3))
+    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(k4a_float3_t))
 
 
 #K4A_EXPORT k4a_result_t k4a_calibration_2d_to_3d(const k4a_calibration_t *calibration,
@@ -393,7 +412,7 @@ k4a_calibration_2d_to_3d = _k4a_dll.k4a_calibration_2d_to_3d
 k4a_calibration_2d_to_3d.restype = k4a_result_t
 k4a_calibration_2d_to_3d.argtypes = (
     _ctypes.POINTER(k4a_calibration_t), _ctypes.POINTER(k4a_float2_t), _ctypes.c_float,
-    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(k4a_float_3), _ctypes.POINTER(_ctypes.c_int))
+    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(k4a_float3_t), _ctypes.POINTER(_ctypes.c_int))
 
 
 #K4A_EXPORT k4a_result_t k4a_calibration_3d_to_2d(const k4a_calibration_t *calibration,
@@ -443,6 +462,7 @@ k4a_transformation_create.argtypes = (_ctypes.POINTER(k4a_calibration_t),)
 
 #K4A_EXPORT void k4a_transformation_destroy(k4a_transformation_t transformation_handle);
 k4a_transformation_destroy = _k4a_dll.k4a_transformation_destroy
+k4a_transformation_destroy.restype = None
 k4a_transformation_destroy.argtypes = (k4a_transformation_t,)
 
 
