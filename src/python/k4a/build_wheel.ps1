@@ -29,10 +29,9 @@ python -m venv temp_build_venv
 python -m pip install --upgrade pip
 pip install -e .
 
-
 # Build the .whl file and place it in a build/ folder.
 pip install wheel
-pip wheel . -w build
+pip wheel . -w build --build-option --plat-name=win_amd64
 Remove-Item ./build/* -Exclude k4a*.whl -Recurse -Force
 
 
