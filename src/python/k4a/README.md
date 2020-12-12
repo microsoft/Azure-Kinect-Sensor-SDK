@@ -22,13 +22,9 @@ K4A enables you to get the most out of your Azure Kinect camera. Features includ
 All image data is encapsulated in numpy arrays, allowing Python users to easily use the data in OpenCV
 and other packages that work with numpy arrays.
 
-## Installation
-
-To use the Python API, please refer to the installation instructions in [usage](docs/usage.md)
-
 ## Documentation
 
-API documentation is available [here]().
+API documentation will soon be made available.
 
 ## Building
 
@@ -38,7 +34,7 @@ For instructions on how to build this distributable, please see
 
 ## Testing
 
-For information on writing or running tests, please see [testing.md](docs/testing.md)
+For information on writing or running tests, please see [testing](docs/testing.md).
 
 ## Contribute
 

@@ -31,7 +31,7 @@ pip install -e .
 
 # Build the .whl file and place it in a build/ folder.
 pip install wheel
-pip wheel . -w build --build-option --plat-name=win_amd64
+pip wheel . -w build --build-option
 Remove-Item ./build/* -Exclude k4a*.whl -Recurse -Force
 
 
