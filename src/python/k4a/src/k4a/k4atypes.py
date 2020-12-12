@@ -145,7 +145,8 @@ class k4a_color_resolution_t(_IntEnum):
     K4A_COLOR_RESOLUTION_1080P       1920 * 1080 16:9.
     K4A_COLOR_RESOLUTION_1440P       2560 * 1440 16:9.
     K4A_COLOR_RESOLUTION_1536P       2048 * 1536 4:3.
-    K4A_COLOR_RESOLUTION_2160P       4096 * 3072 4:3
+    K4A_COLOR_RESOLUTION_2160P       3840 * 2160 16:9.
+    K4A_COLOR_RESOLUTION_3072P       4096 * 3072 4:3.
     ================================ ==========================================
     """
     K4A_COLOR_RESOLUTION_OFF = 0
@@ -154,6 +155,7 @@ class k4a_color_resolution_t(_IntEnum):
     K4A_COLOR_RESOLUTION_1440P = _auto()
     K4A_COLOR_RESOLUTION_1536P = _auto()
     K4A_COLOR_RESOLUTION_2160P = _auto()
+    K4A_COLOR_RESOLUTION_3072P = _auto()
 
 
 @_unique
@@ -845,6 +847,10 @@ class _k4a_xy(_ctypes.Structure):
         ("y", _ctypes.c_float),
         ]
 
+    def __init__(self, x=0, y=0):
+        self.x = x
+        self.y = y
+
     def __repr__(self):
         return ''.join(['x=%f, ', 'y=%f']) % (self.x, self.y)
 
@@ -854,6 +860,9 @@ class k4a_float2_t(_ctypes.Union):
         ("xy", _k4a_xy),
         ("v", _ctypes.c_float * 2),
         ]
+
+    def __init__(self, x=0, y=0):
+        self.xy = _k4a_xy(x, y)
 
     def __repr__(self):
         return self.xy.__repr__()
@@ -866,6 +875,11 @@ class _k4a_xyz(_ctypes.Structure):
         ("z", _ctypes.c_float),
     ]
 
+    def __init__(self, x=0, y=0, z=0):
+        self.x = x
+        self.y = y
+        self.z = z
+
     def __repr__(self):
         return ''.join(['x=%f, ', 'y=%f, ', 'z=%f']) % (self.x, self.y, self.z)
 
@@ -875,6 +889,9 @@ class k4a_float3_t(_ctypes.Union):
         ("xyz", _k4a_xyz),
         ("v", _ctypes.c_float * 3)
     ]
+
+    def __init__(self, x=0, y=0, z=0):
+        self.xyz = _k4a_xyz(x, y, z)
 
     def __repr__(self):
         return self.xyz.__repr__()

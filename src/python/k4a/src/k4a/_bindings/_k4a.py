@@ -450,7 +450,7 @@ k4a_calibration_2d_to_2d.argtypes = (
 k4a_calibration_color_2d_to_depth_2d = _k4a_dll.k4a_calibration_color_2d_to_depth_2d
 k4a_calibration_color_2d_to_depth_2d.restype = k4a_result_t
 k4a_calibration_color_2d_to_depth_2d.argtypes = (
-    _ctypes.POINTER(k4a_calibration_t), _ctypes.POINTER(k4a_float2_t), _ctypes.c_int,
+    _ctypes.POINTER(k4a_calibration_t), _ctypes.POINTER(k4a_float2_t), k4a_image_t,
     _ctypes.POINTER(k4a_float2_t), _ctypes.POINTER(_ctypes.c_int))
 
 

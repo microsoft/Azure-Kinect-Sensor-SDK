@@ -72,6 +72,7 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P, next(enum_values))
         self.assertEqual(k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P, next(enum_values))
         self.assertEqual(k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P, next(enum_values))
+        self.assertEqual(k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P, next(enum_values))
 
     def test_k4a_image_format_t(self):
         enum_values = get_enum_values(len(k4a.k4a_image_format_t))
