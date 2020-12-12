@@ -1136,7 +1136,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                                     self.assertAlmostEqual(depth_mm, target_point.xyz.z)
 
     # This test always fails. Why??
-    @unittest.skip
+    @unittest.expectedFailure
     def test_k4a_calibration_3d_to_2d(self):
         with self.lock:
 
