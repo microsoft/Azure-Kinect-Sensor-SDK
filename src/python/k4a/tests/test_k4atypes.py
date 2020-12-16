@@ -1,4 +1,7 @@
-'''Tests for the k4a types and enums.
+'''
+test_k4atypes.py
+
+Tests for the k4a types and enums.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
 '''
@@ -7,7 +10,6 @@ import unittest
 import ctypes
     
 import k4a
-from k4a import k4atypes
 
 
 def get_enum_values(n):
@@ -169,20 +171,20 @@ class TestStructs(unittest.TestCase):
         pass
 
     def test_k4a_device_t(self):
-        device_handle = k4a.DeviceHandle()
-        self.assertIsInstance(device_handle, k4atypes.DeviceHandle)
+        device_handle = k4a._bindings._k4a._DeviceHandle()
+        self.assertIsInstance(device_handle, k4a._bindings._k4a._DeviceHandle)
 
     def test_k4a_capture_t(self):
-        capture_handle = k4a.CaptureHandle()
-        self.assertIsInstance(capture_handle, k4atypes.CaptureHandle)
+        capture_handle = k4a._bindings._k4a._CaptureHandle()
+        self.assertIsInstance(capture_handle, k4a._bindings._k4a._CaptureHandle)
 
     def test_k4a_image_t(self):
-        image_handle = k4a.ImageHandle()
-        self.assertIsInstance(image_handle, k4atypes.ImageHandle)
+        image_handle = k4a._bindings._k4a._ImageHandle()
+        self.assertIsInstance(image_handle, k4a._bindings._k4a._ImageHandle)
 
     def test_k4a_transformation_t(self):
-        transformation_handle = k4a.TransformationHandle()
-        self.assertIsInstance(transformation_handle, k4atypes.TransformationHandle)
+        transformation_handle = k4a._bindings._k4a._TransformationHandle()
+        self.assertIsInstance(transformation_handle, k4a._bindings._k4a._TransformationHandle)
 
     def test_k4a_device_configuration_t(self):
         device_config = k4a.DeviceConfiguration()
@@ -195,7 +197,7 @@ class TestStructs(unittest.TestCase):
         self.assertEqual(len(calibration_extrinsics._fields_), 2)
 
     def test__k4a_calibration_intrinsic_param(self):
-        calib_intrinsic = k4atypes.CalibrationIntrinsicParam()
+        calib_intrinsic = k4a.CalibrationIntrinsicParam()
         self.assertIsNotNone(calib_intrinsic)
         self.assertEqual(len(calib_intrinsic._fields_), 15)
 
@@ -225,22 +227,22 @@ class TestStructs(unittest.TestCase):
         self.assertEqual(len(version._fields_), 6)
 
     def test__k4a_xy(self):
-        xy = k4atypes._XY()
+        xy = k4a._bindings._k4atypes._XY()
         self.assertIsNotNone(xy)
         self.assertEqual(len(xy._fields_), 2)
 
     def test_k4a_float2_t(self):
-        xy = k4atypes.Float2()
+        xy = k4a.Float2()
         self.assertIsNotNone(xy)
         self.assertEqual(len(xy._fields_), 2)
 
     def test__k4a_xyz(self):
-        xyz = k4atypes._XYZ()
+        xyz = k4a._bindings._k4atypes._XYZ()
         self.assertIsNotNone(xyz)
         self.assertEqual(len(xyz._fields_), 3)
 
     def test_k4a_float3_t(self):
-        xyz = k4atypes.Float3()
+        xyz = k4a.Float3()
         self.assertIsNotNone(xyz)
         self.assertEqual(len(xyz._fields_), 2)
 

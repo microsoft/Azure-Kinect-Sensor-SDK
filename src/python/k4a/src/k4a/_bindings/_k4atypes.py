@@ -7,6 +7,7 @@ These enums defined here are analogous to those defined in k4a.h.
 Copyright (C) Microsoft Corporation. All rights reserved.
 '''
 
+
 from enum import IntEnum as _IntEnum
 from enum import unique as _unique
 from enum import auto as _auto
@@ -294,7 +295,7 @@ class EColorControlCommand(_IntEnum):
     settings can be set with k4a_device_set_color_control().
 
     Control values set on a device are reset only when the device is power 
-    cycled. The device will retain the settings even if the DeviceHandle is 
+    cycled. The device will retain the settings even if the _DeviceHandle is 
     closed or the application is restarted.
 
     ====================== ====================================================
@@ -528,48 +529,6 @@ def K4A_FAILED(result):
 logging_message_cb = _ctypes.WINFUNCTYPE(None,
     _ctypes.c_void_p, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char), 
     _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char))
-
-
-#typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
-memory_destroy_cb = _ctypes.WINFUNCTYPE(
-    None, _ctypes.c_void_p, _ctypes.c_void_p)
-
-
-#typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
-memory_allocate_cb = _ctypes.WINFUNCTYPE(
-    _ctypes.c_uint8, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_void_p))
-
-
-# K4A_DECLARE_HANDLE(handle_k4a_device_t);
-class __handle_k4a_device_t(_ctypes.Structure):
-     _fields_= [
-        ("_rsvd", _ctypes.c_size_t),
-    ]
-DeviceHandle = _ctypes.POINTER(__handle_k4a_device_t)
-
-
-# K4A_DECLARE_HANDLE(handle_k4a_capture_t);
-class __handle_k4a_capture_t(_ctypes.Structure):
-     _fields_= [
-        ("_rsvd", _ctypes.c_size_t),
-    ]
-CaptureHandle = _ctypes.POINTER(__handle_k4a_capture_t)
-
-
-# K4A_DECLARE_HANDLE(handle_k4a_image_t);
-class __handle_k4a_image_t(_ctypes.Structure):
-     _fields_= [
-        ("_rsvd", _ctypes.c_size_t),
-    ]
-ImageHandle = _ctypes.POINTER(__handle_k4a_image_t)
-
-
-# K4A_DECLARE_HANDLE(k4a_transformation_t);
-class __handle_k4a_transformation_t(_ctypes.Structure):
-     _fields_= [
-        ("_rsvd", _ctypes.c_size_t),
-    ]
-TransformationHandle = _ctypes.POINTER(__handle_k4a_transformation_t)
 
 
 class DeviceConfiguration(_ctypes.Structure):
