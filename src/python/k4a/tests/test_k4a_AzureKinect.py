@@ -18,17 +18,17 @@ glb_depth_mode = None
 
 # Use for logging callback. But it doesn't work right now...
 def glb_print_message(context:ctypes.c_void_p, 
-                      level:k4a.k4a_log_level_t, 
+                      level:k4a.ELogLevel, 
                       src_file:ctypes.POINTER(ctypes.c_char), 
                       src_line:ctypes.c_int, 
                       message:ctypes.POINTER(ctypes.c_char)):
     print(str(level) + " in " + str(src_file) + " at line " + str(src_line) + ": " + str(message))
 
 
-def get_capture(device_handle:k4a.k4a_device_t,
-                color_format:k4a.k4a_image_format_t,
-                color_resolution:k4a.k4a_color_resolution_t,
-                depth_mode:k4a.k4a_depth_mode_t)->k4a.k4a_capture_t:
+def get_capture(device_handle:k4a.DeviceHandle,
+                color_format:k4a.EImageFormat,
+                color_resolution:k4a.EColorResolution,
+                depth_mode:k4a.EDepthMode)->k4a.CaptureHandle:
 
     global glb_capture
     global glb_color_format
@@ -48,14 +48,14 @@ def get_capture(device_handle:k4a.k4a_device_t,
             capture = None
 
         # Start the cameras.
-        device_config = k4a.k4a_device_configuration_t()
+        device_config = k4a.DeviceConfiguration()
         device_config.color_format = color_format
         device_config.color_resolution = color_resolution
         device_config.depth_mode = depth_mode
-        device_config.camera_fps = k4a.k4a_fps_t.K4A_FRAMES_PER_SECOND_15
+        device_config.camera_fps = k4a.EFramePerSecond.FPS_15
         device_config.synchronized_images_only = True
         device_config.depth_delay_off_color_usec = 0
-        device_config.wired_sync_mode = k4a.k4a_wired_sync_mode_t.K4A_WIRED_SYNC_MODE_STANDALONE
+        device_config.wired_sync_mode = k4a.EWiredSyncMode.STANDALONE
         device_config.subordinate_delay_off_master_usec = 0
         device_config.disable_streaming_indicator = False
 
@@ -63,7 +63,7 @@ def get_capture(device_handle:k4a.k4a_device_t,
         if(k4a.K4A_SUCCEEDED(status)):
 
             # Get a capture. Ignore the retured status.
-            capture = k4a.k4a_capture_t()
+            capture = k4a.CaptureHandle()
             timeout_ms = ctypes.c_int32(1000)
             status = k4a.k4a_device_get_capture(
                 device_handle,
@@ -84,22 +84,22 @@ def get_capture(device_handle:k4a.k4a_device_t,
 
 def get_1080p_bgr32_nfov_2x2binned(device_handle):
     return get_capture(device_handle,
-        k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32,
-        k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-        k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED)
+        k4a.EImageFormat.COLOR_BGRA32,
+        k4a.EColorResolution.RES_1080P,
+        k4a.EDepthMode.NFOV_2X2BINNED)
 
 
 def k4a_device_get_color_control_capability(
-    device_handle:k4a.k4a_device_t,
-    color_control_command:k4a.k4a_color_control_command_t
-    )->k4a.k4a_result_t:
+    device_handle:k4a.DeviceHandle,
+    color_control_command:k4a.EColorControlCommand
+    )->k4a.EStatus:
 
     supports_auto = ctypes.c_bool(False)
     min_value = ctypes.c_int32(0)
     max_value = ctypes.c_int32(0)
     step_value = ctypes.c_int32(0)
     default_value = ctypes.c_int32(0)
-    color_control_mode = ctypes.c_int32(k4a.k4a_color_control_mode_t.K4A_COLOR_CONTROL_MODE_AUTO.value)
+    color_control_mode = ctypes.c_int32(k4a.EColorControlMode.AUTO.value)
 
     status = k4a.k4a_device_get_color_control_capabilities(
         device_handle,
@@ -115,10 +115,10 @@ def k4a_device_get_color_control_capability(
     return status
 
 def k4a_device_set_and_get_color_control(
-    device_handle:k4a.k4a_device_t,
-    color_control_command:k4a.k4a_color_control_command_t):
+    device_handle:k4a.DeviceHandle,
+    color_control_command:k4a.EColorControlCommand):
 
-    mode = ctypes.c_int32(k4a.k4a_color_control_mode_t.K4A_COLOR_CONTROL_MODE_MANUAL.value)
+    mode = ctypes.c_int32(k4a.EColorControlMode.MANUAL.value)
     saved_value = ctypes.c_int32(0)
 
     # Get the step size.
@@ -127,7 +127,7 @@ def k4a_device_set_and_get_color_control(
     max_value = ctypes.c_int32(0)
     step_value = ctypes.c_int32(0)
     default_value = ctypes.c_int32(0)
-    color_control_mode = ctypes.c_int32(k4a.k4a_color_control_mode_t.K4A_COLOR_CONTROL_MODE_MANUAL.value)
+    color_control_mode = ctypes.c_int32(k4a.EColorControlMode.MANUAL.value)
 
     status = k4a.k4a_device_get_color_control_capabilities(
         device_handle,
@@ -141,7 +141,7 @@ def k4a_device_set_and_get_color_control(
     )
 
     # Read the original value.
-    temp_mode = ctypes.c_int32(k4a.k4a_color_control_mode_t.K4A_COLOR_CONTROL_MODE_MANUAL.value)
+    temp_mode = ctypes.c_int32(k4a.EColorControlMode.MANUAL.value)
     status0 = k4a.k4a_device_get_color_control(
         device_handle,
         ctypes.c_int(color_control_command.value),
@@ -162,7 +162,7 @@ def k4a_device_set_and_get_color_control(
         new_value)
 
     # Read back the value to check that it was written.
-    temp_mode = ctypes.c_int32(k4a.k4a_color_control_mode_t.K4A_COLOR_CONTROL_MODE_MANUAL.value)
+    temp_mode = ctypes.c_int32(k4a.EColorControlMode.MANUAL.value)
     new_value_readback = ctypes.c_int32(0)
     status2 = k4a.k4a_device_get_color_control(
         device_handle,
@@ -178,7 +178,7 @@ def k4a_device_set_and_get_color_control(
         saved_value)
 
     # Read back the value to check that it was written.
-    temp_mode = ctypes.c_int32(k4a.k4a_color_control_mode_t.K4A_COLOR_CONTROL_MODE_MANUAL.value)
+    temp_mode = ctypes.c_int32(k4a.EColorControlMode.MANUAL.value)
     saved_value_readback = ctypes.c_int32(0)
     status4 = k4a.k4a_device_get_color_control(
         device_handle,
@@ -196,7 +196,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.device_handle = k4a.k4a_device_t()
+        cls.device_handle = k4a.DeviceHandle()
         status = k4a.k4a_device_open(ctypes.c_uint32(0), ctypes.byref(cls.device_handle))
         assert(k4a.K4A_SUCCEEDED(status))
 
@@ -214,7 +214,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
         k4a.k4a_device_close(cls.device_handle)
 
     def test_k4a_device_open_twice_expected_fail(self):
-        device_handle_2 = k4a.k4a_device_t()
+        device_handle_2 = k4a.DeviceHandle()
         status = k4a.k4a_device_open(ctypes.c_uint32(0), ctypes.byref(device_handle_2))
         self.assertTrue(k4a.K4A_FAILED(status))
 
@@ -227,19 +227,19 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
     def test_k4a_set_debug_message_handler_NULL_callback(self):
         status = k4a.k4a_set_debug_message_handler(
-            ctypes.cast(ctypes.c_void_p(), ctypes.POINTER(k4a.k4a_logging_message_cb_t)), 
+            ctypes.cast(ctypes.c_void_p(), ctypes.POINTER(k4a.logging_message_cb)), 
             ctypes.c_void_p(), 
-            k4a.k4a_log_level_t.K4A_LOG_LEVEL_TRACE)
+            k4a.ELogLevel.TRACE)
         self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
     @unittest.skip
     def test_k4a_set_debug_message_handler_callback(self):
-        logger_cb = k4a.k4a_logging_message_cb_t(glb_print_message)
+        logger_cb = k4a.logging_message_cb(glb_print_message)
         context = ctypes.c_void_p()
         status = k4a.k4a_set_debug_message_handler(
             ctypes.byref(logger_cb), 
             context, 
-            k4a.k4a_log_level_t.K4A_LOG_LEVEL_TRACE
+            k4a.ELogLevel.TRACE
         )
         self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
@@ -257,7 +257,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             status = k4a.k4a_device_start_imu(self.device_handle)
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
-            imu_sample = k4a.k4a_imu_sample_t()
+            imu_sample = k4a.ImuSample()
             timeout_ms = ctypes.c_int32(1000)
             status = k4a.k4a_device_get_imu_sample(
                 self.device_handle,
@@ -268,7 +268,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             # Stop imu.
             k4a.k4a_device_stop_imu(self.device_handle)
 
-            self.assertEqual(status, k4a.k4a_wait_result_t.K4A_WAIT_RESULT_SUCCEEDED)
+            self.assertEqual(status, k4a.EWaitStatus.SUCCEEDED)
             self.assertNotAlmostEqual(imu_sample.temperature, 0.0)
             self.assertNotAlmostEqual(imu_sample.acc_sample.xyz.x, 0.0)
             self.assertNotAlmostEqual(imu_sample.acc_sample.xyz.y, 0.0)
@@ -280,7 +280,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             self.assertNotEqual(imu_samplew.gyro_timestamp_usec, 0.0)
 
     def test_k4a_capture_create(self):
-        capture = k4a.k4a_capture_t()
+        capture = k4a.CaptureHandle()
         status = k4a.k4a_capture_create(ctypes.byref(capture))
         self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
@@ -294,7 +294,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             self.assertIsNotNone(capture)
             
             color_image = k4a.k4a_capture_get_color_image(capture)
-            self.assertIsInstance(color_image, k4a.k4a_image_t)
+            self.assertIsInstance(color_image, k4a.ImageHandle)
             k4a.k4a_image_release(color_image)
 
     def test_k4a_capture_get_depth_image(self):
@@ -303,7 +303,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             self.assertIsNotNone(capture)
             
             depth_image = k4a.k4a_capture_get_depth_image(capture)
-            self.assertIsInstance(depth_image, k4a.k4a_image_t)
+            self.assertIsInstance(depth_image, k4a.ImageHandle)
             k4a.k4a_image_release(depth_image)
 
     def test_k4a_capture_get_ir_image(self):
@@ -312,20 +312,20 @@ class TestDevice_AzureKinect(unittest.TestCase):
             self.assertIsNotNone(capture)
             
             ir_image = k4a.k4a_capture_get_ir_image(capture)
-            self.assertIsInstance(ir_image, k4a.k4a_image_t)
+            self.assertIsInstance(ir_image, k4a.ImageHandle)
             k4a.k4a_image_release(ir_image)
 
     def test_k4a_image_create(self):
         
-        image_format = k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32
+        image_format = k4a.EImageFormat.COLOR_BGRA32
         width_pixels = 512
         height_pixels = 512
         stride_pixels = 4*512
-        image_handle = k4a.k4a_image_t()
+        image_handle = k4a.ImageHandle()
         
         status = k4a.k4a_image_create(ctypes.c_int(image_format.value), 
             width_pixels, height_pixels, stride_pixels, ctypes.byref(image_handle))
-        self.assertEqual(k4a.k4a_result_t.K4A_RESULT_SUCCEEDED, status)
+        self.assertEqual(k4a.EStatus.SUCCEEDED, status)
 
         # Check that the created image has properties requested.
         created_image_format = k4a.k4a_image_get_format(image_handle)
@@ -350,14 +350,14 @@ class TestDevice_AzureKinect(unittest.TestCase):
             saved_color_image = k4a.k4a_capture_get_color_image(capture)
 
             # Create a new image.
-            image_format = k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32
+            image_format = k4a.EImageFormat.COLOR_BGRA32
             width_pixels = ctypes.c_int(512)
             height_pixels = ctypes.c_int(512)
             stride_bytes = ctypes.c_int(4*512)
-            image_handle = k4a.k4a_image_t()
+            image_handle = k4a.ImageHandle()
             status = k4a.k4a_image_create(ctypes.c_int(image_format.value), 
                 width_pixels, height_pixels, stride_bytes, ctypes.byref(image_handle))
-            self.assertEqual(k4a.k4a_result_t.K4A_RESULT_SUCCEEDED, status)
+            self.assertEqual(k4a.EStatus.SUCCEEDED, status)
 
             # Replace the saved image with the created one.
             k4a.k4a_capture_set_color_image(capture, image_handle)
@@ -385,12 +385,12 @@ class TestDevice_AzureKinect(unittest.TestCase):
             saved_color_image_stride_bytes = k4a.k4a_image_get_stride_bytes(saved_color_image2)
             k4a.k4a_image_release(saved_color_image2)
 
-            self.assertEqual(color_image_format, k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32)
+            self.assertEqual(color_image_format, k4a.EImageFormat.COLOR_BGRA32)
             self.assertEqual(color_image_width_pixels, 512)
             self.assertEqual(color_image_height_pixels, 512)
             self.assertEqual(color_image_stride_bytes, 512*4)
 
-            self.assertEqual(saved_color_image_format, k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32)
+            self.assertEqual(saved_color_image_format, k4a.EImageFormat.COLOR_BGRA32)
             self.assertEqual(saved_color_image_width_pixels, 1920)
             self.assertEqual(saved_color_image_height_pixels, 1080)
             self.assertEqual(saved_color_image_stride_bytes, 1920*4)
@@ -405,14 +405,14 @@ class TestDevice_AzureKinect(unittest.TestCase):
             saved_depth_image = k4a.k4a_capture_get_depth_image(capture)
 
             # Create a new image.
-            image_format = k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_DEPTH16
+            image_format = k4a.EImageFormat.DEPTH16
             width_pixels = ctypes.c_int(512)
             height_pixels = ctypes.c_int(512)
             stride_bytes = ctypes.c_int(4*512)
-            image_handle = k4a.k4a_image_t()
+            image_handle = k4a.ImageHandle()
             status = k4a.k4a_image_create(ctypes.c_int(image_format.value), 
                 width_pixels, height_pixels, stride_bytes, ctypes.byref(image_handle))
-            self.assertEqual(k4a.k4a_result_t.K4A_RESULT_SUCCEEDED, status)
+            self.assertEqual(k4a.EStatus.SUCCEEDED, status)
 
             # Replace the saved image with the created one.
             k4a.k4a_capture_set_depth_image(capture, image_handle)
@@ -440,12 +440,12 @@ class TestDevice_AzureKinect(unittest.TestCase):
             saved_depth_image_stride_bytes = k4a.k4a_image_get_stride_bytes(saved_depth_image)
             k4a.k4a_image_release(saved_depth_image2)
 
-            self.assertEqual(depth_image_format, k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_DEPTH16)
+            self.assertEqual(depth_image_format, k4a.EImageFormat.DEPTH16)
             self.assertEqual(depth_image_width_pixels, 512)
             self.assertEqual(depth_image_height_pixels, 512)
             self.assertEqual(depth_image_stride_bytes, 512*4)
 
-            self.assertEqual(saved_depth_image_format, k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_DEPTH16)
+            self.assertEqual(saved_depth_image_format, k4a.EImageFormat.DEPTH16)
             self.assertEqual(saved_depth_image_width_pixels, 320)
             self.assertEqual(saved_depth_image_height_pixels, 288)
             self.assertEqual(saved_depth_image_stride_bytes, 320*2)
@@ -460,14 +460,14 @@ class TestDevice_AzureKinect(unittest.TestCase):
             saved_ir_image = k4a.k4a_capture_get_ir_image(capture)
 
             # Create a new image.
-            image_format = k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_IR16
+            image_format = k4a.EImageFormat.IR16
             width_pixels = ctypes.c_int(512)
             height_pixels = ctypes.c_int(512)
             stride_bytes = ctypes.c_int(4*512)
-            image_handle = k4a.k4a_image_t()
+            image_handle = k4a.ImageHandle()
             status = k4a.k4a_image_create(ctypes.c_int(image_format.value), 
                 width_pixels, height_pixels, stride_bytes, ctypes.byref(image_handle))
-            self.assertEqual(k4a.k4a_result_t.K4A_RESULT_SUCCEEDED, status)
+            self.assertEqual(k4a.EStatus.SUCCEEDED, status)
 
             # Replace the saved image with the created one.
             k4a.k4a_capture_set_ir_image(capture, image_handle)
@@ -495,12 +495,12 @@ class TestDevice_AzureKinect(unittest.TestCase):
             saved_ir_image_stride_bytes = k4a.k4a_image_get_stride_bytes(saved_ir_image2)
             k4a.k4a_image_release(saved_ir_image2)
 
-            self.assertEqual(ir_image_format, k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_IR16)
+            self.assertEqual(ir_image_format, k4a.EImageFormat.IR16)
             self.assertEqual(ir_image_width_pixels, 512)
             self.assertEqual(ir_image_height_pixels, 512)
             self.assertEqual(ir_image_stride_bytes, 512*4)
 
-            self.assertEqual(saved_ir_image_format, k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_IR16)
+            self.assertEqual(saved_ir_image_format, k4a.EImageFormat.IR16)
             self.assertEqual(saved_ir_image_width_pixels, 320)
             self.assertEqual(saved_ir_image_height_pixels, 288)
             self.assertEqual(saved_ir_image_stride_bytes, 320*2)
@@ -556,7 +556,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             color_image = k4a.k4a_capture_get_color_image(capture)
             color_image_format = k4a.k4a_image_get_format(color_image)
             k4a.k4a_image_release(color_image)
-            self.assertEqual(color_image_format, k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32)
+            self.assertEqual(color_image_format, k4a.EImageFormat.COLOR_BGRA32)
     
     def test_k4a_image_get_width_pixels(self):
         with self.lock:
@@ -776,14 +776,14 @@ class TestDevice_AzureKinect(unittest.TestCase):
     def test_k4a_device_start_cameras_stop_cameras(self):
         with self.lock:
             # Start the cameras.
-            device_config = k4a.k4a_device_configuration_t()
-            device_config.color_format = k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32
-            device_config.color_resolution = k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P
-            device_config.depth_mode = k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED
-            device_config.camera_fps = k4a.k4a_fps_t.K4A_FRAMES_PER_SECOND_15
+            device_config = k4a.DeviceConfiguration()
+            device_config.color_format = k4a.EImageFormat.COLOR_BGRA32
+            device_config.color_resolution = k4a.EColorResolution.RES_1080P
+            device_config.depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            device_config.camera_fps = k4a.EFramePerSecond.FPS_15
             device_config.synchronized_images_only = True
             device_config.depth_delay_off_color_usec = 0
-            device_config.wired_sync_mode = k4a.k4a_wired_sync_mode_t.K4A_WIRED_SYNC_MODE_STANDALONE
+            device_config.wired_sync_mode = k4a.EWiredSyncMode.STANDALONE
             device_config.subordinate_delay_off_master_usec = 0
             device_config.disable_streaming_indicator = False
 
@@ -811,12 +811,12 @@ class TestDevice_AzureKinect(unittest.TestCase):
         strsize = ctypes.c_ulonglong(32)
         serial_number = (ctypes.c_char * strsize.value)()
         status = k4a.k4a_device_get_serialnum(self.device_handle, serial_number, ctypes.byref(strsize))
-        self.assertEqual(k4a.k4a_result_t.K4A_RESULT_SUCCEEDED, status)
+        self.assertEqual(k4a.EStatus.SUCCEEDED, status)
 
     def test_k4a_device_get_version(self):
-        hwver = k4a.k4a_hardware_version_t()
+        hwver = k4a.HardwareVersion()
         status = k4a.k4a_device_get_version(self.device_handle, ctypes.byref(hwver))
-        self.assertEqual(k4a.k4a_result_t.K4A_RESULT_SUCCEEDED, status)
+        self.assertEqual(k4a.EStatus.SUCCEEDED, status)
 
         # Check the versions.
         self.assertTrue(hwver.rgb.major != 0 or hwver.rgb.minor != 0 or hwver.rgb.iteration != 0)
@@ -827,15 +827,15 @@ class TestDevice_AzureKinect(unittest.TestCase):
     def test_k4a_device_get_color_control_capabilities(self):
 
         color_control_commands = [
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_BRIGHTNESS,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_CONTRAST,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_GAIN,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_SATURATION,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_SHARPNESS,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_WHITEBALANCE
+            k4a.EColorControlCommand.BACKLIGHT_COMPENSATION,
+            k4a.EColorControlCommand.BRIGHTNESS,
+            k4a.EColorControlCommand.CONTRAST,
+            k4a.EColorControlCommand.EXPOSURE_TIME_ABSOLUTE,
+            k4a.EColorControlCommand.GAIN,
+            k4a.EColorControlCommand.POWERLINE_FREQUENCY,
+            k4a.EColorControlCommand.SATURATION,
+            k4a.EColorControlCommand.SHARPNESS,
+            k4a.EColorControlCommand.WHITEBALANCE
         ]
 
         for command in color_control_commands:
@@ -846,20 +846,20 @@ class TestDevice_AzureKinect(unittest.TestCase):
     def test_k4a_device_get_color_control(self):
 
         color_control_commands = [
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_BRIGHTNESS,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_CONTRAST,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_GAIN,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_SATURATION,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_SHARPNESS,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_WHITEBALANCE
+            k4a.EColorControlCommand.BACKLIGHT_COMPENSATION,
+            k4a.EColorControlCommand.BRIGHTNESS,
+            k4a.EColorControlCommand.CONTRAST,
+            k4a.EColorControlCommand.EXPOSURE_TIME_ABSOLUTE,
+            k4a.EColorControlCommand.GAIN,
+            k4a.EColorControlCommand.POWERLINE_FREQUENCY,
+            k4a.EColorControlCommand.SATURATION,
+            k4a.EColorControlCommand.SHARPNESS,
+            k4a.EColorControlCommand.WHITEBALANCE
         ]
 
         for command in color_control_commands:
             with self.subTest(command = command):
-                mode = ctypes.c_int32(k4a.k4a_color_control_mode_t.K4A_COLOR_CONTROL_MODE_AUTO.value)
+                mode = ctypes.c_int32(k4a.EColorControlMode.AUTO.value)
                 value = ctypes.c_int32(0)
 
                 status = k4a.k4a_device_get_color_control(
@@ -874,15 +874,15 @@ class TestDevice_AzureKinect(unittest.TestCase):
     def test_k4a_device_set_color_control(self):
 
         color_control_commands = [
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_BRIGHTNESS,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_CONTRAST,
-            #k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_GAIN,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_POWERLINE_FREQUENCY,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_SATURATION,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_SHARPNESS,
-            k4a.k4a_color_control_command_t.K4A_COLOR_CONTROL_WHITEBALANCE
+            k4a.EColorControlCommand.BACKLIGHT_COMPENSATION,
+            k4a.EColorControlCommand.BRIGHTNESS,
+            k4a.EColorControlCommand.CONTRAST,
+            #k4a.EColorControlCommand.EXPOSURE_TIME_ABSOLUTE,
+            k4a.EColorControlCommand.GAIN,
+            k4a.EColorControlCommand.POWERLINE_FREQUENCY,
+            k4a.EColorControlCommand.SATURATION,
+            k4a.EColorControlCommand.SHARPNESS,
+            k4a.EColorControlCommand.WHITEBALANCE
         ]
 
         for command in color_control_commands:
@@ -908,34 +908,34 @@ class TestDevice_AzureKinect(unittest.TestCase):
             buffer = ctypes.c_uint8(0)
             status = k4a.k4a_device_get_raw_calibration(
                 self.device_handle, ctypes.byref(buffer), ctypes.byref(buffer_size))
-            self.assertEqual(status, k4a.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL)
+            self.assertEqual(status, k4a.EBufferStatus.BUFFER_TOO_SMALL)
 
             buffer = ctypes.create_string_buffer(buffer_size.value)
             buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_uint8))
             status = k4a.k4a_device_get_raw_calibration(
                 self.device_handle, buffer, ctypes.byref(buffer_size))
-            self.assertEqual(status, k4a.k4a_buffer_result_t.K4A_BUFFER_RESULT_SUCCEEDED)
+            self.assertEqual(status, k4a.EBufferStatus.SUCCEEDED)
 
     def test_k4a_device_get_calibration(self):
         with self.lock:
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_PASSIVE_IR,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
+                k4a.EDepthMode.PASSIVE_IR,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
-            calibration = k4a.k4a_calibration_t()
+            calibration = k4a.Calibration()
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
@@ -965,34 +965,34 @@ class TestDevice_AzureKinect(unittest.TestCase):
             buffer = ctypes.c_uint8(0)
             status = k4a.k4a_device_get_raw_calibration(
                 self.device_handle, ctypes.byref(buffer), ctypes.byref(buffer_size))
-            self.assertEqual(status, k4a.k4a_buffer_result_t.K4A_BUFFER_RESULT_TOO_SMALL)
+            self.assertEqual(status, k4a.EBufferStatus.BUFFER_TOO_SMALL)
 
             buffer = ctypes.create_string_buffer(buffer_size.value)
             buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_uint8))
             status = k4a.k4a_device_get_raw_calibration(
                 self.device_handle, buffer, ctypes.byref(buffer_size))
-            self.assertEqual(status, k4a.k4a_buffer_result_t.K4A_BUFFER_RESULT_SUCCEEDED)
+            self.assertEqual(status, k4a.EBufferStatus.SUCCEEDED)
 
             # Now get the calibration from the buffer.
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_PASSIVE_IR,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
+                k4a.EDepthMode.PASSIVE_IR,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
             buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_char))
-            calibration = k4a.k4a_calibration_t()
+            calibration = k4a.Calibration()
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
@@ -1010,30 +1010,30 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_PASSIVE_IR,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
+                k4a.EDepthMode.PASSIVE_IR,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
             calibration_types = [
-                k4a.k4a_calibration_type_t.K4A_CALIBRATION_TYPE_COLOR,
-                k4a.k4a_calibration_type_t.K4A_CALIBRATION_TYPE_DEPTH
+                k4a.ECalibrationType.COLOR,
+                k4a.ECalibrationType.DEPTH
             ]
 
-            calibration = k4a.k4a_calibration_t()
-            source_point = k4a.k4a_float3_t(500, 500, 1000)
-            target_point = k4a.k4a_float3_t()
+            calibration = k4a.Calibration()
+            source_point = k4a.Float3(500, 500, 1000)
+            target_point = k4a.Float3()
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
@@ -1073,31 +1073,31 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_PASSIVE_IR,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
+                k4a.EDepthMode.PASSIVE_IR,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
             calibration_types = [
-                k4a.k4a_calibration_type_t.K4A_CALIBRATION_TYPE_COLOR,
-                k4a.k4a_calibration_type_t.K4A_CALIBRATION_TYPE_DEPTH
+                k4a.ECalibrationType.COLOR,
+                k4a.ECalibrationType.DEPTH
             ]
 
-            calibration = k4a.k4a_calibration_t()
-            source_point = k4a.k4a_float2_t(0, 0)
+            calibration = k4a.Calibration()
+            source_point = k4a.Float2(0, 0)
             depth_mm = 1000
-            target_point = k4a.k4a_float3_t()
+            target_point = k4a.Float3()
             valid_int_flag = ctypes.c_int(0)
 
             for depth_mode in depth_modes:
@@ -1141,30 +1141,30 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_PASSIVE_IR,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
+                k4a.EDepthMode.PASSIVE_IR,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
             calibration_types = [
-                k4a.k4a_calibration_type_t.K4A_CALIBRATION_TYPE_COLOR,
-                k4a.k4a_calibration_type_t.K4A_CALIBRATION_TYPE_DEPTH
+                k4a.ECalibrationType.COLOR,
+                k4a.ECalibrationType.DEPTH
             ]
 
-            calibration = k4a.k4a_calibration_t()
-            source_point = k4a.k4a_float3_t(0, 0, 100)
-            target_point = k4a.k4a_float2_t()
+            calibration = k4a.Calibration()
+            source_point = k4a.Float3(0, 0, 100)
+            target_point = k4a.Float2()
             valid_int_flag = ctypes.c_int(0)
 
             for depth_mode in depth_modes:
@@ -1205,31 +1205,31 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_PASSIVE_IR,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
+                k4a.EDepthMode.PASSIVE_IR,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
             calibration_types = [
-                k4a.k4a_calibration_type_t.K4A_CALIBRATION_TYPE_COLOR,
-                k4a.k4a_calibration_type_t.K4A_CALIBRATION_TYPE_DEPTH
+                k4a.ECalibrationType.COLOR,
+                k4a.ECalibrationType.DEPTH
             ]
 
-            calibration = k4a.k4a_calibration_t()
-            source_point = k4a.k4a_float2_t(0, 0)
+            calibration = k4a.Calibration()
+            source_point = k4a.Float2(0, 0)
             depth_mm = 400
-            target_point = k4a.k4a_float2_t()
+            target_point = k4a.Float2()
             valid_int_flag = ctypes.c_int(0)
 
             for depth_mode in depth_modes:
@@ -1273,23 +1273,23 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
-            calibration = k4a.k4a_calibration_t()
-            target_point = k4a.k4a_float2_t()
+            calibration = k4a.Calibration()
+            target_point = k4a.Float2()
             valid_int_flag = ctypes.c_int(0)
 
             # Get a depth image.
@@ -1313,7 +1313,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
                         # Get a depth image.
                         capture = get_capture(self.device_handle,
-                            k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                            k4a.EImageFormat.COLOR_BGRA32,
                             color_resolution,
                             depth_mode)
 
@@ -1324,7 +1324,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                         color_image = k4a.k4a_capture_get_color_image(capture)
                         width_pixels = k4a.k4a_image_get_width_pixels(color_image)
                         height_pixels = k4a.k4a_image_get_height_pixels(color_image)
-                        source_point = k4a.k4a_float2_t(height_pixels/4, width_pixels/4)
+                        source_point = k4a.Float2(height_pixels/4, width_pixels/4)
 
                         # Transform source point from source_camera to target_camera.
                         status = k4a.k4a_calibration_color_2d_to_depth_2d(
@@ -1344,23 +1344,23 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_PASSIVE_IR,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
+                k4a.EDepthMode.PASSIVE_IR,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
-            calibration = k4a.k4a_calibration_t()
+            calibration = k4a.Calibration()
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
@@ -1383,22 +1383,22 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
-            calibration = k4a.k4a_calibration_t()
+            calibration = k4a.Calibration()
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
@@ -1417,7 +1417,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
                         # Get a depth image.
                         capture = get_capture(self.device_handle,
-                            k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                            k4a.EImageFormat.COLOR_BGRA32,
                             color_resolution,
                             depth_mode)
 
@@ -1431,7 +1431,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                         stride_bytes = width_pixels * 2
 
                         # Create an output depth image.
-                        transformed_image = k4a.k4a_image_t()
+                        transformed_image = k4a.ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format,
                             width_pixels,
@@ -1457,22 +1457,22 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
-            calibration = k4a.k4a_calibration_t()
+            calibration = k4a.Calibration()
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
@@ -1491,7 +1491,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
                         # Get a capture.
                         capture = get_capture(self.device_handle,
-                            k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                            k4a.EImageFormat.COLOR_BGRA32,
                             color_resolution,
                             depth_mode)
 
@@ -1508,7 +1508,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                         input_height_pixels = k4a.k4a_image_get_height_pixels(depth_image)
 
                         # Create an output depth image.
-                        transformed_depth_image = k4a.k4a_image_t()
+                        transformed_depth_image = k4a.ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format,
                             output_width_pixels,
@@ -1519,26 +1519,26 @@ class TestDevice_AzureKinect(unittest.TestCase):
                         self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
                         # Create a custom image.
-                        image_format = k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_CUSTOM16
-                        custom_image = k4a.k4a_image_t()
+                        image_format = k4a.EImageFormat.CUSTOM16
+                        custom_image = k4a.ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format.value, 
                             input_width_pixels, 
                             input_height_pixels, 
                             input_width_pixels * 2, 
                             ctypes.byref(custom_image))
-                        self.assertEqual(k4a.k4a_result_t.K4A_RESULT_SUCCEEDED, status)
+                        self.assertEqual(k4a.EStatus.SUCCEEDED, status)
 
                         # Create a transformed custom image.
-                        image_format = k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_CUSTOM16
-                        transformed_custom_image = k4a.k4a_image_t()
+                        image_format = k4a.EImageFormat.CUSTOM16
+                        transformed_custom_image = k4a.ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format.value,
                             output_width_pixels,
                             output_height_pixels, 
                             output_width_pixels * 2, 
                             ctypes.byref(transformed_custom_image))
-                        self.assertEqual(k4a.k4a_result_t.K4A_RESULT_SUCCEEDED, status)
+                        self.assertEqual(k4a.EStatus.SUCCEEDED, status)
 
                         # Apply the transformation.
                         status = k4a.k4a_transformation_depth_image_to_color_camera_custom(
@@ -1547,7 +1547,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                             custom_image,
                             transformed_depth_image,
                             transformed_custom_image,
-                            k4a.k4a_transformation_interpolation_type_t.K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,
+                            k4a.ETransformInterpolationType.LINEAR,
                             0
                         )
                         self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1562,22 +1562,22 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
             ]
 
             color_resolutions = [
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_3072P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_2160P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1536P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1440P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
-                k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_720P,
+                k4a.EColorResolution.RES_3072P,
+                k4a.EColorResolution.RES_2160P,
+                k4a.EColorResolution.RES_1536P,
+                k4a.EColorResolution.RES_1440P,
+                k4a.EColorResolution.RES_1080P,
+                k4a.EColorResolution.RES_720P,
             ]
 
-            calibration = k4a.k4a_calibration_t()
+            calibration = k4a.Calibration()
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
@@ -1596,7 +1596,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
                         # Get a capture and depth and color images.
                         capture = get_capture(self.device_handle,
-                            k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32,
+                            k4a.EImageFormat.COLOR_BGRA32,
                             color_resolution,
                             depth_mode)
 
@@ -1609,7 +1609,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                         height_pixels = k4a.k4a_image_get_height_pixels(depth_image)
                         stride_bytes = width_pixels * 4
 
-                        transformed_image = k4a.k4a_image_t()
+                        transformed_image = k4a.ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format,
                             width_pixels,
@@ -1639,13 +1639,13 @@ class TestDevice_AzureKinect(unittest.TestCase):
         with self.lock:
 
             depth_modes = [
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_NFOV_UNBINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_2X2BINNED,
-                k4a.k4a_depth_mode_t.K4A_DEPTH_MODE_WFOV_UNBINNED,
+                k4a.EDepthMode.NFOV_2X2BINNED,
+                k4a.EDepthMode.NFOV_UNBINNED,
+                k4a.EDepthMode.WFOV_2X2BINNED,
+                k4a.EDepthMode.WFOV_UNBINNED,
             ]
 
-            calibration = k4a.k4a_calibration_t()
+            calibration = k4a.Calibration()
 
             for depth_mode in depth_modes:
                 with self.subTest(depth_mode = depth_mode):
@@ -1653,7 +1653,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                     status = k4a.k4a_device_get_calibration(
                         self.device_handle,
                         depth_mode,
-                        k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
+                        k4a.EColorResolution.RES_1080P,
                         ctypes.byref(calibration))
                     self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
@@ -1662,19 +1662,19 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
                     # Get a capture and depth image.
                     capture = get_capture(self.device_handle,
-                        k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_COLOR_BGRA32,
-                        k4a.k4a_color_resolution_t.K4A_COLOR_RESOLUTION_1080P,
+                        k4a.EImageFormat.COLOR_BGRA32,
+                        k4a.EColorResolution.RES_1080P,
                         depth_mode)
 
                     depth_image = k4a.k4a_capture_get_depth_image(capture)
 
                     # Create an output image.
-                    image_format = k4a.k4a_image_format_t.K4A_IMAGE_FORMAT_CUSTOM
+                    image_format = k4a.EImageFormat.CUSTOM
                     width_pixels = k4a.k4a_image_get_width_pixels(depth_image)
                     height_pixels = k4a.k4a_image_get_height_pixels(depth_image)
                     stride_bytes = width_pixels * 6
 
-                    xyz_image = k4a.k4a_image_t()
+                    xyz_image = k4a.ImageHandle()
                     status = k4a.k4a_image_create(
                         image_format,
                         width_pixels,
@@ -1688,7 +1688,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                     status = k4a.k4a_transformation_depth_image_to_point_cloud(
                         transformation,
                         depth_image,
-                        k4a.k4a_calibration_type_t.K4A_CALIBRATION_TYPE_DEPTH,
+                        k4a.ECalibrationType.DEPTH,
                         xyz_image
                     )
                     self.assertTrue(k4a.K4A_SUCCEEDED(status))
