@@ -1,4 +1,7 @@
-'''Tests for the k4a functions for Azure Kinect device.
+'''
+test_k4a_AzureKinect.py
+
+Tests for the k4a functions for Azure Kinect device.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
 '''
@@ -8,7 +11,6 @@ import ctypes
 from threading import Lock
     
 import k4a
-
 
 # Save capture to reuse in tests since it takes a while to get a capture from the device.
 glb_capture = None
@@ -25,10 +27,10 @@ def glb_print_message(context:ctypes.c_void_p,
     print(str(level) + " in " + str(src_file) + " at line " + str(src_line) + ": " + str(message))
 
 
-def get_capture(device_handle:k4a.DeviceHandle,
+def get_capture(device_handle:k4a._bindings._k4a._DeviceHandle,
                 color_format:k4a.EImageFormat,
                 color_resolution:k4a.EColorResolution,
-                depth_mode:k4a.EDepthMode)->k4a.CaptureHandle:
+                depth_mode:k4a.EDepthMode)->k4a._bindings._k4a._CaptureHandle:
 
     global glb_capture
     global glb_color_format
@@ -63,7 +65,7 @@ def get_capture(device_handle:k4a.DeviceHandle,
         if(k4a.K4A_SUCCEEDED(status)):
 
             # Get a capture. Ignore the retured status.
-            capture = k4a.CaptureHandle()
+            capture = k4a._bindings._k4a._CaptureHandle()
             timeout_ms = ctypes.c_int32(1000)
             status = k4a.k4a_device_get_capture(
                 device_handle,
@@ -90,7 +92,7 @@ def get_1080p_bgr32_nfov_2x2binned(device_handle):
 
 
 def k4a_device_get_color_control_capability(
-    device_handle:k4a.DeviceHandle,
+    device_handle:k4a._bindings._k4a._DeviceHandle,
     color_control_command:k4a.EColorControlCommand
     )->k4a.EStatus:
 
@@ -115,7 +117,7 @@ def k4a_device_get_color_control_capability(
     return status
 
 def k4a_device_set_and_get_color_control(
-    device_handle:k4a.DeviceHandle,
+    device_handle:k4a._bindings._k4a._DeviceHandle,
     color_control_command:k4a.EColorControlCommand):
 
     mode = ctypes.c_int32(k4a.EColorControlMode.MANUAL.value)
@@ -196,7 +198,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.device_handle = k4a.DeviceHandle()
+        cls.device_handle = k4a._bindings._k4a._DeviceHandle()
         status = k4a.k4a_device_open(ctypes.c_uint32(0), ctypes.byref(cls.device_handle))
         assert(k4a.K4A_SUCCEEDED(status))
 
@@ -214,7 +216,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
         k4a.k4a_device_close(cls.device_handle)
 
     def test_k4a_device_open_twice_expected_fail(self):
-        device_handle_2 = k4a.DeviceHandle()
+        device_handle_2 = k4a._bindings._k4a._DeviceHandle()
         status = k4a.k4a_device_open(ctypes.c_uint32(0), ctypes.byref(device_handle_2))
         self.assertTrue(k4a.K4A_FAILED(status))
 
@@ -280,7 +282,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             self.assertNotEqual(imu_samplew.gyro_timestamp_usec, 0.0)
 
     def test_k4a_capture_create(self):
-        capture = k4a.CaptureHandle()
+        capture = k4a._bindings._k4a._CaptureHandle()
         status = k4a.k4a_capture_create(ctypes.byref(capture))
         self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
@@ -294,7 +296,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             self.assertIsNotNone(capture)
             
             color_image = k4a.k4a_capture_get_color_image(capture)
-            self.assertIsInstance(color_image, k4a.ImageHandle)
+            self.assertIsInstance(color_image, k4a._bindings._k4a._ImageHandle)
             k4a.k4a_image_release(color_image)
 
     def test_k4a_capture_get_depth_image(self):
@@ -303,7 +305,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             self.assertIsNotNone(capture)
             
             depth_image = k4a.k4a_capture_get_depth_image(capture)
-            self.assertIsInstance(depth_image, k4a.ImageHandle)
+            self.assertIsInstance(depth_image, k4a._bindings._k4a._ImageHandle)
             k4a.k4a_image_release(depth_image)
 
     def test_k4a_capture_get_ir_image(self):
@@ -312,7 +314,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             self.assertIsNotNone(capture)
             
             ir_image = k4a.k4a_capture_get_ir_image(capture)
-            self.assertIsInstance(ir_image, k4a.ImageHandle)
+            self.assertIsInstance(ir_image, k4a._bindings._k4a._ImageHandle)
             k4a.k4a_image_release(ir_image)
 
     def test_k4a_image_create(self):
@@ -321,7 +323,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
         width_pixels = 512
         height_pixels = 512
         stride_pixels = 4*512
-        image_handle = k4a.ImageHandle()
+        image_handle = k4a._bindings._k4a._ImageHandle()
         
         status = k4a.k4a_image_create(ctypes.c_int(image_format.value), 
             width_pixels, height_pixels, stride_pixels, ctypes.byref(image_handle))
@@ -354,7 +356,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             width_pixels = ctypes.c_int(512)
             height_pixels = ctypes.c_int(512)
             stride_bytes = ctypes.c_int(4*512)
-            image_handle = k4a.ImageHandle()
+            image_handle = k4a._bindings._k4a._ImageHandle()
             status = k4a.k4a_image_create(ctypes.c_int(image_format.value), 
                 width_pixels, height_pixels, stride_bytes, ctypes.byref(image_handle))
             self.assertEqual(k4a.EStatus.SUCCEEDED, status)
@@ -409,7 +411,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             width_pixels = ctypes.c_int(512)
             height_pixels = ctypes.c_int(512)
             stride_bytes = ctypes.c_int(4*512)
-            image_handle = k4a.ImageHandle()
+            image_handle = k4a._bindings._k4a._ImageHandle()
             status = k4a.k4a_image_create(ctypes.c_int(image_format.value), 
                 width_pixels, height_pixels, stride_bytes, ctypes.byref(image_handle))
             self.assertEqual(k4a.EStatus.SUCCEEDED, status)
@@ -464,7 +466,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
             width_pixels = ctypes.c_int(512)
             height_pixels = ctypes.c_int(512)
             stride_bytes = ctypes.c_int(4*512)
-            image_handle = k4a.ImageHandle()
+            image_handle = k4a._bindings._k4a._ImageHandle()
             status = k4a.k4a_image_create(ctypes.c_int(image_format.value), 
                 width_pixels, height_pixels, stride_bytes, ctypes.byref(image_handle))
             self.assertEqual(k4a.EStatus.SUCCEEDED, status)
@@ -1431,7 +1433,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                         stride_bytes = width_pixels * 2
 
                         # Create an output depth image.
-                        transformed_image = k4a.ImageHandle()
+                        transformed_image = k4a._bindings._k4a._ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format,
                             width_pixels,
@@ -1508,7 +1510,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                         input_height_pixels = k4a.k4a_image_get_height_pixels(depth_image)
 
                         # Create an output depth image.
-                        transformed_depth_image = k4a.ImageHandle()
+                        transformed_depth_image = k4a._bindings._k4a._ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format,
                             output_width_pixels,
@@ -1520,7 +1522,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
                         # Create a custom image.
                         image_format = k4a.EImageFormat.CUSTOM16
-                        custom_image = k4a.ImageHandle()
+                        custom_image = k4a._bindings._k4a._ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format.value, 
                             input_width_pixels, 
@@ -1531,7 +1533,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
                         # Create a transformed custom image.
                         image_format = k4a.EImageFormat.CUSTOM16
-                        transformed_custom_image = k4a.ImageHandle()
+                        transformed_custom_image = k4a._bindings._k4a._ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format.value,
                             output_width_pixels,
@@ -1609,7 +1611,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                         height_pixels = k4a.k4a_image_get_height_pixels(depth_image)
                         stride_bytes = width_pixels * 4
 
-                        transformed_image = k4a.ImageHandle()
+                        transformed_image = k4a._bindings._k4a._ImageHandle()
                         status = k4a.k4a_image_create(
                             image_format,
                             width_pixels,
@@ -1674,7 +1676,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
                     height_pixels = k4a.k4a_image_get_height_pixels(depth_image)
                     stride_bytes = width_pixels * 6
 
-                    xyz_image = k4a.ImageHandle()
+                    xyz_image = k4a._bindings._k4a._ImageHandle()
                     status = k4a.k4a_image_create(
                         image_format,
                         width_pixels,
