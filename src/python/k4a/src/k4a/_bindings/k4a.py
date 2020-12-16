@@ -13,8 +13,8 @@ import ctypes as _ctypes
 import os.path as _os_path
 import sys as _sys
 
-from ._k4atypes import *
-from ._k4atypes import _DeviceHandle, _CaptureHandle, _ImageHandle, _TransformationHandle, _memory_allocate_cb, _memory_destroy_cb
+from .k4atypes import *
+from .k4atypes import _DeviceHandle, _CaptureHandle, _ImageHandle, _TransformationHandle, _memory_allocate_cb, _memory_destroy_cb
 
 
 # Load the k4a.dll.
