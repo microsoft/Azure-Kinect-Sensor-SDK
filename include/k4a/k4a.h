@@ -2214,7 +2214,8 @@ K4A_EXPORT k4a_result_t k4a_transformation_color_image_to_depth_camera(k4a_trans
                                                                        const k4a_image_t color_image,
                                                                        k4a_image_t transformed_color_image);
 
-/** Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding 3D points.
+/** Transforms the depth image into a single image with voxels representing
+ * X, Y and Z-coordinates in millimeters of corresponding 3D points.
  *
  * \param transformation_handle
  * Transformation handle.
