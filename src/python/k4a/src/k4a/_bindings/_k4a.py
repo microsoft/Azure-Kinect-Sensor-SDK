@@ -14,49 +14,7 @@ import os.path as _os_path
 import sys as _sys
 
 from ._k4atypes import *
-
-
-#typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
-_memory_destroy_cb = _ctypes.WINFUNCTYPE(
-    None, _ctypes.c_void_p, _ctypes.c_void_p)
-
-
-#typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
-_memory_allocate_cb = _ctypes.WINFUNCTYPE(
-    _ctypes.c_uint8, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_void_p))
-
-
-# K4A_DECLARE_HANDLE(handle_k4a_device_t);
-class __handle_k4a_device_t(_ctypes.Structure):
-     _fields_= [
-        ("_rsvd", _ctypes.c_size_t),
-    ]
-_DeviceHandle = _ctypes.POINTER(__handle_k4a_device_t)
-
-
-# K4A_DECLARE_HANDLE(handle_k4a_capture_t);
-class __handle_k4a_capture_t(_ctypes.Structure):
-     _fields_= [
-        ("_rsvd", _ctypes.c_size_t),
-    ]
-_CaptureHandle = _ctypes.POINTER(__handle_k4a_capture_t)
-
-
-# K4A_DECLARE_HANDLE(handle_k4a_image_t);
-class __handle_k4a_image_t(_ctypes.Structure):
-     _fields_= [
-        ("_rsvd", _ctypes.c_size_t),
-    ]
-_ImageHandle = _ctypes.POINTER(__handle_k4a_image_t)
-
-
-# K4A_DECLARE_HANDLE(k4a_transformation_t);
-class __handle_k4a_transformation_t(_ctypes.Structure):
-     _fields_= [
-        ("_rsvd", _ctypes.c_size_t),
-    ]
-_TransformationHandle = _ctypes.POINTER(__handle_k4a_transformation_t)
-
+from ._k4atypes import _DeviceHandle, _CaptureHandle, _ImageHandle, _TransformationHandle, _memory_allocate_cb, _memory_destroy_cb
 
 
 # Load the k4a.dll.
