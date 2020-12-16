@@ -1,2 +1,2 @@
-from ._k4atypes import *
-from ._k4a import *
+from .k4a import *
+from .device import *

@@ -171,20 +171,20 @@ class TestStructs(unittest.TestCase):
         pass
 
     def test_k4a_device_t(self):
-        device_handle = k4a._bindings._k4a._DeviceHandle()
-        self.assertIsInstance(device_handle, k4a._bindings._k4a._DeviceHandle)
+        device_handle = k4a._bindings.k4a._DeviceHandle()
+        self.assertIsInstance(device_handle, k4a._bindings.k4a._DeviceHandle)
 
     def test_k4a_capture_t(self):
-        capture_handle = k4a._bindings._k4a._CaptureHandle()
-        self.assertIsInstance(capture_handle, k4a._bindings._k4a._CaptureHandle)
+        capture_handle = k4a._bindings.k4a._CaptureHandle()
+        self.assertIsInstance(capture_handle, k4a._bindings.k4a._CaptureHandle)
 
     def test_k4a_image_t(self):
-        image_handle = k4a._bindings._k4a._ImageHandle()
-        self.assertIsInstance(image_handle, k4a._bindings._k4a._ImageHandle)
+        image_handle = k4a._bindings.k4a._ImageHandle()
+        self.assertIsInstance(image_handle, k4a._bindings.k4a._ImageHandle)
 
     def test_k4a_transformation_t(self):
-        transformation_handle = k4a._bindings._k4a._TransformationHandle()
-        self.assertIsInstance(transformation_handle, k4a._bindings._k4a._TransformationHandle)
+        transformation_handle = k4a._bindings.k4a._TransformationHandle()
+        self.assertIsInstance(transformation_handle, k4a._bindings.k4a._TransformationHandle)
 
     def test_k4a_device_configuration_t(self):
         device_config = k4a.DeviceConfiguration()
@@ -227,7 +227,7 @@ class TestStructs(unittest.TestCase):
         self.assertEqual(len(version._fields_), 6)
 
     def test__k4a_xy(self):
-        xy = k4a._bindings._k4atypes._XY()
+        xy = k4a._bindings.k4atypes._XY()
         self.assertIsNotNone(xy)
         self.assertEqual(len(xy._fields_), 2)
 
@@ -237,7 +237,7 @@ class TestStructs(unittest.TestCase):
         self.assertEqual(len(xy._fields_), 2)
 
     def test__k4a_xyz(self):
-        xyz = k4a._bindings._k4atypes._XYZ()
+        xyz = k4a._bindings.k4atypes._XYZ()
         self.assertIsNotNone(xyz)
         self.assertEqual(len(xyz._fields_), 3)
 
