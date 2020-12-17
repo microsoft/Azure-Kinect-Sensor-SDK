@@ -586,9 +586,29 @@ class DeviceConfiguration(_ctypes.Structure):
         ("disable_streaming_indicator", _ctypes.c_bool),
     ]
 
-    def __repr__(self):
-        return ''.join(['<%s.%s object at %s>:',
-            _newline,
+    def __init__(self, 
+        color_format:EImageFormat,
+        color_resolution:EColorResolution,
+        depth_mode:EDepthMode,
+        camera_fps:EFramePerSecond,
+        synchronized_images_only:bool,
+        depth_delay_off_color_usec:int,
+        wired_sync_mode:EWiredSyncMode,
+        subordinate_delay_off_master_usec:int,
+        disable_streaming_indicator:bool):
+
+        self.color_format = color_format
+        self.color_resolution = color_resolution
+        self.depth_mode = depth_mode
+        self.camera_fps = camera_fps
+        self.synchronized_images_only = synchronized_images_only
+        self.depth_delay_off_color_usec = depth_delay_off_color_usec
+        self.wired_sync_mode = wired_sync_mode
+        self.subordinate_delay_off_master_usec = subordinate_delay_off_master_usec
+        self.disable_streaming_indicator = disable_streaming_indicator
+
+    def __str__(self):
+        return ''.join([
             'color_format=%d, ',
             'color_resolution=%d, ',
             'depth_mode=%d, ',
@@ -598,9 +618,6 @@ class DeviceConfiguration(_ctypes.Structure):
             'wired_sync_mode=%d, ',
             'subordinate_delay_off_master_usec=%d, ',
             'disable_streaming_indicator=%s']) % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            hex(id(self)),
             self.color_format,
             self.color_resolution,
             self.depth_mode,
@@ -618,14 +635,10 @@ class CalibrationExtrinsics(_ctypes.Structure):
         ("translation", _ctypes.c_float * 3),
     ]
 
-    def __repr__(self):
-        return ''.join(['<%s.%s object at %s>:',
-            _newline,
+    def __str__(self):
+        return ''.join([
             'rotation=[[%f,%f,%f][%f,%f,%f][%f,%f,%f]] ',
             'translation=[%f,%f,%f]']) % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            hex(id(self)),
             self.rotation[0], self.rotation[1], self.rotation[2],
             self.rotation[3], self.rotation[4], self.rotation[5],
             self.rotation[6], self.rotation[7], self.rotation[8],
@@ -651,18 +664,14 @@ class CalibrationIntrinsicParam(_ctypes.Structure):
         ("metric_radius", _ctypes.c_float),
     ]
 
-    def __repr__(self):
-        return ''.join(['<%s.%s object at %s>:',
-            _newline,
+    def __str__(self):
+        return ''.join([
             'cx=%f, cy=%f, ',
             'fx=%f, fy=%f, ',
             'k1=%f, k2=%f, k3=%f, k4=%f, k5=%f, k6=%f, ',
             'codx=%f, cody=%f, ',
             'p2=%f, p1=%f, ',
             'metric_radius=%f']) % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            hex(id(self)),
             self.cx, self.cy,
             self.fx, self.fy,
             self.k1, self.k2, self.k3, self.k4, self.k5, self.k6,
@@ -670,14 +679,15 @@ class CalibrationIntrinsicParam(_ctypes.Structure):
             self.p2, self.p1,
             self.metric_radius)
 
+
 class _CalibrationIntrinsicParameters(_ctypes.Union):
     _fields_= [
         ("param", CalibrationIntrinsicParam),
         ("v", _ctypes.c_float * 15),
     ]
 
-    def __repr__(self):
-        return self.param.__repr__()
+    def __str__(self):
+        return self.param.__str__()
 
 
 class CalibrationIntrinsics(_ctypes.Structure):
@@ -687,18 +697,14 @@ class CalibrationIntrinsics(_ctypes.Structure):
         ("parameters", _CalibrationIntrinsicParameters),
     ]
 
-    def __repr__(self):
-        return ''.join(['<%s.%s object at %s>:',
-            _newline,
+    def __str__(self):
+        return ''.join([
             'type=%d, ',
             'parameter_count=%d, ',
             'parameters=%s']) % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            hex(id(self)),
             self.type,
             self.parameter_count,
-            self.parameters.__repr__())
+            self.parameters.__str__())
 
 
 class CalibrationCamera(_ctypes.Structure):
@@ -710,19 +716,15 @@ class CalibrationCamera(_ctypes.Structure):
         ("metric_radius", _ctypes.c_float),
     ]
 
-    def __repr__(self):
-        return ''.join(['<%s.%s object at %s>:',
-            _newline,
+    def __str__(self):
+        return ''.join([
             'extrinsics=%s, ',
             'intrinsics=%s, ',
             'resolution_width=%d, ',
             'resolution_height=%d, ',
             'metric_radius=%f',]) % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            hex(id(self)),
-            self.extrinsics.__repr__(),
-            self.intrinsics.__repr__(),
+            self.extrinsics.__str__(),
+            self.intrinsics.__str__(),
             self.resolution_width,
             self.resolution_height,
             self.metric_radius)
@@ -737,21 +739,17 @@ class Calibration(_ctypes.Structure):
         ("color_resolution", _ctypes.c_int),
     ]
 
-    def __repr__(self):
-        s = ''.join(['<%s.%s object at %s>:',
-            _newline,
+    def __str__(self):
+        s = ''.join([
             'depth_camera_calibration=%s, ',
             'color_camera_calibration=%s, ']) % (
-                self.__class__.__module__,
-                self.__class__.__name__,
-                hex(id(self)),
-                self.depth_camera_calibration.__repr__(),
-                self.color_camera_calibration.__repr__(),
+                self.depth_camera_calibration.__str__(),
+                self.color_camera_calibration.__str__(),
             )
         
         for r in range(ECalibrationType.NUM_TYPES):
             for c in range(ECalibrationType.NUM_TYPES):
-                s = ''.join([s, 'extrinsics[%d][%d]=%s, ']) % (r, c, self.extrinsics[r][c].__repr__())
+                s = ''.join([s, 'extrinsics[%d][%d]=%s, ']) % (r, c, self.extrinsics[r][c].__str__())
 
         s = ''.join([s,
             'depth_mode=%d, ',
@@ -770,14 +768,8 @@ class Version(_ctypes.Structure):
         ("iteration", _ctypes.c_uint32),
     ]
 
-    def __repr__(self):
-        return ''.join(['<%s.%s object at %s>:',
-            'major=%d, ',
-            'minor=%d, ',
-            'iteration=%d']) % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            hex(id(self)),
+    def __str__(self):
+        return ''.join(['%d.%d.%d']) % (
             self.major,
             self.minor,
             self.iteration)
@@ -793,21 +785,18 @@ class HardwareVersion(_ctypes.Structure):
         ("firmware_signature", _ctypes.c_int),
     ]
 
-    def __repr__(self):
-        return ''.join(['<%s.%s object at %s>:', _newline,
+    def __str__(self):
+        return ''.join([
             'rgb=%s, ', _newline,
             'depth=%s, ', _newline,
             'audio=%s, ', _newline,
             'depth_sensor=%s, ', _newline,
             'firmware_build=%d, ',
             'firmware_signature=%d']) % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            hex(id(self)),
-            self.rgb,
-            self.depth,
-            self.audio,
-            self.depth_sensor,
+            self.rgb.__str__(),
+            self.depth.__str__(),
+            self.audio.__str__(),
+            self.depth_sensor.__str__(),
             self.firmware_build,
             self.firmware_signature)
 
@@ -822,7 +811,7 @@ class _XY(_ctypes.Structure):
         self.x = x
         self.y = y
 
-    def __repr__(self):
+    def __str__(self):
         return ''.join(['x=%f, ', 'y=%f']) % (self.x, self.y)
 
 
@@ -835,8 +824,8 @@ class Float2(_ctypes.Union):
     def __init__(self, x=0, y=0):
         self.xy = _XY(x, y)
 
-    def __repr__(self):
-        return self.xy.__repr__()
+    def __str__(self):
+        return self.xy.__str__()
 
 
 class _XYZ(_ctypes.Structure):
@@ -851,7 +840,7 @@ class _XYZ(_ctypes.Structure):
         self.y = y
         self.z = z
 
-    def __repr__(self):
+    def __str__(self):
         return ''.join(['x=%f, ', 'y=%f, ', 'z=%f']) % (self.x, self.y, self.z)
 
 
@@ -864,8 +853,8 @@ class Float3(_ctypes.Union):
     def __init__(self, x=0, y=0, z=0):
         self.xyz = _XYZ(x, y, z)
 
-    def __repr__(self):
-        return self.xyz.__repr__()
+    def __str__(self):
+        return self.xyz.__str__()
 
 
 class ImuSample(_ctypes.Structure):
@@ -877,38 +866,55 @@ class ImuSample(_ctypes.Structure):
         ("gyro_timestamp_usec", _ctypes.c_uint64),
     ]
 
-    def __repr__(self):
-        return ''.join(['<%s.%s object at %s>:',
-            _newline,
+    def __str__(self):
+        return ''.join([
             'temperature=%f, ',
             'acc_sample=%s, ',
             'acc_timestamp_usec=%lu, ',
             'gyro_sample=%s, ',
             'gyro_timestamp_usec=%lu']) % (
-            self.__class__.__module__,
-            self.__class__.__name__,
-            hex(id(self)),
             self.temperature,
-            self.acc_sample.__repr__(),
+            self.acc_sample.__str__(),
             self.acc_timestamp_usec,
-            self.gyro_sample.__repr__(),
+            self.gyro_sample.__str__(),
             self.gyro_timestamp_usec)
 
 
 # A static instance of a device configuration where everything is disabled.
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = DeviceConfiguration()
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.color_format = EImageFormat.COLOR_MJPG
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.color_resolution = EColorResolution.OFF
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.depth_mode = EDepthMode.OFF
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.camera_fps = EFramePerSecond.FPS_30
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.synchronized_images_only = False
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.depth_delay_off_color_usec = 0
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.wired_sync_mode = EWiredSyncMode.STANDALONE
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.subordinate_delay_off_master_usec = 0
-K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.disable_streaming_indicator = False
+DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_MJPG,
+    color_resolution = EColorResolution.OFF,
+    depth_mode = EDepthMode.OFF,
+    camera_fps = EFramePerSecond.FPS_30,
+    synchronized_images_only = False,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
+
+DEVICE_CONFIG_BGRA32_4K_WFOV_UNBINNED = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_BGRA32,
+    color_resolution = EColorResolution.RES_2160P,
+    depth_mode = EDepthMode.WFOV_2X2BINNED,
+    camera_fps = EFramePerSecond.FPS_15,
+    synchronized_images_only = True,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
 
 
-del _IntEnum
-del _unique
-del _auto
-del _ctypes
+# An empty class for appending fields dynamically.
+class _EmptyClass:
+    
+    def __str__(self):
+        keys = list(self.__dict__.keys())
+        tempstr = ''
+
+        if len(keys) > 0:
+            for n in range(len(keys)-1):
+                tempstr = tempstr + keys[n] + "=" + str(self.__dict__[keys[n]]) + ", "
+            tempstr = tempstr + keys[len(keys)-1] + "=" + str(self.__dict__[keys[len(keys)-1]])
+            tempstr = tempstr + _newline
+
+        return tempstr

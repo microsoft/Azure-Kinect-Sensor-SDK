@@ -795,7 +795,7 @@ class TestDevice_AzureKinect(unittest.TestCase):
 
     def test_k4a_device_start_cameras_stop_cameras_DEFAULT_DISABLE(self):
         with self.lock:
-            device_config = k4a.K4A_DEVICE_CONFIG_INIT_DISABLE_ALL
+            device_config = k4a.DEVICE_CONFIG_DISABLE_ALL
             status = k4a.k4a_device_start_cameras(self.device_handle, ctypes.byref(device_config))
             self.assertTrue(k4a.K4A_FAILED(status)) # Seems to fail when DISABLE_ALL config is used.
             k4a.k4a_device_stop_cameras(self.device_handle)
