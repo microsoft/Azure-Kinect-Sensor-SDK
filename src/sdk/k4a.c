@@ -1372,7 +1372,7 @@ k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mo
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    *mode_count = sizeof(device_color_modes) / sizeof(k4a_color_mode_info_t);
+    *mode_count = sizeof(device_color_modes) / sizeof(device_color_modes[0]);
 
     return result;
 }
@@ -1414,7 +1414,7 @@ k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mo
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    *mode_count = sizeof(device_depth_modes) / sizeof(k4a_depth_mode_info_t);
+    *mode_count = sizeof(device_depth_modes) / sizeof(device_depth_modes[0]);
 
     return result;
 }
@@ -1460,7 +1460,7 @@ k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    *mode_count = sizeof(device_fps_modes) / sizeof(k4a_fps_mode_info_t);
+    *mode_count = sizeof(device_fps_modes) / sizeof(device_fps_modes[0]);
 
     return result;
 }

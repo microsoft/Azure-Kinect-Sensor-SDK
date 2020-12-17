@@ -1470,7 +1470,7 @@ public:
         if (result == K4A_RESULT_SUCCEEDED)
         {
             modes.reserve(mode_count);
-            for (int i = 0; i <= mode_count; i++)
+            for (int i = 0; i < mode_count; i++)
             {
                 if (k4a_device_get_color_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED)
                 {
@@ -1493,7 +1493,7 @@ public:
         if (result == K4A_RESULT_SUCCEEDED)
         {
             modes.reserve(mode_count);
-            for (int i = 0; i <= mode_count; i++)
+            for (int i = 0; i < mode_count; i++)
             {
                 if (k4a_device_get_depth_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED)
                 {
@@ -1516,7 +1516,7 @@ public:
         if (result == K4A_RESULT_SUCCEEDED)
         {
             modes.reserve(mode_count);
-            for (int i = 0; i <= mode_count; i++)
+            for (int i = 0; i < mode_count; i++)
             {
                 if (k4a_device_get_fps_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED)
                 {
@@ -1526,7 +1526,13 @@ public:
         }
 
         return modes;
-    } 
+    }
+
+    // TODO: add comments
+    int get_common_factor(int width, int height) 
+    {
+        return (height == 0) ? width : get_common_factor(height, width % height);
+    }
 
 private:
     k4a_device_t m_handle;
