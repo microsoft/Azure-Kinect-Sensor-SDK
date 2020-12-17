@@ -1,5 +1,5 @@
 '''
-_k4a.py
+k4a.py
 
 Defines Python _ctypes equivalent functions to those defined in k4a.h. 
 
@@ -15,6 +15,9 @@ import sys as _sys
 
 from .k4atypes import *
 from .k4atypes import _DeviceHandle, _CaptureHandle, _ImageHandle, _TransformationHandle, _memory_allocate_cb, _memory_destroy_cb
+
+
+__all__ = []
 
 
 # Load the k4a.dll.
@@ -508,9 +511,3 @@ k4a_transformation_color_image_to_depth_camera.argtypes = (_TransformationHandle
 k4a_transformation_depth_image_to_point_cloud = _k4a_dll.k4a_transformation_depth_image_to_point_cloud
 k4a_transformation_depth_image_to_point_cloud.restype = EStatus
 k4a_transformation_depth_image_to_point_cloud.argtypes = (_TransformationHandle, _ImageHandle, _ctypes.c_int, _ImageHandle)
-
-
-
-del _ctypes
-del _os_path
-del _sys
