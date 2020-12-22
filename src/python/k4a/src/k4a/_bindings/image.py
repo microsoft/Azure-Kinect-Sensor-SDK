@@ -74,7 +74,7 @@ class Image:
             array_type = (_ctypes.c_uint16 * height_pixels) * width_pixels
             array_len_bytes = width_pixels * height_pixels * 2
         elif image_format == EImageFormat.CUSTOM16:
-            array_type = (_ctypes.c_uint16 * width_pixels) * 
+            array_type = (_ctypes.c_uint16 * width_pixels) * height_pixels
             array_len_bytes = width_pixels * height_pixels * 2
         elif image_format == EImageFormat.CUSTOM8:
             array_type = (_ctypes.c_uint8 * width_pixels) * height_pixels
