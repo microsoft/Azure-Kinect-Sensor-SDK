@@ -1,5 +1,5 @@
 '''
-test_k4a_AzureKinect.py
+test_k4a_azurekinect.py
 
 Tests for the k4a functions for Azure Kinect device.
 
@@ -192,7 +192,7 @@ def k4a_device_set_and_get_color_control(
         saved_value, saved_value_readback, new_value, new_value_readback)
 
 
-class TestDevice_AzureKinect(unittest.TestCase):
+class Test_K4A_AzureKinect(unittest.TestCase):
     '''Test k4a functions requiring a device handle for Azure Kinect device.
     '''
 
