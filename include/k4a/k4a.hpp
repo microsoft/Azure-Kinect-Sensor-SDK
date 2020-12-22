@@ -1165,7 +1165,7 @@ public:
      *
      * \sa k4a_device_get_capture
      */
-    bool get_capture(capture *cap, std::chrono::milliseconds timeout)
+    bool get_capture(capture *cap, std::chrono::milliseconds timeout) const
     {
         k4a_capture_t capture_handle = nullptr;
         int32_t timeout_ms = internal::clamp_cast<int32_t>(timeout.count());
@@ -1188,7 +1188,7 @@ public:
      *
      * \sa k4a_device_get_capture
      */
-    bool get_capture(capture *cap)
+    bool get_capture(capture *cap) const
     {
         return get_capture(cap, std::chrono::milliseconds(K4A_WAIT_INFINITE));
     }
