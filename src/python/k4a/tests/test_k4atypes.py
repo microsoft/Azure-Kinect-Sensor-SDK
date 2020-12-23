@@ -232,7 +232,7 @@ class TestStructs(unittest.TestCase):
         self.assertEqual(len(xy._fields_), 2)
 
     def test_k4a_float2_t(self):
-        xy = k4a.Float2()
+        xy = k4a._Float2()
         self.assertIsNotNone(xy)
         self.assertEqual(len(xy._fields_), 2)
 
@@ -242,7 +242,7 @@ class TestStructs(unittest.TestCase):
         self.assertEqual(len(xyz._fields_), 3)
 
     def test_k4a_float3_t(self):
-        xyz = k4a.Float3()
+        xyz = k4a._Float3()
         self.assertIsNotNone(xyz)
         self.assertEqual(len(xyz._fields_), 2)
 

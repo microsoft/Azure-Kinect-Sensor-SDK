@@ -138,7 +138,7 @@ class Test_Capture_AzureKinect(unittest.TestCase):
         self.device.stop_imu()
         del self.capture
 
-    def check_copy(self, image1, image2):
+    def check_copy(self, image1:k4a.Image, image2:k4a.Image):
         
         # Check that the images are not the same instance.
         self.assertIsNot(image1, image2)

@@ -9,6 +9,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 import ctypes as _ctypes
 import copy as _copy
+from os import linesep as _newline
 
 from .k4atypes import _CaptureHandle, EStatus, _ImageHandle
 
@@ -98,6 +99,17 @@ class Capture:
         self._depth = None
         self._ir = None
         self._temperature = None
+
+    def __str__(self):
+        return ''.join([
+            'color=%s, ', _newline,
+            'depth=%s, ', _newline,
+            'ir=%s, ', _newline,
+            'temperature_C=%f, ']) % (
+            self._color.__str__(),
+            self._depth.__str__(),
+            self._ir.__str__(),
+            self._temperature)
 
     # Define properties and get/set functions. ############### 
     @property

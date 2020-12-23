@@ -14,7 +14,9 @@ import os.path as _os_path
 import sys as _sys
 
 from .k4atypes import *
-from .k4atypes import _DeviceHandle, _CaptureHandle, _ImageHandle, _TransformationHandle, _memory_allocate_cb, _memory_destroy_cb
+from .k4atypes import _DeviceHandle, _CaptureHandle, _ImageHandle, \
+    _TransformationHandle, _Calibration, _Float2, _Float3, \
+    _memory_allocate_cb, _memory_destroy_cb
 
 
 __all__ = []
@@ -372,7 +374,7 @@ k4a_device_get_raw_calibration.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctype
 #                                                   k4a_calibration_t *calibration);
 k4a_device_get_calibration = _k4a_dll.k4a_device_get_calibration
 k4a_device_get_calibration.restype = EStatus
-k4a_device_get_calibration.argtypes = (_DeviceHandle, _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(Calibration))
+k4a_device_get_calibration.argtypes = (_DeviceHandle, _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(_Calibration))
 
 
 #K4A_EXPORT k4a_status_t k4a_device_get_sync_jack(k4a_device_t device_handle,
@@ -391,7 +393,7 @@ k4a_device_get_sync_jack.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctypes.c_bo
 k4a_calibration_get_from_raw = _k4a_dll.k4a_calibration_get_from_raw
 k4a_calibration_get_from_raw.restype = EStatus
 k4a_calibration_get_from_raw.argtypes = (_ctypes.POINTER(_ctypes.c_char), 
-    _ctypes.c_ulonglong, _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(Calibration))
+    _ctypes.c_ulonglong, _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(_Calibration))
 
 
 #K4A_EXPORT k4a_status_t k4a_calibration_3d_to_3d(const k4a_calibration_t *calibration,
@@ -402,8 +404,8 @@ k4a_calibration_get_from_raw.argtypes = (_ctypes.POINTER(_ctypes.c_char),
 k4a_calibration_3d_to_3d = _k4a_dll.k4a_calibration_3d_to_3d
 k4a_calibration_3d_to_3d.restype = EStatus
 k4a_calibration_3d_to_3d.argtypes = (
-    _ctypes.POINTER(Calibration), _ctypes.POINTER(Float3),
-    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(Float3))
+    _ctypes.POINTER(_Calibration), _ctypes.POINTER(_Float3),
+    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(_Float3))
 
 
 #K4A_EXPORT k4a_status_t k4a_calibration_2d_to_3d(const k4a_calibration_t *calibration,
@@ -416,8 +418,8 @@ k4a_calibration_3d_to_3d.argtypes = (
 k4a_calibration_2d_to_3d = _k4a_dll.k4a_calibration_2d_to_3d
 k4a_calibration_2d_to_3d.restype = EStatus
 k4a_calibration_2d_to_3d.argtypes = (
-    _ctypes.POINTER(Calibration), _ctypes.POINTER(Float2), _ctypes.c_float,
-    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(Float3), _ctypes.POINTER(_ctypes.c_int))
+    _ctypes.POINTER(_Calibration), _ctypes.POINTER(_Float2), _ctypes.c_float,
+    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(_Float3), _ctypes.POINTER(_ctypes.c_int))
 
 
 #K4A_EXPORT k4a_status_t k4a_calibration_3d_to_2d(const k4a_calibration_t *calibration,
@@ -429,8 +431,8 @@ k4a_calibration_2d_to_3d.argtypes = (
 k4a_calibration_3d_to_2d = _k4a_dll.k4a_calibration_3d_to_2d
 k4a_calibration_3d_to_2d.restype = EStatus
 k4a_calibration_3d_to_2d.argtypes = (
-    _ctypes.POINTER(Calibration), _ctypes.POINTER(Float3),
-    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(Float2), _ctypes.POINTER(_ctypes.c_int))
+    _ctypes.POINTER(_Calibration), _ctypes.POINTER(_Float3),
+    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(_Float2), _ctypes.POINTER(_ctypes.c_int))
 
 
 #K4A_EXPORT k4a_status_t k4a_calibration_2d_to_2d(const k4a_calibration_t *calibration,
@@ -443,8 +445,8 @@ k4a_calibration_3d_to_2d.argtypes = (
 k4a_calibration_2d_to_2d = _k4a_dll.k4a_calibration_2d_to_2d
 k4a_calibration_2d_to_2d.restype = EStatus
 k4a_calibration_2d_to_2d.argtypes = (
-    _ctypes.POINTER(Calibration), _ctypes.POINTER(Float2), _ctypes.c_float,
-    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(Float2), _ctypes.POINTER(_ctypes.c_int))
+    _ctypes.POINTER(_Calibration), _ctypes.POINTER(_Float2), _ctypes.c_float,
+    _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(_Float2), _ctypes.POINTER(_ctypes.c_int))
 
 
 #K4A_EXPORT k4a_status_t k4a_calibration_color_2d_to_depth_2d(const k4a_calibration_t *calibration,
@@ -455,14 +457,14 @@ k4a_calibration_2d_to_2d.argtypes = (
 k4a_calibration_color_2d_to_depth_2d = _k4a_dll.k4a_calibration_color_2d_to_depth_2d
 k4a_calibration_color_2d_to_depth_2d.restype = EStatus
 k4a_calibration_color_2d_to_depth_2d.argtypes = (
-    _ctypes.POINTER(Calibration), _ctypes.POINTER(Float2), _ImageHandle,
-    _ctypes.POINTER(Float2), _ctypes.POINTER(_ctypes.c_int))
+    _ctypes.POINTER(_Calibration), _ctypes.POINTER(_Float2), _ImageHandle,
+    _ctypes.POINTER(_Float2), _ctypes.POINTER(_ctypes.c_int))
 
 
 #K4A_EXPORT k4a_transform_t k4a_transformation_create(const k4a_calibration_t *calibration);
 k4a_transformation_create = _k4a_dll.k4a_transformation_create
 k4a_transformation_create.restype = _TransformationHandle
-k4a_transformation_create.argtypes = (_ctypes.POINTER(Calibration),)
+k4a_transformation_create.argtypes = (_ctypes.POINTER(_Calibration),)
 
 
 #K4A_EXPORT void k4a_transformation_destroy(k4a_transform_t transformation_handle);

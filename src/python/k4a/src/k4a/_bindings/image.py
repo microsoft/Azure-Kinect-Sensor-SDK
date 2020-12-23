@@ -252,6 +252,31 @@ class Image:
     def __exit__(self):
         del self
 
+    def __str__(self):
+        return ''.join([
+            'data=%s, ',
+            'image_format=%d, ',
+            'size_bytes=%d, ',
+            'width_pixels=%d, ',
+            'height_pixels=%d, ',
+            'stride_bytes=%d, ',
+            'device_timestamp_usec=%d, ',
+            'system_timestamp_nsec=%d, ',
+            'exposure_usec=%d, ',
+            'white_balance=%d, ',
+            'iso_speed=%d, ']) % (
+            self._data.__str__(),
+            self._image_format,
+            self._size_bytes,
+            self._width_pixels,
+            self._height_pixels,
+            self._stride_bytes,
+            self._device_timestamp_usec,
+            self._system_timestamp_nsec,
+            self._exposure_usec,
+            self._white_balance,
+            self._iso_speed)
+
     # Define properties and get/set functions. ############### 
     @property
     def _image_handle(self):
@@ -272,29 +297,30 @@ class Image:
     def data(self):
         # Create a numpy.ndarray from the image buffer.
 
-        # First, get a pointer to the buffer.
-        buffer_ptr = k4a_image_get_buffer(self.__image_handle)
-        buffer_size = k4a_image_get_size(self.__image_handle)
-        image_format = k4a_image_get_format(self.__image_handle)
-        width_pixels = k4a_image_get_width_pixels(self.__image_handle)
-        height_pixels = k4a_image_get_height_pixels(self.__image_handle)
-        stride_bytes = k4a_image_get_stride_bytes(self.__image_handle)
+        if self._data is None:
+            # First, get a pointer to the buffer.
+            buffer_ptr = k4a_image_get_buffer(self.__image_handle)
+            buffer_size = k4a_image_get_size(self.__image_handle)
+            image_format = k4a_image_get_format(self.__image_handle)
+            width_pixels = k4a_image_get_width_pixels(self.__image_handle)
+            height_pixels = k4a_image_get_height_pixels(self.__image_handle)
+            stride_bytes = k4a_image_get_stride_bytes(self.__image_handle)
 
-        assert(buffer_size > 0), "buffer_size must be greater than zero."
-        assert(width_pixels > 0), "width_pixels must be greater than zero."
-        assert(height_pixels > 0), "height_pixels must be greater than zero."
-        assert(stride_bytes > 0), "stride_bytes must be greater than zero."
-        assert(stride_bytes > width_pixels), "stride_bytes must be greater than width_pixels."
-        assert(stride_bytes > height_pixels), "stride_bytes must be greater than height_pixels."
+            assert(buffer_size > 0), "buffer_size must be greater than zero."
+            assert(width_pixels > 0), "width_pixels must be greater than zero."
+            assert(height_pixels > 0), "height_pixels must be greater than zero."
+            assert(stride_bytes > 0), "stride_bytes must be greater than zero."
+            assert(stride_bytes > width_pixels), "stride_bytes must be greater than width_pixels."
+            assert(stride_bytes > height_pixels), "stride_bytes must be greater than height_pixels."
 
-        # Construct a descriptor of the data in the buffer.
-        (array_type, array_len_bytes) = Image._get_array_type_from_format(
-            image_format, buffer_size, width_pixels, height_pixels)
-        assert(array_type is not None), "Unrecognized image format."
-        assert(array_len_bytes <= buffer_size), "ndarray size should be less than buffer size in bytes."
+            # Construct a descriptor of the data in the buffer.
+            (array_type, array_len_bytes) = Image._get_array_type_from_format(
+                image_format, buffer_size, width_pixels, height_pixels)
+            assert(array_type is not None), "Unrecognized image format."
+            assert(array_len_bytes <= buffer_size), "ndarray size should be less than buffer size in bytes."
 
-        self._data = _np.ctypeslib.as_array(array_type.from_address(
-            _ctypes.c_void_p.from_buffer(buffer_ptr).value))
+            self._data = _np.ctypeslib.as_array(array_type.from_address(
+                _ctypes.c_void_p.from_buffer(buffer_ptr).value))
 
         return self._data
 
