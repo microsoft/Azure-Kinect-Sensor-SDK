@@ -631,7 +631,7 @@ class DeviceConfiguration(_ctypes.Structure):
 
 class CalibrationExtrinsics(_ctypes.Structure):
     _fields_= [
-        ("rotation", _ctypes.c_float * 9),
+        ("rotation", (_ctypes.c_float * 3) * 3),
         ("translation", _ctypes.c_float * 3),
     ]
 
@@ -639,9 +639,9 @@ class CalibrationExtrinsics(_ctypes.Structure):
         return ''.join([
             'rotation=[[%f,%f,%f][%f,%f,%f][%f,%f,%f]] ',
             'translation=[%f,%f,%f]']) % (
-            self.rotation[0], self.rotation[1], self.rotation[2],
-            self.rotation[3], self.rotation[4], self.rotation[5],
-            self.rotation[6], self.rotation[7], self.rotation[8],
+            self.rotation[0][0], self.rotation[0][1], self.rotation[0][2],
+            self.rotation[1][0], self.rotation[1][1], self.rotation[1][2],
+            self.rotation[2][0], self.rotation[2][1], self.rotation[2][2],
             self.translation[0], self.translation[1], self.translation[2])
 
 
@@ -730,7 +730,7 @@ class CalibrationCamera(_ctypes.Structure):
             self.metric_radius)
 
 
-class Calibration(_ctypes.Structure):
+class _Calibration(_ctypes.Structure):
     _fields_= [
         ("depth_camera_calibration", CalibrationCamera),
         ("color_camera_calibration", CalibrationCamera),
@@ -791,7 +791,7 @@ class HardwareVersion(_ctypes.Structure):
             'depth=%s, ', _newline,
             'audio=%s, ', _newline,
             'depth_sensor=%s, ', _newline,
-            'firmware_build=%d, ',
+            'firmware_build=%d, ', _newline,
             'firmware_signature=%d']) % (
             self.rgb.__str__(),
             self.depth.__str__(),
@@ -815,7 +815,7 @@ class _XY(_ctypes.Structure):
         return ''.join(['x=%f, ', 'y=%f']) % (self.x, self.y)
 
 
-class Float2(_ctypes.Union):
+class _Float2(_ctypes.Union):
     _fields_= [
         ("xy", _XY),
         ("v", _ctypes.c_float * 2),
@@ -844,7 +844,7 @@ class _XYZ(_ctypes.Structure):
         return ''.join(['x=%f, ', 'y=%f, ', 'z=%f']) % (self.x, self.y, self.z)
 
 
-class Float3(_ctypes.Union):
+class _Float3(_ctypes.Union):
     _fields_= [
         ("xyz", _XYZ),
         ("v", _ctypes.c_float * 3)
@@ -860,9 +860,9 @@ class Float3(_ctypes.Union):
 class ImuSample(_ctypes.Structure):
     _fields_= [
         ("temperature", _ctypes.c_float),
-        ("acc_sample", Float3),
+        ("acc_sample", _Float3),
         ("acc_timestamp_usec", _ctypes.c_uint64),
-        ("gyro_sample", Float3),
+        ("gyro_sample", _Float3),
         ("gyro_timestamp_usec", _ctypes.c_uint64),
     ]
 
@@ -915,6 +915,5 @@ class _EmptyClass:
             for n in range(len(keys)-1):
                 tempstr = tempstr + keys[n] + "=" + str(self.__dict__[keys[n]]) + ", "
             tempstr = tempstr + keys[len(keys)-1] + "=" + str(self.__dict__[keys[len(keys)-1]])
-            tempstr = tempstr + _newline
 
         return tempstr

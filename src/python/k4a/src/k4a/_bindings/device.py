@@ -7,10 +7,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 '''
 
 import ctypes as _ctypes
+from os import linesep as _newline
 
 from .k4atypes import _DeviceHandle, HardwareVersion, EStatus, EBufferStatus, \
     _EmptyClass, EColorControlCommand, EColorControlMode, ImuSample, \
-    EWaitStatus, DeviceConfiguration, _CaptureHandle
+    EWaitStatus, DeviceConfiguration, _CaptureHandle, EDepthMode, EColorResolution, \
+    _Calibration
 
 from .k4a import k4a_device_get_installed_count, k4a_device_open, \
     k4a_device_get_serialnum, k4a_device_get_version, \
@@ -19,9 +21,10 @@ from .k4a import k4a_device_get_installed_count, k4a_device_open, \
     k4a_device_start_cameras, k4a_device_stop_cameras, \
     k4a_device_start_imu, k4a_device_stop_imu, \
     k4a_device_get_color_control, k4a_device_get_raw_calibration, \
-    k4a_device_get_sync_jack, k4a_device_get_capture
+    k4a_device_get_sync_jack, k4a_device_get_capture, k4a_device_get_calibration
 
 from .capture import Capture
+from .calibration import Calibration
 
 
 def _read_sync_jack_helper(device_handle:_DeviceHandle)->(bool, bool):
@@ -142,6 +145,10 @@ class Device:
                     device._color_ctrl_cap.__dict__[command[0]].default_value = int(default_value.value)
                     device._color_ctrl_cap.__dict__[command[0]].default_mode = EColorControlMode(color_control_mode.value)
         
+        # Read the sync jack.
+        (device._sync_in_connected, device._sync_out_connected) = \
+            _read_sync_jack_helper(device.__device_handle)
+
         return device
 
     def close(self):
@@ -182,6 +189,19 @@ class Device:
         self._color_ctrl_cap = None
         self._sync_out_connected = None
         self._sync_in_connected = None
+
+    def __str__(self):
+        return ''.join([
+            'serial_number=%s, ', _newline,
+            'hardware_version=%s, ', _newline,
+            'color_control_capabilities=%s, ', _newline,
+            'sync_out_connected=%s, ', _newline,
+            'sync_in_connected=%s']) % (
+            self._serial_number,
+            self._hardware_version.__str__(),
+            self._color_ctrl_cap.__str__(),
+            self._sync_out_connected,
+            self._sync_in_connected)
 
     def get_imu_sample(self, timeout_ms:int=0):
 
@@ -251,6 +271,23 @@ class Device:
 
         return status
 
+    def get_capture(self, timeout_ms:int)->Capture:
+
+        capture = None
+
+        # Get a capture handle.
+        capture_handle = _CaptureHandle()
+        timeout_in_ms = _ctypes.c_int32(timeout_ms)
+        status = k4a_device_get_capture(
+            self.__device_handle,
+            _ctypes.byref(capture_handle),
+            timeout_in_ms)
+
+        if status == EStatus.SUCCEEDED:
+            capture = Capture(capture_handle=capture_handle)
+
+        return capture
+
     def get_raw_calibration(self)->bytearray:
 
         buffer = None
@@ -285,26 +322,34 @@ class Device:
         
         return buffer
 
-    def get_capture(self, timeout_ms:int)->Capture:
+    def get_calibration(self,
+        depth_mode:EDepthMode,
+        color_resolution:EColorResolution):
 
-        capture = None
+        calibration = None
 
-        # Get a capture handle.
-        capture_handle = _CaptureHandle()
-        timeout_in_ms = _ctypes.c_int32(timeout_ms)
-        status = k4a_device_get_capture(
-            self.__device_handle,
-            _ctypes.byref(capture_handle),
-            timeout_in_ms)
+        if (isinstance(depth_mode, EDepthMode) and
+            isinstance(color_resolution, EColorResolution)):
 
-        if status == EStatus.SUCCEEDED:
-            capture = Capture(capture_handle=capture_handle)
+            # Get ctypes calibration struct.
+            _calibration = _Calibration()
+            status = k4a_device_get_calibration(
+                self.__device_handle,
+                depth_mode,
+                color_resolution,
+                _ctypes.byref(_calibration))
 
-        return capture
+            if status == EStatus.SUCCEEDED:
+                # Wrap the ctypes struct into a non-ctypes class.
+                calibration = Calibration(_calibration=_calibration)
 
-    def get_calibration(self):
-        pass
+        return calibration
 
+
+#K4A_EXPORT k4a_status_t k4a_device_get_calibration(k4a_device_t device_handle,
+#                                                   const k4a_depth_mode_t depth_mode,
+#                                                   const k4a_color_resolution_t color_resolution,
+#                                                   k4a_calibration_t *calibration);
 
     # Define properties and get/set functions. ############### 
     @property
@@ -334,8 +379,9 @@ class Device:
     @property
     def sync_in_connected(self):
         # Read the sync jack.
-        (self._sync_in, self.sync_out) = _read_sync_jack_helper(self.__device_handle)
-        return self._sync_in
+        (self._sync_in_connected, self._sync_out_connected) = \
+            _read_sync_jack_helper(self.__device_handle)
+        return self._sync_in_connected
 
     @sync_in_connected.deleter
     def sync_in_connected(self):
@@ -344,8 +390,9 @@ class Device:
     @property
     def sync_out_connected(self):
         # Read the sync jack.
-        (self._sync_in, self.sync_out) = _read_sync_jack_helper(self.__device_handle)
-        return self._sync_out
+        (self._sync_in_connected, self._sync_out_connected) = \
+            _read_sync_jack_helper(self.__device_handle)
+        return self._sync_out_connected
 
     @sync_out_connected.deleter
     def sync_out_connected(self):

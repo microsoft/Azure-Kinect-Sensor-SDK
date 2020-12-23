@@ -1034,8 +1034,8 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             ]
 
             calibration = k4a.Calibration()
-            source_point = k4a.Float3(500, 500, 1000)
-            target_point = k4a.Float3()
+            source_point = k4a._Float3(500, 500, 1000)
+            target_point = k4a._Float3()
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
@@ -1097,9 +1097,9 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             ]
 
             calibration = k4a.Calibration()
-            source_point = k4a.Float2(0, 0)
+            source_point = k4a._Float2(0, 0)
             depth_mm = 1000
-            target_point = k4a.Float3()
+            target_point = k4a._Float3()
             valid_int_flag = ctypes.c_int(0)
 
             for depth_mode in depth_modes:
@@ -1165,8 +1165,8 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             ]
 
             calibration = k4a.Calibration()
-            source_point = k4a.Float3(0, 0, 100)
-            target_point = k4a.Float2()
+            source_point = k4a._Float3(0, 0, 100)
+            target_point = k4a._Float2()
             valid_int_flag = ctypes.c_int(0)
 
             for depth_mode in depth_modes:
@@ -1229,9 +1229,9 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             ]
 
             calibration = k4a.Calibration()
-            source_point = k4a.Float2(0, 0)
+            source_point = k4a._Float2(0, 0)
             depth_mm = 400
-            target_point = k4a.Float2()
+            target_point = k4a._Float2()
             valid_int_flag = ctypes.c_int(0)
 
             for depth_mode in depth_modes:
@@ -1291,7 +1291,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             ]
 
             calibration = k4a.Calibration()
-            target_point = k4a.Float2()
+            target_point = k4a._Float2()
             valid_int_flag = ctypes.c_int(0)
 
             # Get a depth image.
@@ -1326,7 +1326,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
                         color_image = k4a.k4a_capture_get_color_image(capture)
                         width_pixels = k4a.k4a_image_get_width_pixels(color_image)
                         height_pixels = k4a.k4a_image_get_height_pixels(color_image)
-                        source_point = k4a.Float2(height_pixels/4, width_pixels/4)
+                        source_point = k4a._Float2(height_pixels/4, width_pixels/4)
 
                         # Transform source point from source_camera to target_camera.
                         status = k4a.k4a_calibration_color_2d_to_depth_2d(
