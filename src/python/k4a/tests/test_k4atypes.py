@@ -12,8 +12,8 @@ import ctypes
 import k4a
 
 
-def get_enum_values(n):
-    value = 0
+def get_enum_values(n, start_value = 0):
+    value = start_value
     while(value < n):
         yield value
         value = value + 1
@@ -94,10 +94,10 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.ETransformInterpolationType.LINEAR, next(enum_values))
 
     def test_k4a_fps_t(self):
-        enum_values = get_enum_values(len(k4a.EFramePerSecond))
-        self.assertEqual(k4a.EFramePerSecond.FPS_5, next(enum_values))
-        self.assertEqual(k4a.EFramePerSecond.FPS_15, next(enum_values))
-        self.assertEqual(k4a.EFramePerSecond.FPS_30, next(enum_values))
+        enum_values = get_enum_values(len(k4a.EFramesPerSecond))
+        self.assertEqual(k4a.EFramesPerSecond.FPS_5, next(enum_values))
+        self.assertEqual(k4a.EFramesPerSecond.FPS_15, next(enum_values))
+        self.assertEqual(k4a.EFramesPerSecond.FPS_30, next(enum_values))
 
     def test_k4a_color_control_command_t(self):
         enum_values = get_enum_values(len(k4a.EColorControlCommand))
@@ -124,7 +124,7 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.EWiredSyncMode.SUBORDINATE, next(enum_values))
 
     def test_k4a_calibration_type_t(self):
-        enum_values = get_enum_values(len(k4a.ECalibrationType))
+        enum_values = get_enum_values(len(k4a.ECalibrationType), start_value = -1)
         self.assertEqual(k4a.ECalibrationType.UNKNOWN, next(enum_values))
         self.assertEqual(k4a.ECalibrationType.DEPTH, next(enum_values))
         self.assertEqual(k4a.ECalibrationType.COLOR, next(enum_values))
@@ -212,7 +212,7 @@ class TestStructs(unittest.TestCase):
         self.assertEqual(len(camera_calibration._fields_), 5)
 
     def test_k4a_calibration_t(self):
-        calibration = k4a.Calibration()
+        calibration = k4a._bindings.k4a._Calibration()
         self.assertIsNotNone(calibration)
         self.assertEqual(len(calibration._fields_), 5)
 
@@ -232,7 +232,7 @@ class TestStructs(unittest.TestCase):
         self.assertEqual(len(xy._fields_), 2)
 
     def test_k4a_float2_t(self):
-        xy = k4a._Float2()
+        xy = k4a._bindings.k4a._Float2()
         self.assertIsNotNone(xy)
         self.assertEqual(len(xy._fields_), 2)
 
@@ -242,7 +242,7 @@ class TestStructs(unittest.TestCase):
         self.assertEqual(len(xyz._fields_), 3)
 
     def test_k4a_float3_t(self):
-        xyz = k4a._Float3()
+        xyz = k4a._bindings.k4a._Float3()
         self.assertIsNotNone(xyz)
         self.assertEqual(len(xyz._fields_), 2)
 
