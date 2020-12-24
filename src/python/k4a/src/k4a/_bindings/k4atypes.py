@@ -264,7 +264,7 @@ class ETransformInterpolationType(_IntEnum):
 
 
 @_unique
-class EFramePerSecond(_IntEnum):
+class EFramesPerSecond(_IntEnum):
     """
     Color and depth sensor frame rate.
 
@@ -437,7 +437,7 @@ class ECalibrationType(_IntEnum):
     NUM_TYPES                        Number of types excluding unknown type.
     ================================ ==========================================
     """
-    UNKNOWN = 0
+    UNKNOWN = -1
     DEPTH = _auto()
     COLOR = _auto()
     GYRO = _auto()
@@ -587,15 +587,15 @@ class DeviceConfiguration(_ctypes.Structure):
     ]
 
     def __init__(self, 
-        color_format:EImageFormat,
-        color_resolution:EColorResolution,
-        depth_mode:EDepthMode,
-        camera_fps:EFramePerSecond,
-        synchronized_images_only:bool,
-        depth_delay_off_color_usec:int,
-        wired_sync_mode:EWiredSyncMode,
-        subordinate_delay_off_master_usec:int,
-        disable_streaming_indicator:bool):
+        color_format:EImageFormat=EImageFormat.CUSTOM,
+        color_resolution:EColorResolution=EColorResolution.RES_720P,
+        depth_mode:EDepthMode=EDepthMode.OFF,
+        camera_fps:EFramesPerSecond=EFramesPerSecond.FPS_5,
+        synchronized_images_only:bool=True,
+        depth_delay_off_color_usec:int=0,
+        wired_sync_mode:EWiredSyncMode=EWiredSyncMode.STANDALONE,
+        subordinate_delay_off_master_usec:int=0,
+        disable_streaming_indicator:bool=False):
 
         self.color_format = color_format
         self.color_resolution = color_resolution
@@ -885,7 +885,7 @@ DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
     color_format = EImageFormat.COLOR_MJPG,
     color_resolution = EColorResolution.OFF,
     depth_mode = EDepthMode.OFF,
-    camera_fps = EFramePerSecond.FPS_30,
+    camera_fps = EFramesPerSecond.FPS_30,
     synchronized_images_only = False,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -896,7 +896,7 @@ DEVICE_CONFIG_BGRA32_4K_WFOV_UNBINNED = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
     color_resolution = EColorResolution.RES_2160P,
     depth_mode = EDepthMode.WFOV_2X2BINNED,
-    camera_fps = EFramePerSecond.FPS_15,
+    camera_fps = EFramesPerSecond.FPS_15,
     synchronized_images_only = True,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -913,7 +913,7 @@ class _EmptyClass:
 
         if len(keys) > 0:
             for n in range(len(keys)-1):
-                tempstr = tempstr + keys[n] + "=" + str(self.__dict__[keys[n]]) + ", "
-            tempstr = tempstr + keys[len(keys)-1] + "=" + str(self.__dict__[keys[len(keys)-1]])
+                tempstr = tempstr + str(keys[n]) + "=" + str(self.__dict__[keys[n]]) + ", "
+            tempstr = tempstr + str(keys[len(keys)-1]) + "=" + str(self.__dict__[keys[len(keys)-1]])
 
         return tempstr

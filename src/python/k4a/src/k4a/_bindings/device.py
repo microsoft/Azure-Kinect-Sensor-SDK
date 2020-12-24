@@ -20,7 +20,7 @@ from .k4a import k4a_device_get_installed_count, k4a_device_open, \
     k4a_device_get_imu_sample, k4a_device_get_color_control, \
     k4a_device_start_cameras, k4a_device_stop_cameras, \
     k4a_device_start_imu, k4a_device_stop_imu, \
-    k4a_device_get_color_control, k4a_device_get_raw_calibration, \
+    k4a_device_set_color_control, k4a_device_get_raw_calibration, \
     k4a_device_get_sync_jack, k4a_device_get_capture, k4a_device_get_calibration
 
 from .capture import Capture
@@ -106,15 +106,15 @@ class Device:
 
             # Create a dictionary of color control capabilities.
             color_control_commands = [
-                ('backlight_comp', EColorControlCommand.BACKLIGHT_COMPENSATION),
-                ('brightness', EColorControlCommand.BRIGHTNESS),
-                ('contrast', EColorControlCommand.CONTRAST),
-                ('exposure_time', EColorControlCommand.EXPOSURE_TIME_ABSOLUTE),
-                ('gain', EColorControlCommand.GAIN),
-                ('powerline_freq', EColorControlCommand.POWERLINE_FREQUENCY),
-                ('saturation', EColorControlCommand.SATURATION),
-                ('sharpness', EColorControlCommand.SHARPNESS),
-                ('whitebalance', EColorControlCommand.WHITEBALANCE)
+                EColorControlCommand.BACKLIGHT_COMPENSATION,
+                EColorControlCommand.BRIGHTNESS,
+                EColorControlCommand.CONTRAST,
+                EColorControlCommand.EXPOSURE_TIME_ABSOLUTE,
+                EColorControlCommand.GAIN,
+                EColorControlCommand.POWERLINE_FREQUENCY,
+                EColorControlCommand.SATURATION,
+                EColorControlCommand.SHARPNESS,
+                EColorControlCommand.WHITEBALANCE
             ]
 
             supports_auto = _ctypes.c_bool(False)
@@ -128,7 +128,7 @@ class Device:
 
                 status = k4a_device_get_color_control_capabilities(
                     device.__device_handle,
-                    command[1],
+                    command,
                     _ctypes.byref(supports_auto),
                     _ctypes.byref(min_value),
                     _ctypes.byref(max_value),
@@ -137,17 +137,17 @@ class Device:
                     _ctypes.byref(color_control_mode))
 
                 if (status == EStatus.SUCCEEDED):
-                    device._color_ctrl_cap.__dict__[command[0]] = _EmptyClass()
-                    device._color_ctrl_cap.__dict__[command[0]].supports_auto = bool(supports_auto.value)
-                    device._color_ctrl_cap.__dict__[command[0]].min_value = int(min_value.value)
-                    device._color_ctrl_cap.__dict__[command[0]].max_value = int(max_value.value)
-                    device._color_ctrl_cap.__dict__[command[0]].step_value = int(step_value.value)
-                    device._color_ctrl_cap.__dict__[command[0]].default_value = int(default_value.value)
-                    device._color_ctrl_cap.__dict__[command[0]].default_mode = EColorControlMode(color_control_mode.value)
+                    device._color_ctrl_cap.__dict__[command] = _EmptyClass()
+                    device._color_ctrl_cap.__dict__[command].supports_auto = bool(supports_auto.value)
+                    device._color_ctrl_cap.__dict__[command].min_value = int(min_value.value)
+                    device._color_ctrl_cap.__dict__[command].max_value = int(max_value.value)
+                    device._color_ctrl_cap.__dict__[command].step_value = int(step_value.value)
+                    device._color_ctrl_cap.__dict__[command].default_value = int(default_value.value)
+                    device._color_ctrl_cap.__dict__[command].default_mode = EColorControlMode(color_control_mode.value)
         
-        # Read the sync jack.
-        (device._sync_in_connected, device._sync_out_connected) = \
-            _read_sync_jack_helper(device.__device_handle)
+            # Read the sync jack.
+            (device._sync_in_connected, device._sync_out_connected) = \
+                _read_sync_jack_helper(device.__device_handle)
 
         return device
 
@@ -233,16 +233,16 @@ class Device:
     def stop_imu(self):
         k4a_device_stop_imu(self.__device_handle)
 
-    def get_color_control(
-        color_ctrl_command:EColorControlCommand,
-        color_ctrl_mode:EColorControlMode)->int:
+    def get_color_control(self, 
+        color_ctrl_command:EColorControlCommand)->(int, EColorControlMode):
 
         retval = None
+        retmode = None
 
         color_ctrl_value = _ctypes.c_int32(0)
         command = _ctypes.c_int(color_ctrl_command.value)
-        mode = _ctypes.c_int(color_ctrl_mode.value)
-
+        mode = _ctypes.c_int32(EColorControlMode.MANUAL.value)
+        
         status = k4a_device_get_color_control(
             self.__device_handle,
             color_ctrl_command,
@@ -251,10 +251,12 @@ class Device:
 
         if status == EStatus.SUCCEEDED:
             retval = color_ctrl_value.value
+            retmode = EColorControlMode(mode.value)
 
-        return retval
+        return (retval, retmode)
 
     def set_color_control(
+        self,
         color_ctrl_command:EColorControlCommand,
         color_ctrl_mode:EColorControlMode,
         color_ctrl_value:int)->EStatus:

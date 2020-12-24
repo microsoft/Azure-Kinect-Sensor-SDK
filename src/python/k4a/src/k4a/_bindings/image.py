@@ -206,17 +206,17 @@ class Image:
 
         # Create a shallow copy.
         new_image = Image(self._image_handle)
-        new_image._data = _copy.copy(self._data)
-        new_image._image_format = _copy.copy(self._image_format)
-        new_image._size_bytes = _copy.copy(self._size_bytes)
-        new_image._width_pixels = _copy.copy(self._width_pixels)
-        new_image._height_pixels = _copy.copy(self._height_pixels)
-        new_image._stride_bytes = _copy.copy(self._stride_bytes)
-        new_image._device_timestamp_usec = _copy.copy(self._device_timestamp_usec)
-        new_image._system_timestamp_nsec = _copy.copy(self._system_timestamp_nsec)
-        new_image._exposure_usec = _copy.copy(self._exposure_usec)
-        new_image._white_balance = _copy.copy(self._white_balance)
-        new_image._iso_speed = _copy.copy(self._iso_speed)
+        new_image._data = self._data.view()
+        new_image._image_format = self._image_format
+        new_image._size_bytes = self._size_bytes
+        new_image._width_pixels = self._width_pixels
+        new_image._height_pixels = self._height_pixels
+        new_image._stride_bytes = self._stride_bytes
+        new_image._device_timestamp_usec = self._device_timestamp_usec
+        new_image._system_timestamp_nsec = self._system_timestamp_nsec
+        new_image._exposure_usec =self._exposure_usec
+        new_image._white_balance = self._white_balance
+        new_image._iso_speed = self._iso_speed
 
         # Update reference count.
         new_image._reference()

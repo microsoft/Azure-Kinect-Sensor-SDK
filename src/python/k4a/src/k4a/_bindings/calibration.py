@@ -14,8 +14,10 @@ from .k4a import k4a_calibration_get_from_raw
 
 class Calibration:
 
-    def __init__(self, _calibration:_Calibration):
+    def __init__(self, _calibration:_Calibration=None):
         self._calibration = _calibration
+        if self._calibration is None:
+            self._calibration = _Calibration()
     
     # Allow "with" syntax.
     def __enter__(self):

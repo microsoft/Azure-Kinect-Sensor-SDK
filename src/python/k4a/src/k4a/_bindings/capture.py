@@ -114,8 +114,10 @@ class Capture:
     # Define properties and get/set functions. ############### 
     @property
     def color(self):
-        image_handle = k4a_capture_get_color_image(self._capture_handle)
-        self._color = Image._create_from_existing_image_handle(image_handle)
+        if self._color is None:
+            image_handle = k4a_capture_get_color_image(self._capture_handle)
+            self._color = Image._create_from_existing_image_handle(image_handle)
+
         return self._color
 
     @color.setter
@@ -135,8 +137,10 @@ class Capture:
 
     @property
     def depth(self):
-        image_handle = k4a_capture_get_depth_image(self._capture_handle)
-        self._depth = Image._create_from_existing_image_handle(image_handle)
+        if self._depth is None:
+            image_handle = k4a_capture_get_depth_image(self._capture_handle)
+            self._depth = Image._create_from_existing_image_handle(image_handle)
+
         return self._depth
 
     @depth.setter
@@ -156,8 +160,10 @@ class Capture:
 
     @property
     def ir(self):
-        image_handle = k4a_capture_get_ir_image(self._capture_handle)
-        self._ir = Image._create_from_existing_image_handle(image_handle)
+        if self._ir is None:
+            image_handle = k4a_capture_get_ir_image(self._capture_handle)
+            self._ir = Image._create_from_existing_image_handle(image_handle)
+
         return self._ir
 
     @ir.setter
