@@ -216,6 +216,7 @@ class Test_Device_AzureKinect(unittest.TestCase):
             k4a.EDepthMode.WFOV_UNBINNED,
             k4a.EColorResolution.RES_2160P)
         self.assertIsNotNone(calibration)
+        self.assertIsInstance(calibration, k4a.Calibration)
 
 
 class Test_Capture_AzureKinect(unittest.TestCase):
@@ -662,3 +663,422 @@ class Test_Image_AzureKinect(unittest.TestCase):
         self.assertIsNotNone(iso_speed)
         self.assertIsInstance(iso_speed, int)
         self.assertEqual(iso_speed, 100)
+
+
+class Test_Calibration_AzureKinect(unittest.TestCase):
+    '''Test Calibration class for Azure Kinect device.
+    '''
+
+    @classmethod
+    def setUpClass(cls):
+        cls.device = k4a.Device.open()
+        assert(cls.device is not None)
+
+        cls.lock = Lock()
+
+    @classmethod
+    def tearDownClass(cls):
+
+        # Stop the cameras and imus before closing device.
+        cls.device.stop_cameras()
+        cls.device.stop_imu()
+        cls.device.close()
+        del cls.device
+
+    def test_get_calibration_from_device(self):
+        calibration = self.device.get_calibration(
+            k4a.EDepthMode.WFOV_UNBINNED,
+            k4a.EColorResolution.RES_2160P)
+        self.assertIsNotNone(calibration)
+        self.assertIsInstance(calibration, k4a.Calibration)
+
+    def test_get_calibration_from_raw(self):
+        raw_calibration = self.device.get_raw_calibration()
+        self.assertIsNotNone(raw_calibration)
+
+        calibration = k4a.Calibration.create_from_raw(
+            raw_calibration,
+            k4a.EDepthMode.WFOV_UNBINNED,
+            k4a.EColorResolution.RES_2160P)
+
+        self.assertIsNotNone(calibration)
+        self.assertIsInstance(calibration, k4a.Calibration)
+
+
+class Test_Transformation_AzureKinect(unittest.TestCase):
+    '''Test Transformation class for Azure Kinect device.
+    '''
+
+    depth_modes = [
+        k4a.EDepthMode.NFOV_2X2BINNED,
+        k4a.EDepthMode.NFOV_UNBINNED,
+        k4a.EDepthMode.WFOV_2X2BINNED,
+        k4a.EDepthMode.WFOV_UNBINNED,
+        k4a.EDepthMode.PASSIVE_IR,
+    ]
+
+    color_resolutions = [
+        k4a.EColorResolution.RES_3072P,
+        k4a.EColorResolution.RES_2160P,
+        k4a.EColorResolution.RES_1536P,
+        k4a.EColorResolution.RES_1440P,
+        k4a.EColorResolution.RES_1080P,
+        k4a.EColorResolution.RES_720P,
+    ]
+
+    calibration_types = [
+        k4a.ECalibrationType.COLOR,
+        k4a.ECalibrationType.DEPTH
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.device = k4a.Device.open()
+        assert(cls.device is not None)
+
+        cls.lock = Lock()
+
+        cls.calibration = cls.device.get_calibration(
+            k4a.EDepthMode.WFOV_UNBINNED,
+            k4a.EColorResolution.RES_2160P)
+
+    @classmethod
+    def tearDownClass(cls):
+
+        # Stop the cameras and imus before closing device.
+        cls.device.stop_cameras()
+        cls.device.stop_imu()
+        cls.device.close()
+        del cls.device
+        del cls.calibration
+
+    def test_point_3d_to_point_3d(self):
+
+        for depth_mode in Test_Transformation_AzureKinect.depth_modes:
+            for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
+                for source_camera in Test_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+                        with self.subTest(depth_mode = depth_mode, 
+                            color_resolution = color_resolution,
+                            source_camera = source_camera,
+                            target_camera = target_camera):
+
+                            # Get calibration.
+                            calibration = self.device.get_calibration(
+                                depth_mode,
+                                color_resolution)
+
+                            # Create transformation.
+                            transformation = k4a.Transformation(calibration)
+
+                            # Apply transformation.
+                            (x, y, z) = transformation.point_3d_to_point_3d(
+                                (300.0, 300.0, 500.0),
+                                source_camera,
+                                target_camera)
+
+                            self.assertIsNotNone(x)
+                            self.assertIsNotNone(y)
+                            self.assertIsNotNone(z)
+
+    def test_point_2d_to_point_3d(self):
+
+        for depth_mode in Test_Transformation_AzureKinect.depth_modes:
+            for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
+                for source_camera in Test_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+                        with self.subTest(depth_mode = depth_mode, 
+                            color_resolution = color_resolution,
+                            source_camera = source_camera,
+                            target_camera = target_camera):
+
+                            # Get calibration.
+                            calibration = self.device.get_calibration(
+                                depth_mode,
+                                color_resolution)
+
+                            # Create transformation.
+                            transformation = k4a.Transformation(calibration)
+
+                            # Apply transformation.
+                            (x, y, z) = transformation.point_2d_to_point_3d(
+                                (300.0, 300.0),
+                                500.0,
+                                source_camera,
+                                target_camera)
+
+                            self.assertIsNotNone(x)
+                            self.assertIsNotNone(y)
+                            self.assertIsNotNone(z)
+
+    def test_point_3d_to_point_2d(self):
+
+        for depth_mode in Test_Transformation_AzureKinect.depth_modes:
+            for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
+                for source_camera in Test_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+                        with self.subTest(depth_mode = depth_mode, 
+                            color_resolution = color_resolution,
+                            source_camera = source_camera,
+                            target_camera = target_camera):
+
+                            # Get calibration.
+                            calibration = self.device.get_calibration(
+                                depth_mode,
+                                color_resolution)
+
+                            # Create transformation.
+                            transformation = k4a.Transformation(calibration)
+
+                            # Apply transformation.
+                            (x, y) = transformation.point_3d_to_point_2d(
+                                (300.0, 300.0, 500.0),
+                                source_camera,
+                                target_camera)
+
+                            self.assertIsNotNone(x)
+                            self.assertIsNotNone(y)
+
+    def test_point_2d_to_point_2d(self):
+
+        for depth_mode in Test_Transformation_AzureKinect.depth_modes:
+            for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
+                for source_camera in Test_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+                        with self.subTest(depth_mode = depth_mode, 
+                            color_resolution = color_resolution,
+                            source_camera = source_camera,
+                            target_camera = target_camera):
+
+                            # Get calibration.
+                            calibration = self.device.get_calibration(
+                                depth_mode,
+                                color_resolution)
+
+                            # Create transformation.
+                            transformation = k4a.Transformation(calibration)
+
+                            # Apply transformation.
+                            (x, y) = transformation.point_2d_to_point_2d(
+                                (300.0, 300.0),
+                                500.0,
+                                source_camera,
+                                target_camera)
+
+                            self.assertIsNotNone(x)
+                            self.assertIsNotNone(y)
+    
+    def test_color_2d_to_depth_2d(self):
+
+        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+            for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
+                for source_camera in Test_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+                        with self.subTest(depth_mode = depth_mode, 
+                            color_resolution = color_resolution,
+                            source_camera = source_camera,
+                            target_camera = target_camera):
+
+                            # Get a depth image.
+                            device_config = k4a.DeviceConfiguration(
+                                color_format = k4a.EImageFormat.COLOR_BGRA32,
+                                color_resolution = color_resolution,
+                                depth_mode = depth_mode,
+                                camera_fps = k4a.EFramesPerSecond.FPS_15,
+                                synchronized_images_only = True,
+                                depth_delay_off_color_usec = 0,
+                                wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
+                                subordinate_delay_off_master_usec = 0,
+                                disable_streaming_indicator = False
+                            )
+                            self.device.start_cameras(device_config)
+                            capture = self.device.get_capture(-1)
+                            self.device.stop_cameras()
+
+                            # Get calibration.
+                            calibration = self.device.get_calibration(
+                                depth_mode,
+                                color_resolution)
+
+                            # Create transformation.
+                            transformation = k4a.Transformation(calibration)
+
+                            # Apply transformation.
+                            (x, y) = transformation.color_2d_to_depth_2d(
+                                (capture.color.height_pixels/4, capture.color.width_pixels/4),
+                                capture.depth)
+
+                            self.assertIsNotNone(x)
+                            self.assertIsNotNone(y)
+
+    def test_depth_image_to_color_camera(self):
+
+        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+            for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
+                with self.subTest(depth_mode = depth_mode, 
+                    color_resolution = color_resolution):
+
+                    # Get a depth image.
+                    device_config = k4a.DeviceConfiguration(
+                        color_format = k4a.EImageFormat.COLOR_BGRA32,
+                        color_resolution = color_resolution,
+                        depth_mode = depth_mode,
+                        camera_fps = k4a.EFramesPerSecond.FPS_15,
+                        synchronized_images_only = True,
+                        depth_delay_off_color_usec = 0,
+                        wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
+                        subordinate_delay_off_master_usec = 0,
+                        disable_streaming_indicator = False
+                    )
+                    self.device.start_cameras(device_config)
+                    capture = self.device.get_capture(-1)
+                    depth = capture.depth
+                    color = capture.color
+                    self.device.stop_cameras()
+                    del capture
+
+                    # Get calibration.
+                    calibration = self.device.get_calibration(
+                        depth_mode,
+                        color_resolution)
+
+                    # Create transformation.
+                    transformation = k4a.Transformation(calibration)
+
+                    # Apply transformation.
+                    transformed_depth = transformation.depth_image_to_color_camera(depth, color)
+                    
+                    self.assertIsNotNone(transformed_depth)
+
+    def test_depth_image_to_color_camera_custom(self):
+
+        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+            for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
+                with self.subTest(depth_mode = depth_mode, 
+                    color_resolution = color_resolution):
+
+                    # Get a depth image.
+                    device_config = k4a.DeviceConfiguration(
+                        color_format = k4a.EImageFormat.COLOR_BGRA32,
+                        color_resolution = color_resolution,
+                        depth_mode = depth_mode,
+                        camera_fps = k4a.EFramesPerSecond.FPS_15,
+                        synchronized_images_only = True,
+                        depth_delay_off_color_usec = 0,
+                        wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
+                        subordinate_delay_off_master_usec = 0,
+                        disable_streaming_indicator = False
+                    )                             
+                    self.device.start_cameras(device_config)
+                    capture = self.device.get_capture(-1)
+                    depth = capture.depth
+                    color = capture.color
+                    self.device.stop_cameras()
+                    del capture
+
+                    # Create a custom image.
+                    custom = k4a.Image.create(
+                        k4a.EImageFormat.CUSTOM16,
+                        depth.width_pixels,
+                        depth.height_pixels,
+                        depth.width_pixels * 2)
+
+                    # Get calibration.
+                    calibration = self.device.get_calibration(
+                        depth_mode,
+                        color_resolution)
+
+                    # Create transformation.
+                    transformation = k4a.Transformation(calibration)
+
+                    # Apply transformation.
+                    (transformed_depth, transformed_custom) = \
+                        transformation.depth_image_to_color_camera_custom(
+                            depth,
+                            custom,
+                            color,
+                            k4a.ETransformInterpolationType.LINEAR,
+                            0)
+                    
+                    self.assertIsNotNone(transformed_depth)
+                    self.assertIsNotNone(transformed_custom)
+
+    def test_color_image_to_depth_camera(self):
+
+        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+            for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
+                with self.subTest(depth_mode = depth_mode, 
+                    color_resolution = color_resolution):
+
+                    # Get a depth and color image.
+                    device_config = k4a.DeviceConfiguration(
+                        color_format = k4a.EImageFormat.COLOR_BGRA32,
+                        color_resolution = color_resolution,
+                        depth_mode = depth_mode,
+                        camera_fps = k4a.EFramesPerSecond.FPS_15,
+                        synchronized_images_only = True,
+                        depth_delay_off_color_usec = 0,
+                        wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
+                        subordinate_delay_off_master_usec = 0,
+                        disable_streaming_indicator = False
+                    )
+                    self.device.start_cameras(device_config)
+                    capture = self.device.get_capture(-1)
+                    depth = capture.depth
+                    color = capture.color
+                    self.device.stop_cameras()
+
+                    # Get calibration.
+                    calibration = self.device.get_calibration(
+                        depth_mode,
+                        color_resolution)
+
+                    # Create transformation.
+                    transformation = k4a.Transformation(calibration)
+
+                    # Apply transformation.
+                    transformed_color = transformation.color_image_to_depth_camera(
+                        depth,
+                        color)
+                    
+                    self.assertIsNotNone(transformed_color)
+
+    def test_depth_image_to_point_cloud(self):
+
+        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+            for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
+                with self.subTest(depth_mode = depth_mode, 
+                    color_resolution = color_resolution):
+
+                    # Get a depth image.
+                    device_config = k4a.DeviceConfiguration(
+                        color_format = k4a.EImageFormat.COLOR_BGRA32,
+                        color_resolution = color_resolution,
+                        depth_mode = depth_mode,
+                        camera_fps = k4a.EFramesPerSecond.FPS_15,
+                        synchronized_images_only = True,
+                        depth_delay_off_color_usec = 0,
+                        wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
+                        subordinate_delay_off_master_usec = 0,
+                        disable_streaming_indicator = False
+                    )
+                    self.device.start_cameras(device_config)
+                    capture = self.device.get_capture(-1)
+                    depth = capture.depth
+                    self.device.stop_cameras()
+                    del capture
+
+                    # Get calibration.
+                    calibration = self.device.get_calibration(
+                        depth_mode,
+                        color_resolution)
+
+                    # Create transformation.
+                    transformation = k4a.Transformation(calibration)
+
+                    # Apply transformation.
+                    point_cloud = transformation.depth_image_to_point_cloud(
+                        depth,
+                        k4a.ECalibrationType.DEPTH)
+                    
+                    self.assertIsNotNone(point_cloud)

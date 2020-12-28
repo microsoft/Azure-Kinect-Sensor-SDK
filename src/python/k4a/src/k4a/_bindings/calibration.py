@@ -8,7 +8,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 import ctypes as _ctypes
 
-from .k4atypes import _Calibration, EStatus, EDepthMode, EColorResolution
+from .k4atypes import _Calibration, EStatus, EDepthMode, EColorResolution, _Calibration
 
 from .k4a import k4a_calibration_get_from_raw
 
@@ -46,13 +46,14 @@ class Calibration:
             buffer_size_bytes = _ctypes.c_ulonglong(len(raw_calibration))
             cbuffer = (_ctypes.c_uint8 * buffer_size_bytes.value).from_buffer(raw_calibration)
             cbufferptr = _ctypes.cast(cbuffer, _ctypes.POINTER(_ctypes.c_char))
+            _calibration = _Calibration()
 
             status = k4a_calibration_get_from_raw(
                 cbufferptr,
                 buffer_size_bytes,
                 depth_mode,
                 color_resolution,
-                _ctypes.byref(self._calibration))
+                _ctypes.byref(_calibration))
 
             if status == EStatus.SUCCEEDED:
                 # Wrap the ctypes struct into a non-ctypes class.
