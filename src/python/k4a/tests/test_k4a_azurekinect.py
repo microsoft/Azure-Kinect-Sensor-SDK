@@ -976,7 +976,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
-                    with self.subTest(depth_mode = depth_mode, color_resolution = color_resolutions):
+                    with self.subTest(depth_mode = depth_mode, color_resolution = color_resolution):
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
                             depth_mode,
@@ -1033,7 +1033,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
 
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
-                    with self.subTest(depth_mode = depth_mode, color_resolution = color_resolutions):
+                    with self.subTest(depth_mode = depth_mode, color_resolution = color_resolution):
                         status = k4a._bindings.k4a.k4a_calibration_get_from_raw(
                             buffer,
                             buffer_size,
@@ -1077,7 +1077,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
                     for source_camera in calibration_types:
                         for target_camera in calibration_types:
                             with self.subTest(depth_mode = depth_mode, 
-                                color_resolution = color_resolutions,
+                                color_resolution = color_resolution,
                                 source_camera = source_camera,
                                 target_camera = target_camera):
 
@@ -1140,7 +1140,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
                     for source_camera in calibration_types:
                         for target_camera in calibration_types:
                             with self.subTest(depth_mode = depth_mode, 
-                                color_resolution = color_resolutions,
+                                color_resolution = color_resolution,
                                 source_camera = source_camera,
                                 target_camera = target_camera):
 
@@ -1200,7 +1200,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
                     for source_camera in calibration_types:
                         for target_camera in calibration_types:
                             with self.subTest(depth_mode = depth_mode, 
-                                color_resolution = color_resolutions,
+                                color_resolution = color_resolution,
                                 source_camera = source_camera,
                                 target_camera = target_camera):
 
@@ -1259,7 +1259,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
                     for source_camera in calibration_types:
                         for target_camera in calibration_types:
                             with self.subTest(depth_mode = depth_mode, 
-                                color_resolution = color_resolutions,
+                                color_resolution = color_resolution,
                                 source_camera = source_camera,
                                 target_camera = target_camera):
 
@@ -1317,7 +1317,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
                     with self.subTest(depth_mode = depth_mode, 
-                        color_resolution = color_resolutions):
+                        color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
@@ -1342,7 +1342,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
                         color_image = k4a._bindings.k4a.k4a_capture_get_color_image(capture)
                         width_pixels = k4a._bindings.k4a.k4a_image_get_width_pixels(color_image)
                         height_pixels = k4a._bindings.k4a.k4a_image_get_height_pixels(color_image)
-                        source_point = k4a._bindings.k4a._Float2(height_pixels/4, width_pixels/4)
+                        source_point = k4a._bindings.k4a._Float2(width_pixels/4, height_pixels/4)
 
                         # Transform source point from source_camera to target_camera.
                         status = k4a._bindings.k4a.k4a_calibration_color_2d_to_depth_2d(
@@ -1384,7 +1384,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
                     with self.subTest(depth_mode = depth_mode, 
-                        color_resolution = color_resolutions):
+                        color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
@@ -1422,7 +1422,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
                     with self.subTest(depth_mode = depth_mode, 
-                        color_resolution = color_resolutions):
+                        color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
@@ -1500,7 +1500,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
                     with self.subTest(depth_mode = depth_mode, 
-                        color_resolution = color_resolutions):
+                        color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
@@ -1609,7 +1609,7 @@ class Test_K4A_AzureKinect(unittest.TestCase):
             for depth_mode in depth_modes:
                 for color_resolution in color_resolutions:
                     with self.subTest(depth_mode = depth_mode, 
-                        color_resolution = color_resolutions):
+                        color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,

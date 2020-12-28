@@ -54,12 +54,12 @@ class Transformation:
         source_camera:ECalibrationType,
         target_camera:ECalibrationType)->(float, float, float):
 
-        target_point = None
+        target_point = (None, None, None)
 
         src_pt = _Float3(
             x = source_point_3d[0],
             y = source_point_3d[1],
-            z = source_point_3d[3])
+            z = source_point_3d[2])
 
         tgt_pt = _Float3()
 
@@ -81,13 +81,13 @@ class Transformation:
         source_camera:ECalibrationType,
         target_camera:ECalibrationType)->(float, float, float):
 
-        target_point = None
+        target_point = (None, None, None)
 
         src_pt = _Float2(
             x = source_point_2d[0],
             y = source_point_2d[1])
         tgt_pt = _Float3()
-        valid_int_flag = ctypes.c_int(0)
+        valid_int_flag = _ctypes.c_int(0)
 
         status = k4a_calibration_2d_to_3d(
             self._calibration._calibration,
@@ -108,14 +108,14 @@ class Transformation:
         source_camera:ECalibrationType,
         target_camera:ECalibrationType)->(float, float):
 
-        target_point = None
+        target_point = (None, None)
 
         src_pt = _Float3(
             x = source_point_3d[0],
             y = source_point_3d[1],
             z = source_point_3d[2])
         tgt_pt = _Float2()
-        valid_int_flag = ctypes.c_int(0)
+        valid_int_flag = _ctypes.c_int(0)
 
         status = k4a_calibration_3d_to_2d(
             self._calibration._calibration,
@@ -136,13 +136,13 @@ class Transformation:
         source_camera:ECalibrationType,
         target_camera:ECalibrationType)->(float, float):
 
-        target_point = None
+        target_point = (None, None)
 
         src_pt = _Float2(
             x = source_point_2d[0],
             y = source_point_2d[1])
         tgt_pt = _Float2()
-        valid_int_flag = ctypes.c_int(0)
+        valid_int_flag = _ctypes.c_int(0)
 
         status = k4a_calibration_2d_to_2d(
             self._calibration._calibration,
@@ -162,13 +162,13 @@ class Transformation:
         source_point_2d:(float, float),
         depth:Image)->(float, float):
 
-        target_point = None
+        target_point = (None, None)
 
         src_pt = _Float2(
             x = source_point_2d[0],
             y = source_point_2d[1])
         tgt_pt = _Float2()
-        valid_int_flag = ctypes.c_int(0)
+        valid_int_flag = _ctypes.c_int(0)
 
         status = k4a_calibration_color_2d_to_depth_2d(
             self._calibration._calibration,
@@ -183,9 +183,15 @@ class Transformation:
         return target_point
 
     def depth_image_to_color_camera(self,
-        depth:Image)->Image:
+        depth:Image,
+        color:Image)->Image:
 
-        transformed_depth_image = _copy.deepcopy(depth)
+        # Create an output image.
+        transformed_depth_image = Image.create(
+            depth.image_format,
+            color.width_pixels,
+            color.height_pixels,
+            color.width_pixels * 2)
 
         status = k4a_transformation_depth_image_to_color_camera(
             self.__transform_handle,
@@ -200,11 +206,23 @@ class Transformation:
     def depth_image_to_color_camera_custom(self,
         depth:Image,
         custom:Image,
+        color:Image,
         interp_type:ETransformInterpolationType,
         invalid_value:int)->(Image, Image):
 
-        transformed_depth_image = _copy.deepcopy(depth)
-        transformed_custom_image = _copy.deepcopy(custom)
+        # Create an output image.
+        transformed_depth_image = Image.create(
+            depth.image_format,
+            color.width_pixels,
+            color.height_pixels,
+            color.width_pixels * 2)
+
+        # Create an output image.
+        transformed_custom_image = Image.create(
+            custom.image_format,
+            color.width_pixels,
+            color.height_pixels,
+            color.width_pixels * 2)
 
         status = k4a_transformation_depth_image_to_color_camera_custom(
             self.__transform_handle,
@@ -225,7 +243,12 @@ class Transformation:
         depth:Image,
         color:Image)->Image:
 
-        transformed_color_image = _copy.deepcopy(color)
+        # Create an output image.
+        transformed_color_image = Image.create(
+            color.image_format,
+            depth.width_pixels,
+            depth.height_pixels,
+            depth.width_pixels * 4)
 
         status = k4a_transformation_color_image_to_depth_camera(
             self.__transform_handle,

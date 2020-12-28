@@ -234,7 +234,7 @@ class Image:
             self.stride_bytes)
 
         # Copy the ndarray data to the new buffer.
-        _np.copyto(self._data, new_image._data)
+        _np.copyto(new_image._data, self._data)
 
         # Copy the other image metadata.
         new_image.device_timestamp_usec = self.device_timestamp_usec
