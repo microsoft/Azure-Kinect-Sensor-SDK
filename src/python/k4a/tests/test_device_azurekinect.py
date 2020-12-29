@@ -115,7 +115,7 @@ class Test_Device_AzureKinect(unittest.TestCase):
 
         # Start the cameras.
         status = self.device.start_cameras(
-            k4a.DEVICE_CONFIG_BGRA32_4K_WFOV_UNBINNED)
+            k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         # Get a capture, waiting indefinitely.
@@ -124,6 +124,25 @@ class Test_Device_AzureKinect(unittest.TestCase):
 
         # Stop the cameras.
         self.device.stop_cameras()
+
+    def test_get_imu_sample(self):
+
+        # Start the cameras.
+        status = self.device.start_cameras(
+            k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
+        self.assertEqual(status, k4a.EStatus.SUCCEEDED)
+
+        # Start the imu.
+        status = self.device.start_imu()
+        self.assertEqual(status, k4a.EStatus.SUCCEEDED)
+
+        # Get an imu sample, waiting indefinitely.
+        imu_sample = self.device.get_imu_sample(-1)
+        self.assertIsNotNone(imu_sample)
+
+        # Stop the cameras and imu.
+        self.device.stop_cameras()
+        self.device.stop_imu()
 
     def test_get_serial_number(self):
         serial_number = self.device.serial_number
@@ -148,18 +167,20 @@ class Test_Device_AzureKinect(unittest.TestCase):
         self.assertIsInstance(sync_in_connected, bool)
 
     def test_start_stop_cameras(self):
-        status = self.device.start_cameras(k4a.DEVICE_CONFIG_BGRA32_4K_WFOV_UNBINNED)
+        status = self.device.start_cameras(k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         self.device.stop_cameras()
 
-    # Always fails to start and stop the imu for some reason.
-    @unittest.skip
     def test_start_stop_imu(self):
+        status = self.device.start_cameras(k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
+        self.assertEqual(status, k4a.EStatus.SUCCEEDED)
+
         status = self.device.start_imu()
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         self.device.stop_imu()
+        self.device.stop_cameras()
 
     def test_get_color_control(self):
 
@@ -241,7 +262,7 @@ class Test_Capture_AzureKinect(unittest.TestCase):
 
     def setUp(self):
         status = self.device.start_cameras(
-            k4a.DEVICE_CONFIG_BGRA32_4K_WFOV_UNBINNED)
+            k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         self.capture = self.device.get_capture(-1)
@@ -461,7 +482,7 @@ class Test_Image_AzureKinect(unittest.TestCase):
 
     def setUp(self):
         status = self.device.start_cameras(
-            k4a.DEVICE_CONFIG_BGRA32_4K_WFOV_UNBINNED)
+            k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         self.capture = self.device.get_capture(-1)
@@ -1082,3 +1103,6 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                         k4a.ECalibrationType.DEPTH)
                     
                     self.assertIsNotNone(point_cloud)
+
+if __name__ == '__main__':
+    unittest.main()

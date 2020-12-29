@@ -200,6 +200,11 @@ class Transformation:
 
         if (status != EStatus.SUCCEEDED):
             transformed_depth_image = None
+        else:
+            buffer_ptr = k4a_image_get_buffer(transformed_depth_image._image_handle)
+            array_type = (_ctypes.c_uint16 * color.height_pixels) * color.width_pixels
+            self._data = _np.ctypeslib.as_array(array_type.from_address(
+                _ctypes.c_void_p.from_buffer(buffer_ptr).value))
 
         return transformed_depth_image
 

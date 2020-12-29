@@ -880,30 +880,6 @@ class ImuSample(_ctypes.Structure):
             self.gyro_timestamp_usec)
 
 
-# A static instance of a device configuration where everything is disabled.
-DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_MJPG,
-    color_resolution = EColorResolution.OFF,
-    depth_mode = EDepthMode.OFF,
-    camera_fps = EFramesPerSecond.FPS_30,
-    synchronized_images_only = False,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-DEVICE_CONFIG_BGRA32_4K_WFOV_UNBINNED = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_2160P,
-    depth_mode = EDepthMode.WFOV_2X2BINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
-    synchronized_images_only = True,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-
 # An empty class for appending fields dynamically.
 class _EmptyClass:
     
@@ -917,3 +893,105 @@ class _EmptyClass:
             tempstr = tempstr + str(keys[len(keys)-1]) + "=" + str(self.__dict__[keys[len(keys)-1]])
 
         return tempstr
+
+
+# ############# Define static instances of device configurations. #############
+
+DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_MJPG,
+    color_resolution = EColorResolution.OFF,
+    depth_mode = EDepthMode.OFF,
+    camera_fps = EFramesPerSecond.FPS_30,
+    synchronized_images_only = False,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
+
+DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_BGRA32,
+    color_resolution = EColorResolution.RES_2160P,
+    depth_mode = EDepthMode.WFOV_UNBINNED,
+    camera_fps = EFramesPerSecond.FPS_15,
+    synchronized_images_only = True,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
+
+DEVICE_CONFIG_BGRA32_2160P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_BGRA32,
+    color_resolution = EColorResolution.RES_2160P,
+    depth_mode = EDepthMode.WFOV_2X2BINNED,
+    camera_fps = EFramesPerSecond.FPS_15,
+    synchronized_images_only = True,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
+
+DEVICE_CONFIG_BGRA32_2160P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_BGRA32,
+    color_resolution = EColorResolution.RES_2160P,
+    depth_mode = EDepthMode.NFOV_UNBINNED,
+    camera_fps = EFramesPerSecond.FPS_15,
+    synchronized_images_only = True,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
+
+DEVICE_CONFIG_BGRA32_2160P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_BGRA32,
+    color_resolution = EColorResolution.RES_2160P,
+    depth_mode = EDepthMode.NFOV_2X2BINNED,
+    camera_fps = EFramesPerSecond.FPS_15,
+    synchronized_images_only = True,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
+
+DEVICE_CONFIG_BGRA32_1080P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_BGRA32,
+    color_resolution = EColorResolution.RES_1080P,
+    depth_mode = EDepthMode.WFOV_UNBINNED,
+    camera_fps = EFramesPerSecond.FPS_15,
+    synchronized_images_only = True,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
+
+DEVICE_CONFIG_BGRA32_1080P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_BGRA32,
+    color_resolution = EColorResolution.RES_1080P,
+    depth_mode = EDepthMode.WFOV_2X2BINNED,
+    camera_fps = EFramesPerSecond.FPS_15,
+    synchronized_images_only = True,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
+
+DEVICE_CONFIG_BGRA32_1080P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_BGRA32,
+    color_resolution = EColorResolution.RES_1080P,
+    depth_mode = EDepthMode.NFOV_UNBINNED,
+    camera_fps = EFramesPerSecond.FPS_15,
+    synchronized_images_only = True,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)
+
+DEVICE_CONFIG_BGRA32_1080P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
+    color_format = EImageFormat.COLOR_BGRA32,
+    color_resolution = EColorResolution.RES_1080P,
+    depth_mode = EDepthMode.NFOV_2X2BINNED,
+    camera_fps = EFramesPerSecond.FPS_15,
+    synchronized_images_only = True,
+    depth_delay_off_color_usec = 0,
+    wired_sync_mode = EWiredSyncMode.STANDALONE,
+    subordinate_delay_off_master_usec = 0,
+    disable_streaming_indicator = False)

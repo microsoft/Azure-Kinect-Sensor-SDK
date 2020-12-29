@@ -81,8 +81,8 @@ class Capture:
     def __enter__(self):
         return self
 
-    def __exit__(self):
-        del self
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
     def __del__(self):
         # Release the handle first.
@@ -106,10 +106,10 @@ class Capture:
             'depth=%s, ', _newline,
             'ir=%s, ', _newline,
             'temperature_C=%f, ']) % (
-            self._color.__str__(),
-            self._depth.__str__(),
-            self._ir.__str__(),
-            self._temperature)
+            self.color.__str__(),
+            self.depth.__str__(),
+            self.ir.__str__(),
+            self.temperature)
 
     # Define properties and get/set functions. ############### 
     @property
