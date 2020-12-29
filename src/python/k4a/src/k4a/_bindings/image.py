@@ -68,10 +68,10 @@ class Image:
             array_type = ((_ctypes.c_ubyte * 4) * width_pixels) * height_pixels
             array_len_bytes = width_pixels * height_pixels * 4
         elif image_format == EImageFormat.DEPTH16:
-            array_type = (_ctypes.c_uint16 * height_pixels) * width_pixels
+            array_type = (_ctypes.c_uint16 * width_pixels) * height_pixels
             array_len_bytes = width_pixels * height_pixels * 2
         elif image_format == EImageFormat.IR16:
-            array_type = (_ctypes.c_uint16 * height_pixels) * width_pixels
+            array_type = (_ctypes.c_uint16 * width_pixels) * height_pixels
             array_len_bytes = width_pixels * height_pixels * 2
         elif image_format == EImageFormat.CUSTOM16:
             array_type = (_ctypes.c_uint16 * width_pixels) * height_pixels
@@ -265,17 +265,17 @@ class Image:
             'exposure_usec=%d, ',
             'white_balance=%d, ',
             'iso_speed=%d, ']) % (
-            self._data.__str__(),
-            self._image_format,
-            self._size_bytes,
-            self._width_pixels,
-            self._height_pixels,
-            self._stride_bytes,
-            self._device_timestamp_usec,
-            self._system_timestamp_nsec,
-            self._exposure_usec,
-            self._white_balance,
-            self._iso_speed)
+            self.data.__str__(),
+            self.image_format,
+            self.size_bytes,
+            self.width_pixels,
+            self.height_pixels,
+            self.stride_bytes,
+            self.device_timestamp_usec,
+            self.system_timestamp_nsec,
+            self.exposure_usec,
+            self.white_balance,
+            self.iso_speed)
 
     # Define properties and get/set functions. ############### 
     @property

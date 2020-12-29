@@ -12,7 +12,7 @@ from os import linesep as _newline
 from .k4atypes import _DeviceHandle, HardwareVersion, EStatus, EBufferStatus, \
     _EmptyClass, EColorControlCommand, EColorControlMode, ImuSample, \
     EWaitStatus, DeviceConfiguration, _CaptureHandle, EDepthMode, EColorResolution, \
-    _Calibration
+    _Calibration, ImuSample
 
 from .k4a import k4a_device_get_installed_count, k4a_device_open, \
     k4a_device_get_serialnum, k4a_device_get_version, \
@@ -162,7 +162,7 @@ class Device:
 
     # Called automatically when exiting "with" block.
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
+        pass
 
     # Prevent copying of a device handle.
     def __copy__(self):
@@ -290,6 +290,21 @@ class Device:
 
         return capture
 
+    def get_imu_sample(self, timeout_ms:int)->ImuSample:
+
+        imu_sample = ImuSample()
+
+        wait_status = k4a_device_get_imu_sample(
+            self.__device_handle,
+            _ctypes.byref(imu_sample),
+            _ctypes.c_int32(timeout_ms)
+        )
+
+        if wait_status != EWaitStatus.SUCCEEDED:
+            imu_sample = None
+
+        return imu_sample
+
     def get_raw_calibration(self)->bytearray:
 
         buffer = None
@@ -330,20 +345,23 @@ class Device:
 
         calibration = None
 
-        if (isinstance(depth_mode, EDepthMode) and
-            isinstance(color_resolution, EColorResolution)):
+        if not isinstance(depth_mode, EDepthMode):
+            depth_mode = EDepthMode(depth_mode)
 
-            # Get ctypes calibration struct.
-            _calibration = _Calibration()
-            status = k4a_device_get_calibration(
-                self.__device_handle,
-                depth_mode,
-                color_resolution,
-                _ctypes.byref(_calibration))
+        if not isinstance(color_resolution, EColorResolution):
+            color_resolution = EColorResolution(color_resolution)
 
-            if status == EStatus.SUCCEEDED:
-                # Wrap the ctypes struct into a non-ctypes class.
-                calibration = Calibration(_calibration=_calibration)
+        # Get ctypes calibration struct.
+        _calibration = _Calibration()
+        status = k4a_device_get_calibration(
+            self.__device_handle,
+            depth_mode,
+            color_resolution,
+            _ctypes.byref(_calibration))
+
+        if status == EStatus.SUCCEEDED:
+            # Wrap the ctypes struct into a non-ctypes class.
+            calibration = Calibration(_calibration=_calibration)
 
         return calibration
 

@@ -46,9 +46,7 @@ For SDK feedback or to report a bug, please file a [GitHub Issue](https://github
 
 ## Sample Code
 
-There are several places where the sample code can be found.
-
-- In this repository: [K4A\examples](examples)- each example has a readme page that describes it and the steps to set it up.
+Sample Python code that uses the Python API can be found in the examples/ folder. See [examples](docs/examples.md).
 
 ## Q&A
 
