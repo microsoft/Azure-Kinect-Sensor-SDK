@@ -76,10 +76,10 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                                       K4ADataSource<k4a_imu_sample_t> *imuDataSource,
                                       std::shared_ptr<K4AMicrophoneListener> &&microphoneDataSource,
                                       bool enableDepthCamera,
-                                      uint32_t depth_mode_id,
+                                      k4a_depth_mode_info_t depth_mode_info,
                                       bool enableColorCamera,
                                       k4a_image_format_t colorFormat,
-                                      uint32_t color_mode_id)
+                                      k4a_color_mode_info_t color_mode_info)
 {
     if (cameraDataSource != nullptr)
     {
@@ -89,17 +89,17 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                               "Infrared Camera",
                               *cameraDataSource,
                               std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_IR16>>(
-                                  std14::make_unique<K4AInfraredImageConverter>(depth_mode_id)));
+                                  std14::make_unique<K4AInfraredImageConverter>(depth_mode_info)));
 
             // K4A_DEPTH_MODE_PASSIVE_IR doesn't support actual depth
             //
-            if (depth_mode_id != 5) // 5 = K4A_DEPTH_MODE_PASSIVE_IR
+            if (!depth_mode_info.passive_ir_only)
             {
                 CreateVideoWindow(sourceIdentifier,
                                   "Depth Camera",
                                   *cameraDataSource,
                                   std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_DEPTH16>>(
-                                      std14::make_unique<K4ADepthImageConverter>(depth_mode_id)));
+                                      std14::make_unique<K4ADepthImageConverter>(depth_mode_info)));
             }
         }
 
@@ -115,7 +115,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
                     std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_COLOR_YUY2>>(
-                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_YUY2>(color_mode_id)));
+                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_YUY2>(color_mode_info)));
                 break;
 
             case K4A_IMAGE_FORMAT_COLOR_MJPG:
@@ -124,7 +124,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
                     std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_COLOR_MJPG>>(
-                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_MJPG>(color_mode_id)));
+                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_MJPG>(color_mode_info)));
                 break;
 
             case K4A_IMAGE_FORMAT_COLOR_BGRA32:
@@ -133,7 +133,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
                     std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_COLOR_BGRA32>>(
-                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_BGRA32>(color_mode_id)));
+                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_BGRA32>(color_mode_info)));
                 break;
 
             case K4A_IMAGE_FORMAT_COLOR_NV12:
@@ -142,7 +142,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                     colorWindowTitle,
                     *cameraDataSource,
                     std::make_shared<K4AConvertingImageSource<K4A_IMAGE_FORMAT_COLOR_NV12>>(
-                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_NV12>(color_mode_id)));
+                        K4AColorImageConverterFactory::Create<K4A_IMAGE_FORMAT_COLOR_NV12>(color_mode_info)));
                 break;
 
             default:

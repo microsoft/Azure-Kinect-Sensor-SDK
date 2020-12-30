@@ -60,8 +60,8 @@ k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_
                                                           const k4a_calibration_camera_t *color_camera_calibration,
                                                           const k4a_calibration_extrinsics_t *gyro_extrinsics,
                                                           const k4a_calibration_extrinsics_t *accel_extrinsics,
-                                                          const k4a_depth_mode_t depth_mode,
-                                                          const k4a_color_resolution_t color_resolution,
+                                                          const k4a_depth_mode_info_t depth_mode_info,
+                                                          const k4a_color_mode_info_t color_mode_info,
                                                           k4a_calibration_t *calibration);
 
 k4a_result_t transformation_3d_to_3d(const k4a_calibration_t *calibration,

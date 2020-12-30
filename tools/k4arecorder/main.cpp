@@ -106,6 +106,8 @@ static int string_compare(const char *s1, const char *s2)
     exit(0);
 }
 
+// TODO: update recorder to generic modes
+
 int main(int argc, char **argv)
 {
     int device_index = 0;

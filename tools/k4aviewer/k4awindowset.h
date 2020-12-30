@@ -43,10 +43,10 @@ public:
                                    K4ADataSource<k4a_imu_sample_t> *imuDataSource,
                                    std::shared_ptr<K4AMicrophoneListener> &&microphoneDataSource,
                                    bool enableDepthCamera,
-                                   uint32_t depth_mode_id,
+                                   k4a_depth_mode_info_t depth_mode_info,
                                    bool enableColorCamera,
                                    k4a_image_format_t colorFormat,
-                                   uint32_t color_mode_id);
+                                   k4a_color_mode_info_t color_mode_info);
 
     static void StartPointCloudWindow(const char *sourceIdentifier,
                                       const k4a::calibration &calibrationData,
