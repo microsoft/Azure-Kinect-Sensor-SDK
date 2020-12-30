@@ -23,10 +23,7 @@ class K4ADepthImageConverter
     : public K4ADepthImageConverterBase<K4A_IMAGE_FORMAT_DEPTH16, K4ADepthPixelColorizer::ColorizeBlueToRed>
 {
 public:
-    explicit K4ADepthImageConverter(uint32_t depth_mode_id) :
-        K4ADepthImageConverterBase(depth_mode_id, GetDepthModeRange(depth_mode_id))
-    {
-    }
+    explicit K4ADepthImageConverter(k4a_depth_mode_info_t depth_mode_info) : K4ADepthImageConverterBase(depth_mode_info, GetDepthModeRange(depth_mode_info)) {}
 
     ~K4ADepthImageConverter() override = default;
 

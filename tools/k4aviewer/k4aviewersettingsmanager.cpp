@@ -51,9 +51,9 @@ std::ostream &operator<<(std::ostream &s, const K4ADeviceConfiguration &val)
     s << Separator << EnableColorCameraTag << Separator << val.EnableColorCamera << std::endl;
     s << Separator << EnableDepthCameraTag << Separator << val.EnableDepthCamera << std::endl;
     s << Separator << ColorFormatTag << Separator << val.ColorFormat << std::endl;
-    s << Separator << ColorResolutionTag << Separator << val.ColorResolution << std::endl;
-    s << Separator << DepthModeTag << Separator << val.DepthMode << std::endl;
-    s << Separator << FramerateTag << Separator << val.Framerate << std::endl;
+    s << Separator << ColorResolutionTag << Separator << val.color_mode_id << std::endl;
+    s << Separator << DepthModeTag << Separator << val.depth_mode_id << std::endl;
+    s << Separator << FramerateTag << Separator << val.fps_mode_id << std::endl;
     s << Separator << DepthDelayOffColorUsecTag << Separator << val.DepthDelayOffColorUsec << std::endl;
     s << Separator << WiredSyncModeTag << Separator << val.WiredSyncMode << std::endl;
     s << Separator << SubordinateDelayOffMasterUsecTag << Separator << val.SubordinateDelayOffMasterUsec << std::endl;
@@ -98,15 +98,15 @@ std::istream &operator>>(std::istream &s, K4ADeviceConfiguration &val)
         }
         else if (variableTag == ColorResolutionTag)
         {
-            s >> val.ColorResolution;
+            s >> val.color_mode_id;
         }
         else if (variableTag == DepthModeTag)
         {
-            s >> val.DepthMode;
+            s >> val.depth_mode_id;
         }
         else if (variableTag == FramerateTag)
         {
-            s >> val.Framerate;
+            s >> val.fps_mode_id;
         }
         else if (variableTag == DepthDelayOffColorUsecTag)
         {
@@ -281,9 +281,9 @@ k4a_device_configuration_t K4ADeviceConfiguration::ToK4ADeviceConfiguration() co
     k4a_device_configuration_t deviceConfig;
 
     deviceConfig.color_format = ColorFormat;
-    deviceConfig.color_mode_id = EnableColorCamera ? ColorResolution : 0; // 0 = K4A_COLOR_RESOLUTION_OFF
-    deviceConfig.depth_mode_id = EnableDepthCamera ? DepthMode : 0;       // 0 = K4A_DEPTH_MODE_OFF
-    deviceConfig.fps_mode_id = Framerate;
+    deviceConfig.color_mode_id = EnableColorCamera ? color_mode_id : 0; // 0 = K4A_COLOR_RESOLUTION_OFF
+    deviceConfig.depth_mode_id = EnableDepthCamera ? depth_mode_id : 0;       // 0 = K4A_DEPTH_MODE_OFF
+    deviceConfig.fps_mode_id = fps_mode_id;
 
     deviceConfig.depth_delay_off_color_usec = DepthDelayOffColorUsec;
     deviceConfig.wired_sync_mode = WiredSyncMode;

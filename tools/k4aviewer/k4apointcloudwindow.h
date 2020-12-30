@@ -28,7 +28,8 @@ public:
     K4APointCloudWindow(std::string &&windowTitle,
                         bool enableColorPointCloud,
                         std::shared_ptr<K4ANonBufferingCaptureSource> &&captureSource,
-                        const k4a::calibration &calibrationData);
+                        const k4a::calibration &calibrationData,
+                        k4a::device * device);
     ~K4APointCloudWindow() override = default;
 
     K4APointCloudWindow(const K4APointCloudWindow &) = delete;
@@ -47,8 +48,7 @@ private:
     std::shared_ptr<K4AViewerImage> m_texture;
     std::shared_ptr<K4ANonBufferingCaptureSource> m_captureSource;
 
-    K4APointCloudVisualizer::ColorizationStrategy m_colorizationStrategy =
-        K4APointCloudVisualizer::ColorizationStrategy::Shaded;
+    K4APointCloudVisualizer::ColorizationStrategy m_colorizationStrategy = K4APointCloudVisualizer::ColorizationStrategy::Shaded;
     int m_pointSize;
 
     bool m_enableColorPointCloud = false;

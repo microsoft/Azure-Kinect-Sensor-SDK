@@ -49,10 +49,10 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     //
     m_recordConfiguration = recording.get_record_configuration();
     std::stringstream fpsSS;
-    fpsSS << m_recordConfiguration.fps_mode_id;
+    fpsSS << m_recordConfiguration.fps_mode_info.mode_id;
     m_fpsLabel = fpsSS.str();
 
-    switch (m_recordConfiguration.fps_mode_id)
+    switch (m_recordConfiguration.fps_mode_info.mode_id)
     {
     case 0:  // 0 = K4A_FRAMES_PER_SECOND_5
         m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 5));
@@ -77,7 +77,7 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     std::stringstream depthSS;
     if (m_recordingHasDepth || m_recordingHasIR)
     {
-        depthSS << m_recordConfiguration.depth_mode_id;
+        depthSS << m_recordConfiguration.depth_mode_info.mode_id;
     }
     else
     {
@@ -91,7 +91,7 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     if (m_recordingHasColor)
     {
         colorFormatSS << m_recordConfiguration.color_format;
-        colorResolutionSS << m_recordConfiguration.color_mode_id;
+        colorResolutionSS << m_recordConfiguration.color_mode_info.mode_id;
 
         recording.set_color_conversion(K4A_IMAGE_FORMAT_COLOR_BGRA32);
         m_recordConfiguration.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
@@ -467,10 +467,10 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
                                          imuDataSource,
                                          nullptr, // Audio source - sound is not supported in recordings
                                          m_recordingHasDepth || m_recordingHasIR,
-                                         m_recordConfiguration.depth_mode_id,
+                                         m_recordConfiguration.depth_mode_info,
                                          m_recordingHasColor,
                                          m_recordConfiguration.color_format,
-                                         m_recordConfiguration.color_mode_id);
+                                         m_recordConfiguration.color_mode_info);
         break;
 
     case K4AWindowSet::ViewType::PointCloudViewer:
