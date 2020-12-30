@@ -342,7 +342,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     if (ImGui::TreeNode("Depth Configuration"))
     {
         const bool depthSettingsEditable = !deviceIsStarted && m_config.EnableDepthCamera;
-        auto *pDepthMode = reinterpret_cast<int *>(&m_config.DepthMode);
+        auto *pDepthMode = reinterpret_cast<int *>(&m_config.depth_mode_id);
         //ImGui::Text("Depth mode");
 
         // TODO: remove
@@ -439,14 +439,14 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         {
             if (!imageFormatSupportsHighResolution)
             {
-                m_config.ColorResolution = 1;  // 1 = K4A_COLOR_RESOLUTION_720P
+                m_config.color_mode_id = 1;  // 1 = K4A_COLOR_RESOLUTION_720P
             }
         }
 
         // TODO: remove
         //auto *pColorResolution = reinterpret_cast<int *>(&m_config.ColorResolution);
 
-        auto *pColorMode = reinterpret_cast<int *>(&m_config.ColorResolution);
+        auto *pColorMode = reinterpret_cast<int *>(&m_config.color_mode_id);
 
         //ImGui::Text("Resolution");
         //ImGui::Indent();
@@ -640,22 +640,22 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     if (colorResolutionUpdated || m_firstRun)
     {
-        if (m_config.ColorResolution == 6) // 6 = K4A_COLOR_RESOLUTION_3072P
+        if (m_config.color_mode_id == 6) // 6 = K4A_COLOR_RESOLUTION_3072P
         {
             // 4K supports up to 15FPS
             //
-            m_config.Framerate = 2;  // 2 = K4A_FRAMES_PER_SECOND_15
+            m_config.fps_mode_id = 2;  // 2 = K4A_FRAMES_PER_SECOND_15
         }
     }
     if (depthModeUpdated || m_firstRun)
     {
-        if (m_config.DepthMode == 4) // 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
+        if (m_config.depth_mode_id == 4) // 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
         {
-            m_config.Framerate = 2;  // 2 = K4A_FRAMES_PER_SECOND_15
+            m_config.fps_mode_id = 2;  // 2 = K4A_FRAMES_PER_SECOND_15
         }
     }
 
-    const bool supports30fps = !(m_config.EnableColorCamera && m_config.ColorResolution == 6) && !(m_config.EnableDepthCamera && m_config.DepthMode == 4); // 6 = K4A_COLOR_RESOLUTION_3072P, 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
+    const bool supports30fps = !(m_config.EnableColorCamera && m_config.color_mode_id == 6) && !(m_config.EnableDepthCamera && m_config.depth_mode_id == 4); // 6 = K4A_COLOR_RESOLUTION_3072P, 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
 
     const bool enableFramerate = !deviceIsStarted && (m_config.EnableColorCamera || m_config.EnableDepthCamera);
 
@@ -677,7 +677,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     // TODO: comment
     // TODO: tooltip if 30 fps not available due to other settings
-    auto *pFPSMode = reinterpret_cast<int *>(&m_config.Framerate);
+    auto *pFPSMode = reinterpret_cast<int *>(&m_config.fps_mode_id);
 
     // TODO: only returning 1 item in modes count
     std::vector<std::pair<int, std::string>> fps_mode_items;
@@ -743,7 +743,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             // the user interacts with the control
             //
             int maxDepthDelay = 0;
-            switch (m_config.Framerate)
+            switch (m_config.fps_mode_id)
             {
             case 2:  // 2 = K4A_FRAMES_PER_SECOND_30
                 maxDepthDelay = std::micro::den / 30;
@@ -882,7 +882,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
         ImGui::Separator();
 
-        const bool pointCloudViewerAvailable = m_config.EnableDepthCamera && m_config.DepthMode != 5 && m_camerasStarted; // 5 = K4A_DEPTH_MODE_PASSIVE_IR
+        const bool pointCloudViewerAvailable = m_config.EnableDepthCamera && m_config.depth_mode_id != 5 && m_camerasStarted; // 5 = K4A_DEPTH_MODE_PASSIVE_IR
 
         K4AWindowSet::ShowModeSelector(&m_currentViewType,
                                        true,
@@ -1125,23 +1125,24 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     switch (viewType)
     {
     case K4AWindowSet::ViewType::Normal:
+        k4a_depth_mode_info_t depth_mode_info = m_device.get_depth_mode(m_config.depth_mode_id);
+        k4a_color_mode_info_t color_mode_info = m_device.get_color_mode(m_config.color_mode_id);
         K4AWindowSet::StartNormalWindows(m_deviceSerialNumber.c_str(),
                                          &m_cameraDataSource,
                                          m_config.EnableImu ? &m_imuDataSource : nullptr,
                                          std::move(micListener),
                                          m_config.EnableDepthCamera,
-                                         m_config.DepthMode,
+                                         depth_mode_info,
                                          m_config.EnableColorCamera,
                                          m_config.ColorFormat,
-                                         m_config.ColorResolution);
+                                         color_mode_info);
         break;
 
     case K4AWindowSet::ViewType::PointCloudViewer:
         try
         {
-            k4a::calibration calib = m_device.get_calibration(m_config.DepthMode, m_config.ColorResolution);
-            bool rgbPointCloudAvailable = m_config.EnableColorCamera &&
-                                          m_config.ColorFormat == K4A_IMAGE_FORMAT_COLOR_BGRA32;
+            k4a::calibration calib = m_device.get_calibration(m_config.depth_mode_id, m_config.color_mode_id);
+            bool rgbPointCloudAvailable = m_config.EnableColorCamera && m_config.ColorFormat == K4A_IMAGE_FORMAT_COLOR_BGRA32;
             K4AWindowSet::StartPointCloudWindow(m_deviceSerialNumber.c_str(),
                                                 calib,
                                                 &m_cameraDataSource,

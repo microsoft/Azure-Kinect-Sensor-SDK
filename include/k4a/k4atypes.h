@@ -1116,15 +1116,9 @@ typedef struct _k4a_calibration_t
      */
     k4a_calibration_extrinsics_t extrinsics[K4A_CALIBRATION_TYPE_NUM][K4A_CALIBRATION_TYPE_NUM];
 
-    
-    
-    // TODO: remove temp save of old code
-    //k4a_depth_mode_t depth_mode;             /**< Depth camera mode for which calibration was obtained. */
-    //uint32_t color_resolution; /**< Color camera resolution for which calibration was obtained. */
-    uint32_t depth_mode_id;       /**< Depth camera mode for which calibration was obtained. */
-    uint32_t color_mode_id; /**< Color camera resolution for which calibration was obtained. */
-
-
+    // TODO: comment
+    k4a_depth_mode_info_t depth_mode_info;       /**< Depth camera mode for which calibration was obtained. */
+    k4a_color_mode_info_t color_mode_info; /**< Color camera resolution for which calibration was obtained. */
 
 } k4a_calibration_t;
 

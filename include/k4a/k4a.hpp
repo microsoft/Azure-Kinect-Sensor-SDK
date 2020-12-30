@@ -1480,6 +1480,27 @@ public:
         }
 
         return modes;
+    }    
+    
+    // TODO: add comments
+    k4a_color_mode_info_t get_color_mode(int color_mode_id)
+    {
+        K4A_INIT_STRUCT(k4a_color_mode_info_t, mode);
+
+        int mode_count;
+        k4a_result_t result = k4a_device_get_color_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
+        {
+            if (color_mode_id > -1 && color_mode_id < mode_count)
+            {
+                if (k4a_device_get_color_mode(m_handle, color_mode_id, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    return mode;
+                }
+            }
+        }
+
+        return mode;
     } 
     
     // TODO: add comments
@@ -1506,6 +1527,27 @@ public:
     }
 
     // TODO: add comments
+    k4a_depth_mode_info_t get_depth_mode(int depth_mode_id)
+    {
+        K4A_INIT_STRUCT(k4a_depth_mode_info_t, mode);
+
+        int mode_count;
+        k4a_result_t result = k4a_device_get_depth_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
+        {
+            if (depth_mode_id > -1 && depth_mode_id < mode_count)
+            {
+                if (k4a_device_get_depth_mode(m_handle, depth_mode_id, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    return mode;
+                }
+            }
+        }
+
+        return mode;
+    } 
+
+    // TODO: add comments
     std::vector<k4a_fps_mode_info_t> get_fps_modes()
     {
         K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
@@ -1527,6 +1569,27 @@ public:
 
         return modes;
     }
+
+    // TODO: add comments
+    k4a_fps_mode_info_t get_fps_mode(int fps_mode_id)
+    {
+        K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
+
+        int mode_count;
+        k4a_result_t result = k4a_device_get_fps_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
+        {
+            if (fps_mode_id > -1 && fps_mode_id < mode_count)
+            {
+                if (k4a_device_get_fps_mode(m_handle, fps_mode_id, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    return mode;
+                }
+            }
+        }
+
+        return mode;
+    } 
 
     // TODO: add comments
     int get_common_factor(int width, int height) 

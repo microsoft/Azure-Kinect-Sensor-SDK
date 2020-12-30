@@ -9,6 +9,7 @@
 #include <k4ainternal/deloader.h>
 #include <k4ainternal/tewrapper.h>
 #include <k4ainternal/image.h>
+#include <k4a/k4a.h>
 
 // System dependencies
 #include <stdlib.h>
@@ -19,33 +20,33 @@ k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_
                                                           const k4a_calibration_camera_t *color_camera_calibration,
                                                           const k4a_calibration_extrinsics_t *gyro_extrinsics,
                                                           const k4a_calibration_extrinsics_t *accel_extrinsics,
-                                                          const k4a_depth_mode_t depth_mode,
-                                                          const k4a_color_resolution_t color_resolution,
+                                                          const k4a_depth_mode_info_t depth_mode_info,
+                                                          const k4a_color_mode_info_t color_mode_info,
                                                           k4a_calibration_t *calibration)
 {
     memset(&calibration->color_camera_calibration, 0, sizeof(k4a_calibration_camera_t));
     memset(&calibration->depth_camera_calibration, 0, sizeof(k4a_calibration_camera_t));
 
     if (K4A_FAILED(
-            K4A_RESULT_FROM_BOOL(color_resolution != K4A_COLOR_RESOLUTION_OFF || depth_mode != K4A_DEPTH_MODE_OFF)))
+            K4A_RESULT_FROM_BOOL(color_mode_info.mode_id != K4A_COLOR_RESOLUTION_OFF || depth_mode_info.mode_id != K4A_DEPTH_MODE_OFF)))
     {
         LOG_ERROR("Expect color or depth camera is running.", 0);
         return K4A_RESULT_FAILED;
     }
 
-    if (depth_mode != K4A_DEPTH_MODE_OFF)
+    if (depth_mode_info.mode_id != K4A_DEPTH_MODE_OFF)
     {
         if (K4A_FAILED(TRACE_CALL(transformation_get_mode_specific_depth_camera_calibration(
-                depth_camera_calibration, depth_mode, &calibration->depth_camera_calibration))))
+                depth_camera_calibration, depth_mode_info.mode_id, &calibration->depth_camera_calibration))))
         {
             return K4A_RESULT_FAILED;
         }
     }
 
-    if (color_resolution != K4A_COLOR_RESOLUTION_OFF)
+    if (color_mode_info.mode_id != K4A_COLOR_RESOLUTION_OFF)
     {
         if (K4A_FAILED(TRACE_CALL(transformation_get_mode_specific_color_camera_calibration(
-                color_camera_calibration, color_resolution, &calibration->color_camera_calibration))))
+                color_camera_calibration, color_mode_info.mode_id, &calibration->color_camera_calibration))))
         {
             return K4A_RESULT_FAILED;
         }
@@ -71,8 +72,8 @@ k4a_result_t transformation_get_mode_specific_calibration(const k4a_calibration_
         }
     }
 
-    calibration->depth_mode_id = depth_mode;
-    calibration->color_mode_id = color_resolution;
+    calibration->depth_mode_info = depth_mode_info;
+    calibration->color_mode_info = color_mode_info;
 
     return K4A_RESULT_SUCCEEDED;
 }
@@ -85,12 +86,12 @@ static k4a_result_t transformation_possible(const k4a_calibration_t *camera_cali
         LOG_ERROR("Unexpected camera calibration type %d.", camera);
         return K4A_RESULT_FAILED;
     }
-    if (camera == K4A_CALIBRATION_TYPE_DEPTH && camera_calibration->depth_mode_id == K4A_DEPTH_MODE_OFF)
+    if (camera == K4A_CALIBRATION_TYPE_DEPTH && camera_calibration->depth_mode_info.mode_id == K4A_DEPTH_MODE_OFF)
     {
         LOG_ERROR("Expect depth camera is running to perform transformation.", 0);
         return K4A_RESULT_FAILED;
     }
-    if (camera == K4A_CALIBRATION_TYPE_COLOR && camera_calibration->color_mode_id == K4A_COLOR_RESOLUTION_OFF)
+    if (camera == K4A_CALIBRATION_TYPE_COLOR && camera_calibration->color_mode_info.mode_id == K4A_COLOR_RESOLUTION_OFF)
     {
         LOG_ERROR("Expect color camera is running to perform transformation.", 0);
         return K4A_RESULT_FAILED;
@@ -109,28 +110,19 @@ static bool transformation_is_pixel_within_image(const float p[2], const int wid
     return p[0] >= 0 && p[0] < width && p[1] >= 0 && p[1] < height;
 }
 
+// TODO: should this be replaced with depth mode info properties?
 static k4a_result_t transformation_create_depth_camera_pinhole(const k4a_calibration_t *calibration,
                                                                k4a_transformation_pinhole_t *pinhole)
 {
     float fov_degrees[2];
-    switch (calibration->depth_mode_id)
+
+    if (calibration->depth_mode_info.mode_id > 0)
     {
-    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-    case K4A_DEPTH_MODE_NFOV_UNBINNED:
-    {
-        fov_degrees[0] = 75;
-        fov_degrees[1] = 65;
-        break;
+        fov_degrees[0] = calibration->depth_mode_info.horizontal_fov;
+        fov_degrees[1] = calibration->depth_mode_info.vertical_fov;
     }
-    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-    case K4A_DEPTH_MODE_WFOV_UNBINNED:
-    case K4A_DEPTH_MODE_PASSIVE_IR:
+    else
     {
-        fov_degrees[0] = 120;
-        fov_degrees[1] = 120;
-        break;
-    }
-    default:
         LOG_ERROR("Invalid depth mode.", 0);
         return K4A_RESULT_FAILED;
     }
@@ -609,9 +601,9 @@ k4a_transformation_t transformation_create(const k4a_calibration_t *calibration,
     }
 
     transformation_context->enable_gpu_optimization = gpu_optimization;
-    transformation_context->enable_depth_color_transform = transformation_context->calibration.color_mode_id !=
+    transformation_context->enable_depth_color_transform = transformation_context->calibration.color_mode_info.mode_id !=
                                                                K4A_COLOR_RESOLUTION_OFF &&
-                                                           transformation_context->calibration.depth_mode_id !=
+                                                           transformation_context->calibration.depth_mode_info.mode_id !=
                                                                K4A_DEPTH_MODE_OFF;
     if (transformation_context->enable_gpu_optimization && transformation_context->enable_depth_color_transform)
     {

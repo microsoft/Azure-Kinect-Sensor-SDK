@@ -1620,8 +1620,8 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle,
-                                                   const uint32_t depth_mode_id,
-                                                   const uint32_t color_mode_id,
+                                                   const k4a_depth_mode_info_t depth_mode_info,
+                                                   const k4a_color_mode_info_t color_mode_info,
                                                    k4a_calibration_t *calibration);
 
 /** Get the device jack status for the synchronization in and synchronization out connectors.

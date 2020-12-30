@@ -27,9 +27,9 @@ struct K4ADeviceConfiguration
     bool EnableColorCamera = true;
     bool EnableDepthCamera = true;
     k4a_image_format_t ColorFormat = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-    uint32_t ColorResolution = 1;  // K4A_COLOR_RESOLUTION_720P
-    uint32_t DepthMode = 2;       // K4A_DEPTH_MODE_NFOV_UNBINNED
-    uint32_t Framerate = 2;       // K4A_FRAMES_PER_SECOND_30
+    uint32_t color_mode_id = 1;  // K4A_COLOR_RESOLUTION_720P
+    uint32_t depth_mode_id = 2;       // K4A_DEPTH_MODE_NFOV_UNBINNED
+    uint32_t fps_mode_id = 2;       // K4A_FRAMES_PER_SECOND_30
 
     int32_t DepthDelayOffColorUsec = 0;
     k4a_wired_sync_mode_t WiredSyncMode = K4A_WIRED_SYNC_MODE_STANDALONE;

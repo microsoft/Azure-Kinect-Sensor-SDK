@@ -1027,8 +1027,8 @@ k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle, u
 }
 
 k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle,
-                                        const k4a_depth_mode_t depth_mode,
-                                        const k4a_color_resolution_t color_resolution,
+                                        const k4a_depth_mode_info_t depth_mode_info,
+                                        const k4a_color_mode_info_t color_mode_info,
                                         k4a_calibration_t *calibration)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
@@ -1055,15 +1055,15 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle,
                                                                    &color_calibration,
                                                                    gyro_extrinsics,
                                                                    accel_extrinsics,
-                                                                   depth_mode,
-                                                                   color_resolution,
+                                                                   depth_mode_info,
+                                                                   color_mode_info,
                                                                    calibration));
 }
 
 k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
                                           size_t raw_calibration_size,
-                                          const k4a_depth_mode_t depth_mode,
-                                          const k4a_color_resolution_t color_resolution,
+                                          const k4a_depth_mode_info_t depth_mode_info,
+                                          const k4a_color_mode_info_t color_mode_info,
                                           k4a_calibration_t *calibration)
 {
     k4a_calibration_camera_t depth_calibration;
@@ -1085,8 +1085,8 @@ k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
                                                                          &color_calibration,
                                                                          &gyro_calibration.depth_to_imu,
                                                                          &accel_calibration.depth_to_imu,
-                                                                         depth_mode,
-                                                                         color_resolution,
+                                                                         depth_mode_info,
+                                                                         color_mode_info,
                                                                          calibration));
     }
     return result;

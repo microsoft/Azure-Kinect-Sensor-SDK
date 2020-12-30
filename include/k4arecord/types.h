@@ -172,13 +172,13 @@ typedef struct _k4a_record_configuration_t
     k4a_image_format_t color_format;
 
     /** Image resolution used to record the color camera. */
-    uint32_t color_mode_id;
+    k4a_color_mode_info_t color_mode_info;
 
     /** Mode used to record the depth camera. */
-    uint32_t depth_mode_id;
+    k4a_depth_mode_info_t depth_mode_info;
 
     /** Frame rate used to record the color and depth camera. */
-    uint32_t fps_mode_id;
+    k4a_fps_mode_info_t fps_mode_info;
 
     /** True if the recording contains Color camera frames. */
     bool color_track_enabled;
