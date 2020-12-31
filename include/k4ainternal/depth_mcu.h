@@ -103,11 +103,11 @@ k4a_result_t depthmcu_depth_start_streaming(depthmcu_t depthmcu_handle,
 
 void depthmcu_depth_stop_streaming(depthmcu_t depthmcu_handle, bool quiet);
 
-k4a_result_t depthmcu_depth_set_capture_mode(depthmcu_t depthmcu_handle, k4a_depth_mode_t depth_mode);
-k4a_result_t depthmcu_depth_get_capture_mode(depthmcu_t depthmcu_handle, k4a_depth_mode_t *depth_mode);
+k4a_result_t depthmcu_depth_set_capture_mode(depthmcu_t depthmcu_handle, k4a_depth_mode_info_t depth_mode_info);
+k4a_result_t depthmcu_depth_get_capture_mode(depthmcu_t depthmcu_handle, k4a_depth_mode_info_t *depth_mode_info);
 
-k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, k4a_fps_t depth_fps);
-k4a_result_t depthmcu_depth_get_fps(depthmcu_t depthmcu_handle, k4a_fps_t *depth_fps);
+k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, k4a_fps_mode_info_t fps_mode_info);
+k4a_result_t depthmcu_depth_get_fps(depthmcu_t depthmcu_handle, k4a_fps_mode_info_t *fps_mode_info);
 
 k4a_result_t depthmcu_get_color_imu_calibration(depthmcu_t depthmcu_handle,
                                                 k4a_capture_t cal,
