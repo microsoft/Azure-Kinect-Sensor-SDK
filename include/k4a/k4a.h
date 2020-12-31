@@ -1704,8 +1704,8 @@ K4A_EXPORT k4a_result_t k4a_device_get_sync_jack(k4a_device_t device_handle,
  */
 K4A_EXPORT k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
                                                      size_t raw_calibration_size,
-                                                     const uint32_t depth_mode_id,
-                                                     const uint32_t color_resolution_id,
+                                                     const k4a_depth_mode_info_t depth_mode_info,
+                                                     const k4a_color_mode_info_t color_mode_info,
                                                      k4a_calibration_t *calibration);
 
 /** Transform a 3D point of a source coordinate system into a 3D point of the target coordinate system

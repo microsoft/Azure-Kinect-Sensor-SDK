@@ -766,14 +766,14 @@ struct calibration : public k4a_calibration_t
      */
     static calibration get_from_raw(char *raw_calibration,
                                     size_t raw_calibration_size,
-                                    uint32_t target_depth_mode_id,
-                                    uint32_t target_color_mode_id)
+                                    k4a_depth_mode_info_t depth_mode_info,
+                                    k4a_color_mode_info_t color_mode_info)
     {
         calibration calib;
         k4a_result_t result = k4a_calibration_get_from_raw(raw_calibration,
                                                            raw_calibration_size,
-                                                           target_depth_mode_id,
-                                                           target_color_mode_id,
+                                                           depth_mode_info,
+                                                           color_mode_info,
                                                            &calib);
 
         if (K4A_RESULT_SUCCEEDED != result)
@@ -790,13 +790,13 @@ struct calibration : public k4a_calibration_t
      */
     static calibration get_from_raw(uint8_t *raw_calibration,
                                     size_t raw_calibration_size,
-                                    uint32_t target_depth_mode_id,
-                                    uint32_t target_color_mode_id)
+                                    k4a_depth_mode_info_t depth_mode_info,
+                                    k4a_color_mode_info_t color_mode_info)
     {
         return get_from_raw(reinterpret_cast<char *>(raw_calibration),
                             raw_calibration_size,
-                            target_depth_mode_id,
-                            target_color_mode_id);
+                            depth_mode_info,
+                            color_mode_info);
     }
 
     /** Get the camera calibration for a device from a raw calibration blob.
@@ -805,13 +805,13 @@ struct calibration : public k4a_calibration_t
      * \sa k4a_calibration_get_from_raw
      */
     static calibration get_from_raw(std::vector<uint8_t> &raw_calibration,
-                                    uint32_t target_depth_mode_id,
-                                    uint32_t target_color_mode_id)
+                                    k4a_depth_mode_info_t depth_mode_info,
+                                    k4a_color_mode_info_t color_mode_info)
     {
         return get_from_raw(reinterpret_cast<char *>(raw_calibration.data()),
                             raw_calibration.size(),
-                            target_depth_mode_id,
-                            target_color_mode_id);
+                            depth_mode_info,
+                            color_mode_info);
     }
 };
 
@@ -1360,10 +1360,10 @@ public:
      *
      * \sa k4a_device_get_calibration
      */
-    calibration get_calibration(uint32_t depth_mode_id, uint32_t color_mode_id) const
+    calibration get_calibration(k4a_depth_mode_info_t depth_mode_info, k4a_color_mode_info_t color_mode_info) const
     {
         calibration calib;
-        k4a_result_t result = k4a_device_get_calibration(m_handle, depth_mode_id, color_mode_id, &calib);
+        k4a_result_t result = k4a_device_get_calibration(m_handle, depth_mode_info, color_mode_info, &calib);
 
         if (K4A_RESULT_SUCCEEDED != result)
         {

@@ -6,7 +6,7 @@
 
 #include "k4adepthpixelcolorizer.h"
 #include "k4apixel.h"
-#include "k4astaticimageproperties.h"
+#include <k4a/k4a.hpp>
 #include "texture.h"
 #include "viewerwindow.h"
 
@@ -29,13 +29,26 @@ int main()
             throw std::runtime_error("No Azure Kinect devices detected!");
         }
 
+        std::cout << "Started opening K4A device..." << std::endl;
+
+        k4a::device dev = k4a::device::open(K4A_DEVICE_DEFAULT);
+
+        k4a_color_mode_info_t color_mode_info;
+        k4a_device_get_color_mode(dev.handle(), 1, &color_mode_info); // K4A_COLOR_RESOLUTION_720P
+
+        k4a_depth_mode_info_t depth_mode_info;
+        k4a_device_get_depth_mode(dev.handle(), 3, &depth_mode_info); // K4A_DEPTH_MODE_WFOV_2X2BINNED
+
+        k4a_fps_mode_info_t fps_mode_info;
+        k4a_device_get_fps_mode(dev.handle(), 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
+
         // Start the device
         //
         k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.fps_mode_id = 2; // K4A_FRAMES_PER_SECOND_30
-        config.depth_mode_id = 3; // K4A_DEPTH_MODE_WFOV_2X2BINNED
         config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-        config.color_mode_id = 1; // K4A_COLOR_RESOLUTION_720P
+        config.color_mode_info = color_mode_info;
+        config.depth_mode_info = depth_mode_info;
+        config.fps_mode_info = fps_mode_info;
 
         // This means that we'll only get captures that have both color and
         // depth images, so we don't need to check if the capture contains
@@ -43,9 +56,6 @@ int main()
         //
         config.synchronized_images_only = true;
 
-        std::cout << "Started opening K4A device..." << std::endl;
-
-        k4a::device dev = k4a::device::open(K4A_DEVICE_DEFAULT);
         dev.start_cameras(&config);
 
         std::cout << "Finished opening K4A device." << std::endl;
@@ -56,9 +66,8 @@ int main()
         window.Initialize("Simple Azure Kinect Viewer", 1440, 900);
 
         // Textures we can give to OpenGL / the viewer window to render.
-        //
-        Texture depthTexture = window.CreateTexture(GetDepthDimensions(dev.handle(), config.depth_mode_id));
-        Texture colorTexture = window.CreateTexture(GetColorDimensions(dev.handle(), config.color_mode_id));
+        Texture depthTexture = window.CreateTexture({ config.depth_mode_info.width, config.depth_mode_info.height });
+        Texture colorTexture = window.CreateTexture({ config.color_mode_info.width, config.color_mode_info.height });
 
         // A buffer containing a BGRA color representation of the depth image.
         // This is what we'll end up giving to depthTexture as an image source.
@@ -97,7 +106,8 @@ int main()
                 //
                 ColorizeDepthImage(depthImage,
                                    K4ADepthPixelColorizer::ColorizeBlueToRed,
-                                   GetDepthModeRange(dev.handle(), config.depth_mode_id),
+                                   { (uint16_t)config.depth_mode_info.min_range,
+                                     (uint16_t)config.depth_mode_info.max_range },
                                    &depthTextureBuffer);
                 depthTexture.Update(&depthTextureBuffer[0]);
 

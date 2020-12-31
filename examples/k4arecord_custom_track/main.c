@@ -60,12 +60,22 @@ int main(int argc, char **argv)
 
     char *recording_filename = argv[1];
 
-    k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-    device_config.depth_mode_id = 2; // K4A_DEPTH_MODE_NFOV_UNBINNED
-    device_config.fps_mode_id = 2; // K4A_FRAMES_PER_SECOND_30
-
     k4a_device_t device;
     VERIFY(k4a_device_open(0, &device));
+
+    k4a_color_mode_info_t color_mode_info;
+    k4a_device_get_color_mode(device, 0, &color_mode_info); // K4A_COLOR_RESOLUTION_OFF
+
+    k4a_depth_mode_info_t depth_mode_info;
+    k4a_device_get_depth_mode(device, 2, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_UNBINNED
+
+    k4a_fps_mode_info_t fps_mode_info;
+    k4a_device_get_fps_mode(device, 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
+
+    k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
+    device_config.depth_mode_info = depth_mode_info; 
+    device_config.fps_mode_info = fps_mode_info;
+
     VERIFY(k4a_device_start_cameras(device, &device_config));
 
     printf("Device started\n");
@@ -90,7 +100,7 @@ int main(int argc, char **argv)
     // Add a custom video track to store processed depth images.
     // Read the depth resolution from the camera configuration so we can create our custom track with the same size.
     k4a_calibration_t sensor_calibration;
-    VERIFY(k4a_device_get_calibration(device, device_config.depth_mode_id, 0, &sensor_calibration)); // K4A_COLOR_RESOLUTION_OFF
+    VERIFY(k4a_device_get_calibration(device, device_config.depth_mode_info, color_mode_info, &sensor_calibration));
     uint32_t depth_width = (uint32_t)sensor_calibration.depth_camera_calibration.resolution_width;
     uint32_t depth_height = (uint32_t)sensor_calibration.depth_camera_calibration.resolution_height;
 

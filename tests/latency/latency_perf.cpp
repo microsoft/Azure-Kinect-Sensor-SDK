@@ -557,9 +557,9 @@ TEST_P(latency_perf, testTest)
     }
 
     config.color_format = as.color_format;
-    config.color_mode_id = as.color_resolution;
-    config.depth_mode_id = as.depth_mode;
-    config.fps_mode_id = as.fps;
+    config.color_mode_info.mode_id = as.color_resolution;
+    config.depth_mode_info.mode_id = as.depth_mode;
+    config.fps_mode_info.mode_id = as.fps;
     config.depth_delay_off_color_usec = g_depth_delay_off_color_usec;
     config.wired_sync_mode = g_wired_sync_mode;
     config.synchronized_images_only = g_synchronized_images_only;
@@ -567,9 +567,9 @@ TEST_P(latency_perf, testTest)
 
     printf("Config being used is:\n");
     printf("    color_format:%d\n", config.color_format);
-    printf("    color_resolution:%d\n", config.color_mode_id);
-    printf("    depth_mode:%d\n", config.depth_mode_id);
-    printf("    camera_fps:%d\n", config.fps_mode_id);
+    printf("    color_resolution:%d\n", config.color_mode_info.mode_id);
+    printf("    depth_mode:%d\n", config.depth_mode_info.mode_id);
+    printf("    camera_fps:%d\n", config.fps_mode_info.mode_id);
     printf("    synchronized_images_only:%d\n", config.synchronized_images_only);
     printf("    depth_delay_off_color_usec:%d\n", config.depth_delay_off_color_usec);
     printf("    wired_sync_mode:%d\n", config.wired_sync_mode);
@@ -804,7 +804,7 @@ TEST_P(latency_perf, testTest)
         }
         ir_system_latency_ave = ir_system_latency_ave / ir_system_latency.size();
         print_and_log("   IR System Time Latency",
-                      get_string_from_depth_mode((k4a_depth_mode_t)config.depth_mode_id),
+                      get_string_from_depth_mode((k4a_depth_mode_t)config.depth_mode_info.mode_id),
                       STS_TO_MS(ir_system_latency_ave),
                       STS_TO_MS(min),
                       STS_TO_MS(max));
@@ -827,7 +827,7 @@ TEST_P(latency_perf, testTest)
         }
         ir_system_latency_from_pts_ave = ir_system_latency_from_pts_ave / ir_system_latency_from_pts.size();
         print_and_log("   IR System Time PTS",
-                      get_string_from_depth_mode((k4a_depth_mode_t)config.depth_mode_id),
+                      get_string_from_depth_mode((k4a_depth_mode_t)config.depth_mode_info.mode_id),
                       STS_TO_MS(ir_system_latency_from_pts_ave),
                       STS_TO_MS(min),
                       STS_TO_MS(max));

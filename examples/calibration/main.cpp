@@ -57,17 +57,26 @@ static void print_calibration()
 
         k4a_calibration_t calibration;
 
+        k4a_color_mode_info_t color_mode_info;
+        k4a_device_get_color_mode(device, 2, &color_mode_info); // K4A_COLOR_RESOLUTION_1080P
+
+        k4a_depth_mode_info_t depth_mode_info;
+        k4a_device_get_depth_mode(device, 2, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_UNBINNED
+
+        k4a_fps_mode_info_t fps_mode_info;
+        k4a_device_get_fps_mode(device, 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
+
         k4a_device_configuration_t deviceConfig = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         deviceConfig.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        deviceConfig.color_mode_id = 2; // 2 = K4A_COLOR_RESOLUTION_1080P
-        deviceConfig.depth_mode_id = 2; // 2 = K4A_DEPTH_MODE_NFOV_UNBINNED
-        deviceConfig.fps_mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
+        deviceConfig.color_mode_info = color_mode_info;
+        deviceConfig.depth_mode_info = depth_mode_info;
+        deviceConfig.fps_mode_info = fps_mode_info;
         deviceConfig.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
         deviceConfig.synchronized_images_only = true;
 
         // get calibration
         if (K4A_RESULT_SUCCEEDED !=
-            k4a_device_get_calibration(device, deviceConfig.depth_mode_id, deviceConfig.color_mode_id, &calibration))
+            k4a_device_get_calibration(device, deviceConfig.depth_mode_info, deviceConfig.color_mode_info, &calibration))
         {
             cout << "Failed to get calibration" << endl;
             exit(-1);

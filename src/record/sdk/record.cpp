@@ -47,7 +47,7 @@ k4a_result_t k4a_record_create(const char *path,
         context->device_config = device_config;
 
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
-        context->camera_fps = k4a_convert_fps_to_uint((k4a_fps_t)device_config.fps_mode_id);
+        context->camera_fps = k4a_convert_fps_to_uint((k4a_fps_t)device_config.fps_mode_info.mode_id);
         if (context->camera_fps == 0)
         {
             // Set camera FPS to 30 if no cameras are enabled so IMU can still be written.
@@ -57,11 +57,11 @@ k4a_result_t k4a_record_create(const char *path,
 
     uint32_t color_width = 0;
     uint32_t color_height = 0;
-    if (K4A_SUCCEEDED(result) && device_config.color_mode_id != K4A_COLOR_RESOLUTION_OFF)
+    if (K4A_SUCCEEDED(result) && device_config.color_mode_info.mode_id != K4A_COLOR_RESOLUTION_OFF)
     {
-        if (!k4a_convert_resolution_to_width_height((k4a_color_resolution_t)device_config.color_mode_id, &color_width, &color_height))
+        if (!k4a_convert_resolution_to_width_height((k4a_color_resolution_t)device_config.color_mode_info.mode_id, &color_width, &color_height))
         {
-            LOG_ERROR("Unsupported color_resolution specified in recording: %d", device_config.color_mode_id);
+            LOG_ERROR("Unsupported color_resolution specified in recording: %d", device_config.color_mode_info.mode_id);
             result = K4A_RESULT_FAILED;
         }
     }
@@ -69,7 +69,7 @@ k4a_result_t k4a_record_create(const char *path,
     std::ostringstream color_mode_str;
     if (K4A_SUCCEEDED(result))
     {
-        if (device_config.color_mode_id != K4A_COLOR_RESOLUTION_OFF)
+        if (device_config.color_mode_info.mode_id != K4A_COLOR_RESOLUTION_OFF)
         {
             switch (device_config.color_format)
             {
@@ -101,15 +101,15 @@ k4a_result_t k4a_record_create(const char *path,
     uint32_t depth_height = 0;
     if (K4A_SUCCEEDED(result))
     {
-        if (device_config.depth_mode_id != K4A_DEPTH_MODE_OFF)
+        if (device_config.depth_mode_info.mode_id != K4A_DEPTH_MODE_OFF)
         {
             for (size_t i = 0; i < arraysize(depth_modes); i++)
             {
-                if ((k4a_depth_mode_t)device_config.depth_mode_id == depth_modes[i].first)
+                if ((k4a_depth_mode_t)device_config.depth_mode_info.mode_id == depth_modes[i].first)
                 {
                     if (!k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
                     {
-                        LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode_id);
+                        LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode_info.mode_id);
                         result = K4A_RESULT_FAILED;
                     }
                     depth_mode_str = depth_modes[i].second.c_str();
@@ -118,7 +118,7 @@ k4a_result_t k4a_record_create(const char *path,
             }
             if (depth_width == 0 || depth_height == 0)
             {
-                LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode_id);
+                LOG_ERROR("Unsupported depth_mode specified in recording: %d", device_config.depth_mode_info.mode_id);
                 result = K4A_RESULT_FAILED;
             }
         }
@@ -144,7 +144,7 @@ k4a_result_t k4a_record_create(const char *path,
         tags.EnableChecksum();
     }
 
-    if (K4A_SUCCEEDED(result) && device_config.color_mode_id != K4A_COLOR_RESOLUTION_OFF)
+    if (K4A_SUCCEEDED(result) && device_config.color_mode_info.mode_id != K4A_COLOR_RESOLUTION_OFF)
     {
         BITMAPINFOHEADER codec_info = {};
         result = TRACE_CALL(
@@ -175,11 +175,11 @@ k4a_result_t k4a_record_create(const char *path,
 
     if (K4A_SUCCEEDED(result))
     {
-        if (device_config.depth_mode_id == K4A_DEPTH_MODE_PASSIVE_IR)
+        if (device_config.depth_mode_info.mode_id == K4A_DEPTH_MODE_PASSIVE_IR)
         {
             add_tag(context, "K4A_DEPTH_MODE", depth_mode_str);
         }
-        else if (device_config.depth_mode_id != K4A_DEPTH_MODE_OFF)
+        else if (device_config.depth_mode_info.mode_id != K4A_DEPTH_MODE_OFF)
         {
             // Depth track
             BITMAPINFOHEADER codec_info = {};
@@ -210,7 +210,7 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    if (K4A_SUCCEEDED(result) && device_config.depth_mode_id != K4A_DEPTH_MODE_OFF)
+    if (K4A_SUCCEEDED(result) && device_config.depth_mode_info.mode_id != K4A_DEPTH_MODE_OFF)
     {
         // IR Track
         BITMAPINFOHEADER codec_info = {};
@@ -232,7 +232,7 @@ k4a_result_t k4a_record_create(const char *path,
             add_tag(context, "K4A_IR_TRACK", track_uid_str.str().c_str(), TAG_TARGET_TYPE_TRACK, track_uid);
             add_tag(context,
                     "K4A_IR_MODE",
-                    device_config.depth_mode_id == K4A_DEPTH_MODE_PASSIVE_IR ? "PASSIVE" : "ACTIVE",
+                    device_config.depth_mode_info.mode_id == K4A_DEPTH_MODE_PASSIVE_IR ? "PASSIVE" : "ACTIVE",
                     TAG_TARGET_TYPE_TRACK,
                     track_uid);
         }
@@ -243,8 +243,8 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    if (K4A_SUCCEEDED(result) && device_config.color_mode_id != K4A_COLOR_RESOLUTION_OFF &&
-        device_config.depth_mode_id != K4A_DEPTH_MODE_OFF)
+    if (K4A_SUCCEEDED(result) && device_config.color_mode_info.mode_id != K4A_COLOR_RESOLUTION_OFF &&
+        device_config.depth_mode_info.mode_id != K4A_DEPTH_MODE_OFF)
     {
         std::ostringstream delay_str;
         delay_str << device_config.depth_delay_off_color_usec * 1000;
