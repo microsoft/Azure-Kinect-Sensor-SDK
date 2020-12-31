@@ -3,7 +3,9 @@ the_basics.py
 
 A simple program that makes use of the Device, Capture, and Images classes.
 
-Copyright (C) Microsoft Corporation. All rights reserved.
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+Kinect For Azure SDK.
 '''
 
 # This will import all the public symbols into the k4a namespace.

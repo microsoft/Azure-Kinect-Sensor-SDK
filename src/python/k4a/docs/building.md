@@ -39,8 +39,8 @@ The following dependencies are for both Windows and Linux:
 
 The following tools are optional:
 
-* [sphinx](https://pypi.org/project/Sphinx/).
-  Required for building documentation. To install, run "pip install sphinx".
+* [doxygen](https://github.com/doxygen/doxygen)
+  Required for building documentation.
 
 
 ## Building

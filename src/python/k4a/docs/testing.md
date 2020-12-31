@@ -21,7 +21,7 @@ The following are required in order to run the Python K4A tests.
 
 ### Running tests on the command line
 
-1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
+1. Copy the k4a and DE dynamic libraries (.dll or .so) into the folder src/python/k4a/src/k4a/_libs.
 
 2. In a command line terminal, create a Python virtual environment and activate it (do not include brackets):
       cd <repo_root>/src/python/k4a
@@ -31,8 +31,9 @@ The following are required in order to run the Python K4A tests.
 3. Install the k4a package in development mode. This is required in order to
    automatically install required Python packages for running the tests, as
    well as to install the code with the k4a package as the root of the 
-   subpackages and modules.
-      pip install -e .[test]   (include "[test]" with square brackets)
+   subpackages and modules. In the command below, make sure to include 
+   ".[test]" with dot and square brackets.
+      pip install -e .[test]
       
 4. Run the tests in python. To capture the results, use an additional --junit-xml=./test_results.xml option.
       python -m pytest tests

@@ -385,15 +385,15 @@ class Test_Capture_AzureKinect(unittest.TestCase):
     def test_get_depth(self):
         depth = self.capture.depth
         self.assertIsNotNone(depth)
-        self.assertEqual(depth.width_pixels, 512)
-        self.assertEqual(depth.height_pixels, 512)
+        self.assertEqual(depth.width_pixels, 1024)
+        self.assertEqual(depth.height_pixels, 1024)
         self.assertEqual(depth.image_format, k4a.EImageFormat.DEPTH16)
 
     def test_get_ir(self):
         ir = self.capture.ir
         self.assertIsNotNone(ir)
-        self.assertEqual(ir.width_pixels, 512)
-        self.assertEqual(ir.height_pixels, 512)
+        self.assertEqual(ir.width_pixels, 1024)
+        self.assertEqual(ir.height_pixels, 1024)
         self.assertEqual(ir.image_format, k4a.EImageFormat.IR16)
 
     def test_set_color(self):
@@ -422,8 +422,8 @@ class Test_Capture_AzureKinect(unittest.TestCase):
 
         depth1 = self.capture.depth
         self.assertIsNotNone(depth1)
-        self.assertEqual(depth1.width_pixels, 512)
-        self.assertEqual(depth1.height_pixels, 512)
+        self.assertEqual(depth1.width_pixels, 1024)
+        self.assertEqual(depth1.height_pixels, 1024)
         self.assertEqual(depth1.image_format, k4a.EImageFormat.DEPTH16)
 
         depth2 = copy.deepcopy(depth1)
@@ -431,8 +431,8 @@ class Test_Capture_AzureKinect(unittest.TestCase):
 
         depth3 = self.capture.depth
         self.assertIsNotNone(depth3)
-        self.assertEqual(depth3.width_pixels, 512)
-        self.assertEqual(depth3.height_pixels, 512)
+        self.assertEqual(depth3.width_pixels, 1024)
+        self.assertEqual(depth3.height_pixels, 1024)
         self.assertEqual(depth3.image_format, k4a.EImageFormat.DEPTH16)
         
         self.assertIsNot(depth3, depth1)
@@ -442,8 +442,8 @@ class Test_Capture_AzureKinect(unittest.TestCase):
     def test_set_ir(self):
         ir1 = self.capture.ir
         self.assertIsNotNone(ir1)
-        self.assertEqual(ir1.width_pixels, 512)
-        self.assertEqual(ir1.height_pixels, 512)
+        self.assertEqual(ir1.width_pixels, 1024)
+        self.assertEqual(ir1.height_pixels, 1024)
         self.assertEqual(ir1.image_format, k4a.EImageFormat.IR16)
 
         ir2 = copy.deepcopy(ir1)
@@ -451,8 +451,8 @@ class Test_Capture_AzureKinect(unittest.TestCase):
 
         ir3 = self.capture.ir
         self.assertIsNotNone(ir3)
-        self.assertEqual(ir3.width_pixels, 512)
-        self.assertEqual(ir3.height_pixels, 512)
+        self.assertEqual(ir3.width_pixels, 1024)
+        self.assertEqual(ir3.height_pixels, 1024)
         self.assertEqual(ir3.image_format, k4a.EImageFormat.IR16)
         
         self.assertIsNot(ir3, ir1)
@@ -992,7 +992,6 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                     self.device.start_cameras(device_config)
                     capture = self.device.get_capture(-1)
                     depth = capture.depth
-                    color = capture.color
                     self.device.stop_cameras()
                     del capture
 
@@ -1016,7 +1015,6 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                         transformation.depth_image_to_color_camera_custom(
                             depth,
                             custom,
-                            color,
                             k4a.ETransformInterpolationType.LINEAR,
                             0)
                     

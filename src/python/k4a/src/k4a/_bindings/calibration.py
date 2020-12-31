@@ -48,6 +48,33 @@ class Calibration:
         raw_calibration:bytearray,
         depth_mode:EDepthMode,
         color_resolution:EColorResolution):
+        '''! Get the camera calibration for a device from a raw calibration blob.
+
+        @param raw_calibration (bytearray): Raw calibration blob obtained from
+            a device or recording. The raw calibration must be NULL terminated.
+
+        @param depth_mode (EDepthMode): Mode in which depth camera is operated.
+
+        @param color_resolution (EColorResolution): Resolution in which color 
+            camera is operated.
+
+        @returns Calibration: A Calibration instance.
+
+        @remarks
+        - The calibration represents the data needed to transform between the
+            camera views and is different for each operating @p depth_mode and 
+            @p color_resolution the device is configured to operate in.
+
+        @remarks
+        - The function Device.get_raw_calibration() retrieves the raw
+            calibration blob from the device as a bytearray. This can then be
+            used in this function to extract the depth mode and color
+            resolution dependent calibration data.
+
+        @remarks
+        - This function is equivalent to Device.get_calibration() function.
+            Both functions return the same calibration data.
+        '''
 
         calibration = None
 
