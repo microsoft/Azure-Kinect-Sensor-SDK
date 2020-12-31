@@ -1,11 +1,15 @@
-'''
-k4a.py
+'''!
+@file k4a.py
 
 Defines Python _ctypes equivalent functions to those defined in k4a.h. 
 
 Credit given to hexops's github contribution for the
 _ctypes.Structure definitions and _ctypes function bindings.
 https://github.com/hexops/Azure-Kinect-Python
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+Kinect For Azure SDK.
 '''
 
 

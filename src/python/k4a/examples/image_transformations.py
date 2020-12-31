@@ -82,7 +82,7 @@ def image_transformations():
             plot_images(color, depth, color_transformed)
 
             # Get a depth image but transformed in the color space.
-            depth_transformed = transform.depth_image_to_color_camera(depth, color)
+            depth_transformed = transform.depth_image_to_color_camera(depth)
             plot_images(color, depth, depth_transformed, cmap='jet')
 
             # Get a depth image and custom image but transformed in the color 
@@ -97,7 +97,7 @@ def image_transformations():
             np.copyto(ir_custom.data, ir.data)
 
             depth_transformed, ir_transformed = transform.depth_image_to_color_camera_custom(
-                depth, ir_custom, color, k4a.ETransformInterpolationType.LINEAR, 0)
+                depth, ir_custom, k4a.ETransformInterpolationType.LINEAR, 0)
             plot_images(color, depth_transformed, ir_transformed, cmap='gray')
 
     # There is no need to delete resources since Python will take care
