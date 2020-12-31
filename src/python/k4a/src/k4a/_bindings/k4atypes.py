@@ -4,11 +4,9 @@
 Defines common enums and structures used in the Azure Kinect SDK.
 These enums defined here are analogous to those defined in k4a.h.
 
-@author Jonathan Santos
-@version 1.0.0
-@date 2020-12-30
-
-Copyright (C) Microsoft Corporation. All rights reserved.
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+Kinect For Azure SDK.
 '''
 
 

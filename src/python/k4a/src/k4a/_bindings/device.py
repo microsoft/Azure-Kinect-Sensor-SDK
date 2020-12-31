@@ -7,6 +7,29 @@ and functions to communicate with the device.
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 Kinect For Azure SDK.
+
+@mainpage Welcome
+
+This documentation describes the Python API usage for the Azure Kinect Sensor
+SDK.
+
+For details about the Azure Kinect DK hardware and for more information about 
+getting started with development please see https://azure.com/kinect.
+
+@section api_languages API Languages
+The Azure Kinect Sensor SDK is primarily a C API. This documentation covers the
+Python wrapper extension to the API. For the most detailed documentation of API
+behavior, see the documentation for the C functions that the Python classes 
+wrap.
+
+@section python_examples Examples
+Refer to the Examples for example Python code to effectively use the Python 
+API. Once the Python API package is installed, a simple "import k4a" will
+give you access to all the classes and enums used in the API.
+
+@example the_basics.py
+@example image_transformations.py
+@example simple_viewer.py
 '''
 
 import ctypes as _ctypes
