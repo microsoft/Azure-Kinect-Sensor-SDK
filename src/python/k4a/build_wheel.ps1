@@ -31,20 +31,24 @@ pip install -e .
 
 # Build the .whl file and place it in a build/ folder.
 pip install wheel
-pip wheel . -w build --build-option
+pip wheel . -w build
 Remove-Item ./build/* -Exclude k4a*.whl -Recurse -Force
 
 
-# Build the docs and move them to the build/ folder.
-#cd ./docs
-#powershell -File ./build_docs.ps1
-#Move-Item ./build/html ../build/docs/
+# Build the docs and move them to the build/ folder. doxygen must be in the path.
+mkdir ./build/docs
+doxygen ./Doxyfile
+
+# Create a convenient documentation.html that redirects to the index.html that doxygen generates.
+'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta http-equiv="REFRESH" content="0;URL=html/index.html">
+</html>' > ./build/docs/documentation.html
 
 
 # Deactivate virtual environment and delete it.
 ./temp_build_venv/Scripts/deactivate.bat
 Remove-Item -LiteralPath "temp_build_venv" -Force -Recurse
-
-
-# Copy the docs/ folder into the build/ folder.
-#Copy-Item -Path .\docs -Destination .\build -Recurse

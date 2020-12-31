@@ -3,7 +3,9 @@ image_tarnsformations.py
 
 A simple program that transforms images from one camera coordinate to another.
 
-Copyright (C) Microsoft Corporation. All rights reserved.
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+Kinect For Azure SDK.
 '''
 
 # This package is used for displaying the images.

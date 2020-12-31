@@ -195,8 +195,8 @@ class Transformation:
         target_point = (None, None, None)
 
         src_pt = _Float2(
-            x = source_point_2d[0],
-            y = source_point_2d[1])
+            x = source_pixel_2d[0],
+            y = source_pixel_2d[1])
         tgt_pt = _Float3()
         valid_int_flag = _ctypes.c_int(0)
 
@@ -310,8 +310,8 @@ class Transformation:
         target_point = (None, None)
 
         src_pt = _Float2(
-            x = source_point_2d[0],
-            y = source_point_2d[1])
+            x = source_pixel_2d[0],
+            y = source_pixel_2d[1])
         tgt_pt = _Float2()
         valid_int_flag = _ctypes.c_int(0)
 
@@ -356,8 +356,8 @@ class Transformation:
         target_point = (None, None)
 
         src_pt = _Float2(
-            x = source_point_2d[0],
-            y = source_point_2d[1])
+            x = source_pixel_2d[0],
+            y = source_pixel_2d[1])
         tgt_pt = _Float2()
         valid_int_flag = _ctypes.c_int(0)
 
