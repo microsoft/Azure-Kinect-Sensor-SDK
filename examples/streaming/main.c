@@ -38,11 +38,20 @@ int main(int argc, char **argv)
         goto Exit;
     }
 
+    k4a_color_mode_info_t color_mode_info;
+    k4a_device_get_color_mode(device, 5, &color_mode_info); // K4A_COLOR_RESOLUTION_2160P
+
+    k4a_depth_mode_info_t depth_mode_info;
+    k4a_device_get_depth_mode(device, 2, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_UNBINNED
+
+    k4a_fps_mode_info_t fps_mode_info;
+    k4a_device_get_fps_mode(device, 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
+
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_id = 5; // K4A_COLOR_RESOLUTION_2160P
-    config.depth_mode_id = 2; // K4A_DEPTH_MODE_NFOV_UNBINNED
-    config.fps_mode_id = 2; // K4A_FRAMES_PER_SECOND_30
+    config.color_mode_info = color_mode_info; 
+    config.depth_mode_info = depth_mode_info;
+    config.fps_mode_info = fps_mode_info;
 
     if (K4A_RESULT_SUCCEEDED != k4a_device_start_cameras(device, &config))
     {

@@ -240,9 +240,9 @@ TEST_F(multidevice_ft, stream_two_1_then_2)
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_id = K4A_COLOR_RESOLUTION_1080P;
-    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_1080P;
+    config.depth_mode_info.mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    config.fps_mode_info.mode_id = K4A_FRAMES_PER_SECOND_30;
 
     ASSERT_LE((uint32_t)2, k4a_device_get_installed_count());
 
@@ -282,9 +282,9 @@ TEST_F(multidevice_ft, stream_two_2_then_1)
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_id = K4A_COLOR_RESOLUTION_1080P;
-    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_1080P;
+    config.depth_mode_info.mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    config.fps_mode_info.mode_id = K4A_FRAMES_PER_SECOND_30;
 
     ASSERT_LE((uint32_t)2, k4a_device_get_installed_count());
 
@@ -566,9 +566,9 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
 
     k4a_device_configuration_t default_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     default_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    default_config.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
-    default_config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    default_config.fps_mode_id = g_frame_rate;
+    default_config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_2160P;
+    default_config.depth_mode_info.mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    default_config.fps_mode_info.mode_id = g_frame_rate;
     default_config.subordinate_delay_off_master_usec = 0;
     default_config.depth_delay_off_color_usec = 0;
     default_config.synchronized_images_only = true;
@@ -707,9 +707,9 @@ TEST_F(multidevice_ft, ensure_color_camera_is_enabled)
         k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
         config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
-        config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-        config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+        config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_OFF;
+        config.depth_mode_info.mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+        config.fps_mode_info.mode_id = K4A_FRAMES_PER_SECOND_30;
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED,
                   k4a_device_get_sync_jack(m_device1, &sync_in_cable_present, &sync_out_cable_present));
@@ -815,9 +815,9 @@ TEST_F(multidevice_ft, start_parallel)
 
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
-    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_2160P;
+    config.depth_mode_info.mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    config.fps_mode_info.mode_id = K4A_FRAMES_PER_SECOND_30;
 
     // prevent the threads from running
     Lock(lock);
@@ -866,9 +866,9 @@ TEST_F(multidevice_ft, close_parallel)
 
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
-    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_2160P;
+    config.depth_mode_info.mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    config.fps_mode_info.mode_id = K4A_FRAMES_PER_SECOND_30;
 
     data2.config = data1.config = &config;
     data1.lock = data2.lock = lock;
@@ -922,16 +922,16 @@ TEST_F(multidevice_sync_ft, multi_sync_no_color)
 
     k4a_device_configuration_t default_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     default_config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    default_config.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
-    default_config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    default_config.fps_mode_id = frame_rate;
+    default_config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_2160P;
+    default_config.depth_mode_info.mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    default_config.fps_mode_info.mode_id = frame_rate;
     default_config.subordinate_delay_off_master_usec = 0;
     default_config.depth_delay_off_color_usec = 0;
     default_config.synchronized_images_only = true;
 
     k4a_device_configuration_t s_config = default_config;
     s_config.wired_sync_mode = K4A_WIRED_SYNC_MODE_SUBORDINATE;
-    s_config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+    s_config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_OFF;
     s_config.synchronized_images_only = false;
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(subordinate, &s_config));
 

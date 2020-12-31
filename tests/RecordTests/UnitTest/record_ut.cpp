@@ -139,9 +139,9 @@ TEST_F(record_ut, DISABLED_bgra_color_max_disk_write)
 {
     k4a_device_configuration_t record_config = {};
     record_config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-    record_config.color_mode_id = K4A_COLOR_RESOLUTION_2160P;
-    record_config.depth_mode_id = K4A_DEPTH_MODE_OFF;
-    record_config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    record_config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_2160P;
+    record_config.depth_mode_info.mode_id = K4A_DEPTH_MODE_OFF;
+    record_config.fps_mode_info.mode_id = K4A_FRAMES_PER_SECOND_30;
 
     std::cout
         << "A 'Disk write speed is too low, write queue is filling up.' log message is expected after about 4 seconds."

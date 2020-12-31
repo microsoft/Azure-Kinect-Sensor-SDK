@@ -246,13 +246,13 @@ k4a_result_t depthmcu_get_version(depthmcu_t depthmcu_handle, depthmcu_firmware_
     return result;
 }
 
-k4a_result_t depthmcu_depth_set_capture_mode(depthmcu_t depthmcu_handle, k4a_depth_mode_t capture_mode)
+k4a_result_t depthmcu_depth_set_capture_mode(depthmcu_t depthmcu_handle, k4a_depth_mode_info_t depth_mode_info)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, depthmcu_t, depthmcu_handle);
     depthmcu_context_t *depthmcu = depthmcu_t_get_context(depthmcu_handle);
     uint32_t mode;
 
-    switch (capture_mode)
+    switch (depth_mode_info.mode_id)
     {
     case K4A_DEPTH_MODE_NFOV_2X2BINNED:
     case K4A_DEPTH_MODE_NFOV_UNBINNED:
@@ -276,7 +276,7 @@ k4a_result_t depthmcu_depth_set_capture_mode(depthmcu_t depthmcu_handle, k4a_dep
         depthmcu->mode_size = SENSOR_MODE_PSEUDO_COMMON_SIZE;
         break;
     default:
-        LOG_ERROR("Invalid mode %d", capture_mode);
+        LOG_ERROR("Invalid mode %d", depth_mode_info.mode_id);
         return K4A_RESULT_FAILED;
     }
 
@@ -285,14 +285,14 @@ k4a_result_t depthmcu_depth_set_capture_mode(depthmcu_t depthmcu_handle, k4a_dep
         usb_cmd_write(depthmcu->usb_cmd, DEV_CMD_DEPTH_MODE_SET, (uint8_t *)&mode, sizeof(mode), NULL, 0));
 }
 
-k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, k4a_fps_t capture_fps)
+k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, k4a_fps_mode_info_t fps_mode_info)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, depthmcu_t, depthmcu_handle);
     depthmcu_context_t *depthmcu = depthmcu_t_get_context(depthmcu_handle);
     uint32_t fps;
 
     // Translate FPS to values understood by sensor module
-    switch (capture_fps)
+    switch (fps_mode_info.mode_id)
     {
     case K4A_FRAMES_PER_SECOND_30:
         fps = 30;
@@ -304,7 +304,7 @@ k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, k4a_fps_t captur
         fps = 5;
         break;
     default:
-        LOG_ERROR("Invalid FPS %d", capture_fps);
+        LOG_ERROR("Invalid FPS %d", fps_mode_info.mode_id);
         return K4A_RESULT_FAILED;
     }
 
