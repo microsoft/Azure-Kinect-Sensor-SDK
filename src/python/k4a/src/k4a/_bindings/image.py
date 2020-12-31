@@ -1,10 +1,12 @@
-'''
-image.py
+'''!
+@file image.py
 
 Defines an Image class that is a container for a single image
 from an Azure Kinect device.
 
-Copyright (C) Microsoft Corporation. All rights reserved.
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+Kinect For Azure SDK.
 '''
 
 import ctypes as _ctypes
@@ -25,6 +27,185 @@ from .k4a import k4a_image_create, k4a_image_create_from_buffer, \
     k4a_image_get_iso_speed, k4a_image_set_iso_speed
 
 class Image:
+    '''! A class that represents an image from an imaging sensor in an
+    Azure Kinect device.
+
+    <table>
+    <tr style="background-color: #323C7D; color: #ffffff;">
+    <td> Property Name </td><td> Type </td><td> R/W </td><td> Description </td>
+    </tr>
+    
+    <tr>
+    <td> data </td>
+    <td> numpy.ndarray </td>
+    <td> R/W </td>
+    <td> The image data as a numpy ndarray. </td>
+    </tr>
+
+    <tr>
+    <td> image_format </td>
+    <td> EImageFormat </td>
+    <td> R </td>
+    <td> The format of the image. </td>
+    </tr>
+
+    <tr>
+    <td> size_bytes </td>
+    <td> int </td>
+    <td> R </td>
+    <td> The size in bytes of the data. </td>
+    </tr>
+
+    <tr>
+    <td> width_pixels </td>
+    <td> int </td>
+    <td> R </td>
+    <td> The width in pixels of the data. </td>
+    </tr>
+
+    <tr>
+    <td> height_pixels </td>
+    <td> int </td>
+    <td> R </td>
+    <td> The height in pixels of the data. </td>
+    </tr>
+
+    <tr>
+    <td> stride_bytes </td>
+    <td> int </td>
+    <td> R </td>
+    <td> The stride in bytes of the rows. </td>
+    </tr>
+
+    <tr>
+    <td> device_timestamp_usec </td>
+    <td> int </td>
+    <td> R/W </td>
+    <td> The device timestamp in microseconds.
+         - Timestamps are recorded by the device and represent the mid-point of
+            exposure. They may be used for relative comparison, but their 
+            absolute value has no defined meaning.
+         - If the Image is invalid or if no timestamp was set for the image,
+            this value will be 0. It is also possible for a 0 value to be a
+            valid timestamp originating from the beginning of a recording or
+            the start of streaming.
+    </td>
+    </tr>
+
+    <tr>
+    <td> system_timestamp_nsec </td>
+    <td> int </td>
+    <td> R/W </td>
+    <td> The device timestamp in nanoseconds.
+         - The system timestamp is a high performance and increasing clock 
+            (from boot). The timestamp represents the time immediately after 
+            the image buffer was read by the host PC.
+         - Timestamps are recorded by the host. They may be used for relative
+            comparision, as they are relative to the corresponding system 
+            clock. The absolute value is a monotonic count from an arbitrary 
+            point in the past.
+         - The system timestamp is captured at the moment host PC finishes 
+            receiving the image.
+         - On Linux the system timestamp is read from 
+            clock_gettime(CLOCK_MONOTONIC), which measures realtime and is not
+            impacted by adjustments to the system clock. It starts from an 
+            arbitrary point in the past. On Windows the system timestamp is 
+            read from QueryPerformanceCounter(). It also measures realtime and
+            is not impacted by adjustments to the system clock. It also starts
+            from an arbitrary point in the past.
+         - If the Image is invalid or if no timestamp was set for the image,
+            this value will be 0. It is also possible for a 0 value to be a
+            valid timestamp originating from the beginning of a recording or
+            the start of streaming.
+    </td>
+    </tr>
+
+    <tr>
+    <td> exposure_usec </td>
+    <td> int </td>
+    <td> R/W </td>
+    <td> The image exposure in microseconds.
+         - This is only supported on color image formats.
+         - If the Image is invalid or if no exposure was set for the image,
+            this value will be 0. An exposure time of 0 is considered invalid.
+    </td>
+    </tr>
+
+    <tr>
+    <td> white_balance </td>
+    <td> int </td>
+    <td> R/W </td>
+    <td> The image white balance in Kelvin.
+         - This function is only valid for color captures, and not for depth or
+            IR captures.
+         - If the Image is invalid or if no white balance was set for the image,
+            this value will be 0. A white balance of 0 is considered invalid.
+    </td>
+    </tr>
+
+    <tr>
+    <td> iso_speed </td>
+    <td> int </td>
+    <td> R/W </td>
+    <td> The image ISO speed.
+         - This function is only valid for color captures, and not for depth or
+            IR captures.
+         - If the Image is invalid or if no white balance was set for the image,
+            this value will be 0. If the image is read from the device and this
+            value is 0, this indicates the ISO speed was not available or an
+            error occurred. An ISO of 0 is considered invalid.
+    </td>
+    </tr>
+
+    </table>
+
+    @remarks 
+    - An Image manages an image buffer and associated metadata.
+    
+    @remarks 
+    - Do not use the Image() constructor to get an Image instance. It
+        will return an object that does not have a handle to the image
+        resources held by the SDK. Instead, use the create() function.
+
+    @remarks 
+    - The memory associated with the image buffer in an Image may have been
+    allocated by the Azure Kinect APIs or by the application. If the 
+    Image was created by an Azure Kinect API, its memory will be freed when all
+    references to the Image are released. All images retrieved directly from a
+    device will have been created by the API. An application can create an
+    Image using memory that it has allocated using create_from_ndarray() and
+    passing an numpy ndarray with a pre-allocated memory. In both cases, the
+    memory is released when the all references to the Image object are
+    released, either explicitly with del or it goes out of scope. Users do not
+    need to worry about memory allocation and deallocation other than the
+    normal rules for Python objects.
+
+    @remarks
+    - An image has a number of metadata properties that can be set or 
+    retrieved. Not all properties are applicable to images of all types. 
+    See the documentation for the individual properties for more information on
+    their applicability and meaning.
+
+    @remarks
+    - Images may be of one of the standard EImageFormat formats, or may be of 
+    format EImageFormat.CUSTOM. The format defines how the underlying image 
+    buffer should be interpreted.
+
+    @remarks
+    - Images from a device are retrieved through a Capture object returned by 
+    Device.get_capture().
+
+    @remarks
+    - Images stored in a capture are referenced by the capture until they are
+    replaced or the capture is destroyed.
+
+    @remarks 
+    - An Image object may be copied or deep copied. A shallow copy
+        shares the same data as the original, and any changes in one will
+        affect the other. A deep copy does not share any resources with the
+        original, and changes in one will not affect the other. In both shallow
+        and deep copies, deleting one will have no effects on the other.
+    '''
 
     def __init__(self, image_handle:_ImageHandle=None):
         self.__image_handle = image_handle
@@ -105,6 +286,43 @@ class Image:
         width_pixels:int,
         height_pixels:int,
         stride_bytes:int):
+        '''! Create an image.
+
+        @param image_format (EImageFormat): The format of the image that will
+            be stored in this image container.
+
+        @param width_pixels (int): Width in pixels.
+
+        @param height_pixels (int): Height in pixels.
+
+        @param stride_bytes (int): The number of bytes per horizontal line of
+            the image. If set to 0, the stride will be set to the minimum size
+            given the image format and width_pixels.
+
+        @returns Image: An Image instance with an allocated data buffer. If an
+            error occurs, then None is returned.
+
+        @remarks
+        - This function is used to create images of formats that have 
+            consistent stride. The function is not suitable for compressed
+            formats that may not be represented by the same number of bytes per
+            line.
+
+        @remarks
+        - For most image formats, the function will allocate an image buffer of
+            size @p height_pixels * @p stride_bytes. Buffers with image format
+            of EImageFormat.COLOR_NV12 will allocate an additional 
+            \p height_pixels / 2 set of lines (each of \p stride_bytes). This 
+            function cannot be used to allocate EImageFormat.COLOR_MJPG buffer.
+
+        @remarks
+        - To create an image object without the API allocating memory, or to 
+            represent an image that has a non-deterministic stride, use 
+            create_from_ndarray().
+
+        @remarks
+        - If an error occurs, then None is returned.
+        '''
 
         image = None
 
@@ -134,8 +352,52 @@ class Image:
         image_format:EImageFormat,
         arr:_np.ndarray,
         stride_bytes_custom:int=0,
-        size_bytes_custom:int=0):
+        size_bytes_custom:int=0,
+        width_pixels_custom:int=0,
+        height_pixels_custom:int=0):
+        '''! Create an image from a pre-allocated buffer.
 
+        @param image_format (EImageFormat): The format of the image that will
+            be stored in this image container.
+
+        @param arr (numpy.ndarray): A pre-allocated numpy ndarray.
+
+        @param stride_bytes_custom (int, optional): User-defined stride in bytes.
+
+        @param size_bytes_custom (int): User-defined size in bytes of the data.
+
+        @param width_pixels_custom (int): User-defined width in pixels of the data.
+
+        @param height_pixels_custom (int): User-defined height in pixels of the data.
+
+        @returns Image: An Image instance using the pre-allocated data buffer. If an
+            error occurs, then None is returned.
+
+        @remarks
+        - This function is used to create images of formats that have 
+            consistent stride. The function is not suitable for compressed
+            formats that may not be represented by the same number of bytes per
+            line.
+
+        @remarks
+        - The numpy ndarray keeps a record of the per-dimension stride in bytes
+            to get to the next sample in the same dimension. The definition of
+            stride in the Azure Kinect SDK is the number of bytes to get to the
+            next sample in the row, so it only has one stride. As such, the
+            stride that is used to pass to the SDK is the first stride in the
+            ndarray. In cases where the geometry of the ndarray does not map
+            well to this scheme, the user can use the optional
+            @p stride_bytes_custom to pass in a custom stride to use.
+
+        @remarks
+        - Users can pass in their own size, width, height, and stride to use in
+            cases where the ndarray shape and size metadata does not map well
+            to the predefined EImageFormat types. They supercede any of the
+            corresponding metadata in the ndarray.
+
+        @remarks
+        - If an error occurs, then None is returned.
+        '''
         image = None
 
         assert(isinstance(arr, _nd.ndarray)), "arr must be a numpy ndarray object."
@@ -146,20 +408,23 @@ class Image:
             _ctypes.addressof(np.ctypeslib.as_ctypes(arr)), 
             _ctypes.POINTER(_ctypes.c_uint8))
 
-        width_pixels = _ctypes.c_int(arr.shape[0])
-        height_pixels = _ctypes.c_int(arr.shape[1])
+        width_pixels = _ctypes.c_int(width_pixels_custom)
+        height_pixels = _ctypes.c_int(height_pixels_custom)
         stride_bytes = _ctypes.c_int(stride_bytes_custom)
         size_bytes = _ctypes.c_int(size_bytes_custom)
 
-        # For non-custom image formats, use the ndarray sizes.
-        if (image_format != EImageFormat.COLOR_MJPG and
-            image_format != EImageFormat.CUSTOM and
-            image_format != EImageFormat.CUSTOM8 and
-            image_format != EImageFormat.CUSTOM16):
+        # Use the ndarray sizes if the custom size info is not passed in.
+        if width_pixels == 0:
+            width_pixels = _ctypes.c_int(arr.shape[0])
 
+        if height_pixels == 0:
+            height_pixels = _ctypes.c_int(arr.shape[1])
+
+        if size_bytes == 0:
             size_bytes = _ctypes.c_int(arr.itemsize * arr.size)
-            if len(arr.shape) > 2:
-                stride_bytes = _ctypes.c_int(arr.shape[2])
+
+        if len(arr.shape) > 2 and stride_bytes == 0:
+            stride_bytes = _ctypes.c_int(arr.shape[2])
 
         # Create image from the numpy buffer.
         image_handle = _ImageHandle()

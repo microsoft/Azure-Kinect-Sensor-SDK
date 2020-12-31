@@ -802,7 +802,7 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                             self.assertIsNotNone(y)
                             self.assertIsNotNone(z)
 
-    def test_point_2d_to_point_3d(self):
+    def test_pixel_2d_to_point_3d(self):
 
         for depth_mode in Test_Transformation_AzureKinect.depth_modes:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
@@ -822,7 +822,7 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                             transformation = k4a.Transformation(calibration)
 
                             # Apply transformation.
-                            (x, y, z) = transformation.point_2d_to_point_3d(
+                            (x, y, z) = transformation.pixel_2d_to_point_3d(
                                 (300.0, 300.0),
                                 500.0,
                                 source_camera,
@@ -832,7 +832,7 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                             self.assertIsNotNone(y)
                             self.assertIsNotNone(z)
 
-    def test_point_3d_to_point_2d(self):
+    def test_point_3d_to_pixel_2d(self):
 
         for depth_mode in Test_Transformation_AzureKinect.depth_modes:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
@@ -852,7 +852,7 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                             transformation = k4a.Transformation(calibration)
 
                             # Apply transformation.
-                            (x, y) = transformation.point_3d_to_point_2d(
+                            (x, y) = transformation.point_3d_to_pixel_2d(
                                 (300.0, 300.0, 500.0),
                                 source_camera,
                                 target_camera)
@@ -860,7 +860,7 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                             self.assertIsNotNone(x)
                             self.assertIsNotNone(y)
 
-    def test_point_2d_to_point_2d(self):
+    def test_pixel_2d_to_pixel_2d(self):
 
         for depth_mode in Test_Transformation_AzureKinect.depth_modes:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
@@ -880,7 +880,7 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                             transformation = k4a.Transformation(calibration)
 
                             # Apply transformation.
-                            (x, y) = transformation.point_2d_to_point_2d(
+                            (x, y) = transformation.pixel_2d_to_pixel_2d(
                                 (300.0, 300.0),
                                 500.0,
                                 source_camera,
@@ -954,7 +954,6 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                     self.device.start_cameras(device_config)
                     capture = self.device.get_capture(-1)
                     depth = capture.depth
-                    color = capture.color
                     self.device.stop_cameras()
                     del capture
 
@@ -967,7 +966,7 @@ class Test_Transformation_AzureKinect(unittest.TestCase):
                     transformation = k4a.Transformation(calibration)
 
                     # Apply transformation.
-                    transformed_depth = transformation.depth_image_to_color_camera(depth, color)
+                    transformed_depth = transformation.depth_image_to_color_camera(depth)
                     
                     self.assertIsNotNone(transformed_depth)
 

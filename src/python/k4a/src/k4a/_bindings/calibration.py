@@ -1,9 +1,11 @@
-'''
-calibration.py
+'''!
+@file calibration.py
 
 Defines a Calibration class that is a container for a device calibration.
 
-Copyright (C) Microsoft Corporation. All rights reserved.
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+Kinect For Azure SDK.
 '''
 
 import ctypes as _ctypes
@@ -13,7 +15,18 @@ from .k4atypes import _Calibration, EStatus, EDepthMode, EColorResolution, _Cali
 from .k4a import k4a_calibration_get_from_raw
 
 class Calibration:
+    '''! Camera calibration contains intrinsic and extrinsic calibration
+    information for a camera.
 
+    Name              | Type                  | Description
+    ----------------- | --------------------- | ----------------------------------------------
+    extrinsics        | CalibrationExtrinsics | Extrinsic calibration data.
+    intrinsics        | CalibrationIntrinsics | Intrinsic calibration data.
+    resolution_width  | int                   | Resolution width of the calibration sensor.
+    resolution_height | int                   | Resolution height of the calibration sensor.
+    metric_radius     | float                 | Max FOV of the camera.
+    '''
+    
     def __init__(self, _calibration:_Calibration=None):
         self._calibration = _calibration
         if self._calibration is None:

@@ -29,7 +29,9 @@ The following are required in order to run the Python K4A tests.
       ./<env_name>/Scripts/activate
       
 3. Install the k4a package in development mode. This is required in order to
-   automatically install required Python packages for running the tests.
+   automatically install required Python packages for running the tests, as
+   well as to install the code with the k4a package as the root of the 
+   subpackages and modules.
       pip install -e .[test]   (include "[test]" with square brackets)
       
 4. Run the tests in python. To capture the results, use an additional --junit-xml=./test_results.xml option.

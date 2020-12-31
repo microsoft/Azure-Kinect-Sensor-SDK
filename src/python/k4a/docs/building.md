@@ -69,6 +69,11 @@ The following tools are optional:
       ./<env_name>/Scripts/deactivate.bat
       Delete the directory <env_name>
       
+### Building the HTML Documentation
+
+A Doxygen settings file is provided in the project directory. Run doxygen using this
+settings file to create the html documentation.
+      
 ## Installing
 
 The build process will create a k4a*.whl wheel file that can be installed via pip.
@@ -77,3 +82,5 @@ The wheel file can be distributed and installed as follows.
 1. In a command line terminal, install the k4a python library via pip.
    Replace <k4a*.whl> with the name of the wheel file.
       pip install <k4a*.whl>
+      
+Once installed, the user can "import k4a" in their python code.
