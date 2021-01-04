@@ -342,20 +342,8 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     if (ImGui::TreeNode("Depth Configuration"))
     {
         const bool depthSettingsEditable = !deviceIsStarted && m_config.EnableDepthCamera;
-        auto *pDepthMode = reinterpret_cast<int *>(&m_config.depth_mode_id);
+        auto *pDepthMode = reinterpret_cast<int *>(&m_config.depth_mode_info.mode_id);
         //ImGui::Text("Depth mode");
-
-        // TODO: remove
-        //depthModeUpdated |= ImGuiExtensions::K4ARadioButton("NFOV Binned", pDepthMode, 1, depthSettingsEditable); // 1 = K4A_DEPTH_MODE_NFOV_2X2BINNED
-
-        //depthModeUpdated |= ImGuiExtensions::K4ARadioButton("NFOV Unbinned  ", pDepthMode, 2, depthSettingsEditable); // 2 = K4A_DEPTH_MODE_NFOV_UNBINNED
-
-        //depthModeUpdated |= ImGuiExtensions::K4ARadioButton("WFOV Binned", pDepthMode, 3, depthSettingsEditable); // 3 = K4A_DEPTH_MODE_WFOV_2X2BINNED
-
-        //depthModeUpdated |= ImGuiExtensions::K4ARadioButton("WFOV Unbinned  ", pDepthMode, 4, depthSettingsEditable); // 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
-
-        //depthModeUpdated |= ImGuiExtensions::K4ARadioButton("Passive IR", pDepthMode, 5, depthSettingsEditable); //  5 = K4A_DEPTH_MODE_PASSIVE_IR
-
 
         std::vector<std::pair<int, std::string>> depth_mode_items;
         std::vector<k4a_depth_mode_info_t> depth_modes = m_device.get_depth_modes();
@@ -439,38 +427,16 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         {
             if (!imageFormatSupportsHighResolution)
             {
-                m_config.color_mode_id = 1;  // 1 = K4A_COLOR_RESOLUTION_720P
+                m_config.color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 1, 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30  };  // 1 = K4A_COLOR_RESOLUTION_720P
             }
         }
 
         // TODO: remove
         //auto *pColorResolution = reinterpret_cast<int *>(&m_config.ColorResolution);
 
-        auto *pColorMode = reinterpret_cast<int *>(&m_config.color_mode_id);
+        auto *pColorMode = reinterpret_cast<int *>(&m_config.color_mode_info.mode_id);
 
         //ImGui::Text("Resolution");
-        //ImGui::Indent();
-
-        //ImGui::Text("16:9");
-
-        //colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton(" 720p", pColorResolution, 1, colorSettingsEditable); // 1 = K4A_COLOR_RESOLUTION_720P
-
-        //colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1080p", pColorResolution, 2, colorSettingsEditable && imageFormatSupportsHighResolution); // 2 = K4A_COLOR_RESOLUTION_1080P
-        //ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
-
-        //colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1440p", pColorResolution, 3, colorSettingsEditable && imageFormatSupportsHighResolution); // 3 = K4A_COLOR_RESOLUTION_1440P
-        //ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
-
-        //colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("2160p", pColorResolution, 4, colorSettingsEditable && imageFormatSupportsHighResolution); // 4 = K4A_COLOR_RESOLUTION_2160P
-        //ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
-
-        //ImGui::Text("4:3");
-
-        //colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("1536p", pColorResolution, 5, colorSettingsEditable && imageFormatSupportsHighResolution); // 5 = K4A_COLOR_RESOLUTION_1536P
-        //ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
-
-        //colorResolutionUpdated |= ImGuiExtensions::K4ARadioButton("3072p", pColorResolution, 6, colorSettingsEditable && imageFormatSupportsHighResolution); // 6 = K4A_COLOR_RESOLUTION_3072P
-        //ImGuiExtensions::K4AShowTooltip(imageFormatHelpMessage, !imageFormatSupportsHighResolution);
 
         std::vector<std::pair<int, std::string>> color_mode_items;
         std::vector<k4a_color_mode_info_t> color_modes = m_device.get_color_modes();
@@ -661,19 +627,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     //ImGui::Text("Framerate");
 
-    // TODO: remove
-    //auto *pFramerate = reinterpret_cast<int *>(&m_config.Framerate);
-
     bool framerateUpdated = false;
-    
-    
-    // TODO: remove
-    //framerateUpdated |= ImGuiExtensions::K4ARadioButton("30 FPS", pFramerate, 2, enableFramerate && supports30fps); // 2 = K4A_FRAMES_PER_SECOND_30
-    //ImGuiExtensions::K4AShowTooltip("Not supported with WFOV Unbinned or 3072p!", !supports30fps);
-
-    //framerateUpdated |= ImGuiExtensions::K4ARadioButton("15 FPS", pFramerate, 1, enableFramerate); // 1 = K4A_FRAMES_PER_SECOND_15
-
-    //framerateUpdated |= ImGuiExtensions::K4ARadioButton(" 5 FPS", pFramerate, 0, enableFramerate); // 0 = K4A_FRAMES_PER_SECOND_5
 
     // TODO: comment
     // TODO: tooltip if 30 fps not available due to other settings
@@ -743,7 +697,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             // the user interacts with the control
             //
             int maxDepthDelay = 0;
-            switch (m_config.fps_mode_id)
+            switch (m_config.fps_mode_info.mode_id)
             {
             case 2:  // 2 = K4A_FRAMES_PER_SECOND_30
                 maxDepthDelay = std::micro::den / 30;
