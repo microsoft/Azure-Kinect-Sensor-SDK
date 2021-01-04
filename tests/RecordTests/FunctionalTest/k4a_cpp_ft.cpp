@@ -90,7 +90,9 @@ TEST_F(k4a_cpp_ft, k4a)
         // should not throw exception
         calibration cal = kinect.get_calibration(depth_mode_info, color_mode_info);
         calibration cal2 = cal;
-        ASSERT_EQ(cal.color_mode_info, cal2.color_mode_info);
+
+        // TODO: double check this with develop branch
+        ASSERT_EQ(cal.color_mode_info.mode_id, cal2.color_mode_info.mode_id);
     }
 
     {
