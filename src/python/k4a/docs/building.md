@@ -48,13 +48,24 @@ The following tools are optional:
 ### Building using a powershell script (Windows)
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
+   The file names MUST be k4a.dll and depthengine.dll.
 
 2. In a powershell terminal, run the script src/python/k4a/build_wheel.ps1.
+   This will create the .whl file in a build/ folder.
+
+### Building using a bash script (Linux)
+
+1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
+   The file names MUST be k4a.so and depthengine.so.
+
+2. In a terminal, source the script src/python/k4a/build_wheel.csh.
    This will create the .whl file in a build/ folder.
    
 ### Building using a command line terminal (cross platform)
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
+   The file names MUST be k4a.dll and depthengine.dll in Windows, and
+   the file names MUST be k4a.so and depthengine.so in Linux.
 
 2. In a command line terminal, create a Python virtual environment and activate it (do not include brackets):
       cd <repo_root>/src/python/k4a

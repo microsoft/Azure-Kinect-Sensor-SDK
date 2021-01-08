@@ -21,7 +21,8 @@ The following are required in order to run the Python K4A tests.
 
 ### Running tests on the command line
 
-1. Copy the k4a and DE dynamic libraries (.dll or .so) into the folder src/python/k4a/src/k4a/_libs.
+1. Copy the k4a and DE dynamic libraries (.dll or .so) into the folder src/python/k4a/src/k4a/_libs. The file names MUST be k4a.dll and depthengine.dll in Windows, and
+the file names MUST be k4a.so and depthengine.so in Linux.
 
 2. In a command line terminal, create a Python virtual environment and activate it (do not include brackets):
       cd <repo_root>/src/python/k4a
@@ -46,7 +47,8 @@ In general, the steps are:
 
 Run steps 1-3 above before starting the IDE. 
 
-In Visual Studio Code, Ctrl+Shift+P will let you select the Python interpreter (virtual environment).
+In Visual Studio Code, Ctrl+Shift+P will let you select the Python interpreter (virtual environment). You may also need to configure the Python settings to use pytest
+framework if it is not turned on by default.
 https://code.visualstudio.com/docs/python/environments
 
 In Visual Studio, there is a Python environment selector.
@@ -58,3 +60,13 @@ There are some tests that are decorated with "@unittest.skip" or "@unittest.expe
 These are tests that for some reason always fail. They affect a small subset of the Python K4A API.
 They are annonated as such so that automated test pipelines will not get hung up.
 The annotations will be removed whenever the tests are fixed to be passing.
+
+When running the Test_K4A_AzureKinect tests, these may take a
+very long time. Consider running these tests one by one.
+
+When running the Test_Transformation_AzureKinect tests, this may take a
+very long time. Consider running these tests one by one. Additionally, the tests
+capture live data and may fail if the data cannot be transformed from one camera
+to another. For example, this may happen if the selected pixel to transform is an
+invalid pixel in the depth image just because the data at that pixel is not in the
+range of depths that the depth sensor can see.
