@@ -20,14 +20,14 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 # Check that the k4a.so and depth_engine.so have been copied into the _libs/ folder.
 # Because these dlls may not be located in a standard place, leave it to the developer
 # to manually copy them into the _libs/ folder.
-if [ ! -f "$DIR/src/k4a/_libs/k4a.so" ] && [ ! -h "$DIR/src/k4a/_libs/k4a.so" ]; then
-    echo "File not found: $DIR/src/k4a/_libs/k4a.so"
+if [ ! -f "$DIR/src/k4a/_libs/libk4a.so" ] && [ ! -h "$DIR/src/k4a/_libs/libk4a.so" ]; then
+    echo "File not found: $DIR/src/k4a/_libs/libk4a.so"
     echo "Please manually copy the library into that folder."
     return 1
 fi
 
-if [ ! -f "$DIR/src/k4a/_libs/depthengine.so" ] && [ ! -h "$DIR/src/k4a/_libs/depthengine.so" ]; then
-    echo "File not found: $DIR/src/k4a/_libs/depthengine.so"
+if [ ! -f "$DIR/src/k4a/_libs/libdepthengine.so" ] && [ ! -h "$DIR/src/k4a/_libs/libdepthengine.so" ]; then
+    echo "File not found: $DIR/src/k4a/_libs/libdepthengine.so"
     echo "Please manually copy the library into that folder."
     return 1
 fi
