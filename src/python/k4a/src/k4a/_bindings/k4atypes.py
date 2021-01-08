@@ -21,7 +21,7 @@ import platform as _platform
 # Determine the calling convention to use.
 _IS_WINDOWS = 'Windows' == _platform.system()
 if _IS_WINDOWS:
-    _FUNCTYPE = _ctypes.WINFUNCTYPE
+    _FUNCTYPE = _ctypes.CFUNCTYPE
 else:
     _FUNCTYPE = _ctypes.CFUNCTYPE
 

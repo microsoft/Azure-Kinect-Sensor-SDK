@@ -33,11 +33,11 @@ try:
     _lib_dir = _os_path.join(_os_path.dirname(_os_path.dirname(__file__)), '_libs')
 
     if _IS_WINDOWS:
-        _depthengine_lib = _ctypes.WinDLL(_os_path.join(_lib_dir, 'depthengine.dll'))
-        _k4a_lib = _ctypes.WinDLL(_os_path.join(_lib_dir, 'k4a.dll'))
+        _depthengine_lib = _ctypes.CDLL(_os_path.join(_lib_dir, 'depthengine.dll'))
+        _k4a_lib = _ctypes.CDLL(_os_path.join(_lib_dir, 'k4a.dll'))
     else:
-        _depthengine_lib = _ctypes.CDLL(_os_path.join(_lib_dir, 'depthengine.so'))
-        _k4a_lib = _ctypes.CDLL(_os_path.join(_lib_dir, 'k4a.so'))
+        _depthengine_lib = _ctypes.CDLL(_os_path.join(_lib_dir, 'libdepthengine.so'))
+        _k4a_lib = _ctypes.CDLL(_os_path.join(_lib_dir, 'libk4a.so'))
 
 except Exception as ee:
     print("Failed to load library", ee)
