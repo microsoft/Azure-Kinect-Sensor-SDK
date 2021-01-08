@@ -1,6 +1,6 @@
 # Script to automate creation of the Python wheel for the k4a library.
 
-# Check that the k4a.dll and depth_engine_2_0.dll have been copied into the _libs/ folder.
+# Check that the k4a.dll and depth_engine.dll have been copied into the _libs/ folder.
 # Because these dlls may not be located in a standard place, leave it to the developer
 # to manually copy them into the _libs/ folder.
 If (-not (Test-Path -Path "$PSScriptRoot\src\k4a\_libs\k4a.dll")) {
@@ -9,8 +9,8 @@ If (-not (Test-Path -Path "$PSScriptRoot\src\k4a\_libs\k4a.dll")) {
     exit 1
 }
 
-If (-not(Test-Path -Path "$PSScriptRoot\src\k4a\_libs\depthengine*.dll")) {
-    Write-Host "File not found: $PSScriptRoot\src\k4a\_libs\depthengine*.dll"
+If (-not(Test-Path -Path "$PSScriptRoot\src\k4a\_libs\depthengine.dll")) {
+    Write-Host "File not found: $PSScriptRoot\src\k4a\_libs\depthengine.dll"
     Write-Host "Please manually copy the dll into that folder."
     exit 1
 }
@@ -20,6 +20,10 @@ Write-Host "Creating a Python virtual environment."
 
 If (Test-Path -Path "temp_build_venv") {
     Remove-Item -LiteralPath "temp_build_venv" -Force -Recurse
+}
+
+If (Test-Path -Path "build") {
+    Remove-Item -LiteralPath "build" -Force -Recurse
 }
 
 python -m venv temp_build_venv

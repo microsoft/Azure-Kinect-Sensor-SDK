@@ -16,9 +16,9 @@ import copy as _copy
 from .k4atypes import _ImageHandle, EStatus, EImageFormat
 
 from .k4a import k4a_image_create, k4a_image_create_from_buffer, \
-    k4a_image_release, k4a_image_get_buffer, k4a_image_get_size, \
-    k4a_image_reference, k4a_image_release, k4a_image_create_from_buffer, \
-    k4a_image_get_format, k4a_image_get_size, k4a_image_get_width_pixels, \
+    k4a_image_release, k4a_image_get_buffer, \
+    k4a_image_reference, k4a_image_release, k4a_image_get_format, \
+    k4a_image_get_size, k4a_image_get_width_pixels, \
     k4a_image_get_height_pixels, k4a_image_get_stride_bytes, \
     k4a_image_get_device_timestamp_usec, k4a_image_set_device_timestamp_usec, \
     k4a_image_get_system_timestamp_nsec, k4a_image_set_system_timestamp_nsec, \
