@@ -48,7 +48,9 @@ The following tools are optional:
 ### Building using a powershell script (Windows)
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
-   The file names MUST be k4a.dll and depthengine.dll.
+   The file names MUST be k4a.dll and depthengine.dll. 
+   Note: If the dlls have different names, create a symlink with relative redirection. This may
+         require elevated permissions to create the symlink as well as run build_wheel.ps1.
 
 2. In a powershell terminal, run the script src/python/k4a/build_wheel.ps1.
    This will create the .whl file in a build/ folder.
@@ -56,7 +58,9 @@ The following tools are optional:
 ### Building using a bash script (Linux)
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
-   The file names MUST be k4a.so and depthengine.so.
+   The file names MUST be libk4a.so and libdepthengine.so.
+   Note: If the .so have different names, create a symlink with relative redirection. This may
+         require elevated permissions to create the symlink as well as run build_wheel.csh.
 
 2. In a terminal, source the script src/python/k4a/build_wheel.csh.
    This will create the .whl file in a build/ folder.
@@ -65,7 +69,10 @@ The following tools are optional:
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
    The file names MUST be k4a.dll and depthengine.dll in Windows, and
-   the file names MUST be k4a.so and depthengine.so in Linux.
+   the file names MUST be libk4a.so and libdepthengine.so in Linux.
+   
+   Note: If the libraries have different names, create a symlink with relative redirection. This may
+         require elevated permissions to create the symlink.
 
 2. In a command line terminal, create a Python virtual environment and activate it (do not include brackets):
       cd <repo_root>/src/python/k4a
