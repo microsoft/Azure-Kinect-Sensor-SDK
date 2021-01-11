@@ -292,9 +292,9 @@ k4a_device_configuration_t K4ADeviceConfiguration::ToK4ADeviceConfiguration(k4a:
     k4a_color_mode_info_t color_mode_info = device->get_color_mode(EnableColorCamera ? color_mode_id : 0); // 0 = K4A_COLOR_RESOLUTION_OFF
     k4a_fps_mode_info_t fps_mode_info = device->get_fps_mode(fps_mode_id);
 
-    deviceConfig.color_mode_info = color_mode_info;
-    deviceConfig.depth_mode_info = depth_mode_info ;      
-    deviceConfig.fps_mode_info = fps_mode_info;
+    deviceConfig.color_mode_id = color_mode_info.mode_id;
+    deviceConfig.depth_mode_id = depth_mode_info.mode_id;      
+    deviceConfig.fps_mode_id = fps_mode_info.mode_id;
 
     deviceConfig.depth_delay_off_color_usec = DepthDelayOffColorUsec;
     deviceConfig.wired_sync_mode = WiredSyncMode;

@@ -129,8 +129,8 @@ TEST_F(k4a_cpp_ft, k4a)
         k4a_imu_sample_t sample = { 0 };
         capture cap1, cap2;
         k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.color_mode_info.mode_id = 2; // K4A_COLOR_RESOLUTION_1080P
-        config.depth_mode_info.mode_id = 5; // K4A_DEPTH_MODE_PASSIVE_IR
+        config.color_mode_id = 2; // K4A_COLOR_RESOLUTION_1080P
+        config.depth_mode_id = 5; // K4A_DEPTH_MODE_PASSIVE_IR
         config.synchronized_images_only = true;
         kinect.start_cameras(&config);
         kinect.start_imu();
@@ -269,8 +269,8 @@ static void test_record(void)
     record recorder;
     device kinect = device::open(0);
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-    config.color_mode_info.mode_id = 2; // K4A_COLOR_RESOLUTION_1080P
-    config.depth_mode_info.mode_id = 2; // K4A_DEPTH_MODE_NFOV_UNBINNED
+    config.color_mode_id = 2; // K4A_COLOR_RESOLUTION_1080P
+    config.depth_mode_id = 2; // K4A_DEPTH_MODE_NFOV_UNBINNED
     config.synchronized_images_only = true;
     kinect.start_cameras(&config);
     kinect.start_imu();

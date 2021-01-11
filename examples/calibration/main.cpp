@@ -68,15 +68,15 @@ static void print_calibration()
 
         k4a_device_configuration_t deviceConfig = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         deviceConfig.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        deviceConfig.color_mode_info = color_mode_info;
-        deviceConfig.depth_mode_info = depth_mode_info;
-        deviceConfig.fps_mode_info = fps_mode_info;
+        deviceConfig.color_mode_id = color_mode_info.mode_id;
+        deviceConfig.depth_mode_id = depth_mode_info.mode_id;
+        deviceConfig.fps_mode_id = fps_mode_info.mode_id;
         deviceConfig.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
         deviceConfig.synchronized_images_only = true;
 
         // get calibration
         if (K4A_RESULT_SUCCEEDED !=
-            k4a_device_get_calibration(device, deviceConfig.depth_mode_info, deviceConfig.color_mode_info, &calibration))
+            k4a_device_get_calibration(device, depth_mode_info, color_mode_info, &calibration))
         {
             cout << "Failed to get calibration" << endl;
             exit(-1);
