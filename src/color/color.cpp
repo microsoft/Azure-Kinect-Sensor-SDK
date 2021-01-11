@@ -135,7 +135,7 @@ k4a_result_t color_start(color_t color_handle, const k4a_device_configuration_t 
     uint32_t height = 0;
     float fps = 1.0f;
 
-    switch (config->color_mode_info.mode_id)
+    switch (config->color_mode_id)
     {
     case K4A_COLOR_RESOLUTION_720P:
         width = 1280;
@@ -162,11 +162,11 @@ k4a_result_t color_start(color_t color_handle, const k4a_device_configuration_t 
         height = 1536;
         break;
     default:
-        LOG_ERROR("color_resolution %d is invalid", config->color_mode_info.mode_id);
+        LOG_ERROR("color_resolution %d is invalid", config->color_mode_id);
         return K4A_RESULT_FAILED;
     }
 
-    switch (config->fps_mode_info.mode_id)
+    switch (config->fps_mode_id)
     {
     case K4A_FRAMES_PER_SECOND_30:
         fps = 30.0f;
@@ -178,7 +178,7 @@ k4a_result_t color_start(color_t color_handle, const k4a_device_configuration_t 
         fps = 5.0f;
         break;
     default:
-        LOG_ERROR("camera_fps %d is invalid", config->fps_mode_info.mode_id);
+        LOG_ERROR("camera_fps %d is invalid", config->fps_mode_id);
         return K4A_RESULT_FAILED;
     }
 

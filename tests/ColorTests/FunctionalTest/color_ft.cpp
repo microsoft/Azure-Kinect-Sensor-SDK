@@ -124,10 +124,10 @@ TEST_P(color_functional_test, color_streaming_test)
     stream_count = STREAM_RUN_TIME_SEC * as.expected_fps;
 
     // Configure the stream
-    config.fps_mode_info.mode_id = as.color_rate;
+    config.fps_mode_id = as.color_rate;
     config.color_format = as.color_format;
-    config.color_mode_info.mode_id = as.color_mode_id;
-    config.depth_mode_info.mode_id = 0; // 0 = K4A_DEPTH_MODE_OFF
+    config.color_mode_id = as.color_mode_id;
+    config.depth_mode_id = 0; // 0 = K4A_DEPTH_MODE_OFF
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
@@ -499,15 +499,15 @@ TEST_F(color_functional_test, colorModeChange)
 
     // Create two valid configs that are expected to yield different-sized color payloads
     //
-    config.fps_mode_info.mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
+    config.fps_mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_mode_info.mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
-    config.depth_mode_info.mode_id = 0; // = K4A_DEPTH_MODE_OFF
+    config.color_mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
+    config.depth_mode_id = 0; // = K4A_DEPTH_MODE_OFF
 
-    config2.fps_mode_info.mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
+    config2.fps_mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
     config2.color_format = K4A_IMAGE_FORMAT_COLOR_YUY2;
-    config2.color_mode_info.mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
-    config2.depth_mode_info.mode_id = 0; // 0 = K4A_DEPTH_MODE_OFF
+    config2.color_mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
+    config2.depth_mode_id = 0; // 0 = K4A_DEPTH_MODE_OFF
 
     // Start device in first mode and check frame size
     //
@@ -567,10 +567,10 @@ TEST_F(color_functional_test, colorExposureTest)
 
     // Create two valid configs that are expected to yield different-sized color payloads
     //
-    config.fps_mode_info.mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
+    config.fps_mode_id = 2; // 2 = K4A_FRAMES_PER_SECOND_30
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_mode_info.mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
-    config.depth_mode_info.mode_id = 0; // 0 = K4A_DEPTH_MODE_OFF
+    config.color_mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
+    config.depth_mode_id = 0; // 0 = K4A_DEPTH_MODE_OFF
 
     // Exposure set test
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -785,10 +785,10 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
     if ((rand() * 2 / RAND_MAX) >= 1)
     {
         config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.fps_mode_info.mode_id = 0; // 0 = K4A_FRAMES_PER_SECOND_5
+        config.fps_mode_id = 0; // 0 = K4A_FRAMES_PER_SECOND_5
         config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        config.color_mode_info.mode_id = 2; // 2 = K4A_COLOR_RESOLUTION_1080P
-        config.depth_mode_info.mode_id = 3; // 3 = K4A_DEPTH_MODE_WFOV_2X2BINNED
+        config.color_mode_id = 2; // 2 = K4A_COLOR_RESOLUTION_1080P
+        config.depth_mode_id = 3; // 3 = K4A_DEPTH_MODE_WFOV_2X2BINNED
         config.synchronized_images_only = true;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
         std::cout << "control_test_worker: k4a_device_start_cameras called\n";
@@ -854,7 +854,7 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
             ASSERT_EQ(value, map_manual_exposure(testValue, b_sixty_hertz)) << testValue << " was the value tested\n";
             if (cameras_running)
             {
-                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, (k4a_fps_t)config.fps_mode_info.mode_id)) << "1";
+                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, (k4a_fps_t)config.fps_mode_id)) << "1";
             }
 
             testValue = threshold;
@@ -864,7 +864,7 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
             ASSERT_EQ(value, map_manual_exposure(testValue, b_sixty_hertz)) << testValue << " was the value tested\n";
             if (cameras_running)
             {
-                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, (k4a_fps_t)config.fps_mode_info.mode_id))
+                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, (k4a_fps_t)config.fps_mode_id))
                     << "2";
             }
 
@@ -875,7 +875,7 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
             ASSERT_EQ(value, map_manual_exposure(testValue, b_sixty_hertz)) << testValue << " was the value tested\n";
             if (cameras_running)
             {
-                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, (k4a_fps_t)config.fps_mode_info.mode_id))
+                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, (k4a_fps_t)config.fps_mode_id))
                     << "3";
             }
 

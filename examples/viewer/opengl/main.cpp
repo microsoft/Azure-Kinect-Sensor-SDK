@@ -46,9 +46,9 @@ int main()
         //
         k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-        config.color_mode_info = color_mode_info;
-        config.depth_mode_info = depth_mode_info;
-        config.fps_mode_info = fps_mode_info;
+        config.color_mode_id = color_mode_info.mode_id;
+        config.depth_mode_id = depth_mode_info.mode_id;
+        config.fps_mode_id = fps_mode_info.mode_id;
 
         // This means that we'll only get captures that have both color and
         // depth images, so we don't need to check if the capture contains
@@ -66,8 +66,8 @@ int main()
         window.Initialize("Simple Azure Kinect Viewer", 1440, 900);
 
         // Textures we can give to OpenGL / the viewer window to render.
-        Texture depthTexture = window.CreateTexture({ config.depth_mode_info.width, config.depth_mode_info.height });
-        Texture colorTexture = window.CreateTexture({ config.color_mode_info.width, config.color_mode_info.height });
+        Texture depthTexture = window.CreateTexture({ depth_mode_info.width, depth_mode_info.height });
+        Texture colorTexture = window.CreateTexture({ color_mode_info.width, color_mode_info.height });
 
         // A buffer containing a BGRA color representation of the depth image.
         // This is what we'll end up giving to depthTexture as an image source.
@@ -106,8 +106,8 @@ int main()
                 //
                 ColorizeDepthImage(depthImage,
                                    K4ADepthPixelColorizer::ColorizeBlueToRed,
-                                   { (uint16_t)config.depth_mode_info.min_range,
-                                     (uint16_t)config.depth_mode_info.max_range },
+                                   { (uint16_t)depth_mode_info.min_range,
+                                     (uint16_t)depth_mode_info.max_range },
                                    &depthTextureBuffer);
                 depthTexture.Update(&depthTextureBuffer[0]);
 

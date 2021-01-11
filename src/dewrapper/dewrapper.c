@@ -36,8 +36,8 @@ typedef struct _dewrapper_context_t
     volatile bool thread_stop;
     k4a_result_t thread_start_result;
 
-    k4a_fps_mode_info_t fps_mode_info;
-    k4a_depth_mode_info_t depth_mode_info;
+    int fps_mode_id;
+    int depth_mode_id;
 
     TICK_COUNTER_HANDLE tick;
     dewrapper_streaming_capture_cb_t *capture_ready_cb;
@@ -56,11 +56,11 @@ typedef struct _shared_image_context_t
 
 K4A_DECLARE_CONTEXT(dewrapper_t, dewrapper_context_t);
 
-static k4a_depth_engine_mode_t get_de_mode_from_depth_mode(k4a_depth_mode_info_t depth_mode_info)
+static k4a_depth_engine_mode_t get_de_mode_from_depth_mode(uint32_t depth_mode_id)
 {
     k4a_depth_engine_mode_t de_mode;
 
-    switch (depth_mode_info.mode_id)
+    switch (depth_mode_id)
     {
     case K4A_DEPTH_MODE_NFOV_2X2BINNED:
         de_mode = K4A_DEPTH_ENGINE_MODE_LT_SW_BINNING;
@@ -84,9 +84,9 @@ static k4a_depth_engine_mode_t get_de_mode_from_depth_mode(k4a_depth_mode_info_t
     return de_mode;
 }
 
-static k4a_depth_engine_input_type_t get_input_format_from_depth_mode(k4a_depth_mode_info_t depth_mode_info)
+static k4a_depth_engine_input_type_t get_input_format_from_depth_mode(uint32_t depth_mode_id)
 {
-    k4a_depth_engine_mode_t de_mode = get_de_mode_from_depth_mode(depth_mode_info);
+    k4a_depth_engine_mode_t de_mode = get_de_mode_from_depth_mode(depth_mode_id);
     k4a_depth_engine_input_type_t format;
 
     format = K4A_DEPTH_ENGINE_INPUT_TYPE_12BIT_COMPRESSED;
@@ -122,20 +122,20 @@ static void free_shared_depth_image(void *buffer, void *context)
 }
 
 static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
-                                              k4a_fps_mode_info_t fps_mode_info,
-                                              k4a_depth_mode_info_t depth_mode_info,
+                                              uint32_t fps_mode_id,
+                                              uint32_t depth_mode_id,
                                               int *depth_engine_max_compute_time_ms,
                                               size_t *depth_engine_output_buffer_size)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, fps_mode_info.mode_id < K4A_FRAMES_PER_SECOND_5 || fps_mode_info.mode_id > K4A_FRAMES_PER_SECOND_30);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, depth_mode_info.mode_id <= K4A_DEPTH_MODE_OFF || depth_mode_info.mode_id > K4A_DEPTH_MODE_PASSIVE_IR);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, fps_mode_id < K4A_FRAMES_PER_SECOND_5 || fps_mode_id > K4A_FRAMES_PER_SECOND_30);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, depth_mode_id <= K4A_DEPTH_MODE_OFF || depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     assert(dewrapper->depth_engine == NULL);
     assert(dewrapper->calibration_memory != NULL);
 
     // Max comput time is the configured FPS
-    *depth_engine_max_compute_time_ms = HZ_TO_PERIOD_MS(k4a_convert_fps_to_uint(fps_mode_info.mode_id));
+    *depth_engine_max_compute_time_ms = HZ_TO_PERIOD_MS(k4a_convert_fps_to_uint(fps_mode_id));
     result = K4A_RESULT_FROM_BOOL(*depth_engine_max_compute_time_ms != 0);
 
     if (K4A_SUCCEEDED(result))
@@ -144,8 +144,8 @@ static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
             deloader_depth_engine_create_and_initialize(&dewrapper->depth_engine,
                                                         dewrapper->calibration_memory_size,
                                                         dewrapper->calibration_memory,
-                                                        get_de_mode_from_depth_mode(depth_mode_info),
-                                                        get_input_format_from_depth_mode(depth_mode_info),
+                                                        get_de_mode_from_depth_mode(depth_mode_id),
+                                                        get_input_format_from_depth_mode(depth_mode_id),
                                                         dewrapper->calibration, // k4a_calibration_camera_t*
                                                         NULL,                   // Callback
                                                         NULL);                  // Callback Context
@@ -188,8 +188,8 @@ static int depth_engine_thread(void *param)
     bool received_valid_image = false;
 
     result = TRACE_CALL(depth_engine_start_helper(dewrapper,
-                                                  dewrapper->fps_mode_info,
-                                                  dewrapper->depth_mode_info,
+                                                  dewrapper->fps_mode_id,
+                                                  dewrapper->depth_mode_id,
                                                   &depth_engine_max_compute_time_ms,
                                                   &depth_engine_output_buffer_size));
 
@@ -301,10 +301,10 @@ static int depth_engine_thread(void *param)
             result = TRACE_CALL(capture_create(&capture));
         }
 
-        bool depth16_present = (dewrapper->depth_mode_info.mode_id == K4A_DEPTH_MODE_NFOV_2X2BINNED ||
-                                dewrapper->depth_mode_info.mode_id == K4A_DEPTH_MODE_NFOV_UNBINNED ||
-                                dewrapper->depth_mode_info.mode_id == K4A_DEPTH_MODE_WFOV_2X2BINNED ||
-                                dewrapper->depth_mode_info.mode_id == K4A_DEPTH_MODE_WFOV_UNBINNED);
+        bool depth16_present = (dewrapper->depth_mode_id == K4A_DEPTH_MODE_NFOV_2X2BINNED ||
+                                dewrapper->depth_mode_id == K4A_DEPTH_MODE_NFOV_UNBINNED ||
+                                dewrapper->depth_mode_id == K4A_DEPTH_MODE_WFOV_2X2BINNED ||
+                                dewrapper->depth_mode_id == K4A_DEPTH_MODE_WFOV_UNBINNED);
 
         if (K4A_SUCCEEDED(result) & depth16_present)
         {
@@ -527,8 +527,8 @@ k4a_result_t dewrapper_start(dewrapper_t dewrapper_handle,
         queue_enable(dewrapper->queue);
 
         // NOTE: do not copy config ptr, it may be freed after this call
-        dewrapper->fps_mode_info = config->fps_mode_info;
-        dewrapper->depth_mode_info = config->depth_mode_info;
+        dewrapper->fps_mode_id = config->fps_mode_id;
+        dewrapper->depth_mode_id = config->depth_mode_id;
         dewrapper->thread_stop = false;
         dewrapper->thread_started = false;
 
@@ -587,8 +587,8 @@ void dewrapper_stop(dewrapper_t dewrapper_handle)
         (void)K4A_RESULT_FROM_BOOL(tresult == THREADAPI_OK); // Trace the issue, but we don't return a failure
 
         // TODO: watch out for whatever was supposed to happen by having set fps = -1
-        dewrapper->fps_mode_info = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.fps_mode_info;
-        dewrapper->depth_mode_info = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.depth_mode_info;
+        dewrapper->fps_mode_id = 2; // 
+        dewrapper->depth_mode_id = 0; // K4A_DEPTH_MODE_OFF
     }
 
     queue_disable(dewrapper->queue);

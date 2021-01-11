@@ -293,9 +293,9 @@ TEST_P(throughput_perf, testTest)
     fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(as.fps));
 
     config.color_format = as.color_format;
-    config.color_mode_info.mode_id = as.color_resolution;
-    config.depth_mode_info.mode_id = as.depth_mode;
-    config.fps_mode_info.mode_id = as.fps;
+    config.color_mode_id = as.color_resolution;
+    config.depth_mode_id = as.depth_mode;
+    config.fps_mode_id = as.fps;
     config.depth_delay_off_color_usec = g_depth_delay_off_color_usec;
     config.wired_sync_mode = g_wired_sync_mode;
     config.synchronized_images_only = g_synchronized_images_only;
@@ -310,9 +310,9 @@ TEST_P(throughput_perf, testTest)
 
     printf("Config being used is:\n");
     printf("    color_format:%d\n", config.color_format);
-    printf("    color_resolution:%d\n", config.color_mode_info.mode_id);
-    printf("    depth_mode:%d\n", config.depth_mode_info.mode_id);
-    printf("    camera_fps:%d\n", config.fps_mode_info.mode_id);
+    printf("    color_resolution:%d\n", config.color_mode_id);
+    printf("    depth_mode:%d\n", config.depth_mode_id);
+    printf("    camera_fps:%d\n", config.fps_mode_id);
     printf("    synchronized_images_only:%d\n", config.synchronized_images_only);
     printf("    depth_delay_off_color_usec:%d\n", config.depth_delay_off_color_usec);
     printf("    wired_sync_mode:%d\n", config.wired_sync_mode);

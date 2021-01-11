@@ -927,13 +927,13 @@ typedef struct _k4a_device_configuration_t
     k4a_image_format_t color_format;
 
     /** Image resolution to capture with the color camera. */
-    k4a_color_mode_info_t color_mode_info;
+    uint32_t color_mode_id;
 
     /** Capture mode for the depth camera. */
-    k4a_depth_mode_info_t depth_mode_info;
+    uint32_t depth_mode_id;
 
     /** Desired frame rate for the color and depth camera. */
-    k4a_fps_mode_info_t fps_mode_info;
+    uint32_t fps_mode_id;
 
     /** Only produce k4a_capture_t objects if they contain synchronized color and depth images.
      *
@@ -1256,16 +1256,8 @@ typedef struct _k4a_imu_sample_t
  * </requirements>
  * \endxmlonly
  */
-static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = { 
-    K4A_IMAGE_FORMAT_COLOR_MJPG,
-    { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 },
-    { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0, false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 },
-    { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0, 30 },
-    false,
-    0,
-    K4A_WIRED_SYNC_MODE_STANDALONE,
-    0,
-    false 
+static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = {
+    K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 2, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false
 };
 
 /**
