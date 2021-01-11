@@ -138,9 +138,9 @@ static void RunStreamConfig(k4a_device_t device,
 
     // Configure the stream
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_OFF;
-    config.depth_mode_info.mode_id = depth_mode;
-    config.fps_mode_info.mode_id = depth_fps;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+    config.depth_mode_id = depth_mode;
+    config.fps_mode_id = depth_fps;
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
@@ -488,14 +488,14 @@ TEST_F(depth_ft, depthModeChange)
     // Create two valid configs that are expected to yield different-sized depth payloads
     //
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_OFF;
-    config.depth_mode_info.mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    config.fps_mode_info.mode_id = K4A_FRAMES_PER_SECOND_15;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
 
     config2.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config2.color_mode_info.mode_id = K4A_COLOR_RESOLUTION_OFF;
-    config2.depth_mode_info.mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    config2.fps_mode_info.mode_id = K4A_FRAMES_PER_SECOND_15;
+    config2.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+    config2.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    config2.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
 
     // Start device in first mode and check frame size
     //
@@ -503,7 +503,7 @@ TEST_F(depth_ft, depthModeChange)
 
     ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(m_device, &depth_capture, timeout_ms));
 
-    if (config.depth_mode_info.mode_id != K4A_DEPTH_MODE_PASSIVE_IR)
+    if (config.depth_mode_id != K4A_DEPTH_MODE_PASSIVE_IR)
     {
         image = k4a_capture_get_depth_image(depth_capture);
         ASSERT_NE(k4a_image_get_buffer(image), (uint8_t *)NULL);
@@ -526,7 +526,7 @@ TEST_F(depth_ft, depthModeChange)
 
     ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(m_device, &depth_capture, timeout_ms));
 
-    if (config2.depth_mode_info.mode_id != K4A_DEPTH_MODE_PASSIVE_IR)
+    if (config2.depth_mode_id != K4A_DEPTH_MODE_PASSIVE_IR)
     {
         image = k4a_capture_get_depth_image(depth_capture);
         ASSERT_NE(k4a_image_get_buffer(image), (uint8_t *)NULL);

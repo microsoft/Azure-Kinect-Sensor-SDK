@@ -49,9 +49,9 @@ int main(int argc, char **argv)
 
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_info = color_mode_info; 
-    config.depth_mode_info = depth_mode_info;
-    config.fps_mode_info = fps_mode_info;
+    config.color_mode_id = color_mode_info.mode_id; 
+    config.depth_mode_id = depth_mode_info.mode_id;
+    config.fps_mode_id = fps_mode_info.mode_id;
 
     if (K4A_RESULT_SUCCEEDED != k4a_device_start_cameras(device, &config))
     {
