@@ -18,3 +18,6 @@
 		```./mkv2images -in=board1.mkv -out=c:/data -c=0 -f=0```
 
 ## Dependencies 
+
+	OpenCV
+	OpenCV Contrib

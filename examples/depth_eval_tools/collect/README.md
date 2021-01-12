@@ -43,3 +43,5 @@
 	K4A_FRAMES_PER_SECOND_30,  2: FPS=30.
 
 ## Dependencies 
+
+	OpenCV

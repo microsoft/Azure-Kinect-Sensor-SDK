@@ -22,3 +22,6 @@
 		```./depth_eval -i=board1.mkv -d=board2.mkv -t=plane.json -out=c:/data```
 
 ## Dependencies 
+
+	OpenCV
+	OpenCV Contrib
