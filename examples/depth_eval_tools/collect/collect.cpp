@@ -4,7 +4,6 @@
 //#include <stdio.h>
 //#include <stdlib.h>
 #include <k4a/k4a.h>
-#include <k4a/k4a.h>
 #include <vector>
 #include <math.h>
 #include <string>
@@ -13,8 +12,8 @@
 #include <iostream> // std::cout
 #include <fstream>  // std::ofstream
 
-#include "opencv2/core.hpp"
-#include "opencv2/calib3d.hpp"
+#include <opencv2/core.hpp>
+#include <opencv2/calib3d.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 

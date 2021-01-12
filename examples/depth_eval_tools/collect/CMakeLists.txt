@@ -5,14 +5,14 @@ find_package(OpenCV REQUIRED)
 include_directories(
     .
 	../kahelpers/inc/
-    ${OPENCV_INCLUDE_DIRS}
-)
+	)
 
 add_executable(collect
     collect.cpp
-	../kahelpers/inc/kahelpers.h)
+	../kahelpers/inc/kahelpers.h
+	)
 
 target_link_libraries(collect PRIVATE
     k4a::k4a
-    ${OPENCV_LIBRARIES}
+    ${OpenCV_LIBS}
 	)
