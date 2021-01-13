@@ -27,6 +27,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "../usbcommand/usb_cmd_priv.h"
 
 char K4A_ENV_VAR_LOG_TO_A_FILE[] = K4A_ENABLE_LOG_TO_A_FILE;
 
@@ -1360,8 +1361,8 @@ k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t* 
     k4a_device_info_t info = {
         sizeof(k4a_device_info_t),
         K4A_ABI_VERSION,
-        0,
-        0,
+        K4A_MSFT_VID,
+        K4A_DEPTH_PID,
         ​​​​​​K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU
     };
 
