@@ -83,6 +83,20 @@ static bool process_mkv(const std::string &passive_ir_mkv,
 
     cv::Mat ir8;
     get_gray_gamma_img(ir16, ir8, gray_gamma, gray_max, gray_percentile);
+
+    if (save_images)
+    {
+        // save images as png files
+        if (!ir16.empty())
+            cv::imwrite(output_dir + "/ir16.png", ir16);
+        if (!depth16.empty())
+            cv::imwrite(output_dir + "/depth16.png", depth16);
+        if (!passive_ir8.empty())
+            cv::imwrite(output_dir + "/color8.png", passive_ir8);
+        if (!ir8.empty())
+            cv::imwrite(output_dir + "/ir8.png", ir8);
+    }
+
     //
     // create a charuco target from a json template
     charuco_target charuco(template_file);

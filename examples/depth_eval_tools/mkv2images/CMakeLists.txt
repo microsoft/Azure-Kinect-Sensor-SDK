@@ -4,11 +4,13 @@
 find_package(OpenCV REQUIRED)
 include_directories(
     .
+	../kahelpers/
 	../kahelpers/inc/
 	)
 
 add_executable(mkv2images
     mkv2images.cpp
+	../kahelpers/kahelpers.cpp
 	../kahelpers/inc/kahelpers.h
 	)
 
