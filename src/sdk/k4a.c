@@ -1395,17 +1395,28 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_inde
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
+    const uint32_t size = sizeof(k4a_depth_mode_info_t);
+    const uint32_t version = K4A_ABI_VERSION;
+    const uint32_t index = mode_index;    
+    const uint32_t width = device_color_modes[mode_index].width;
+    const uint32_t height = device_color_modes[mode_index].height;
+    const uint32_t native_format = device_color_modes[mode_index].native_format;
+    const uint32_t horizontal_fov = device_color_modes[mode_index].horizontal_fov;
+    const uint32_t vertical_fov = device_color_modes[mode_index].vertical_fov;
+    const uint32_t min_fps = device_color_modes[mode_index].min_fps;
+    const uint32_t max_fps = device_color_modes[mode_index].max_fps;
+
     k4a_color_mode_info_t color_mode_info = {
-        sizeof(k4a_color_mode_info_t),
-        K4A_ABI_VERSION,
-        mode_index,
-        device_color_modes[mode_index].width,
-        device_color_modes[mode_index].height,
-        device_color_modes[mode_index].native_format,
-        device_color_modes[mode_index].horizontal_fov,
-        device_color_modes[mode_index].vertical_fov,
-        device_color_modes[mode_index].min_fps,
-        device_color_modes[mode_index].max_fps,
+        size,
+        version,
+        index,
+        width,
+        height,
+        native_format,
+        horizontal_fov,
+        vertical_fov,
+        min_fps,
+        max_fps,
     };
 
     SAFE_COPY_STRUCT(mode_info, &color_mode_info);
@@ -1436,22 +1447,24 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
 
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    
+    const uint32_t size = sizeof(k4a_depth_mode_info_t);
+    const uint32_t version = K4A_ABI_VERSION;
+    const uint32_t index = mode_index;
+    const uint32_t passive_ir_only = device_depth_modes[mode_index].passive_ir_only;
+    const uint32_t width = device_depth_modes[mode_index].width;
+    const uint32_t height = device_depth_modes[mode_index].height;
+    const uint32_t native_format = device_depth_modes[mode_index].native_format;
+    const uint32_t horizontal_fov = device_depth_modes[mode_index].horizontal_fov;
+    const uint32_t vertical_fov = device_depth_modes[mode_index].vertical_fov;
+    const uint32_t min_fps = device_depth_modes[mode_index].min_fps;
+    const uint32_t max_fps = device_depth_modes[mode_index].max_fps;
+    const uint32_t min_range = device_depth_modes[mode_index].min_range;
+    const uint32_t max_range = device_depth_modes[mode_index].max_range;
 
-    k4a_depth_mode_info_t depth_mode_info = { 
-        sizeof(k4a_depth_mode_info_t),
-        K4A_ABI_VERSION,
-        mode_index, 
-        device_depth_modes[mode_index].passive_ir_only, 
-        device_depth_modes[mode_index].width,
-        device_depth_modes[mode_index].height,
-        device_depth_modes[mode_index].native_format,
-        device_depth_modes[mode_index].horizontal_fov,
-        device_depth_modes[mode_index].vertical_fov,
-        device_depth_modes[mode_index].min_fps,
-        device_depth_modes[mode_index].max_fps,
-        device_depth_modes[mode_index].min_range,
-        device_depth_modes[mode_index].max_range,
-    };
+    k4a_depth_mode_info_t depth_mode_info = { size,    version,       index,          passive_ir_only, width,
+                                              height,  native_format, horizontal_fov, vertical_fov,    min_fps,
+                                              max_fps, min_range,     max_range };
 
     SAFE_COPY_STRUCT(mode_info, &depth_mode_info); 
 
@@ -1483,12 +1496,12 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_index,
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4a_fps_mode_info_t fps_mode_info = {
-        sizeof(k4a_fps_mode_info_t),
-        K4A_ABI_VERSION,
-        mode_index,
-        device_fps_modes[mode_index].fps,
-    };
+    const uint32_t size = sizeof(k4a_fps_mode_info_t);
+    const uint32_t version = K4A_ABI_VERSION;
+    const uint32_t index = mode_index;
+    const uint32_t fps = device_fps_modes[mode_index].fps;
+
+    k4a_fps_mode_info_t fps_mode_info = { size, version, index, fps };
 
     SAFE_COPY_STRUCT(mode_info, &fps_mode_info);
 
