@@ -11,9 +11,11 @@
 
    * Print out one of the three target files targets provided in the repo: `plane_files\plane.pdf`, `plane_files\plane_large.pdf` or `plane_files\plane_small.pdf`.
 
+      * The small plane file is sized to fit on an 8.5"x11" piece of paper. The large plane file is twice the size of `plane.pdf`.
+
    * `plane.json`, `plane_large.json` and `plane_small.json` define the physical parameters of the target board. Square length is the length of one side in mm of the charuco_square, marker_length is the size length of the QR code marker in mm. You can use opencv to create your own Charuco target. In this case you would need to copy and modify the json parameters accordingly.
 
-		* Parameter aruco_dict_name is an ENUM specifying the tag type. The one used in the above example is #6
+		* Parameter aruco_dict_name is an ENUM specifying the tag type. All plane files use dictionary number six.
 
 		* See predefined dictionaries on the OpenCV website [here.](https://docs.opencv.org/master/dc/df7/dictionary_8hpp.html)
          ![Board Params](example_images/plane_parameters/board_parameters.png "Board Parameters")
