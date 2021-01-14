@@ -11,7 +11,7 @@
 
    * Print out either the large or the small target provided in the repo: `plane_files\plane_large.pdf` or `plane_files\plane_small.pdf`.
 
-   * `plane_large.json` and `plane_small.json` define the physical parameters of the board. Square length is the length of one side in mm of the charuco_square, marker_length is the size length of the QR code marker in mm. Modify these parameters in the json based on the dimensions of the board printed.
+   * `plane_large.json` and `plane_small.json` define the physical parameters of the board. Square length is the length of one side in mm of the charuco_square, marker_length is the size length of the QR code marker in mm. You can use opencv to create your own Charuco target. In this case you would need to copy and modify the json parameters accordingly.
 
 		* Parameter aruco_dict_name is an ENUM specifying the tag type. The one used in the above example is #6
 
@@ -97,14 +97,16 @@
 
    * Depth bias is the difference between the ground truth depth measurement (determined by the projection of the target board) and the measured depth from the sensor. 
 
-   * Example Output (_High Depth Bias_):
+   * Example Output:
 
    ```
    board has 104 charuco corners
-   number of detected corners in ir = 73
-   Mean of Z deph bias = 18.6551 mm
-   RMS of Z depth bias = 18.7039 mm
+   number of detected corners in ir = 101
+   Mean of Z depth bias = 3.33104 mm
+   RMS of Z depth bias = 3.47157 mm
    ```
+
+   * The maximum bias should be expected to be within +/- 11mm. A depth bias outside of this range indicates a poor device calibration and the example Calibration tool should be used to recalibrate the device. 
 
    * Minimum example command: ```./depth_eval -i=board1.mkv -d=board2.mkv -t=plane.json -out=c:/data```
 
@@ -130,24 +132,19 @@
 
    * The Depth MKV file should be collected using the following command: ```k4arecorder.exe -c 3072p -d WFOV_2X2BINNED -l 3 board2.mkv```
 
-   * This tool will evaluate the transformation re-projection error between the color camera and depth sensor of a device. 
+   * This tool will evaluate the transformation re-projection error between the color camera and depth sensor of a device.
 
    * The output consists of five values. Total charuco corners as specified by the charuco dictionary, the actual number of detected corners in IR capture (_Depends on image quality, the higher the better_), the actual number of detected corners in the color capture (_Depends on image quality, the higher the better_), the number of common corners detected between the images, and the RMS re-projection error in pixels.
 
+   * Use the `-s` flag to generate and save visual representations of the transformation re-projection error.
+      
+	  * The output image, `checkered_pattern.png`, is a visual representation of the sensor registration error. The image is a composition of the color and IR images. Zooming in, the registration error (alignment of Charuco target pattern) can be clearly seen at the boundaries of the checkerboard pattern.
+
+	  * The output image, `transformation_error.png`, is a visual of the re-projection error represented as a vector field. Zooming in, the green mark is the location of the detected marker corner in the color image, and the blue marker represents the projected position of the detected marker corner in the IR image.
+
    * Re-projection error is the difference between the position of the target in the color image and the target as captured in the IR image projected into the coordinate space of the color camera.
 
-   ```
-     Sensor B          Sensor A (prj)
-   ------------        ------------
-   | 3D points| -----> | 3D points|
-   ------------        ------------
-        ^                   |
-        |                   |
-        |                   v                    Sensor A (detected)
-   ------------        ------------   diff with  ------------
-   | 3D board |        | 2D points|  <---------> | 2D points|
-   ------------        ------------              ------------
-   ```
+   ![Reprojection Error Calculation](example_images/transformation_eval/tr_eval.png "Reprojection Error Calculation")
 
    * Example Output:
 
@@ -158,6 +155,8 @@
    number of common corners = 65
    rms = 7.42723 pixels
    ```
+
+   * The RMS re-projection error should be no greater than 12 pixels. An RMS re-projection error greater than this indicates a poor device registration and the example Registration tool should be used to correct the device registration.
 
    * Minimum example command: ```./transformation_eval -i=board1.mkv -d=board2.mkv -t=plane.json -out=c:/data```
 
@@ -221,3 +220,4 @@
    * To change the default install location add `-DCMAKE_INSTALL_PREFIX=<path_of_the_new_location>`
    to the `cmake .. -GNinja` command 
 
+   * The Azure Kinect Sensor SDK expects the OpenCV library files to be located at `c:\opencv\build\x64\vc15\lib`. The path of your installation may need to be modified to conform to this expectation.
