@@ -18,7 +18,7 @@
 		* See predefined dictionaries on the OpenCV website [here.](https://docs.opencv.org/master/dc/df7/dictionary_8hpp.html)
          ![Board Params](example_images/plane_parameters/board_parameters.png "Board Parameters")
 
-   * To capture good data, it is recommended to capture images of the target board with the camera(s) aligned with the center of the target and from a reasonable distance such that the target board fills the majority of the view. See the provided example data for reference.
+   * To capture good data, it is recommended to capture images of the target board with the camera(s) aligned with the center of the target and from a reasonable distance such that the target board fills the majority of the view. The target should be as flat as possible. It is also best to avoid being low to the floor and to minimize reflections in the space. See the provided example data for reference.
 
    * For high quality data, the image should _not_ be grainy and you should be able to visually see all fiducial features on the board.
 
