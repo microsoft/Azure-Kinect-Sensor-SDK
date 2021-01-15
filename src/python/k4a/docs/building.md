@@ -49,8 +49,13 @@ The following tools are optional:
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
    The file names MUST be k4a.dll and depthengine.dll. 
+   
+   Note: To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
+         copied into the folder.
    Note: If the dlls have different names, create a symlink with relative redirection. This may
          require elevated permissions to create the symlink as well as run build_wheel.ps1.
+   Note: If the .so have different names, create a symlink with relative redirection. This may
+         require elevated permissions to create the symlink as well as run build_wheel.csh.
 
 2. In a powershell terminal, run the script src/python/k4a/build_wheel.ps1.
    This will create the .whl file in a build/ folder.
@@ -59,6 +64,11 @@ The following tools are optional:
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
    The file names MUST be libk4a.so and libdepthengine.so.
+   
+   Note: To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
+         copied into the folder.
+   Note: If the dlls have different names, create a symlink with relative redirection. This may
+         require elevated permissions to create the symlink as well as run build_wheel.ps1.
    Note: If the .so have different names, create a symlink with relative redirection. This may
          require elevated permissions to create the symlink as well as run build_wheel.csh.
 
@@ -71,8 +81,12 @@ The following tools are optional:
    The file names MUST be k4a.dll and depthengine.dll in Windows, and
    the file names MUST be libk4a.so and libdepthengine.so in Linux.
    
-   Note: If the libraries have different names, create a symlink with relative redirection. This may
-         require elevated permissions to create the symlink.
+   Note: To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
+         copied into the folder.
+   Note: If the dlls have different names, create a symlink with relative redirection. This may
+         require elevated permissions to create the symlink as well as run build_wheel.ps1.
+   Note: If the .so have different names, create a symlink with relative redirection. This may
+         require elevated permissions to create the symlink as well as run build_wheel.csh.
 
 2. In a command line terminal, create a Python virtual environment and activate it (do not include brackets):
       cd <repo_root>/src/python/k4a
@@ -89,8 +103,10 @@ The following tools are optional:
       
 ### Building the HTML Documentation
 
-A Doxygen settings file is provided in the project directory. Run doxygen using this
-settings file to create the html documentation.
+A Doxygen settings file is provided in the project directory. Run doxygen using the
+settings file to create the html documentation. 
+
+The build scripts will run doxygen as part of the build.
       
 ## Installing
 
