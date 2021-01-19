@@ -57,7 +57,7 @@ public:
     PointCloudVisualizationResult SetColorizationStrategy(ColorizationStrategy strategy);
     void SetPointSize(int size);
 
-    K4APointCloudVisualizer(bool enableColorPointCloud, const k4a::calibration &calibrationData);
+    K4APointCloudVisualizer(bool enableColorPointCloud, const k4a::calibration &calibrationData, k4a_depth_mode_info_t depth_mode_info);
     ~K4APointCloudVisualizer() = default;
 
     K4APointCloudVisualizer(const K4APointCloudVisualizer &) = delete;

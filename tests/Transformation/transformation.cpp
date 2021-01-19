@@ -65,8 +65,8 @@ protected:
 
         k4a_result_t result = k4a_calibration_get_from_raw(g_test_json,
                                                            sizeof(g_test_json),
-                                                           depth_mode_info,
-                                                           color_mode_info,
+                                                           depth_mode_info.mode_id,
+                                                           color_mode_info.mode_id,
                                                            &m_calibration);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     };
@@ -610,8 +610,8 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
         k4a_calibration_t calibration;
         k4a_result_t result = k4a_calibration_get_from_raw(g_test_json,
                                                            sizeof(g_test_json),
-                                                           depth_mode_info,
-                                                           color_mode_info,
+                                                           depth_mode_info.mode_id,
+                                                           color_mode_info.mode_id,
                                                            &calibration);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 

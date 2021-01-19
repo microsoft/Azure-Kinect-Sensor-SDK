@@ -1085,10 +1085,11 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
     case K4AWindowSet::ViewType::PointCloudViewer:
         try
         {
-            k4a::calibration calib = m_device.get_calibration(depth_mode_info, color_mode_info);
+            k4a::calibration calib = m_device.get_calibration(depth_mode_info.mode_id, color_mode_info.mode_id);
             bool rgbPointCloudAvailable = m_config.EnableColorCamera && m_config.ColorFormat == K4A_IMAGE_FORMAT_COLOR_BGRA32;
             K4AWindowSet::StartPointCloudWindow(m_deviceSerialNumber.c_str(),
                                                 calib,
+                                                depth_mode_info,
                                                 &m_cameraDataSource,
                                                 rgbPointCloudAvailable);
         }
