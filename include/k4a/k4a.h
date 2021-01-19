@@ -1620,8 +1620,8 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle,
-                                                   const k4a_depth_mode_info_t depth_mode_info,
-                                                   const k4a_color_mode_info_t color_mode_info,
+                                                   const uint32_t depth_mode_id,
+                                                   const uint32_t color_mode_id,
                                                    k4a_calibration_t *calibration);
 
 /** Get the device jack status for the synchronization in and synchronization out connectors.
@@ -1704,8 +1704,8 @@ K4A_EXPORT k4a_result_t k4a_device_get_sync_jack(k4a_device_t device_handle,
  */
 K4A_EXPORT k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
                                                      size_t raw_calibration_size,
-                                                     const k4a_depth_mode_info_t depth_mode_info,
-                                                     const k4a_color_mode_info_t color_mode_info,
+                                                     const uint32_t depth_mode_id,
+                                                     const uint32_t color_mode_id,
                                                      k4a_calibration_t *calibration);
 
 /** Transform a 3D point of a source coordinate system into a 3D point of the target coordinate system

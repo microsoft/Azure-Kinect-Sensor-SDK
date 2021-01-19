@@ -181,6 +181,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
 
 void K4AWindowSet::StartPointCloudWindow(const char *sourceIdentifier,
                                          const k4a::calibration &calibrationData,
+                                         k4a_depth_mode_info_t depth_mode_info,
                                          K4ADataSource<k4a::capture> *cameraDataSource,
                                          bool enableColorPointCloud)
 {
@@ -192,5 +193,6 @@ void K4AWindowSet::StartPointCloudWindow(const char *sourceIdentifier,
     wm.AddWindow(std14::make_unique<K4APointCloudWindow>(std::move(pointCloudTitle),
                                                          enableColorPointCloud,
                                                          std::move(captureSource),
-                                                         calibrationData));
+                                                         calibrationData,
+                                                         depth_mode_info));
 }
