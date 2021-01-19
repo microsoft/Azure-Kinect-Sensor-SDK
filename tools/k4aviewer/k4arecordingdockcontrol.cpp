@@ -477,8 +477,11 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         try
         {
             k4a::calibration calibration = m_playbackThreadState.Recording.get_calibration();
+            k4a_record_configuration_t record_configuration = m_playbackThreadState.Recording.get_record_configuration();
+            k4a_depth_mode_info_t depth_mode_info = record_configuration.depth_mode_info;
             K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
                                                 std::move(calibration),
+                                                depth_mode_info,
                                                 &m_playbackThreadState.CaptureDataSource,
                                                 m_recordConfiguration.color_track_enabled);
         }

@@ -50,6 +50,7 @@ public:
 
     static void StartPointCloudWindow(const char *sourceIdentifier,
                                       const k4a::calibration &calibrationData,
+                                      k4a_depth_mode_info_t depth_mode_info,
                                       K4ADataSource<k4a::capture> *cameraDataSource,
                                       bool enableColorPointCloud);
 };

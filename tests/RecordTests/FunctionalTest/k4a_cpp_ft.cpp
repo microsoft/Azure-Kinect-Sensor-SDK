@@ -88,11 +88,11 @@ TEST_F(k4a_cpp_ft, k4a)
         k4a_device_get_color_mode(kinect.handle(), 3, &color_mode_info); // K4A_COLOR_RESOLUTION_1440P
 
         // should not throw exception
-        calibration cal = kinect.get_calibration(depth_mode_info, color_mode_info);
+        calibration cal = kinect.get_calibration(depth_mode_info.mode_id, color_mode_info.mode_id);
         calibration cal2 = cal;
 
         // TODO: double check this with develop branch
-        ASSERT_EQ(cal.color_mode_info.mode_id, cal2.color_mode_info.mode_id);
+        ASSERT_EQ(cal.color_mode_id, cal2.color_mode_id);
     }
 
     {
@@ -103,14 +103,14 @@ TEST_F(k4a_cpp_ft, k4a)
         k4a_device_get_color_mode(kinect.handle(), 3, &color_mode_info3); // K4A_COLOR_RESOLUTION_1440P
 
         std::vector<uint8_t> raw_cal = kinect.get_raw_calibration();
-        calibration cal = kinect.get_calibration(depth_mode_info, color_mode_info3);
-        ASSERT_EQ(cal.color_mode_info.mode_id, (uint32_t)3);
+        calibration cal = kinect.get_calibration(depth_mode_info.mode_id, color_mode_info3.mode_id);
+        ASSERT_EQ(cal.color_mode_id, (uint32_t)3);
 
         k4a_color_mode_info_t color_mode_info2;
         k4a_device_get_color_mode(kinect.handle(), 2, &color_mode_info2); // K4A_COLOR_RESOLUTION_1080P
 
-        cal = calibration::get_from_raw(raw_cal.data(), raw_cal.size(), depth_mode_info, color_mode_info2);
-        ASSERT_EQ(cal.color_mode_info.mode_id, (uint32_t)2);
+        cal = calibration::get_from_raw(raw_cal.data(), raw_cal.size(), depth_mode_info.mode_id, color_mode_info2.mode_id);
+        ASSERT_EQ(cal.color_mode_id, (uint32_t)2);
     }
 
     {
@@ -406,9 +406,9 @@ static void test_playback(void)
     calibration cal = pback.get_calibration();
     {
         device kinect = device::open(0);
-        calibration device_cal = kinect.get_calibration(config.depth_mode_info, config.color_mode_info);
-        ASSERT_TRUE(cal.color_mode_info.mode_id == device_cal.color_mode_info.mode_id);
-        ASSERT_TRUE(cal.depth_mode_info.mode_id == device_cal.depth_mode_info.mode_id);
+        calibration device_cal = kinect.get_calibration(config.depth_mode_id, config.color_mode_id);
+        ASSERT_TRUE(cal.color_mode_id == device_cal.color_mode_id);
+        ASSERT_TRUE(cal.depth_mode_id == device_cal.depth_mode_id);
     }
 
     pback.set_color_conversion(K4A_IMAGE_FORMAT_COLOR_NV12);

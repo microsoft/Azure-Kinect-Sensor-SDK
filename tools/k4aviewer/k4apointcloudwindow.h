@@ -28,7 +28,8 @@ public:
     K4APointCloudWindow(std::string &&windowTitle,
                         bool enableColorPointCloud,
                         std::shared_ptr<K4ANonBufferingCaptureSource> &&captureSource,
-                        const k4a::calibration &calibrationData);
+                        const k4a::calibration &calibrationData,
+                        k4a_depth_mode_info_t depth_mode_info);
     ~K4APointCloudWindow() override = default;
 
     K4APointCloudWindow(const K4APointCloudWindow &) = delete;

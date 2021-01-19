@@ -171,12 +171,14 @@ void K4APointCloudVisualizer::SetPointSize(int size)
     m_pointCloudRenderer.SetPointSize(size);
 }
 
-K4APointCloudVisualizer::K4APointCloudVisualizer(const bool enableColorPointCloud, const k4a::calibration &calibrationData) :
+K4APointCloudVisualizer::K4APointCloudVisualizer(const bool enableColorPointCloud,
+                                                 const k4a::calibration &calibrationData,
+                                                 k4a_depth_mode_info_t depth_mode_info) :
     m_dimensions(PointCloudVisualizerTextureDimensions),
     m_enableColorPointCloud(enableColorPointCloud),
     m_calibrationData(calibrationData)
 {
-    m_expectedValueRange = GetDepthModeRange(m_calibrationData.depth_mode_info);
+    m_expectedValueRange = GetDepthModeRange(depth_mode_info);
     m_transformation = k4a::transformation(m_calibrationData);
 
     glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer.Id());

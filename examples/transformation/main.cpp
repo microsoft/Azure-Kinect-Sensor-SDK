@@ -163,7 +163,7 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
 
     k4a_calibration_t calibration;
     if (K4A_RESULT_SUCCEEDED !=
-        k4a_device_get_calibration(device, depth_mode_info, color_mode_info, &calibration))
+        k4a_device_get_calibration(device, depth_mode_info.mode_id, color_mode_info.mode_id, &calibration))
     {
         printf("Failed to get calibration\n");
         goto Exit;

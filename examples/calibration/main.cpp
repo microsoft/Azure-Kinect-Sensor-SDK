@@ -76,7 +76,7 @@ static void print_calibration()
 
         // get calibration
         if (K4A_RESULT_SUCCEEDED !=
-            k4a_device_get_calibration(device, depth_mode_info, color_mode_info, &calibration))
+            k4a_device_get_calibration(device, depth_mode_info.mode_id, color_mode_info.mode_id, &calibration))
         {
             cout << "Failed to get calibration" << endl;
             exit(-1);

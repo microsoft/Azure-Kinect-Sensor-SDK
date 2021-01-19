@@ -132,9 +132,10 @@ const char *K4APointCloudWindow::GetTitle() const
 K4APointCloudWindow::K4APointCloudWindow(std::string &&windowTitle,
                                          bool enableColorPointCloud,
                                          std::shared_ptr<K4ANonBufferingCaptureSource> &&captureSource,
-                                         const k4a::calibration &calibrationData) :
+                                         const k4a::calibration &calibrationData,
+                                         k4a_depth_mode_info_t depth_mode_info) :
     m_title(std::move(windowTitle)),
-    m_pointCloudVisualizer(enableColorPointCloud, calibrationData),
+    m_pointCloudVisualizer(enableColorPointCloud, calibrationData, depth_mode_info),
     m_captureSource(std::move(captureSource)),
     m_pointSize(DefaultPointSize),
     m_enableColorPointCloud(enableColorPointCloud)
