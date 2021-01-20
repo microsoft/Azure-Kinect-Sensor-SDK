@@ -2291,6 +2291,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
                                                 int mode_index,
                                                 k4a_fps_mode_info_t *mode_info);
 
+
 /**
  * @}
  */

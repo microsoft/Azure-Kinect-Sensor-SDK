@@ -406,7 +406,7 @@ static void test_playback(void)
     calibration cal = pback.get_calibration();
     {
         device kinect = device::open(0);
-        calibration device_cal = kinect.get_calibration(config.depth_mode_id, config.color_mode_id);
+        calibration device_cal = kinect.get_calibration(config.depth_mode_info.mode_id, config.color_mode_info.mode_id);
         ASSERT_TRUE(cal.color_mode_id == device_cal.color_mode_id);
         ASSERT_TRUE(cal.depth_mode_id == device_cal.depth_mode_id);
     }

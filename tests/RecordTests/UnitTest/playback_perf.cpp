@@ -51,9 +51,9 @@ TEST_F(playback_perf, test_open)
     }
     std::cout << std::endl;
     std::cout << "    Color format: " << format_names[config.color_format] << std::endl;
-    std::cout << "    Color resolution: " << resolution_names[config.color_mode_id] << std::endl;
-    std::cout << "    Depth mode: " << depth_names[config.depth_mode_id] << std::endl;
-    std::cout << "    Frame rate: " << fps_names[config.fps_mode_id] << std::endl;
+    std::cout << "    Color resolution: " << resolution_names[config.color_mode_info.mode_id] << std::endl;
+    std::cout << "    Depth mode: " << depth_names[config.depth_mode_info.mode_id] << std::endl;
+    std::cout << "    Frame rate: " << fps_names[config.fps_mode_info.mode_id] << std::endl;
     std::cout << "    Depth delay: " << config.depth_delay_off_color_usec << " usec" << std::endl;
     std::cout << "    Start offset: " << config.start_timestamp_offset_usec << " usec" << std::endl;
 

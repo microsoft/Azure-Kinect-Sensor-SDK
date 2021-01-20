@@ -77,9 +77,9 @@ TEST_F(playback_ut, open_large_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_TRUE(config.color_track_enabled);
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);
@@ -92,7 +92,7 @@ TEST_F(playback_ut, open_large_file)
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 0, 1000, 1000 };
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_id));
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_info.mode_id));
     size_t i = 0;
     for (; i < 50; i++)
     {
@@ -101,8 +101,8 @@ TEST_F(playback_ut, open_large_file)
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
                                           config.color_format,
-                                          config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
         timestamps[0] += timestamp_delta;
         timestamps[1] += timestamp_delta;
@@ -122,8 +122,8 @@ TEST_F(playback_ut, open_large_file)
             ASSERT_TRUE(validate_test_capture(capture,
                                               timestamps,
                                               config.color_format,
-                                              config.color_mode_id,
-                                              config.depth_mode_id));
+                                              config.color_mode_info.mode_id,
+                                              config.depth_mode_info.mode_id));
             k4a_capture_release(capture);
         }
         timestamps[0] += timestamp_delta;
@@ -137,8 +137,8 @@ TEST_F(playback_ut, open_large_file)
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
                                           config.color_format,
-                                          config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
         timestamps[0] += timestamp_delta;
         timestamps[1] += timestamp_delta;
@@ -162,9 +162,9 @@ TEST_F(playback_ut, open_delay_offset_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_TRUE(config.color_track_enabled);
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);
@@ -177,7 +177,7 @@ TEST_F(playback_ut, open_delay_offset_file)
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 0, 10000, 10000 };
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_id));
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_info.mode_id));
 
     // Read forward
     for (size_t i = 0; i < test_frame_count; i++)
@@ -187,8 +187,8 @@ TEST_F(playback_ut, open_delay_offset_file)
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
                                           config.color_format,
-                                          config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
         timestamps[0] += timestamp_delta;
         timestamps[1] += timestamp_delta;
@@ -209,8 +209,8 @@ TEST_F(playback_ut, open_delay_offset_file)
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
                                           config.color_format,
-                                          config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
     }
     stream_result = k4a_playback_get_previous_capture(handle, &capture);
@@ -231,9 +231,9 @@ TEST_F(playback_ut, open_subordinate_delay_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_TRUE(config.color_track_enabled);
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);
@@ -251,8 +251,8 @@ TEST_F(playback_ut, open_subordinate_delay_file)
     ASSERT_TRUE(validate_test_capture(capture,
                                       timestamps,
                                       config.color_format,
-                                      config.color_mode_id,
-                                      config.depth_mode_id));
+                                      config.color_mode_info.mode_id,
+                                      config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     k4a_playback_close(handle);
@@ -269,9 +269,9 @@ TEST_F(playback_ut, playback_seek_test)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_TRUE(config.color_track_enabled);
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);
@@ -284,7 +284,7 @@ TEST_F(playback_ut, playback_seek_test)
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 0, 1000, 1000 };
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_id));
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_info.mode_id));
 
     k4a_imu_sample_t imu_sample = { 0 };
     uint64_t imu_timestamp = 1150;
@@ -301,7 +301,7 @@ TEST_F(playback_ut, playback_seek_test)
     stream_result = k4a_playback_get_next_capture(handle, &capture);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_id, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_info.mode_id, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
@@ -357,8 +357,8 @@ TEST_F(playback_ut, playback_seek_test)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
 
         stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
@@ -377,8 +377,8 @@ TEST_F(playback_ut, playback_seek_test)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
 
         stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
@@ -409,8 +409,8 @@ TEST_F(playback_ut, playback_seek_test)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
 
         stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
@@ -429,8 +429,8 @@ TEST_F(playback_ut, playback_seek_test)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
 
         stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
@@ -457,8 +457,8 @@ TEST_F(playback_ut, playback_seek_test)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
 
         stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
@@ -474,8 +474,8 @@ TEST_F(playback_ut, playback_seek_test)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
 
         stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
@@ -490,8 +490,8 @@ TEST_F(playback_ut, playback_seek_test)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
 
         stream_result = k4a_playback_get_previous_imu_sample(handle, &imu_sample);
@@ -507,8 +507,8 @@ TEST_F(playback_ut, playback_seek_test)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
 
         stream_result = k4a_playback_get_next_imu_sample(handle, &imu_sample);
@@ -530,9 +530,9 @@ TEST_F(playback_ut, open_skipped_frames_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_EQ(config.depth_delay_off_color_usec, 0);
     ASSERT_EQ(config.wired_sync_mode, K4A_WIRED_SYNC_MODE_STANDALONE);
     ASSERT_EQ(config.subordinate_delay_off_master_usec, (uint32_t)0);
@@ -541,7 +541,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 1000000, 1001000, 1001000 };
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_id));
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_info.mode_id));
 
     // Test initial state
     stream_result = k4a_playback_get_previous_capture(handle, &capture);
@@ -553,7 +553,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     // According to the generated sample sequence, the first capture is missing a Color image
     // i == 0 in generation loop (see sample_recordings.cpp)
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     // Test seek to beginning
@@ -568,7 +568,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     // i == 0, Color image is dropped
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     // Test seek past beginning
@@ -581,7 +581,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     // i == 0, Color image is dropped
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     // Test seek to end
@@ -599,7 +599,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     // i == 99, No images are dropped
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_id, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_info.mode_id, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     // Test seek to end, relative to start
@@ -616,7 +616,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     // i == 99, No images are dropped
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_id, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_info.mode_id, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     // Test seek to middle of the recording, then read forward
@@ -630,7 +630,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     // i == 49, Depth image is dropped
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_id, K4A_DEPTH_MODE_OFF));
+        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_info.mode_id, K4A_DEPTH_MODE_OFF));
     k4a_capture_release(capture);
 
     // Test seek to middle of the recording, then read backward
@@ -645,7 +645,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     // i == 48, Color image is dropped
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, K4A_COLOR_RESOLUTION_OFF, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     // Read the rest of the file
@@ -665,13 +665,13 @@ TEST_F(playback_ut, open_skipped_frames_file)
                                               timestamps,
                                               config.color_format,
                                               K4A_COLOR_RESOLUTION_OFF,
-                                              config.depth_mode_id));
+                                              config.depth_mode_info.mode_id));
             break;
         case 1: // Color Only
             ASSERT_TRUE(validate_test_capture(capture,
                                               timestamps,
                                               config.color_format,
-                                              config.color_mode_id,
+                                              config.color_mode_info.mode_id,
                                               K4A_DEPTH_MODE_OFF));
             break;
         case 2: // No frames, advance timestamp and read as next index.
@@ -684,8 +684,8 @@ TEST_F(playback_ut, open_skipped_frames_file)
             ASSERT_TRUE(validate_test_capture(capture,
                                               timestamps,
                                               config.color_format,
-                                              config.color_mode_id,
-                                              config.depth_mode_id));
+                                              config.color_mode_info.mode_id,
+                                              config.depth_mode_info.mode_id));
             break;
         }
         k4a_capture_release(capture);
@@ -709,9 +709,9 @@ TEST_F(playback_ut, open_imu_playback_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_TRUE(config.color_track_enabled);
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);
@@ -795,9 +795,9 @@ TEST_F(playback_ut, open_start_offset_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_TRUE(config.color_track_enabled);
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);
@@ -812,7 +812,7 @@ TEST_F(playback_ut, open_start_offset_file)
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 1000000, 1000000, 1000000 };
     uint64_t imu_timestamp = 1001150;
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_id));
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint((k4a_fps_t)config.fps_mode_info.mode_id));
     uint64_t last_timestamp = k4a_playback_get_recording_length_usec(handle) +
                               (uint64_t)config.start_timestamp_offset_usec;
     ASSERT_EQ(last_timestamp, (uint64_t)config.start_timestamp_offset_usec + 3333150);
@@ -824,8 +824,8 @@ TEST_F(playback_ut, open_start_offset_file)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
         timestamps[0] += timestamp_delta;
         timestamps[1] += timestamp_delta;
@@ -845,8 +845,8 @@ TEST_F(playback_ut, open_start_offset_file)
         ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
         ASSERT_TRUE(validate_test_capture(capture,
                                           timestamps,
-                                          config.color_format, config.color_mode_id,
-                                          config.depth_mode_id));
+                                          config.color_format, config.color_mode_info.mode_id,
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
     }
     stream_result = k4a_playback_get_previous_capture(handle, &capture);
@@ -921,9 +921,9 @@ TEST_F(playback_ut, open_color_only_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_MJPG);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_OFF);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_OFF);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_TRUE(config.color_track_enabled);
     ASSERT_FALSE(config.depth_track_enabled);
     ASSERT_FALSE(config.ir_track_enabled);
@@ -939,7 +939,7 @@ TEST_F(playback_ut, open_color_only_file)
     k4a_stream_result_t stream_result = k4a_playback_get_next_capture(handle, &capture);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_id, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_info.mode_id, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     k4a_playback_close(handle);
@@ -956,9 +956,9 @@ TEST_F(playback_ut, open_depth_only_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_CUSTOM);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_OFF);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_OFF);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_FALSE(config.color_track_enabled);
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);
@@ -974,7 +974,7 @@ TEST_F(playback_ut, open_depth_only_file)
     k4a_stream_result_t stream_result = k4a_playback_get_next_capture(handle, &capture);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_id, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_info.mode_id, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     k4a_playback_close(handle);
@@ -991,9 +991,9 @@ TEST_F(playback_ut, open_bgra_color_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_COLOR_BGRA32);
-    ASSERT_EQ(config.color_mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
-    ASSERT_EQ(config.depth_mode_id, (uint32_t)K4A_DEPTH_MODE_OFF);
-    ASSERT_EQ(config.fps_mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_1080P);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_OFF);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_TRUE(config.color_track_enabled);
     ASSERT_FALSE(config.depth_track_enabled);
     ASSERT_FALSE(config.ir_track_enabled);
@@ -1009,7 +1009,7 @@ TEST_F(playback_ut, open_bgra_color_file)
     k4a_stream_result_t stream_result = k4a_playback_get_next_capture(handle, &capture);
     ASSERT_EQ(stream_result, K4A_STREAM_RESULT_SUCCEEDED);
     ASSERT_TRUE(
-        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_id, config.depth_mode_id));
+        validate_test_capture(capture, timestamps, config.color_format, config.color_mode_info.mode_id, config.depth_mode_info.mode_id));
     k4a_capture_release(capture);
 
     k4a_playback_close(handle);
