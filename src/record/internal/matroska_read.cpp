@@ -15,6 +15,10 @@
 #include <turbojpeg.h>
 #include <libyuv.h>
 
+// TODO: comment
+#include <cJSON.h>
+#include <locale.h> //cJSON.h need this set correctly.
+
 using namespace LIBMATROSKA_NAMESPACE;
 
 namespace k4arecord
@@ -421,12 +425,10 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         LOG_WARNING("Device calibration is missing from recording.", 0);
     }
 
-
-
-
-
-
-
+    // TODO: comment
+    uint32_t color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+    uint32_t depth_mode_id = K4A_DEPTH_MODE_OFF;
+    uint32_t fps_mode_id = K4A_FRAMES_PER_SECOND_30;
 
     uint64_t frame_period_ns = 0;
     if (context->color_track)
@@ -440,7 +442,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         frame_period_ns = context->color_track->frame_period_ns;
 
         RETURN_IF_ERROR(read_bitmap_info_header(context->color_track));
-        context->record_config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+        
         for (size_t i = 0; i < arraysize(color_resolutions); i++)
         {
             uint32_t width, height;
@@ -448,13 +450,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             {
                 if (context->color_track->width == width && context->color_track->height == height)
                 {
-                    context->record_config.color_mode_id = color_resolutions[i];
+                    color_mode_id = color_resolutions[i];
                     break;
                 }
             }
         }
 
-        if (context->record_config.color_mode_id == K4A_COLOR_RESOLUTION_OFF)
+        if (color_mode_id == K4A_COLOR_RESOLUTION_OFF)
         {
             LOG_WARNING("The color resolution is not officially supported: %dx%d. You cannot get the calibration "
                         "information for this color resolution",
@@ -468,7 +470,6 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     }
     else
     {
-        context->record_config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
         // Set to a default color format if color track is disabled.
         context->record_config.color_format = K4A_IMAGE_FORMAT_CUSTOM;
         context->color_format_conversion = K4A_IMAGE_FORMAT_CUSTOM;
@@ -484,7 +485,6 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     std::string depth_mode_str;
     uint32_t depth_width = 0;
     uint32_t depth_height = 0;
-    context->record_config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     if (depth_mode_tag != NULL)
     {
@@ -495,13 +495,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             {
                 if (k4a_convert_depth_mode_to_width_height(depth_modes[i].first, &depth_width, &depth_height))
                 {
-                    context->record_config.depth_mode_id = depth_modes[i].first;
+                    depth_mode_id = depth_modes[i].first;
                     break;
                 }
             }
         }
 
-        if (context->record_config.depth_mode_id == K4A_DEPTH_MODE_OFF)
+        if (depth_mode_id == K4A_DEPTH_MODE_OFF)
         {
             // Try to find the mode matching strings in the legacy modes
             for (size_t i = 0; i < arraysize(legacy_depth_modes); i++)
@@ -512,13 +512,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                                                                &depth_width,
                                                                &depth_height))
                     {
-                        context->record_config.depth_mode_id = legacy_depth_modes[i].first;
+                        depth_mode_id = legacy_depth_modes[i].first;
                         break;
                     }
                 }
             }
         }
-        if (context->record_config.depth_mode_id == K4A_DEPTH_MODE_OFF)
+        if (depth_mode_id == K4A_DEPTH_MODE_OFF)
         {
             LOG_ERROR("Unsupported depth mode: %s", depth_mode_str.c_str());
             return K4A_RESULT_FAILED;
@@ -616,13 +616,13 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         switch (1_s / frame_period_ns)
         {
         case 5:
-            context->record_config.fps_mode_id = K4A_FRAMES_PER_SECOND_5;
+            fps_mode_id = K4A_FRAMES_PER_SECOND_5;
             break;
         case 15:
-            context->record_config.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
+            fps_mode_id = K4A_FRAMES_PER_SECOND_15;
             break;
         case 30:
-            context->record_config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+            fps_mode_id = K4A_FRAMES_PER_SECOND_30;
             break;
         default:
             LOG_ERROR("Unsupported recording frame period: %llu ns (%llu fps)",
@@ -634,7 +634,173 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     else
     {
         // Default to 30 fps if no video tracks are enabled.
-        context->record_config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+        fps_mode_id = K4A_FRAMES_PER_SECOND_30;
+    }
+
+
+    
+    // TODO: comment
+    // TODO: move to c file, doesn't compile well in c++
+    // TODO: add error handling
+    KaxTag *color_mode_info_tag = get_tag(context, "K4A_COLOR_MODE_INFO");
+    KaxTag *depth_mode_info_tag = get_tag(context, "K4A_DEPTH_MODE_INFO");
+    KaxTag *fps_mode_info_tag = get_tag(context, "K4A_FPS_MODE_INFO");
+
+    if (color_mode_info_tag != NULL && depth_mode_info_tag != NULL && fps_mode_info_tag != NULL)
+    {
+        std::string color_mode_info_string = get_tag_string(color_mode_info_tag);
+        std::string depth_mode_info_string = get_tag_string(depth_mode_info_tag);
+        std::string fps_mode_info_string = get_tag_string(fps_mode_info_tag);
+
+        if (!color_mode_info_string.empty() && !depth_mode_info_string.empty() && !fps_mode_info_string.empty())
+        {
+            cJSON *color_mode_info_json = cJSON_Parse(color_mode_info_string.c_str());
+            const cJSON *color_mode_info_json_mode_id = cJSON_GetObjectItem(color_mode_info_json, "mode_id");
+            const cJSON *color_mode_info_json_width = cJSON_GetObjectItem(color_mode_info_json, "width");
+            const cJSON *color_mode_info_json_height = cJSON_GetObjectItem(color_mode_info_json, "height");
+            const cJSON *color_mode_info_json_native_format = cJSON_GetObjectItem(color_mode_info_json, "native_format");
+            const cJSON *color_mode_info_json_horizontal_fov = cJSON_GetObjectItem(color_mode_info_json, "horizontal_fov");
+            const cJSON *color_mode_info_json_vertical_fov = cJSON_GetObjectItem(color_mode_info_json, "vertical_fov");
+            const cJSON *color_mode_info_json_min_fps = cJSON_GetObjectItem(color_mode_info_json, "min_fps");
+            const cJSON *color_mode_info_json_max_fps = cJSON_GetObjectItem(color_mode_info_json, "max_fps");
+
+            k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+            color_mode_info.mode_id = (uint32_t)color_mode_info_json_mode_id->valuedouble;
+            color_mode_info.width = (uint32_t)color_mode_info_json_width->valuedouble;
+            color_mode_info.height = (uint32_t)color_mode_info_json_height->valuedouble;
+            color_mode_info.native_format = (k4a_image_format_t)color_mode_info_json_native_format->valuedouble;
+            color_mode_info.horizontal_fov = (float)color_mode_info_json_horizontal_fov->valuedouble;
+            color_mode_info.vertical_fov = (float)color_mode_info_json_vertical_fov->valuedouble;
+            color_mode_info.min_fps = (int)color_mode_info_json_min_fps->valuedouble;
+            color_mode_info.max_fps = (int)color_mode_info_json_max_fps->valuedouble;
+
+            // depth
+            cJSON *depth_mode_info_json = cJSON_Parse(depth_mode_info_string.c_str());
+            const cJSON *depth_mode_info_json_mode_id = cJSON_GetObjectItem(depth_mode_info_json, "mode_id");
+            const cJSON *depth_mode_info_json_passive_ir_only = cJSON_GetObjectItem(depth_mode_info_json, "passive_ir_only");
+            const cJSON *depth_mode_info_json_width = cJSON_GetObjectItem(depth_mode_info_json, "width");
+            const cJSON *depth_mode_info_json_height = cJSON_GetObjectItem(depth_mode_info_json, "height");
+            const cJSON *depth_mode_info_json_native_format = cJSON_GetObjectItem(depth_mode_info_json, "native_format");
+            const cJSON *depth_mode_info_json_horizontal_fov = cJSON_GetObjectItem(depth_mode_info_json, "horizontal_fov");
+            const cJSON *depth_mode_info_json_vertical_fov = cJSON_GetObjectItem(depth_mode_info_json, "vertical_fov");
+            const cJSON *depth_mode_info_json_min_fps = cJSON_GetObjectItem(depth_mode_info_json, "min_fps");
+            const cJSON *depth_mode_info_json_max_fps = cJSON_GetObjectItem(depth_mode_info_json, "max_fps");
+            const cJSON *depth_mode_info_json_min_range = cJSON_GetObjectItem(depth_mode_info_json, "min_range");
+            const cJSON *depth_mode_info_json_max_range = cJSON_GetObjectItem(depth_mode_info_json, "max_range");
+
+            k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+            depth_mode_info.mode_id = (uint32_t)depth_mode_info_json_mode_id->valuedouble;
+            depth_mode_info.passive_ir_only = cJSON_IsTrue(depth_mode_info_json_passive_ir_only) ? true : false;
+            depth_mode_info.width = (uint32_t)depth_mode_info_json_width->valuedouble;
+            depth_mode_info.height = (uint32_t)depth_mode_info_json_height->valuedouble;
+            depth_mode_info.native_format = (k4a_image_format_t)depth_mode_info_json_native_format->valuedouble;
+            depth_mode_info.horizontal_fov = (float)depth_mode_info_json_horizontal_fov->valuedouble;
+            depth_mode_info.vertical_fov = (float)depth_mode_info_json_vertical_fov->valuedouble;
+            depth_mode_info.min_fps = (int)depth_mode_info_json_min_fps->valuedouble;
+            depth_mode_info.max_fps = (int)depth_mode_info_json_max_fps->valuedouble;
+            depth_mode_info.min_range = (int)depth_mode_info_json_min_range->valuedouble;
+            depth_mode_info.max_range = (int)depth_mode_info_json_max_range->valuedouble;
+
+            // fps
+            cJSON *fps_mode_info_json = cJSON_Parse(fps_mode_info_string.c_str());
+            const cJSON *fps_mode_info_json_mode_id = cJSON_GetObjectItem(fps_mode_info_json, "mode_id");
+            const cJSON *fps_mode_info_json_fps = cJSON_GetObjectItem(fps_mode_info_json, "fps");
+
+            k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+            fps_mode_info.mode_id = (uint32_t)fps_mode_info_json_mode_id->valuedouble;
+            fps_mode_info.fps = (uint32_t)fps_mode_info_json_fps->valuedouble;
+
+            // set record config modes
+            context->record_config.color_mode_info = color_mode_info;
+            context->record_config.depth_mode_info = depth_mode_info;
+            context->record_config.fps_mode_info = fps_mode_info;
+
+            // delete json objects
+            cJSON_Delete(color_mode_info_json);
+            cJSON_Delete(depth_mode_info_json);
+            cJSON_Delete(fps_mode_info_json);
+        }
+    }
+    else 
+    {
+        // TODO: these static mode arrays are also in k4a.c
+        // TODO: there must be a better place to put them.
+        struct _recording_color_modes
+        {
+            uint32_t width;
+            uint32_t height;
+            k4a_image_format_t native_format;
+            float horizontal_fov;
+            float vertical_fov;
+            int min_fps;
+            int max_fps;
+        } recording_color_modes[] = { { 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 }, // color mode will be turned
+                                                                                         // off
+                                      { 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                                      { 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                                      { 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                                      { 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
+                                      { 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                                      { 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 } };
+
+        struct _recording_depth_modes
+        {
+            bool passive_ir_only;
+            uint32_t width;
+            uint32_t height;
+            k4a_image_format_t native_format;
+            float horizontal_fov;
+            float vertical_fov;
+            int min_fps;
+            int max_fps;
+            int min_range;
+            int max_range;
+        } recording_depth_modes[] = { { false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 }, // depth mode
+                                                                                                         // will be
+                                                                                                         // turned off
+                                      { false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800 },
+                                      { false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 },
+                                      { false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000 },
+                                      { false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500 },
+                                      { true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100 } };
+
+        struct _recording_fps_modes
+        {
+            int fps;
+        } recording_fps_modes[] = { { 5 }, { 15 }, { 30 } };
+
+        // TODO: comment
+
+        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        color_mode_info.mode_id = color_mode_id;
+        color_mode_info.width = recording_color_modes[color_mode_id].width;
+        color_mode_info.height = recording_color_modes[color_mode_id].height;
+        color_mode_info.native_format = recording_color_modes[color_mode_id].native_format;
+        color_mode_info.horizontal_fov = recording_color_modes[color_mode_id].horizontal_fov;
+        color_mode_info.vertical_fov = recording_color_modes[color_mode_id].vertical_fov;
+        color_mode_info.min_fps = recording_color_modes[color_mode_id].min_fps;
+        color_mode_info.max_fps = recording_color_modes[color_mode_id].max_fps;
+
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        depth_mode_info.mode_id = depth_mode_id;
+        depth_mode_info.passive_ir_only = recording_depth_modes[depth_mode_id].passive_ir_only;
+        depth_mode_info.width = recording_depth_modes[depth_mode_id].width;
+        depth_mode_info.height = recording_depth_modes[depth_mode_id].height;
+        depth_mode_info.native_format = recording_depth_modes[depth_mode_id].native_format;
+        depth_mode_info.horizontal_fov = recording_depth_modes[depth_mode_id].horizontal_fov;
+        depth_mode_info.vertical_fov = recording_depth_modes[depth_mode_id].vertical_fov;
+        depth_mode_info.min_fps = recording_depth_modes[depth_mode_id].min_fps;
+        depth_mode_info.max_fps = recording_depth_modes[depth_mode_id].max_fps;
+        depth_mode_info.min_range = recording_depth_modes[depth_mode_id].min_range;
+        depth_mode_info.max_range = recording_depth_modes[depth_mode_id].max_range;
+
+        k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        fps_mode_info.mode_id = fps_mode_id;
+        fps_mode_info.fps = recording_fps_modes[fps_mode_id].fps;
+
+        context->record_config.color_mode_info = color_mode_info;
+        context->record_config.depth_mode_info = depth_mode_info;
+        context->record_config.fps_mode_info = fps_mode_info;
     }
 
     // Read depth_delay_off_color_usec and set offsets for each builtin track accordingly.
