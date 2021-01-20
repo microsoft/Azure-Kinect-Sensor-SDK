@@ -11,6 +11,10 @@
 #include <k4ainternal/logging.h>
 #include <k4ainternal/common.h>
 
+// TODO: comment
+#include <cJSON.h>
+#include <locale.h> //cJSON.h need this set correctly.
+
 using namespace k4arecord;
 using namespace LIBMATROSKA_NAMESPACE;
 
@@ -147,8 +151,7 @@ k4a_result_t k4a_record_create(const char *path,
     if (K4A_SUCCEEDED(result) && device_config.color_mode_id != K4A_COLOR_RESOLUTION_OFF)
     {
         BITMAPINFOHEADER codec_info = {};
-        result = TRACE_CALL(
-            populate_bitmap_info_header(&codec_info, color_width, color_height, device_config.color_format));
+        result = TRACE_CALL(populate_bitmap_info_header(&codec_info, color_width, color_height, device_config.color_format));
 
         context->color_track = add_track(context,
                                          K4A_TRACK_NAME_COLOR,
@@ -300,13 +303,11 @@ k4a_result_t k4a_record_create(const char *path,
     {
         // Add calibration.json to the recording
         size_t calibration_size = 0;
-        k4a_buffer_result_t buffer_result = TRACE_BUFFER_CALL(
-            k4a_device_get_raw_calibration(device, NULL, &calibration_size));
+        k4a_buffer_result_t buffer_result = TRACE_BUFFER_CALL(k4a_device_get_raw_calibration(device, NULL, &calibration_size));
         if (buffer_result == K4A_BUFFER_RESULT_TOO_SMALL)
         {
             std::vector<uint8_t> calibration_buffer = std::vector<uint8_t>(calibration_size);
-            buffer_result = TRACE_BUFFER_CALL(
-                k4a_device_get_raw_calibration(device, calibration_buffer.data(), &calibration_size));
+            buffer_result = TRACE_BUFFER_CALL(k4a_device_get_raw_calibration(device, calibration_buffer.data(), &calibration_size));
             if (buffer_result == K4A_BUFFER_RESULT_SUCCEEDED)
             {
                 // Remove the null-terminated byte from the file before writing it.
@@ -335,6 +336,79 @@ k4a_result_t k4a_record_create(const char *path,
             result = K4A_RESULT_FAILED;
         }
     }
+
+
+    // TODO: comment
+    // TODO: move to c file, doesn't compile well in c++
+    // TODO: add error handling
+    if (K4A_SUCCEEDED(result) && device != NULL)
+    {
+        const char *color_mode_info_str = "";
+        const char *depth_mode_info_str = "";
+        const char *fps_mode_info_str = "";
+        
+        // get mode info structs
+        k4a_color_mode_info_t color_mode_info;
+        k4a_device_get_color_mode(device, device_config.color_mode_id, &color_mode_info);
+
+        k4a_depth_mode_info_t depth_mode_info;
+        k4a_device_get_depth_mode(device, device_config.depth_mode_id, &depth_mode_info);
+
+        k4a_fps_mode_info_t fps_mode_info;
+        k4a_device_get_fps_mode(device, device_config.fps_mode_id, &fps_mode_info);
+
+        // print to json
+
+        // color
+        cJSON *color_mode_info_json = cJSON_CreateObject();
+
+        cJSON_AddNumberToObject(color_mode_info_json, "mode_id", (double)color_mode_info.mode_id);
+        cJSON_AddNumberToObject(color_mode_info_json, "width", (double)color_mode_info.width);
+        cJSON_AddNumberToObject(color_mode_info_json, "height", (double)color_mode_info.height);
+        cJSON_AddNumberToObject(color_mode_info_json, "navitive_format", (double)color_mode_info.native_format);
+        cJSON_AddNumberToObject(color_mode_info_json, "horizontal_fov", (double)color_mode_info.horizontal_fov);
+        cJSON_AddNumberToObject(color_mode_info_json, "vertical_fov", (double)color_mode_info.vertical_fov);
+        cJSON_AddNumberToObject(color_mode_info_json, "min_fps", (double)color_mode_info.min_fps);
+        cJSON_AddNumberToObject(color_mode_info_json, "min_fps", (double)color_mode_info.max_fps);
+
+        color_mode_info_str = cJSON_Print(color_mode_info_json);
+
+        // depth
+        cJSON *depth_mode_info_json = cJSON_CreateObject();
+
+        cJSON_AddNumberToObject(depth_mode_info_json, "mode_id", (double)depth_mode_info.mode_id);
+        cJSON_AddBoolToObject(depth_mode_info_json, "passive_ir_only", depth_mode_info.passive_ir_only);
+        cJSON_AddNumberToObject(depth_mode_info_json, "width", (double)depth_mode_info.width);
+        cJSON_AddNumberToObject(depth_mode_info_json, "height", (double)depth_mode_info.height);
+        cJSON_AddNumberToObject(depth_mode_info_json, "native_format", (double)depth_mode_info.native_format);
+        cJSON_AddNumberToObject(depth_mode_info_json, "horizontal_fov", (double)depth_mode_info.horizontal_fov);
+        cJSON_AddNumberToObject(depth_mode_info_json, "vertical_fov", (double)depth_mode_info.vertical_fov);
+        cJSON_AddNumberToObject(depth_mode_info_json, "min_fps", (double)depth_mode_info.min_fps);
+        cJSON_AddNumberToObject(depth_mode_info_json, "max_fps", (double)depth_mode_info.max_fps);
+        cJSON_AddNumberToObject(depth_mode_info_json, "min_range", (double)depth_mode_info.min_range);
+        cJSON_AddNumberToObject(depth_mode_info_json, "max_range", (double)depth_mode_info.max_range);
+
+        depth_mode_info_str = cJSON_Print(depth_mode_info_json);
+
+        // fps
+        cJSON *fps_mode_info_json = cJSON_CreateObject();
+
+        cJSON_AddNumberToObject(fps_mode_info_json, "mode_id", (double)fps_mode_info.mode_id);
+        cJSON_AddNumberToObject(fps_mode_info_json, "fps", (double)fps_mode_info.fps);
+
+        fps_mode_info_str = cJSON_Print(fps_mode_info_json);
+
+        // save json in tags
+        add_tag(context, "K4A_COLOR_MODE_INFO", color_mode_info_str);
+        add_tag(context, "K4A_DEPTH_MODE_INFO", depth_mode_info_str);
+        add_tag(context, "K4A_FPS_MODE_INFO", fps_mode_info_str);
+
+        // delete json objects
+        cJSON_Delete(color_mode_info_json);
+        cJSON_Delete(depth_mode_info_json);
+        cJSON_Delete(fps_mode_info_json);
+    }
+
 
     if (K4A_SUCCEEDED(result))
     {

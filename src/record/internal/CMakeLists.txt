@@ -21,6 +21,7 @@ target_include_directories(k4a_playback PUBLIC
 
 target_link_libraries(k4a_record PUBLIC 
     k4a::k4a
+    cJSON::cJSON
     k4ainternal::logging
     ebml::ebml
     matroska::matroska
@@ -28,6 +29,7 @@ target_link_libraries(k4a_record PUBLIC
 
 target_link_libraries(k4a_playback PUBLIC 
     k4a::k4a
+    cJSON::cJSON
     k4ainternal::logging
     ebml::ebml
     matroska::matroska

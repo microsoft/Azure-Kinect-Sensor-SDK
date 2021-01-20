@@ -215,6 +215,7 @@ inline static bool k4a_is_version_greater_or_equal(k4a_version_t *fw_version_l, 
 
     return (fw == FW_OK);
 }
+
 #ifdef __cplusplus
 }
 #endif
