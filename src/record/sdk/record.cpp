@@ -358,47 +358,54 @@ k4a_result_t k4a_record_create(const char *path,
             hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
             hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
 
-            cJSON *device_info_json = cJSON_CreateObject();
-
-            if (K4A_SUCCEEDED(result))
+            if (hasDepthDevice || hasColorDevice)
             {
-                if (cJSON_AddNumberToObject(device_info_json, "capabilities", device_info.capabilities) == NULL)
-                {
-                    result = K4A_RESULT_FAILED;
-                }
-            }
+                cJSON *device_info_json = cJSON_CreateObject();
 
-            if (K4A_SUCCEEDED(result))
+                if (K4A_SUCCEEDED(result))
+                {
+                    if (cJSON_AddNumberToObject(device_info_json, "capabilities", device_info.capabilities) == NULL)
+                    {
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+
+                if (K4A_SUCCEEDED(result))
+                {
+                    if (cJSON_AddNumberToObject(device_info_json, "device_id", device_info.device_id) == NULL)
+                    {
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+
+                if (K4A_SUCCEEDED(result))
+                {
+                    if (cJSON_AddNumberToObject(device_info_json, "vendor_id", device_info.vendor_id) == NULL)
+                    {
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+
+                if (K4A_SUCCEEDED(result))
+                {
+                    device_info_str = cJSON_Print(device_info_json);
+
+                    if (device_info_str != NULL)
+                    {
+                        add_tag(context, "K4A_DEVICE_INFO", device_info_str);
+                    }
+                    else
+                    {
+                        result = K4A_RESULT_FAILED;
+                    }
+                }
+
+                cJSON_Delete(device_info_json);
+            }
+            else
             {
-                if (cJSON_AddNumberToObject(device_info_json, "device_id", device_info.device_id) == NULL)
-                {
-                    result = K4A_RESULT_FAILED;
-                }
+                result = K4A_RESULT_FAILED;
             }
-
-            if (K4A_SUCCEEDED(result))
-            {
-                if (cJSON_AddNumberToObject(device_info_json, "vendor_id", device_info.vendor_id) == NULL)
-                {
-                    result = K4A_RESULT_FAILED;
-                }
-            }
-
-            if (K4A_SUCCEEDED(result))
-            {
-                device_info_str = cJSON_Print(device_info_json);
-
-                if (device_info_str != NULL)
-                {
-                    add_tag(context, "K4A_DEVICE_INFO", device_info_str);
-                }
-                else
-                {
-                    result = K4A_RESULT_FAILED;
-                }
-            }
-
-            cJSON_Delete(device_info_json);
         }
         else
         {
