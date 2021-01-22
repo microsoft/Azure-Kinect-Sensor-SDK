@@ -18,6 +18,7 @@
 #include <k4ainternal/logging.h>
 #include <k4ainternal/modes.h>
 #include <azure_c_shared_utility/tickcounter.h>
+#include <k4ainternal\usbcommand.h>
 
 // System dependencies
 #include <stdlib.h>
@@ -28,7 +29,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "../usbcommand/usb_cmd_priv.h"
 
 char K4A_ENV_VAR_LOG_TO_A_FILE[] = K4A_ENABLE_LOG_TO_A_FILE;
 

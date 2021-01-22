@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 #include <ctime>
@@ -11,6 +11,7 @@
 #include <k4ainternal/matroska_read.h>
 #include <k4ainternal/common.h>
 #include <k4ainternal/logging.h>
+#include <k4ainternal\usbcommand.h>
 
 #include <turbojpeg.h>
 #include <libyuv.h>
@@ -645,14 +646,16 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     KaxTag *color_mode_info_tag = get_tag(context, "K4A_COLOR_MODE_INFO");
     KaxTag *depth_mode_info_tag = get_tag(context, "K4A_DEPTH_MODE_INFO");
     KaxTag *fps_mode_info_tag = get_tag(context, "K4A_FPS_MODE_INFO");
+    KaxTag *device_info_tag = get_tag(context, "K4A_DEVICE_INFO");
 
-    if (color_mode_info_tag != NULL && depth_mode_info_tag != NULL && fps_mode_info_tag != NULL)
+    if (color_mode_info_tag != NULL && depth_mode_info_tag != NULL && fps_mode_info_tag != NULL && device_info_tag != NULL)
     {
         std::string color_mode_info_string = get_tag_string(color_mode_info_tag);
         std::string depth_mode_info_string = get_tag_string(depth_mode_info_tag);
         std::string fps_mode_info_string = get_tag_string(fps_mode_info_tag);
+        std::string device_info_string = get_tag_string(device_info_tag);
 
-        if (!color_mode_info_string.empty() && !depth_mode_info_string.empty() && !fps_mode_info_string.empty())
+        if (!color_mode_info_string.empty() && !depth_mode_info_string.empty() && !fps_mode_info_string.empty() && !device_info_string.empty())
         {
             cJSON *color_mode_info_json = cJSON_Parse(color_mode_info_string.c_str());
             const cJSON *color_mode_info_json_mode_id = cJSON_GetObjectItem(color_mode_info_json, "mode_id");
@@ -710,15 +713,28 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             fps_mode_info.mode_id = (uint32_t)fps_mode_info_json_mode_id->valuedouble;
             fps_mode_info.fps = (uint32_t)fps_mode_info_json_fps->valuedouble;
 
+            // device info
+            cJSON *device_info_json = cJSON_Parse(device_info_string.c_str());
+            const cJSON *device_info_json_capabilities = cJSON_GetObjectItem(device_info_json, "capabilities");
+            const cJSON *device_info_json_device_id = cJSON_GetObjectItem(device_info_json, "device_id");
+            const cJSON *device_info_json_vendor_id = cJSON_GetObjectItem(device_info_json, "vendor_id");
+
+            k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, { 0 } };
+            device_info.capabilities = (uint32_t)device_info_json_capabilities->valuedouble;
+            device_info.device_id = (uint32_t)device_info_json_device_id->valuedouble;
+            device_info.vendor_id = (uint32_t)device_info_json_vendor_id->valuedouble;
+
             // set record config modes
             context->record_config.color_mode_info = color_mode_info;
             context->record_config.depth_mode_info = depth_mode_info;
             context->record_config.fps_mode_info = fps_mode_info;
+            context->record_config.device_info = device_info;
 
             // delete json objects
             cJSON_Delete(color_mode_info_json);
             cJSON_Delete(depth_mode_info_json);
             cJSON_Delete(fps_mode_info_json);
+            cJSON_Delete(device_info_json);
         }
     }
     else 
@@ -798,9 +814,16 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         fps_mode_info.mode_id = fps_mode_id;
         fps_mode_info.fps = recording_fps_modes[fps_mode_id].fps;
 
+        k4a_device_info_t device_info = { sizeof(k4a_device_info_t),
+                                          K4A_ABI_VERSION,
+                                          K4A_MSFT_VID,
+                                          K4A_DEPTH_PID,
+                                          ​​​​​​K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU };
+
         context->record_config.color_mode_info = color_mode_info;
         context->record_config.depth_mode_info = depth_mode_info;
         context->record_config.fps_mode_info = fps_mode_info;
+        context->record_config.device_info = device_info;
     }
 
     // Read depth_delay_off_color_usec and set offsets for each builtin track accordingly.
