@@ -65,16 +65,16 @@ bool charuco_target::read_from_json(const std::string template_file)
             shapes[i]["shape"] >> s;
             if (s.compare("charuco") == 0)
             {
-                if (!shapes[i]["squaresX"].empty())
-                    squaresX = (int)shapes[i]["squaresX"];
-                if (!shapes[i]["squaresY"].empty())
-                    squaresY = (int)shapes[i]["squaresY"];
-                if (!shapes[i]["squareLength_mm"].empty())
-                    squareLength_mm = (float)shapes[i]["squareLength_mm"];
-                if (!shapes[i]["markerLength_mm"].empty())
-                    markerLength_mm = (float)shapes[i]["markerLength_mm"];
-                if (!shapes[i]["marginSize_mm"].empty())
-                    marginSize_mm = (float)shapes[i]["marginSize_mm"];
+                if (!shapes[i]["squares_x"].empty())
+                    squaresX = (int)shapes[i]["squares_x"];
+                if (!shapes[i]["squares_y"].empty())
+                    squaresY = (int)shapes[i]["squares_y"];
+                if (!shapes[i]["square_length"].empty())
+                    squareLength_mm = (float)shapes[i]["square_length"];
+                if (!shapes[i]["marker_length"].empty())
+                    markerLength_mm = (float)shapes[i]["marker_length"];
+                if (!shapes[i]["margin_size"].empty())
+                    marginSize_mm = (float)shapes[i]["margin_size"];
                 if (!shapes[i]["aruco_dict_name"].empty())
                     aruco_dict_name = (int)shapes[i]["aruco_dict_name"];
                 valid = true;
