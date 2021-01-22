@@ -312,7 +312,7 @@ class Image:
         - For most image formats, the function will allocate an image buffer of
             size @p height_pixels * @p stride_bytes. Buffers with image format
             of EImageFormat.COLOR_NV12 will allocate an additional 
-            \p height_pixels / 2 set of lines (each of \p stride_bytes). This 
+            @p height_pixels / 2 set of lines (each of @p stride_bytes). This 
             function cannot be used to allocate EImageFormat.COLOR_MJPG buffer.
 
         @remarks

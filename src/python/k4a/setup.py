@@ -16,10 +16,12 @@ setup(
     zip_safe=False,
     tests_require=[
         'pytest',
+        'numpy'
     ],
     install_requires=[
+        'numpy',
     ],
     extras_require={
-        'test': ['pytest'],
+        'test': ['pytest', 'numpy'],
     },
 )

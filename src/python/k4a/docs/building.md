@@ -75,6 +75,9 @@ The following tools are optional:
 2. In a terminal, source the script src/python/k4a/build_wheel.csh.
    This will create the .whl file in a build/ folder.
    
+   cd <repo_root>/src/python/k4a
+   source build_wheel.csh
+   
 ### Building using a command line terminal (cross platform)
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.

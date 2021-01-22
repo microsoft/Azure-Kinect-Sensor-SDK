@@ -433,7 +433,7 @@ class Transformation:
         @param custom (Image): A custom image.
 
         @param interp_type (ETransformInterpolationType): Parameter that 
-            controls how pixels in \p custom_image should be interpolated when 
+            controls how pixels in @p custom_image should be interpolated when 
             transformed to color camera space. 
             - ETransformInterpolationType.LINEAR if linear interpolation should
                 be used.
