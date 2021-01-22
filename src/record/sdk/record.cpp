@@ -348,13 +348,13 @@ k4a_result_t k4a_record_create(const char *path,
         const char *fps_mode_info_str = "";
         
         // get mode info structs
-        k4a_color_mode_info_t color_mode_info;
+        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
         k4a_device_get_color_mode(device, device_config.color_mode_id, &color_mode_info);
 
-        k4a_depth_mode_info_t depth_mode_info;
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
         k4a_device_get_depth_mode(device, device_config.depth_mode_id, &depth_mode_info);
 
-        k4a_fps_mode_info_t fps_mode_info;
+        k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
         k4a_device_get_fps_mode(device, device_config.fps_mode_id, &fps_mode_info);
 
         // print to json
@@ -362,41 +362,49 @@ k4a_result_t k4a_record_create(const char *path,
         // color
         cJSON *color_mode_info_json = cJSON_CreateObject();
 
-        cJSON_AddNumberToObject(color_mode_info_json, "mode_id", (double)color_mode_info.mode_id);
-        cJSON_AddNumberToObject(color_mode_info_json, "width", (double)color_mode_info.width);
-        cJSON_AddNumberToObject(color_mode_info_json, "height", (double)color_mode_info.height);
-        cJSON_AddNumberToObject(color_mode_info_json, "navitive_format", (double)color_mode_info.native_format);
-        cJSON_AddNumberToObject(color_mode_info_json, "horizontal_fov", (double)color_mode_info.horizontal_fov);
-        cJSON_AddNumberToObject(color_mode_info_json, "vertical_fov", (double)color_mode_info.vertical_fov);
-        cJSON_AddNumberToObject(color_mode_info_json, "min_fps", (double)color_mode_info.min_fps);
-        cJSON_AddNumberToObject(color_mode_info_json, "min_fps", (double)color_mode_info.max_fps);
+        cJSON_AddNumberToObject(color_mode_info_json, "mode_id", color_mode_info.mode_id);
+        cJSON_AddNumberToObject(color_mode_info_json, "width", color_mode_info.width);
+        cJSON_AddNumberToObject(color_mode_info_json, "height", color_mode_info.height);
+        cJSON_AddNumberToObject(color_mode_info_json, "native_format", color_mode_info.native_format);
+        cJSON_AddNumberToObject(color_mode_info_json, "horizontal_fov", color_mode_info.horizontal_fov);
+        cJSON_AddNumberToObject(color_mode_info_json, "vertical_fov", color_mode_info.vertical_fov);
+        cJSON_AddNumberToObject(color_mode_info_json, "min_fps", color_mode_info.min_fps);
+        cJSON_AddNumberToObject(color_mode_info_json, "max_fps", color_mode_info.max_fps);
 
         color_mode_info_str = cJSON_Print(color_mode_info_json);
 
         // depth
         cJSON *depth_mode_info_json = cJSON_CreateObject();
 
-        cJSON_AddNumberToObject(depth_mode_info_json, "mode_id", (double)depth_mode_info.mode_id);
+        cJSON_AddNumberToObject(depth_mode_info_json, "mode_id", depth_mode_info.mode_id);
         cJSON_AddBoolToObject(depth_mode_info_json, "passive_ir_only", depth_mode_info.passive_ir_only);
-        cJSON_AddNumberToObject(depth_mode_info_json, "width", (double)depth_mode_info.width);
-        cJSON_AddNumberToObject(depth_mode_info_json, "height", (double)depth_mode_info.height);
-        cJSON_AddNumberToObject(depth_mode_info_json, "native_format", (double)depth_mode_info.native_format);
-        cJSON_AddNumberToObject(depth_mode_info_json, "horizontal_fov", (double)depth_mode_info.horizontal_fov);
-        cJSON_AddNumberToObject(depth_mode_info_json, "vertical_fov", (double)depth_mode_info.vertical_fov);
-        cJSON_AddNumberToObject(depth_mode_info_json, "min_fps", (double)depth_mode_info.min_fps);
-        cJSON_AddNumberToObject(depth_mode_info_json, "max_fps", (double)depth_mode_info.max_fps);
-        cJSON_AddNumberToObject(depth_mode_info_json, "min_range", (double)depth_mode_info.min_range);
-        cJSON_AddNumberToObject(depth_mode_info_json, "max_range", (double)depth_mode_info.max_range);
+        cJSON_AddNumberToObject(depth_mode_info_json, "width", depth_mode_info.width);
+        cJSON_AddNumberToObject(depth_mode_info_json, "height", depth_mode_info.height);
+        cJSON_AddNumberToObject(depth_mode_info_json, "native_format", depth_mode_info.native_format);
+        cJSON_AddNumberToObject(depth_mode_info_json, "horizontal_fov", depth_mode_info.horizontal_fov);
+        cJSON_AddNumberToObject(depth_mode_info_json, "vertical_fov", depth_mode_info.vertical_fov);
+        cJSON_AddNumberToObject(depth_mode_info_json, "min_fps", depth_mode_info.min_fps);
+        cJSON_AddNumberToObject(depth_mode_info_json, "max_fps", depth_mode_info.max_fps);
+        cJSON_AddNumberToObject(depth_mode_info_json, "min_range", depth_mode_info.min_range);
+        cJSON_AddNumberToObject(depth_mode_info_json, "max_range", depth_mode_info.max_range);
 
         depth_mode_info_str = cJSON_Print(depth_mode_info_json);
 
         // fps
         cJSON *fps_mode_info_json = cJSON_CreateObject();
 
-        cJSON_AddNumberToObject(fps_mode_info_json, "mode_id", (double)fps_mode_info.mode_id);
-        cJSON_AddNumberToObject(fps_mode_info_json, "fps", (double)fps_mode_info.fps);
+        cJSON_AddNumberToObject(fps_mode_info_json, "mode_id", fps_mode_info.mode_id);
+        cJSON_AddNumberToObject(fps_mode_info_json, "fps", fps_mode_info.fps);
+
+        std::cout << "fps: " << fps_mode_info.fps << std::endl;
 
         fps_mode_info_str = cJSON_Print(fps_mode_info_json);
+
+
+        // k4arecorder -l 10 -c 1080p -d NFOV_2X2BINNED -r 30 "D:\Neal Analytics\Microsoft\Kinect Recordings\output.mkv"
+        std::cout << color_mode_info_str << std::endl;
+        std::cout << depth_mode_info_str << std::endl;
+        std::cout << fps_mode_info_str << std::endl;
 
         // save json in tags
         add_tag(context, "K4A_COLOR_MODE_INFO", color_mode_info_str);
