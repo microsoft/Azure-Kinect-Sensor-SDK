@@ -377,22 +377,12 @@ int main(int argc, char **argv)
         goto Exit;
     }
 
-    k4a_color_mode_info_t color_mode_info;
-    k4a_device_get_color_mode(device, 0, &color_mode_info); // K4A_COLOR_RESOLUTION_OFF
-
-    k4a_depth_mode_info_t depth_mode_info;
-    k4a_device_get_depth_mode(device, 3, &depth_mode_info); // K4A_DEPTH_MODE_WFOV_2X2BINNED
-
-    k4a_fps_mode_info_t fps_mode_info;
-    k4a_device_get_fps_mode(device, 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
-
-
-    config.depth_mode_id = depth_mode_info.mode_id;
-    config.fps_mode_id = fps_mode_info.mode_id;
+    config.depth_mode_id = 3;// K4A_DEPTH_MODE_WFOV_2X2BINNED
+    config.fps_mode_id = 2;// K4A_FRAMES_PER_SECOND_30
 
     k4a_calibration_t calibration;
     if (K4A_RESULT_SUCCEEDED !=
-        k4a_device_get_calibration(device, depth_mode_info.mode_id, color_mode_info.mode_id, &calibration))
+        k4a_device_get_calibration(device, config.depth_mode_id, config.color_mode_id, &calibration))
     {
         printf("Failed to get calibration\n");
         goto Exit;
