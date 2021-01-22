@@ -346,6 +346,7 @@ k4a_result_t k4a_record_create(const char *path,
         const char *color_mode_info_str = "";
         const char *depth_mode_info_str = "";
         const char *fps_mode_info_str = "";
+        const char *device_info_str = "";
         
         // get mode info structs
         k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
@@ -356,6 +357,9 @@ k4a_result_t k4a_record_create(const char *path,
 
         k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
         k4a_device_get_fps_mode(device, device_config.fps_mode_id, &fps_mode_info);
+
+        k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_device_get_info(device, &device_info);
 
         // print to json
 
@@ -396,25 +400,35 @@ k4a_result_t k4a_record_create(const char *path,
         cJSON_AddNumberToObject(fps_mode_info_json, "mode_id", fps_mode_info.mode_id);
         cJSON_AddNumberToObject(fps_mode_info_json, "fps", fps_mode_info.fps);
 
-        std::cout << "fps: " << fps_mode_info.fps << std::endl;
-
         fps_mode_info_str = cJSON_Print(fps_mode_info_json);
 
+        // device info
+        cJSON *device_info_json = cJSON_CreateObject();
 
+        cJSON_AddNumberToObject(device_info_json, "capabilities", device_info.capabilities);
+        cJSON_AddNumberToObject(device_info_json, "device_id", device_info.device_id);
+        cJSON_AddNumberToObject(device_info_json, "vendor_id", device_info.vendor_id);
+
+        device_info_str = cJSON_Print(device_info_json);
+
+        // TODO: remove after finished testing
         // k4arecorder -l 10 -c 1080p -d NFOV_2X2BINNED -r 30 "D:\Neal Analytics\Microsoft\Kinect Recordings\output.mkv"
         std::cout << color_mode_info_str << std::endl;
         std::cout << depth_mode_info_str << std::endl;
         std::cout << fps_mode_info_str << std::endl;
+        std::cout << device_info_str << std::endl;
 
         // save json in tags
         add_tag(context, "K4A_COLOR_MODE_INFO", color_mode_info_str);
         add_tag(context, "K4A_DEPTH_MODE_INFO", depth_mode_info_str);
         add_tag(context, "K4A_FPS_MODE_INFO", fps_mode_info_str);
+        add_tag(context, "K4A_DEVICE_INFO", device_info_str);
 
         // delete json objects
         cJSON_Delete(color_mode_info_json);
         cJSON_Delete(depth_mode_info_json);
         cJSON_Delete(fps_mode_info_json);
+        cJSON_Delete(device_info_json);
     }
 
 
