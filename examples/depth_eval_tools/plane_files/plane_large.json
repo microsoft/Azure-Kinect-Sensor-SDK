@@ -4,11 +4,11 @@
 "shapes": [
 {
 "shape": "charuco",
-"squaresX": 14,
-"squaresY": 9,
-"squareLength_mm": 80,
-"markerLength_mm": 60,
-"marginSize_mm": 40,
+"squares_x": 14,
+"squares_y": 9,
+"square_length": 80,
+"marker_length": 60,
+"margin_size": 40,
 "width": 1200,
 "height": 800,
 "x": -40,
