@@ -9,7 +9,12 @@
     "square_length": 40,
     "marker_length": 30,
     "margin_size": 20,
-    "aruco_dict_name": 6
+    "aruco_dict_name": 6,
+    "width": 600,
+    "height": 400,
+    "x": -20,
+    "y": -20,
+    "dpi_factor": 5,
 }
 ]
 }
