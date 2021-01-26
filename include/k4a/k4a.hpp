@@ -1604,14 +1604,6 @@ public:
         return mode;
     }
 
-    /** TODO: Fill in.
-     *
-     */
-    int get_common_factor(int width, int height)
-    {
-        return (height == 0) ? width : get_common_factor(height, width % height);
-    }
-
 private:
     k4a_device_t m_handle;
 };

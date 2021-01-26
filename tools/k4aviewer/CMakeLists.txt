@@ -57,6 +57,7 @@ include_directories(
 set(EXTERNAL_LIBRARIES
     k4a::k4a
     k4a::k4arecord
+    k4a_math
     imgui::imgui
     libjpeg-turbo::libjpeg-turbo
     libsoundio::libsoundio

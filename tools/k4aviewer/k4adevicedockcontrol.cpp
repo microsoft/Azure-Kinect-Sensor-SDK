@@ -14,6 +14,7 @@
 
 // Library headers
 //
+#include <k4ainternal\math.h>
 
 // Project headers
 //
@@ -447,7 +448,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             k4a_color_mode_info_t color_mode = color_modes[c];
             int width = static_cast<int>(color_mode.width);
             int height = static_cast<int>(color_mode.height);
-            int common_factor = m_device.get_common_factor(width, height);
+            int common_factor = math_get_common_factor(width, height);
 
             std::string description = "";
             if (height < 1000)
