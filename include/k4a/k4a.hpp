@@ -1442,7 +1442,10 @@ public:
         return k4a_device_get_installed_count();
     }
 
-    // TODO: add comments
+    /** TODO: Fill in.
+     *
+     * \sa k4a_device_get_info
+     */
     k4a_device_info_t get_info()
     {
         K4A_INIT_STRUCT(k4a_device_info_t, info);
@@ -1451,7 +1454,10 @@ public:
         return info;
     }
 
-    // TODO: add comments
+    /** TODO: Fill in.
+     *
+     * \sa k4a_device_get_color_mode_count
+     */
     std::vector<k4a_color_mode_info_t> get_color_modes()
     {
         K4A_INIT_STRUCT(k4a_color_mode_info_t, mode);
@@ -1474,7 +1480,10 @@ public:
         return modes;
     }
 
-    // TODO: add comments
+    /** TODO: Fill in.
+     *
+     * \sa k4a_device_get_color_mode
+     */
     k4a_color_mode_info_t get_color_mode(int color_mode_id)
     {
         K4A_INIT_STRUCT(k4a_color_mode_info_t, mode);
@@ -1495,7 +1504,10 @@ public:
         return mode;
     }
 
-    // TODO: add comments
+    /** TODO: Fill in.
+     *
+     * \sa k4a_device_get_depth_mode_count
+     */
     std::vector<k4a_depth_mode_info_t> get_depth_modes()
     {
         K4A_INIT_STRUCT(k4a_depth_mode_info_t, mode);
@@ -1518,7 +1530,10 @@ public:
         return modes;
     }
 
-    // TODO: add comments
+    /** TODO: Fill in.
+     *
+     * \sa k4a_device_get_depth_mode
+     */
     k4a_depth_mode_info_t get_depth_mode(int depth_mode_id)
     {
         K4A_INIT_STRUCT(k4a_depth_mode_info_t, mode);
@@ -1539,7 +1554,10 @@ public:
         return mode;
     }
 
-    // TODO: add comments
+    /** TODO: Fill in.
+     *
+     * \sa k4a_device_get_fps_mode_count
+     */
     std::vector<k4a_fps_mode_info_t> get_fps_modes()
     {
         K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
@@ -1562,7 +1580,10 @@ public:
         return modes;
     }
 
-    // TODO: add comments
+    /** TODO: Fill in.
+     *
+     * \sa k4a_device_get_fps_mode
+     */
     k4a_fps_mode_info_t get_fps_mode(int fps_mode_id)
     {
         K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
@@ -1583,7 +1604,9 @@ public:
         return mode;
     }
 
-    // TODO: add comments
+    /** TODO: Fill in.
+     *
+     */
     int get_common_factor(int width, int height)
     {
         return (height == 0) ? width : get_common_factor(height, width % height);
