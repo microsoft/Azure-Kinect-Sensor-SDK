@@ -218,7 +218,7 @@ typedef enum
 {
     K4A_RESULT_SUCCEEDED = 0, /**< The result was successful */
     K4A_RESULT_FAILED,        /**< The result was a failure */
-    K4A_RESULT_UNSUPPORTED,   /**< The result was unsupported */
+    K4A_RESULT_UNSUPPORTED,   /**< The operation was unsupported */
 } k4a_result_t;
 
 /** Result code returned by Azure Kinect APIs.
@@ -234,7 +234,7 @@ typedef enum
     K4A_BUFFER_RESULT_SUCCEEDED = 0, /**< The result was successful */
     K4A_BUFFER_RESULT_FAILED,        /**< The result was a failure */
     K4A_BUFFER_RESULT_TOO_SMALL,     /**< The input buffer was too small */
-    K4A_BUFFER_RESULT_UNSUPPORTED,   /**< The result was unsupported */
+    K4A_BUFFER_RESULT_UNSUPPORTED,   /**< The operation was unsupported */
 } k4a_buffer_result_t;
 
 /** Result code returned by Azure Kinect APIs.
@@ -250,7 +250,7 @@ typedef enum
     K4A_WAIT_RESULT_SUCCEEDED = 0, /**< The result was successful */
     K4A_WAIT_RESULT_FAILED,        /**< The result was a failure */
     K4A_WAIT_RESULT_TIMEOUT,       /**< The operation timed out */
-    K4A_WAIT_RESULT_UNSUPPORTED,   /**< The result was unsupported */
+    K4A_WAIT_RESULT_UNSUPPORTED,   /**< The operation was unsupported */
 } k4a_wait_result_t;
 
 /** Verbosity levels of debug messaging
