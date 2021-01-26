@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_mode_id = color_mode_info.mode_id; 
+    config.color_mode_id = color_mode_info.mode_id;
     config.depth_mode_id = depth_mode_info.mode_id;
     config.fps_mode_id = fps_mode_info.mode_id;
 

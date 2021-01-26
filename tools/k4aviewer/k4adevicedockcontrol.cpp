@@ -347,11 +347,11 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         std::vector<std::pair<int, std::string>> depth_mode_items;
         std::vector<k4a_depth_mode_info_t> depth_modes = m_device.get_depth_modes();
         size_t depth_modes_size = depth_modes.size();
-        for (int d = 1; d < depth_modes_size; d++)
+        for (size_t d = 1; d < depth_modes_size; d++) // Start at index = 1 (0 is off).
         {
             k4a_depth_mode_info_t depth_mode = depth_modes[d];
-            int width = (int)depth_mode.width;
-            int height = (int)depth_mode.height;
+            int width = static_cast<int>(depth_mode.width);
+            int height = static_cast<int>(depth_mode.height);
             float fov = depth_mode.horizontal_fov;
 
             std::string description = "";
@@ -378,7 +378,12 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             depth_mode_items.push_back({ depth_mode.mode_id, (const std::string)description });
         }
 
-        depthModeUpdated |= ImGuiExtensions::K4AComboBox("##Depth", "", ImGuiComboFlags_None, depth_mode_items, pDepthModeInfo, depthSettingsEditable);
+        depthModeUpdated |= ImGuiExtensions::K4AComboBox("##Depth",
+                                                         "",
+                                                         ImGuiComboFlags_None,
+                                                         depth_mode_items,
+                                                         pDepthModeInfo,
+                                                         depthSettingsEditable);
 
         ImGui::TreePop();
     }
@@ -403,18 +408,22 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         auto *pColorFormat = reinterpret_cast<int *>(&m_config.ColorFormat);
 
         ImGui::Text("Format");
-        colorFormatUpdated |= ImGuiExtensions::K4ARadioButton("BGRA", pColorFormat, K4A_IMAGE_FORMAT_COLOR_BGRA32, colorSettingsEditable);
+        colorFormatUpdated |=
+            ImGuiExtensions::K4ARadioButton("BGRA", pColorFormat, K4A_IMAGE_FORMAT_COLOR_BGRA32, colorSettingsEditable);
         ImGui::SameLine();
-        colorFormatUpdated |= ImGuiExtensions::K4ARadioButton("MJPG", pColorFormat, K4A_IMAGE_FORMAT_COLOR_MJPG, colorSettingsEditable);
+        colorFormatUpdated |=
+            ImGuiExtensions::K4ARadioButton("MJPG", pColorFormat, K4A_IMAGE_FORMAT_COLOR_MJPG, colorSettingsEditable);
         ImGui::SameLine();
-        colorFormatUpdated |= ImGuiExtensions::K4ARadioButton("NV12", pColorFormat, K4A_IMAGE_FORMAT_COLOR_NV12, colorSettingsEditable);
+        colorFormatUpdated |=
+            ImGuiExtensions::K4ARadioButton("NV12", pColorFormat, K4A_IMAGE_FORMAT_COLOR_NV12, colorSettingsEditable);
         ImGui::SameLine();
-        colorFormatUpdated |= ImGuiExtensions::K4ARadioButton("YUY2", pColorFormat, K4A_IMAGE_FORMAT_COLOR_YUY2, colorSettingsEditable);
+        colorFormatUpdated |=
+            ImGuiExtensions::K4ARadioButton("YUY2", pColorFormat, K4A_IMAGE_FORMAT_COLOR_YUY2, colorSettingsEditable);
 
         // Uncompressed formats are only supported at 720p.
 
         // TODO: tooltip if not supported in NV12 or YUY2 mode
-        //const char *imageFormatHelpMessage = "Not supported in NV12 or YUY2 mode!";
+        // const char *imageFormatHelpMessage = "Not supported in NV12 or YUY2 mode!";
 
         const bool imageFormatSupportsHighResolution = m_config.ColorFormat != K4A_IMAGE_FORMAT_COLOR_NV12 &&
                                                        m_config.ColorFormat != K4A_IMAGE_FORMAT_COLOR_YUY2;
@@ -433,11 +442,11 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         std::vector<std::pair<int, std::string>> color_mode_items;
         std::vector<k4a_color_mode_info_t> color_modes = m_device.get_color_modes();
         size_t color_modes_size = color_modes.size();
-        for (int c = 1; c < color_modes_size; c++)
+        for (size_t c = 1; c < color_modes_size; c++) // Start at index = 1 (0 is off).
         {
             k4a_color_mode_info_t color_mode = color_modes[c];
-            int width = (int)color_mode.width;
-            int height = (int)color_mode.height;
+            int width = static_cast<int>(color_mode.width);
+            int height = static_cast<int>(color_mode.height);
             int common_factor = m_device.get_common_factor(width, height);
 
             std::string description = "";
@@ -448,11 +457,16 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             description += std::to_string(height) + "p ";
             description += std::to_string(width / common_factor) + ":" + std::to_string(height / common_factor);
 
-            color_mode_items.push_back({ color_mode.mode_id, (const std::string) description });
+            color_mode_items.push_back({ color_mode.mode_id, (const std::string)description });
         }
 
-        colorResolutionUpdated |= ImGuiExtensions::K4AComboBox("##Resolution", "", ImGuiComboFlags_None, color_mode_items, pColorModeInfo, colorSettingsEditable);
-        
+        colorResolutionUpdated |= ImGuiExtensions::K4AComboBox("##Resolution",
+                                                               "",
+                                                               ImGuiComboFlags_None,
+                                                               color_mode_items,
+                                                               pColorModeInfo,
+                                                               colorSettingsEditable);
+
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Color Controls"))
@@ -608,7 +622,10 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         }
     }
 
-    const bool supports30fps = !(m_config.EnableColorCamera && m_config.color_mode_id == 6) && !(m_config.EnableDepthCamera && m_config.depth_mode_id == 4); // 6 = K4A_COLOR_RESOLUTION_3072P, 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
+    const bool supports30fps = !(m_config.EnableColorCamera && m_config.color_mode_id == 6) &&
+                               !(m_config.EnableDepthCamera &&
+                                 m_config.depth_mode_id == 4); // 6 = K4A_COLOR_RESOLUTION_3072P, 4 =
+                                                               // K4A_DEPTH_MODE_WFOV_UNBINNED
 
     const bool enableFramerate = !deviceIsStarted && (m_config.EnableColorCamera || m_config.EnableDepthCamera);
 
@@ -625,7 +642,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     std::vector<std::pair<int, std::string>> fps_mode_items;
     std::vector<k4a_fps_mode_info_t> fps_modes = m_device.get_fps_modes();
     size_t fps_modes_size = fps_modes.size();
-    for (int f = 0; f < fps_modes_size; f++)
+    for (size_t f = 0; f < fps_modes_size; f++)
     {
         k4a_fps_mode_info_t fps_mode = fps_modes[f];
         int fps = (int)fps_mode.fps;
@@ -634,7 +651,8 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         fps_mode_items.push_back({ fps_mode.mode_id, (const std::string)description });
     }
 
-    framerateUpdated |= ImGuiExtensions::K4AComboBox("##Framerate", "", ImGuiComboFlags_None, fps_mode_items, pFPSModeInfo);
+    framerateUpdated |=
+        ImGuiExtensions::K4AComboBox("##Framerate", "", ImGuiComboFlags_None, fps_mode_items, pFPSModeInfo);
 
     ImGui::Unindent();
 
@@ -687,10 +705,10 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             int maxDepthDelay = 0;
             switch (m_config.fps_mode_id)
             {
-            case 2:  // 2 = K4A_FRAMES_PER_SECOND_30
+            case 2: // 2 = K4A_FRAMES_PER_SECOND_30
                 maxDepthDelay = std::micro::den / 30;
                 break;
-            case 1:  // 1 = K4A_FRAMES_PER_SECOND_15
+            case 1: // 1 = K4A_FRAMES_PER_SECOND_15
                 maxDepthDelay = std::micro::den / 15;
                 break;
             case 0: // 0 = K4A_FRAMES_PER_SECOND_5
@@ -824,7 +842,8 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
         ImGui::Separator();
 
-        const bool pointCloudViewerAvailable = m_config.EnableDepthCamera && m_config.depth_mode_id != 5 && m_camerasStarted; // 5 = K4A_DEPTH_MODE_PASSIVE_IR
+        const bool pointCloudViewerAvailable = m_config.EnableDepthCamera && m_config.depth_mode_id != 5 &&
+                                               m_camerasStarted; // 5 = K4A_DEPTH_MODE_PASSIVE_IR
 
         K4AWindowSet::ShowModeSelector(&m_currentViewType,
                                        true,
@@ -1064,7 +1083,6 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         }
     }
 
-    
     k4a_depth_mode_info_t depth_mode_info = m_device.get_depth_mode(m_config.depth_mode_id);
     k4a_color_mode_info_t color_mode_info = m_device.get_color_mode(m_config.color_mode_id);
 
@@ -1086,7 +1104,8 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         try
         {
             k4a::calibration calib = m_device.get_calibration(depth_mode_info.mode_id, color_mode_info.mode_id);
-            bool rgbPointCloudAvailable = m_config.EnableColorCamera && m_config.ColorFormat == K4A_IMAGE_FORMAT_COLOR_BGRA32;
+            bool rgbPointCloudAvailable = m_config.EnableColorCamera &&
+                                          m_config.ColorFormat == K4A_IMAGE_FORMAT_COLOR_BGRA32;
             K4AWindowSet::StartPointCloudWindow(m_deviceSerialNumber.c_str(),
                                                 calib,
                                                 depth_mode_info,

@@ -764,17 +764,12 @@ struct calibration : public k4a_calibration_t
      *
      * \sa k4a_calibration_get_from_raw
      */
-    static calibration get_from_raw(char *raw_calibration,
-                                    size_t raw_calibration_size,
-                                    uint32_t depth_mode_id,
-                                    uint32_t color_mode_id)
+    static calibration
+    get_from_raw(char *raw_calibration, size_t raw_calibration_size, uint32_t depth_mode_id, uint32_t color_mode_id)
     {
         calibration calib;
-        k4a_result_t result = k4a_calibration_get_from_raw(raw_calibration,
-                                                           raw_calibration_size,
-                                                           depth_mode_id,
-                                                           color_mode_id,
-                                                           &calib);
+        k4a_result_t result =
+            k4a_calibration_get_from_raw(raw_calibration, raw_calibration_size, depth_mode_id, color_mode_id, &calib);
 
         if (K4A_RESULT_SUCCEEDED != result)
         {
@@ -788,10 +783,8 @@ struct calibration : public k4a_calibration_t
      *
      * \sa k4a_calibration_get_from_raw
      */
-    static calibration get_from_raw(uint8_t *raw_calibration,
-                                    size_t raw_calibration_size,
-                                    uint32_t depth_mode_id,
-                                    uint32_t color_mode_id)
+    static calibration
+    get_from_raw(uint8_t *raw_calibration, size_t raw_calibration_size, uint32_t depth_mode_id, uint32_t color_mode_id)
     {
         return get_from_raw(reinterpret_cast<char *>(raw_calibration),
                             raw_calibration_size,
@@ -1449,7 +1442,6 @@ public:
         return k4a_device_get_installed_count();
     }
 
-
     // TODO: add comments
     k4a_device_info_t get_info()
     {
@@ -1457,8 +1449,8 @@ public:
         k4a_device_get_info(m_handle, &info);
 
         return info;
-    } 
-    
+    }
+
     // TODO: add comments
     std::vector<k4a_color_mode_info_t> get_color_modes()
     {
@@ -1480,8 +1472,8 @@ public:
         }
 
         return modes;
-    }    
-    
+    }
+
     // TODO: add comments
     k4a_color_mode_info_t get_color_mode(int color_mode_id)
     {
@@ -1501,8 +1493,8 @@ public:
         }
 
         return mode;
-    } 
-    
+    }
+
     // TODO: add comments
     std::vector<k4a_depth_mode_info_t> get_depth_modes()
     {
@@ -1522,7 +1514,7 @@ public:
                 }
             }
         }
-        
+
         return modes;
     }
 
@@ -1545,7 +1537,7 @@ public:
         }
 
         return mode;
-    } 
+    }
 
     // TODO: add comments
     std::vector<k4a_fps_mode_info_t> get_fps_modes()
@@ -1589,10 +1581,10 @@ public:
         }
 
         return mode;
-    } 
+    }
 
     // TODO: add comments
-    int get_common_factor(int width, int height) 
+    int get_common_factor(int width, int height)
     {
         return (height == 0) ? width : get_common_factor(height, width % height);
     }
