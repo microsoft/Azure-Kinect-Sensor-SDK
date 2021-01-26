@@ -25,7 +25,7 @@ extern "C" {
 /**
  * Declare an opaque handle type.
  *
- * \param _handle_name_ The type name of the handle
+ * \param \_handle_name_ The type name of the handle
  *
  * \remarks
  * This is used to define the public handle types for the Azure Kinect APIs.
@@ -193,15 +193,6 @@ K4A_DECLARE_HANDLE(k4a_image_t);
  * \endxmlonly
  */
 K4A_DECLARE_HANDLE(k4a_transformation_t);
-
-// TODO: comment
-#define K4A_INIT_STRUCT(T, S)                                                                                          \
-    T S{};                                                                                                             \
-    S.struct_size = sizeof(T);                                                                                         \
-    S.struct_version = K4A_ABI_VERSION;
-
-// TODO: comment
-#define K4A_ABI_VERSION 1
 
 /**
  *
@@ -695,6 +686,28 @@ typedef enum
  */
 #define K4A_FAILED(_result_) (!K4A_SUCCEEDED(_result_))
 
+/** TODO: Fill in.
+ *
+ * \param T
+ * TODO: Fill in
+ *
+ * \param S
+ * TODO: Fill in
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_INIT_STRUCT(T, S)                                                                                          \
+    T S{};                                                                                                             \
+    S.struct_size = sizeof(T);                                                                                         \
+    S.struct_version = K4A_ABI_VERSION;
+
 /**
  *
  * @}
@@ -846,10 +859,17 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
  * @{
  */
 
-/**
-    TODO: add comments
-*/
-
+/** TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 typedef enum
 {
     ​​​​​​K4A_CAPABILITY_DEPTH = 1,
@@ -857,15 +877,37 @@ typedef enum
     K4A_CAPABILITY_IMU = 4
 } device_capabilities​​;
 
+/** TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 typedef struct _k4a_device_info_t
 {
-    uint32_t struct_size;
-    uint32_t struct_version;
-    uint32_t vendor_id;    /**< 0 to 65535 : reserved for registered USB VID numbers. */
-    uint32_t device_id;    /**< Vendor specific device ID. */
-    uint32_t capabilities; /**< Binary combination of capability flags. */
+    uint32_t struct_size;    /**< TODO: Fill in. */
+    uint32_t struct_version; /**< TODO: Fill in. */
+    uint32_t vendor_id;      /**< 0 to 65535 : reserved for registered USB VID numbers. */
+    uint32_t device_id;      /**< Vendor specific device ID. */
+    uint32_t capabilities;   /**< Binary combination of capability flags. */
 } k4a_device_info_t;
 
+/** TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 typedef struct _k4a_color_mode_info_t
 {
     uint32_t struct_size;    /**< Must be equal to sizeof(k4a_color_mode_info_t). */
@@ -880,6 +922,17 @@ typedef struct _k4a_color_mode_info_t
     int max_fps;                      /**< Maximum supported ramerate. */
 } k4a_color_mode_info_t;
 
+/** TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 typedef struct _k4a_depth_mode_info_t
 {
     uint32_t struct_size;    /**< Must be equal to sizeof(k4a_depth_mode_info_t). */
@@ -897,12 +950,23 @@ typedef struct _k4a_depth_mode_info_t
     int max_range;                    /**< Max values expected for mode in millimeters */
 } k4a_depth_mode_info_t;
 
+/** TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 typedef struct _k4a_fps_mode_info_t
 {
     uint32_t struct_size;    /**< Must be equal to sizeof(k4a_fps_mode_info_t). */
     uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
     uint32_t mode_id;        /**< Mode identifier to use to select this mode. */
-    int fps;
+    int fps;                 /**< TODO: Fill in. */
 } k4a_fps_mode_info_t;
 
 // TODO: redo comments for color, depth and fps?
@@ -1219,6 +1283,19 @@ typedef struct _k4a_imu_sample_t
  *
  * @{
  */
+
+/** TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_ABI_VERSION 1
 
 /** Default device index.
  *

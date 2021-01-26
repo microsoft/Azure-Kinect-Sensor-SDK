@@ -1585,10 +1585,10 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
  * \param device_handle
  * Handle obtained by k4a_device_open().
  *
- * \param depth_mode
+ * \param depth_mode_id
  * Mode in which depth camera is operated.
  *
- * \param color_resolution
+ * \param color_mode_id
  * Resolution in which color camera is operated.
  *
  * \param calibration
@@ -1599,7 +1599,7 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
  *
  * \remarks
  * The \p calibration represents the data needed to transform between the camera views and may be
- * different for each operating \p depth_mode and \p color_resolution the device is configured to operate in.
+ * different for each operating \p depth_mode_id and \p color_mode_id the device is configured to operate in.
  *
  * \remarks
  * The \p calibration output is used as input to all calibration and transformation functions.
@@ -1668,10 +1668,10 @@ K4A_EXPORT k4a_result_t k4a_device_get_sync_jack(k4a_device_t device_handle,
  * \param raw_calibration_size
  * The size, in bytes, of raw_calibration including the NULL termination.
  *
- * \param depth_mode
+ * \param depth_mode_id
  * Mode in which depth camera is operated.
  *
- * \param color_resolution
+ * \param color_mode_id
  * Resolution in which color camera is operated.
  *
  * \param calibration
@@ -1682,7 +1682,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_sync_jack(k4a_device_t device_handle,
  *
  * \remarks
  * The \p calibration represents the data needed to transform between the camera views and is
- * different for each operating \p depth_mode and \p color_resolution the device is configured to operate in.
+ * different for each operating \p depth_mode_id and \p color_mode_id the device is configured to operate in.
  *
  * \remarks
  * The \p calibration output is used as input to all transformation functions.
@@ -2267,26 +2267,164 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
                                                                       const k4a_calibration_type_t camera,
                                                                       k4a_image_t xyz_image);
 
-/**
-    TODO: add comments
-*/
-
+/** TODO: Fill in.
+ *
+ * \param device_handle
+ * TODO: Fill in.
+ *
+ * \param device_info
+ * TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info);
 
+/** TODO: Fill in.
+ *
+ * \param device_handle
+ * TODO: Fill in.
+ *
+ * \param mode_count
+ * TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count);
 
+/** TODO: Fill in.
+ *
+ * \param device_handle
+ * TODO: Fill in.
+ *
+ * \param mode_index
+ * TODO: Fill in.
+ *
+ * \param mode_info
+ * TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
                                                   int mode_index,
                                                   k4a_color_mode_info_t *mode_info);
 
+/** TODO: Fill in.
+ *
+ * \param device_handle
+ * TODO: Fill in.
+ *
+ * \param mode_count
+ * TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count);
 
+/** TODO: Fill in.
+ *
+ * \param device_handle
+ * TODO: Fill in.
+ *
+ * \param mode_index
+ * TODO: Fill in.
+ *
+ * \param mode_info
+ * TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
                                                   int mode_index,
                                                   k4a_depth_mode_info_t *mode_info);
 
+/** TODO: Fill in.
+ *
+ * \param device_handle
+ * TODO: Fill in.
+ *
+ * \param mode_count
+ * TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count);
 
+/** TODO: Fill in.
+ *
+ * \param device_handle
+ * TODO: Fill in.
+ *
+ * \param mode_index
+ * TODO: Fill in.
+ *
+ * \param mode_info
+ * TODO: Fill in.
+ *
+ * \remarks
+ * TODO: Fill in
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
 K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
                                                 int mode_index,
                                                 k4a_fps_mode_info_t *mode_info);
