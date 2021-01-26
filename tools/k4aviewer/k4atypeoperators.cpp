@@ -145,14 +145,14 @@ std::istream &operator>>(std::istream &s, k4a_wired_sync_mode_t &val)
 
 // TODO: remove?
 
-//namespace
+// namespace
 //{
-//constexpr char FramesPerSecond5[] = "K4A_FRAMES_PER_SECOND_5";
-//constexpr char FramesPerSecond15[] = "K4A_FRAMES_PER_SECOND_15";
-//constexpr char FramesPerSecond30[] = "K4A_FRAMES_PER_SECOND_30";
+// constexpr char FramesPerSecond5[] = "K4A_FRAMES_PER_SECOND_5";
+// constexpr char FramesPerSecond15[] = "K4A_FRAMES_PER_SECOND_15";
+// constexpr char FramesPerSecond30[] = "K4A_FRAMES_PER_SECOND_30";
 //} // namespace
 //
-//std::ostream &operator<<(std::ostream &s, const k4a_fps_t &val)
+// std::ostream &operator<<(std::ostream &s, const k4a_fps_t &val)
 //{
 //    switch (val)
 //    {
@@ -171,7 +171,7 @@ std::istream &operator>>(std::istream &s, k4a_wired_sync_mode_t &val)
 //    return s;
 //}
 //
-//std::istream &operator>>(std::istream &s, k4a_fps_t &val)
+// std::istream &operator>>(std::istream &s, k4a_fps_t &val)
 //{
 //    std::string str;
 //    s >> str;
@@ -194,17 +194,17 @@ std::istream &operator>>(std::istream &s, k4a_wired_sync_mode_t &val)
 //    return s;
 //}
 //
-//namespace
+// namespace
 //{
-//constexpr char DepthModeOff[] = "K4A_DEPTH_MODE_OFF";
-//constexpr char DepthModeNfov2x2Binned[] = "K4A_DEPTH_MODE_NFOV_2X2BINNED";
-//constexpr char DepthModeNfovUnbinned[] = "K4A_DEPTH_MODE_NFOV_UNBINNED";
-//constexpr char DepthModeWfov2x2Binned[] = "K4A_DEPTH_MODE_WFOV_2X2BINNED";
-//constexpr char DepthModeWfovUnbinned[] = "K4A_DEPTH_MODE_WFOV_UNBINNED";
-//constexpr char DepthModePassiveIr[] = "K4A_DEPTH_MODE_PASSIVE_IR";
+// constexpr char DepthModeOff[] = "K4A_DEPTH_MODE_OFF";
+// constexpr char DepthModeNfov2x2Binned[] = "K4A_DEPTH_MODE_NFOV_2X2BINNED";
+// constexpr char DepthModeNfovUnbinned[] = "K4A_DEPTH_MODE_NFOV_UNBINNED";
+// constexpr char DepthModeWfov2x2Binned[] = "K4A_DEPTH_MODE_WFOV_2X2BINNED";
+// constexpr char DepthModeWfovUnbinned[] = "K4A_DEPTH_MODE_WFOV_UNBINNED";
+// constexpr char DepthModePassiveIr[] = "K4A_DEPTH_MODE_PASSIVE_IR";
 //} // namespace
 //
-//std::ostream &operator<<(std::ostream &s, const k4a_depth_mode_t &val)
+// std::ostream &operator<<(std::ostream &s, const k4a_depth_mode_t &val)
 //{
 //    switch (val)
 //    {
@@ -232,7 +232,7 @@ std::istream &operator>>(std::istream &s, k4a_wired_sync_mode_t &val)
 //    return s;
 //}
 //
-//std::istream &operator>>(std::istream &s, k4a_depth_mode_t &val)
+// std::istream &operator>>(std::istream &s, k4a_depth_mode_t &val)
 //{
 //    std::string str;
 //    s >> str;
@@ -267,18 +267,18 @@ std::istream &operator>>(std::istream &s, k4a_wired_sync_mode_t &val)
 //    return s;
 //}
 //
-//namespace
+// namespace
 //{
-//constexpr char ColorResolutionOff[] = "K4A_COLOR_RESOLUTION_OFF";
-//constexpr char ColorResolution720p[] = "K4A_COLOR_RESOLUTION_720P";
-//constexpr char ColorResolution1080p[] = "K4A_COLOR_RESOLUTION_1080P";
-//constexpr char ColorResolution1440p[] = "K4A_COLOR_RESOLUTION_1440P";
-//constexpr char ColorResolution1536p[] = "K4A_COLOR_RESOLUTION_1536P";
-//constexpr char ColorResolution2160p[] = "K4A_COLOR_RESOLUTION_2160P";
-//constexpr char ColorResolution3072p[] = "K4A_COLOR_RESOLUTION_3072P";
+// constexpr char ColorResolutionOff[] = "K4A_COLOR_RESOLUTION_OFF";
+// constexpr char ColorResolution720p[] = "K4A_COLOR_RESOLUTION_720P";
+// constexpr char ColorResolution1080p[] = "K4A_COLOR_RESOLUTION_1080P";
+// constexpr char ColorResolution1440p[] = "K4A_COLOR_RESOLUTION_1440P";
+// constexpr char ColorResolution1536p[] = "K4A_COLOR_RESOLUTION_1536P";
+// constexpr char ColorResolution2160p[] = "K4A_COLOR_RESOLUTION_2160P";
+// constexpr char ColorResolution3072p[] = "K4A_COLOR_RESOLUTION_3072P";
 //} // namespace
 //
-//std::ostream &operator<<(std::ostream &s, const k4a_color_resolution_t &val)
+// std::ostream &operator<<(std::ostream &s, const k4a_color_resolution_t &val)
 //{
 //    switch (val)
 //    {
@@ -309,7 +309,7 @@ std::istream &operator>>(std::istream &s, k4a_wired_sync_mode_t &val)
 //    return s;
 //}
 //
-//std::istream &operator>>(std::istream &s, k4a_color_resolution_t &val)
+// std::istream &operator>>(std::istream &s, k4a_color_resolution_t &val)
 //{
 //    std::string str;
 //    s >> str;

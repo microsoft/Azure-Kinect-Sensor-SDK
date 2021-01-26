@@ -195,11 +195,10 @@ K4A_DECLARE_HANDLE(k4a_image_t);
 K4A_DECLARE_HANDLE(k4a_transformation_t);
 
 // TODO: comment
-#define K4A_INIT_STRUCT(T, S) \
-    T S{}; \
-    S.struct_size = sizeof(T); \
+#define K4A_INIT_STRUCT(T, S)                                                                                          \
+    T S{};                                                                                                             \
+    S.struct_size = sizeof(T);                                                                                         \
     S.struct_version = K4A_ABI_VERSION;
-
 
 // TODO: comment
 #define K4A_ABI_VERSION 1
@@ -1254,9 +1253,8 @@ typedef struct _k4a_imu_sample_t
  * </requirements>
  * \endxmlonly
  */
-static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = {
-    K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 2, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false
-};
+static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL =
+    { K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 2, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false };
 
 /**
  * @}

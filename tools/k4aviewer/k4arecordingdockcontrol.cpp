@@ -54,7 +54,7 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
 
     switch (m_recordConfiguration.fps_mode_info.mode_id)
     {
-    case 0:  // 0 = K4A_FRAMES_PER_SECOND_5
+    case 0: // 0 = K4A_FRAMES_PER_SECOND_5
         m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 5));
         break;
 
@@ -62,7 +62,7 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
         m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 15));
         break;
 
-    case 2:  // 2 = K4A_FRAMES_PER_SECOND_30
+    case 2: // 2 = K4A_FRAMES_PER_SECOND_30
     default:
         m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 30));
         break;
@@ -477,7 +477,8 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         try
         {
             k4a::calibration calibration = m_playbackThreadState.Recording.get_calibration();
-            k4a_record_configuration_t record_configuration = m_playbackThreadState.Recording.get_record_configuration();
+            k4a_record_configuration_t record_configuration =
+                m_playbackThreadState.Recording.get_record_configuration();
             k4a_depth_mode_info_t depth_mode_info = record_configuration.depth_mode_info;
             K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
                                                 std::move(calibration),
