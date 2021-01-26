@@ -28,7 +28,8 @@
 
 k4a_capture_t create_test_capture(uint64_t timestamp_us[3],
                                   k4a_image_format_t color_format,
-                                  uint32_t color_mode_id, uint32_t depth_mode_id)
+                                  uint32_t color_mode_id,
+                                  uint32_t depth_mode_id)
 {
     k4a_capture_t capture = NULL;
     k4a_result_t result = k4a_capture_create(&capture);
@@ -84,7 +85,8 @@ bool validate_test_capture(k4a_capture_t capture,
         {
             uint32_t width = 0;
             uint32_t height = 0;
-            EXIT_IF_FALSE(k4a_convert_resolution_to_width_height((k4a_color_resolution_t)color_mode_id, &width, &height));
+            EXIT_IF_FALSE(
+                k4a_convert_resolution_to_width_height((k4a_color_resolution_t)color_mode_id, &width, &height));
 
             uint32_t color_stride = 0;
             if (color_format == K4A_IMAGE_FORMAT_COLOR_NV12)

@@ -282,18 +282,21 @@ std::ostream &operator<<(std::ostream &s, const ViewerOption &val)
 // The UI doesn't quite line up with the struct we actually need to give to the K4A API, so
 // we have to do a bit of conversion.
 //
-k4a_device_configuration_t K4ADeviceConfiguration::ToK4ADeviceConfiguration(k4a::device * device) const
+k4a_device_configuration_t K4ADeviceConfiguration::ToK4ADeviceConfiguration(k4a::device *device) const
 {
     k4a_device_configuration_t deviceConfig;
 
     deviceConfig.color_format = ColorFormat;
 
-    k4a_depth_mode_info_t depth_mode_info = device->get_depth_mode(EnableDepthCamera ? depth_mode_id : 0); // 0 = K4A_DEPTH_MODE_OFF
-    k4a_color_mode_info_t color_mode_info = device->get_color_mode(EnableColorCamera ? color_mode_id : 0); // 0 = K4A_COLOR_RESOLUTION_OFF
+    k4a_depth_mode_info_t depth_mode_info = device->get_depth_mode(EnableDepthCamera ? depth_mode_id :
+                                                                                       0); // 0 = K4A_DEPTH_MODE_OFF
+    k4a_color_mode_info_t color_mode_info = device->get_color_mode(EnableColorCamera ? color_mode_id :
+                                                                                       0); // 0 =
+                                                                                           // K4A_COLOR_RESOLUTION_OFF
     k4a_fps_mode_info_t fps_mode_info = device->get_fps_mode(fps_mode_id);
 
     deviceConfig.color_mode_id = color_mode_info.mode_id;
-    deviceConfig.depth_mode_id = depth_mode_info.mode_id;      
+    deviceConfig.depth_mode_id = depth_mode_info.mode_id;
     deviceConfig.fps_mode_id = fps_mode_info.mode_id;
 
     deviceConfig.depth_delay_off_color_usec = DepthDelayOffColorUsec;

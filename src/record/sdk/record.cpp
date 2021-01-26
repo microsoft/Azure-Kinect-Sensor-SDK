@@ -63,7 +63,9 @@ k4a_result_t k4a_record_create(const char *path,
     uint32_t color_height = 0;
     if (K4A_SUCCEEDED(result) && device_config.color_mode_id != K4A_COLOR_RESOLUTION_OFF)
     {
-        if (!k4a_convert_resolution_to_width_height((k4a_color_resolution_t)device_config.color_mode_id, &color_width, &color_height))
+        if (!k4a_convert_resolution_to_width_height((k4a_color_resolution_t)device_config.color_mode_id,
+                                                    &color_width,
+                                                    &color_height))
         {
             LOG_ERROR("Unsupported color_resolution specified in recording: %d", device_config.color_mode_id);
             result = K4A_RESULT_FAILED;
@@ -151,7 +153,8 @@ k4a_result_t k4a_record_create(const char *path,
     if (K4A_SUCCEEDED(result) && device_config.color_mode_id != K4A_COLOR_RESOLUTION_OFF)
     {
         BITMAPINFOHEADER codec_info = {};
-        result = TRACE_CALL(populate_bitmap_info_header(&codec_info, color_width, color_height, device_config.color_format));
+        result = TRACE_CALL(
+            populate_bitmap_info_header(&codec_info, color_width, color_height, device_config.color_format));
 
         context->color_track = add_track(context,
                                          K4A_TRACK_NAME_COLOR,
@@ -303,11 +306,13 @@ k4a_result_t k4a_record_create(const char *path,
     {
         // Add calibration.json to the recording
         size_t calibration_size = 0;
-        k4a_buffer_result_t buffer_result = TRACE_BUFFER_CALL(k4a_device_get_raw_calibration(device, NULL, &calibration_size));
+        k4a_buffer_result_t buffer_result = TRACE_BUFFER_CALL(
+            k4a_device_get_raw_calibration(device, NULL, &calibration_size));
         if (buffer_result == K4A_BUFFER_RESULT_TOO_SMALL)
         {
             std::vector<uint8_t> calibration_buffer = std::vector<uint8_t>(calibration_size);
-            buffer_result = TRACE_BUFFER_CALL(k4a_device_get_raw_calibration(device, calibration_buffer.data(), &calibration_size));
+            buffer_result = TRACE_BUFFER_CALL(
+                k4a_device_get_raw_calibration(device, calibration_buffer.data(), &calibration_size));
             if (buffer_result == K4A_BUFFER_RESULT_SUCCEEDED)
             {
                 // Remove the null-terminated byte from the file before writing it.
@@ -337,10 +342,9 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    
     // TODO: remove after finished testing
     // k4arecorder -l 10 -c 1080p -d NFOV_2X2BINNED -r 30 "D:\Neal Analytics\Microsoft\Kinect Recordings\output.mkv"
-    
+
     // TODO: comment
     bool hasColorDevice = false;
     bool hasDepthDevice = false;
@@ -420,7 +424,9 @@ k4a_result_t k4a_record_create(const char *path,
 
         k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
 
-        k4a_result_t color_mode_result = k4a_device_get_color_mode(device, device_config.color_mode_id, &color_mode_info);
+        k4a_result_t color_mode_result = k4a_device_get_color_mode(device,
+                                                                   device_config.color_mode_id,
+                                                                   &color_mode_info);
 
         if (K4A_SUCCEEDED(color_mode_result))
         {
@@ -439,7 +445,6 @@ k4a_result_t k4a_record_create(const char *path,
                 }
             }
 
-            
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(color_mode_info_json, "height", color_mode_info.height) == NULL)
@@ -450,7 +455,8 @@ k4a_result_t k4a_record_create(const char *path,
 
             if (K4A_SUCCEEDED(result))
             {
-                if (cJSON_AddNumberToObject(color_mode_info_json, "native_format", color_mode_info.native_format) == NULL)
+                if (cJSON_AddNumberToObject(color_mode_info_json, "native_format", color_mode_info.native_format) ==
+                    NULL)
                 {
                     result = K4A_RESULT_FAILED;
                 }
@@ -458,7 +464,8 @@ k4a_result_t k4a_record_create(const char *path,
 
             if (K4A_SUCCEEDED(result))
             {
-                if (cJSON_AddNumberToObject(color_mode_info_json, "horizontal_fov", color_mode_info.horizontal_fov) == NULL)
+                if (cJSON_AddNumberToObject(color_mode_info_json, "horizontal_fov", color_mode_info.horizontal_fov) ==
+                    NULL)
                 {
                     result = K4A_RESULT_FAILED;
                 }
@@ -517,13 +524,14 @@ k4a_result_t k4a_record_create(const char *path,
 
         k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
 
-        k4a_result_t depth_mode_result = k4a_device_get_depth_mode(device, device_config.depth_mode_id, &depth_mode_info);
+        k4a_result_t depth_mode_result = k4a_device_get_depth_mode(device,
+                                                                   device_config.depth_mode_id,
+                                                                   &depth_mode_info);
         if (K4A_SUCCEEDED(depth_mode_result))
         {
 
             cJSON *depth_mode_info_json = cJSON_CreateObject();
 
-            
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(depth_mode_info_json, "mode_id", depth_mode_info.mode_id) == NULL)
@@ -531,15 +539,16 @@ k4a_result_t k4a_record_create(const char *path,
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
-                if (cJSON_AddBoolToObject(depth_mode_info_json, "passive_ir_only", depth_mode_info.passive_ir_only) == NULL)
+                if (cJSON_AddBoolToObject(depth_mode_info_json, "passive_ir_only", depth_mode_info.passive_ir_only) ==
+                    NULL)
                 {
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(depth_mode_info_json, "width", depth_mode_info.width) == NULL)
@@ -547,7 +556,7 @@ k4a_result_t k4a_record_create(const char *path,
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(depth_mode_info_json, "height", depth_mode_info.height) == NULL)
@@ -555,23 +564,25 @@ k4a_result_t k4a_record_create(const char *path,
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
-                if (cJSON_AddNumberToObject(depth_mode_info_json, "native_format", depth_mode_info.native_format) == NULL)
+                if (cJSON_AddNumberToObject(depth_mode_info_json, "native_format", depth_mode_info.native_format) ==
+                    NULL)
                 {
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
-                if (cJSON_AddNumberToObject(depth_mode_info_json, "horizontal_fov", depth_mode_info.horizontal_fov) == NULL)
+                if (cJSON_AddNumberToObject(depth_mode_info_json, "horizontal_fov", depth_mode_info.horizontal_fov) ==
+                    NULL)
                 {
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(depth_mode_info_json, "vertical_fov", depth_mode_info.vertical_fov) == NULL)
@@ -579,7 +590,7 @@ k4a_result_t k4a_record_create(const char *path,
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(depth_mode_info_json, "min_fps", depth_mode_info.min_fps) == NULL)
@@ -587,7 +598,7 @@ k4a_result_t k4a_record_create(const char *path,
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(depth_mode_info_json, "max_fps", depth_mode_info.max_fps) == NULL)
@@ -595,7 +606,7 @@ k4a_result_t k4a_record_create(const char *path,
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(depth_mode_info_json, "min_range", depth_mode_info.min_range) == NULL)
@@ -611,7 +622,7 @@ k4a_result_t k4a_record_create(const char *path,
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
                 depth_mode_info_str = cJSON_Print(depth_mode_info_json);
@@ -654,7 +665,7 @@ k4a_result_t k4a_record_create(const char *path,
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(fps_mode_info_json, "fps", fps_mode_info.fps) == NULL)
@@ -662,7 +673,7 @@ k4a_result_t k4a_record_create(const char *path,
                     result = K4A_RESULT_FAILED;
                 }
             }
-            
+
             if (K4A_SUCCEEDED(result))
             {
                 fps_mode_info_str = cJSON_Print(fps_mode_info_json);

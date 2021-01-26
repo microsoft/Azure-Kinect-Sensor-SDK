@@ -106,8 +106,7 @@ int main()
                 //
                 ColorizeDepthImage(depthImage,
                                    K4ADepthPixelColorizer::ColorizeBlueToRed,
-                                   { (uint16_t)depth_mode_info.min_range,
-                                     (uint16_t)depth_mode_info.max_range },
+                                   { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range },
                                    &depthTextureBuffer);
                 depthTexture.Update(&depthTextureBuffer[0]);
 

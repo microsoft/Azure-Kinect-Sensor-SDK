@@ -109,7 +109,10 @@ TEST_F(k4a_cpp_ft, k4a)
         k4a_color_mode_info_t color_mode_info2 = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
         k4a_device_get_color_mode(kinect.handle(), 2, &color_mode_info2); // K4A_COLOR_RESOLUTION_1080P
 
-        cal = calibration::get_from_raw(raw_cal.data(), raw_cal.size(), depth_mode_info.mode_id, color_mode_info2.mode_id);
+        cal = calibration::get_from_raw(raw_cal.data(),
+                                        raw_cal.size(),
+                                        depth_mode_info.mode_id,
+                                        color_mode_info2.mode_id);
         ASSERT_EQ(cal.color_mode_id, (uint32_t)2);
     }
 
