@@ -49,7 +49,8 @@ public:
     }
 
 protected:
-    explicit K4AColorImageConverterBase(k4a_color_mode_info_t color_mode_info) : m_dimensions(GetColorDimensions(color_mode_info))
+    explicit K4AColorImageConverterBase(k4a_color_mode_info_t color_mode_info) :
+        m_dimensions(GetColorDimensions(color_mode_info))
     {
         m_expectedBufferSize = sizeof(BgraPixel) * static_cast<size_t>(m_dimensions.Width * m_dimensions.Height);
     }
@@ -219,7 +220,11 @@ public:
         return ImageConversionResult::Success;
     }
 
-    K4AMJPGImageConverter(k4a_color_mode_info_t color_mode_info) :  K4AColorImageConverterBase(color_mode_info),  m_decompressor(tjInitDecompress()) {}
+    K4AMJPGImageConverter(k4a_color_mode_info_t color_mode_info) :
+        K4AColorImageConverterBase(color_mode_info),
+        m_decompressor(tjInitDecompress())
+    {
+    }
 
     ~K4AMJPGImageConverter() override
     {

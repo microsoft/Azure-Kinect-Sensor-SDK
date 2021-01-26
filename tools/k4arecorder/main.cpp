@@ -377,8 +377,11 @@ int main(int argc, char **argv)
         cmd_parser.PrintOptions();
         return 0;
     }
-   
-    if (recording_rate == 2 && (recording_depth_mode == 4 || recording_color_resolution == 6)) // 2 = K4A_FRAMES_PER_SECOND_30, 4 = K4A_DEPTH_MODE_WFOV_UNBINNED, 6 = K4A_COLOR_RESOLUTION_3072P
+
+    if (recording_rate == 2 &&
+        (recording_depth_mode == 4 || recording_color_resolution == 6)) // 2 = K4A_FRAMES_PER_SECOND_30, 4 =
+                                                                        // K4A_DEPTH_MODE_WFOV_UNBINNED, 6 =
+                                                                        // K4A_COLOR_RESOLUTION_3072P
     {
         if (!recording_rate_set)
         {

@@ -596,8 +596,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->color_mode_id < K4A_COLOR_RESOLUTION_OFF ||
-            config->color_mode_id > K4A_COLOR_RESOLUTION_3072P)
+        if (config->color_mode_id < K4A_COLOR_RESOLUTION_OFF || config->color_mode_id > K4A_COLOR_RESOLUTION_3072P)
         {
             result = K4A_RESULT_FAILED;
             LOG_ERROR("The configured color_resolution is not a valid k4a_color_resolution_t value.", 0);
@@ -606,8 +605,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->depth_mode_id < K4A_DEPTH_MODE_OFF ||
-            config->depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR)
+        if (config->depth_mode_id < K4A_DEPTH_MODE_OFF || config->depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR)
         {
             result = K4A_RESULT_FAILED;
             LOG_ERROR("The configured depth_mode is not a valid k4a_depth_mode_t value.", 0);
@@ -616,8 +614,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->fps_mode_id != K4A_FRAMES_PER_SECOND_5 &&
-            config->fps_mode_id != K4A_FRAMES_PER_SECOND_15 &&
+        if (config->fps_mode_id != K4A_FRAMES_PER_SECOND_5 && config->fps_mode_id != K4A_FRAMES_PER_SECOND_15 &&
             config->fps_mode_id != K4A_FRAMES_PER_SECOND_30)
         {
             result = K4A_RESULT_FAILED;
@@ -1290,8 +1287,6 @@ k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transformation_t 
                                                                 &xyz_image_descriptor));
 }
 
-
-
 // TODO: comment
 
 struct _device_color_modes
@@ -1336,7 +1331,8 @@ struct _device_fps_modes
     int fps;
 } device_fps_modes[] = { { 5 }, { 15 }, { 30 } };
 
-k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t* device_info) {
+k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info)
+{
     if (!device_info)
     {
         return K4A_RESULT_FAILED;
@@ -1349,13 +1345,11 @@ k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t* 
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4a_device_info_t info = {
-        sizeof(k4a_device_info_t),
-        K4A_ABI_VERSION,
-        K4A_MSFT_VID,
-        K4A_DEPTH_PID,
-        ​​​​​​K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU
-    };
+    k4a_device_info_t info = { sizeof(k4a_device_info_t),
+                               K4A_ABI_VERSION,
+                               K4A_MSFT_VID,
+                               K4A_DEPTH_PID,
+                               ​​​​​​K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU };
 
     SAFE_COPY_STRUCT(device_info, &info);
 

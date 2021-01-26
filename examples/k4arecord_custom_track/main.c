@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     k4a_device_get_fps_mode(device, 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
 
     k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-    device_config.depth_mode_id = depth_mode_info.mode_id; 
+    device_config.depth_mode_id = depth_mode_info.mode_id;
     device_config.fps_mode_id = fps_mode_info.mode_id;
 
     VERIFY(k4a_device_start_cameras(device, &device_config));

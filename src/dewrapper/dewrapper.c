@@ -127,8 +127,10 @@ static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
                                               int *depth_engine_max_compute_time_ms,
                                               size_t *depth_engine_output_buffer_size)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, fps_mode_id < K4A_FRAMES_PER_SECOND_5 || fps_mode_id > K4A_FRAMES_PER_SECOND_30);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, depth_mode_id <= K4A_DEPTH_MODE_OFF || depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
+                        fps_mode_id < K4A_FRAMES_PER_SECOND_5 || fps_mode_id > K4A_FRAMES_PER_SECOND_30);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
+                        depth_mode_id <= K4A_DEPTH_MODE_OFF || depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     assert(dewrapper->depth_engine == NULL);
@@ -587,7 +589,7 @@ void dewrapper_stop(dewrapper_t dewrapper_handle)
         (void)K4A_RESULT_FROM_BOOL(tresult == THREADAPI_OK); // Trace the issue, but we don't return a failure
 
         // TODO: watch out for whatever was supposed to happen by having set fps = -1
-        dewrapper->fps_mode_id = 2; // 
+        dewrapper->fps_mode_id = 2;   //
         dewrapper->depth_mode_id = 0; // K4A_DEPTH_MODE_OFF
     }
 

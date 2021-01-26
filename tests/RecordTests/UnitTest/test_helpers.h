@@ -33,7 +33,8 @@ static const size_t test_frame_count = 100;
 
 k4a_capture_t create_test_capture(uint64_t timestamp_us[3],
                                   k4a_image_format_t color_format,
-                                  uint32_t color_mode_id, uint32_t depth_mode_id);
+                                  uint32_t color_mode_id,
+                                  uint32_t depth_mode_id);
 bool validate_test_capture(k4a_capture_t capture,
                            uint64_t timestamp_us[3],
                            k4a_image_format_t color_format,

@@ -48,7 +48,8 @@ private:
     std::shared_ptr<K4AViewerImage> m_texture;
     std::shared_ptr<K4ANonBufferingCaptureSource> m_captureSource;
 
-    K4APointCloudVisualizer::ColorizationStrategy m_colorizationStrategy = K4APointCloudVisualizer::ColorizationStrategy::Shaded;
+    K4APointCloudVisualizer::ColorizationStrategy m_colorizationStrategy =
+        K4APointCloudVisualizer::ColorizationStrategy::Shaded;
     int m_pointSize;
 
     bool m_enableColorPointCloud = false;

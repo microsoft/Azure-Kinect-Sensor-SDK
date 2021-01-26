@@ -52,16 +52,9 @@ protected:
                                                   30,
                                                   250,
                                                   3000 }; // K4A_DEPTH_MODE_WFOV_2X2BINNED
-        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), 
-                                                  K4A_ABI_VERSION, 
-                                                  5,     
-                                                  3840, 
-                                                  2160,
-                                                  K4A_IMAGE_FORMAT_COLOR_MJPG,   
-                                                  90.0f,           
-                                                  59.0f, 
-                                                  5,    
-                                                  30 }; // K4A_COLOR_RESOLUTION_2160P
+        k4a_color_mode_info_t color_mode_info =
+            { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 5,     3840, 2160,
+              K4A_IMAGE_FORMAT_COLOR_MJPG,   90.0f,           59.0f, 5,    30 }; // K4A_COLOR_RESOLUTION_2160P
 
         k4a_result_t result = k4a_calibration_get_from_raw(g_test_json,
                                                            sizeof(g_test_json),
@@ -581,30 +574,113 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
 
     for (int i = 0; i < 5; i++)
     {
-        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0, false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 };
-        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 };
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t),
+                                                  K4A_ABI_VERSION,
+                                                  0,
+                                                  false,
+                                                  0,
+                                                  0,
+                                                  K4A_IMAGE_FORMAT_DEPTH16,
+                                                  0.0f,
+                                                  0.0f,
+                                                  0,
+                                                  0,
+                                                  0,
+                                                  0 };
+        k4a_color_mode_info_t color_mode_info =
+            { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 };
 
         switch (i)
         {
         case 0:
-            depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 2, false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 }; // K4A_DEPTH_MODE_NFOV_UNBINNED
-            color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 }; // K4A_COLOR_RESOLUTION_OFF
+            depth_mode_info = { sizeof(k4a_depth_mode_info_t),
+                                K4A_ABI_VERSION,
+                                2,
+                                false,
+                                640,
+                                576,
+                                K4A_IMAGE_FORMAT_DEPTH16,
+                                75.0f,
+                                65.0f,
+                                5,
+                                30,
+                                500,
+                                4000 }; // K4A_DEPTH_MODE_NFOV_UNBINNED
+            color_mode_info = {
+                sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0
+            }; // K4A_COLOR_RESOLUTION_OFF
             break;
         case 1:
-            depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0, false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 }; // K4A_DEPTH_MODE_OFF
-            color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 1, 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30  }; // K4A_COLOR_RESOLUTION_720P
+            depth_mode_info = { sizeof(k4a_depth_mode_info_t),
+                                K4A_ABI_VERSION,
+                                0,
+                                false,
+                                0,
+                                0,
+                                K4A_IMAGE_FORMAT_DEPTH16,
+                                0.0f,
+                                0.0f,
+                                0,
+                                0,
+                                0,
+                                0 }; // K4A_DEPTH_MODE_OFF
+            color_mode_info =
+                { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 1,     1280, 720,
+                  K4A_IMAGE_FORMAT_COLOR_MJPG,   90.0f,           59.0f, 5,    30 }; // K4A_COLOR_RESOLUTION_720P
             break;
         case 2:
-            depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 1, false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800 }; // K4A_DEPTH_MODE_NFOV_2X2BINNED
-            color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 1, 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30  }; // K4A_COLOR_RESOLUTION_720P
+            depth_mode_info = { sizeof(k4a_depth_mode_info_t),
+                                K4A_ABI_VERSION,
+                                1,
+                                false,
+                                320,
+                                288,
+                                K4A_IMAGE_FORMAT_DEPTH16,
+                                75.0f,
+                                65.0f,
+                                5,
+                                30,
+                                500,
+                                5800 }; // K4A_DEPTH_MODE_NFOV_2X2BINNED
+            color_mode_info =
+                { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 1,     1280, 720,
+                  K4A_IMAGE_FORMAT_COLOR_MJPG,   90.0f,           59.0f, 5,    30 }; // K4A_COLOR_RESOLUTION_720P
             break;
         case 3:
-            depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 2, false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 }; // K4A_DEPTH_MODE_NFOV_UNBINNED
-            color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 5, 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 }; // K4A_COLOR_RESOLUTION_2160P
+            depth_mode_info = { sizeof(k4a_depth_mode_info_t),
+                                K4A_ABI_VERSION,
+                                2,
+                                false,
+                                640,
+                                576,
+                                K4A_IMAGE_FORMAT_DEPTH16,
+                                75.0f,
+                                65.0f,
+                                5,
+                                30,
+                                500,
+                                4000 }; // K4A_DEPTH_MODE_NFOV_UNBINNED
+            color_mode_info =
+                { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 5,     3840, 2160,
+                  K4A_IMAGE_FORMAT_COLOR_MJPG,   90.0f,           59.0f, 5,    30 }; // K4A_COLOR_RESOLUTION_2160P
             break;
         default:
-            depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 2, false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 }; // K4A_DEPTH_MODE_NFOV_UNBINNED
-            color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 1, 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30  }; // K4A_COLOR_RESOLUTION_720P
+            depth_mode_info = { sizeof(k4a_depth_mode_info_t),
+                                K4A_ABI_VERSION,
+                                2,
+                                false,
+                                640,
+                                576,
+                                K4A_IMAGE_FORMAT_DEPTH16,
+                                75.0f,
+                                65.0f,
+                                5,
+                                30,
+                                500,
+                                4000 }; // K4A_DEPTH_MODE_NFOV_UNBINNED
+            color_mode_info =
+                { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 1,     1280, 720,
+                  K4A_IMAGE_FORMAT_COLOR_MJPG,   90.0f,           59.0f, 5,    30 }; // K4A_COLOR_RESOLUTION_720P
         }
 
         k4a_calibration_t calibration;
