@@ -671,8 +671,11 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 if (cJSON_IsNumber(device_info_json_capabilities) && device_info_json_capabilities->valuedouble != NULL)
                 {
                     uint32_t capabilities = (uint32_t)device_info_json_capabilities->valuedouble;
-                    hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
-                    hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
+                    //hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
+                    //hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
+
+                    hasDepthDevice = (capabilities & 0x0001) == 1;
+                    hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
 
                     device_info.capabilities = capabilities;
                 }
@@ -713,11 +716,11 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         }
     }
 
-    if (!K4A_SUCCEEDED(device_info_result))
+    if (!K4A_SUCCEEDED(device_info_result) || device_info_tag == NULL)
     {
         device_info.device_id = K4A_DEPTH_PID;
         device_info.vendor_id = K4A_MSFT_VID;
-        device_info.capabilities = ​​​​​​K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU;
+        device_info.capabilities = K4A_CAPABILITY_IMU | K4A_CAPABILITY_COLOR | ​​​​​​K4A_CAPABILITY_DEPTH;
     }
 
     context->record_config.device_info = device_info;
