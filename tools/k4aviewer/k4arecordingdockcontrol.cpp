@@ -156,9 +156,13 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
     bool hasDepthDevice = false;
     bool hasIMUDevice = false;
     uint32_t capabilities = (uint32_t)m_recordConfiguration.device_info.capabilities;
-    hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
-    hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
-    hasIMUDevice = capabilities == 4 || capabilities == 5 || capabilities == 6 || capabilities == 7;
+    //hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
+    //hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
+    //hasIMUDevice = capabilities == 4 || capabilities == 5 || capabilities == 6 || capabilities == 7;
+
+    hasDepthDevice = (capabilities & 0x0001) == 1;
+    hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+    hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;
 
     ImGui::TextUnformatted(m_filenameLabel.c_str());
     ImGui::SameLine();
@@ -194,8 +198,8 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
 
     ImGui::TextUnformatted("Sync settings");
 
-    // TODO: conditionally show Depth/color based on bools above
-    ImGui::Text("Depth/color delay (us): %d", m_depthDelayOffColorUsec);
+    std::string delay_description = hasColorDevice && hasDepthDevice ? "Depth/color" : hasDepthDevice ? "Depth" : "Color";
+    ImGui::Text("%s delay (us): %d", delay_description.c_str(), m_depthDelayOffColorUsec);
     
     ImGui::Text("Sync mode:              %s", m_wiredSyncModeLabel.c_str());
     ImGui::Text("Subordinate delay (us): %d", m_subordinateDelayOffMasterUsec);
