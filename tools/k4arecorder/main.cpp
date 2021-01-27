@@ -16,6 +16,7 @@
 #include <ctime>
 #include <csignal>
 #include <math.h>
+#include <k4ainternal\math.h>
 
 static time_t exiting_timestamp;
 
@@ -66,7 +67,8 @@ static int string_compare(const char *s1, const char *s2)
     {
         for (uint8_t i = 0; i < device_count; i++)
         {
-            std::cout << "Index:" << (int)i;
+            std::cout << std::endl;
+            std::cout << "Index: " << (int)i << std::endl << std::endl;
             k4a_device_t device;
             if (K4A_SUCCEEDED(k4a_device_open(i, &device)))
             {
@@ -75,21 +77,167 @@ static int string_compare(const char *s1, const char *s2)
                 if (k4a_device_get_serialnum(device, serial_number_buffer, &serial_number_buffer_size) ==
                     K4A_BUFFER_RESULT_SUCCEEDED)
                 {
-                    std::cout << "\tSerial:" << serial_number_buffer;
+                    std::cout << "\tSerial: " << serial_number_buffer << std::endl << std::endl;
                 }
                 else
                 {
-                    std::cout << "\tSerial:ERROR";
+                    std::cout << "\tSerial: ERROR" << std::endl << std::endl;
                 }
 
-                k4a_hardware_version_t version_info;
-                if (K4A_SUCCEEDED(k4a_device_get_version(device, &version_info)))
+                // device info
+                k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, { 0 } };
+                if (k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
                 {
-                    std::cout << "\tColor:" << version_info.rgb.major << "." << version_info.rgb.minor << "."
-                              << version_info.rgb.iteration;
-                    std::cout << "\tDepth:" << version_info.depth.major << "." << version_info.depth.minor << "."
-                              << version_info.depth.iteration;
+                    bool hasColorDevice = false;
+                    bool hasDepthDevice = false;
+                    bool hasIMUDevice = false;
+                    uint32_t capabilities = (uint32_t)device_info.capabilities;
+
+                    hasDepthDevice = (capabilities & 0x0001) == 1;
+                    hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+                    hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;
+
+                    k4a_hardware_version_t version_info;
+                    if (K4A_SUCCEEDED(k4a_device_get_version(device, &version_info)))
+                    {
+                        if (hasColorDevice)
+                        {
+                            std::cout << "\tColor: Supported (" << version_info.rgb.major << "." << version_info.rgb.minor << "."
+                                      << version_info.rgb.iteration << ")" << std::endl;
+                        }
+                        else
+                        {
+                            std::cout << "\tColor: Unsupported";
+                        }
+                        if (hasDepthDevice)
+                        {
+                            std::cout << "\tDepth: Supported (" << version_info.depth.major << "." << version_info.depth.minor
+                                      << "." << version_info.depth.iteration << ")" << std::endl;
+                        }
+                        else
+                        {
+                            std::cout << "\tDepth: Unsupported";
+                        }
+                        if (hasIMUDevice)
+                        {
+                            std::cout << "\tIMU: Supported";
+                        }
+                        else
+                        {
+                            std::cout << "\tIMU: Unsupported";
+                        }
+
+                        std::cout << std::endl;
+
+                        if (hasColorDevice)
+                        {
+                            int color_mode_count = 0;
+                            k4a_device_get_color_mode_count(device, &color_mode_count);
+                            if (color_mode_count > 0)
+                            {
+                                std::cout << std::endl;
+                                std::cout << "\tColor modes: \tid = description" << std::endl;
+                                std::cout << "\t\t\t----------------" << std::endl;
+                                for (int j = 0; j < color_mode_count; j++)
+                                {
+                                    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t),
+                                                                              K4A_ABI_VERSION,
+                                                                              { 0 } };
+                                    if (k4a_device_get_color_mode(device, j, &color_mode_info) == K4A_RESULT_SUCCEEDED)
+                                    {
+                                        std::cout << "\t\t\t" << j << " = ";
+                                        if (j == 0)
+                                        {
+                                            std::cout << "OFF" << std::endl;
+                                        }
+                                        else
+                                        {
+                                            int width = color_mode_info.width;
+                                            int height = color_mode_info.height;
+                                            int common_factor = math_get_common_factor(width, height);
+                                            if (height < 1000)
+                                            {
+                                                std::cout << " ";
+                                            }
+                                            std::cout << height << "p ";
+                                            std::cout << width / common_factor << ":";
+                                            std::cout << height / common_factor << std::endl;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (hasDepthDevice)
+                        {
+                            int depth_mode_count = 0;
+                            k4a_device_get_depth_mode_count(device, &depth_mode_count);
+                            if (depth_mode_count > 0)
+                            {
+                                std::cout << std::endl;
+                                std::cout << "\tDepth modes: \tid = description" << std::endl;
+                                std::cout << "\t\t\t----------------" << std::endl;
+                                for (int j = 0; j < depth_mode_count; j++)
+                                {
+                                    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t),
+                                                                              K4A_ABI_VERSION,
+                                                                              { 0 } };
+                                    if (k4a_device_get_depth_mode(device, j, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
+                                    {
+                                        std::cout << "\t\t\t" << j << " = ";
+                                        if (j == 0)
+                                        {
+                                            std::cout << "OFF" << std::endl;
+                                        }
+                                        else
+                                        {
+                                            int width = depth_mode_info.width;
+                                            int height = depth_mode_info.height;
+                                            float fov = depth_mode_info.horizontal_fov;
+                                            if (depth_mode_info.passive_ir_only)
+                                            {
+                                                std::cout << "Passive IR" << std::endl;
+                                            }
+                                            else
+                                            {
+                                                if (height < 1000)
+                                                {
+                                                    std::cout << " ";
+                                                }
+                                                std::cout << width << "x";
+                                                std::cout << height << ", ";
+                                                std::cout << fov << "Deg" << std::endl;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (hasColorDevice || hasDepthDevice)
+                        {
+                            int fps_mode_count = 0;
+                            k4a_device_get_fps_mode_count(device, &fps_mode_count);
+                            if (fps_mode_count > 0)
+                            {
+                                std::cout << std::endl;
+                                std::cout << "\tFPS modes: \tid = description" << std::endl;
+                                std::cout << "\t\t\t----------------" << std::endl;
+                                for (int j = 0; j < fps_mode_count; j++)
+                                {
+                                    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t),
+                                                                          K4A_ABI_VERSION,
+                                                                          { 0 } };
+                                    if (k4a_device_get_fps_mode(device, j, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
+                                    {
+                                        std::cout << "\t\t\t" << j << " = " << fps_mode_info.fps << std::endl;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+
                 k4a_device_close(device);
             }
             else
@@ -171,9 +319,8 @@ static bool validate_depth_mode(int device_id, int depth_mode_id)
 
     return false;
 }
-
 // TODO: comment
-static bool validate_fps(int device_id, int fps)
+static bool find_fps_mode_id(int device_id, int fps, uint32_t * fps_mode_id)
 {
     uint32_t device_count = k4a_device_get_installed_count();
     if (device_count > 0)
@@ -192,9 +339,43 @@ static bool validate_fps(int device_id, int fps)
                     {
                         if (fps_mode_info.fps == fps)
                         {
+                            *fps_mode_id = j;
                             return true;
                         }
                     }
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Unkown device specified." << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "No devices connected or unkown device specified." << std::endl;
+    }
+
+    return false;
+}
+
+// TODO: comment
+static bool validate_fps(int device_id, int fps_mode_id)
+{
+    uint32_t device_count = k4a_device_get_installed_count();
+    if (device_count > 0)
+    {
+        k4a_device_t device;
+        if (K4A_SUCCEEDED(k4a_device_open(device_id, &device)))
+        {
+            int mode_count = 0;
+            k4a_device_get_fps_mode_count(device, &mode_count);
+            if (mode_count > 0)
+            {
+                k4a_fps_mode_info_t fps_mode_info;
+                if (k4a_device_get_fps_mode(device, fps_mode_id, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
+                {
+                    return true;
                 }
             }
         }
@@ -480,7 +661,7 @@ int main(int argc, char **argv)
     }
 
 
-
+    // TODO: validate options for azure kinect
     if (validate_color_mode(device_index, recording_color_mode)) 
     {
     }
@@ -502,8 +683,14 @@ int main(int argc, char **argv)
     {
     }
 
-    if (validate_fps(device_index, recording_frame_rate))
+    if (find_fps_mode_id(device_index, recording_frame_rate, &recording_fps_mode))
     {
+    
+    }
+
+    if (validate_fps(device_index, recording_fps_mode))
+    {
+
     }
     else
     {
