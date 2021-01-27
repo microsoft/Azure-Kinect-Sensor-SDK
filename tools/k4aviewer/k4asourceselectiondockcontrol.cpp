@@ -18,12 +18,15 @@
 // Project headers
 //
 #include "filesystem17.h"
-#include "k4aaudiomanager.h"
 #include "k4aimguiextensions.h"
 #include "k4aviewererrormanager.h"
 #include "k4arecordingdockcontrol.h"
 #include "k4aviewerutil.h"
 #include "k4awindowmanager.h"
+
+#ifdef K4A_INCLUDE_AUDIO
+#include "k4aaudiomanager.h"
+#endif
 
 using namespace k4aviewer;
 
@@ -110,6 +113,7 @@ void K4ASourceSelectionDockControl::RefreshDevices()
         SelectedDevice = m_connectedDevices[0].first;
     }
 
+#ifdef K4A_INCLUDE_AUDIO
     const int audioRefreshStatus = K4AAudioManager::Instance().RefreshDevices();
     if (audioRefreshStatus != SoundIoErrorNone)
     {
@@ -119,6 +123,8 @@ void K4ASourceSelectionDockControl::RefreshDevices()
 
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
     }
+#endif
+
 }
 
 void K4ASourceSelectionDockControl::OpenDevice()
