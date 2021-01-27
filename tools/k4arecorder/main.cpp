@@ -106,17 +106,160 @@ static int string_compare(const char *s1, const char *s2)
     exit(0);
 }
 
-// TODO: update recorder to generic modes
+// TODO: comment
+static bool validate_color_mode(int device_id, int color_mode_id)
+{
+    uint32_t device_count = k4a_device_get_installed_count();
+    if (device_count > 0)
+    {
+        k4a_device_t device;
+        if (K4A_SUCCEEDED(k4a_device_open(device_id, &device)))
+        {
+            int mode_count = 0;
+            k4a_device_get_color_mode_count(device, &mode_count);
+            if (mode_count > 0)
+            {
+                k4a_color_mode_info_t color_mode_info;
+                if (k4a_device_get_color_mode(device, color_mode_id, &color_mode_info) == K4A_RESULT_SUCCEEDED)
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Unkown device specified." << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "No devices connected or unkown device specified." << std::endl;
+    }
+
+    return false;
+}
+
+// TODO: comment
+static bool validate_depth_mode(int device_id, int depth_mode_id)
+{
+    uint32_t device_count = k4a_device_get_installed_count();
+    if (device_count > 0)
+    {
+        k4a_device_t device;
+        if (K4A_SUCCEEDED(k4a_device_open(device_id, &device)))
+        {
+            int mode_count = 0;
+            k4a_device_get_depth_mode_count(device, &mode_count);
+            if (mode_count > 0)
+            {
+                k4a_depth_mode_info_t depth_mode_info;
+                if (k4a_device_get_depth_mode(device, depth_mode_id, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Unkown device specified." << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "No devices connected or unkown device specified." << std::endl;
+    }
+
+    return false;
+}
+
+// TODO: comment
+static bool validate_fps(int device_id, int fps)
+{
+    uint32_t device_count = k4a_device_get_installed_count();
+    if (device_count > 0)
+    {
+        k4a_device_t device;
+        if (K4A_SUCCEEDED(k4a_device_open(device_id, &device)))
+        {
+            int mode_count = 0;
+            k4a_device_get_fps_mode_count(device, &mode_count);
+            if (mode_count > 0)
+            {
+                for (uint8_t j = 0; j < mode_count; j++)
+                {
+                    k4a_fps_mode_info_t fps_mode_info;
+                    if (k4a_device_get_fps_mode(device, j, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
+                    {
+                        if (fps_mode_info.fps == fps)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Unkown device specified." << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "No devices connected or unkown device specified." << std::endl;
+    }
+
+    return false;
+}
+
+// TODO: comment
+static bool validate_image_format(int device_id, int color_mode_id, k4a_image_format_t image_format)
+{
+    uint32_t device_count = k4a_device_get_installed_count();
+    if (device_count > 0)
+    {
+        k4a_device_t device;
+        if (K4A_SUCCEEDED(k4a_device_open(device_id, &device)))
+        {
+            int mode_count = 0;
+            k4a_device_get_color_mode_count(device, &mode_count);
+            if (mode_count > 0)
+            {
+                k4a_color_mode_info_t color_mode_info;
+                if (k4a_device_get_color_mode(device, color_mode_id, &color_mode_info) == K4A_RESULT_SUCCEEDED)
+                {
+                    if (image_format == K4A_IMAGE_FORMAT_COLOR_MJPG ||
+                        (image_format == K4A_IMAGE_FORMAT_COLOR_NV12 && color_mode_info.height == 720) ||
+                        (image_format == K4A_IMAGE_FORMAT_COLOR_YUY2 && color_mode_info.height == 720))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Unkown device specified." << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "No devices connected or unkown device specified." << std::endl;
+    }
+
+    return false;
+}
+
 
 int main(int argc, char **argv)
 {
     int device_index = 0;
     int recording_length = -1;
     k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    uint32_t recording_color_resolution = 2; // 2 = K4A_COLOR_RESOLUTION_1080P
-    uint32_t recording_depth_mode = 2;       // 2 = K4A_DEPTH_MODE_NFOV_UNBINNED
-    uint32_t recording_rate = 2;             // 2 = K4A_FRAMES_PER_SECOND_30
-    bool recording_rate_set = false;
+    uint32_t recording_color_mode = 2; // 2 = K4A_COLOR_RESOLUTION_1080P
+    uint32_t recording_depth_mode = 2; // 2 = K4A_DEPTH_MODE_NFOV_UNBINNED
+    uint32_t recording_fps_mode = 2;   // 2 = K4A_FRAMES_PER_SECOND_30
+    int recording_frame_rate = 30;
+    bool recording_frame_rate_set = false;
     bool recording_imu_enabled = true;
     k4a_wired_sync_mode_t wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
     int32_t depth_delay_off_color_usec = 0;
@@ -131,7 +274,7 @@ int main(int argc, char **argv)
         cmd_parser.PrintOptions();
         exit(0);
     });
-    cmd_parser.RegisterOption("--list", "List the currently connected K4A devices", list_devices);
+    cmd_parser.RegisterOption("--list", "List the currently connected devices (includes color, depth and fps modes)", list_devices);
     cmd_parser.RegisterOption("--device",
                               "Specify the device index to use (default: 0)",
                               1,
@@ -149,91 +292,56 @@ int main(int argc, char **argv)
                                       throw std::runtime_error("Recording length must be positive");
                               });
     cmd_parser.RegisterOption("-c|--color-mode",
-                              "Set the color sensor mode (default: 1080p), Available options:\n"
-                              "3072p, 2160p, 1536p, 1440p, 1080p, 720p, 720p_NV12, 720p_YUY2, OFF",
+                              "Set the color sensor mode (default: 0 for OFF), Use --list to see the available modes.",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  if (string_compare(args[0], "3072p") == 0)
+                                  int color_mode = std::stoi(args[0]);
+                                  if (color_mode < 0)
                                   {
-                                      recording_color_resolution = 6; // 6 = K4A_COLOR_RESOLUTION_3072P
-                                  }
-                                  else if (string_compare(args[0], "2160p") == 0)
-                                  {
-                                      recording_color_resolution = 5; // 5 = K4A_COLOR_RESOLUTION_2160P
-                                  }
-                                  else if (string_compare(args[0], "1536p") == 0)
-                                  {
-                                      recording_color_resolution = 4; // 4 = K4A_COLOR_RESOLUTION_1536P
-                                  }
-                                  else if (string_compare(args[0], "1440p") == 0)
-                                  {
-                                      recording_color_resolution = 3; // 3 = K4A_COLOR_RESOLUTION_1440P
-                                  }
-                                  else if (string_compare(args[0], "1080p") == 0)
-                                  {
-                                      recording_color_resolution = 2; // 2 = K4A_COLOR_RESOLUTION_1080P
-                                  }
-                                  else if (string_compare(args[0], "720p") == 0)
-                                  {
-                                      recording_color_resolution = 1; // 1 = K4A_COLOR_RESOLUTION_720P
-                                  }
-                                  else if (string_compare(args[0], "720p_NV12") == 0)
-                                  {
-                                      recording_color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-                                      recording_color_resolution = 1; // 1 = K4A_COLOR_RESOLUTION_720P
-                                  }
-                                  else if (string_compare(args[0], "720p_YUY2") == 0)
-                                  {
-                                      recording_color_format = K4A_IMAGE_FORMAT_COLOR_YUY2;
-                                      recording_color_resolution = 1; // 1 = K4A_COLOR_RESOLUTION_720P
-                                  }
-                                  else if (string_compare(args[0], "off") == 0)
-                                  {
-                                      recording_color_resolution = 0; // 0 = K4A_COLOR_RESOLUTION_OFF
-                                  }
-                                  else
-                                  {
-                                      recording_color_resolution = 0; // 0 = K4A_COLOR_RESOLUTION_OFF
-
                                       std::ostringstream str;
                                       str << "Unknown color mode specified: " << args[0];
                                       throw std::runtime_error(str.str());
                                   }
+                                  else
+                                  {
+                                      recording_color_mode = color_mode;
+                                  }
                               });
-    cmd_parser.RegisterOption("-d|--depth-mode",
-                              "Set the depth sensor mode (default: NFOV_UNBINNED), Available options:\n"
-                              "NFOV_2X2BINNED, NFOV_UNBINNED, WFOV_2X2BINNED, WFOV_UNBINNED, PASSIVE_IR, OFF",
+    cmd_parser.RegisterOption("-i|--image-format",
+                              "Set the image format (default: MJPG), Available options:\n"
+                              "MJPG, NV12, YUY2\n"
+                              "Note that for NV12 and YUY2, the color resolution must not be greater than 720p.",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  if (string_compare(args[0], "NFOV_2X2BINNED") == 0)
+                                  if (string_compare(args[0], "NV12") == 0)
                                   {
-                                      recording_depth_mode = 1; // 1 = K4A_DEPTH_MODE_NFOV_2X2BINNED
+                                      recording_color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
                                   }
-                                  else if (string_compare(args[0], "NFOV_UNBINNED") == 0)
+                                  else if (string_compare(args[0], "YUY2") == 0)
                                   {
-                                      recording_depth_mode = 2; // 2 = K4A_DEPTH_MODE_NFOV_UNBINNED
-                                  }
-                                  else if (string_compare(args[0], "WFOV_2X2BINNED") == 0)
-                                  {
-                                      recording_depth_mode = 3; // 3 = K4A_DEPTH_MODE_WFOV_2X2BINNED
-                                  }
-                                  else if (string_compare(args[0], "WFOV_UNBINNED") == 0)
-                                  {
-                                      recording_depth_mode = 4; // 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
-                                  }
-                                  else if (string_compare(args[0], "PASSIVE_IR") == 0)
-                                  {
-                                      recording_depth_mode = 5; // 5 = K4A_DEPTH_MODE_PASSIVE_IR
-                                  }
-                                  else if (string_compare(args[0], "off") == 0)
-                                  {
-                                      recording_depth_mode = 0; // 0 = K4A_DEPTH_MODE_OFF
+                                      recording_color_format = K4A_IMAGE_FORMAT_COLOR_YUY2;
                                   }
                                   else
                                   {
                                       std::ostringstream str;
+                                      str << "Unknown image format specified: " << args[0];
+                                      throw std::runtime_error(str.str());
+                                  }
+                              });
+    cmd_parser.RegisterOption("-d|--depth-mode",
+                              "Set the depth sensor mode (default: 0 for OFF), Use --list to see the available modes.",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  int depth_mode = std::stoi(args[0]);
+                                  if (depth_mode < 0)
+                                  {
+                                      std::ostringstream str;
                                       str << "Unknown depth mode specified: " << args[0];
                                       throw std::runtime_error(str.str());
+                                  }
+                                  else
+                                  {
+                                      recording_depth_mode = depth_mode;
                                   }
                               });
     cmd_parser.RegisterOption("--depth-delay",
@@ -247,27 +355,20 @@ int main(int argc, char **argv)
     cmd_parser.RegisterOption("-r|--rate",
                               "Set the camera frame rate in Frames per Second\n"
                               "Default is the maximum rate supported by the camera modes.\n"
-                              "Available options: 30, 15, 5",
+                              "Use --list to see the available modes.",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  recording_rate_set = true;
-                                  if (string_compare(args[0], "30") == 0)
-                                  {
-                                      recording_rate = 2; // 2 = K4A_FRAMES_PER_SECOND_30
-                                  }
-                                  else if (string_compare(args[0], "15") == 0)
-                                  {
-                                      recording_rate = 1; // 1 = K4A_FRAMES_PER_SECOND_15
-                                  }
-                                  else if (string_compare(args[0], "5") == 0)
-                                  {
-                                      recording_rate = 0; // 0 = K4A_FRAMES_PER_SECOND_5
-                                  }
-                                  else
+                                  int frame_rate = std::stoi(args[0]);
+                                  if (frame_rate < 0)
                                   {
                                       std::ostringstream str;
                                       str << "Unknown frame rate specified: " << args[0];
                                       throw std::runtime_error(str.str());
+                                  }
+                                  else
+                                  {
+                                      recording_frame_rate = frame_rate;
+                                      recording_frame_rate_set = true;
                                   }
                               });
     cmd_parser.RegisterOption("--imu",
@@ -378,15 +479,43 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    if (recording_rate == 2 &&
-        (recording_depth_mode == 4 || recording_color_resolution == 6)) // 2 = K4A_FRAMES_PER_SECOND_30, 4 =
-                                                                        // K4A_DEPTH_MODE_WFOV_UNBINNED, 6 =
-                                                                        // K4A_COLOR_RESOLUTION_3072P
+
+
+    if (validate_color_mode(device_index, recording_color_mode)) 
     {
-        if (!recording_rate_set)
+    }
+    else
+    {
+    }
+
+    if (validate_image_format(device_index, recording_color_mode, recording_color_format))
+    {
+    }
+    else
+    {
+    }
+
+    if (validate_depth_mode(device_index, recording_depth_mode))
+    {
+    }
+    else
+    {
+    }
+
+    if (validate_fps(device_index, recording_frame_rate))
+    {
+    }
+    else
+    {
+    }
+
+    // 2 = K4A_FRAMES_PER_SECOND_30, 4 = K4A_DEPTH_MODE_WFOV_UNBINNED, 6 = K4A_COLOR_RESOLUTION_3072P
+    if (recording_fps_mode == 2 && (recording_depth_mode == 4 || recording_color_mode == 6)) 
+    {
+        if (!recording_frame_rate_set)
         {
             // Default to max supported frame rate
-            recording_rate = 2; // 2 = K4A_FRAMES_PER_SECOND_15
+            recording_fps_mode = 1; // 1 = K4A_FRAMES_PER_SECOND_15
         }
         else
         {
@@ -394,6 +523,9 @@ int main(int argc, char **argv)
             return 1;
         }
     }
+
+
+
     if (subordinate_delay_off_master_usec > 0 && wired_sync_mode != K4A_WIRED_SYNC_MODE_SUBORDINATE)
     {
         std::cerr << "--sync-delay is only valid if --external-sync is set to Subordinate." << std::endl;
@@ -421,9 +553,9 @@ int main(int argc, char **argv)
 
     k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     device_config.color_format = recording_color_format;
-    device_config.color_mode_id = recording_color_resolution;
+    device_config.color_mode_id = recording_color_mode;
     device_config.depth_mode_id = recording_depth_mode;
-    device_config.fps_mode_id = recording_rate;
+    device_config.fps_mode_id = recording_fps_mode;
     device_config.wired_sync_mode = wired_sync_mode;
     device_config.depth_delay_off_color_usec = depth_delay_off_color_usec;
     device_config.subordinate_delay_off_master_usec = subordinate_delay_off_master_usec;
