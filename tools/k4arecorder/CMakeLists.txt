@@ -6,6 +6,7 @@ add_executable(k4arecorder main.cpp recorder.cpp ${CMAKE_CURRENT_BINARY_DIR}/ver
 target_link_libraries(k4arecorder PRIVATE
     k4a::k4a
     k4a::k4arecord
+    k4a_math
     )
 
 # Include ${CMAKE_CURRENT_BINARY_DIR}/version.rc in the target's sources
