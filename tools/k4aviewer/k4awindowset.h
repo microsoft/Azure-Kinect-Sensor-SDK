@@ -20,8 +20,11 @@
 // Project headers
 //
 #include "k4adatasource.h"
-#include "k4amicrophonelistener.h"
 #include "k4avideowindow.h"
+
+#ifdef K4A_INCLUDE_AUDIO
+#include "k4amicrophonelistener.h"
+#endif
 
 namespace k4aviewer
 {
@@ -41,7 +44,9 @@ public:
     static void StartNormalWindows(const char *sourceIdentifier,
                                    K4ADataSource<k4a::capture> *cameraDataSource,
                                    K4ADataSource<k4a_imu_sample_t> *imuDataSource,
+#ifdef K4A_INCLUDE_AUDIO
                                    std::shared_ptr<K4AMicrophoneListener> &&microphoneDataSource,
+#endif
                                    bool enableDepthCamera,
                                    k4a_depth_mode_info_t depth_mode_info,
                                    bool enableColorCamera,
