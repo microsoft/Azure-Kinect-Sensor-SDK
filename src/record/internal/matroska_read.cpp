@@ -671,9 +671,8 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 if (cJSON_IsNumber(device_info_json_capabilities) && device_info_json_capabilities->valuedouble != NULL)
                 {
                     uint32_t capabilities = (uint32_t)device_info_json_capabilities->valuedouble;
-                    // hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities ==
-                    // 7; hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities
-                    // == 7;
+                    // hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
+                    // hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
 
                     hasDepthDevice = (capabilities & 0x0001) == 1;
                     hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
