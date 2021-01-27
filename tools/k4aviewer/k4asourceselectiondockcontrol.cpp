@@ -124,7 +124,6 @@ void K4ASourceSelectionDockControl::RefreshDevices()
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
     }
 #endif
-
 }
 
 void K4ASourceSelectionDockControl::OpenDevice()
