@@ -1382,7 +1382,8 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_inde
 
     k4a_color_mode_info_t color_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
 
-    color_mode_info.mode_id = mode_index;
+    color_mode_info.mode_id = mode_index; // for akdk the mode id is sequential, may not be the case for other device
+                                          // implementations
     color_mode_info.width = device_color_modes[mode_index].width;
     color_mode_info.height = device_color_modes[mode_index].height;
     color_mode_info.native_format = device_color_modes[mode_index].native_format;
@@ -1422,7 +1423,8 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
 
     k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
 
-    depth_mode_info.mode_id = mode_index;
+    depth_mode_info.mode_id = mode_index; // for akdk the mode id is sequential, may not be the case for other device
+                                          // implementations
     depth_mode_info.passive_ir_only = device_depth_modes[mode_index].passive_ir_only;
     depth_mode_info.width = device_depth_modes[mode_index].width;
     depth_mode_info.height = device_depth_modes[mode_index].height;
@@ -1464,7 +1466,8 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_index,
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
-    fps_mode_info.mode_id = mode_index;
+    fps_mode_info.mode_id = mode_index; // for akdk the mode id is sequential, may not be the case for other device
+                                        // implementations
     fps_mode_info.fps = device_fps_modes[mode_index].fps;
 
     SAFE_COPY_STRUCT(mode_info, &fps_mode_info);
