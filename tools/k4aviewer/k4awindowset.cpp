@@ -13,7 +13,6 @@
 
 // Project headers
 //
-#include "k4aaudiowindow.h"
 #include "k4acolorimageconverter.h"
 #include "k4adepthimageconverter.h"
 #include "k4aimguiextensions.h"
@@ -22,6 +21,10 @@
 #include "k4ainfraredimageconverter.h"
 #include "k4apointcloudwindow.h"
 #include "k4awindowmanager.h"
+
+#ifdef K4A_INCLUDE_AUDIO
+#include "k4aaudiowindow.h"
+#endif
 
 using namespace k4aviewer;
 
@@ -74,7 +77,9 @@ void K4AWindowSet::ShowModeSelector(ViewType *viewType,
 void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
                                       K4ADataSource<k4a::capture> *cameraDataSource,
                                       K4ADataSource<k4a_imu_sample_t> *imuDataSource,
+#ifdef K4A_INCLUDE_AUDIO
                                       std::shared_ptr<K4AMicrophoneListener> &&microphoneDataSource,
+#endif
                                       bool enableDepthCamera,
                                       k4a_depth_mode_info_t depth_mode_info,
                                       bool enableColorCamera,
@@ -165,6 +170,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
         graphWindows.emplace_back(std14::make_unique<K4AImuWindow>(std::move(title), std::move(imuGraphDataGenerator)));
     }
 
+#ifdef K4A_INCLUDE_AUDIO
     if (microphoneDataSource != nullptr)
     {
         std::string micTitle = std::string(sourceIdentifier) + ": Microphone Data";
@@ -172,6 +178,7 @@ void K4AWindowSet::StartNormalWindows(const char *sourceIdentifier,
         graphWindows.emplace_back(std::unique_ptr<IK4AVisualizationWindow>(
             std14::make_unique<K4AAudioWindow>(std::move(micTitle), std::move(microphoneDataSource))));
     }
+#endif
 
     if (!graphWindows.empty())
     {

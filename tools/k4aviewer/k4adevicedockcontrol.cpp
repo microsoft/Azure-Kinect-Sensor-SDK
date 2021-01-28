@@ -18,12 +18,15 @@
 
 // Project headers
 //
-#include "k4aaudiomanager.h"
 #include "k4aimguiextensions.h"
 #include "k4atypeoperators.h"
 #include "k4aviewererrormanager.h"
 #include "k4aviewerutil.h"
 #include "k4awindowmanager.h"
+
+#ifdef K4A_INCLUDE_AUDIO
+#include "k4aaudiomanager.h"
+#endif
 
 using namespace k4aviewer;
 
@@ -272,7 +275,11 @@ void K4ADeviceDockControl::RefreshSyncCableStatus()
 
 bool K4ADeviceDockControl::DeviceIsStarted() const
 {
+#ifdef K4A_INCLUDE_AUDIO
     return m_camerasStarted || m_imuStarted || (m_microphone && m_microphone->IsStarted());
+#else
+    return m_camerasStarted || m_imuStarted;
+#endif
 }
 
 K4ADeviceDockControl::K4ADeviceDockControl(k4a::device &&device) : m_device(std::move(device))
@@ -282,7 +289,9 @@ K4ADeviceDockControl::K4ADeviceDockControl(k4a::device &&device) : m_device(std:
     m_deviceSerialNumber = m_device.get_serialnum();
     m_windowTitle = m_deviceSerialNumber + ": Configuration";
 
+#ifdef K4A_INCLUDE_AUDIO
     m_microphone = K4AAudioManager::Instance().GetMicrophoneForDevice(m_deviceSerialNumber);
+#endif
 
     LoadColorSettingsCache();
     RefreshSyncCableStatus();
@@ -312,6 +321,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     const bool deviceIsStarted = DeviceIsStarted();
 
+#ifdef K4A_INCLUDE_AUDIO
     // Check microphone health
     //
     if (m_microphone && m_microphone->GetStatusCode() != SoundIoErrorNone)
@@ -322,6 +332,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         StopMicrophone();
         m_microphone->ClearStatusCode();
     }
+#endif
 
     // Draw controls
     //
@@ -669,6 +680,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     const bool synchronizedImagesAvailable = m_config.EnableColorCamera && m_config.EnableDepthCamera;
     m_config.SynchronizedImagesOnly &= synchronizedImagesAvailable;
 
+#ifdef K4A_INCLUDE_AUDIO
     if (m_microphone)
     {
         ImGuiExtensions::K4ACheckbox("Enable Microphone", &m_config.EnableMicrophone, !deviceIsStarted);
@@ -678,6 +690,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         m_config.EnableMicrophone = false;
         ImGui::Text("Microphone not detected!");
     }
+#endif
 
     ImGui::Separator();
 
@@ -884,10 +897,13 @@ void K4ADeviceDockControl::Start()
             StartImu();
         }
     }
+
+#ifdef K4A_INCLUDE_AUDIO
     if (m_config.EnableMicrophone)
     {
         StartMicrophone();
     }
+#endif
 
     SetViewType(K4AWindowSet::ViewType::Normal);
     m_paused = false;
@@ -899,7 +915,10 @@ void K4ADeviceDockControl::Stop()
 
     StopCameras();
     StopImu();
+
+#ifdef K4A_INCLUDE_AUDIO
     StopMicrophone();
+#endif
 }
 
 bool K4ADeviceDockControl::StartCameras()
@@ -969,6 +988,7 @@ void K4ADeviceDockControl::StopCameras()
                       &m_camerasAbortInProgress);
 }
 
+#ifdef K4A_INCLUDE_AUDIO
 bool K4ADeviceDockControl::StartMicrophone()
 {
     if (!m_microphone)
@@ -1003,6 +1023,7 @@ void K4ADeviceDockControl::StopMicrophone()
         m_microphone->Stop();
     }
 }
+#endif
 
 bool K4ADeviceDockControl::StartImu()
 {
@@ -1072,6 +1093,7 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
 {
     K4AWindowManager::Instance().ClearWindows();
 
+#ifdef K4A_INCLUDE_AUDIO
     std::shared_ptr<K4AMicrophoneListener> micListener = nullptr;
     if (m_config.EnableMicrophone)
     {
@@ -1083,6 +1105,7 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
             K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str());
         }
     }
+#endif
 
     k4a_depth_mode_info_t depth_mode_info = m_device.get_depth_mode(m_config.depth_mode_id);
     k4a_color_mode_info_t color_mode_info = m_device.get_color_mode(m_config.color_mode_id);
@@ -1093,7 +1116,9 @@ void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         K4AWindowSet::StartNormalWindows(m_deviceSerialNumber.c_str(),
                                          &m_cameraDataSource,
                                          m_config.EnableImu ? &m_imuDataSource : nullptr,
+#ifdef K4A_INCLUDE_AUDIO
                                          std::move(micListener),
+#endif
                                          m_config.EnableDepthCamera,
                                          depth_mode_info,
                                          m_config.EnableColorCamera,

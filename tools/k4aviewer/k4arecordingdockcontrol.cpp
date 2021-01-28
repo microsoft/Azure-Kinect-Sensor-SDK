@@ -523,7 +523,9 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         K4AWindowSet::StartNormalWindows(m_filenameLabel.c_str(),
                                          &m_playbackThreadState.CaptureDataSource,
                                          imuDataSource,
+#ifdef K4A_INCLUDE_AUDIO
                                          nullptr, // Audio source - sound is not supported in recordings
+#endif
                                          m_recordingHasDepth || m_recordingHasIR,
                                          m_recordConfiguration.depth_mode_info,
                                          m_recordingHasColor,
