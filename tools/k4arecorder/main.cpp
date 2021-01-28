@@ -102,8 +102,9 @@ static int string_compare(const char *s1, const char *s2)
                     {
                         if (hasColorDevice)
                         {
-                            std::cout << "\tColor: Supported (" << version_info.rgb.major << "." << version_info.rgb.minor << "."
-                                      << version_info.rgb.iteration << ")" << std::endl;
+                            std::cout << "\tColor: Supported (" << version_info.rgb.major << "."
+                                      << version_info.rgb.minor << "." << version_info.rgb.iteration << ")"
+                                      << std::endl;
                         }
                         else
                         {
@@ -111,8 +112,9 @@ static int string_compare(const char *s1, const char *s2)
                         }
                         if (hasDepthDevice)
                         {
-                            std::cout << "\tDepth: Supported (" << version_info.depth.major << "." << version_info.depth.minor
-                                      << "." << version_info.depth.iteration << ")" << std::endl;
+                            std::cout << "\tDepth: Supported (" << version_info.depth.major << "."
+                                      << version_info.depth.minor << "." << version_info.depth.iteration << ")"
+                                      << std::endl;
                         }
                         else
                         {
@@ -254,143 +256,185 @@ static int string_compare(const char *s1, const char *s2)
     exit(0);
 }
 
-// TODO: comment
-static bool validate_color_mode(int device_id, int color_mode_id)
+static k4a_result_t get_device_info(k4a_device_t device, bool *hasDepthDevice, bool *hasColorDevice, bool *hasIMUDevice)
 {
-    uint32_t device_count = k4a_device_get_installed_count();
-    if (device_count > 0)
+    k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, { 0 } };
+    if (k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
     {
-        k4a_device_t device;
-        if (K4A_SUCCEEDED(k4a_device_open(device_id, &device)))
-        {
-            int mode_count = 0;
-            k4a_device_get_color_mode_count(device, &mode_count);
-            if (mode_count > 0)
-            {
-                k4a_color_mode_info_t color_mode_info;
-                if (k4a_device_get_color_mode(device, color_mode_id, &color_mode_info) == K4A_RESULT_SUCCEEDED)
-                {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            std::cout << "Unkown device specified." << std::endl;
-        }
+        uint32_t capabilities = (uint32_t)device_info.capabilities;
+
+        *hasDepthDevice = (capabilities & 0x0001) == 1;
+        *hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+        *hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;
+
+        return K4A_RESULT_SUCCEEDED;
     }
     else
     {
-        std::cout << "No devices connected or unkown device specified." << std::endl;
+        std::cout << "Device Get Info Failed" << std::endl;
     }
-
-    return false;
+    return K4A_RESULT_FAILED;
 }
 
-// TODO: comment
-static bool validate_depth_mode(int device_id, int depth_mode_id)
+static k4a_result_t get_color_mode_info(k4a_device_t device,
+                                        int32_t *mode_id,
+                                        k4a_image_format_t image_format,
+                                        k4a_color_mode_info_t *color_mode_info)
 {
-    uint32_t device_count = k4a_device_get_installed_count();
-    if (device_count > 0)
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
+    int mode_count = 0;
+    k4a_device_get_color_mode_count(device, &mode_count);
+    if (mode_count > 0)
     {
-        k4a_device_t device;
-        if (K4A_SUCCEEDED(k4a_device_open(device_id, &device)))
+        if (image_format == K4A_IMAGE_FORMAT_COLOR_NV12 || image_format == K4A_IMAGE_FORMAT_COLOR_YUY2)
         {
-            int mode_count = 0;
-            k4a_device_get_depth_mode_count(device, &mode_count);
-            if (mode_count > 0)
+            *mode_id = -1;
+        }
+        if (*mode_id == -1)
+        {
+            for (int i = 1; i < mode_count; i++)
             {
-                k4a_depth_mode_info_t depth_mode_info;
-                if (k4a_device_get_depth_mode(device, depth_mode_id, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
+                k4a_color_mode_info_t mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+                if (K4A_SUCCEEDED(k4a_device_get_color_mode(device, i, &mode_info)))
                 {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            std::cout << "Unkown device specified." << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "No devices connected or unkown device specified." << std::endl;
-    }
-
-    return false;
-}
-
-// TODO: comment
-static bool validate_fps(int device_id, int fps_mode_id)
-{
-    uint32_t device_count = k4a_device_get_installed_count();
-    if (device_count > 0)
-    {
-        k4a_device_t device;
-        if (K4A_SUCCEEDED(k4a_device_open(device_id, &device)))
-        {
-            int mode_count = 0;
-            k4a_device_get_fps_mode_count(device, &mode_count);
-            if (mode_count > 0)
-            {
-                k4a_fps_mode_info_t fps_mode_info;
-                if (k4a_device_get_fps_mode(device, fps_mode_id, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
-                {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            std::cout << "Unkown device specified." << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "No devices connected or unkown device specified." << std::endl;
-    }
-
-    return false;
-}
-
-// TODO: comment
-static bool validate_image_format(int device_id, int color_mode_id, k4a_image_format_t image_format)
-{
-    uint32_t device_count = k4a_device_get_installed_count();
-    if (device_count > 0)
-    {
-        k4a_device_t device;
-        if (K4A_SUCCEEDED(k4a_device_open(device_id, &device)))
-        {
-            int mode_count = 0;
-            k4a_device_get_color_mode_count(device, &mode_count);
-            if (mode_count > 0)
-            {
-                k4a_color_mode_info_t color_mode_info;
-                if (k4a_device_get_color_mode(device, color_mode_id, &color_mode_info) == K4A_RESULT_SUCCEEDED)
-                {
-                    if (image_format == K4A_IMAGE_FORMAT_COLOR_MJPG ||
-                        (image_format == K4A_IMAGE_FORMAT_COLOR_NV12 && color_mode_info.height == 720) ||
-                        (image_format == K4A_IMAGE_FORMAT_COLOR_YUY2 && color_mode_info.height == 720))
+                    if (mode_info.height <= 720)
                     {
-                        return true;
+                        *mode_id = i;
+                        break;
                     }
                 }
             }
         }
-        else
+
+        result = k4a_device_get_color_mode(device, *mode_id, color_mode_info);
+        if (result == K4A_RESULT_FAILED)
         {
-            std::cout << "Unkown device specified." << std::endl;
+            color_mode_info->mode_id = 0;
         }
     }
     else
     {
-        std::cout << "No devices connected or unkown device specified." << std::endl;
+        result = K4A_RESULT_FAILED;
     }
 
-    return false;
+    return result;
 }
 
+static k4a_result_t get_depth_mode_info(k4a_device_t device, int32_t *mode_id, k4a_depth_mode_info_t *depth_mode_info)
+{
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
+    int mode_count = 0;
+    k4a_device_get_depth_mode_count(device, &mode_count);
+    if (mode_count > 0)
+    {
+        if (*mode_id == -1)
+        {
+            for (int i = 1; i < mode_count; i++)
+            {
+                k4a_depth_mode_info_t mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+                if (K4A_SUCCEEDED(k4a_device_get_depth_mode(device, i, &mode_info)))
+                {
+                    if (mode_info.width > 320 && mode_info.height > 288 && mode_info.horizontal_fov < 120.0f &&
+                        mode_info.vertical_fov < 120.0f)
+                    {
+                        *mode_id = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        result = k4a_device_get_depth_mode(device, *mode_id, depth_mode_info);
+        if (result == K4A_RESULT_FAILED)
+        {
+            depth_mode_info->mode_id = 0;
+        }
+    }
+    else
+    {
+        result = K4A_RESULT_FAILED;
+    }
+
+    return result;
+}
+
+static k4a_result_t get_fps_mode_info(k4a_device_t device,
+                                      int32_t *fps_mode_id,
+                                      k4a_color_mode_info_t *color_mode_info,
+                                      k4a_depth_mode_info_t *depth_mode_info,
+                                      k4a_fps_mode_info_t *fps_mode_info)
+{
+    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+
+    int mode_count = 0;
+    k4a_device_get_fps_mode_count(device, &mode_count);
+    if (mode_count > 0)
+    {
+        if (*fps_mode_id == -1)
+        {
+            int max_fps = 0;
+            for (int i = 1; i < mode_count; i++)
+            {
+                k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+                if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
+                {
+                    if (mode_info.fps > max_fps)
+                    {
+                        *fps_mode_id = i;
+                        max_fps = mode_info.fps;
+                    }
+                }
+            }
+        }
+
+
+        result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
+        if (K4A_SUCCEEDED(result))
+        {
+            if (color_mode_info->height >= 3072 ||
+                (depth_mode_info->height >= 1024 && depth_mode_info->horizontal_fov >= 120.0f &&
+                    depth_mode_info->vertical_fov >= 120.0f && depth_mode_info->min_range >= 250 &&
+                    depth_mode_info->max_range >= 2500))
+            {
+                int fps = 0;
+                int mode_id = 0;
+                for (int i = 1; i < mode_count; i++)
+                {
+                    std::cout << i << std::endl;
+                    k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+                    if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
+                    {
+                        std::cout << mode_info.fps << std::endl;
+                        if ((fps == 0 || mode_info.fps > fps) && mode_info.fps <= 15)
+                        {
+                            mode_id = i;
+                            fps = mode_info.fps;
+                        }
+                    }
+                }
+
+                std::cout << "Warning: reduced frame rate down to " << fps << "." << std::endl;
+                if (mode_id != 0 && mode_id != *fps_mode_id)
+                {
+                    *fps_mode_id = mode_id;
+                    result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
+                }
+                else
+                {
+                    result = K4A_RESULT_FAILED;
+                }
+            }
+        }
+    }
+    else
+    {
+        result = K4A_RESULT_FAILED;
+    }
+
+    return result;
+}
 
 int main(int argc, char **argv)
 {
@@ -414,37 +458,58 @@ int main(int argc, char **argv)
         cmd_parser.PrintOptions();
         exit(0);
     });
-    cmd_parser.RegisterOption("--list", "List the currently connected devices (includes color, depth and fps modes)", list_devices);
+    cmd_parser.RegisterOption("--list",
+                              "List the currently connected devices (includes color, depth and fps modes)",
+                              list_devices);
     cmd_parser.RegisterOption("--device",
                               "Specify the device index to use (default: 0)",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  device_index = std::stoi(args[0]);
-                                  if (device_index < 0 || device_index > 255)
-                                      throw std::runtime_error("Device index must 0-255");
+                                  try
+                                  {
+                                      device_index = std::stoi(args[0]);
+                                      if (device_index < 0 || device_index > 255)
+                                          throw std::runtime_error("Device index must 0-255");
+                                  }
+                                  catch (const std::exception &)
+                                  {
+                                      std::ostringstream str;
+                                      str << "Unknown device index specified: " << args[0];
+                                      throw std::runtime_error(str.str());
+                                  }
                               });
     cmd_parser.RegisterOption("-l|--record-length",
                               "Limit the recording to N seconds (default: infinite)",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  recording_length = std::stoi(args[0]);
-                                  if (recording_length < 0)
-                                      throw std::runtime_error("Recording length must be positive");
+                                  try
+                                  {
+                                      recording_length = std::stoi(args[0]);
+                                      if (recording_length < 0)
+                                          throw std::runtime_error("Recording length must be positive");
+                                  }
+                                  catch (const std::exception &)
+                                  {
+                                      std::ostringstream str;
+                                      str << "Unknown record length specified: " << args[0];
+                                      throw std::runtime_error(str.str());
+                                  }
                               });
     cmd_parser.RegisterOption("-c|--color-mode",
                               "Set the color sensor mode (default: 0 for OFF), Use --list to see the available modes.",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  int color_mode = std::stoi(args[0]);
-                                  if (color_mode < 0)
+                                  try
+                                  {
+                                      recording_color_mode = std::stoi(args[0]);
+                                      if (recording_color_mode < 0)
+                                          throw std::runtime_error("Color mode must be positive");
+                                  }
+                                  catch (const std::exception &)
                                   {
                                       std::ostringstream str;
                                       str << "Unknown color mode specified: " << args[0];
                                       throw std::runtime_error(str.str());
-                                  }
-                                  else
-                                  {
-                                      recording_color_mode = color_mode;
                                   }
                               });
     cmd_parser.RegisterOption("-i|--image-format",
@@ -476,16 +541,17 @@ int main(int argc, char **argv)
                               "Set the depth sensor mode (default: 0 for OFF), Use --list to see the available modes.",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  int depth_mode = std::stoi(args[0]);
-                                  if (depth_mode < 0)
+                                  try
+                                  {
+                                      recording_depth_mode = std::stoi(args[0]);
+                                      if (recording_depth_mode < 0)
+                                          throw std::runtime_error("Depth mode must be positive");
+                                  }
+                                  catch (const std::exception &)
                                   {
                                       std::ostringstream str;
                                       str << "Unknown depth mode specified: " << args[0];
                                       throw std::runtime_error(str.str());
-                                  }
-                                  else
-                                  {
-                                      recording_depth_mode = depth_mode;
                                   }
                               });
     cmd_parser.RegisterOption("--depth-delay",
@@ -494,7 +560,18 @@ int main(int argc, char **argv)
                               "The delay must be less than 1 frame period.",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  depth_delay_off_color_usec = std::stoi(args[0]);
+                                  try
+                                  {
+                                      depth_delay_off_color_usec = std::stoi(args[0]);
+                                      if (depth_delay_off_color_usec < 1)
+                                          throw std::runtime_error("Depth delay must be less than 1 frame period");
+                                  }
+                                  catch (const std::exception &)
+                                  {
+                                      std::ostringstream str;
+                                      str << "Unknown depth delay specified: " << args[0];
+                                      throw std::runtime_error(str.str());
+                                  }
                               });
     cmd_parser.RegisterOption("-r|--rate",
                               "Set the camera frame rate in Frames per Second\n"
@@ -505,6 +582,8 @@ int main(int argc, char **argv)
                                   try
                                   {
                                       recording_fps_mode = std::stoi(args[0]);
+                                      if (recording_fps_mode < 0)
+                                          throw std::runtime_error("Frame rate must be positive");
                                   }
                                   catch (const std::exception &)
                                   {
@@ -561,43 +640,67 @@ int main(int argc, char **argv)
                               "This setting is only valid if the camera is in Subordinate mode.",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  int delay = std::stoi(args[0]);
-                                  if (delay < 0)
+                                  try
                                   {
-                                      throw std::runtime_error("External sync delay must be positive.");
+                                      subordinate_delay_off_master_usec = std::stoi(args[0]);
+                                      if (subordinate_delay_off_master_usec < 0)
+                                          throw std::runtime_error("External sync delay must be positive.");
                                   }
-                                  subordinate_delay_off_master_usec = (uint32_t)delay;
+                                  catch (const std::exception &)
+                                  {
+                                      std::ostringstream str;
+                                      str << "Unknown sync delay specified: " << args[0];
+                                      throw std::runtime_error(str.str());
+                                  }
                               });
     cmd_parser.RegisterOption("-e|--exposure-control",
                               "Set manual exposure value from 2 us to 200,000us for the RGB camera (default: \n"
                               "auto exposure). This control also supports MFC settings of -11 to 1).",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  int exposureValue = std::stoi(args[0]);
-                                  if (exposureValue >= -11 && exposureValue <= 1)
+                                  try
                                   {
-                                      absoluteExposureValue = static_cast<int32_t>(exp2f((float)exposureValue) *
-                                                                                   1000000.0f);
+                                      int exposureValue = std::stoi(args[0]);
+                                      if (exposureValue >= -11 && exposureValue <= 1)
+                                      {
+                                          absoluteExposureValue = static_cast<int32_t>(exp2f((float)exposureValue) *
+                                                                                       1000000.0f);
+                                      }
+                                      else if (exposureValue >= 2 && exposureValue <= 200000)
+                                      {
+                                          absoluteExposureValue = exposureValue;
+                                      }
+                                      else
+                                      {
+                                          throw std::runtime_error("Exposure value range is 2 to 5s, or -11 to 1.");
+                                      }
                                   }
-                                  else if (exposureValue >= 2 && exposureValue <= 200000)
+                                  catch (const std::exception &)
                                   {
-                                      absoluteExposureValue = exposureValue;
-                                  }
-                                  else
-                                  {
-                                      throw std::runtime_error("Exposure value range is 2 to 5s, or -11 to 1.");
+                                      std::ostringstream str;
+                                      str << "Unknown specified: " << args[0];
+                                      throw std::runtime_error(str.str());
                                   }
                               });
     cmd_parser.RegisterOption("-g|--gain",
                               "Set cameras manual gain. The valid range is 0 to 255. (default: auto)",
                               1,
                               [&](const std::vector<char *> &args) {
-                                  int gainSetting = std::stoi(args[0]);
-                                  if (gainSetting < 0 || gainSetting > 255)
+                                  try
                                   {
-                                      throw std::runtime_error("Gain value must be between 0 and 255.");
+                                      int gainSetting = std::stoi(args[0]);
+                                      if (gainSetting < 0 || gainSetting > 255)
+                                      {
+                                          throw std::runtime_error("Gain value must be between 0 and 255.");
+                                      }
+                                      gain = gainSetting;
                                   }
-                                  gain = gainSetting;
+                                  catch (const std::exception &)
+                                  {
+                                      std::ostringstream str;
+                                      str << "Unknown specified: " << args[0];
+                                      throw std::runtime_error(str.str());
+                                  }
                               });
 
     int args_left = 0;
@@ -621,55 +724,96 @@ int main(int argc, char **argv)
         return 0;
     }
 
-
-    // TODO: validate options for azure kinect
-    if (validate_color_mode(device_index, recording_color_mode)) 
+    if (recording_color_mode == -1 && recording_depth_mode == -1)
     {
+        std::cout << "A recording requires either a color or a depth device." << std::endl;
+        return 1;
+    }
+
+    uint32_t device_count = k4a_device_get_installed_count();
+    if (device_count > 0)
+    {
+        k4a_device_t device;
+        if (K4A_SUCCEEDED(k4a_device_open(device_index, &device)))
+        {
+
+            
+            bool hasColorDevice = false;
+            bool hasDepthDevice = false;
+            bool hasIMUDevice = false;
+
+            k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+            k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+            k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+
+            k4a_result_t device_info_result = get_device_info(device, &hasDepthDevice, &hasColorDevice, &hasIMUDevice);
+
+            if (K4A_SUCCEEDED(device_info_result))
+            {
+                if (hasColorDevice)
+                {
+                    if (!K4A_SUCCEEDED(get_color_mode_info(device,
+                                                           &recording_color_mode,
+                                                           recording_color_format,
+                                                           &color_mode_info)))
+                    {
+                        recording_color_mode = 0;
+                    }
+                }
+                else
+                {
+                    recording_color_mode = 0;
+                }
+
+                if (hasDepthDevice)
+                {
+                    if (!K4A_SUCCEEDED(get_depth_mode_info(device, &recording_depth_mode, &depth_mode_info)))
+                    {
+                        recording_depth_mode = 0;
+                    }
+                }
+                else
+                {
+                    recording_depth_mode = 0;
+                }
+
+                if (recording_color_mode == 0 && recording_depth_mode == 0)
+                {
+                    std::cout << "A recording requires either a color or a depth device." << std::endl;
+                    return 1;
+                }
+
+                if (!K4A_SUCCEEDED(get_fps_mode_info(
+                        device, &recording_fps_mode, &color_mode_info, &depth_mode_info, &fps_mode_info)))
+                {
+                    std::cout << "Error finding valid framerate for recording camera settings." << std::endl;
+                    return 1;
+                }
+
+                // validate imu
+                if (recording_imu_enabled && !hasIMUDevice)
+                {
+                    recording_imu_enabled = false;
+                    std::cout << "Warning: device " << device_index
+                              << " does not support IMU, so, IMU has been disabled." << std::endl;
+                }
+            }
+            else
+            {
+                return 1;
+            }
+
+            k4a_device_close(device);
+        }
+        else
+        {
+            std::cout << device_index << "Device Open Failed" << std::endl;
+        }
     }
     else
     {
+        std::cout << "No devices connected or unkown device specified." << std::endl;
     }
-
-    if (validate_image_format(device_index, recording_color_mode, recording_color_format))
-    {
-
-    }
-    else
-    {
-    }
-
-    if (validate_depth_mode(device_index, recording_depth_mode))
-    {
-    }
-    else
-    {
-    }
-
-    if (validate_fps(device_index, recording_fps_mode))
-    {
-
-        // 2 = K4A_FRAMES_PER_SECOND_30, 4 = K4A_DEPTH_MODE_WFOV_UNBINNED, 6 = K4A_COLOR_RESOLUTION_3072P
-        // if (recording_fps_mode == 2 && (recording_depth_mode == 4 || recording_color_mode == 6))
-        //{
-        //    if (!recording_frame_rate_set)
-        //    {
-        //        // Default to max supported frame rate
-        //        recording_fps_mode = 1; // 1 = K4A_FRAMES_PER_SECOND_15
-        //    }
-        //    else
-        //    {
-        //        std::cerr << "Error: 30 Frames per second is not supported by this camera mode." << std::endl;
-        //        return 1;
-        //    }
-        //}
-    }
-    else
-    {
-    }
-
-    // TODO: validate IMU (if unsupported, provide warning message, but don't kill)
-
-
 
 
     if (subordinate_delay_off_master_usec > 0 && wired_sync_mode != K4A_WIRED_SYNC_MODE_SUBORDINATE)
