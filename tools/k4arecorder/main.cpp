@@ -622,31 +622,26 @@ int main(int argc, char **argv)
     }
 
     // TODO: validate options for azure kinect
-    if (validate_color_mode(device_index, recording_color_mode))
+    if (validate_color_mode(device_index, recording_color_mode)) 
     {
-        
     }
     else
     {
-        
     }
 
     if (validate_image_format(device_index, recording_color_mode, recording_color_format))
     {
-        
     }
     else
     {
-        
     }
 
     if (validate_depth_mode(device_index, recording_depth_mode))
     {
-        
+
     }
     else
     {
-        
     }
 
     if (validate_fps(device_index, recording_fps_mode))
