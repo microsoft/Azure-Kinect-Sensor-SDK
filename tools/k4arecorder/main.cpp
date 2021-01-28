@@ -256,250 +256,178 @@ static int string_compare(const char *s1, const char *s2)
     exit(0);
 }
 
-static k4a_result_t get_device_info(uint32_t device_index, bool *hasDepthDevice, bool *hasColorDevice, bool *hasIMUDevice)
+static k4a_result_t get_device_info(k4a_device_t device, bool *hasDepthDevice, bool *hasColorDevice, bool *hasIMUDevice)
 {
-    uint32_t device_count = k4a_device_get_installed_count();
-    if (device_count > 0)
+    k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, { 0 } };
+    if (k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
     {
-        k4a_device_t device;
-        if (K4A_SUCCEEDED(k4a_device_open(device_index, &device)))
-        {
-            k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, { 0 } };
-            if (k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
-            {
-                uint32_t capabilities = (uint32_t)device_info.capabilities;
+        uint32_t capabilities = (uint32_t)device_info.capabilities;
 
-                *hasDepthDevice = (capabilities & 0x0001) == 1;
-                *hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
-                *hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;
-                return K4A_RESULT_SUCCEEDED;
-            }
-            else
-            {
-                std::cout << device_index << "Device Get Info Failed" << std::endl;
-            }
-            k4a_device_close(device);
-        }
-        else
-        {
-            std::cout << device_index << "Device Open Failed" << std::endl;
-        }
+        *hasDepthDevice = (capabilities & 0x0001) == 1;
+        *hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+        *hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;
+
+        return K4A_RESULT_SUCCEEDED;
     }
     else
     {
-        std::cout << "No devices connected or unkown device specified." << std::endl;
+        std::cout << "Device Get Info Failed" << std::endl;
     }
     return K4A_RESULT_FAILED;
 }
 
-static k4a_result_t get_color_mode_info(uint32_t device_index,
+static k4a_result_t get_color_mode_info(k4a_device_t device,
                                         int32_t *mode_id,
                                         k4a_image_format_t image_format,
                                         k4a_color_mode_info_t *color_mode_info)
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    uint32_t device_count = k4a_device_get_installed_count();
-    if (device_count > 0)
+    int mode_count = 0;
+    k4a_device_get_color_mode_count(device, &mode_count);
+    if (mode_count > 0)
     {
-        k4a_device_t device;
-        if (K4A_SUCCEEDED(k4a_device_open(device_index, &device)))
+        if (image_format == K4A_IMAGE_FORMAT_COLOR_NV12 || image_format == K4A_IMAGE_FORMAT_COLOR_YUY2)
         {
-            int mode_count = 0;
-            k4a_device_get_color_mode_count(device, &mode_count);
-            if (mode_count > 0)
+            *mode_id = -1;
+        }
+        if (*mode_id == -1)
+        {
+            for (int i = 1; i < mode_count; i++)
             {
-                if (image_format == K4A_IMAGE_FORMAT_COLOR_NV12 || image_format == K4A_IMAGE_FORMAT_COLOR_YUY2)
+                k4a_color_mode_info_t mode_info;
+                if (K4A_SUCCEEDED(k4a_device_get_color_mode(device, i, &mode_info)))
                 {
-                    *mode_id = -1;
-                }
-                if (*mode_id == -1)
-                {
-                    for (int i = 1; i < mode_count; i++)
+                    if (mode_info.height <= 720)
                     {
-                        k4a_color_mode_info_t mode_info;
-                        if (K4A_SUCCEEDED(k4a_device_get_color_mode(device, i, &mode_info)))
-                        {
-                            if (mode_info.height <= 720)
-                            {
-                                *mode_id = i;
-                                break;
-                            }
-                        }
+                        *mode_id = i;
+                        break;
                     }
                 }
-
-                result = k4a_device_get_color_mode(device, *mode_id, color_mode_info);
-                if (result == K4A_RESULT_FAILED)
-                {
-                    color_mode_info->mode_id = 0;
-                }
             }
-            else
-            {
-                result = K4A_RESULT_FAILED;
-            }
-
-            k4a_device_close(device);
         }
-        else
+
+        result = k4a_device_get_color_mode(device, *mode_id, color_mode_info);
+        if (result == K4A_RESULT_FAILED)
         {
-            std::cout << device_index << "Device Open Failed" << std::endl;
-            result = K4A_RESULT_FAILED;
+            color_mode_info->mode_id = 0;
         }
     }
     else
     {
-        std::cout << "No devices connected or unkown device specified." << std::endl;
         result = K4A_RESULT_FAILED;
     }
 
     return result;
 }
 
-static k4a_result_t get_depth_mode_info(uint32_t device_index, int32_t * mode_id, k4a_depth_mode_info_t *depth_mode_info)
+static k4a_result_t get_depth_mode_info(k4a_device_t device, int32_t *mode_id, k4a_depth_mode_info_t *depth_mode_info)
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    uint32_t device_count = k4a_device_get_installed_count();
-    if (device_count > 0)
+    int mode_count = 0;
+    k4a_device_get_depth_mode_count(device, &mode_count);
+    if (mode_count > 0)
     {
-        k4a_device_t device;
-        if (K4A_SUCCEEDED(k4a_device_open(device_index, &device)))
+        if (*mode_id == -1)
         {
-            int mode_count = 0;
-            k4a_device_get_depth_mode_count(device, &mode_count);
-            if (mode_count > 0)
+            for (int i = 1; i < mode_count; i++)
             {
-                if (*mode_id == -1)
+                k4a_depth_mode_info_t mode_info;
+                if (K4A_SUCCEEDED(k4a_device_get_depth_mode(device, i, &mode_info)))
                 {
-                    for (int i = 1; i < mode_count; i++)
+                    if (mode_info.width > 320 && mode_info.height > 288 && mode_info.horizontal_fov < 120.0f &&
+                        mode_info.vertical_fov < 120.0f)
                     {
-                        k4a_depth_mode_info_t mode_info;
-                        if (K4A_SUCCEEDED(k4a_device_get_depth_mode(device, i, &mode_info)))
-                        {
-                            if (mode_info.width > 320 && mode_info.height > 288 && mode_info.horizontal_fov < 120.0f &&
-                                mode_info.vertical_fov < 120.0f)
-                            {
-                                *mode_id = i;
-                                break;
-                            }
-                        }
+                        *mode_id = i;
+                        break;
                     }
                 }
-
-                result = k4a_device_get_depth_mode(device, *mode_id, depth_mode_info);
-                if (result == K4A_RESULT_FAILED)
-                {
-                    depth_mode_info->mode_id = 0;
-                }
             }
-            else
-            {
-                result = K4A_RESULT_FAILED;
-            }
-
-            k4a_device_close(device);
         }
-        else
+
+        result = k4a_device_get_depth_mode(device, *mode_id, depth_mode_info);
+        if (result == K4A_RESULT_FAILED)
         {
-            std::cout << device_index << "Device Open Failed" << std::endl;
-            result = K4A_RESULT_FAILED;
+            depth_mode_info->mode_id = 0;
         }
     }
     else
     {
-        std::cout << "No devices connected or unkown device specified." << std::endl;
         result = K4A_RESULT_FAILED;
     }
 
     return result;
 }
 
-static k4a_result_t get_fps_mode_info(uint32_t device_index, int32_t * fps_mode_id, k4a_color_mode_info_t *color_mode_info, k4a_depth_mode_info_t *depth_mode_info, k4a_fps_mode_info_t *fps_mode_info)
+static k4a_result_t get_fps_mode_info(k4a_device_t device,
+                                      int32_t *fps_mode_id,
+                                      k4a_color_mode_info_t *color_mode_info,
+                                      k4a_depth_mode_info_t *depth_mode_info,
+                                      k4a_fps_mode_info_t *fps_mode_info)
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    uint32_t device_count = k4a_device_get_installed_count();
-    if (device_count > 0)
+    int mode_count = 0;
+    k4a_device_get_fps_mode_count(device, &mode_count);
+    if (mode_count > 0)
     {
-        k4a_device_t device;
-        if (K4A_SUCCEEDED(k4a_device_open(device_index, &device)))
+        if (*fps_mode_id == -1)
         {
-            int mode_count = 0;
-            k4a_device_get_fps_mode_count(device, &mode_count);
-            if (mode_count > 0)
+            int max_fps = 0;
+            for (int i = 1; i < mode_count; i++)
             {
-                if (*fps_mode_id == -1)
+                k4a_fps_mode_info_t mode_info;
+                if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
                 {
-                    int max_fps = 0;
-                    for (int i = 1; i < mode_count; i++)
+                    if (mode_info.fps > max_fps)
                     {
-                        k4a_fps_mode_info_t mode_info;
-                        if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
-                        {
-                            if (mode_info.fps > max_fps)
-                            {
-                                *fps_mode_id = i;
-                                max_fps = mode_info.fps;
-                            }
-                        }
-                    }
-                }
-
-
-                result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
-                if (K4A_SUCCEEDED(result))
-                {
-                    if (color_mode_info->height >= 3072 ||
-                        (depth_mode_info->height >= 1024 && depth_mode_info->horizontal_fov >= 120.0f &&
-                         depth_mode_info->vertical_fov >= 120.0f && depth_mode_info->min_range >= 250 &&
-                         depth_mode_info->max_range >= 2500))
-                    {
-                        int fps = 0;
-                        int mode_id = 0;
-                        for (int i = 1; i < mode_count; i++)
-                        {
-                            k4a_fps_mode_info_t mode_info;
-                            if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
-                            {
-                                if (mode_info.fps > fps && mode_info.fps <= 15)
-                                {
-                                    mode_id = i;
-                                    fps = mode_info.fps;
-                                }
-                            }
-                        }
-
-                        std::cout << "Could not recording using 30 frames per second with camera settings." << std::endl;
-
-                        if (mode_id != 0 && mode_id != *fps_mode_id)
-                        {
-                            result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
-                        }
-                        else
-                        {
-                            result = K4A_RESULT_FAILED;
-                        }
+                        *fps_mode_id = i;
+                        max_fps = mode_info.fps;
                     }
                 }
             }
-            else
-            {
-                result = K4A_RESULT_FAILED;
-            }
-
-            k4a_device_close(device);
         }
-        else
+
+
+        result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
+        if (K4A_SUCCEEDED(result))
         {
-            std::cout << device_index << "Device Open Failed" << std::endl;
-            result = K4A_RESULT_FAILED;
+            if (color_mode_info->height >= 3072 ||
+                (depth_mode_info->height >= 1024 && depth_mode_info->horizontal_fov >= 120.0f &&
+                    depth_mode_info->vertical_fov >= 120.0f && depth_mode_info->min_range >= 250 &&
+                    depth_mode_info->max_range >= 2500))
+            {
+                int fps = 0;
+                int mode_id = 0;
+                for (int i = 1; i < mode_count; i++)
+                {
+                    k4a_fps_mode_info_t mode_info;
+                    if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
+                    {
+                        if (mode_info.fps > fps && mode_info.fps <= 15)
+                        {
+                            mode_id = i;
+                            fps = mode_info.fps;
+                        }
+                    }
+                }
+
+                std::cout << "Could not recording using 30 frames per second with camera settings." << std::endl;
+
+                if (mode_id != 0 && mode_id != *fps_mode_id)
+                {
+                    result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
+                }
+                else
+                {
+                    result = K4A_RESULT_FAILED;
+                }
+            }
         }
     }
     else
     {
-        std::cout << "No devices connected or unkown device specified." << std::endl;
         result = K4A_RESULT_FAILED;
     }
 
@@ -800,66 +728,91 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    bool hasColorDevice = false;
-    bool hasDepthDevice = false;
-    bool hasIMUDevice = false;
-
-    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
-    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
-    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
-
-    k4a_result_t device_info_result = get_device_info(device_index, &hasDepthDevice, &hasColorDevice, &hasIMUDevice);
-
-    if (K4A_SUCCEEDED(device_info_result))
+    uint32_t device_count = k4a_device_get_installed_count();
+    if (device_count > 0)
     {
-        if (hasColorDevice)
+        k4a_device_t device;
+        if (K4A_SUCCEEDED(k4a_device_open(device_index, &device)))
         {
-            if (!K4A_SUCCEEDED(get_color_mode_info(device_index, &recording_color_mode, recording_color_format, &color_mode_info))) {
-                recording_color_mode = 0;
+
+            
+            bool hasColorDevice = false;
+            bool hasDepthDevice = false;
+            bool hasIMUDevice = false;
+
+            k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+            k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+            k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+
+            k4a_result_t device_info_result = get_device_info(device, &hasDepthDevice, &hasColorDevice, &hasIMUDevice);
+
+            if (K4A_SUCCEEDED(device_info_result))
+            {
+                if (hasColorDevice)
+                {
+                    if (!K4A_SUCCEEDED(get_color_mode_info(device,
+                                                           &recording_color_mode,
+                                                           recording_color_format,
+                                                           &color_mode_info)))
+                    {
+                        recording_color_mode = 0;
+                    }
+                }
+                else
+                {
+                    recording_color_mode = 0;
+                }
+
+                if (hasDepthDevice)
+                {
+                    if (!K4A_SUCCEEDED(get_depth_mode_info(device, &recording_depth_mode, &depth_mode_info)))
+                    {
+                        recording_depth_mode = 0;
+                    }
+                }
+                else
+                {
+                    recording_depth_mode = 0;
+                }
+
+                if (recording_color_mode == 0 && recording_depth_mode == 0)
+                {
+                    std::cout << "A recording requires either a color or a depth device." << std::endl;
+                    return 1;
+                }
+
+                if (!K4A_SUCCEEDED(get_fps_mode_info(
+                        device, &recording_fps_mode, &color_mode_info, &depth_mode_info, &fps_mode_info)))
+                {
+                    std::cout << "Error finding valid framerate for recording camera settings." << std::endl;
+                    return 1;
+                }
+
+                // validate imu
+                if (recording_imu_enabled && !hasIMUDevice)
+                {
+                    recording_imu_enabled = false;
+                    std::cout << "Warning: device " << device_index
+                              << " does not support IMU, so, IMU has been disabled." << std::endl;
+                }
             }
+            else
+            {
+                return 1;
+            }
+
+            k4a_device_close(device);
         }
         else
         {
-            recording_color_mode = 0;
-        }
-
-        if (hasDepthDevice)
-        {
-            if (!K4A_SUCCEEDED(get_depth_mode_info(device_index, &recording_depth_mode, &depth_mode_info)))
-            {
-                recording_depth_mode = 0;
-            }
-        }
-        else 
-        {
-            recording_depth_mode = 0;
-        }
-
-        if (recording_color_mode == 0 && recording_depth_mode == 0)
-        {
-            std::cout << "A recording requires either a color or a depth device." << std::endl;
-            return 1;
-        }
-
-        if (!K4A_SUCCEEDED(get_fps_mode_info(
-                device_index, &recording_fps_mode, &color_mode_info, &depth_mode_info, &fps_mode_info)))
-        {
-            std::cout << "Error finding valid framerate for recording camera settings." << std::endl;
-            return 1;
-        }
-
-        // validate imu
-        if (recording_imu_enabled && !hasIMUDevice)
-        {
-            recording_imu_enabled = false;
-            std::cout << "Warning: device " << device_index << " does not support IMU, so, IMU has been disabled."
-                      << std::endl;
+            std::cout << device_index << "Device Open Failed" << std::endl;
         }
     }
     else
     {
-        return 1;
+        std::cout << "No devices connected or unkown device specified." << std::endl;
     }
+
 
     if (subordinate_delay_off_master_usec > 0 && wired_sync_mode != K4A_WIRED_SYNC_MODE_SUBORDINATE)
     {
