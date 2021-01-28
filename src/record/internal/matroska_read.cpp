@@ -840,6 +840,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     {
         struct _recording_color_modes
         {
+            uint32_t mode_id;
             uint32_t width;
             uint32_t height;
             k4a_image_format_t native_format;
@@ -847,23 +848,34 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             float vertical_fov;
             int min_fps;
             int max_fps;
-        } recording_color_modes[] = { { 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 }, // color mode will be turned
-                                                                                         // off
-                                      { 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                                      { 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                                      { 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                                      { 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
-                                      { 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                                      { 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 } };
+        } recording_color_modes[] = { { 0, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 }, // color mode will be turned
+                                                                                            // off
+                                      { 1, 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                                      { 2, 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                                      { 3, 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                                      { 4, 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
+                                      { 5, 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+                                      { 6, 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 } };
 
-        color_mode_info.mode_id = color_mode_id;
-        color_mode_info.width = recording_color_modes[color_mode_id].width;
-        color_mode_info.height = recording_color_modes[color_mode_id].height;
-        color_mode_info.native_format = recording_color_modes[color_mode_id].native_format;
-        color_mode_info.horizontal_fov = recording_color_modes[color_mode_id].horizontal_fov;
-        color_mode_info.vertical_fov = recording_color_modes[color_mode_id].vertical_fov;
-        color_mode_info.min_fps = recording_color_modes[color_mode_id].min_fps;
-        color_mode_info.max_fps = recording_color_modes[color_mode_id].max_fps;
+        int mode_count = sizeof(recording_color_modes) / sizeof(recording_color_modes[0]);
+        int color_mode_index = 0;
+        for (int i = 0; i < mode_count; i++)
+        {
+            if (recording_color_modes[i].mode_id == color_mode_id)
+            {
+                color_mode_index = i;
+                break;
+            }
+        }
+
+        color_mode_info.mode_id = recording_color_modes[color_mode_index].mode_id;
+        color_mode_info.width = recording_color_modes[color_mode_index].width;
+        color_mode_info.height = recording_color_modes[color_mode_index].height;
+        color_mode_info.native_format = recording_color_modes[color_mode_index].native_format;
+        color_mode_info.horizontal_fov = recording_color_modes[color_mode_index].horizontal_fov;
+        color_mode_info.vertical_fov = recording_color_modes[color_mode_index].vertical_fov;
+        color_mode_info.min_fps = recording_color_modes[color_mode_index].min_fps;
+        color_mode_info.max_fps = recording_color_modes[color_mode_index].max_fps;
     }
 
     context->record_config.color_mode_info = color_mode_info;
@@ -1019,7 +1031,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     {
         struct _recording_depth_modes
         {
-            bool passive_ir_only;
+            uint32_t mode_id;
             uint32_t width;
             uint32_t height;
             k4a_image_format_t native_format;
@@ -1029,26 +1041,40 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
             int max_fps;
             int min_range;
             int max_range;
-        } recording_depth_modes[] = { { false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 }, // depth mode
-                                                                                                         // will be
-                                                                                                         // turned off
-                                      { false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800 },
-                                      { false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 },
-                                      { false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000 },
-                                      { false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500 },
-                                      { true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100 } };
+            bool passive_ir_only;
+        } recording_depth_modes[] = {
+            { 0, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0, false }, // depth mode
+                                                                                  // will be
+                                                                                  // turned off
+            { 1, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800, false },
+            { 2, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000, false },
+            { 3, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000, false },
+            { 4, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500, false },
+            { 5, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100, false }
+        };
+        
+        int mode_count = sizeof(recording_depth_modes) / sizeof(recording_depth_modes[0]);
+        int depth_mode_index = 0;
+        for (int i = 0; i < mode_count; i++)
+        {
+            if (recording_depth_modes[i].mode_id == depth_mode_id)
+            {
+                depth_mode_index = i;
+                break;
+            }
+        }
 
-        depth_mode_info.mode_id = depth_mode_id;
-        depth_mode_info.passive_ir_only = recording_depth_modes[depth_mode_id].passive_ir_only;
-        depth_mode_info.width = recording_depth_modes[depth_mode_id].width;
-        depth_mode_info.height = recording_depth_modes[depth_mode_id].height;
-        depth_mode_info.native_format = recording_depth_modes[depth_mode_id].native_format;
-        depth_mode_info.horizontal_fov = recording_depth_modes[depth_mode_id].horizontal_fov;
-        depth_mode_info.vertical_fov = recording_depth_modes[depth_mode_id].vertical_fov;
-        depth_mode_info.min_fps = recording_depth_modes[depth_mode_id].min_fps;
-        depth_mode_info.max_fps = recording_depth_modes[depth_mode_id].max_fps;
-        depth_mode_info.min_range = recording_depth_modes[depth_mode_id].min_range;
-        depth_mode_info.max_range = recording_depth_modes[depth_mode_id].max_range;
+        depth_mode_info.mode_id = recording_depth_modes[depth_mode_index].mode_id;
+        depth_mode_info.width = recording_depth_modes[depth_mode_index].width;
+        depth_mode_info.height = recording_depth_modes[depth_mode_index].height;
+        depth_mode_info.native_format = recording_depth_modes[depth_mode_index].native_format;
+        depth_mode_info.horizontal_fov = recording_depth_modes[depth_mode_index].horizontal_fov;
+        depth_mode_info.vertical_fov = recording_depth_modes[depth_mode_index].vertical_fov;
+        depth_mode_info.min_fps = recording_depth_modes[depth_mode_index].min_fps;
+        depth_mode_info.max_fps = recording_depth_modes[depth_mode_index].max_fps;
+        depth_mode_info.min_range = recording_depth_modes[depth_mode_index].min_range;
+        depth_mode_info.max_range = recording_depth_modes[depth_mode_index].max_range;
+        depth_mode_info.passive_ir_only = recording_depth_modes[depth_mode_index].passive_ir_only;
     }
 
     context->record_config.depth_mode_info = depth_mode_info;
@@ -1104,11 +1130,24 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     {
         struct _recording_fps_modes
         {
+            uint32_t mode_id;
             int fps;
-        } recording_fps_modes[] = { { 5 }, { 15 }, { 30 } };
+        } recording_fps_modes[] = { { 0, 5 }, { 1, 15 }, { 2, 30 } };
 
-        fps_mode_info.mode_id = fps_mode_id;
-        fps_mode_info.fps = recording_fps_modes[fps_mode_id].fps;
+        
+        int mode_count = sizeof(recording_fps_modes) / sizeof(recording_fps_modes[0]);
+        int fps_mode_index = 0;
+        for (int i = 0; i < mode_count; i++)
+        {
+            if (recording_fps_modes[i].mode_id == fps_mode_id)
+            {
+                fps_mode_index = i;
+                break;
+            }
+        }
+
+        fps_mode_info.mode_id = recording_fps_modes[fps_mode_index].mode_id;
+        fps_mode_info.fps = recording_fps_modes[fps_mode_index].fps;
     }
 
     context->record_config.fps_mode_info = fps_mode_info;
