@@ -1002,6 +1002,59 @@ TEST_P(color_control_test, control_test)
     }
 }
 
+/**
+ *  Functional test for verifying color modes.
+ *
+ *  @Test criteria
+ *   Pass conditions;
+ *       Calling k4a_device_get_color_mode_count() and k4a_device_get_color_mode() has proper return values.
+ *
+ */
+TEST_F(color_functional_test, colorModeInfo)
+{
+    K4A_INIT_STRUCT(k4a_color_mode_info_t, colorModeInfo)
+    int colorModeCount = 0;
+
+    // Test invalid arguments.
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode_count(NULL, &colorModeCount))
+        << "Unexpected return value for invalid device handle.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode_count(m_device, NULL))
+        << "Unexpected return value for invalid depth mode count pointer.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode(NULL, 0, &colorModeInfo))
+        << "Unexpected return value for invalid device handle.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode(m_device, 0, NULL))
+        << "Unexpected return value for invalid device handle.\n";
+
+    // Get the color mode count.
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_mode_count(m_device, &colorModeCount))
+        << "Couldn't get color mode count.\n";
+
+    // Test invalid color mode index.
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode(m_device, -1, &colorModeInfo))
+        << "Unexpected return value for color mode index less than 0.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode(m_device, colorModeCount, &colorModeInfo))
+        << "Unexpected return value for color mode index greater than number of depth modes.\n";
+
+    // Get color mode info.
+    for (int d = 0; d < colorModeCount; ++d)
+    {
+        colorModeInfo = { colorModeInfo.struct_size, colorModeInfo.struct_version, { 0 } };
+
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_mode(m_device, d, &colorModeInfo))
+            << "Couldn't get color mode info.\n";
+
+        EXPECT_EQ(colorModeInfo.struct_version, static_cast<uint32_t>(K4A_ABI_VERSION))
+            << "Color mode struct version invalid\n";
+
+        EXPECT_EQ(colorModeInfo.struct_size, static_cast<uint32_t>(sizeof(k4a_color_mode_info_t)))
+            << "Color mode struct size invalid\n";
+    }
+}
+
 INSTANTIATE_TEST_CASE_P(
     color_control,
     color_control_test,
