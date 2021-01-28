@@ -102,8 +102,8 @@ static int string_compare(const char *s1, const char *s2)
                     {
                         if (hasColorDevice)
                         {
-                            std::cout << "\tColor: Supported (" << version_info.rgb.major << "."
-                                      << version_info.rgb.minor << "." << version_info.rgb.iteration << ")" << std::endl;
+                            std::cout << "\tColor: Supported (" << version_info.rgb.major << "." << version_info.rgb.minor << "."
+                                      << version_info.rgb.iteration << ")" << std::endl;
                         }
                         else
                         {
@@ -111,7 +111,7 @@ static int string_compare(const char *s1, const char *s2)
                         }
                         if (hasDepthDevice)
                         {
-                            std::cout << "\tDepth: Supported (" << version_info.depth.major << "." << version_info.depth.minor 
+                            std::cout << "\tDepth: Supported (" << version_info.depth.major << "." << version_info.depth.minor
                                       << "." << version_info.depth.iteration << ")" << std::endl;
                         }
                         else
