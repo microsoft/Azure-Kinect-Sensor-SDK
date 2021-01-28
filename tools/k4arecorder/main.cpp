@@ -391,6 +391,7 @@ static bool validate_image_format(int device_id, int color_mode_id, k4a_image_fo
     return false;
 }
 
+
 int main(int argc, char **argv)
 {
     int device_index = 0;
@@ -413,9 +414,7 @@ int main(int argc, char **argv)
         cmd_parser.PrintOptions();
         exit(0);
     });
-    cmd_parser.RegisterOption("--list",
-                              "List the currently connected devices (includes color, depth and fps modes)",
-                              list_devices);
+    cmd_parser.RegisterOption("--list", "List the currently connected devices (includes color, depth and fps modes)", list_devices);
     cmd_parser.RegisterOption("--device",
                               "Specify the device index to use (default: 0)",
                               1,
@@ -625,23 +624,29 @@ int main(int argc, char **argv)
     // TODO: validate options for azure kinect
     if (validate_color_mode(device_index, recording_color_mode))
     {
+        
     }
     else
     {
+        
     }
 
     if (validate_image_format(device_index, recording_color_mode, recording_color_format))
     {
+        
     }
     else
     {
+        
     }
 
     if (validate_depth_mode(device_index, recording_depth_mode))
     {
+        
     }
     else
     {
+        
     }
 
     if (validate_fps(device_index, recording_fps_mode))
