@@ -555,7 +555,7 @@ TEST_F(depth_ft, depthModeChange)
  */
 TEST_F(depth_ft, deviceInfo)
 {
-    k4a_device_info_t deviceInfo;
+    K4A_INIT_STRUCT(k4a_device_info_t, deviceInfo)
 
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_info(NULL, &deviceInfo))
         << "Unexpected return value for invalid device handle.";
