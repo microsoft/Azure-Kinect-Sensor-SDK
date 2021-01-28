@@ -110,7 +110,8 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
         int height = static_cast<int>(m_recordConfiguration.color_mode_info.height);
         int common_factor = math_get_common_factor(width, height);
 
-        colorResolutionSS << (height < 1000 ? " " : "") << std::to_string(height) << "p " << std::to_string(width/ common_factor) << ":" << std::to_string(height/common_factor);
+        colorResolutionSS << (height < 1000 ? " " : "") << std::to_string(height) << "p "
+                          << std::to_string(width / common_factor) << ":" << std::to_string(height / common_factor);
 
         recording.set_color_conversion(K4A_IMAGE_FORMAT_COLOR_BGRA32);
         m_recordConfiguration.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
@@ -156,9 +157,9 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
     bool hasDepthDevice = false;
     bool hasIMUDevice = false;
     uint32_t capabilities = (uint32_t)m_recordConfiguration.device_info.capabilities;
-    //hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
-    //hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
-    //hasIMUDevice = capabilities == 4 || capabilities == 5 || capabilities == 6 || capabilities == 7;
+    // hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
+    // hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
+    // hasIMUDevice = capabilities == 4 || capabilities == 5 || capabilities == 6 || capabilities == 7;
 
     hasDepthDevice = (capabilities & 0x0001) == 1;
     hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
@@ -177,12 +178,12 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
 
     ImGui::TextUnformatted("Recording Settings");
     ImGui::Text("FPS:              %s", m_fpsLabel.c_str());
-    
+
     if (hasDepthDevice)
     {
         ImGui::Text("Depth mode:       %s", m_depthModeLabel.c_str());
     }
-    
+
     if (hasColorDevice)
     {
         ImGui::Text("Color format:     %s", m_colorFormatLabel.c_str());
@@ -198,9 +199,10 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
 
     ImGui::TextUnformatted("Sync settings");
 
-    std::string delay_description = hasColorDevice && hasDepthDevice ? "Depth/color" : hasDepthDevice ? "Depth" : "Color";
+    std::string delay_description = hasColorDevice && hasDepthDevice ? "Depth/color" :
+                                                                       hasDepthDevice ? "Depth" : "Color";
     ImGui::Text("%s delay (us): %d", delay_description.c_str(), m_depthDelayOffColorUsec);
-    
+
     ImGui::Text("Sync mode:              %s", m_wiredSyncModeLabel.c_str());
     ImGui::Text("Subordinate delay (us): %d", m_subordinateDelayOffMasterUsec);
     ImGui::Text("Start timestamp offset: %d", m_startTimestampOffsetUsec);
@@ -209,12 +211,12 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
 
     ImGui::TextUnformatted("Device info");
     ImGui::Text("Device S/N:      %s", m_deviceSerialNumber.c_str());
-    
+
     if (hasColorDevice)
     {
         ImGui::Text("RGB camera FW:   %s", m_colorFirmwareVersion.c_str());
     }
-    
+
     if (hasDepthDevice)
     {
         ImGui::Text("Depth camera FW: %s", m_depthFirmwareVersion.c_str());

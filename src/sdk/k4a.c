@@ -1359,9 +1359,13 @@ k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *
 k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    *mode_count = sizeof(device_color_modes) / sizeof(device_color_modes[0]);
+    k4a_result_t result = K4A_RESULT_FAILED;
+    if (NULL != mode_count)
+    {
+        *mode_count = sizeof(device_color_modes) / sizeof(device_color_modes[0]);
+        result = K4A_RESULT_SUCCEEDED;
+    }
 
     return result;
 }
@@ -1372,27 +1376,38 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_inde
     {
         return K4A_RESULT_FAILED;
     }
+
     if (mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
     {
         return K4A_RESULT_UNSUPPORTED;
     }
 
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+    k4a_result_t result = K4A_RESULT_FAILED;
+    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
 
-    color_mode_info.mode_id = mode_index; // for akdk the mode id is sequential, may not be the case for other device
-                                          // implementations
-    color_mode_info.width = device_color_modes[mode_index].width;
-    color_mode_info.height = device_color_modes[mode_index].height;
-    color_mode_info.native_format = device_color_modes[mode_index].native_format;
-    color_mode_info.horizontal_fov = device_color_modes[mode_index].horizontal_fov;
-    color_mode_info.vertical_fov = device_color_modes[mode_index].vertical_fov;
-    color_mode_info.min_fps = device_color_modes[mode_index].min_fps;
-    color_mode_info.max_fps = device_color_modes[mode_index].max_fps;
+    int color_mode_count = 0;
+    result = k4a_device_get_color_mode_count(device_handle, &color_mode_count);
 
-    SAFE_COPY_STRUCT(mode_info, &color_mode_info);
+    if (K4A_RESULT_SUCCEEDED == result && mode_index >= 0 && mode_index < color_mode_count)
+    {
+        color_mode_info.mode_id = mode_index; // for akdk the mode id is sequential, may not be the case for other
+                                              // device implementations
+        color_mode_info.width = device_color_modes[mode_index].width;
+        color_mode_info.height = device_color_modes[mode_index].height;
+        color_mode_info.native_format = device_color_modes[mode_index].native_format;
+        color_mode_info.horizontal_fov = device_color_modes[mode_index].horizontal_fov;
+        color_mode_info.vertical_fov = device_color_modes[mode_index].vertical_fov;
+        color_mode_info.min_fps = device_color_modes[mode_index].min_fps;
+        color_mode_info.max_fps = device_color_modes[mode_index].max_fps;
+
+        SAFE_COPY_STRUCT(mode_info, &color_mode_info);
+    }
+    else
+    {
+        result = K4A_RESULT_FAILED;
+    }
 
     return result;
 }
@@ -1400,9 +1415,13 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_inde
 k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    *mode_count = sizeof(device_depth_modes) / sizeof(device_depth_modes[0]);
+    k4a_result_t result = K4A_RESULT_FAILED;
+    if (NULL != mode_count)
+    {
+        *mode_count = sizeof(device_depth_modes) / sizeof(device_depth_modes[0]);
+        result = K4A_RESULT_SUCCEEDED;
+    }
 
     return result;
 }
@@ -1419,24 +1438,34 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
     }
 
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
+    k4a_result_t result = K4A_RESULT_FAILED;
     k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
 
-    depth_mode_info.mode_id = mode_index; // for akdk the mode id is sequential, may not be the case for other device
-                                          // implementations
-    depth_mode_info.passive_ir_only = device_depth_modes[mode_index].passive_ir_only;
-    depth_mode_info.width = device_depth_modes[mode_index].width;
-    depth_mode_info.height = device_depth_modes[mode_index].height;
-    depth_mode_info.native_format = device_depth_modes[mode_index].native_format;
-    depth_mode_info.horizontal_fov = device_depth_modes[mode_index].horizontal_fov;
-    depth_mode_info.vertical_fov = device_depth_modes[mode_index].vertical_fov;
-    depth_mode_info.min_fps = device_depth_modes[mode_index].min_fps;
-    depth_mode_info.max_fps = device_depth_modes[mode_index].max_fps;
-    depth_mode_info.min_range = device_depth_modes[mode_index].min_range;
-    depth_mode_info.max_range = device_depth_modes[mode_index].max_range;
+    int depth_mode_count = 0;
+    result = k4a_device_get_depth_mode_count(device_handle, &depth_mode_count);
 
-    SAFE_COPY_STRUCT(mode_info, &depth_mode_info);
+    if (K4A_RESULT_SUCCEEDED == result && mode_index >= 0 && mode_index < depth_mode_count)
+    {
+        depth_mode_info.mode_id = mode_index; // for akdk the mode id is sequential, may not be the case for other
+                                              // device implementations
+        depth_mode_info.passive_ir_only = device_depth_modes[mode_index].passive_ir_only;
+        depth_mode_info.width = device_depth_modes[mode_index].width;
+        depth_mode_info.height = device_depth_modes[mode_index].height;
+        depth_mode_info.native_format = device_depth_modes[mode_index].native_format;
+        depth_mode_info.horizontal_fov = device_depth_modes[mode_index].horizontal_fov;
+        depth_mode_info.vertical_fov = device_depth_modes[mode_index].vertical_fov;
+        depth_mode_info.min_fps = device_depth_modes[mode_index].min_fps;
+        depth_mode_info.max_fps = device_depth_modes[mode_index].max_fps;
+        depth_mode_info.min_range = device_depth_modes[mode_index].min_range;
+        depth_mode_info.max_range = device_depth_modes[mode_index].max_range;
+
+        SAFE_COPY_STRUCT(mode_info, &depth_mode_info);
+    }
+    else
+    {
+        result = K4A_RESULT_FAILED;
+    }
 
     return result;
 }
@@ -1444,9 +1473,13 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_inde
 k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    *mode_count = sizeof(device_fps_modes) / sizeof(device_fps_modes[0]);
+    k4a_result_t result = K4A_RESULT_FAILED;
+    if (NULL != mode_count)
+    {
+        *mode_count = sizeof(device_fps_modes) / sizeof(device_fps_modes[0]);
+        result = K4A_RESULT_SUCCEEDED;
+    }
 
     return result;
 }
@@ -1463,14 +1496,25 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_index,
     }
 
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
-    fps_mode_info.mode_id = mode_index; // for akdk the mode id is sequential, may not be the case for other device
-                                        // implementations
-    fps_mode_info.fps = device_fps_modes[mode_index].fps;
+    k4a_result_t result = K4A_RESULT_FAILED;
+    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
 
-    SAFE_COPY_STRUCT(mode_info, &fps_mode_info);
+    int fps_mode_count = 0;
+    result = k4a_device_get_fps_mode_count(device_handle, &fps_mode_count);
+
+    if (K4A_RESULT_SUCCEEDED == result && mode_index >= 0 && mode_index < fps_mode_count)
+    {
+        fps_mode_info.mode_id = mode_index; // for akdk the mode id is sequential, may not be the case for other device
+                                            // implementations
+        fps_mode_info.fps = device_fps_modes[mode_index].fps;
+
+        SAFE_COPY_STRUCT(mode_info, &fps_mode_info);
+    }
+    else
+    {
+        result = K4A_RESULT_FAILED;
+    }
 
     return result;
 }

@@ -359,8 +359,8 @@ k4a_result_t k4a_record_create(const char *path,
         if (K4A_SUCCEEDED(device_info_result))
         {
             uint32_t capabilities = device_info.capabilities;
-            //hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
-            //hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
+            // hasDepthDevice = capabilities == 1 || capabilities == 3 || capabilities == 5 || capabilities == 7;
+            // hasColorDevice = capabilities == 2 || capabilities == 3 || capabilities == 6 || capabilities == 7;
             hasDepthDevice = (capabilities & 0x0001) == 1;
             hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
 
