@@ -102,8 +102,9 @@ static int string_compare(const char *s1, const char *s2)
                     {
                         if (hasColorDevice)
                         {
-                            std::cout << "\tColor: Supported (" << version_info.rgb.major << "." << version_info.rgb.minor << "."
-                                      << version_info.rgb.iteration << ")" << std::endl;
+                            std::cout << "\tColor: Supported (" << version_info.rgb.major << "."
+                                      << version_info.rgb.minor << "." << version_info.rgb.iteration << ")"
+                                      << std::endl;
                         }
                         else
                         {
@@ -111,8 +112,9 @@ static int string_compare(const char *s1, const char *s2)
                         }
                         if (hasDepthDevice)
                         {
-                            std::cout << "\tDepth: Supported (" << version_info.depth.major << "." << version_info.depth.minor
-                                      << "." << version_info.depth.iteration << ")" << std::endl;
+                            std::cout << "\tDepth: Supported (" << version_info.depth.major << "."
+                                      << version_info.depth.minor << "." << version_info.depth.iteration << ")"
+                                      << std::endl;
                         }
                         else
                         {
@@ -391,7 +393,6 @@ static bool validate_image_format(int device_id, int color_mode_id, k4a_image_fo
     return false;
 }
 
-
 int main(int argc, char **argv)
 {
     int device_index = 0;
@@ -414,7 +415,9 @@ int main(int argc, char **argv)
         cmd_parser.PrintOptions();
         exit(0);
     });
-    cmd_parser.RegisterOption("--list", "List the currently connected devices (includes color, depth and fps modes)", list_devices);
+    cmd_parser.RegisterOption("--list",
+                              "List the currently connected devices (includes color, depth and fps modes)",
+                              list_devices);
     cmd_parser.RegisterOption("--device",
                               "Specify the device index to use (default: 0)",
                               1,
@@ -621,9 +624,8 @@ int main(int argc, char **argv)
         return 0;
     }
 
-
     // TODO: validate options for azure kinect
-    if (validate_color_mode(device_index, recording_color_mode)) 
+    if (validate_color_mode(device_index, recording_color_mode))
     {
     }
     else
@@ -632,7 +634,6 @@ int main(int argc, char **argv)
 
     if (validate_image_format(device_index, recording_color_mode, recording_color_format))
     {
-
     }
     else
     {
@@ -668,9 +669,6 @@ int main(int argc, char **argv)
     }
 
     // TODO: validate IMU (if unsupported, provide warning message, but don't kill)
-
-
-
 
     if (subordinate_delay_off_master_usec > 0 && wired_sync_mode != K4A_WIRED_SYNC_MODE_SUBORDINATE)
     {
