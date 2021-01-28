@@ -295,7 +295,7 @@ static k4a_result_t get_color_mode_info(k4a_device_t device,
         {
             for (int i = 1; i < mode_count; i++)
             {
-                k4a_color_mode_info_t mode_info;
+                k4a_color_mode_info_t mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
                 if (K4A_SUCCEEDED(k4a_device_get_color_mode(device, i, &mode_info)))
                 {
                     if (mode_info.height <= 720)
@@ -333,7 +333,7 @@ static k4a_result_t get_depth_mode_info(k4a_device_t device, int32_t *mode_id, k
         {
             for (int i = 1; i < mode_count; i++)
             {
-                k4a_depth_mode_info_t mode_info;
+                k4a_depth_mode_info_t mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
                 if (K4A_SUCCEEDED(k4a_device_get_depth_mode(device, i, &mode_info)))
                 {
                     if (mode_info.width > 320 && mode_info.height > 288 && mode_info.horizontal_fov < 120.0f &&
@@ -377,7 +377,7 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
             int max_fps = 0;
             for (int i = 1; i < mode_count; i++)
             {
-                k4a_fps_mode_info_t mode_info;
+                k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
                 if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
                 {
                     if (mode_info.fps > max_fps)
@@ -402,10 +402,12 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
                 int mode_id = 0;
                 for (int i = 1; i < mode_count; i++)
                 {
-                    k4a_fps_mode_info_t mode_info;
+                    std::cout << i << std::endl;
+                    k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
                     if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
                     {
-                        if (mode_info.fps > fps && mode_info.fps <= 15)
+                        std::cout << mode_info.fps << std::endl;
+                        if ((fps == 0 || mode_info.fps > fps) && mode_info.fps <= 15)
                         {
                             mode_id = i;
                             fps = mode_info.fps;
@@ -413,10 +415,10 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
                     }
                 }
 
-                std::cout << "Could not recording using 30 frames per second with camera settings." << std::endl;
-
+                std::cout << "Warning: reduced frame rate down to " << fps << "." << std::endl;
                 if (mode_id != 0 && mode_id != *fps_mode_id)
                 {
+                    *fps_mode_id = mode_id;
                     result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
                 }
                 else
