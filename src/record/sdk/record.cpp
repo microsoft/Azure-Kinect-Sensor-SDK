@@ -344,6 +344,7 @@ k4a_result_t k4a_record_create(const char *path,
 
     // TODO: remove after finished testing
     // k4arecorder -l 10 -c 1080p -d NFOV_2X2BINNED -r 30 "D:\Neal Analytics\Microsoft\Kinect Recordings\output.mkv"
+    // k4arecorder -l 10 -c 1 -d 2 -r 2 "D:\Neal Analytics\Microsoft\Kinect Recordings\output.mkv"
 
     // TODO: comment
     bool hasColorDevice = false;
@@ -542,15 +543,6 @@ k4a_result_t k4a_record_create(const char *path,
 
             if (K4A_SUCCEEDED(result))
             {
-                if (cJSON_AddBoolToObject(depth_mode_info_json, "passive_ir_only", depth_mode_info.passive_ir_only) ==
-                    NULL)
-                {
-                    result = K4A_RESULT_FAILED;
-                }
-            }
-
-            if (K4A_SUCCEEDED(result))
-            {
                 if (cJSON_AddNumberToObject(depth_mode_info_json, "width", depth_mode_info.width) == NULL)
                 {
                     result = K4A_RESULT_FAILED;
@@ -618,6 +610,15 @@ k4a_result_t k4a_record_create(const char *path,
             if (K4A_SUCCEEDED(result))
             {
                 if (cJSON_AddNumberToObject(depth_mode_info_json, "max_range", depth_mode_info.max_range) == NULL)
+                {
+                    result = K4A_RESULT_FAILED;
+                }
+            }
+
+            if (K4A_SUCCEEDED(result))
+            {
+                if (cJSON_AddBoolToObject(depth_mode_info_json, "passive_ir_only", depth_mode_info.passive_ir_only) ==
+                    NULL)
                 {
                     result = K4A_RESULT_FAILED;
                 }
