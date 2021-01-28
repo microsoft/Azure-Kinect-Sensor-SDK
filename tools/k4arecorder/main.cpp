@@ -621,6 +621,7 @@ int main(int argc, char **argv)
         return 0;
     }
 
+
     // TODO: validate options for azure kinect
     if (validate_color_mode(device_index, recording_color_mode)) 
     {
@@ -631,6 +632,7 @@ int main(int argc, char **argv)
 
     if (validate_image_format(device_index, recording_color_mode, recording_color_format))
     {
+
     }
     else
     {
@@ -638,7 +640,6 @@ int main(int argc, char **argv)
 
     if (validate_depth_mode(device_index, recording_depth_mode))
     {
-
     }
     else
     {
@@ -667,6 +668,9 @@ int main(int argc, char **argv)
     }
 
     // TODO: validate IMU (if unsupported, provide warning message, but don't kill)
+
+
+
 
     if (subordinate_delay_off_master_usec > 0 && wired_sync_mode != K4A_WIRED_SYNC_MODE_SUBORDINATE)
     {
