@@ -122,12 +122,13 @@ static void free_shared_depth_image(void *buffer, void *context)
 }
 
 static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
-                                              uint32_t fps_mode_id,
-                                              uint32_t depth_mode_id,
+                                              int32_t fps_mode_id,
+                                              int32_t depth_mode_id,
                                               int *depth_engine_max_compute_time_ms,
                                               size_t *depth_engine_output_buffer_size)
 {
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, fps_mode_id > K4A_FRAMES_PER_SECOND_30);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
+                        fps_mode_id < K4A_FRAMES_PER_SECOND_5 || fps_mode_id > K4A_FRAMES_PER_SECOND_30);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
                         depth_mode_id <= K4A_DEPTH_MODE_OFF || depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;

@@ -65,9 +65,9 @@ Assumes size comes before version */
 /* Safe getting a value from a struct */
 #define SAFE_GET_MEMBER(S, M, DEFAULT_VALUE) (HAS_MEMBER(S, M) ? ((S)->M) : (DEFAULT_VALUE));
 
-inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
+inline static uint32_t k4a_convert_fps_to_uint(int fps)
 {
-    uint32_t fps_int;
+    uint32_t fps_int = 0;
     switch (fps)
     {
     case K4A_FRAMES_PER_SECOND_5:
