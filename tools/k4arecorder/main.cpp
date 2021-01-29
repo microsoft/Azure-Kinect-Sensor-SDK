@@ -389,14 +389,13 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
             }
         }
 
-
         result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
         if (K4A_SUCCEEDED(result))
         {
             if (color_mode_info->height >= 3072 ||
                 (depth_mode_info->height >= 1024 && depth_mode_info->horizontal_fov >= 120.0f &&
-                    depth_mode_info->vertical_fov >= 120.0f && depth_mode_info->min_range >= 250 &&
-                    depth_mode_info->max_range >= 2500))
+                 depth_mode_info->vertical_fov >= 120.0f && depth_mode_info->min_range >= 250 &&
+                 depth_mode_info->max_range >= 2500))
             {
                 int fps = 0;
                 int mode_id = 0;
@@ -649,8 +648,8 @@ int main(int argc, char **argv)
                                       }
                                       else
                                       {
-                                          subordinate_delay_off_master_usec = 
-                                              static_cast<uint32_t>(subordinate_delay_off_master_usec_value);
+                                          subordinate_delay_off_master_usec = static_cast<uint32_t>(
+                                              subordinate_delay_off_master_usec_value);
                                       }
                                   }
                                   catch (const std::exception &)
@@ -744,7 +743,6 @@ int main(int argc, char **argv)
         if (K4A_SUCCEEDED(k4a_device_open(device_index, &device)))
         {
 
-            
             bool hasColorDevice = false;
             bool hasDepthDevice = false;
             bool hasIMUDevice = false;
@@ -821,7 +819,6 @@ int main(int argc, char **argv)
     {
         std::cout << "No devices connected or unkown device specified." << std::endl;
     }
-
 
     if (subordinate_delay_off_master_usec > 0 && wired_sync_mode != K4A_WIRED_SYNC_MODE_SUBORDINATE)
     {
