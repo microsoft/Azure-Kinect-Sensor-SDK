@@ -33,13 +33,13 @@ int main()
 
         k4a::device dev = k4a::device::open(K4A_DEVICE_DEFAULT);
 
-        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_color_mode(dev.handle(), 1, &color_mode_info); // K4A_COLOR_RESOLUTION_720P
 
-        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_depth_mode(dev.handle(), 3, &depth_mode_info); // K4A_DEPTH_MODE_WFOV_2X2BINNED
 
-        k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_fps_mode(dev.handle(), 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
 
         // Start the device

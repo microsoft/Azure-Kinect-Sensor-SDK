@@ -22,7 +22,7 @@
 #include "k4aviewerutil.h"
 #include "k4awindowmanager.h"
 #include "k4aimugraphdatagenerator.h"
-#include <k4ainternal\math.h>
+#include <k4ainternal/math.h>
 
 using namespace k4aviewer;
 namespace
