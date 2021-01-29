@@ -57,22 +57,14 @@ static void print_calibration()
 
         k4a_calibration_t calibration;
 
-        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_color_mode(device, 2, &color_mode_info); // K4A_COLOR_RESOLUTION_1080P
 
-        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_depth_mode(device, 2, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_UNBINNED
 
-        k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_fps_mode(device, 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
-
-        k4a_device_configuration_t deviceConfig = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        deviceConfig.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        deviceConfig.color_mode_id = color_mode_info.mode_id;
-        deviceConfig.depth_mode_id = depth_mode_info.mode_id;
-        deviceConfig.fps_mode_id = fps_mode_info.mode_id;
-        deviceConfig.wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
-        deviceConfig.synchronized_images_only = true;
 
         // get calibration
         if (K4A_RESULT_SUCCEEDED !=

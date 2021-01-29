@@ -1042,7 +1042,7 @@ TEST_F(color_functional_test, colorModeInfo)
     // Get color mode info.
     for (int d = 0; d < colorModeCount; ++d)
     {
-        colorModeInfo = { colorModeInfo.struct_size, colorModeInfo.struct_version, { 0 } };
+        colorModeInfo = { colorModeInfo.struct_size, colorModeInfo.struct_version, 0 };
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_mode(m_device, d, &colorModeInfo))
             << "Couldn't get color mode info.\n";
