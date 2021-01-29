@@ -176,6 +176,7 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
         printf("Timed out waiting for a capture\n");
         goto Exit;
     case K4A_WAIT_RESULT_FAILED:
+    case K4A_WAIT_RESULT_UNSUPPORTED:
         printf("Failed to read a capture\n");
         goto Exit;
     }

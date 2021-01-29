@@ -153,7 +153,7 @@ static const char *get_string_from_color_resolution(k4a_color_resolution_t resol
     switch (resolution)
     {
     case K4A_COLOR_RESOLUTION_OFF:
-        return "OFF";
+        return "K4A_COLOR_RESOLUTION_OFF";
         break;
     case K4A_COLOR_RESOLUTION_720P:
         return "1280 * 720  16:9";
@@ -172,6 +172,9 @@ static const char *get_string_from_color_resolution(k4a_color_resolution_t resol
         break;
     case K4A_COLOR_RESOLUTION_3072P:
         return "4096 * 3072 4:3";
+        break;
+    case K4A_COLOR_RESOLUTION_COUNT:
+        return "K4A_COLOR_RESOLUTION_INVALID";
         break;
     }
     assert(0);
@@ -199,6 +202,9 @@ static const char *get_string_from_depth_mode(k4a_depth_mode_t mode)
         break;
     case K4A_DEPTH_MODE_PASSIVE_IR:
         return "K4A_DEPTH_MODE_PASSIVE_IR";
+        break;
+    case K4A_DEPTH_MODE_COUNT:
+        return "K4A_DEPTH_MODE_INVALID";
         break;
     }
     assert(0);
