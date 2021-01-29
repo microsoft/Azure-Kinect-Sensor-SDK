@@ -637,8 +637,10 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     // TODO: Uncomment supports30fps if it is going to be used.
     // It is commented out for now to allow compilation in Linux without warning/error.
-    // const bool supports30fps = !(m_config.EnableColorCamera && m_config.color_mode_id == K4A_COLOR_RESOLUTION_3072P) &&
-    //                            !(m_config.EnableDepthCamera && m_config.depth_mode_id == K4A_DEPTH_MODE_WFOV_UNBINNED);
+    // const bool supports30fps = !(m_config.EnableColorCamera && m_config.color_mode_id == K4A_COLOR_RESOLUTION_3072P)
+    // &&
+    //                            !(m_config.EnableDepthCamera && m_config.depth_mode_id ==
+    //                            K4A_DEPTH_MODE_WFOV_UNBINNED);
 
     // TODO: Uncomment if enableFramerate is going to be used.
     // It is commented out for now to allow compilation in Linux without warning/error.

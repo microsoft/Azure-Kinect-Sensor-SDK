@@ -614,8 +614,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->fps_mode_id != K4A_FRAMES_PER_SECOND_5 || 
-            config->fps_mode_id != K4A_FRAMES_PER_SECOND_15 ||
+        if (config->fps_mode_id != K4A_FRAMES_PER_SECOND_5 || config->fps_mode_id != K4A_FRAMES_PER_SECOND_15 ||
             config->fps_mode_id != K4A_FRAMES_PER_SECOND_30)
         {
             result = K4A_RESULT_FAILED;
