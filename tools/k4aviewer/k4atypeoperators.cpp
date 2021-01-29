@@ -34,6 +34,8 @@ std::ostream &operator<<(std::ostream &s, const k4a_result_t &val)
         return s << "K4A_RESULT_SUCCEEDED";
     case K4A_RESULT_FAILED:
         return s << "K4A_RESULT_FAILED";
+    case K4A_RESULT_UNSUPPORTED:
+        return s << "K4A_RESULT_UNSUPPORTED";
     }
     return s;
 }
@@ -48,6 +50,8 @@ std::ostream &operator<<(std::ostream &s, const k4a_wait_result_t &val)
         return s << "K4A_WAIT_RESULT_FAILED";
     case K4A_WAIT_RESULT_TIMEOUT:
         return s << "K4A_WAIT_RESULT_TIMEOUT";
+    case K4A_WAIT_RESULT_UNSUPPORTED:
+        return s << "K4A_WAIT_RESULT_UNSUPPORTED";
     }
     return s;
 }
@@ -62,6 +66,8 @@ std::ostream &operator<<(std::ostream &s, const k4a_buffer_result_t &val)
         return s << "K4A_BUFFER_RESULT_FAILED";
     case K4A_BUFFER_RESULT_TOO_SMALL:
         return s << "K4A_BUFFER_RESULT_TOO_SMALL";
+    case K4A_BUFFER_RESULT_UNSUPPORTED:
+        return s << "K4A_BUFFER_RESULT_UNSUPPORTED";
     }
     return s;
 }

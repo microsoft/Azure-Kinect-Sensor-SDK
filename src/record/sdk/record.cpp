@@ -353,7 +353,7 @@ k4a_result_t k4a_record_create(const char *path,
     {
         const char *device_info_str = "";
 
-        k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
 
         k4a_result_t device_info_result = k4a_device_get_info(device, &device_info);
 
@@ -423,7 +423,7 @@ k4a_result_t k4a_record_create(const char *path,
     {
         const char *color_mode_info_str = "";
 
-        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
 
         k4a_result_t color_mode_result = k4a_device_get_color_mode(device,
                                                                    device_config.color_mode_id,
@@ -523,7 +523,7 @@ k4a_result_t k4a_record_create(const char *path,
     {
         const char *depth_mode_info_str = "";
 
-        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
 
         k4a_result_t depth_mode_result = k4a_device_get_depth_mode(device,
                                                                    device_config.depth_mode_id,
@@ -651,7 +651,7 @@ k4a_result_t k4a_record_create(const char *path,
     {
         const char *fps_mode_info_str = "";
 
-        k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
 
         k4a_result_t fps_mode_result = k4a_device_get_fps_mode(device, device_config.fps_mode_id, &fps_mode_info);
 

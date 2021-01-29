@@ -16,7 +16,7 @@
 #include <ctime>
 #include <csignal>
 #include <math.h>
-#include <k4ainternal\math.h>
+#include <k4ainternal/math.h>
 
 static time_t exiting_timestamp;
 
@@ -85,7 +85,7 @@ static int string_compare(const char *s1, const char *s2)
                 }
 
                 // device info
-                k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, { 0 } };
+                k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
                 if (k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
                 {
                     bool hasColorDevice = false;
@@ -144,7 +144,7 @@ static int string_compare(const char *s1, const char *s2)
                                 {
                                     k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t),
                                                                               K4A_ABI_VERSION,
-                                                                              { 0 } };
+                                                                              0 };
                                     if (k4a_device_get_color_mode(device, j, &color_mode_info) == K4A_RESULT_SUCCEEDED)
                                     {
                                         std::cout << "\t\t\t" << j << " = ";
@@ -183,7 +183,7 @@ static int string_compare(const char *s1, const char *s2)
                                 {
                                     k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t),
                                                                               K4A_ABI_VERSION,
-                                                                              { 0 } };
+                                                                              0 };
                                     if (k4a_device_get_depth_mode(device, j, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
                                     {
                                         std::cout << "\t\t\t" << j << " = ";
@@ -229,7 +229,7 @@ static int string_compare(const char *s1, const char *s2)
                                 {
                                     k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t),
                                                                           K4A_ABI_VERSION,
-                                                                          { 0 } };
+                                                                          0 };
                                     if (k4a_device_get_fps_mode(device, j, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
                                     {
                                         std::cout << "\t\t\t" << j << " = " << fps_mode_info.fps << std::endl;
@@ -258,7 +258,7 @@ static int string_compare(const char *s1, const char *s2)
 
 static k4a_result_t get_device_info(k4a_device_t device, bool *hasDepthDevice, bool *hasColorDevice, bool *hasIMUDevice)
 {
-    k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, { 0 } };
+    k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
     if (k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
     {
         uint32_t capabilities = (uint32_t)device_info.capabilities;
@@ -295,7 +295,7 @@ static k4a_result_t get_color_mode_info(k4a_device_t device,
         {
             for (int i = 1; i < mode_count; i++)
             {
-                k4a_color_mode_info_t mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+                k4a_color_mode_info_t mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
                 if (K4A_SUCCEEDED(k4a_device_get_color_mode(device, i, &mode_info)))
                 {
                     if (mode_info.height <= 720)
@@ -333,7 +333,7 @@ static k4a_result_t get_depth_mode_info(k4a_device_t device, int32_t *mode_id, k
         {
             for (int i = 1; i < mode_count; i++)
             {
-                k4a_depth_mode_info_t mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+                k4a_depth_mode_info_t mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
                 if (K4A_SUCCEEDED(k4a_device_get_depth_mode(device, i, &mode_info)))
                 {
                     if (mode_info.width > 320 && mode_info.height > 288 && mode_info.horizontal_fov < 120.0f &&
@@ -377,7 +377,7 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
             int max_fps = 0;
             for (int i = 1; i < mode_count; i++)
             {
-                k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+                k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
                 if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
                 {
                     if (mode_info.fps > max_fps)
@@ -403,7 +403,7 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
                 for (int i = 1; i < mode_count; i++)
                 {
                     std::cout << i << std::endl;
-                    k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+                    k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
                     if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
                     {
                         std::cout << mode_info.fps << std::endl;
@@ -642,9 +642,16 @@ int main(int argc, char **argv)
                               [&](const std::vector<char *> &args) {
                                   try
                                   {
-                                      subordinate_delay_off_master_usec = std::stoi(args[0]);
-                                      if (subordinate_delay_off_master_usec < 0)
+                                      int subordinate_delay_off_master_usec_value = std::stoi(args[0]);
+                                      if (subordinate_delay_off_master_usec_value < 0)
+                                      {
                                           throw std::runtime_error("External sync delay must be positive.");
+                                      }
+                                      else
+                                      {
+                                          subordinate_delay_off_master_usec = 
+                                              static_cast<uint32_t>(subordinate_delay_off_master_usec_value);
+                                      }
                                   }
                                   catch (const std::exception &)
                                   {
@@ -742,9 +749,9 @@ int main(int argc, char **argv)
             bool hasDepthDevice = false;
             bool hasIMUDevice = false;
 
-            k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
-            k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
-            k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+            k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+            k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
+            k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
 
             k4a_result_t device_info_result = get_device_info(device, &hasDepthDevice, &hasColorDevice, &hasIMUDevice);
 

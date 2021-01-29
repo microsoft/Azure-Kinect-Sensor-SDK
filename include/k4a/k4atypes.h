@@ -872,10 +872,10 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
  */
 typedef enum
 {
-    ​​​​​​K4A_CAPABILITY_DEPTH = 1,
+    K4A_CAPABILITY_DEPTH = 1,
     K4A_CAPABILITY_COLOR = 2,
     K4A_CAPABILITY_IMU = 4
-} device_capabilities​​;
+} device_capabilities;
 
 /** TODO: Fill in.
  *

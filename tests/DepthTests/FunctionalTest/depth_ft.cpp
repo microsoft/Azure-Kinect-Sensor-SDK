@@ -615,7 +615,7 @@ TEST_F(depth_ft, deviceModeInfo)
     // Get depth mode info.
     for (int d = 0; d < depthModeCount; ++d)
     {
-        depthModeInfo = { depthModeInfo.struct_size, depthModeInfo.struct_version, { 0 } };
+        depthModeInfo = { depthModeInfo.struct_size, depthModeInfo.struct_version, 0 };
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_depth_mode(m_device, d, &depthModeInfo))
             << "Couldn't get depth mode info.\n";
@@ -668,7 +668,7 @@ TEST_F(depth_ft, fpsModeInfo)
     // Get fps mode info.
     for (int d = 0; d < fpsModeCount; ++d)
     {
-        fpsModeInfo = { fpsModeInfo.struct_size, fpsModeInfo.struct_version, { 0 } };
+        fpsModeInfo = { fpsModeInfo.struct_size, fpsModeInfo.struct_version, 0 };
 
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_fps_mode(m_device, d, &fpsModeInfo))
             << "Couldn't get fps mode info.\n";

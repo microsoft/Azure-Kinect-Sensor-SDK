@@ -81,10 +81,10 @@ TEST_F(k4a_cpp_ft, k4a)
     (void)kinect.is_sync_in_connected();
 
     {
-        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_depth_mode(kinect.handle(), 1, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_2X2BINNED
 
-        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_color_mode(kinect.handle(), 3, &color_mode_info); // K4A_COLOR_RESOLUTION_1440P
 
         // should not throw exception
@@ -96,17 +96,17 @@ TEST_F(k4a_cpp_ft, k4a)
     }
 
     {
-        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_depth_mode(kinect.handle(), 1, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_2X2BINNED
 
-        k4a_color_mode_info_t color_mode_info3 = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_color_mode_info_t color_mode_info3 = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_color_mode(kinect.handle(), 3, &color_mode_info3); // K4A_COLOR_RESOLUTION_1440P
 
         std::vector<uint8_t> raw_cal = kinect.get_raw_calibration();
         calibration cal = kinect.get_calibration(depth_mode_info.mode_id, color_mode_info3.mode_id);
         ASSERT_EQ(cal.color_mode_id, (uint32_t)3);
 
-        k4a_color_mode_info_t color_mode_info2 = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+        k4a_color_mode_info_t color_mode_info2 = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_device_get_color_mode(kinect.handle(), 2, &color_mode_info2); // K4A_COLOR_RESOLUTION_1080P
 
         cal = calibration::get_from_raw(raw_cal.data(),
