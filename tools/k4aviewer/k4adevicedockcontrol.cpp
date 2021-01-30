@@ -669,8 +669,12 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         fps_mode_items.push_back({ fps_mode.mode_id, (const std::string)description });
     }
 
-    framerateUpdated |=
-        ImGuiExtensions::K4AComboBox("##Framerate", "", ImGuiComboFlags_None, fps_mode_items, pFPSModeInfo);
+    framerateUpdated |= ImGuiExtensions::K4AComboBox("##Framerate",
+                                                     "",
+                                                     ImGuiComboFlags_None,
+                                                     fps_mode_items,
+                                                     pFPSModeInfo,
+                                                     enableFramerate);
 
     ImGui::Unindent();
 
