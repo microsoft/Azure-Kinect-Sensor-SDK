@@ -1,0 +1,370 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a_1_1calibration" kind="class" language="C++" prot="public">
+    <compoundname>k4a::calibration</compoundname>
+    <basecompoundref refid="structk4a__calibration__t" prot="public" virt="non-virtual">k4a_calibration_t</basecompoundref>
+    <includes refid="k4a_8hpp" local="no">k4a/k4a.hpp</includes>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="structk4a_1_1calibration_a44fbcadffdbef6fa2be0e076afcfb470_1a44fbcadffdbef6fa2be0e076afcfb470" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="unionk4a__float3__t" kindref="compound">k4a_float3_t</ref></type>
+        <definition>k4a_float3_t k4a::calibration::convert_3d_to_3d</definition>
+        <argsstring>(const k4a_float3_t &amp;source_point3d, k4a_calibration_type_t source_camera, k4a_calibration_type_t target_camera) const</argsstring>
+        <name>convert_3d_to_3d</name>
+        <param>
+          <type>const <ref refid="unionk4a__float3__t" kindref="compound">k4a_float3_t</ref> &amp;</type>
+          <declname>source_point3d</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>source_camera</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>target_camera</declname>
+        </param>
+        <briefdescription>
+<para>Transform a 3d point of a source coordinate system into a 3d point of the target coordinate system. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_gaacd1eab997ef964b5e436afa5295726e_1gaacd1eab997ef964b5e436afa5295726e" kindref="member">k4a_calibration_3d_to_3d</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="652" column="18" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="652" bodyend="665"/>
+      </memberdef>
+      <memberdef kind="function" id="structk4a_1_1calibration_a84577df64d47642d0b8f1fee11b21a96_1a84577df64d47642d0b8f1fee11b21a96" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::calibration::convert_2d_to_3d</definition>
+        <argsstring>(const k4a_float2_t &amp;source_point2d, float source_depth, k4a_calibration_type_t source_camera, k4a_calibration_type_t target_camera, k4a_float3_t *target_point3d) const</argsstring>
+        <name>convert_2d_to_3d</name>
+        <param>
+          <type>const <ref refid="unionk4a__float2__t" kindref="compound">k4a_float2_t</ref> &amp;</type>
+          <declname>source_point2d</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>source_depth</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>source_camera</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>target_camera</declname>
+        </param>
+        <param>
+          <type><ref refid="unionk4a__float3__t" kindref="compound">k4a_float3_t</ref> *</type>
+          <declname>target_point3d</declname>
+        </param>
+        <briefdescription>
+<para>Transform a 2d pixel coordinate with an associated depth value of the source camera into a 3d point of the target coordinate system. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Returns false if the point is invalid in the target coordinate system (and therefore target_point3d should not be used) Throws error if calibration contains invalid data.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga664602bdb48dab38117a6c1d14b880de_1ga664602bdb48dab38117a6c1d14b880de" kindref="member">k4a_calibration_2d_to_3d</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="675" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="675" bodyend="690"/>
+      </memberdef>
+      <memberdef kind="function" id="structk4a_1_1calibration_a74a6fef25540e9cdf18ed06ff1cfdc2e_1a74a6fef25540e9cdf18ed06ff1cfdc2e" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::calibration::convert_3d_to_2d</definition>
+        <argsstring>(const k4a_float3_t &amp;source_point3d, k4a_calibration_type_t source_camera, k4a_calibration_type_t target_camera, k4a_float2_t *target_point2d) const</argsstring>
+        <name>convert_3d_to_2d</name>
+        <param>
+          <type>const <ref refid="unionk4a__float3__t" kindref="compound">k4a_float3_t</ref> &amp;</type>
+          <declname>source_point3d</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>source_camera</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>target_camera</declname>
+        </param>
+        <param>
+          <type><ref refid="unionk4a__float2__t" kindref="compound">k4a_float2_t</ref> *</type>
+          <declname>target_point2d</declname>
+        </param>
+        <briefdescription>
+<para>Transform a 3d point of a source coordinate system into a 2d pixel coordinate of the target camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Returns false if the point is invalid in the target coordinate system (and therefore target_point2d should not be used) Throws error if calibration contains invalid data.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga2ed8b51d727425caa942aab190fc2ba9_1ga2ed8b51d727425caa942aab190fc2ba9" kindref="member">k4a_calibration_3d_to_2d</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="699" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="699" bodyend="713"/>
+      </memberdef>
+      <memberdef kind="function" id="structk4a_1_1calibration_afd343e2419c2a3437559aa90fcf2a4f0_1afd343e2419c2a3437559aa90fcf2a4f0" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::calibration::convert_2d_to_2d</definition>
+        <argsstring>(const k4a_float2_t &amp;source_point2d, float source_depth, k4a_calibration_type_t source_camera, k4a_calibration_type_t target_camera, k4a_float2_t *target_point2d) const</argsstring>
+        <name>convert_2d_to_2d</name>
+        <param>
+          <type>const <ref refid="unionk4a__float2__t" kindref="compound">k4a_float2_t</ref> &amp;</type>
+          <declname>source_point2d</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>source_depth</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>source_camera</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>target_camera</declname>
+        </param>
+        <param>
+          <type><ref refid="unionk4a__float2__t" kindref="compound">k4a_float2_t</ref> *</type>
+          <declname>target_point2d</declname>
+        </param>
+        <briefdescription>
+<para>Transform a 2d pixel coordinate with an associated depth value of the source camera into a 2d pixel coordinate of the target camera Returns false if the point is invalid in the target coordinate system (and therefore target_point2d should not be used) Throws error if calibration contains invalid data. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga3b6bf6dedbfe67468e2f895dcce68ed4_1ga3b6bf6dedbfe67468e2f895dcce68ed4" kindref="member">k4a_calibration_2d_to_2d</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="723" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="723" bodyend="738"/>
+      </memberdef>
+      <memberdef kind="function" id="structk4a_1_1calibration_ab72a37ed466a41d68c522678fa57ff4f_1ab72a37ed466a41d68c522678fa57ff4f" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::calibration::convert_color_2d_to_depth_2d</definition>
+        <argsstring>(const k4a_float2_t &amp;source_point2d, const image &amp;depth_image, k4a_float2_t *target_point2d) const</argsstring>
+        <name>convert_color_2d_to_depth_2d</name>
+        <param>
+          <type>const <ref refid="unionk4a__float2__t" kindref="compound">k4a_float2_t</ref> &amp;</type>
+          <declname>source_point2d</declname>
+        </param>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type><ref refid="unionk4a__float2__t" kindref="compound">k4a_float2_t</ref> *</type>
+          <declname>target_point2d</declname>
+        </param>
+        <briefdescription>
+<para>Transform a 2D pixel coordinate from color camera into a 2D pixel coordinate of the depth camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>This function searches along an epipolar line in the depth image to find the corresponding depth pixel. Returns false if the point is invalid in the target coordinate system (and therefore target_point2d should not be used) Throws error if calibration contains invalid data.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga18bc3138d6cc68af6c49902853fda9b5_1ga18bc3138d6cc68af6c49902853fda9b5" kindref="member">k4a_calibration_color_2d_to_depth_2d</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="747" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="747" bodyend="760"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structk4a_1_1calibration_afa00ccc1e2fa237c17220385c49ed7be_1afa00ccc1e2fa237c17220385c49ed7be" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="structk4a_1_1calibration" kindref="compound">calibration</ref></type>
+        <definition>static calibration k4a::calibration::get_from_raw</definition>
+        <argsstring>(char *raw_calibration, size_t raw_calibration_size, uint32_t depth_mode_id, uint32_t color_mode_id)</argsstring>
+        <name>get_from_raw</name>
+        <param>
+          <type>char *</type>
+          <declname>raw_calibration</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>raw_calibration_size</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>depth_mode_id</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>color_mode_id</declname>
+        </param>
+        <briefdescription>
+<para>Get the camera calibration for a device from a raw calibration blob. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga3efe518a3de8c75c174cb97c84e12735_1ga3efe518a3de8c75c174cb97c84e12735" kindref="member">k4a_calibration_get_from_raw</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="768" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="768" bodyend="779"/>
+      </memberdef>
+      <memberdef kind="function" id="structk4a_1_1calibration_a16c8644a560372d08819f14cef2e16a3_1a16c8644a560372d08819f14cef2e16a3" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="structk4a_1_1calibration" kindref="compound">calibration</ref></type>
+        <definition>static calibration k4a::calibration::get_from_raw</definition>
+        <argsstring>(uint8_t *raw_calibration, size_t raw_calibration_size, uint32_t depth_mode_id, uint32_t color_mode_id)</argsstring>
+        <name>get_from_raw</name>
+        <param>
+          <type>uint8_t *</type>
+          <declname>raw_calibration</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>raw_calibration_size</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>depth_mode_id</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>color_mode_id</declname>
+        </param>
+        <briefdescription>
+<para>Get the camera calibration for a device from a raw calibration blob. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga3efe518a3de8c75c174cb97c84e12735_1ga3efe518a3de8c75c174cb97c84e12735" kindref="member">k4a_calibration_get_from_raw</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="787" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="787" bodyend="793"/>
+      </memberdef>
+      <memberdef kind="function" id="structk4a_1_1calibration_a664b3159be937252240e7d5baa638837_1a664b3159be937252240e7d5baa638837" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="structk4a_1_1calibration" kindref="compound">calibration</ref></type>
+        <definition>static calibration k4a::calibration::get_from_raw</definition>
+        <argsstring>(std::vector&lt; uint8_t &gt; &amp;raw_calibration, uint32_t depth_mode_id, uint32_t color_mode_id)</argsstring>
+        <name>get_from_raw</name>
+        <param>
+          <type>std::vector&lt; uint8_t &gt; &amp;</type>
+          <declname>raw_calibration</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>depth_mode_id</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>color_mode_id</declname>
+        </param>
+        <briefdescription>
+<para>Get the camera calibration for a device from a raw calibration blob. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga3efe518a3de8c75c174cb97c84e12735_1ga3efe518a3de8c75c174cb97c84e12735" kindref="member">k4a_calibration_get_from_raw</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="800" column="24" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="800" bodyend="808"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Wrapper for <ref refid="structk4a__calibration__t" kindref="compound">k4a_calibration_t</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Provides member functions for <ref refid="structk4a__calibration__t" kindref="compound">k4a_calibration_t</ref>. </para>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>k4a::calibration</label>
+        <link refid="structk4a_1_1calibration"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>k4a_calibration_t</label>
+        <link refid="structk4a__calibration__t"/>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="6">
+        <label>k4a_calibration_intrinsic_parameters_t::_param</label>
+        <link refid="structk4a__calibration__intrinsic__parameters__t_1_1__param"/>
+      </node>
+      <node id="3">
+        <label>k4a_calibration_camera_t</label>
+        <link refid="structk4a__calibration__camera__t"/>
+        <childnode refid="4" relation="usage">
+          <edgelabel>intrinsics</edgelabel>
+        </childnode>
+        <childnode refid="7" relation="usage">
+          <edgelabel>extrinsics</edgelabel>
+        </childnode>
+      </node>
+      <node id="4">
+        <label>k4a_calibration_intrinsics_t</label>
+        <link refid="structk4a__calibration__intrinsics__t"/>
+        <childnode refid="5" relation="usage">
+          <edgelabel>parameters</edgelabel>
+        </childnode>
+      </node>
+      <node id="1">
+        <label>k4a::calibration</label>
+        <link refid="structk4a_1_1calibration"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="7">
+        <label>k4a_calibration_extrinsics_t</label>
+        <link refid="structk4a__calibration__extrinsics__t"/>
+      </node>
+      <node id="5">
+        <label>k4a_calibration_intrinsic_parameters_t</label>
+        <link refid="unionk4a__calibration__intrinsic__parameters__t"/>
+        <childnode refid="6" relation="usage">
+          <edgelabel>param</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>k4a_calibration_t</label>
+        <link refid="structk4a__calibration__t"/>
+        <childnode refid="3" relation="usage">
+          <edgelabel>color_camera_calibration</edgelabel>
+          <edgelabel>depth_camera_calibration</edgelabel>
+        </childnode>
+        <childnode refid="7" relation="usage">
+          <edgelabel>extrinsics</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="645" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="646" bodyend="809"/>
+    <listofallmembers>
+      <member refid="structk4a__calibration__t_1a3adc45fd59f6c8df46bec9848d70c565" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>color_camera_calibration</name></member>
+      <member refid="structk4a__calibration__t_1a1fc290d07999eda51ddbe6765e4a4223" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>color_mode_id</name></member>
+      <member refid="structk4a_1_1calibration_afd343e2419c2a3437559aa90fcf2a4f0_1afd343e2419c2a3437559aa90fcf2a4f0" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>convert_2d_to_2d</name></member>
+      <member refid="structk4a_1_1calibration_a84577df64d47642d0b8f1fee11b21a96_1a84577df64d47642d0b8f1fee11b21a96" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>convert_2d_to_3d</name></member>
+      <member refid="structk4a_1_1calibration_a74a6fef25540e9cdf18ed06ff1cfdc2e_1a74a6fef25540e9cdf18ed06ff1cfdc2e" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>convert_3d_to_2d</name></member>
+      <member refid="structk4a_1_1calibration_a44fbcadffdbef6fa2be0e076afcfb470_1a44fbcadffdbef6fa2be0e076afcfb470" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>convert_3d_to_3d</name></member>
+      <member refid="structk4a_1_1calibration_ab72a37ed466a41d68c522678fa57ff4f_1ab72a37ed466a41d68c522678fa57ff4f" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>convert_color_2d_to_depth_2d</name></member>
+      <member refid="structk4a__calibration__t_1afb9c6f1ed401107b0f65a7fa6a5af910" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>depth_camera_calibration</name></member>
+      <member refid="structk4a__calibration__t_1a1b206641693220f43836e40b74585028" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>depth_mode_id</name></member>
+      <member refid="structk4a__calibration__t_a03f4b1600f8088739ffeea818a5df890_1a03f4b1600f8088739ffeea818a5df890" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>extrinsics</name></member>
+      <member refid="structk4a_1_1calibration_afa00ccc1e2fa237c17220385c49ed7be_1afa00ccc1e2fa237c17220385c49ed7be" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>get_from_raw</name></member>
+      <member refid="structk4a_1_1calibration_a16c8644a560372d08819f14cef2e16a3_1a16c8644a560372d08819f14cef2e16a3" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>get_from_raw</name></member>
+      <member refid="structk4a_1_1calibration_a664b3159be937252240e7d5baa638837_1a664b3159be937252240e7d5baa638837" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>get_from_raw</name></member>
+      <member refid="group___functions_ga3b6bf6dedbfe67468e2f895dcce68ed4_1ga3b6bf6dedbfe67468e2f895dcce68ed4" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>k4a_calibration_2d_to_2d</name></member>
+      <member refid="group___functions_ga664602bdb48dab38117a6c1d14b880de_1ga664602bdb48dab38117a6c1d14b880de" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>k4a_calibration_2d_to_3d</name></member>
+      <member refid="group___functions_ga2ed8b51d727425caa942aab190fc2ba9_1ga2ed8b51d727425caa942aab190fc2ba9" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>k4a_calibration_3d_to_2d</name></member>
+      <member refid="group___functions_gaacd1eab997ef964b5e436afa5295726e_1gaacd1eab997ef964b5e436afa5295726e" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>k4a_calibration_3d_to_3d</name></member>
+      <member refid="group___functions_ga18bc3138d6cc68af6c49902853fda9b5_1ga18bc3138d6cc68af6c49902853fda9b5" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>k4a_calibration_color_2d_to_depth_2d</name></member>
+      <member refid="group___functions_ga853a1a5b6d521bbdf523a69e890c4f10_1ga853a1a5b6d521bbdf523a69e890c4f10" prot="public" virt="non-virtual"><scope>k4a::calibration</scope><name>k4a_transformation_create</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -50,7 +50,6 @@ inline std::pair<uint16_t, uint16_t> GetDepthModeRange(k4a_depth_mode_info_t dep
 {
     if (K4ASourceSelectionDockControl::SelectedDevice != -1)
     {
-        // TODO: not sure if we need this check for passive
         if (!depth_mode_info.passive_ir_only)
         {
             return { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range };

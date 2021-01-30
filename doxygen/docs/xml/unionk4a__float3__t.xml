@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="unionk4a__float3__t" kind="union" language="C++" prot="public">
+    <compoundname>k4a_float3_t</compoundname>
+    <includes refid="k4atypes_8h" local="no">k4atypes.h</includes>
+    <innerclass refid="structk4a__float3__t_1_1__xyz" prot="public">k4a_float3_t::_xyz</innerclass>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="unionk4a__float3__t_1a58b13ec006f76805563722e17cb6857c" prot="public" static="no" mutable="no">
+        <type>struct <ref refid="structk4a__float3__t_1_1__xyz" kindref="compound">k4a_float3_t::_xyz</ref></type>
+        <definition>struct k4a_float3_t::_xyz k4a_float3_t::xyz</definition>
+        <argsstring></argsstring>
+        <name>xyz</name>
+        <briefdescription>
+<para>X, Y, Z representation of a vector. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1253" column="21"/>
+      </memberdef>
+      <memberdef kind="variable" id="unionk4a__float3__t_1ace48a59a47986cef62c0a2e6137beacf" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_float3_t::v[3]</definition>
+        <argsstring>[3]</argsstring>
+        <name>v</name>
+        <briefdescription>
+<para>Array representation of a vector. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1254" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1254" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Three dimensional floating point vector. </para>
+    </briefdescription>
+    <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>k4a_float3_t::_xyz</label>
+        <link refid="structk4a__float3__t_1_1__xyz"/>
+      </node>
+      <node id="1">
+        <label>k4a_float3_t</label>
+        <link refid="unionk4a__float3__t"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>xyz</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1245" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1246" bodyend="1255"/>
+    <listofallmembers>
+      <member refid="unionk4a__float3__t_1ace48a59a47986cef62c0a2e6137beacf" prot="public" virt="non-virtual"><scope>k4a_float3_t</scope><name>v</name></member>
+      <member refid="unionk4a__float3__t_1a58b13ec006f76805563722e17cb6857c" prot="public" virt="non-virtual"><scope>k4a_float3_t</scope><name>xyz</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

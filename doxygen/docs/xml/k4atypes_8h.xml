@@ -1,0 +1,1598 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="k4atypes_8h" kind="file" language="C++">
+    <compoundname>k4atypes.h</compoundname>
+    <includes local="no">inttypes.h</includes>
+    <includes local="no">stddef.h</includes>
+    <includes local="no">string.h</includes>
+    <includes local="no">stdbool.h</includes>
+    <includedby refid="k4a_8h" local="no">k4a.h</includedby>
+    <incdepgraph>
+      <node id="5">
+        <label>stdbool.h</label>
+      </node>
+      <node id="1">
+        <label>k4atypes.h</label>
+        <link refid="k4atypes_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>stddef.h</label>
+      </node>
+      <node id="4">
+        <label>string.h</label>
+      </node>
+      <node id="2">
+        <label>inttypes.h</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>k4a.h</label>
+        <link refid="k4a_8h_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>k4atypes.h</label>
+        <link refid="k4atypes_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>k4a.hpp</label>
+        <link refid="k4a_8hpp_source"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="structk4a__device__t" prot="public">k4a_device_t</innerclass>
+    <innerclass refid="structk4a__capture__t" prot="public">k4a_capture_t</innerclass>
+    <innerclass refid="structk4a__image__t" prot="public">k4a_image_t</innerclass>
+    <innerclass refid="structk4a__transformation__t" prot="public">k4a_transformation_t</innerclass>
+    <innerclass refid="structk4a__device__info__t" prot="public">k4a_device_info_t</innerclass>
+    <innerclass refid="structk4a__color__mode__info__t" prot="public">k4a_color_mode_info_t</innerclass>
+    <innerclass refid="structk4a__depth__mode__info__t" prot="public">k4a_depth_mode_info_t</innerclass>
+    <innerclass refid="structk4a__fps__mode__info__t" prot="public">k4a_fps_mode_info_t</innerclass>
+    <innerclass refid="structk4a__device__configuration__t" prot="public">k4a_device_configuration_t</innerclass>
+    <innerclass refid="structk4a__calibration__extrinsics__t" prot="public">k4a_calibration_extrinsics_t</innerclass>
+    <innerclass refid="unionk4a__calibration__intrinsic__parameters__t" prot="public">k4a_calibration_intrinsic_parameters_t</innerclass>
+    <innerclass refid="structk4a__calibration__intrinsic__parameters__t_1_1__param" prot="public">k4a_calibration_intrinsic_parameters_t::_param</innerclass>
+    <innerclass refid="structk4a__calibration__intrinsics__t" prot="public">k4a_calibration_intrinsics_t</innerclass>
+    <innerclass refid="structk4a__calibration__camera__t" prot="public">k4a_calibration_camera_t</innerclass>
+    <innerclass refid="structk4a__calibration__t" prot="public">k4a_calibration_t</innerclass>
+    <innerclass refid="structk4a__version__t" prot="public">k4a_version_t</innerclass>
+    <innerclass refid="structk4a__hardware__version__t" prot="public">k4a_hardware_version_t</innerclass>
+    <innerclass refid="unionk4a__float2__t" prot="public">k4a_float2_t</innerclass>
+    <innerclass refid="structk4a__float2__t_1_1__xy" prot="public">k4a_float2_t::_xy</innerclass>
+    <innerclass refid="unionk4a__float3__t" prot="public">k4a_float3_t</innerclass>
+    <innerclass refid="structk4a__float3__t_1_1__xyz" prot="public">k4a_float3_t::_xyz</innerclass>
+    <innerclass refid="structk4a__imu__sample__t" prot="public">k4a_imu_sample_t</innerclass>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="k4atypes_8h_a9ef8ef99366f3a043bc6f2dcf02fa437_1a9ef8ef99366f3a043bc6f2dcf02fa437" prot="public" static="no">
+        <name>K4A_DECLARE_HANDLE</name>
+        <param><defname>_handle_name_</defname></param>
+        <initializer>    typedef struct _##_handle_name_                                                                                    \
+    {                                                                                                                  \
+        size_t _rsvd; /**&lt; Reserved, do not use. */                                                                    \
+    } * _handle_name_;</initializer>
+        <briefdescription>
+<para>Declare an opaque handle type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>_handle_name_</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The type name of the handle</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>This is used to define the public handle types for the Azure Kinect APIs. The macro is not intended to be used outside of the Azure Kinect headers. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="34" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="34" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___macros_ga8e5b48150bc243c6052793bd830c2fcd_1ga8e5b48150bc243c6052793bd830c2fcd" prot="public" static="no">
+        <name>K4A_SUCCEEDED</name>
+        <param><defname>_result_</defname></param>
+        <initializer>(_result_ == <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref>)</initializer>
+        <briefdescription>
+<para>Validate that a k4a_result_t is successful. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="677" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="677" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___macros_ga7c2e32349135d008b6f836c571d434b4_1ga7c2e32349135d008b6f836c571d434b4" prot="public" static="no">
+        <name>K4A_FAILED</name>
+        <param><defname>_result_</defname></param>
+        <initializer>(!<ref refid="group___macros_ga8e5b48150bc243c6052793bd830c2fcd_1ga8e5b48150bc243c6052793bd830c2fcd" kindref="member">K4A_SUCCEEDED</ref>(_result_))</initializer>
+        <briefdescription>
+<para>Validate that a k4a_result_t is failed. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="687" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="687" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___macros_gaeab021a840259ca3ad882bd080260224_1gaeab021a840259ca3ad882bd080260224" prot="public" static="no">
+        <name>K4A_INIT_STRUCT</name>
+        <param><defname>T</defname></param>
+        <param><defname>S</defname></param>
+        <initializer>    T S{};                                                                                                             \
+    S.struct_size = sizeof(T);                                                                                         \
+    S.struct_version = <ref refid="group___definitions_ga91dde801d6ce8feecfd317e330361eee_1ga91dde801d6ce8feecfd317e330361eee" kindref="member">K4A_ABI_VERSION</ref>;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>T</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Type of struct</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>S</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Instance of a struct of type T</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Initializes a struct of type T with a struct size and a struct version.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="706" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="706" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___definitions_ga91dde801d6ce8feecfd317e330361eee_1ga91dde801d6ce8feecfd317e330361eee" prot="public" static="no">
+        <name>K4A_ABI_VERSION</name>
+        <initializer>1</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="remark"><para>The ABI version of the SDK implementation.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1297" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1297" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___definitions_gaebe4c1071a8ba3b04e32d55c85cae72d_1gaebe4c1071a8ba3b04e32d55c85cae72d" prot="public" static="no">
+        <name>K4A_DEVICE_DEFAULT</name>
+        <initializer>(0)</initializer>
+        <briefdescription>
+<para>Default device index. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Passed as an argument to <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref> to open the default sensor</para>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1309" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1309" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___definitions_gac012768169429fb54ba09f2964775cb9_1gac012768169429fb54ba09f2964775cb9" prot="public" static="no">
+        <name>K4A_WAIT_INFINITE</name>
+        <initializer>(-1)</initializer>
+        <briefdescription>
+<para>An infinite wait time for functions that take a timeout parameter. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1319" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1319" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="enum">
+      <memberdef kind="enum" id="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_result_t</name>
+        <enumvalue id="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" prot="public">
+          <name>K4A_RESULT_SUCCEEDED</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+<para>The result was successful. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" prot="public">
+          <name>K4A_RESULT_FAILED</name>
+          <briefdescription>
+<para>The result was a failure. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" prot="public">
+          <name>K4A_RESULT_UNSUPPORTED</name>
+          <briefdescription>
+<para>The operation was unsupported. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Result code returned by Azure Kinect APIs. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="217" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="218" bodyend="222"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1ga71b3cf304a2cd8fbac2f86c876deda5c" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_buffer_result_t</name>
+        <enumvalue id="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3" prot="public">
+          <name>K4A_BUFFER_RESULT_SUCCEEDED</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+<para>The result was successful. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca29305af05427c7e739e910f02f72709a" prot="public">
+          <name>K4A_BUFFER_RESULT_FAILED</name>
+          <briefdescription>
+<para>The result was a failure. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248" prot="public">
+          <name>K4A_BUFFER_RESULT_TOO_SMALL</name>
+          <briefdescription>
+<para>The input buffer was too small. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5cacf0947fc3cc389914416e42c43aa102e" prot="public">
+          <name>K4A_BUFFER_RESULT_UNSUPPORTED</name>
+          <briefdescription>
+<para>The operation was unsupported. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Result code returned by Azure Kinect APIs. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="232" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="233" bodyend="238"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1ga44c7c0c1cfba7c879e9e2da1a869e4ee" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_wait_result_t</name>
+        <enumvalue id="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca" prot="public">
+          <name>K4A_WAIT_RESULT_SUCCEEDED</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+<para>The result was successful. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea956d1d20b14de6ba0a0ed97955e75540" prot="public">
+          <name>K4A_WAIT_RESULT_FAILED</name>
+          <briefdescription>
+<para>The result was a failure. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6" prot="public">
+          <name>K4A_WAIT_RESULT_TIMEOUT</name>
+          <briefdescription>
+<para>The operation timed out. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eeab95879b0cce3590b7e76255ce6f20a4a" prot="public">
+          <name>K4A_WAIT_RESULT_UNSUPPORTED</name>
+          <briefdescription>
+<para>The operation was unsupported. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Result code returned by Azure Kinect APIs. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="248" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="249" bodyend="254"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1ga84d8f9a665773fb4e75a2ac8160444c6" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_log_level_t</name>
+        <enumvalue id="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6ae7fe889b69c2046d0e053c63131d39ba" prot="public">
+          <name>K4A_LOG_LEVEL_CRITICAL</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+<para>Most severe level of debug messaging. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6ac0ca5fc3565ffd8de299b9b856ddba21" prot="public">
+          <name>K4A_LOG_LEVEL_ERROR</name>
+          <briefdescription>
+<para>2nd most severe level of debug messaging. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6ad66a4a27178ad83bd17c82c49b84f8f3" prot="public">
+          <name>K4A_LOG_LEVEL_WARNING</name>
+          <briefdescription>
+<para>3nd most severe level of debug messaging. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6acc980bd260314ea70122265107413a3d" prot="public">
+          <name>K4A_LOG_LEVEL_INFO</name>
+          <briefdescription>
+<para>2nd least severe level of debug messaging. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6a98a692cbdade257a83e341dfc78b4497" prot="public">
+          <name>K4A_LOG_LEVEL_TRACE</name>
+          <briefdescription>
+<para>Least severe level of debug messaging. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6a9e378e25c87ede3b91dece190350aaee" prot="public">
+          <name>K4A_LOG_LEVEL_OFF</name>
+          <briefdescription>
+<para>No logging is performed. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Verbosity levels of debug messaging. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="264" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="265" bodyend="272"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_image_format_t</name>
+        <enumvalue id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaae172e7eecc6f4adfc318c789e49aaf9" prot="public">
+          <name>K4A_IMAGE_FORMAT_COLOR_MJPG</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+<para>Color image type MJPG. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>The buffer for each image is encoded as a JPEG and can be decoded by a JPEG decoder.</para>
+<para>Because the image is compressed, the stride parameter for the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> is not applicable.</para>
+<para>Each MJPG encoded image in a stream may be of differing size depending on the compression efficiency. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaf334f6c32b6b44d1f5df02a349f05288" prot="public">
+          <name>K4A_IMAGE_FORMAT_COLOR_NV12</name>
+          <briefdescription>
+<para>Color image type NV12. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>NV12 images separate the luminance and chroma data such that all the luminance is at the beginning of the buffer, and the chroma lines follow immediately after.</para>
+<para>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. Chroma has half as many lines of height and half the width in pixels of the luminance. Each chroma line has the same width in bytes as a luminance line. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbab6a418334cfd2018ff3b9e360c472306" prot="public">
+          <name>K4A_IMAGE_FORMAT_COLOR_YUY2</name>
+          <briefdescription>
+<para>Color image type YUY2. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>YUY2 stores chroma and luminance data in interleaved pixels.</para>
+<para>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbade43f3d12f5ce476be5be2b0e289d481" prot="public">
+          <name>K4A_IMAGE_FORMAT_COLOR_BGRA32</name>
+          <briefdescription>
+<para>Color image type BGRA32. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Each pixel of BGRA32 data is four bytes. The first three bytes represent Blue, Green, and Red data. The fourth byte is the alpha channel and is unused in the Azure Kinect APIs.</para>
+<para>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory.</para>
+<para>The Azure Kinect device does not natively capture in this format. Requesting images of this format requires additional computation in the API. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba5abd5fdff69181007ec79ed3087aa18e" prot="public">
+          <name>K4A_IMAGE_FORMAT_DEPTH16</name>
+          <briefdescription>
+<para>Depth image type DEPTH16. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Each pixel of DEPTH16 data is two bytes of little endian unsigned depth data. The unit of the data is in millimeters from the origin of the camera.</para>
+<para>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba39a56f94523816908dbb08994e33c37f" prot="public">
+          <name>K4A_IMAGE_FORMAT_IR16</name>
+          <briefdescription>
+<para>Image type IR16. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Each pixel of IR16 data is two bytes of little endian unsigned depth data. The value of the data represents brightness.</para>
+<para>This format represents infrared light and is captured by the depth camera.</para>
+<para>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba17dea221ecdfa136dea68f80e0397e15" prot="public">
+          <name>K4A_IMAGE_FORMAT_CUSTOM8</name>
+          <briefdescription>
+<para>Single channel image type CUSTOM8. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Each pixel of CUSTOM8 is a single channel one byte of unsigned data.</para>
+<para>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba6f2ee5c37729f9196b0cf3d3028edc42" prot="public">
+          <name>K4A_IMAGE_FORMAT_CUSTOM16</name>
+          <briefdescription>
+<para>Single channel image type CUSTOM16. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Each pixel of CUSTOM16 is a single channel two bytes of little endian unsigned data.</para>
+<para>Stride indicates the length of each line in bytes and should be used to determine the start location of each line of the image in memory. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52" prot="public">
+          <name>K4A_IMAGE_FORMAT_CUSTOM</name>
+          <briefdescription>
+<para>Custom image format. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Used in conjunction with user created images or images packing non-standard data.</para>
+<para>See the originator of the custom formatted image for information on how to interpret the data. </para>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Image format type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="remark"><para>The image format indicates how the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> buffer data is interpreted.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="286" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="287" bodyend="400"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1ga06f55e23e1d260b069e89e4a9cd6f4ee" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_transformation_interpolation_type_t</name>
+        <enumvalue id="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1gga06f55e23e1d260b069e89e4a9cd6f4eea9b7517e41898a208566db614bcf26cc5" prot="public">
+          <name>K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+<para>Nearest neighbor interpolation. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1gga06f55e23e1d260b069e89e4a9cd6f4eeac91cb5f01c87411e2980d109a7a36e56" prot="public">
+          <name>K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR</name>
+          <briefdescription>
+<para>Linear interpolation. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Transformation interpolation type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="remark"><para>Interpolation type used with k4a_transformation_depth_image_to_color_camera_custom.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="413" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="414" bodyend="417"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_color_control_command_t</name>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a13b21d4ea33a20633096955c966d96e5" prot="public">
+          <name>K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+<para>Exposure time setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a4f851ff5f566e23588abaa10ba1e9194" kindref="member">K4A_COLOR_CONTROL_MODE_AUTO</ref> or <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>.</para>
+<para>The Azure Kinect supports a limited number of fixed expsore settings. When setting this, expect the exposure to be rounded up to the nearest setting. Exceptions are 1) The last value in the table is the upper limit, so a value larger than this will be overridden to the largest entry in the table. 2) The exposure time cannot be larger than the equivelent FPS. So expect 100ms exposure time to be reduced to 30ms or 33.33ms when the camera is started. The most recent copy of the table &apos;device_exposure_mapping&apos; is in <ulink url="https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/src/color/color_priv.h">https://github.com/microsoft/Azure-Kinect-Sensor-SDK/blob/develop/src/color/color_priv.h</ulink></para>
+<para>Exposure time is measured in microseconds. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a2dc2ccb23e64049b49a57e2a44346e46" prot="public">
+          <name>K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY</name>
+          <briefdescription>
+<para>Exposure or Framerate priority setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May only be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>.</para>
+<para>Value of 0 means framerate priority. Value of 1 means exposure priority.</para>
+<para>Using exposure priority may impact the framerate of both the color and depth cameras.</para>
+<para>Deprecated starting in 1.2.0. Please discontinue usage, firmware does not support this. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a4c6d97415ef755ab4966e5952d68eb5d" prot="public">
+          <name>K4A_COLOR_CONTROL_BRIGHTNESS</name>
+          <briefdescription>
+<para>Brightness setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May only be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>.</para>
+<para>The valid range is 0 to 255. The default value is 128. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a8adb525eccd99574d260749dc84e88a8" prot="public">
+          <name>K4A_COLOR_CONTROL_CONTRAST</name>
+          <briefdescription>
+<para>Contrast setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May only be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a59e8a733fcf68f06f0a887faa2cfda49" prot="public">
+          <name>K4A_COLOR_CONTROL_SATURATION</name>
+          <briefdescription>
+<para>Saturation setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May only be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468aa0348c48b612513655f4267550a9bb0a" prot="public">
+          <name>K4A_COLOR_CONTROL_SHARPNESS</name>
+          <briefdescription>
+<para>Sharpness setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May only be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468ad51b4d047313a5c6a778e17cce066a91" prot="public">
+          <name>K4A_COLOR_CONTROL_WHITEBALANCE</name>
+          <briefdescription>
+<para>White balance setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a4f851ff5f566e23588abaa10ba1e9194" kindref="member">K4A_COLOR_CONTROL_MODE_AUTO</ref> or <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>.</para>
+<para>The unit is degrees Kelvin. The setting must be set to a value evenly divisible by 10 degrees. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468aee6d4472b21851255ead137b43424715" prot="public">
+          <name>K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION</name>
+          <briefdescription>
+<para>Backlight compensation setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May only be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>.</para>
+<para>Value of 0 means backlight compensation is disabled. Value of 1 means backlight compensation is enabled. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a1b519b3a91fb0a79e8638187f94f177c" prot="public">
+          <name>K4A_COLOR_CONTROL_GAIN</name>
+          <briefdescription>
+<para>Gain setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May only be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a2faa17ccc813fda09c1172fc1a8b629e" prot="public">
+          <name>K4A_COLOR_CONTROL_POWERLINE_FREQUENCY</name>
+          <briefdescription>
+<para>Powerline frequency setting. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>May only be set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>.</para>
+<para>Value of 1 sets the powerline compensation to 50 Hz. Value of 2 sets the powerline compensation to 60 Hz. </para>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Color sensor control commands. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="remark"><para>The current settings can be read with <ref refid="group___functions_ga5cb97bc0db4ab28ad98c44e323da1cce_1ga5cb97bc0db4ab28ad98c44e323da1cce" kindref="member">k4a_device_get_color_control()</ref>. The settings can be set with <ref refid="group___functions_gae81269489170b26b7f0bbe1a7f9d31d6_1gae81269489170b26b7f0bbe1a7f9d31d6" kindref="member">k4a_device_set_color_control()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>Control values set on a device are reset only when the device is power cycled. The device will retain the settings even if the <ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref> is closed or the application is restarted.</para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1ga3485402fc1bc5dc709e0d5859b6e8c88" kindref="member">k4a_color_control_mode_t</ref></para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="437" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="438" bodyend="540"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1ga3485402fc1bc5dc709e0d5859b6e8c88" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_color_control_mode_t</name>
+        <enumvalue id="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a4f851ff5f566e23588abaa10ba1e9194" prot="public">
+          <name>K4A_COLOR_CONTROL_MODE_AUTO</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+<para>set the associated k4a_color_control_command_t to auto </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" prot="public">
+          <name>K4A_COLOR_CONTROL_MODE_MANUAL</name>
+          <briefdescription>
+<para>set the associated k4a_color_control_command_t to manual </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Color sensor control mode. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="remark"><para>The current settings can be read with <ref refid="group___functions_ga5cb97bc0db4ab28ad98c44e323da1cce_1ga5cb97bc0db4ab28ad98c44e323da1cce" kindref="member">k4a_device_get_color_control()</ref>. The settings can be set with <ref refid="group___functions_gae81269489170b26b7f0bbe1a7f9d31d6_1gae81269489170b26b7f0bbe1a7f9d31d6" kindref="member">k4a_device_set_color_control()</ref>.</para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" kindref="member">k4a_color_control_command_t</ref></para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="556" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="557" bodyend="560"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1ga6404c655dd8656efb745c6ee90da2505" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_wired_sync_mode_t</name>
+        <enumvalue id="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c" prot="public">
+          <name>K4A_WIRED_SYNC_MODE_STANDALONE</name>
+          <briefdescription>
+<para>Neither &apos;Sync In&apos; or &apos;Sync Out&apos; connections are used. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505a014b98f7b0c962a994abe1a472bf6697" prot="public">
+          <name>K4A_WIRED_SYNC_MODE_MASTER</name>
+          <briefdescription>
+<para>The &apos;Sync Out&apos; jack is enabled and synchronization data it driven out the connected wire. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>While in master mode the color camera must be enabled as part of the multi device sync signalling logic. Even if the color image is not needed, the color camera must be running. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505a8140f817b21902d275832a1ef6c216ca" prot="public">
+          <name>K4A_WIRED_SYNC_MODE_SUBORDINATE</name>
+          <briefdescription>
+<para>The &apos;Sync In&apos; jack is used for synchronization and &apos;Sync Out&apos; is driven for the next device in the chain. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>&apos;Sync Out&apos; is a mirror of &apos;Sync In&apos; for this mode. </para>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Synchronization mode when connecting two or more devices together. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="570" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="571" bodyend="580"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_calibration_type_t</name>
+        <enumvalue id="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a1125662b013ee7624cc663a583637d79" prot="public">
+          <name>K4A_CALIBRATION_TYPE_UNKNOWN</name>
+          <initializer>= -1</initializer>
+          <briefdescription>
+<para>Calibration type is unknown. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a5e8e2174902ceeeb16c4dc54914fcc66" prot="public">
+          <name>K4A_CALIBRATION_TYPE_DEPTH</name>
+          <briefdescription>
+<para>Depth sensor. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a5e5062625d7c0ba242b078daf0b526c3" prot="public">
+          <name>K4A_CALIBRATION_TYPE_COLOR</name>
+          <briefdescription>
+<para>Color sensor. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a632965983030d4ff2eea8375ad9ca606" prot="public">
+          <name>K4A_CALIBRATION_TYPE_GYRO</name>
+          <briefdescription>
+<para>Gyroscope sensor. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a16f265f6e61cc007d0494f778368ffc1" prot="public">
+          <name>K4A_CALIBRATION_TYPE_ACCEL</name>
+          <briefdescription>
+<para>Accelerometer sensor. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a972984dcc30591a8f98034fb582fcfcd" prot="public">
+          <name>K4A_CALIBRATION_TYPE_NUM</name>
+          <briefdescription>
+<para>Number of types excluding unknown type. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Calibration types. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Specifies a type of calibration.</para>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="592" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="593" bodyend="600"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1ga1c33fe57cf4e99fcfd556be60fce4d35" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_calibration_model_type_t</name>
+        <enumvalue id="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35a09673a25321231c5966844657df659a0" prot="public">
+          <name>K4A_CALIBRATION_LENS_DISTORTION_MODEL_UNKNOWN</name>
+          <initializer>= 0</initializer>
+          <briefdescription>
+<para>Calibration model is unknown. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35ad05f33e19c0eba062f09295ae324031c" prot="public">
+          <name>K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA</name>
+          <briefdescription>
+<para>Deprecated (not supported). </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Calibration model is Theta (arctan). </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35a235e0c967248f931b85854781bed9587" prot="public">
+          <name>K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K</name>
+          <briefdescription>
+<para>Deprecated (not supported). </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Calibration model is Polynomial 3K. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35a78505f093c54ef9496aebbf29c31ecd1" prot="public">
+          <name>K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT</name>
+          <briefdescription>
+<para>Deprecated (only supported early internal devices). </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Calibration model is Rational 6KT. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35a3b6f7595f39bb87da3f448385e90d7cf" prot="public">
+          <name>K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY</name>
+          <briefdescription>
+<para>Calibration model is Brown Conrady (compatible with OpenCV) </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Calibration model type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>The model used interpret the calibration parameters.</para>
+<para><simplesect kind="remark"><para>Azure Kinect devices are calibrated with Brown Conrady.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="615" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="616" bodyend="626"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1ga78923d8e6a782252bfb9874415ab7f82" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_firmware_build_t</name>
+        <enumvalue id="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1gga78923d8e6a782252bfb9874415ab7f82ac7938e2e4432243b0030315dca40b885" prot="public">
+          <name>K4A_FIRMWARE_BUILD_RELEASE</name>
+          <briefdescription>
+<para>Production firmware. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1gga78923d8e6a782252bfb9874415ab7f82a7f0d4e41e2f700250d58dec80c8bfe87" prot="public">
+          <name>K4A_FIRMWARE_BUILD_DEBUG</name>
+          <briefdescription>
+<para>Pre-production firmware. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Firmware build type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="636" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="637" bodyend="640"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1gaecc6d5a96577361afd83b855b59db7ab" prot="public" static="no" strong="no">
+        <type></type>
+        <name>k4a_firmware_signature_t</name>
+        <enumvalue id="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1ggaecc6d5a96577361afd83b855b59db7aba4849e4fdbadcda82898ea4f16876aeae" prot="public">
+          <name>K4A_FIRMWARE_SIGNATURE_MSFT</name>
+          <briefdescription>
+<para>Microsoft signed firmware. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1ggaecc6d5a96577361afd83b855b59db7aba79dbf6242833f37a6127582cb69b76e2" prot="public">
+          <name>K4A_FIRMWARE_SIGNATURE_TEST</name>
+          <briefdescription>
+<para>Test signed firmware. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1ggaecc6d5a96577361afd83b855b59db7abacbc20c42184a824759f5040f966892a1" prot="public">
+          <name>K4A_FIRMWARE_SIGNATURE_UNSIGNED</name>
+          <briefdescription>
+<para>Unsigned firmware. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Firmware signature type. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="650" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="651" bodyend="655"/>
+      </memberdef>
+      <memberdef kind="enum" id="group___structures_ga9a605af3ceaab166fc896a00a64f9324_1ga9a605af3ceaab166fc896a00a64f9324" prot="public" static="no" strong="no">
+        <type></type>
+        <name>device_capabilities​​</name>
+        <enumvalue id="group___structures_ga9a605af3ceaab166fc896a00a64f9324_1gga9a605af3ceaab166fc896a00a64f9324a9a2ef9e6e065fd3d848600b131437814" prot="public">
+          <name>​​​​​​K4A_CAPABILITY_DEPTH</name>
+          <initializer>= 1</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___structures_ga9a605af3ceaab166fc896a00a64f9324_1gga9a605af3ceaab166fc896a00a64f9324aa07e2893436ca8843659438f998820f8" prot="public">
+          <name>K4A_CAPABILITY_COLOR</name>
+          <initializer>= 2</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group___structures_ga9a605af3ceaab166fc896a00a64f9324_1gga9a605af3ceaab166fc896a00a64f9324a07d6b23df8f3f410c6dbdde610a06116" prot="public">
+          <name>K4A_CAPABILITY_IMU</name>
+          <initializer>= 4</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="remark"><para>Used by </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="structk4a__device__info__t" kindref="compound">k4a_device_info_t</ref> to store whether a device has a color camera, a depth camera and IMU.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="873" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="874" bodyend="878"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="group___prototypes_gab303ae435243b852c36bc1981b96adfe_1gab303ae435243b852c36bc1981b96adfe" prot="public" static="no">
+        <type>void()</type>
+        <definition>typedef void() k4a_logging_message_cb_t(void *context, k4a_log_level_t level, const char *file, const int line, const char *message)</definition>
+        <argsstring>(void *context, k4a_log_level_t level, const char *file, const int line, const char *message)</argsstring>
+        <name>k4a_logging_message_cb_t</name>
+        <briefdescription>
+<para>Callback function for debug messages being generated by the Azure Kinect SDK. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>context</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The context of the callback function. This is the context that was supplied by the caller to <computeroutput>k4a_set_debug_message_handler</computeroutput>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>level</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The level of the message that has been created.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>file</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The file name of the source file that generated the message.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>line</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The line number of the source file that generated the message.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>message</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The messaged generated by the Azure Kinect SDK.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>The callback is called asynchronously when the Azure Kinext SDK generates a message at a <computeroutput>level</computeroutput> that is equal to or more critical than the level specified when calling <ref refid="group___functions_ga77a5f83e56a04136df1398478353193d_1ga77a5f83e56a04136df1398478353193d" kindref="member">k4a_set_debug_message_handler()</ref> to register the callback.</para>
+</simplesect>
+<simplesect kind="remark"><para>This callback can occur from any thread and blocks the calling thread. The k4a_logging_message_cb_t function user must protect it&apos;s logging resources from concurrent calls. All care should be made to minimize the amount of time locks are held.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="798" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="798" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_1ga1e290c645920c7674c6d36dcbb75909b" prot="public" static="no">
+        <type>void()</type>
+        <definition>typedef void() k4a_memory_destroy_cb_t(void *buffer, void *context)</definition>
+        <argsstring>(void *buffer, void *context)</argsstring>
+        <name>k4a_memory_destroy_cb_t</name>
+        <briefdescription>
+<para>Callback function for a memory object being destroyed. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>buffer</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The buffer pointer that was supplied by the caller as <computeroutput>buffer_release_cb</computeroutput> to <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>context</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The context for the memory object that needs to be destroyed that was supplied by the caller as <computeroutput>buffer_release_cb_context</computeroutput> to <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>When all references for the memory object are released, this callback will be invoked as the final destroy for the given memory.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="824" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="824" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___prototypes_ga5471d7b53e52a1c10569b2f17bb66b5d_1ga5471d7b53e52a1c10569b2f17bb66b5d" prot="public" static="no">
+        <type>uint8_t *()</type>
+        <definition>typedef uint8_t*() k4a_memory_allocate_cb_t(int size, void **context)</definition>
+        <argsstring>(int size, void **context)</argsstring>
+        <name>k4a_memory_allocate_cb_t</name>
+        <briefdescription>
+<para>Callback function for a memory allocation. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>size</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Minimum size in bytes needed for the buffer.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>context</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output parameter for a context that will be provided in the subsequent call to the <ref refid="group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_1ga1e290c645920c7674c6d36dcbb75909b" kindref="member">k4a_memory_destroy_cb_t</ref> callback.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>A pointer to the newly allocated memory.</para>
+</simplesect>
+<simplesect kind="remark"><para>A callback of this type is provided when there is an application defined allocator.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="848" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="848" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="var">
+      <memberdef kind="variable" id="group___definitions_ga4f693ace52a6eeec10cc6ca0350d6601_1ga4f693ace52a6eeec10cc6ca0350d6601" prot="public" static="yes" mutable="no">
+        <type>const <ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref></type>
+        <definition>const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL</definition>
+        <argsstring></argsstring>
+        <name>K4A_DEVICE_CONFIG_INIT_DISABLE_ALL</name>
+        <initializer>=
+    { <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaae172e7eecc6f4adfc318c789e49aaf9" kindref="member">K4A_IMAGE_FORMAT_COLOR_MJPG</ref>, 0, 0, 2, false, 0, <ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c" kindref="member">K4A_WIRED_SYNC_MODE_STANDALONE</ref>, 0, false }</initializer>
+        <briefdescription>
+<para>Initial configuration setting for disabling all sensors. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="remark"><para>Use this setting to initialize a <ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref> to a disabled state.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1332" column="41" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1332" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Copyright (c) Microsoft Corporation. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>All rights reserved. Licensed under the MIT License. Kinect For Azure SDK Type definitions. </para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>K4ATYPES_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>K4ATYPES_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cplusplus</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cinttypes&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstddef&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstring&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#else</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;inttypes.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;stddef.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;string.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;stdbool.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cplusplus</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;C&quot;</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>K4A_DECLARE_HANDLE(_handle_name_)<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="35"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>typedef<sp/>struct<sp/>_##_handle_name_<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="36"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>{<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="37"><highlight class="preprocessor"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>size_t<sp/>_rsvd;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="38"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>}<sp/>*<sp/>_handle_name_;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight></codeline>
+<codeline lineno="66" refid="structk4a__device__t" refkind="compound"><highlight class="normal">K4A_DECLARE_HANDLE(<ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref>);</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight></codeline>
+<codeline lineno="122" refid="structk4a__capture__t" refkind="compound"><highlight class="normal">K4A_DECLARE_HANDLE(<ref refid="structk4a__capture__t" kindref="compound">k4a_capture_t</ref>);</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"></highlight></codeline>
+<codeline lineno="173" refid="structk4a__image__t" refkind="compound"><highlight class="normal">K4A_DECLARE_HANDLE(<ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>);</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"></highlight></codeline>
+<codeline lineno="195" refid="structk4a__transformation__t" refkind="compound"><highlight class="normal">K4A_DECLARE_HANDLE(<ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref>);</highlight></codeline>
+<codeline lineno="196"><highlight class="normal"></highlight></codeline>
+<codeline lineno="217" refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="218"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="219" refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref><sp/>=<sp/>0,<sp/></highlight></codeline>
+<codeline lineno="220" refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="221" refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref>,<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="222"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref>;</highlight></codeline>
+<codeline lineno="223"><highlight class="normal"></highlight></codeline>
+<codeline lineno="232" refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1ga71b3cf304a2cd8fbac2f86c876deda5c" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="233"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="234" refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3" kindref="member">K4A_BUFFER_RESULT_SUCCEEDED</ref><sp/>=<sp/>0,<sp/></highlight></codeline>
+<codeline lineno="235" refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca29305af05427c7e739e910f02f72709a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca29305af05427c7e739e910f02f72709a" kindref="member">K4A_BUFFER_RESULT_FAILED</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="236" refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248" kindref="member">K4A_BUFFER_RESULT_TOO_SMALL</ref>,<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="237" refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5cacf0947fc3cc389914416e42c43aa102e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5cacf0947fc3cc389914416e42c43aa102e" kindref="member">K4A_BUFFER_RESULT_UNSUPPORTED</ref>,<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="238"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1ga71b3cf304a2cd8fbac2f86c876deda5c" kindref="member">k4a_buffer_result_t</ref>;</highlight></codeline>
+<codeline lineno="239"><highlight class="normal"></highlight></codeline>
+<codeline lineno="248" refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1ga44c7c0c1cfba7c879e9e2da1a869e4ee" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="249"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="250" refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca" kindref="member">K4A_WAIT_RESULT_SUCCEEDED</ref><sp/>=<sp/>0,<sp/></highlight></codeline>
+<codeline lineno="251" refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea956d1d20b14de6ba0a0ed97955e75540" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea956d1d20b14de6ba0a0ed97955e75540" kindref="member">K4A_WAIT_RESULT_FAILED</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="252" refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6" kindref="member">K4A_WAIT_RESULT_TIMEOUT</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="253" refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eeab95879b0cce3590b7e76255ce6f20a4a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eeab95879b0cce3590b7e76255ce6f20a4a" kindref="member">K4A_WAIT_RESULT_UNSUPPORTED</ref>,<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="254"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1ga44c7c0c1cfba7c879e9e2da1a869e4ee" kindref="member">k4a_wait_result_t</ref>;</highlight></codeline>
+<codeline lineno="255"><highlight class="normal"></highlight></codeline>
+<codeline lineno="264" refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1ga84d8f9a665773fb4e75a2ac8160444c6" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="265"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="266" refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6ae7fe889b69c2046d0e053c63131d39ba" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6ae7fe889b69c2046d0e053c63131d39ba" kindref="member">K4A_LOG_LEVEL_CRITICAL</ref><sp/>=<sp/>0,<sp/></highlight></codeline>
+<codeline lineno="267" refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6ac0ca5fc3565ffd8de299b9b856ddba21" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6ac0ca5fc3565ffd8de299b9b856ddba21" kindref="member">K4A_LOG_LEVEL_ERROR</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="268" refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6ad66a4a27178ad83bd17c82c49b84f8f3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6ad66a4a27178ad83bd17c82c49b84f8f3" kindref="member">K4A_LOG_LEVEL_WARNING</ref>,<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="269" refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6acc980bd260314ea70122265107413a3d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6acc980bd260314ea70122265107413a3d" kindref="member">K4A_LOG_LEVEL_INFO</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="270" refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6a98a692cbdade257a83e341dfc78b4497" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6a98a692cbdade257a83e341dfc78b4497" kindref="member">K4A_LOG_LEVEL_TRACE</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="271" refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6a9e378e25c87ede3b91dece190350aaee" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1gga84d8f9a665773fb4e75a2ac8160444c6a9e378e25c87ede3b91dece190350aaee" kindref="member">K4A_LOG_LEVEL_OFF</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="272"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1ga84d8f9a665773fb4e75a2ac8160444c6" kindref="member">k4a_log_level_t</ref>;</highlight></codeline>
+<codeline lineno="273"><highlight class="normal"></highlight></codeline>
+<codeline lineno="285"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Be<sp/>sure<sp/>to<sp/>update<sp/>k4a_image_format_to_string<sp/>in<sp/>k4a.c<sp/>if<sp/>enum<sp/>values<sp/>are<sp/>added.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="286" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="287"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="299" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaae172e7eecc6f4adfc318c789e49aaf9" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaae172e7eecc6f4adfc318c789e49aaf9" kindref="member">K4A_IMAGE_FORMAT_COLOR_MJPG</ref><sp/>=<sp/>0,</highlight></codeline>
+<codeline lineno="300"><highlight class="normal"></highlight></codeline>
+<codeline lineno="312" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaf334f6c32b6b44d1f5df02a349f05288" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaf334f6c32b6b44d1f5df02a349f05288" kindref="member">K4A_IMAGE_FORMAT_COLOR_NV12</ref>,</highlight></codeline>
+<codeline lineno="313"><highlight class="normal"></highlight></codeline>
+<codeline lineno="323" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbab6a418334cfd2018ff3b9e360c472306" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbab6a418334cfd2018ff3b9e360c472306" kindref="member">K4A_IMAGE_FORMAT_COLOR_YUY2</ref>,</highlight></codeline>
+<codeline lineno="324"><highlight class="normal"></highlight></codeline>
+<codeline lineno="340" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbade43f3d12f5ce476be5be2b0e289d481" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbade43f3d12f5ce476be5be2b0e289d481" kindref="member">K4A_IMAGE_FORMAT_COLOR_BGRA32</ref>,</highlight></codeline>
+<codeline lineno="341"><highlight class="normal"></highlight></codeline>
+<codeline lineno="352" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba5abd5fdff69181007ec79ed3087aa18e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba5abd5fdff69181007ec79ed3087aa18e" kindref="member">K4A_IMAGE_FORMAT_DEPTH16</ref>,</highlight></codeline>
+<codeline lineno="353"><highlight class="normal"></highlight></codeline>
+<codeline lineno="367" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba39a56f94523816908dbb08994e33c37f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba39a56f94523816908dbb08994e33c37f" kindref="member">K4A_IMAGE_FORMAT_IR16</ref>,</highlight></codeline>
+<codeline lineno="368"><highlight class="normal"></highlight></codeline>
+<codeline lineno="378" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba17dea221ecdfa136dea68f80e0397e15" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba17dea221ecdfa136dea68f80e0397e15" kindref="member">K4A_IMAGE_FORMAT_CUSTOM8</ref>,</highlight></codeline>
+<codeline lineno="379"><highlight class="normal"></highlight></codeline>
+<codeline lineno="389" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba6f2ee5c37729f9196b0cf3d3028edc42" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba6f2ee5c37729f9196b0cf3d3028edc42" kindref="member">K4A_IMAGE_FORMAT_CUSTOM16</ref>,</highlight></codeline>
+<codeline lineno="390"><highlight class="normal"></highlight></codeline>
+<codeline lineno="399" refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52" kindref="member">K4A_IMAGE_FORMAT_CUSTOM</ref>,</highlight></codeline>
+<codeline lineno="400"><highlight class="normal">}<sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref>;</highlight></codeline>
+<codeline lineno="401"><highlight class="normal"></highlight></codeline>
+<codeline lineno="413" refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1ga06f55e23e1d260b069e89e4a9cd6f4ee" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="414"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="415" refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1gga06f55e23e1d260b069e89e4a9cd6f4eea9b7517e41898a208566db614bcf26cc5" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1gga06f55e23e1d260b069e89e4a9cd6f4eea9b7517e41898a208566db614bcf26cc5" kindref="member">K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST</ref><sp/>=<sp/>0,<sp/></highlight></codeline>
+<codeline lineno="416" refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1gga06f55e23e1d260b069e89e4a9cd6f4eeac91cb5f01c87411e2980d109a7a36e56" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1gga06f55e23e1d260b069e89e4a9cd6f4eeac91cb5f01c87411e2980d109a7a36e56" kindref="member">K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR</ref>,<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="417"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1ga06f55e23e1d260b069e89e4a9cd6f4ee" kindref="member">k4a_transformation_interpolation_type_t</ref>;</highlight></codeline>
+<codeline lineno="418"><highlight class="normal"></highlight></codeline>
+<codeline lineno="437" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="438"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="455" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a13b21d4ea33a20633096955c966d96e5" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a13b21d4ea33a20633096955c966d96e5" kindref="member">K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE</ref><sp/>=<sp/>0,</highlight></codeline>
+<codeline lineno="456"><highlight class="normal"></highlight></codeline>
+<codeline lineno="471" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a2dc2ccb23e64049b49a57e2a44346e46" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a2dc2ccb23e64049b49a57e2a44346e46" kindref="member">K4A_COLOR_CONTROL_AUTO_EXPOSURE_PRIORITY</ref>,</highlight></codeline>
+<codeline lineno="472"><highlight class="normal"></highlight></codeline>
+<codeline lineno="481" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a4c6d97415ef755ab4966e5952d68eb5d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a4c6d97415ef755ab4966e5952d68eb5d" kindref="member">K4A_COLOR_CONTROL_BRIGHTNESS</ref>,</highlight></codeline>
+<codeline lineno="482"><highlight class="normal"></highlight></codeline>
+<codeline lineno="488" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a8adb525eccd99574d260749dc84e88a8" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a8adb525eccd99574d260749dc84e88a8" kindref="member">K4A_COLOR_CONTROL_CONTRAST</ref>,</highlight></codeline>
+<codeline lineno="489"><highlight class="normal"></highlight></codeline>
+<codeline lineno="495" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a59e8a733fcf68f06f0a887faa2cfda49" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a59e8a733fcf68f06f0a887faa2cfda49" kindref="member">K4A_COLOR_CONTROL_SATURATION</ref>,</highlight></codeline>
+<codeline lineno="496"><highlight class="normal"></highlight></codeline>
+<codeline lineno="502" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468aa0348c48b612513655f4267550a9bb0a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468aa0348c48b612513655f4267550a9bb0a" kindref="member">K4A_COLOR_CONTROL_SHARPNESS</ref>,</highlight></codeline>
+<codeline lineno="503"><highlight class="normal"></highlight></codeline>
+<codeline lineno="512" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468ad51b4d047313a5c6a778e17cce066a91" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468ad51b4d047313a5c6a778e17cce066a91" kindref="member">K4A_COLOR_CONTROL_WHITEBALANCE</ref>,</highlight></codeline>
+<codeline lineno="513"><highlight class="normal"></highlight></codeline>
+<codeline lineno="522" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468aee6d4472b21851255ead137b43424715" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468aee6d4472b21851255ead137b43424715" kindref="member">K4A_COLOR_CONTROL_BACKLIGHT_COMPENSATION</ref>,</highlight></codeline>
+<codeline lineno="523"><highlight class="normal"></highlight></codeline>
+<codeline lineno="529" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a1b519b3a91fb0a79e8638187f94f177c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a1b519b3a91fb0a79e8638187f94f177c" kindref="member">K4A_COLOR_CONTROL_GAIN</ref>,</highlight></codeline>
+<codeline lineno="530"><highlight class="normal"></highlight></codeline>
+<codeline lineno="539"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a2faa17ccc813fda09c1172fc1a8b629e" kindref="member">K4A_COLOR_CONTROL_POWERLINE_FREQUENCY</ref></highlight></codeline>
+<codeline lineno="540" refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1ggafba23de13b10b11e413485e421aa0468a2faa17ccc813fda09c1172fc1a8b629e" refkind="member"><highlight class="normal">}<sp/><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" kindref="member">k4a_color_control_command_t</ref>;</highlight></codeline>
+<codeline lineno="541"><highlight class="normal"></highlight></codeline>
+<codeline lineno="556" refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1ga3485402fc1bc5dc709e0d5859b6e8c88" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="557"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="558" refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a4f851ff5f566e23588abaa10ba1e9194" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a4f851ff5f566e23588abaa10ba1e9194" kindref="member">K4A_COLOR_CONTROL_MODE_AUTO</ref><sp/>=<sp/>0,<sp/></highlight></codeline>
+<codeline lineno="559" refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>,<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="560"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1ga3485402fc1bc5dc709e0d5859b6e8c88" kindref="member">k4a_color_control_mode_t</ref>;</highlight></codeline>
+<codeline lineno="561"><highlight class="normal"></highlight></codeline>
+<codeline lineno="570" refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1ga6404c655dd8656efb745c6ee90da2505" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="571"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="572" refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c" kindref="member">K4A_WIRED_SYNC_MODE_STANDALONE</ref>,<sp/></highlight></codeline>
+<codeline lineno="573"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505a014b98f7b0c962a994abe1a472bf6697" kindref="member">K4A_WIRED_SYNC_MODE_MASTER</ref>,<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="577"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505a8140f817b21902d275832a1ef6c216ca" kindref="member">K4A_WIRED_SYNC_MODE_SUBORDINATE</ref><sp/></highlight></codeline>
+<codeline lineno="580" refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505a8140f817b21902d275832a1ef6c216ca" refkind="member"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1ga6404c655dd8656efb745c6ee90da2505" kindref="member">k4a_wired_sync_mode_t</ref>;</highlight></codeline>
+<codeline lineno="581"><highlight class="normal"></highlight></codeline>
+<codeline lineno="592" refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="593"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="594" refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a1125662b013ee7624cc663a583637d79" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a1125662b013ee7624cc663a583637d79" kindref="member">K4A_CALIBRATION_TYPE_UNKNOWN</ref><sp/>=<sp/>-1,<sp/></highlight></codeline>
+<codeline lineno="595" refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a5e8e2174902ceeeb16c4dc54914fcc66" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a5e8e2174902ceeeb16c4dc54914fcc66" kindref="member">K4A_CALIBRATION_TYPE_DEPTH</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="596" refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a5e5062625d7c0ba242b078daf0b526c3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a5e5062625d7c0ba242b078daf0b526c3" kindref="member">K4A_CALIBRATION_TYPE_COLOR</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="597" refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a632965983030d4ff2eea8375ad9ca606" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a632965983030d4ff2eea8375ad9ca606" kindref="member">K4A_CALIBRATION_TYPE_GYRO</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="598" refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a16f265f6e61cc007d0494f778368ffc1" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a16f265f6e61cc007d0494f778368ffc1" kindref="member">K4A_CALIBRATION_TYPE_ACCEL</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="599" refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a972984dcc30591a8f98034fb582fcfcd" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a972984dcc30591a8f98034fb582fcfcd" kindref="member">K4A_CALIBRATION_TYPE_NUM</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="600"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref>;</highlight></codeline>
+<codeline lineno="601"><highlight class="normal"></highlight></codeline>
+<codeline lineno="615" refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1ga1c33fe57cf4e99fcfd556be60fce4d35" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="616"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="617" refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35a09673a25321231c5966844657df659a0" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35a09673a25321231c5966844657df659a0" kindref="member">K4A_CALIBRATION_LENS_DISTORTION_MODEL_UNKNOWN</ref><sp/>=<sp/>0,<sp/></highlight></codeline>
+<codeline lineno="618"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35ad05f33e19c0eba062f09295ae324031c" kindref="member">K4A_CALIBRATION_LENS_DISTORTION_MODEL_THETA</ref>,<sp/></highlight></codeline>
+<codeline lineno="620"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35a235e0c967248f931b85854781bed9587" kindref="member">K4A_CALIBRATION_LENS_DISTORTION_MODEL_POLYNOMIAL_3K</ref>,<sp/></highlight></codeline>
+<codeline lineno="622"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35a78505f093c54ef9496aebbf29c31ecd1" kindref="member">K4A_CALIBRATION_LENS_DISTORTION_MODEL_RATIONAL_6KT</ref>,<sp/><sp/></highlight></codeline>
+<codeline lineno="624"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1gga1c33fe57cf4e99fcfd556be60fce4d35a3b6f7595f39bb87da3f448385e90d7cf" kindref="member">K4A_CALIBRATION_LENS_DISTORTION_MODEL_BROWN_CONRADY</ref>,<sp/></highlight></codeline>
+<codeline lineno="626"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1ga1c33fe57cf4e99fcfd556be60fce4d35" kindref="member">k4a_calibration_model_type_t</ref>;</highlight></codeline>
+<codeline lineno="627"><highlight class="normal"></highlight></codeline>
+<codeline lineno="636" refid="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1ga78923d8e6a782252bfb9874415ab7f82" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="637"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="638" refid="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1gga78923d8e6a782252bfb9874415ab7f82ac7938e2e4432243b0030315dca40b885" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1gga78923d8e6a782252bfb9874415ab7f82ac7938e2e4432243b0030315dca40b885" kindref="member">K4A_FIRMWARE_BUILD_RELEASE</ref>,<sp/></highlight></codeline>
+<codeline lineno="639"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1gga78923d8e6a782252bfb9874415ab7f82a7f0d4e41e2f700250d58dec80c8bfe87" kindref="member">K4A_FIRMWARE_BUILD_DEBUG</ref><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="640" refid="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1gga78923d8e6a782252bfb9874415ab7f82a7f0d4e41e2f700250d58dec80c8bfe87" refkind="member"><highlight class="normal">}<sp/><ref refid="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1ga78923d8e6a782252bfb9874415ab7f82" kindref="member">k4a_firmware_build_t</ref>;</highlight></codeline>
+<codeline lineno="641"><highlight class="normal"></highlight></codeline>
+<codeline lineno="650" refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1gaecc6d5a96577361afd83b855b59db7ab" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="651"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="652" refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1ggaecc6d5a96577361afd83b855b59db7aba4849e4fdbadcda82898ea4f16876aeae" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1ggaecc6d5a96577361afd83b855b59db7aba4849e4fdbadcda82898ea4f16876aeae" kindref="member">K4A_FIRMWARE_SIGNATURE_MSFT</ref>,<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="653" refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1ggaecc6d5a96577361afd83b855b59db7aba79dbf6242833f37a6127582cb69b76e2" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1ggaecc6d5a96577361afd83b855b59db7aba79dbf6242833f37a6127582cb69b76e2" kindref="member">K4A_FIRMWARE_SIGNATURE_TEST</ref>,<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="654"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1ggaecc6d5a96577361afd83b855b59db7abacbc20c42184a824759f5040f966892a1" kindref="member">K4A_FIRMWARE_SIGNATURE_UNSIGNED</ref><sp/></highlight></codeline>
+<codeline lineno="655" refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1ggaecc6d5a96577361afd83b855b59db7abacbc20c42184a824759f5040f966892a1" refkind="member"><highlight class="normal">}<sp/><ref refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1gaecc6d5a96577361afd83b855b59db7ab" kindref="member">k4a_firmware_signature_t</ref>;</highlight></codeline>
+<codeline lineno="656"><highlight class="normal"></highlight></codeline>
+<codeline lineno="677" refid="group___macros_ga8e5b48150bc243c6052793bd830c2fcd_1ga8e5b48150bc243c6052793bd830c2fcd" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>K4A_SUCCEEDED(_result_)<sp/>(_result_<sp/>==<sp/>K4A_RESULT_SUCCEEDED)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="678"><highlight class="normal"></highlight></codeline>
+<codeline lineno="687" refid="group___macros_ga7c2e32349135d008b6f836c571d434b4_1ga7c2e32349135d008b6f836c571d434b4" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>K4A_FAILED(_result_)<sp/>(!K4A_SUCCEEDED(_result_))</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="688"><highlight class="normal"></highlight></codeline>
+<codeline lineno="706" refid="group___macros_gaeab021a840259ca3ad882bd080260224_1gaeab021a840259ca3ad882bd080260224" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>K4A_INIT_STRUCT(T,<sp/>S)<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="707"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>T<sp/>S{};<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="708"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>S.struct_size<sp/>=<sp/>sizeof(T);<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="709"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>S.struct_version<sp/>=<sp/>K4A_ABI_VERSION;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="710"><highlight class="normal"></highlight></codeline>
+<codeline lineno="798" refid="group___prototypes_gab303ae435243b852c36bc1981b96adfe_1gab303ae435243b852c36bc1981b96adfe" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>void(<ref refid="group___prototypes_gab303ae435243b852c36bc1981b96adfe_1gab303ae435243b852c36bc1981b96adfe" kindref="member">k4a_logging_message_cb_t</ref>)(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*context,</highlight></codeline>
+<codeline lineno="799"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga84d8f9a665773fb4e75a2ac8160444c6_1ga84d8f9a665773fb4e75a2ac8160444c6" kindref="member">k4a_log_level_t</ref><sp/>level,</highlight></codeline>
+<codeline lineno="800"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*file,</highlight></codeline>
+<codeline lineno="801"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>line,</highlight></codeline>
+<codeline lineno="802"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*message);</highlight></codeline>
+<codeline lineno="803"><highlight class="normal"></highlight></codeline>
+<codeline lineno="824" refid="group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_1ga1e290c645920c7674c6d36dcbb75909b" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>void(<ref refid="group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_1ga1e290c645920c7674c6d36dcbb75909b" kindref="member">k4a_memory_destroy_cb_t</ref>)(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*buffer,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>*context);</highlight></codeline>
+<codeline lineno="825"><highlight class="normal"></highlight></codeline>
+<codeline lineno="848" refid="group___prototypes_ga5471d7b53e52a1c10569b2f17bb66b5d_1ga5471d7b53e52a1c10569b2f17bb66b5d" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>uint8_t<sp/>*(<ref refid="group___prototypes_ga5471d7b53e52a1c10569b2f17bb66b5d_1ga5471d7b53e52a1c10569b2f17bb66b5d" kindref="member">k4a_memory_allocate_cb_t</ref>)(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>size,<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**context);</highlight></codeline>
+<codeline lineno="849"><highlight class="normal"></highlight></codeline>
+<codeline lineno="873" refid="group___structures_ga9a605af3ceaab166fc896a00a64f9324_1ga9a605af3ceaab166fc896a00a64f9324" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="874"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="875"><highlight class="normal"><sp/><sp/><sp/><sp/>​​​​​​K4A_CAPABILITY_DEPTH<sp/>=<sp/>1,</highlight></codeline>
+<codeline lineno="876"><highlight class="normal"><sp/><sp/><sp/><sp/>K4A_CAPABILITY_COLOR<sp/>=<sp/>2,</highlight></codeline>
+<codeline lineno="877"><highlight class="normal"><sp/><sp/><sp/><sp/>K4A_CAPABILITY_IMU<sp/>=<sp/>4</highlight></codeline>
+<codeline lineno="878"><highlight class="normal">}<sp/><ref refid="group___structures_ga9a605af3ceaab166fc896a00a64f9324_1ga9a605af3ceaab166fc896a00a64f9324" kindref="member">device_capabilities​​</ref>;</highlight></codeline>
+<codeline lineno="879"><highlight class="normal"></highlight></codeline>
+<codeline lineno="891" refid="structk4a__device__info__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_device_info_t</highlight></codeline>
+<codeline lineno="892"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="893" refid="structk4a__device__info__t_1ad53910168cf32c55b79c554d526bff57" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__device__info__t_1ad53910168cf32c55b79c554d526bff57" kindref="member">struct_size</ref>;<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="894" refid="structk4a__device__info__t_1a673fc689adb403043b13e7be4c2c81ce" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__device__info__t_1a673fc689adb403043b13e7be4c2c81ce" kindref="member">struct_version</ref>;<sp/></highlight></codeline>
+<codeline lineno="895" refid="structk4a__device__info__t_1adf0b99f08dcd6e0973304759ee4aff5d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__device__info__t_1adf0b99f08dcd6e0973304759ee4aff5d" kindref="member">vendor_id</ref>;<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="896" refid="structk4a__device__info__t_1a2e9eecc6a6d77d82c3b6290f1085f41b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__device__info__t_1a2e9eecc6a6d77d82c3b6290f1085f41b" kindref="member">device_id</ref>;<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="897" refid="structk4a__device__info__t_1a22faf124ad41b02359ca1ae33888f20b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__device__info__t_1a22faf124ad41b02359ca1ae33888f20b" kindref="member">capabilities</ref>;<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="898"><highlight class="normal">}<sp/><ref refid="structk4a__device__info__t" kindref="compound">k4a_device_info_t</ref>;</highlight></codeline>
+<codeline lineno="899"><highlight class="normal"></highlight></codeline>
+<codeline lineno="911" refid="structk4a__color__mode__info__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_color_mode_info_t</highlight></codeline>
+<codeline lineno="912"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="913" refid="structk4a__color__mode__info__t_1a4895521e1b7853fa109f879ce50987e8" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__color__mode__info__t_1a4895521e1b7853fa109f879ce50987e8" kindref="member">struct_size</ref>;<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="914" refid="structk4a__color__mode__info__t_a1e8e8a6f3366b24fec3c19e7d8840235_1a1e8e8a6f3366b24fec3c19e7d8840235" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__color__mode__info__t_a1e8e8a6f3366b24fec3c19e7d8840235_1a1e8e8a6f3366b24fec3c19e7d8840235" kindref="member">struct_version</ref>;<sp/></highlight></codeline>
+<codeline lineno="915" refid="structk4a__color__mode__info__t_a9fef69bfa46d06807078769a4b2a0edc_1a9fef69bfa46d06807078769a4b2a0edc" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__color__mode__info__t_a9fef69bfa46d06807078769a4b2a0edc_1a9fef69bfa46d06807078769a4b2a0edc" kindref="member">mode_id</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="916" refid="structk4a__color__mode__info__t_1a05fc49b96a51e6b50163300d598da05a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__color__mode__info__t_1a05fc49b96a51e6b50163300d598da05a" kindref="member">width</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="917" refid="structk4a__color__mode__info__t_1af86d62b6640ebf61a3285d4a3557cd89" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__color__mode__info__t_1af86d62b6640ebf61a3285d4a3557cd89" kindref="member">height</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="918" refid="structk4a__color__mode__info__t_1a3d30e445ba9c7760d64678a0b1b84234" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref><sp/><ref refid="structk4a__color__mode__info__t_1a3d30e445ba9c7760d64678a0b1b84234" kindref="member">native_format</ref>;<sp/></highlight></codeline>
+<codeline lineno="919" refid="structk4a__color__mode__info__t_1a782f8b3d400a467bf7a2f030aa11e44a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__color__mode__info__t_1a782f8b3d400a467bf7a2f030aa11e44a" kindref="member">horizontal_fov</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="920" refid="structk4a__color__mode__info__t_1a1415e159824be7758b44706886c8988f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__color__mode__info__t_1a1415e159824be7758b44706886c8988f" kindref="member">vertical_fov</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="921" refid="structk4a__color__mode__info__t_1ac5512dba7c946f9ff9fedd93efd7ab5b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__color__mode__info__t_1ac5512dba7c946f9ff9fedd93efd7ab5b" kindref="member">min_fps</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="922" refid="structk4a__color__mode__info__t_1ac1256451ac7cf8c7a8836d2e4b490428" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__color__mode__info__t_1ac1256451ac7cf8c7a8836d2e4b490428" kindref="member">max_fps</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="923"><highlight class="normal">}<sp/><ref refid="structk4a__color__mode__info__t" kindref="compound">k4a_color_mode_info_t</ref>;</highlight></codeline>
+<codeline lineno="924"><highlight class="normal"></highlight></codeline>
+<codeline lineno="936" refid="structk4a__depth__mode__info__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_depth_mode_info_t</highlight></codeline>
+<codeline lineno="937"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="938" refid="structk4a__depth__mode__info__t_1a9ec6ee2d22176e8014afed4d963df74e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__depth__mode__info__t_1a9ec6ee2d22176e8014afed4d963df74e" kindref="member">struct_size</ref>;<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="939" refid="structk4a__depth__mode__info__t_afcbfb4faaca9e687bd2c42f9136ef291_1afcbfb4faaca9e687bd2c42f9136ef291" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__depth__mode__info__t_afcbfb4faaca9e687bd2c42f9136ef291_1afcbfb4faaca9e687bd2c42f9136ef291" kindref="member">struct_version</ref>;<sp/></highlight></codeline>
+<codeline lineno="940" refid="structk4a__depth__mode__info__t_a17ad844ed8e299fb00cb9ef17acafaf7_1a17ad844ed8e299fb00cb9ef17acafaf7" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__depth__mode__info__t_a17ad844ed8e299fb00cb9ef17acafaf7_1a17ad844ed8e299fb00cb9ef17acafaf7" kindref="member">mode_id</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="941" refid="structk4a__depth__mode__info__t_1a0257e3cdd457132534b468a6979a4c78" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="structk4a__depth__mode__info__t_1a0257e3cdd457132534b468a6979a4c78" kindref="member">passive_ir_only</ref>;<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="942" refid="structk4a__depth__mode__info__t_1a16da38c2f40e63b65f61442cdad420d1" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__depth__mode__info__t_1a16da38c2f40e63b65f61442cdad420d1" kindref="member">width</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="943" refid="structk4a__depth__mode__info__t_1ab3490f6e4ebb2a67941682954318c56b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__depth__mode__info__t_1ab3490f6e4ebb2a67941682954318c56b" kindref="member">height</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="944" refid="structk4a__depth__mode__info__t_1aa05ecf7b3b9d610cf050823a15e1b7e2" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref><sp/><ref refid="structk4a__depth__mode__info__t_1aa05ecf7b3b9d610cf050823a15e1b7e2" kindref="member">native_format</ref>;<sp/></highlight></codeline>
+<codeline lineno="945" refid="structk4a__depth__mode__info__t_1aff9fb75449f496324397c9c6adf3e565" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__depth__mode__info__t_1aff9fb75449f496324397c9c6adf3e565" kindref="member">horizontal_fov</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="946" refid="structk4a__depth__mode__info__t_1a93ed5718ce50dbd48f9cb468d6d2ca1d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__depth__mode__info__t_1a93ed5718ce50dbd48f9cb468d6d2ca1d" kindref="member">vertical_fov</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="947" refid="structk4a__depth__mode__info__t_1a7b1fe64bd337df9e602ff17cbef27cd6" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__depth__mode__info__t_1a7b1fe64bd337df9e602ff17cbef27cd6" kindref="member">min_fps</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="948" refid="structk4a__depth__mode__info__t_1a7b8cc91260c1f2861f184c0b766d8ea2" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__depth__mode__info__t_1a7b8cc91260c1f2861f184c0b766d8ea2" kindref="member">max_fps</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="949" refid="structk4a__depth__mode__info__t_1a967aec3ad67765bd0d0725f6059861a0" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__depth__mode__info__t_1a967aec3ad67765bd0d0725f6059861a0" kindref="member">min_range</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="950" refid="structk4a__depth__mode__info__t_1a1b7a5f0667524df08e9d66008ba44e60" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__depth__mode__info__t_1a1b7a5f0667524df08e9d66008ba44e60" kindref="member">max_range</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="951"><highlight class="normal">}<sp/><ref refid="structk4a__depth__mode__info__t" kindref="compound">k4a_depth_mode_info_t</ref>;</highlight></codeline>
+<codeline lineno="952"><highlight class="normal"></highlight></codeline>
+<codeline lineno="964" refid="structk4a__fps__mode__info__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_fps_mode_info_t</highlight></codeline>
+<codeline lineno="965"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="966" refid="structk4a__fps__mode__info__t_1a330141878eb081f976c307f5fe028080" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__fps__mode__info__t_1a330141878eb081f976c307f5fe028080" kindref="member">struct_size</ref>;<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="967" refid="structk4a__fps__mode__info__t_a07bad1812a3a2ca91989632d890d5593_1a07bad1812a3a2ca91989632d890d5593" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__fps__mode__info__t_a07bad1812a3a2ca91989632d890d5593_1a07bad1812a3a2ca91989632d890d5593" kindref="member">struct_version</ref>;<sp/></highlight></codeline>
+<codeline lineno="968" refid="structk4a__fps__mode__info__t_1ac45b467c4f7677162b2161af8ea15e3a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__fps__mode__info__t_1ac45b467c4f7677162b2161af8ea15e3a" kindref="member">mode_id</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="969" refid="structk4a__fps__mode__info__t_1a8e0e4fa545b99bbae76d1ac237bde48e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__fps__mode__info__t_1a8e0e4fa545b99bbae76d1ac237bde48e" kindref="member">fps</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="970"><highlight class="normal">}<sp/><ref refid="structk4a__fps__mode__info__t" kindref="compound">k4a_fps_mode_info_t</ref>;</highlight></codeline>
+<codeline lineno="971"><highlight class="normal"></highlight></codeline>
+<codeline lineno="983" refid="structk4a__device__configuration__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_device_configuration_t</highlight></codeline>
+<codeline lineno="984"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="989" refid="structk4a__device__configuration__t_a89d4e4703550d607e4fc3a8cce5b30ed_1a89d4e4703550d607e4fc3a8cce5b30ed" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref><sp/><ref refid="structk4a__device__configuration__t_a89d4e4703550d607e4fc3a8cce5b30ed_1a89d4e4703550d607e4fc3a8cce5b30ed" kindref="member">color_format</ref>;</highlight></codeline>
+<codeline lineno="990"><highlight class="normal"></highlight></codeline>
+<codeline lineno="992" refid="structk4a__device__configuration__t_1afeb238dbdceb6d061678ad4b9d40183e" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__device__configuration__t_1afeb238dbdceb6d061678ad4b9d40183e" kindref="member">color_mode_id</ref>;</highlight></codeline>
+<codeline lineno="993"><highlight class="normal"></highlight></codeline>
+<codeline lineno="995" refid="structk4a__device__configuration__t_1a3ec12e21314c28686a8f806608cdb745" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__device__configuration__t_1a3ec12e21314c28686a8f806608cdb745" kindref="member">depth_mode_id</ref>;</highlight></codeline>
+<codeline lineno="996"><highlight class="normal"></highlight></codeline>
+<codeline lineno="998" refid="structk4a__device__configuration__t_1a3e476faea863c6bd039831cd066d88b3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__device__configuration__t_1a3e476faea863c6bd039831cd066d88b3" kindref="member">fps_mode_id</ref>;</highlight></codeline>
+<codeline lineno="999"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1018" refid="structk4a__device__configuration__t_a8208974f05d89fc1362c6a0900bdef4d_1a8208974f05d89fc1362c6a0900bdef4d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="structk4a__device__configuration__t_a8208974f05d89fc1362c6a0900bdef4d_1a8208974f05d89fc1362c6a0900bdef4d" kindref="member">synchronized_images_only</ref>;</highlight></codeline>
+<codeline lineno="1019"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1029" refid="structk4a__device__configuration__t_a65f787c15d6b0a75119c2179054b5db4_1a65f787c15d6b0a75119c2179054b5db4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>int32_t<sp/><ref refid="structk4a__device__configuration__t_a65f787c15d6b0a75119c2179054b5db4_1a65f787c15d6b0a75119c2179054b5db4" kindref="member">depth_delay_off_color_usec</ref>;</highlight></codeline>
+<codeline lineno="1030"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1032" refid="structk4a__device__configuration__t_1ab2b227f0d1ae58e8d59ff89fd27504b3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1ga6404c655dd8656efb745c6ee90da2505" kindref="member">k4a_wired_sync_mode_t</ref><sp/><ref refid="structk4a__device__configuration__t_1ab2b227f0d1ae58e8d59ff89fd27504b3" kindref="member">wired_sync_mode</ref>;</highlight></codeline>
+<codeline lineno="1033"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1045" refid="structk4a__device__configuration__t_a85928bddb1fd92882d604678b648eea5_1a85928bddb1fd92882d604678b648eea5" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__device__configuration__t_a85928bddb1fd92882d604678b648eea5_1a85928bddb1fd92882d604678b648eea5" kindref="member">subordinate_delay_off_master_usec</ref>;</highlight></codeline>
+<codeline lineno="1046"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1051" refid="structk4a__device__configuration__t_a1fcc00f1a70f9cc28caeac306ba61253_1a1fcc00f1a70f9cc28caeac306ba61253" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="structk4a__device__configuration__t_a1fcc00f1a70f9cc28caeac306ba61253_1a1fcc00f1a70f9cc28caeac306ba61253" kindref="member">disable_streaming_indicator</ref>;</highlight></codeline>
+<codeline lineno="1052"><highlight class="normal">}<sp/><ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref>;</highlight></codeline>
+<codeline lineno="1053"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1067" refid="structk4a__calibration__extrinsics__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_calibration_extrinsics_t</highlight></codeline>
+<codeline lineno="1068"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1069" refid="structk4a__calibration__extrinsics__t_1a2227d500bc6f240628774be2503c20a7" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>rotation[9];<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1070" refid="structk4a__calibration__extrinsics__t_1a9246edc779148b57fb90efa283e65fcf" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>translation[3];<sp/></highlight></codeline>
+<codeline lineno="1071"><highlight class="normal">}<sp/><ref refid="structk4a__calibration__extrinsics__t" kindref="compound">k4a_calibration_extrinsics_t</ref>;</highlight></codeline>
+<codeline lineno="1072"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1090" refid="unionk4a__calibration__intrinsic__parameters__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">union</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1091"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1093" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param" refkind="compound"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param" kindref="compound">_param</ref></highlight></codeline>
+<codeline lineno="1094"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="1095" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1acdaf3c374353bc3347551b379ee4f83c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1acdaf3c374353bc3347551b379ee4f83c" kindref="member">cx</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1096" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a033e90a9b862dddffc0e4e5f6d1f02b3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a033e90a9b862dddffc0e4e5f6d1f02b3" kindref="member">cy</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1097" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a8069e7da60119d09b9c7a37cf9f65d6a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a8069e7da60119d09b9c7a37cf9f65d6a" kindref="member">fx</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1098" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a88fcdda1ec2d887b03be4011d8442c6a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a88fcdda1ec2d887b03be4011d8442c6a" kindref="member">fy</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1099" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a37e8c8a30e851f28a008c415504b92ed" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a37e8c8a30e851f28a008c415504b92ed" kindref="member">k1</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1100" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1af543f06407c571b7329c3e35653db4aa" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1af543f06407c571b7329c3e35653db4aa" kindref="member">k2</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1101" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a7ec939246110c28e7bfb2f0b7004a208" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a7ec939246110c28e7bfb2f0b7004a208" kindref="member">k3</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1102" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a30f9b667e6661b737f98afa38ac47fd2" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a30f9b667e6661b737f98afa38ac47fd2" kindref="member">k4</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1103" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1ac5d1ce28acdba0f35cd3bbcc6a174f41" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1ac5d1ce28acdba0f35cd3bbcc6a174f41" kindref="member">k5</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1104" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a3b36721c7c58ec9f3228809c2a92b263" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a3b36721c7c58ec9f3228809c2a92b263" kindref="member">k6</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1105" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a11b533b26b38b6cfd0e3b69c9aeade55" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a11b533b26b38b6cfd0e3b69c9aeade55" kindref="member">codx</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1106" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a0e3edc5180a9323a5f7d28c7f3cd7f65" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a0e3edc5180a9323a5f7d28c7f3cd7f65" kindref="member">cody</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1107" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a80718603ed70e762dfe9aa01eccbcc6b" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a80718603ed70e762dfe9aa01eccbcc6b" kindref="member">p2</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1108" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a0967d84ba1f4ce82b47bfa2fa13a8360" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a0967d84ba1f4ce82b47bfa2fa13a8360" kindref="member">p1</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1109" refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a91b39ee152b891ae79641ad8e6137adb" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a91b39ee152b891ae79641ad8e6137adb" kindref="member">metric_radius</ref>;<sp/></highlight></codeline>
+<codeline lineno="1110" refid="unionk4a__calibration__intrinsic__parameters__t_1aba32dd57ef2dbbfec9c6f11c285d3c41" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/>param;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1111" refid="unionk4a__calibration__intrinsic__parameters__t_1ac61b843bb57e4c345b010e6fa5c10cd3" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>v[15];<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1112"><highlight class="normal">}<sp/><ref refid="unionk4a__calibration__intrinsic__parameters__t" kindref="compound">k4a_calibration_intrinsic_parameters_t</ref>;</highlight></codeline>
+<codeline lineno="1113"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1131" refid="structk4a__calibration__intrinsics__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_calibration_intrinsics_t</highlight></codeline>
+<codeline lineno="1132"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1133" refid="structk4a__calibration__intrinsics__t_1abf7247b67cdc839e09ab226498f22294" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1ga1c33fe57cf4e99fcfd556be60fce4d35" kindref="member">k4a_calibration_model_type_t</ref><sp/><ref refid="structk4a__calibration__intrinsics__t_1abf7247b67cdc839e09ab226498f22294" kindref="member">type</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1134" refid="structk4a__calibration__intrinsics__t_1a2e0654444a6d350ce3e5e19ffdb3c7f6" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__intrinsics__t_1a2e0654444a6d350ce3e5e19ffdb3c7f6" kindref="member">parameter_count</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1135" refid="structk4a__calibration__intrinsics__t_1a0b48309440647746ea36015cd618bbba" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="unionk4a__calibration__intrinsic__parameters__t" kindref="compound">k4a_calibration_intrinsic_parameters_t</ref><sp/><ref refid="structk4a__calibration__intrinsics__t_1a0b48309440647746ea36015cd618bbba" kindref="member">parameters</ref>;<sp/></highlight></codeline>
+<codeline lineno="1136"><highlight class="normal">}<sp/><ref refid="structk4a__calibration__intrinsics__t" kindref="compound">k4a_calibration_intrinsics_t</ref>;</highlight></codeline>
+<codeline lineno="1137"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1148" refid="structk4a__calibration__camera__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_calibration_camera_t</highlight></codeline>
+<codeline lineno="1149"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1150" refid="structk4a__calibration__camera__t_1ace9c34429fcaa1a5c3be9aca9ba01f3d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structk4a__calibration__extrinsics__t" kindref="compound">k4a_calibration_extrinsics_t</ref><sp/><ref refid="structk4a__calibration__camera__t_1ace9c34429fcaa1a5c3be9aca9ba01f3d" kindref="member">extrinsics</ref>;<sp/></highlight></codeline>
+<codeline lineno="1151" refid="structk4a__calibration__camera__t_1a0c2ddd100f986b0a5a604abaf67e8e44" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structk4a__calibration__intrinsics__t" kindref="compound">k4a_calibration_intrinsics_t</ref><sp/><ref refid="structk4a__calibration__camera__t_1a0c2ddd100f986b0a5a604abaf67e8e44" kindref="member">intrinsics</ref>;<sp/></highlight></codeline>
+<codeline lineno="1152" refid="structk4a__calibration__camera__t_1a3e45105675a0b95f139f3ecae1e46427" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__camera__t_1a3e45105675a0b95f139f3ecae1e46427" kindref="member">resolution_width</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1153" refid="structk4a__calibration__camera__t_1ac47d2146081bca338ddf9d71cccdb2b8" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__camera__t_1ac47d2146081bca338ddf9d71cccdb2b8" kindref="member">resolution_height</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1154" refid="structk4a__calibration__camera__t_1ac9ba89cf72b237cb8ce7cdcbaca0c6a5" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__calibration__camera__t_1ac9ba89cf72b237cb8ce7cdcbaca0c6a5" kindref="member">metric_radius</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1155"><highlight class="normal">}<sp/><ref refid="structk4a__calibration__camera__t" kindref="compound">k4a_calibration_camera_t</ref>;</highlight></codeline>
+<codeline lineno="1156"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1165" refid="structk4a__calibration__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_calibration_t</highlight></codeline>
+<codeline lineno="1166"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1167" refid="structk4a__calibration__t_1afb9c6f1ed401107b0f65a7fa6a5af910" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structk4a__calibration__camera__t" kindref="compound">k4a_calibration_camera_t</ref><sp/><ref refid="structk4a__calibration__t_1afb9c6f1ed401107b0f65a7fa6a5af910" kindref="member">depth_camera_calibration</ref>;<sp/></highlight></codeline>
+<codeline lineno="1169" refid="structk4a__calibration__t_1a3adc45fd59f6c8df46bec9848d70c565" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structk4a__calibration__camera__t" kindref="compound">k4a_calibration_camera_t</ref><sp/><ref refid="structk4a__calibration__t_1a3adc45fd59f6c8df46bec9848d70c565" kindref="member">color_camera_calibration</ref>;<sp/></highlight></codeline>
+<codeline lineno="1177" refid="structk4a__calibration__t_a03f4b1600f8088739ffeea818a5df890_1a03f4b1600f8088739ffeea818a5df890" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structk4a__calibration__extrinsics__t" kindref="compound">k4a_calibration_extrinsics_t</ref><sp/>extrinsics[<ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a972984dcc30591a8f98034fb582fcfcd" kindref="member">K4A_CALIBRATION_TYPE_NUM</ref>][<ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a972984dcc30591a8f98034fb582fcfcd" kindref="member">K4A_CALIBRATION_TYPE_NUM</ref>];</highlight></codeline>
+<codeline lineno="1178"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1179" refid="structk4a__calibration__t_1a1b206641693220f43836e40b74585028" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__calibration__t_1a1b206641693220f43836e40b74585028" kindref="member">depth_mode_id</ref>;<sp/></highlight></codeline>
+<codeline lineno="1180" refid="structk4a__calibration__t_1a1fc290d07999eda51ddbe6765e4a4223" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__calibration__t_1a1fc290d07999eda51ddbe6765e4a4223" kindref="member">color_mode_id</ref>;<sp/></highlight></codeline>
+<codeline lineno="1181"><highlight class="normal">}<sp/><ref refid="structk4a__calibration__t" kindref="compound">k4a_calibration_t</ref>;</highlight></codeline>
+<codeline lineno="1182"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1191" refid="structk4a__version__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_version_t</highlight></codeline>
+<codeline lineno="1192"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1193" refid="structk4a__version__t_1aba947b238819496adc41888de36df6e1" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__version__t_1aba947b238819496adc41888de36df6e1" kindref="member">major</ref>;<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1194" refid="structk4a__version__t_1a52626a80e919cac31d837efa3d01abfb" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__version__t_1a52626a80e919cac31d837efa3d01abfb" kindref="member">minor</ref>;<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1196" refid="structk4a__version__t_1a9f3ec6a118f81533c7748b9080f68acf" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint32_t<sp/><ref refid="structk4a__version__t_1a9f3ec6a118f81533c7748b9080f68acf" kindref="member">iteration</ref>;<sp/></highlight></codeline>
+<codeline lineno="1197"><highlight class="normal">}<sp/><ref refid="structk4a__version__t" kindref="compound">k4a_version_t</ref>;</highlight></codeline>
+<codeline lineno="1198"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1207" refid="structk4a__hardware__version__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_hardware_version_t</highlight></codeline>
+<codeline lineno="1208"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1209" refid="structk4a__hardware__version__t_1a1fee646cb54b74f2c257ee528322f4b4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structk4a__version__t" kindref="compound">k4a_version_t</ref><sp/><ref refid="structk4a__hardware__version__t_1a1fee646cb54b74f2c257ee528322f4b4" kindref="member">rgb</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1210" refid="structk4a__hardware__version__t_1a0a633007ba808514d59a8b710a11db04" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structk4a__version__t" kindref="compound">k4a_version_t</ref><sp/><ref refid="structk4a__hardware__version__t_1a0a633007ba808514d59a8b710a11db04" kindref="member">depth</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1211" refid="structk4a__hardware__version__t_1a5e84b60b8f2c73a643e9e675105a2ccf" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structk4a__version__t" kindref="compound">k4a_version_t</ref><sp/><ref refid="structk4a__hardware__version__t_1a5e84b60b8f2c73a643e9e675105a2ccf" kindref="member">audio</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1212" refid="structk4a__hardware__version__t_1a5d9d2e5e0f093d7b74f483c381c06534" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structk4a__version__t" kindref="compound">k4a_version_t</ref><sp/><ref refid="structk4a__hardware__version__t_1a5d9d2e5e0f093d7b74f483c381c06534" kindref="member">depth_sensor</ref>;<sp/></highlight></codeline>
+<codeline lineno="1214" refid="structk4a__hardware__version__t_1ae737e359b66141852bdd26662df7f2e8" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1ga78923d8e6a782252bfb9874415ab7f82" kindref="member">k4a_firmware_build_t</ref><sp/><ref refid="structk4a__hardware__version__t_1ae737e359b66141852bdd26662df7f2e8" kindref="member">firmware_build</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1215" refid="structk4a__hardware__version__t_1a10847af1b6b417da36507e380bc5404c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1gaecc6d5a96577361afd83b855b59db7ab" kindref="member">k4a_firmware_signature_t</ref><sp/><ref refid="structk4a__hardware__version__t_1a10847af1b6b417da36507e380bc5404c" kindref="member">firmware_signature</ref>;<sp/></highlight></codeline>
+<codeline lineno="1216"><highlight class="normal">}<sp/><ref refid="structk4a__hardware__version__t" kindref="compound">k4a_hardware_version_t</ref>;</highlight></codeline>
+<codeline lineno="1217"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1226" refid="unionk4a__float2__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">union</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1227"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1229" refid="structk4a__float2__t_1_1__xy" refkind="compound"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structk4a__float2__t_1_1__xy" kindref="compound">_xy</ref></highlight></codeline>
+<codeline lineno="1230"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="1231" refid="structk4a__float2__t_1_1__xy_1a045e7ea3933e7c0b2c21b3b362f9e9b0" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__float2__t_1_1__xy_1a045e7ea3933e7c0b2c21b3b362f9e9b0" kindref="member">x</ref>;<sp/></highlight></codeline>
+<codeline lineno="1232" refid="structk4a__float2__t_1_1__xy_1a741293a6bb2362c9aa506ca793599707" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__float2__t_1_1__xy_1a741293a6bb2362c9aa506ca793599707" kindref="member">y</ref>;<sp/></highlight></codeline>
+<codeline lineno="1233" refid="unionk4a__float2__t_1acc0527ecc3b56531e7c29f16e33dbd40" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/>xy;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1234" refid="unionk4a__float2__t_1ab085251b8d54dd0581a4b45d19cf80d0" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>v[2];<sp/><sp/></highlight></codeline>
+<codeline lineno="1235"><highlight class="normal">}<sp/><ref refid="unionk4a__float2__t" kindref="compound">k4a_float2_t</ref>;</highlight></codeline>
+<codeline lineno="1236"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1245" refid="unionk4a__float3__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">union</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1246"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1248" refid="structk4a__float3__t_1_1__xyz" refkind="compound"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structk4a__float3__t_1_1__xyz" kindref="compound">_xyz</ref></highlight></codeline>
+<codeline lineno="1249"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="1250" refid="structk4a__float3__t_1_1__xyz_1a21c7d10afe5ba22922607083c9fc6625" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__float3__t_1_1__xyz_1a21c7d10afe5ba22922607083c9fc6625" kindref="member">x</ref>;<sp/></highlight></codeline>
+<codeline lineno="1251" refid="structk4a__float3__t_1_1__xyz_1a8d0daad684174757630f64ce84f142b4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__float3__t_1_1__xyz_1a8d0daad684174757630f64ce84f142b4" kindref="member">y</ref>;<sp/></highlight></codeline>
+<codeline lineno="1252" refid="structk4a__float3__t_1_1__xyz_1ac48d96dc75aa3a2a59386fcfd08474de" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__float3__t_1_1__xyz_1ac48d96dc75aa3a2a59386fcfd08474de" kindref="member">z</ref>;<sp/></highlight></codeline>
+<codeline lineno="1253" refid="unionk4a__float3__t_1a58b13ec006f76805563722e17cb6857c" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/>xyz;<sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1254" refid="unionk4a__float3__t_1ace48a59a47986cef62c0a2e6137beacf" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>v[3];<sp/><sp/></highlight></codeline>
+<codeline lineno="1255"><highlight class="normal">}<sp/><ref refid="unionk4a__float3__t" kindref="compound">k4a_float3_t</ref>;</highlight></codeline>
+<codeline lineno="1256"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1265" refid="structk4a__imu__sample__t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">_k4a_imu_sample_t</highlight></codeline>
+<codeline lineno="1266"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="1267" refid="structk4a__imu__sample__t_1aa18dbd8281ba8f570c6717253af3b1c4" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="structk4a__imu__sample__t_1aa18dbd8281ba8f570c6717253af3b1c4" kindref="member">temperature</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1268" refid="structk4a__imu__sample__t_1a9950b04962f1f796e7910594f1b90398" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="unionk4a__float3__t" kindref="compound">k4a_float3_t</ref><sp/><ref refid="structk4a__imu__sample__t_1a9950b04962f1f796e7910594f1b90398" kindref="member">acc_sample</ref>;<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1269" refid="structk4a__imu__sample__t_1a7f14c94aabeea0628c423e475bb47377" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint64_t<sp/><ref refid="structk4a__imu__sample__t_1a7f14c94aabeea0628c423e475bb47377" kindref="member">acc_timestamp_usec</ref>;<sp/><sp/></highlight></codeline>
+<codeline lineno="1270" refid="structk4a__imu__sample__t_1aacb7ac18928c86a8babea1b4691ec28a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="unionk4a__float3__t" kindref="compound">k4a_float3_t</ref><sp/><ref refid="structk4a__imu__sample__t_1aacb7ac18928c86a8babea1b4691ec28a" kindref="member">gyro_sample</ref>;<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="1271" refid="structk4a__imu__sample__t_1afce6c68eff09e50fdb57e91a383c4798" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>uint64_t<sp/><ref refid="structk4a__imu__sample__t_1afce6c68eff09e50fdb57e91a383c4798" kindref="member">gyro_timestamp_usec</ref>;<sp/></highlight></codeline>
+<codeline lineno="1272"><highlight class="normal">}<sp/><ref refid="structk4a__imu__sample__t" kindref="compound">k4a_imu_sample_t</ref>;</highlight></codeline>
+<codeline lineno="1273"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1297" refid="group___definitions_ga91dde801d6ce8feecfd317e330361eee_1ga91dde801d6ce8feecfd317e330361eee" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>K4A_ABI_VERSION<sp/>1</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1298"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1309" refid="group___definitions_gaebe4c1071a8ba3b04e32d55c85cae72d_1gaebe4c1071a8ba3b04e32d55c85cae72d" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>K4A_DEVICE_DEFAULT<sp/>(0)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1310"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1319" refid="group___definitions_gac012768169429fb54ba09f2964775cb9_1gac012768169429fb54ba09f2964775cb9" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>K4A_WAIT_INFINITE<sp/>(-1)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1320"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1332" refid="group___definitions_ga4f693ace52a6eeec10cc6ca0350d6601_1ga4f693ace52a6eeec10cc6ca0350d6601" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref><sp/><ref refid="group___definitions_ga4f693ace52a6eeec10cc6ca0350d6601_1ga4f693ace52a6eeec10cc6ca0350d6601" kindref="member">K4A_DEVICE_CONFIG_INIT_DISABLE_ALL</ref><sp/>=</highlight></codeline>
+<codeline lineno="1333"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaae172e7eecc6f4adfc318c789e49aaf9" kindref="member">K4A_IMAGE_FORMAT_COLOR_MJPG</ref>,<sp/>0,<sp/>0,<sp/>2,<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">,<sp/>0,<sp/><ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c" kindref="member">K4A_WIRED_SYNC_MODE_STANDALONE</ref>,<sp/>0,<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal"><sp/>};</highlight></codeline>
+<codeline lineno="1334"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1339"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cplusplus</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1340"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="1341"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="1342"><highlight class="normal"></highlight></codeline>
+<codeline lineno="1343"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>K4ATYPES_H<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h"/>
+  </compounddef>
+</doxygen>

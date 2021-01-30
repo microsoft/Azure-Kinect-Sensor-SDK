@@ -1287,8 +1287,6 @@ k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transformation_t 
                                                                 &xyz_image_descriptor));
 }
 
-// TODO: comment
-
 struct _device_color_modes
 {
     uint32_t mode_id;

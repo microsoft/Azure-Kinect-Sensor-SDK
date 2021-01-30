@@ -27,6 +27,7 @@
 #ifdef K4A_INCLUDE_AUDIO
 #include "k4aaudiomanager.h"
 #endif
+#include <k4aviewerlogmanager.h>
 
 using namespace k4aviewer;
 
@@ -302,7 +303,6 @@ K4ADeviceDockControl::~K4ADeviceDockControl()
     Stop();
 }
 
-// TODO: clean up and document refactor
 K4ADockControlStatus K4ADeviceDockControl::Show()
 {
     std::stringstream labelBuilder;
@@ -434,9 +434,6 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
         // Uncompressed formats are only supported at 720p.
 
-        // TODO: tooltip if not supported in NV12 or YUY2 mode
-        // const char *imageFormatHelpMessage = "Not supported in NV12 or YUY2 mode!";
-
         const bool imageFormatSupportsHighResolution = m_config.ColorFormat != K4A_IMAGE_FORMAT_COLOR_NV12 &&
                                                        m_config.ColorFormat != K4A_IMAGE_FORMAT_COLOR_YUY2;
         if (colorFormatUpdated || m_firstRun)
@@ -444,6 +441,11 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
             if (!imageFormatSupportsHighResolution)
             {
                 m_config.color_mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
+                K4AViewerLogManager::Instance()
+                    .Log(K4A_LOG_LEVEL_WARNING,
+                         __FILE__,
+                         __LINE__,
+                         "The selected image format only supports color mode resolution up to 720p.");
             }
         }
 
@@ -622,8 +624,10 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     {
         if (m_config.color_mode_id == 6) // 6 = K4A_COLOR_RESOLUTION_3072P
         {
-            // 4K supports up to 15FPS
-            m_config.fps_mode_id = 1; // 1 = K4A_FRAMES_PER_SECOND_15
+            K4AViewerLogManager::Instance().Log(K4A_LOG_LEVEL_WARNING,
+                                                __FILE__,
+                                                __LINE__,
+                                                "The selected color mode only supports up to 15 FPS.");
         }
     }
     if (depthModeUpdated || m_firstRun)
@@ -631,6 +635,10 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         if (m_config.depth_mode_id == 4) // 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
         {
             m_config.fps_mode_id = 1; // 1 = K4A_FRAMES_PER_SECOND_15
+            K4AViewerLogManager::Instance().Log(K4A_LOG_LEVEL_WARNING,
+                                                __FILE__,
+                                                __LINE__,
+                                                "The selected depth mode only supports up to 15 FPS.");
         }
     }
 
@@ -643,8 +651,6 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     bool framerateUpdated = false;
 
-    // TODO: comment
-    // TODO: tooltip if 30 fps not available due to other settings
     auto *pFPSModeInfo = reinterpret_cast<int *>(&m_config.fps_mode_id);
 
     ImGui::Text("Framerate");
@@ -710,7 +716,6 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
                                                                        "%d",
                                                                        !deviceIsStarted);
 
-        // TODO: replace switch with calculation using mode info
         if (framerateUpdated || depthDelayUpdated)
         {
             // InputScalar doesn't do bounds-checks, so we have to do it ourselves whenever
@@ -960,19 +965,18 @@ bool K4ADeviceDockControl::StartCameras()
                 //
                 pollingTimeout = SubordinateModeStartupTimeout;
             }
-            return PollSensor<k4a::capture>("Cameras",
-                                            pDevice,
-                                            pCameraDataSource,
-                                            pPaused,
-                                            pCamerasStarted,
-                                            pAbortInProgress,
-                                            [](k4a::device *device,
-                                               k4a::capture *capture,
-                                               std::chrono::milliseconds timeout) {
-                                                return device->get_capture(capture, timeout);
-                                            },
-                                            [](k4a::device *device) { device->stop_cameras(); },
-                                            pollingTimeout);
+            return PollSensor<k4a::capture>(
+                "Cameras",
+                pDevice,
+                pCameraDataSource,
+                pPaused,
+                pCamerasStarted,
+                pAbortInProgress,
+                [](k4a::device *device, k4a::capture *capture, std::chrono::milliseconds timeout) {
+                    return device->get_capture(capture, timeout);
+                },
+                [](k4a::device *device) { device->stop_cameras(); },
+                pollingTimeout);
         });
 
     return true;
@@ -980,12 +984,13 @@ bool K4ADeviceDockControl::StartCameras()
 
 void K4ADeviceDockControl::StopCameras()
 {
-    StopPollingThread(&m_cameraPollingThread,
-                      &m_device,
-                      [](k4a::device *device) { device->stop_cameras(); },
-                      &m_cameraDataSource,
-                      &m_camerasStarted,
-                      &m_camerasAbortInProgress);
+    StopPollingThread(
+        &m_cameraPollingThread,
+        &m_device,
+        [](k4a::device *device) { device->stop_cameras(); },
+        &m_cameraDataSource,
+        &m_camerasStarted,
+        &m_camerasAbortInProgress);
 }
 
 #ifdef K4A_INCLUDE_AUDIO
@@ -1061,19 +1066,18 @@ bool K4ADeviceDockControl::StartImu()
                 //
                 pollingTimeout = SubordinateModeStartupTimeout;
             }
-            return PollSensor<k4a_imu_sample_t>("IMU",
-                                                pDevice,
-                                                pImuDataSource,
-                                                pPaused,
-                                                pImuStarted,
-                                                pAbortInProgress,
-                                                [](k4a::device *device,
-                                                   k4a_imu_sample_t *sample,
-                                                   std::chrono::milliseconds timeout) {
-                                                    return device->get_imu_sample(sample, timeout);
-                                                },
-                                                [](k4a::device *device) { device->stop_imu(); },
-                                                pollingTimeout);
+            return PollSensor<k4a_imu_sample_t>(
+                "IMU",
+                pDevice,
+                pImuDataSource,
+                pPaused,
+                pImuStarted,
+                pAbortInProgress,
+                [](k4a::device *device, k4a_imu_sample_t *sample, std::chrono::milliseconds timeout) {
+                    return device->get_imu_sample(sample, timeout);
+                },
+                [](k4a::device *device) { device->stop_imu(); },
+                pollingTimeout);
         });
 
     return true;
@@ -1081,12 +1085,13 @@ bool K4ADeviceDockControl::StartImu()
 
 void K4ADeviceDockControl::StopImu()
 {
-    StopPollingThread(&m_imuPollingThread,
-                      &m_device,
-                      [](k4a::device *device) { device->stop_imu(); },
-                      &m_imuDataSource,
-                      &m_imuStarted,
-                      &m_imuAbortInProgress);
+    StopPollingThread(
+        &m_imuPollingThread,
+        &m_device,
+        [](k4a::device *device) { device->stop_imu(); },
+        &m_imuDataSource,
+        &m_imuStarted,
+        &m_imuAbortInProgress);
 }
 
 void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)

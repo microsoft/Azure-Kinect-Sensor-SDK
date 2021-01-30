@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a__hardware__version__t" kind="struct" language="C++" prot="public">
+    <compoundname>k4a_hardware_version_t</compoundname>
+    <includes refid="k4atypes_8h" local="no">k4atypes.h</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structk4a__hardware__version__t_1a1fee646cb54b74f2c257ee528322f4b4" prot="public" static="no" mutable="no">
+        <type><ref refid="structk4a__version__t" kindref="compound">k4a_version_t</ref></type>
+        <definition>k4a_version_t k4a_hardware_version_t::rgb</definition>
+        <argsstring></argsstring>
+        <name>rgb</name>
+        <briefdescription>
+<para>Color camera firmware version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1209" column="19" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1209" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__hardware__version__t_1a0a633007ba808514d59a8b710a11db04" prot="public" static="no" mutable="no">
+        <type><ref refid="structk4a__version__t" kindref="compound">k4a_version_t</ref></type>
+        <definition>k4a_version_t k4a_hardware_version_t::depth</definition>
+        <argsstring></argsstring>
+        <name>depth</name>
+        <briefdescription>
+<para>Depth camera firmware version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1210" column="19" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1210" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__hardware__version__t_1a5e84b60b8f2c73a643e9e675105a2ccf" prot="public" static="no" mutable="no">
+        <type><ref refid="structk4a__version__t" kindref="compound">k4a_version_t</ref></type>
+        <definition>k4a_version_t k4a_hardware_version_t::audio</definition>
+        <argsstring></argsstring>
+        <name>audio</name>
+        <briefdescription>
+<para>Audio device firmware version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1211" column="19" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1211" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__hardware__version__t_1a5d9d2e5e0f093d7b74f483c381c06534" prot="public" static="no" mutable="no">
+        <type><ref refid="structk4a__version__t" kindref="compound">k4a_version_t</ref></type>
+        <definition>k4a_version_t k4a_hardware_version_t::depth_sensor</definition>
+        <argsstring></argsstring>
+        <name>depth_sensor</name>
+        <briefdescription>
+<para>Depth sensor firmware version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1212" column="19" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1212" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__hardware__version__t_1ae737e359b66141852bdd26662df7f2e8" prot="public" static="no" mutable="no">
+        <type><ref refid="group___enumerations_ga78923d8e6a782252bfb9874415ab7f82_1ga78923d8e6a782252bfb9874415ab7f82" kindref="member">k4a_firmware_build_t</ref></type>
+        <definition>k4a_firmware_build_t k4a_hardware_version_t::firmware_build</definition>
+        <argsstring></argsstring>
+        <name>firmware_build</name>
+        <briefdescription>
+<para>Build type reported by the firmware. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1214" column="26" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1214" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__hardware__version__t_1a10847af1b6b417da36507e380bc5404c" prot="public" static="no" mutable="no">
+        <type><ref refid="group___enumerations_gaecc6d5a96577361afd83b855b59db7ab_1gaecc6d5a96577361afd83b855b59db7ab" kindref="member">k4a_firmware_signature_t</ref></type>
+        <definition>k4a_firmware_signature_t k4a_hardware_version_t::firmware_signature</definition>
+        <argsstring></argsstring>
+        <name>firmware_signature</name>
+        <briefdescription>
+<para>Signature type of the firmware. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1215" column="30" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1215" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Structure to define hardware version. </para>
+    </briefdescription>
+    <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="1">
+        <label>k4a_hardware_version_t</label>
+        <link refid="structk4a__hardware__version__t"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>audio</edgelabel>
+          <edgelabel>depth</edgelabel>
+          <edgelabel>depth_sensor</edgelabel>
+          <edgelabel>rgb</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>k4a_version_t</label>
+        <link refid="structk4a__version__t"/>
+      </node>
+    </collaborationgraph>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1207" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1208" bodyend="1216"/>
+    <listofallmembers>
+      <member refid="structk4a__hardware__version__t_1a5e84b60b8f2c73a643e9e675105a2ccf" prot="public" virt="non-virtual"><scope>k4a_hardware_version_t</scope><name>audio</name></member>
+      <member refid="structk4a__hardware__version__t_1a0a633007ba808514d59a8b710a11db04" prot="public" virt="non-virtual"><scope>k4a_hardware_version_t</scope><name>depth</name></member>
+      <member refid="structk4a__hardware__version__t_1a5d9d2e5e0f093d7b74f483c381c06534" prot="public" virt="non-virtual"><scope>k4a_hardware_version_t</scope><name>depth_sensor</name></member>
+      <member refid="structk4a__hardware__version__t_1ae737e359b66141852bdd26662df7f2e8" prot="public" virt="non-virtual"><scope>k4a_hardware_version_t</scope><name>firmware_build</name></member>
+      <member refid="structk4a__hardware__version__t_1a10847af1b6b417da36507e380bc5404c" prot="public" virt="non-virtual"><scope>k4a_hardware_version_t</scope><name>firmware_signature</name></member>
+      <member refid="structk4a__hardware__version__t_1a1fee646cb54b74f2c257ee528322f4b4" prot="public" virt="non-virtual"><scope>k4a_hardware_version_t</scope><name>rgb</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>
