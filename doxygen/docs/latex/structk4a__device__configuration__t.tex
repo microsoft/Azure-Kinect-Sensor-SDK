@@ -1,0 +1,116 @@
+\hypertarget{structk4a__device__configuration__t}{}\doxysection{k4a\+\_\+device\+\_\+configuration\+\_\+t Struct Reference}
+\label{structk4a__device__configuration__t}\index{k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}}
+
+
+Configuration parameters for an Azure Kinect device.  
+
+
+
+
+{\ttfamily \#include $<$k4atypes.\+h$>$}
+
+\doxysubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} \mbox{\hyperlink{structk4a__device__configuration__t_a89d4e4703550d607e4fc3a8cce5b30ed_a89d4e4703550d607e4fc3a8cce5b30ed}{color\+\_\+format}}
+\begin{DoxyCompactList}\small\item\em Image format to capture with the color camera. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structk4a__device__configuration__t_afeb238dbdceb6d061678ad4b9d40183e}\label{structk4a__device__configuration__t_afeb238dbdceb6d061678ad4b9d40183e}} 
+uint32\+\_\+t \mbox{\hyperlink{structk4a__device__configuration__t_afeb238dbdceb6d061678ad4b9d40183e}{color\+\_\+mode\+\_\+id}}
+\begin{DoxyCompactList}\small\item\em Capture mode for the color camera. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structk4a__device__configuration__t_a3ec12e21314c28686a8f806608cdb745}\label{structk4a__device__configuration__t_a3ec12e21314c28686a8f806608cdb745}} 
+uint32\+\_\+t \mbox{\hyperlink{structk4a__device__configuration__t_a3ec12e21314c28686a8f806608cdb745}{depth\+\_\+mode\+\_\+id}}
+\begin{DoxyCompactList}\small\item\em Capture mode for the depth camera. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structk4a__device__configuration__t_a3e476faea863c6bd039831cd066d88b3}\label{structk4a__device__configuration__t_a3e476faea863c6bd039831cd066d88b3}} 
+uint32\+\_\+t \mbox{\hyperlink{structk4a__device__configuration__t_a3e476faea863c6bd039831cd066d88b3}{fps\+\_\+mode\+\_\+id}}
+\begin{DoxyCompactList}\small\item\em Desired frame rate for the color and depth camera. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{structk4a__device__configuration__t_a8208974f05d89fc1362c6a0900bdef4d_a8208974f05d89fc1362c6a0900bdef4d}{synchronized\+\_\+images\+\_\+only}}
+\begin{DoxyCompactList}\small\item\em Only produce \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} objects if they contain synchronized color and depth images. \end{DoxyCompactList}\item 
+int32\+\_\+t \mbox{\hyperlink{structk4a__device__configuration__t_a65f787c15d6b0a75119c2179054b5db4_a65f787c15d6b0a75119c2179054b5db4}{depth\+\_\+delay\+\_\+off\+\_\+color\+\_\+usec}}
+\begin{DoxyCompactList}\small\item\em Desired delay between the capture of the color image and the capture of the depth image. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structk4a__device__configuration__t_ab2b227f0d1ae58e8d59ff89fd27504b3}\label{structk4a__device__configuration__t_ab2b227f0d1ae58e8d59ff89fd27504b3}} 
+\mbox{\hyperlink{group___enumerations_ga6404c655dd8656efb745c6ee90da2505_ga6404c655dd8656efb745c6ee90da2505}{k4a\+\_\+wired\+\_\+sync\+\_\+mode\+\_\+t}} \mbox{\hyperlink{structk4a__device__configuration__t_ab2b227f0d1ae58e8d59ff89fd27504b3}{wired\+\_\+sync\+\_\+mode}}
+\begin{DoxyCompactList}\small\item\em The external synchronization mode. \end{DoxyCompactList}\item 
+uint32\+\_\+t \mbox{\hyperlink{structk4a__device__configuration__t_a85928bddb1fd92882d604678b648eea5_a85928bddb1fd92882d604678b648eea5}{subordinate\+\_\+delay\+\_\+off\+\_\+master\+\_\+usec}}
+\begin{DoxyCompactList}\small\item\em The external synchronization timing. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{structk4a__device__configuration__t_a1fcc00f1a70f9cc28caeac306ba61253_a1fcc00f1a70f9cc28caeac306ba61253}{disable\+\_\+streaming\+\_\+indicator}}
+\begin{DoxyCompactList}\small\item\em Streaming indicator automatically turns on when the color or depth camera\textquotesingle{}s are in use. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Configuration parameters for an Azure Kinect device. 
+
+\begin{DoxyRemark}{Remarks}
+Used by \mbox{\hyperlink{group___functions_gaad7a85e1e5471810262442fc4a8e217a_gaad7a85e1e5471810262442fc4a8e217a}{k4a\+\_\+device\+\_\+start\+\_\+cameras()}} to specify the configuration of the data capture.
+\end{DoxyRemark}
+ 
+
+\doxysubsection{Field Documentation}
+\mbox{\Hypertarget{structk4a__device__configuration__t_a89d4e4703550d607e4fc3a8cce5b30ed_a89d4e4703550d607e4fc3a8cce5b30ed}\label{structk4a__device__configuration__t_a89d4e4703550d607e4fc3a8cce5b30ed_a89d4e4703550d607e4fc3a8cce5b30ed}} 
+\index{k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}!color\_format@{color\_format}}
+\index{color\_format@{color\_format}!k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}}
+\doxysubsubsection{\texorpdfstring{color\_format}{color\_format}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} k4a\+\_\+device\+\_\+configuration\+\_\+t\+::color\+\_\+format}
+
+
+
+Image format to capture with the color camera. 
+
+The color camera does not natively produce BGRA32 images. Setting \mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_ggabd9688eb20d5cb878fd22d36de882ddbade43f3d12f5ce476be5be2b0e289d481}{K4\+A\+\_\+\+IMAGE\+\_\+\+FORMAT\+\_\+\+COLOR\+\_\+\+BGRA32}} for color\+\_\+format will result in higher CPU utilization. \mbox{\Hypertarget{structk4a__device__configuration__t_a65f787c15d6b0a75119c2179054b5db4_a65f787c15d6b0a75119c2179054b5db4}\label{structk4a__device__configuration__t_a65f787c15d6b0a75119c2179054b5db4_a65f787c15d6b0a75119c2179054b5db4}} 
+\index{k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}!depth\_delay\_off\_color\_usec@{depth\_delay\_off\_color\_usec}}
+\index{depth\_delay\_off\_color\_usec@{depth\_delay\_off\_color\_usec}!k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}}
+\doxysubsubsection{\texorpdfstring{depth\_delay\_off\_color\_usec}{depth\_delay\_off\_color\_usec}}
+{\footnotesize\ttfamily int32\+\_\+t k4a\+\_\+device\+\_\+configuration\+\_\+t\+::depth\+\_\+delay\+\_\+off\+\_\+color\+\_\+usec}
+
+
+
+Desired delay between the capture of the color image and the capture of the depth image. 
+
+A negative value indicates that the depth image should be captured before the color image.
+
+Any value between negative and positive one capture period is valid. \mbox{\Hypertarget{structk4a__device__configuration__t_a1fcc00f1a70f9cc28caeac306ba61253_a1fcc00f1a70f9cc28caeac306ba61253}\label{structk4a__device__configuration__t_a1fcc00f1a70f9cc28caeac306ba61253_a1fcc00f1a70f9cc28caeac306ba61253}} 
+\index{k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}!disable\_streaming\_indicator@{disable\_streaming\_indicator}}
+\index{disable\_streaming\_indicator@{disable\_streaming\_indicator}!k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}}
+\doxysubsubsection{\texorpdfstring{disable\_streaming\_indicator}{disable\_streaming\_indicator}}
+{\footnotesize\ttfamily bool k4a\+\_\+device\+\_\+configuration\+\_\+t\+::disable\+\_\+streaming\+\_\+indicator}
+
+
+
+Streaming indicator automatically turns on when the color or depth camera\textquotesingle{}s are in use. 
+
+This setting disables that behavior and keeps the LED in an off state. \mbox{\Hypertarget{structk4a__device__configuration__t_a85928bddb1fd92882d604678b648eea5_a85928bddb1fd92882d604678b648eea5}\label{structk4a__device__configuration__t_a85928bddb1fd92882d604678b648eea5_a85928bddb1fd92882d604678b648eea5}} 
+\index{k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}!subordinate\_delay\_off\_master\_usec@{subordinate\_delay\_off\_master\_usec}}
+\index{subordinate\_delay\_off\_master\_usec@{subordinate\_delay\_off\_master\_usec}!k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}}
+\doxysubsubsection{\texorpdfstring{subordinate\_delay\_off\_master\_usec}{subordinate\_delay\_off\_master\_usec}}
+{\footnotesize\ttfamily uint32\+\_\+t k4a\+\_\+device\+\_\+configuration\+\_\+t\+::subordinate\+\_\+delay\+\_\+off\+\_\+master\+\_\+usec}
+
+
+
+The external synchronization timing. 
+
+If this camera is a subordinate, this sets the capture delay between the color camera capture and the external input pulse. A setting of zero indicates that the master and subordinate color images should be aligned.
+
+This setting does not effect the \textquotesingle{}Sync out\textquotesingle{} connection.
+
+This value must be positive and range from zero to one capture period.
+
+If this is not a subordinate, then this value is ignored. \mbox{\Hypertarget{structk4a__device__configuration__t_a8208974f05d89fc1362c6a0900bdef4d_a8208974f05d89fc1362c6a0900bdef4d}\label{structk4a__device__configuration__t_a8208974f05d89fc1362c6a0900bdef4d_a8208974f05d89fc1362c6a0900bdef4d}} 
+\index{k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}!synchronized\_images\_only@{synchronized\_images\_only}}
+\index{synchronized\_images\_only@{synchronized\_images\_only}!k4a\_device\_configuration\_t@{k4a\_device\_configuration\_t}}
+\doxysubsubsection{\texorpdfstring{synchronized\_images\_only}{synchronized\_images\_only}}
+{\footnotesize\ttfamily bool k4a\+\_\+device\+\_\+configuration\+\_\+t\+::synchronized\+\_\+images\+\_\+only}
+
+
+
+Only produce \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} objects if they contain synchronized color and depth images. 
+
+This setting controls the behavior in which images are dropped when images are produced faster than they can be read, or if there are errors in reading images from the device.
+
+If set to true, \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} objects will only be produced with both color and depth images. If set to false, \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} objects may be produced only a single image when the corresponding image is dropped.
+
+Setting this to false ensures that the caller receives all of the images received from the camera, regardless of whether the corresponding images expected in the capture are available.
+
+If either the color or depth camera are disabled, this setting has no effect. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+k4atypes.\+h\end{DoxyCompactItemize}

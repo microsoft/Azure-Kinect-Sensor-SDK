@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="unionk4a__calibration__intrinsic__parameters__t" kind="union" language="C++" prot="public">
+    <compoundname>k4a_calibration_intrinsic_parameters_t</compoundname>
+    <includes refid="k4atypes_8h" local="no">k4atypes.h</includes>
+    <innerclass refid="structk4a__calibration__intrinsic__parameters__t_1_1__param" prot="public">k4a_calibration_intrinsic_parameters_t::_param</innerclass>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="unionk4a__calibration__intrinsic__parameters__t_1aba32dd57ef2dbbfec9c6f11c285d3c41" prot="public" static="no" mutable="no">
+        <type>struct <ref refid="structk4a__calibration__intrinsic__parameters__t_1_1__param" kindref="compound">k4a_calibration_intrinsic_parameters_t::_param</ref></type>
+        <definition>struct k4a_calibration_intrinsic_parameters_t::_param k4a_calibration_intrinsic_parameters_t::param</definition>
+        <argsstring></argsstring>
+        <name>param</name>
+        <briefdescription>
+<para>Individual parameter representation of intrinsic model. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1110" column="33"/>
+      </memberdef>
+      <memberdef kind="variable" id="unionk4a__calibration__intrinsic__parameters__t_1ac61b843bb57e4c345b010e6fa5c10cd3" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::v[15]</definition>
+        <argsstring>[15]</argsstring>
+        <name>v</name>
+        <briefdescription>
+<para>Array representation of intrinsic model parameters. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1111" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1111" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Camera intrinsic calibration data. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="remark"><para>Intrinsic calibration represents the internal optical properties of the camera.</para>
+</simplesect>
+<simplesect kind="remark"><para>Azure Kinect devices are calibrated with Brown Conrady which is compatible with OpenCV.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>k4a_calibration_intrinsic_parameters_t::_param</label>
+        <link refid="structk4a__calibration__intrinsic__parameters__t_1_1__param"/>
+      </node>
+      <node id="1">
+        <label>k4a_calibration_intrinsic_parameters_t</label>
+        <link refid="unionk4a__calibration__intrinsic__parameters__t"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>param</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1090" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1091" bodyend="1112"/>
+    <listofallmembers>
+      <member refid="unionk4a__calibration__intrinsic__parameters__t_1aba32dd57ef2dbbfec9c6f11c285d3c41" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t</scope><name>param</name></member>
+      <member refid="unionk4a__calibration__intrinsic__parameters__t_1ac61b843bb57e4c345b010e6fa5c10cd3" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t</scope><name>v</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

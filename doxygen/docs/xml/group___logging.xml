@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="group___logging" kind="group">
+    <compoundname>Logging</compoundname>
+    <title>Error and event logging</title>
+    <briefdescription>
+<para>The SDK can log data to the console, files, or to a custom handler. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Environment Variables:</para>
+<para>K4A_ENABLE_LOG_TO_A_FILE / K4A_RECORD_ENABLE_LOG_TO_A_FILE Specifies the log file to save the log to. K4a.dll and k4arecord.dll can not log to the same file.</para>
+<para>K4A_ENABLE_LOG_TO_A_FILE = K4A_RECORD_ENABLE_LOG_TO_A_FILE = 0 - completely disable logging to a file log\custom.log - log all messages to the path and file specified - must end in &apos;.log&apos; to be considered a valid entry NOTE 1: When enabled this takes precedence over the value of K4A_ENABLE_LOG_TO_STDOUT. NOTE 2: This can not be set to the same value as K4A_RECORD_ENABLE_LOG_TO_A_FILE as they represent separate logger instance that do not allowed shared access to the file being written to.</para>
+<para>K4A_ENABLE_LOG_TO_STDOUT = 0 - disable logging to stdout all else - log all messages to stdout</para>
+<para>K4A_LOG_LEVEL = &apos;c&apos; - log all messages of level &apos;critical&apos; criticality &apos;e&apos; - log all messages of level &apos;error&apos; or higher criticality &apos;w&apos; - log all messages of level &apos;warning&apos; or higher criticality &apos;i&apos; - log all messages of level &apos;info&apos; or higher criticality &apos;t&apos; - log all messages of level &apos;trace&apos; or higher criticality DEFAULT - log all message of level &apos;error&apos; or higher criticality</para>
+<para>See remarks section of <computeroutput>k4a_set_debug_message_handler</computeroutput> </para>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

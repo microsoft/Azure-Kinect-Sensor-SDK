@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a__version__t" kind="struct" language="C++" prot="public">
+    <compoundname>k4a_version_t</compoundname>
+    <includes refid="k4atypes_8h" local="no">k4atypes.h</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structk4a__version__t_1aba947b238819496adc41888de36df6e1" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_version_t::major</definition>
+        <argsstring></argsstring>
+        <name>major</name>
+        <briefdescription>
+<para>Major version; represents a breaking change. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1193" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1193" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__version__t_1a52626a80e919cac31d837efa3d01abfb" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_version_t::minor</definition>
+        <argsstring></argsstring>
+        <name>minor</name>
+        <briefdescription>
+<para>Minor version; represents additional features, no regression from lower versions with same major version. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1194" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1194" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__version__t_1a9f3ec6a118f81533c7748b9080f68acf" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_version_t::iteration</definition>
+        <argsstring></argsstring>
+        <name>iteration</name>
+        <briefdescription>
+<para>Reserved. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1196" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1196" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Version information. </para>
+    </briefdescription>
+    <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1191" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1192" bodyend="1197"/>
+    <listofallmembers>
+      <member refid="structk4a__version__t_1a9f3ec6a118f81533c7748b9080f68acf" prot="public" virt="non-virtual"><scope>k4a_version_t</scope><name>iteration</name></member>
+      <member refid="structk4a__version__t_1aba947b238819496adc41888de36df6e1" prot="public" virt="non-virtual"><scope>k4a_version_t</scope><name>major</name></member>
+      <member refid="structk4a__version__t_1a52626a80e919cac31d837efa3d01abfb" prot="public" virt="non-virtual"><scope>k4a_version_t</scope><name>minor</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="group___definitions" kind="group">
+    <compoundname>Definitions</compoundname>
+    <title>Definitions</title>
+      <sectiondef kind="var">
+      <memberdef kind="variable" id="group___definitions_1ga4f693ace52a6eeec10cc6ca0350d6601" prot="public" static="yes" mutable="no">
+        <type>const <ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref></type>
+        <definition>const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL</definition>
+        <argsstring></argsstring>
+        <name>K4A_DEVICE_CONFIG_INIT_DISABLE_ALL</name>
+        <initializer>=
+    { <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaae172e7eecc6f4adfc318c789e49aaf9" kindref="member">K4A_IMAGE_FORMAT_COLOR_MJPG</ref>, 0, 0, 2, false, 0, <ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c" kindref="member">K4A_WIRED_SYNC_MODE_STANDALONE</ref>, 0, false }</initializer>
+        <briefdescription>
+<para>Initial configuration setting for disabling all sensors. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="remark"><para>Use this setting to initialize a <ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref> to a disabled state.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1332" column="41" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1332" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="group___definitions_1ga91dde801d6ce8feecfd317e330361eee" prot="public" static="no">
+        <name>K4A_ABI_VERSION</name>
+        <initializer>1</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="remark"><para>The ABI version of the SDK implementation.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1297" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1297" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___definitions_1gaebe4c1071a8ba3b04e32d55c85cae72d" prot="public" static="no">
+        <name>K4A_DEVICE_DEFAULT</name>
+        <initializer>(0)</initializer>
+        <briefdescription>
+<para>Default device index. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Passed as an argument to <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref> to open the default sensor</para>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1309" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1309" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___definitions_1gac012768169429fb54ba09f2964775cb9" prot="public" static="no">
+        <name>K4A_WAIT_INFINITE</name>
+        <initializer>(-1)</initializer>
+        <briefdescription>
+<para>An infinite wait time for functions that take a timeout parameter. </para>
+        </briefdescription>
+        <detaileddescription>
+<para> 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1319" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1319" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Definition of constant values. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

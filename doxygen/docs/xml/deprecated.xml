@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="deprecated" kind="page">
+    <compoundname>deprecated</compoundname>
+    <title>Deprecated List</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><variablelist>
+<varlistentry><term>Global <ref refid="group___functions_ga5a0940fb8ecf418eb3a388412bd08643_1ga5a0940fb8ecf418eb3a388412bd08643" kindref="member">k4a_image_get_timestamp_usec</ref>  </term></varlistentry>
+<listitem><para><anchor id="deprecated_1_deprecated000001"/> Deprecated starting in 1.2.0. Please use <ref refid="group___functions_ga318e115976ac441b513f6cf3c102a655_1ga318e115976ac441b513f6cf3c102a655" kindref="member">k4a_image_get_device_timestamp_usec()</ref>. </para>
+</listitem>
+<varlistentry><term>Global <ref refid="group___functions_ga29954cc87d1fabc8651155f7baff5c9f_1ga29954cc87d1fabc8651155f7baff5c9f" kindref="member">k4a_image_set_exposure_time_usec</ref>  </term></varlistentry>
+<listitem><para><anchor id="deprecated_1_deprecated000003"/> Deprecated starting in 1.2.0. Please use <ref refid="group___functions_ga617dac1d4664f8f4ead3013c1739ebb0_1ga617dac1d4664f8f4ead3013c1739ebb0" kindref="member">k4a_image_set_exposure_usec()</ref>. </para>
+</listitem>
+<varlistentry><term>Global <ref refid="group___functions_ga276298132ac76f56bf2c8b7589e38d63_1ga276298132ac76f56bf2c8b7589e38d63" kindref="member">k4a_image_set_timestamp_usec</ref>  </term></varlistentry>
+<listitem><para><anchor id="deprecated_1_deprecated000002"/> Deprecated starting in 1.2.0. Please use <ref refid="group___functions_gacc2c4bf42956687a101937b77f8dfa21_1gacc2c4bf42956687a101937b77f8dfa21" kindref="member">k4a_image_set_device_timestamp_usec()</ref>.</para>
+</listitem>
+</variablelist>
+</para>
+    </detaileddescription>
+    <location file="deprecated"/>
+  </compounddef>
+</doxygen>

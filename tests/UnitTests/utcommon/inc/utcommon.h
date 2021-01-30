@@ -10,7 +10,6 @@
 #include <k4a/k4atypes.h>
 #include <ostream>
 
-// TODO: comment
 #include <k4ainternal/modes.h>
 
 // Define the output operator for k4a_result_t types for clean test output

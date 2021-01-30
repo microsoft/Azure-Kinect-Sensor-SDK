@@ -1,0 +1,1166 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a__device__t" kind="class" language="C++" prot="public">
+    <compoundname>k4a_device_t</compoundname>
+    <includes refid="k4a_8h" local="no">k4a/k4a.h</includes>
+      <sectiondef kind="related">
+      <memberdef kind="function" id="group___functions_gaf7d19df0f73f8e4dfaa21e1b4b719ecc_1gaf7d19df0f73f8e4dfaa21e1b4b719ecc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_device_get_installed_count</definition>
+        <argsstring>(void)</argsstring>
+        <name>k4a_device_get_installed_count</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Gets the number of connected devices. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>Number of sensors connected to the PC.</para>
+</simplesect>
+<simplesect kind="remark"><para>This API counts the number of Azure Kinect devices connected to the host PC.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="49" column="11" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="49" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_device_open</definition>
+        <argsstring>(uint32_t index, k4a_device_t *device_handle)</argsstring>
+        <name>k4a_device_open</name>
+        <param>
+          <type>uint32_t</type>
+          <declname>index</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref> *</type>
+          <declname>device_handle</declname>
+        </param>
+        <briefdescription>
+<para>Open an Azure Kinect device. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>index</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The index of the device to open, starting with 0. Optionally pass in <ref refid="group___definitions_gaebe4c1071a8ba3b04e32d55c85cae72d_1gaebe4c1071a8ba3b04e32d55c85cae72d" kindref="member">K4A_DEVICE_DEFAULT</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Output parameter which on success will return a handle to the device.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if the device was opened successfully. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> if the device was not opened successfully.</para>
+</simplesect>
+<simplesect kind="remark"><para>If successful, <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref> will return a device handle in the device_handle parameter. This handle grants exclusive access to the device and may be used in the other Azure Kinect API calls.</para>
+</simplesect>
+<simplesect kind="remark"><para>When done with the device, close the handle with <ref refid="group___functions_ga7a3931d9a690b3971caaac83b43f9423_1ga7a3931d9a690b3971caaac83b43f9423" kindref="member">k4a_device_close()</ref></para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="165" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="165" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga7a3931d9a690b3971caaac83b43f9423_1ga7a3931d9a690b3971caaac83b43f9423" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_device_close</definition>
+        <argsstring>(k4a_device_t device_handle)</argsstring>
+        <name>k4a_device_close</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <briefdescription>
+<para>Closes an Azure Kinect device. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Once closed, the handle is no longer valid.</para>
+</simplesect>
+<simplesect kind="remark"><para>Before closing the handle to the device, ensure that all <ref refid="structk4a__capture__t" kindref="compound">k4a_capture_t</ref> captures have been released with <ref refid="group___functions_ga0ed6f74ec403c3eac1b8ef3afb32cee6_1ga0ed6f74ec403c3eac1b8ef3afb32cee6" kindref="member">k4a_capture_release()</ref>.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="187" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="187" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_1ga4dac757a33657f4d3dbf1ae8b21c158a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1ga44c7c0c1cfba7c879e9e2da1a869e4ee" kindref="member">k4a_wait_result_t</ref></type>
+        <definition>k4a_wait_result_t k4a_device_get_capture</definition>
+        <argsstring>(k4a_device_t device_handle, k4a_capture_t *capture_handle, int32_t timeout_in_ms)</argsstring>
+        <name>k4a_device_get_capture</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__capture__t" kindref="compound">k4a_capture_t</ref> *</type>
+          <declname>capture_handle</declname>
+        </param>
+        <param>
+          <type>int32_t</type>
+          <declname>timeout_in_ms</declname>
+        </param>
+        <briefdescription>
+<para>Reads a sensor capture. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>capture_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>If successful this contains a handle to a capture object. Caller must call <ref refid="group___functions_ga0ed6f74ec403c3eac1b8ef3afb32cee6_1ga0ed6f74ec403c3eac1b8ef3afb32cee6" kindref="member">k4a_capture_release()</ref> when its done using this capture.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>timeout_in_ms</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Specifies the time in milliseconds the function should block waiting for the capture. If set to 0, the function will return without blocking. Passing a value of <ref refid="group___definitions_gac012768169429fb54ba09f2964775cb9_1gac012768169429fb54ba09f2964775cb9" kindref="member">K4A_WAIT_INFINITE</ref> will block indefinitely until data is available, the device is disconnected, or another error occurs.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca" kindref="member">K4A_WAIT_RESULT_SUCCEEDED</ref> if a capture is returned. If a capture is not available before the timeout elapses, the function will return <ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6" kindref="member">K4A_WAIT_RESULT_TIMEOUT</ref>. All other failures will return <ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea956d1d20b14de6ba0a0ed97955e75540" kindref="member">K4A_WAIT_RESULT_FAILED</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>Gets the next capture in the streamed sequence of captures from the camera. If a new capture is not currently available, this function will block until the timeout is reached. The SDK will buffer at least two captures worth of data before dropping the oldest capture. Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.</para>
+</simplesect>
+<simplesect kind="remark"><para>Upon successfully reading a capture this function will return success and populate <computeroutput>capture</computeroutput>. If a capture is not available in the configured <computeroutput>timeout_in_ms</computeroutput>, then the API will return <ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6" kindref="member">K4A_WAIT_RESULT_TIMEOUT</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>If the call is successful and a capture is returned, callers must call <ref refid="group___functions_ga0ed6f74ec403c3eac1b8ef3afb32cee6_1ga0ed6f74ec403c3eac1b8ef3afb32cee6" kindref="member">k4a_capture_release()</ref> to return the allocated memory.</para>
+</simplesect>
+<simplesect kind="remark"><para>This function needs to be called while the device is in a running state; after <ref refid="group___functions_gaad7a85e1e5471810262442fc4a8e217a_1gaad7a85e1e5471810262442fc4a8e217a" kindref="member">k4a_device_start_cameras()</ref> is called and before <ref refid="group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_1ga4fa0e0a011a7105309ad97f081a5d6b8" kindref="member">k4a_device_stop_cameras()</ref> is called.</para>
+</simplesect>
+<simplesect kind="remark"><para>This function returns an error when an internal problem is encountered; such as loss of the USB connection, inability to allocate enough memory, and other unexpected issues. Any error returned by this function signals the end of streaming data, and caller should stop the stream using <ref refid="group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_1ga4fa0e0a011a7105309ad97f081a5d6b8" kindref="member">k4a_device_stop_cameras()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>If this function is waiting for data (non-zero timeout) when <ref refid="group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_1ga4fa0e0a011a7105309ad97f081a5d6b8" kindref="member">k4a_device_stop_cameras()</ref> or <ref refid="group___functions_ga7a3931d9a690b3971caaac83b43f9423_1ga7a3931d9a690b3971caaac83b43f9423" kindref="member">k4a_device_close()</ref> is called on another thread, this function will return an error.</para>
+</simplesect>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca" kindref="member">K4A_WAIT_RESULT_SUCCEEDED</ref> if a capture is returned. If a capture is not available before the timeout elapses, the function will return <ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6" kindref="member">K4A_WAIT_RESULT_TIMEOUT</ref>. All other failures will return <ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea956d1d20b14de6ba0a0ed97955e75540" kindref="member">K4A_WAIT_RESULT_FAILED</ref>.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="248" column="20" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="248" declcolumn="20"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e_1ga8e5913b3bb94a453c7143bbd6e399a0e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1ga44c7c0c1cfba7c879e9e2da1a869e4ee" kindref="member">k4a_wait_result_t</ref></type>
+        <definition>k4a_wait_result_t k4a_device_get_imu_sample</definition>
+        <argsstring>(k4a_device_t device_handle, k4a_imu_sample_t *imu_sample, int32_t timeout_in_ms)</argsstring>
+        <name>k4a_device_get_imu_sample</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__imu__sample__t" kindref="compound">k4a_imu_sample_t</ref> *</type>
+          <declname>imu_sample</declname>
+        </param>
+        <param>
+          <type>int32_t</type>
+          <declname>timeout_in_ms</declname>
+        </param>
+        <briefdescription>
+<para>Reads an IMU sample. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>imu_sample</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Pointer to the location for the API to write the IMU sample.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>timeout_in_ms</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Specifies the time in milliseconds the function should block waiting for the sample. If set to 0, the function will return without blocking. Passing a value of <ref refid="group___definitions_gac012768169429fb54ba09f2964775cb9_1gac012768169429fb54ba09f2964775cb9" kindref="member">K4A_WAIT_INFINITE</ref> will block indefinitely until data is available, the device is disconnected, or another error occurs.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca" kindref="member">K4A_WAIT_RESULT_SUCCEEDED</ref> if a sample is returned. If a sample is not available before the timeout elapses, the function will return <ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6" kindref="member">K4A_WAIT_RESULT_TIMEOUT</ref>. If a device does not support an IMU, then <ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eeab95879b0cce3590b7e76255ce6f20a4a" kindref="member">K4A_WAIT_RESULT_UNSUPPORTED</ref> is returned. All other failures will return <ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea956d1d20b14de6ba0a0ed97955e75540" kindref="member">K4A_WAIT_RESULT_FAILED</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>Gets the next sample in the streamed sequence of IMU samples from the device. If a new sample is not currently available, this function will block until the timeout is reached. The API will buffer at least two camera capture intervals worth of samples before dropping the oldest sample. Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.</para>
+</simplesect>
+<simplesect kind="remark"><para>Upon successfully reading a sample this function will return success and populate <computeroutput>imu_sample</computeroutput>. If a sample is not available in the configured <computeroutput>timeout_in_ms</computeroutput>, then the API will return <ref refid="group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_1gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6" kindref="member">K4A_WAIT_RESULT_TIMEOUT</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>This function needs to be called while the device is in a running state; after <ref refid="group___functions_gaa855688659a69c0098ce9e0b2ffcc152_1gaa855688659a69c0098ce9e0b2ffcc152" kindref="member">k4a_device_start_imu()</ref> is called and before <ref refid="group___functions_ga731c3ddd0833ce86d31e278992cf3453_1ga731c3ddd0833ce86d31e278992cf3453" kindref="member">k4a_device_stop_imu()</ref> is called.</para>
+</simplesect>
+<simplesect kind="remark"><para>This function returns an error when an internal problem is encountered; such as loss of the USB connection, inability to allocate enough memory, and other unexpected issues. Any error returned by this function signals the end of streaming data, and caller should stop the stream using <ref refid="group___functions_ga731c3ddd0833ce86d31e278992cf3453_1ga731c3ddd0833ce86d31e278992cf3453" kindref="member">k4a_device_stop_imu()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>If this function is waiting for data (non-zero timeout) when <ref refid="group___functions_ga731c3ddd0833ce86d31e278992cf3453_1ga731c3ddd0833ce86d31e278992cf3453" kindref="member">k4a_device_stop_imu()</ref> or <ref refid="group___functions_ga7a3931d9a690b3971caaac83b43f9423_1ga7a3931d9a690b3971caaac83b43f9423" kindref="member">k4a_device_close()</ref> is called on another thread, this function will return an error.</para>
+</simplesect>
+<simplesect kind="remark"><para>The memory the IMU sample is written to is allocated and owned by the caller, so there is no need to call an Azure Kinect API to free or release the sample.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="307" column="20" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="307" declcolumn="20"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gaad7a85e1e5471810262442fc4a8e217a_1gaad7a85e1e5471810262442fc4a8e217a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_device_start_cameras</definition>
+        <argsstring>(k4a_device_t device_handle, const k4a_device_configuration_t *config)</argsstring>
+        <name>k4a_device_start_cameras</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref> *</type>
+          <declname>config</declname>
+        </param>
+        <briefdescription>
+<para>Starts color and depth camera capture. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>config</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The configuration we want to run the device in. This can be initialized with <ref refid="group___definitions_ga4f693ace52a6eeec10cc6ca0350d6601_1ga4f693ace52a6eeec10cc6ca0350d6601" kindref="member">K4A_DEVICE_CONFIG_INIT_DISABLE_ALL</ref>.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> is returned on success.</para>
+</simplesect>
+<simplesect kind="remark"><para>Individual sensors configured to run will now start to stream captured data.</para>
+</simplesect>
+<simplesect kind="remark"><para>It is not valid to call <ref refid="group___functions_gaad7a85e1e5471810262442fc4a8e217a_1gaad7a85e1e5471810262442fc4a8e217a" kindref="member">k4a_device_start_cameras()</ref> a second time on the same <ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref> until <ref refid="group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_1ga4fa0e0a011a7105309ad97f081a5d6b8" kindref="member">k4a_device_stop_cameras()</ref> has been called.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1266" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1266" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_1ga4fa0e0a011a7105309ad97f081a5d6b8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_device_stop_cameras</definition>
+        <argsstring>(k4a_device_t device_handle)</argsstring>
+        <name>k4a_device_stop_cameras</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <briefdescription>
+<para>Stops the color and depth camera capture. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>The streaming of individual sensors stops as a result of this call. Once called, <ref refid="group___functions_gaad7a85e1e5471810262442fc4a8e217a_1gaad7a85e1e5471810262442fc4a8e217a" kindref="member">k4a_device_start_cameras()</ref> may be called again to resume sensor streaming.</para>
+</simplesect>
+<simplesect kind="remark"><para>This function may be called while another thread is blocking in <ref refid="group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_1ga4dac757a33657f4d3dbf1ae8b21c158a" kindref="member">k4a_device_get_capture()</ref>. Calling this function while another thread is in that function will result in that function returning a failure.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1291" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1291" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gaa855688659a69c0098ce9e0b2ffcc152_1gaa855688659a69c0098ce9e0b2ffcc152" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_device_start_imu</definition>
+        <argsstring>(k4a_device_t device_handle)</argsstring>
+        <name>k4a_device_start_imu</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <briefdescription>
+<para>Starts the IMU sample stream. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> is returned on success. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> if the sensor is already running or a failure is encountered. If a device does not support an IMU, <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref> is returned.</para>
+</simplesect>
+<simplesect kind="remark"><para>Call this API to start streaming IMU data. It is not valid to call this function a second time on the same <ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref> until <ref refid="group___functions_ga731c3ddd0833ce86d31e278992cf3453_1ga731c3ddd0833ce86d31e278992cf3453" kindref="member">k4a_device_stop_imu()</ref> has been called.</para>
+</simplesect>
+<simplesect kind="remark"><para>This function is dependent on the state of the cameras. The color or depth camera must be started before the IMU. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> will be returned if one of the cameras is not running.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1320" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1320" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga731c3ddd0833ce86d31e278992cf3453_1ga731c3ddd0833ce86d31e278992cf3453" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_device_stop_imu</definition>
+        <argsstring>(k4a_device_t device_handle)</argsstring>
+        <name>k4a_device_stop_imu</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <briefdescription>
+<para>Stops the IMU capture. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>The streaming of the IMU stops as a result of this call. Once called, <ref refid="group___functions_gaa855688659a69c0098ce9e0b2ffcc152_1gaa855688659a69c0098ce9e0b2ffcc152" kindref="member">k4a_device_start_imu()</ref> may be called again to resume sensor streaming, so long as the cameras are running.</para>
+</simplesect>
+<simplesect kind="remark"><para>This function may be called while another thread is blocking in <ref refid="group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e_1ga8e5913b3bb94a453c7143bbd6e399a0e" kindref="member">k4a_device_get_imu_sample()</ref>. Calling this function while another thread is in that function will result in that function returning a failure.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1345" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1345" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga798489af207ff1c99f2285ff6b08bc22_1ga798489af207ff1c99f2285ff6b08bc22" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1ga71b3cf304a2cd8fbac2f86c876deda5c" kindref="member">k4a_buffer_result_t</ref></type>
+        <definition>k4a_buffer_result_t k4a_device_get_serialnum</definition>
+        <argsstring>(k4a_device_t device_handle, char *serial_number, size_t *serial_number_size)</argsstring>
+        <name>k4a_device_get_serialnum</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type>char *</type>
+          <declname>serial_number</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>serial_number_size</declname>
+        </param>
+        <briefdescription>
+<para>Get the Azure Kinect device serial number. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>serial_number</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to write the serial number to. If the function returns <ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3" kindref="member">K4A_BUFFER_RESULT_SUCCEEDED</ref>, this will be a NULL terminated string of ASCII characters. If this input is NULL <computeroutput>serial_number_size</computeroutput> will still be updated to return the size of the buffer needed to store the string.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>serial_number_size</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>On input, the size of the <computeroutput>serial_number</computeroutput> buffer if that pointer is not NULL. On output, this value is set to the actual number of bytes in the serial number (including the null terminator).</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>A return of <ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3" kindref="member">K4A_BUFFER_RESULT_SUCCEEDED</ref> means that the <computeroutput>serial_number</computeroutput> has been filled in. If the buffer is too small the function returns <ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248" kindref="member">K4A_BUFFER_RESULT_TOO_SMALL</ref> and the size of the serial number is returned in the <computeroutput>serial_number_size</computeroutput> parameter. All other failures return <ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca29305af05427c7e739e910f02f72709a" kindref="member">K4A_BUFFER_RESULT_FAILED</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>Queries the device for its serial number. If the caller needs to know the size of the serial number to allocate memory, the function should be called once with a NULL <computeroutput>serial_number</computeroutput> to get the needed size in the <computeroutput>serial_number_size</computeroutput> output, and then again with the allocated buffer.</para>
+</simplesect>
+<simplesect kind="remark"><para>Only a complete serial number will be returned. If the caller&apos;s buffer is too small, the function will return <ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248" kindref="member">K4A_BUFFER_RESULT_TOO_SMALL</ref> without returning any data in <computeroutput>serial_number</computeroutput>.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1385" column="22" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1385" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gaea1def0a70bfa64ba275534be945669e_1gaea1def0a70bfa64ba275534be945669e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_device_get_version</definition>
+        <argsstring>(k4a_device_t device_handle, k4a_hardware_version_t *version)</argsstring>
+        <name>k4a_device_get_version</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__hardware__version__t" kindref="compound">k4a_hardware_version_t</ref> *</type>
+          <declname>version</declname>
+        </param>
+        <briefdescription>
+<para>Get the version numbers of the device&apos;s subsystems. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>version</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to write the version info to.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>A return of <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> means that the version structure has been filled in. All other failures return <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref>.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1410" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1410" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga70968e31e13aed0e2bef2009f169b901_1ga70968e31e13aed0e2bef2009f169b901" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_device_get_color_control_capabilities</definition>
+        <argsstring>(k4a_device_t device_handle, k4a_color_control_command_t command, bool *supports_auto, int32_t *min_value, int32_t *max_value, int32_t *step_value, int32_t *default_value, k4a_color_control_mode_t *default_mode)</argsstring>
+        <name>k4a_device_get_color_control_capabilities</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" kindref="member">k4a_color_control_command_t</ref></type>
+          <declname>command</declname>
+        </param>
+        <param>
+          <type>bool *</type>
+          <declname>supports_auto</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>min_value</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>max_value</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>step_value</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>default_value</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1ga3485402fc1bc5dc709e0d5859b6e8c88" kindref="member">k4a_color_control_mode_t</ref> *</type>
+          <declname>default_mode</declname>
+        </param>
+        <briefdescription>
+<para>Get the Azure Kinect color sensor control capabilities. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>command</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Color sensor control command.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>supports_auto</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to store whether the color sensor&apos;s control support auto mode or not. true if it supports auto mode, otherwise false.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>min_value</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to store the color sensor&apos;s control minimum value of /p command.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>max_value</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to store the color sensor&apos;s control maximum value of /p command.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>step_value</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to store the color sensor&apos;s control step value of /p command.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>default_value</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to store the color sensor&apos;s control default value of /p command.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>default_mode</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to store the color sensor&apos;s control default mode of /p command.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if the value was successfully returned, <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> if an error occurred. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref> if the device does not support this operation.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1453" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1453" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga5cb97bc0db4ab28ad98c44e323da1cce_1ga5cb97bc0db4ab28ad98c44e323da1cce" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_device_get_color_control</definition>
+        <argsstring>(k4a_device_t device_handle, k4a_color_control_command_t command, k4a_color_control_mode_t *mode, int32_t *value)</argsstring>
+        <name>k4a_device_get_color_control</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" kindref="member">k4a_color_control_command_t</ref></type>
+          <declname>command</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1ga3485402fc1bc5dc709e0d5859b6e8c88" kindref="member">k4a_color_control_mode_t</ref> *</type>
+          <declname>mode</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+<para>Get the Azure Kinect color sensor control value. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>command</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Color sensor control command.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>mode</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to store the color sensor&apos;s control mode. This mode represents whether the command is in automatic or manual mode.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>value</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to store the color sensor&apos;s control value. This value is always written, but is only valid when the <computeroutput>mode</computeroutput> returned is <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref> for the current <computeroutput>command</computeroutput>.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if the value was successfully returned, <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> if an error occurred. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref> if the device does not support this operation.</para>
+</simplesect>
+<simplesect kind="remark"><para>Each control command may be set to manual or automatic. See the definition of <ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" kindref="member">k4a_color_control_command_t</ref> on how to interpret the <computeroutput>value</computeroutput> for each command.</para>
+</simplesect>
+<simplesect kind="remark"><para>Some control commands are only supported in manual mode. When a command is in automatic mode, the <computeroutput>value</computeroutput> for that command is not valid.</para>
+</simplesect>
+<simplesect kind="remark"><para>Control values set on a device are reset only when the device is power cycled. The device will retain the settings even if the <ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref> is closed or the application is restarted.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1505" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1505" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gae81269489170b26b7f0bbe1a7f9d31d6_1gae81269489170b26b7f0bbe1a7f9d31d6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_device_set_color_control</definition>
+        <argsstring>(k4a_device_t device_handle, k4a_color_control_command_t command, k4a_color_control_mode_t mode, int32_t value)</argsstring>
+        <name>k4a_device_set_color_control</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" kindref="member">k4a_color_control_command_t</ref></type>
+          <declname>command</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1ga3485402fc1bc5dc709e0d5859b6e8c88" kindref="member">k4a_color_control_mode_t</ref></type>
+          <declname>mode</declname>
+        </param>
+        <param>
+          <type>int32_t</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+<para>Set the Azure Kinect color sensor control value. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>command</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Color sensor control command.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>mode</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Color sensor control mode to set. This mode represents whether the command is in automatic or manual mode.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>value</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Value to set the color sensor&apos;s control to. The value is only valid if <computeroutput>mode</computeroutput> is set to <ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b" kindref="member">K4A_COLOR_CONTROL_MODE_MANUAL</ref>, and is otherwise ignored.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if the value was successfully set, <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> if an error occurred. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref> if the device does not support this operation.</para>
+</simplesect>
+<simplesect kind="remark"><para>Each control command may be set to manual or automatic. See the definition of <ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" kindref="member">k4a_color_control_command_t</ref> on how to interpret the <computeroutput>value</computeroutput> for each command.</para>
+</simplesect>
+<simplesect kind="remark"><para>Some control commands are only supported in manual mode. When a command is in automatic mode, the <computeroutput>value</computeroutput> for that command is not valid.</para>
+</simplesect>
+<simplesect kind="remark"><para>Control values set on a device are reset only when the device is power cycled. The device will retain the settings even if the <ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref> is closed or the application is restarted.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1551" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1551" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga8c4e46642cee3115aeb0b33e2b43b24f_1ga8c4e46642cee3115aeb0b33e2b43b24f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1ga71b3cf304a2cd8fbac2f86c876deda5c" kindref="member">k4a_buffer_result_t</ref></type>
+        <definition>k4a_buffer_result_t k4a_device_get_raw_calibration</definition>
+        <argsstring>(k4a_device_t device_handle, uint8_t *data, size_t *data_size)</argsstring>
+        <name>k4a_device_get_raw_calibration</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>data_size</declname>
+        </param>
+        <briefdescription>
+<para>Get the raw calibration blob for the entire Azure Kinect device. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to write the calibration data to. This field may optionally be set to NULL for the caller to query for the needed data size.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>data_size</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>On passing <computeroutput>data_size</computeroutput> into the function this variable represents the available size of the <computeroutput>data</computeroutput> buffer. On return this variable is updated with the amount of data actually written to the buffer, or the size required to store the calibration buffer if <computeroutput>data</computeroutput> is NULL.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3" kindref="member">K4A_BUFFER_RESULT_SUCCEEDED</ref> if <computeroutput>data</computeroutput> was successfully written. If <computeroutput>data_size</computeroutput> points to a buffer size that is too small to hold the output or <computeroutput>data</computeroutput> is NULL, <ref refid="group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_1gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248" kindref="member">K4A_BUFFER_RESULT_TOO_SMALL</ref> is returned and <computeroutput>data_size</computeroutput> is updated to contain the minimum buffer size needed to capture the calibration data.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1585" column="22" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1585" declcolumn="22"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga2d9b1bea66eecbbf7b2d2868f913292b_1ga2d9b1bea66eecbbf7b2d2868f913292b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_device_get_calibration</definition>
+        <argsstring>(k4a_device_t device_handle, const uint32_t depth_mode_id, const uint32_t color_mode_id, k4a_calibration_t *calibration)</argsstring>
+        <name>k4a_device_get_calibration</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type>const uint32_t</type>
+          <declname>depth_mode_id</declname>
+        </param>
+        <param>
+          <type>const uint32_t</type>
+          <declname>color_mode_id</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__calibration__t" kindref="compound">k4a_calibration_t</ref> *</type>
+          <declname>calibration</declname>
+        </param>
+        <briefdescription>
+<para>Get the camera calibration for the entire Azure Kinect device. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>depth_mode_id</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Mode in which depth camera is operated.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>color_mode_id</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Mode in which color camera is operated.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>calibration</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to write the calibration</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if <computeroutput>calibration</computeroutput> was successfully written. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> otherwise.</para>
+</simplesect>
+<simplesect kind="remark"><para>The <computeroutput>calibration</computeroutput> represents the data needed to transform between the camera views and may be different for each operating <computeroutput>depth_mode_id</computeroutput> and <computeroutput>color_mode_id</computeroutput> the device is configured to operate in.</para>
+</simplesect>
+<simplesect kind="remark"><para>The <computeroutput>calibration</computeroutput> output is used as input to all calibration and transformation functions.</para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___functions_ga3b6bf6dedbfe67468e2f895dcce68ed4_1ga3b6bf6dedbfe67468e2f895dcce68ed4" kindref="member">k4a_calibration_2d_to_2d()</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___functions_ga664602bdb48dab38117a6c1d14b880de_1ga664602bdb48dab38117a6c1d14b880de" kindref="member">k4a_calibration_2d_to_3d()</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___functions_ga2ed8b51d727425caa942aab190fc2ba9_1ga2ed8b51d727425caa942aab190fc2ba9" kindref="member">k4a_calibration_3d_to_2d()</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___functions_gaacd1eab997ef964b5e436afa5295726e_1gaacd1eab997ef964b5e436afa5295726e" kindref="member">k4a_calibration_3d_to_3d()</ref></para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1628" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1628" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga0209ac87bfd055163677321b0304e962_1ga0209ac87bfd055163677321b0304e962" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_device_get_sync_jack</definition>
+        <argsstring>(k4a_device_t device_handle, bool *sync_in_jack_connected, bool *sync_out_jack_connected)</argsstring>
+        <name>k4a_device_get_sync_jack</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>device_handle</declname>
+        </param>
+        <param>
+          <type>bool *</type>
+          <declname>sync_in_jack_connected</declname>
+        </param>
+        <param>
+          <type>bool *</type>
+          <declname>sync_out_jack_connected</declname>
+        </param>
+        <briefdescription>
+<para>Get the device jack status for the synchronization in and synchronization out connectors. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>device_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle obtained by <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sync_in_jack_connected</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Upon successful return this value will be set to true if a cable is connected to this sync in jack.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sync_out_jack_connected</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Upon successful return this value will be set to true if a cable is connected to this sync out jack.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if the connector status was successfully read. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref> if the device does not support this operation.</para>
+</simplesect>
+<simplesect kind="remark"><para>If <computeroutput>sync_out_jack_connected</computeroutput> is true then <ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref> wired_sync_mode mode can be set to <ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c" kindref="member">K4A_WIRED_SYNC_MODE_STANDALONE</ref> or <ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505a014b98f7b0c962a994abe1a472bf6697" kindref="member">K4A_WIRED_SYNC_MODE_MASTER</ref>. If <computeroutput>sync_in_jack_connected</computeroutput> is true then <ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref> wired_sync_mode mode can be set to <ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c" kindref="member">K4A_WIRED_SYNC_MODE_STANDALONE</ref> or <ref refid="group___enumerations_ga6404c655dd8656efb745c6ee90da2505_1gga6404c655dd8656efb745c6ee90da2505a8140f817b21902d275832a1ef6c216ca" kindref="member">K4A_WIRED_SYNC_MODE_SUBORDINATE</ref>.</para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___functions_gaad7a85e1e5471810262442fc4a8e217a_1gaad7a85e1e5471810262442fc4a8e217a" kindref="member">k4a_device_start_cameras()</ref></para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1666" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1666" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga3efe518a3de8c75c174cb97c84e12735_1ga3efe518a3de8c75c174cb97c84e12735" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_calibration_get_from_raw</definition>
+        <argsstring>(char *raw_calibration, size_t raw_calibration_size, const uint32_t depth_mode_id, const uint32_t color_mode_id, k4a_calibration_t *calibration)</argsstring>
+        <name>k4a_calibration_get_from_raw</name>
+        <param>
+          <type>char *</type>
+          <declname>raw_calibration</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>raw_calibration_size</declname>
+        </param>
+        <param>
+          <type>const uint32_t</type>
+          <declname>depth_mode_id</declname>
+        </param>
+        <param>
+          <type>const uint32_t</type>
+          <declname>color_mode_id</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__calibration__t" kindref="compound">k4a_calibration_t</ref> *</type>
+          <declname>calibration</declname>
+        </param>
+        <briefdescription>
+<para>Get the camera calibration for a device from a raw calibration blob. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>raw_calibration</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Raw calibration blob obtained from a device or recording. The raw calibration must be NULL terminated.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>raw_calibration_size</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The size, in bytes, of raw_calibration including the NULL termination.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>depth_mode_id</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Mode in which depth camera is operated.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>color_mode_id</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Resolution in which color camera is operated.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>calibration</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Location to write the calibration.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if <computeroutput>calibration</computeroutput> was successfully written. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> otherwise.</para>
+</simplesect>
+<simplesect kind="remark"><para>The <computeroutput>calibration</computeroutput> represents the data needed to transform between the camera views and is different for each operating <computeroutput>depth_mode_id</computeroutput> and <computeroutput>color_mode_id</computeroutput> the device is configured to operate in.</para>
+</simplesect>
+<simplesect kind="remark"><para>The <computeroutput>calibration</computeroutput> output is used as input to all transformation functions.</para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___functions_ga3b6bf6dedbfe67468e2f895dcce68ed4_1ga3b6bf6dedbfe67468e2f895dcce68ed4" kindref="member">k4a_calibration_2d_to_2d()</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___functions_ga664602bdb48dab38117a6c1d14b880de_1ga664602bdb48dab38117a6c1d14b880de" kindref="member">k4a_calibration_2d_to_3d()</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___functions_ga2ed8b51d727425caa942aab190fc2ba9_1ga2ed8b51d727425caa942aab190fc2ba9" kindref="member">k4a_calibration_3d_to_2d()</ref> </para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="group___functions_gaacd1eab997ef964b5e436afa5295726e_1gaacd1eab997ef964b5e436afa5295726e" kindref="member">k4a_calibration_3d_to_3d()</ref></para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1712" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1712" declcolumn="15"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Handle to an Azure Kinect device. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="remark"><para>Handles are created with <ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open()</ref> and closed with <ref refid="group___functions_ga7a3931d9a690b3971caaac83b43f9423_1ga7a3931d9a690b3971caaac83b43f9423" kindref="member">k4a_device_close()</ref>. Invalid handles are set to 0.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="66" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="66" bodyend="66"/>
+    <listofallmembers>
+      <member refid="group___functions_ga3efe518a3de8c75c174cb97c84e12735_1ga3efe518a3de8c75c174cb97c84e12735" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_calibration_get_from_raw</name></member>
+      <member refid="group___functions_ga7a3931d9a690b3971caaac83b43f9423_1ga7a3931d9a690b3971caaac83b43f9423" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_close</name></member>
+      <member refid="group___functions_ga2d9b1bea66eecbbf7b2d2868f913292b_1ga2d9b1bea66eecbbf7b2d2868f913292b" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_calibration</name></member>
+      <member refid="group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_1ga4dac757a33657f4d3dbf1ae8b21c158a" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_capture</name></member>
+      <member refid="group___functions_ga5cb97bc0db4ab28ad98c44e323da1cce_1ga5cb97bc0db4ab28ad98c44e323da1cce" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_color_control</name></member>
+      <member refid="group___functions_ga70968e31e13aed0e2bef2009f169b901_1ga70968e31e13aed0e2bef2009f169b901" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_color_control_capabilities</name></member>
+      <member refid="group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e_1ga8e5913b3bb94a453c7143bbd6e399a0e" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_imu_sample</name></member>
+      <member refid="group___functions_gaf7d19df0f73f8e4dfaa21e1b4b719ecc_1gaf7d19df0f73f8e4dfaa21e1b4b719ecc" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_installed_count</name></member>
+      <member refid="group___functions_ga8c4e46642cee3115aeb0b33e2b43b24f_1ga8c4e46642cee3115aeb0b33e2b43b24f" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_raw_calibration</name></member>
+      <member refid="group___functions_ga798489af207ff1c99f2285ff6b08bc22_1ga798489af207ff1c99f2285ff6b08bc22" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_serialnum</name></member>
+      <member refid="group___functions_ga0209ac87bfd055163677321b0304e962_1ga0209ac87bfd055163677321b0304e962" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_sync_jack</name></member>
+      <member refid="group___functions_gaea1def0a70bfa64ba275534be945669e_1gaea1def0a70bfa64ba275534be945669e" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_get_version</name></member>
+      <member refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_open</name></member>
+      <member refid="group___functions_gae81269489170b26b7f0bbe1a7f9d31d6_1gae81269489170b26b7f0bbe1a7f9d31d6" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_set_color_control</name></member>
+      <member refid="group___functions_gaad7a85e1e5471810262442fc4a8e217a_1gaad7a85e1e5471810262442fc4a8e217a" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_start_cameras</name></member>
+      <member refid="group___functions_gaa855688659a69c0098ce9e0b2ffcc152_1gaa855688659a69c0098ce9e0b2ffcc152" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_start_imu</name></member>
+      <member refid="group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_1ga4fa0e0a011a7105309ad97f081a5d6b8" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_stop_cameras</name></member>
+      <member refid="group___functions_ga731c3ddd0833ce86d31e278992cf3453_1ga731c3ddd0833ce86d31e278992cf3453" prot="public" virt="non-virtual"><scope>k4a_device_t</scope><name>k4a_device_stop_imu</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,427 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a__transformation__t" kind="class" language="C++" prot="public">
+    <compoundname>k4a_transformation_t</compoundname>
+    <includes refid="k4a_8h" local="no">k4a/k4a.h</includes>
+      <sectiondef kind="related">
+      <memberdef kind="function" id="group___functions_ga7d3ecaae66f26c1a89da9042b1bc6d44_1ga7d3ecaae66f26c1a89da9042b1bc6d44" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_transformation_destroy</definition>
+        <argsstring>(k4a_transformation_t transformation_handle)</argsstring>
+        <name>k4a_transformation_destroy</name>
+        <param>
+          <type><ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref></type>
+          <declname>transformation_handle</declname>
+        </param>
+        <briefdescription>
+<para>Destroy transformation handle. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>transformation_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Transformation handle to destroy.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="2040" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="2040" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gafacffb5f781a9c2df30d4a16241cd514_1gafacffb5f781a9c2df30d4a16241cd514" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_transformation_depth_image_to_color_camera</definition>
+        <argsstring>(k4a_transformation_t transformation_handle, const k4a_image_t depth_image, k4a_image_t transformed_depth_image)</argsstring>
+        <name>k4a_transformation_depth_image_to_color_camera</name>
+        <param>
+          <type><ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref></type>
+          <declname>transformation_handle</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>transformed_depth_image</declname>
+        </param>
+        <briefdescription>
+<para>Transforms the depth map into the geometry of the color camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>transformation_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Transformation handle.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>depth_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to input depth image.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>transformed_depth_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to output transformed depth image.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>This produces a depth image for which each pixel matches the corresponding pixel coordinates of the color camera.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>depth_image</computeroutput> and <computeroutput>transformed_depth_image</computeroutput> must be of format <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba5abd5fdff69181007ec79ed3087aa18e" kindref="member">K4A_IMAGE_FORMAT_DEPTH16</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>transformed_depth_image</computeroutput> must have a width and height matching the width and height of the color camera in the mode specified by the <ref refid="structk4a__calibration__t" kindref="compound">k4a_calibration_t</ref> used to create the <computeroutput>transformation_handle</computeroutput> with <ref refid="group___functions_ga853a1a5b6d521bbdf523a69e890c4f10_1ga853a1a5b6d521bbdf523a69e890c4f10" kindref="member">k4a_transformation_create()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The contents <computeroutput>transformed_depth_image</computeroutput> will be filled with the depth values derived from <computeroutput>depth_image</computeroutput> in the color camera&apos;s coordinate space.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>transformed_depth_image</computeroutput> should be created by the caller using <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref>.</para>
+</simplesect>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if <computeroutput>transformed_depth_image</computeroutput> was successfully written and <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> otherwise. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref> if the device does not support this operation.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="2085" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="2085" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gac00dd00e7612a86382e3d0a130f276bb_1gac00dd00e7612a86382e3d0a130f276bb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_transformation_depth_image_to_color_camera_custom</definition>
+        <argsstring>(k4a_transformation_t transformation_handle, const k4a_image_t depth_image, const k4a_image_t custom_image, k4a_image_t transformed_depth_image, k4a_image_t transformed_custom_image, k4a_transformation_interpolation_type_t interpolation_type, uint32_t invalid_custom_value)</argsstring>
+        <name>k4a_transformation_depth_image_to_color_camera_custom</name>
+        <param>
+          <type><ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref></type>
+          <declname>transformation_handle</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>custom_image</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>transformed_depth_image</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>transformed_custom_image</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1ga06f55e23e1d260b069e89e4a9cd6f4ee" kindref="member">k4a_transformation_interpolation_type_t</ref></type>
+          <declname>interpolation_type</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>invalid_custom_value</declname>
+        </param>
+        <briefdescription>
+<para>Transforms depth map and a custom image into the geometry of the color camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>transformation_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Transformation handle.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>depth_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to input depth image.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>custom_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to input custom image.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>transformed_depth_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to output transformed depth image.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>transformed_custom_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to output transformed custom image.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>interpolation_type</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Parameter that controls how pixels in <computeroutput>custom_image</computeroutput> should be interpolated when transformed to color camera space. K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR if linear interpolation should be used. K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST if nearest neighbor interpolation should be used.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>invalid_custom_value</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Defines the custom image pixel value that should be written to <computeroutput>transformed_custom_image</computeroutput> in case the corresponding depth pixel can not be transformed into the color camera space.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>This produces a depth image and a corresponding custom image for which each pixel matches the corresponding pixel coordinates of the color camera.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>depth_image</computeroutput> and <computeroutput>transformed_depth_image</computeroutput> must be of format <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba5abd5fdff69181007ec79ed3087aa18e" kindref="member">K4A_IMAGE_FORMAT_DEPTH16</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>custom_image</computeroutput> and <computeroutput>transformed_custom_image</computeroutput> must be of format <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba17dea221ecdfa136dea68f80e0397e15" kindref="member">K4A_IMAGE_FORMAT_CUSTOM8</ref> or <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba6f2ee5c37729f9196b0cf3d3028edc42" kindref="member">K4A_IMAGE_FORMAT_CUSTOM16</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>transformed_depth_image</computeroutput> and <computeroutput>transformed_custom_image</computeroutput> must have a width and height matching the width and height of the color camera in the mode specified by the <ref refid="structk4a__calibration__t" kindref="compound">k4a_calibration_t</ref> used to create the <computeroutput>transformation_handle</computeroutput> with <ref refid="group___functions_ga853a1a5b6d521bbdf523a69e890c4f10_1ga853a1a5b6d521bbdf523a69e890c4f10" kindref="member">k4a_transformation_create()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>custom_image</computeroutput> must have a width and height matching the width and height of <computeroutput>depth_image</computeroutput>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The contents <computeroutput>transformed_depth_image</computeroutput> will be filled with the depth values derived from <computeroutput>depth_image</computeroutput> in the color camera&apos;s coordinate space.</para>
+</simplesect>
+<simplesect kind="remark"><para>The contents <computeroutput>transformed_custom_image</computeroutput> will be filled with the values derived from <computeroutput>custom_image</computeroutput> in the color camera&apos;s coordinate space.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>transformed_depth_image</computeroutput> and <computeroutput>transformed_custom_image</computeroutput> should be created by the caller using <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>Using <ref refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1gga06f55e23e1d260b069e89e4a9cd6f4eeac91cb5f01c87411e2980d109a7a36e56" kindref="member">K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR</ref> for <computeroutput>interpolation_type</computeroutput> could create new values to <computeroutput>transformed_custom_image</computeroutput> which do no exist in <computeroutput>custom_image</computeroutput>. Using <ref refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1gga06f55e23e1d260b069e89e4a9cd6f4eea9b7517e41898a208566db614bcf26cc5" kindref="member">K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST</ref> will prevent this from happenning but will result in a less smooth image.</para>
+</simplesect>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if <computeroutput>transformed_depth_image</computeroutput> and <computeroutput>transformed_custom_image</computeroutput> were successfully written and <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> otherwise. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref> if the device does not support this operation.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="2166" column="1" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="2166" declcolumn="1"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gaf3a941f07bb0185cd7a72699a648fc29_1gaf3a941f07bb0185cd7a72699a648fc29" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_transformation_color_image_to_depth_camera</definition>
+        <argsstring>(k4a_transformation_t transformation_handle, const k4a_image_t depth_image, const k4a_image_t color_image, k4a_image_t transformed_color_image)</argsstring>
+        <name>k4a_transformation_color_image_to_depth_camera</name>
+        <param>
+          <type><ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref></type>
+          <declname>transformation_handle</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>color_image</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>transformed_color_image</declname>
+        </param>
+        <briefdescription>
+<para>Transforms a color image into the geometry of the depth camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>transformation_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Transformation handle.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>depth_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to input depth image.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>color_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to input color image.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>transformed_color_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to output transformed color image.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>This produces a color image for which each pixel matches the corresponding pixel coordinates of the depth camera.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>depth_image</computeroutput> and <computeroutput>color_image</computeroutput> need to represent the same moment in time. The depth data will be applied to the color image to properly warp the color data to the perspective of the depth camera.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>depth_image</computeroutput> must be of type <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba5abd5fdff69181007ec79ed3087aa18e" kindref="member">K4A_IMAGE_FORMAT_DEPTH16</ref>. <computeroutput>color_image</computeroutput> must be of format <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbade43f3d12f5ce476be5be2b0e289d481" kindref="member">K4A_IMAGE_FORMAT_COLOR_BGRA32</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>transformed_color_image</computeroutput> image must be of format <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbade43f3d12f5ce476be5be2b0e289d481" kindref="member">K4A_IMAGE_FORMAT_COLOR_BGRA32</ref>. <computeroutput>transformed_color_image</computeroutput> must have the width and height of the depth camera in the mode specified by the <ref refid="structk4a__calibration__t" kindref="compound">k4a_calibration_t</ref> used to create the <computeroutput>transformation_handle</computeroutput> with <ref refid="group___functions_ga853a1a5b6d521bbdf523a69e890c4f10_1ga853a1a5b6d521bbdf523a69e890c4f10" kindref="member">k4a_transformation_create()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>transformed_color_image</computeroutput> should be created by the caller using <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref>.</para>
+</simplesect>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if <computeroutput>transformed_color_image</computeroutput> was successfully written and <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> otherwise. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref> if the device does not support this operation.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="2222" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="2222" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga7385eb4beb9d8892e8a88cf4feb3be70_1ga7385eb4beb9d8892e8a88cf4feb3be70" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_transformation_depth_image_to_point_cloud</definition>
+        <argsstring>(k4a_transformation_t transformation_handle, const k4a_image_t depth_image, const k4a_calibration_type_t camera, k4a_image_t xyz_image)</argsstring>
+        <name>k4a_transformation_depth_image_to_point_cloud</name>
+        <param>
+          <type><ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref></type>
+          <declname>transformation_handle</declname>
+        </param>
+        <param>
+          <type>const <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type>const <ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>camera</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>xyz_image</declname>
+        </param>
+        <briefdescription>
+<para>Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding 3D points. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>transformation_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Transformation handle.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>depth_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to input depth image.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>camera</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Geometry in which depth map was computed.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>xyz_image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle to output xyz image.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para><computeroutput>depth_image</computeroutput> must be of format <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba5abd5fdff69181007ec79ed3087aa18e" kindref="member">K4A_IMAGE_FORMAT_DEPTH16</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The <computeroutput>camera</computeroutput> parameter tells the function what the perspective of the <computeroutput>depth_image</computeroutput> is. If the <computeroutput>depth_image</computeroutput> was captured directly from the depth camera, the value should be <ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a5e8e2174902ceeeb16c4dc54914fcc66" kindref="member">K4A_CALIBRATION_TYPE_DEPTH</ref>. If the <computeroutput>depth_image</computeroutput> is the result of a transformation into the color camera&apos;s coordinate space using <ref refid="group___functions_gafacffb5f781a9c2df30d4a16241cd514_1gafacffb5f781a9c2df30d4a16241cd514" kindref="member">k4a_transformation_depth_image_to_color_camera()</ref>, the value should be <ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1gga8d5fae13125f360be86c166684cdb5c5a5e5062625d7c0ba242b078daf0b526c3" kindref="member">K4A_CALIBRATION_TYPE_COLOR</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The format of <computeroutput>xyz_image</computeroutput> must be <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52" kindref="member">K4A_IMAGE_FORMAT_CUSTOM</ref>. The width and height of <computeroutput>xyz_image</computeroutput> must match the width and height of <computeroutput>depth_image</computeroutput>. <computeroutput>xyz_image</computeroutput> must have a stride in bytes of at least 6 times its width in pixels.</para>
+</simplesect>
+<simplesect kind="remark"><para>Each pixel of the <computeroutput>xyz_image</computeroutput> consists of three int16_t values, totaling 6 bytes. The three int16_t values are the X, Y, and Z values of the point.</para>
+</simplesect>
+<simplesect kind="remark"><para><computeroutput>xyz_image</computeroutput> should be created by the caller using <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref>.</para>
+</simplesect>
+<simplesect kind="return"><para><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> if <computeroutput>xyz_image</computeroutput> was successfully written and <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> otherwise. <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13" kindref="member">K4A_RESULT_UNSUPPORTED</ref> if the device does not support this operation.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="2275" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="2275" declcolumn="15"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Handle to an Azure Kinect transformation context. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="remark"><para>Handles are created with <ref refid="group___functions_ga853a1a5b6d521bbdf523a69e890c4f10_1ga853a1a5b6d521bbdf523a69e890c4f10" kindref="member">k4a_transformation_create()</ref> and closed with <ref refid="group___functions_ga7d3ecaae66f26c1a89da9042b1bc6d44_1ga7d3ecaae66f26c1a89da9042b1bc6d44" kindref="member">k4a_transformation_destroy()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The transformation handle is used to transform images from the coordinate system of one camera into the other. Each transformation handle requires some pre-computed resources to be allocated, which are retained until the handle is destroyed.</para>
+</simplesect>
+<simplesect kind="remark"><para>Invalid handles are set to 0.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="195" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="195" bodyend="195"/>
+    <listofallmembers>
+      <member refid="group___functions_gaf3a941f07bb0185cd7a72699a648fc29_1gaf3a941f07bb0185cd7a72699a648fc29" prot="public" virt="non-virtual"><scope>k4a_transformation_t</scope><name>k4a_transformation_color_image_to_depth_camera</name></member>
+      <member refid="group___functions_gafacffb5f781a9c2df30d4a16241cd514_1gafacffb5f781a9c2df30d4a16241cd514" prot="public" virt="non-virtual"><scope>k4a_transformation_t</scope><name>k4a_transformation_depth_image_to_color_camera</name></member>
+      <member refid="group___functions_gac00dd00e7612a86382e3d0a130f276bb_1gac00dd00e7612a86382e3d0a130f276bb" prot="public" virt="non-virtual"><scope>k4a_transformation_t</scope><name>k4a_transformation_depth_image_to_color_camera_custom</name></member>
+      <member refid="group___functions_ga7385eb4beb9d8892e8a88cf4feb3be70_1ga7385eb4beb9d8892e8a88cf4feb3be70" prot="public" virt="non-virtual"><scope>k4a_transformation_t</scope><name>k4a_transformation_depth_image_to_point_cloud</name></member>
+      <member refid="group___functions_ga7d3ecaae66f26c1a89da9042b1bc6d44_1ga7d3ecaae66f26c1a89da9042b1bc6d44" prot="public" virt="non-virtual"><scope>k4a_transformation_t</scope><name>k4a_transformation_destroy</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

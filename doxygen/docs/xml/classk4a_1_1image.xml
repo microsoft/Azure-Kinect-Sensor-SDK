@@ -1,0 +1,691 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="classk4a_1_1image" kind="class" language="C++" prot="public">
+    <compoundname>k4a::image</compoundname>
+    <includes refid="k4a_8hpp" local="no">k4a/k4a.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classk4a_1_1image_1a9e1a4ccdcaf28610331b8058a61002e1" prot="private" static="no" mutable="no">
+        <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+        <definition>k4a_image_t k4a::image::m_handle</definition>
+        <argsstring></argsstring>
+        <name>m_handle</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="406" column="17" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="406" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classk4a_1_1image_ac9f26e8ea2dc561d64de0cabe004967e_1ac9f26e8ea2dc561d64de0cabe004967e" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::image::image</definition>
+        <argsstring>(k4a_image_t handle=nullptr) noexcept</argsstring>
+        <name>image</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>handle</declname>
+          <defval>nullptr</defval>
+        </param>
+        <briefdescription>
+<para>Creates an image from a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Takes ownership of the handle, i.e. assuming that handle has a refcount of 1, you should not call k4a_image_release on the handle after giving it to the image; the image will take care of that. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="88" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="88" bodyend="88"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1aff608c45cc2a141c71a448607741df34" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::image::image</definition>
+        <argsstring>(const image &amp;other) noexcept</argsstring>
+        <name>image</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Creates a shallow copy of another image. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="92" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="92" bodyend="98"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1adb337f5ae0c5428a7d34876affdb5ae8" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::image::image</definition>
+        <argsstring>(image &amp;&amp;other) noexcept</argsstring>
+        <name>image</name>
+        <param>
+          <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;&amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Moves another image into a new image. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="102" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="102" bodyend="105"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1aad7e03e67c7019e08874d3a2a8f128a3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::image::~image</definition>
+        <argsstring>()</argsstring>
+        <name>~image</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="107" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="107" bodyend="110"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1a08a32ff87256a778ce77bfffb6568beb" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+        <definition>image&amp; k4a::image::operator=</definition>
+        <argsstring>(const image &amp;other) noexcept</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Sets image to a shallow copy of the other image. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="114" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="114" bodyend="126"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1a6a4670119bd9a2b91f243c343d312a90" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+        <definition>image&amp; k4a::image::operator=</definition>
+        <argsstring>(image &amp;&amp;other) noexcept</argsstring>
+        <name>operator=</name>
+        <param>
+          <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;&amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Moves another image into this image; other is set to invalid. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="130" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="130" bodyend="139"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1aa52fed26cdd34b9f63f3b219f7c1bc6d" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+        <definition>image&amp; k4a::image::operator=</definition>
+        <argsstring>(std::nullptr_t) noexcept</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>std::nullptr_t</type>
+        </param>
+        <briefdescription>
+<para>Invalidates this image. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="143" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="143" bodyend="147"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1afcc26100d131a15edb5f4f87501c37bc" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::image::operator==</definition>
+        <argsstring>(const image &amp;other) const noexcept</argsstring>
+        <name>operator==</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Returns true if two images refer to the same <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>, false otherwise. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="151" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="151" bodyend="154"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1aac0490a29722a1377564cbcc7642c0b4" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::image::operator==</definition>
+        <argsstring>(std::nullptr_t) const noexcept</argsstring>
+        <name>operator==</name>
+        <param>
+          <type>std::nullptr_t</type>
+        </param>
+        <briefdescription>
+<para>Returns false if the image is valid, true otherwise. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="158" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="158" bodyend="161"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1aa000850be81fbda9b9bbfdde0283ec7a" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::image::operator!=</definition>
+        <argsstring>(const image &amp;other) const noexcept</argsstring>
+        <name>operator!=</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Returns true if two images wrap different <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> instances, false otherwise. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="165" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="165" bodyend="168"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1a76be4cef7e6661f3940f9b9adcc16840" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::image::operator!=</definition>
+        <argsstring>(std::nullptr_t) const noexcept</argsstring>
+        <name>operator!=</name>
+        <param>
+          <type>std::nullptr_t</type>
+        </param>
+        <briefdescription>
+<para>Returns true if the image is valid, false otherwise. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="172" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="172" bodyend="175"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1a32b1ba1b4dc1f1190fa456250ee0e4a0" prot="public" static="no" const="yes" explicit="yes" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::image::operator bool</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>operator bool</name>
+        <briefdescription>
+<para>Returns true if the image is valid, false otherwise. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="179" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="179" bodyend="182"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1a94f398595ba9086533e9d6afe74b38b5" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::image::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <briefdescription>
+<para>Returns true if the image is valid, false otherwise. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="186" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="186" bodyend="189"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a88a5e67e8dd75677502e2421b3ba7c2c_1a88a5e67e8dd75677502e2421b3ba7c2c" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+        <definition>k4a_image_t k4a::image::handle</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>handle</name>
+        <briefdescription>
+<para>Returns the underlying <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> handle. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Note that this function does not increment the reference count on the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>. The caller is responsible for incrementing the reference count on the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> if the caller needs the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> to outlive this C++ object. Otherwise, the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> will be destroyed by this C++ object. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="198" column="17" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="198" bodyend="201"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_1a5654ce02204e255e11350c14cf1f4b89" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::image::reset</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>reset</name>
+        <briefdescription>
+<para>Releases the underlying <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>; the image is set to invalid. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="205" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="205" bodyend="212"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_af088c323209fecac22012e253dc3d9d1_1af088c323209fecac22012e253dc3d9d1" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint8_t *</type>
+        <definition>uint8_t* k4a::image::get_buffer</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>get_buffer</name>
+        <briefdescription>
+<para>Get the image buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga2ef070cf4e543cd0f726478af332546e_1ga2ef070cf4e543cd0f726478af332546e" kindref="member">k4a_image_get_buffer</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="265" column="13" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="265" bodyend="268"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a6b68d771858ff5d1878f6f0c314a669e_1a6b68d771858ff5d1878f6f0c314a669e" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>const uint8_t *</type>
+        <definition>const uint8_t* k4a::image::get_buffer</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_buffer</name>
+        <briefdescription>
+<para>Get the image buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga2ef070cf4e543cd0f726478af332546e_1ga2ef070cf4e543cd0f726478af332546e" kindref="member">k4a_image_get_buffer</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="274" column="19" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="274" bodyend="277"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a681ade955c81f42d967d41dcbaf065d4_1a681ade955c81f42d967d41dcbaf065d4" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t k4a::image::get_size</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_size</name>
+        <briefdescription>
+<para>Get the image buffer size in bytes. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga814fd12783faf624e9357bbb3655643b_1ga814fd12783faf624e9357bbb3655643b" kindref="member">k4a_image_get_size</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="283" column="12" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="283" bodyend="286"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_aad5e858608f4109d7c3c8fa0f58cd6ac_1aad5e858608f4109d7c3c8fa0f58cd6ac" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref></type>
+        <definition>k4a_image_format_t k4a::image::get_format</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_format</name>
+        <briefdescription>
+<para>Get the image format of the image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga16f663cb93d8a8fa059fd551485f1315_1ga16f663cb93d8a8fa059fd551485f1315" kindref="member">k4a_image_get_format</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="292" column="24" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="292" bodyend="295"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a2ed85b2247946a21251c790071612904_1a2ed85b2247946a21251c790071612904" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int k4a::image::get_width_pixels</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_width_pixels</name>
+        <briefdescription>
+<para>Get the image width in pixels. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gab3df35a307588f272665328711342c06_1gab3df35a307588f272665328711342c06" kindref="member">k4a_image_get_width_pixels</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="301" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="301" bodyend="304"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a806880f3fe29f7b4833813138d40c0fa_1a806880f3fe29f7b4833813138d40c0fa" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int k4a::image::get_height_pixels</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_height_pixels</name>
+        <briefdescription>
+<para>Get the image height in pixels. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga57ef7c5ce58812e176537476e4eb1764_1ga57ef7c5ce58812e176537476e4eb1764" kindref="member">k4a_image_get_height_pixels</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="310" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="310" bodyend="313"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a5e22c7875e15ecf102cc4cf4accb27c2_1a5e22c7875e15ecf102cc4cf4accb27c2" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int k4a::image::get_stride_bytes</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_stride_bytes</name>
+        <briefdescription>
+<para>Get the image stride in bytes. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga18fa129b72b89ce8d13cd3e650af88e6_1ga18fa129b72b89ce8d13cd3e650af88e6" kindref="member">k4a_image_get_stride_bytes</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="319" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="319" bodyend="322"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a2d45cb5d26b004d0f93be7b3c130aabe_1a2d45cb5d26b004d0f93be7b3c130aabe" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>std::chrono::microseconds</type>
+        <definition>std::chrono::microseconds k4a::image::get_device_timestamp</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_device_timestamp</name>
+        <briefdescription>
+<para>Get the image&apos;s device timestamp in microseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga318e115976ac441b513f6cf3c102a655_1ga318e115976ac441b513f6cf3c102a655" kindref="member">k4a_image_get_device_timestamp_usec</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="328" column="31" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="328" bodyend="331"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_aa691f71650646a9183352cae0c993e40_1aa691f71650646a9183352cae0c993e40" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>std::chrono::nanoseconds</type>
+        <definition>std::chrono::nanoseconds k4a::image::get_system_timestamp</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_system_timestamp</name>
+        <briefdescription>
+<para>Get the image&apos;s system timestamp in nanoseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga98ba229d1ee1cf3b7c27a0f95e14826b_1ga98ba229d1ee1cf3b7c27a0f95e14826b" kindref="member">k4a_image_get_system_timestamp_nsec</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="337" column="30" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="337" bodyend="340"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a02849afc366ccb6e01d8a15ef284bea3_1a02849afc366ccb6e01d8a15ef284bea3" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>std::chrono::microseconds</type>
+        <definition>std::chrono::microseconds k4a::image::get_exposure</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_exposure</name>
+        <briefdescription>
+<para>Get the image exposure time in microseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga54568ebab477f2534b3c4c92688344d9_1ga54568ebab477f2534b3c4c92688344d9" kindref="member">k4a_image_get_exposure_usec</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="346" column="31" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="346" bodyend="349"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a98fc61c44d56d183125ddd1f519f4cc8_1a98fc61c44d56d183125ddd1f519f4cc8" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a::image::get_white_balance</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_white_balance</name>
+        <briefdescription>
+<para>Get the image white balance in Kelvin (color images only) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga5075f97b2de6cb0fee1725d5e9250879_1ga5075f97b2de6cb0fee1725d5e9250879" kindref="member">k4a_image_get_white_balance</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="355" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="355" bodyend="358"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a666dca56f2e7224488b95ac3b6ae8a6b_1a666dca56f2e7224488b95ac3b6ae8a6b" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a::image::get_iso_speed</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>get_iso_speed</name>
+        <briefdescription>
+<para>Get the image&apos;s ISO speed (color images only) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga5075f97b2de6cb0fee1725d5e9250879_1ga5075f97b2de6cb0fee1725d5e9250879" kindref="member">k4a_image_get_white_balance</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="364" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="364" bodyend="367"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a867e09f47781f3f3dee0dac1d7dcc6d7_1a867e09f47781f3f3dee0dac1d7dcc6d7" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::image::set_timestamp</definition>
+        <argsstring>(std::chrono::microseconds timestamp) noexcept</argsstring>
+        <name>set_timestamp</name>
+        <param>
+          <type>std::chrono::microseconds</type>
+          <declname>timestamp</declname>
+        </param>
+        <briefdescription>
+<para>Set the image&apos;s timestamp in microseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gacc2c4bf42956687a101937b77f8dfa21_1gacc2c4bf42956687a101937b77f8dfa21" kindref="member">k4a_image_set_device_timestamp_usec</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="373" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="373" bodyend="376"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_aee70ef70051ec0ec28021e528c427758_1aee70ef70051ec0ec28021e528c427758" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::image::set_exposure_time</definition>
+        <argsstring>(std::chrono::microseconds exposure) noexcept</argsstring>
+        <name>set_exposure_time</name>
+        <param>
+          <type>std::chrono::microseconds</type>
+          <declname>exposure</declname>
+        </param>
+        <briefdescription>
+<para>Set the image&apos;s exposure time in microseconds (color images only) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga29954cc87d1fabc8651155f7baff5c9f_1ga29954cc87d1fabc8651155f7baff5c9f" kindref="member">k4a_image_set_exposure_time_usec</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="382" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="382" bodyend="385"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a4b6b1f96c49dbdf90b083181e4839c39_1a4b6b1f96c49dbdf90b083181e4839c39" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::image::set_white_balance</definition>
+        <argsstring>(uint32_t white_balance) noexcept</argsstring>
+        <name>set_white_balance</name>
+        <param>
+          <type>uint32_t</type>
+          <declname>white_balance</declname>
+        </param>
+        <briefdescription>
+<para>Set the white balance of the image (color images only) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gad8c0bbccfd5086a7330bf897ae82561b_1gad8c0bbccfd5086a7330bf897ae82561b" kindref="member">k4a_image_set_white_balance</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="391" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="391" bodyend="394"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_ab5857c281c7bafb0c14c1ecdc068280c_1ab5857c281c7bafb0c14c1ecdc068280c" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::image::set_iso_speed</definition>
+        <argsstring>(uint32_t iso_speed) noexcept</argsstring>
+        <name>set_iso_speed</name>
+        <param>
+          <type>uint32_t</type>
+          <declname>iso_speed</declname>
+        </param>
+        <briefdescription>
+<para>Set the ISO speed of the image (color images only) </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga5a64f64515ff4dff317fec92a8427f45_1ga5a64f64515ff4dff317fec92a8427f45" kindref="member">k4a_image_set_iso_speed</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="400" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="400" bodyend="403"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classk4a_1_1image_a7a92d9119d57b57039946f6f7220d9a9_1a7a92d9119d57b57039946f6f7220d9a9" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1image" kindref="compound">image</ref></type>
+        <definition>static image k4a::image::create</definition>
+        <argsstring>(k4a_image_format_t format, int width_pixels, int height_pixels, int stride_bytes)</argsstring>
+        <name>create</name>
+        <param>
+          <type><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref></type>
+          <declname>format</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width_pixels</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>height_pixels</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>stride_bytes</declname>
+        </param>
+        <briefdescription>
+<para>Create a blank image Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="219" column="18" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="219" bodyend="228"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1image_a2885ff39ce74f193d5fe9fd1e92072ce_1a2885ff39ce74f193d5fe9fd1e92072ce" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1image" kindref="compound">image</ref></type>
+        <definition>static image k4a::image::create_from_buffer</definition>
+        <argsstring>(k4a_image_format_t format, int width_pixels, int height_pixels, int stride_bytes, uint8_t *buffer, size_t buffer_size, k4a_memory_destroy_cb_t *buffer_release_cb, void *buffer_release_cb_context)</argsstring>
+        <name>create_from_buffer</name>
+        <param>
+          <type><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref></type>
+          <declname>format</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width_pixels</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>height_pixels</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>stride_bytes</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>buffer</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>buffer_size</declname>
+        </param>
+        <param>
+          <type><ref refid="group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_1ga1e290c645920c7674c6d36dcbb75909b" kindref="member">k4a_memory_destroy_cb_t</ref> *</type>
+          <declname>buffer_release_cb</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>buffer_release_cb_context</declname>
+        </param>
+        <briefdescription>
+<para>Create an image from a pre-allocated buffer Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="235" column="18" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="235" bodyend="259"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Wrapper for <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Wraps a handle for an image. Copying/moving is cheap, copies are shallow.</para>
+<para><simplesect kind="see"><para><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="80" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="81" bodyend="407"/>
+    <listofallmembers>
+      <member refid="classk4a_1_1image_a7a92d9119d57b57039946f6f7220d9a9_1a7a92d9119d57b57039946f6f7220d9a9" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>create</name></member>
+      <member refid="classk4a_1_1image_a2885ff39ce74f193d5fe9fd1e92072ce_1a2885ff39ce74f193d5fe9fd1e92072ce" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>create_from_buffer</name></member>
+      <member refid="classk4a_1_1image_af088c323209fecac22012e253dc3d9d1_1af088c323209fecac22012e253dc3d9d1" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_buffer</name></member>
+      <member refid="classk4a_1_1image_a6b68d771858ff5d1878f6f0c314a669e_1a6b68d771858ff5d1878f6f0c314a669e" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_buffer</name></member>
+      <member refid="classk4a_1_1image_a2d45cb5d26b004d0f93be7b3c130aabe_1a2d45cb5d26b004d0f93be7b3c130aabe" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_device_timestamp</name></member>
+      <member refid="classk4a_1_1image_a02849afc366ccb6e01d8a15ef284bea3_1a02849afc366ccb6e01d8a15ef284bea3" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_exposure</name></member>
+      <member refid="classk4a_1_1image_aad5e858608f4109d7c3c8fa0f58cd6ac_1aad5e858608f4109d7c3c8fa0f58cd6ac" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_format</name></member>
+      <member refid="classk4a_1_1image_a806880f3fe29f7b4833813138d40c0fa_1a806880f3fe29f7b4833813138d40c0fa" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_height_pixels</name></member>
+      <member refid="classk4a_1_1image_a666dca56f2e7224488b95ac3b6ae8a6b_1a666dca56f2e7224488b95ac3b6ae8a6b" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_iso_speed</name></member>
+      <member refid="classk4a_1_1image_a681ade955c81f42d967d41dcbaf065d4_1a681ade955c81f42d967d41dcbaf065d4" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_size</name></member>
+      <member refid="classk4a_1_1image_a5e22c7875e15ecf102cc4cf4accb27c2_1a5e22c7875e15ecf102cc4cf4accb27c2" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_stride_bytes</name></member>
+      <member refid="classk4a_1_1image_aa691f71650646a9183352cae0c993e40_1aa691f71650646a9183352cae0c993e40" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_system_timestamp</name></member>
+      <member refid="classk4a_1_1image_a98fc61c44d56d183125ddd1f519f4cc8_1a98fc61c44d56d183125ddd1f519f4cc8" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_white_balance</name></member>
+      <member refid="classk4a_1_1image_a2ed85b2247946a21251c790071612904_1a2ed85b2247946a21251c790071612904" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>get_width_pixels</name></member>
+      <member refid="classk4a_1_1image_a88a5e67e8dd75677502e2421b3ba7c2c_1a88a5e67e8dd75677502e2421b3ba7c2c" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>handle</name></member>
+      <member refid="classk4a_1_1image_ac9f26e8ea2dc561d64de0cabe004967e_1ac9f26e8ea2dc561d64de0cabe004967e" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>image</name></member>
+      <member refid="classk4a_1_1image_1aff608c45cc2a141c71a448607741df34" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>image</name></member>
+      <member refid="classk4a_1_1image_1adb337f5ae0c5428a7d34876affdb5ae8" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>image</name></member>
+      <member refid="classk4a_1_1image_1a94f398595ba9086533e9d6afe74b38b5" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>is_valid</name></member>
+      <member refid="classk4a_1_1image_1a9e1a4ccdcaf28610331b8058a61002e1" prot="private" virt="non-virtual"><scope>k4a::image</scope><name>m_handle</name></member>
+      <member refid="classk4a_1_1image_1a32b1ba1b4dc1f1190fa456250ee0e4a0" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>operator bool</name></member>
+      <member refid="classk4a_1_1image_1aa000850be81fbda9b9bbfdde0283ec7a" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>operator!=</name></member>
+      <member refid="classk4a_1_1image_1a76be4cef7e6661f3940f9b9adcc16840" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>operator!=</name></member>
+      <member refid="classk4a_1_1image_1a08a32ff87256a778ce77bfffb6568beb" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>operator=</name></member>
+      <member refid="classk4a_1_1image_1a6a4670119bd9a2b91f243c343d312a90" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>operator=</name></member>
+      <member refid="classk4a_1_1image_1aa52fed26cdd34b9f63f3b219f7c1bc6d" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>operator=</name></member>
+      <member refid="classk4a_1_1image_1afcc26100d131a15edb5f4f87501c37bc" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>operator==</name></member>
+      <member refid="classk4a_1_1image_1aac0490a29722a1377564cbcc7642c0b4" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>operator==</name></member>
+      <member refid="classk4a_1_1image_1a5654ce02204e255e11350c14cf1f4b89" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>reset</name></member>
+      <member refid="classk4a_1_1image_aee70ef70051ec0ec28021e528c427758_1aee70ef70051ec0ec28021e528c427758" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>set_exposure_time</name></member>
+      <member refid="classk4a_1_1image_ab5857c281c7bafb0c14c1ecdc068280c_1ab5857c281c7bafb0c14c1ecdc068280c" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>set_iso_speed</name></member>
+      <member refid="classk4a_1_1image_a867e09f47781f3f3dee0dac1d7dcc6d7_1a867e09f47781f3f3dee0dac1d7dcc6d7" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>set_timestamp</name></member>
+      <member refid="classk4a_1_1image_a4b6b1f96c49dbdf90b083181e4839c39_1a4b6b1f96c49dbdf90b083181e4839c39" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>set_white_balance</name></member>
+      <member refid="classk4a_1_1image_1aad7e03e67c7019e08874d3a2a8f128a3" prot="public" virt="non-virtual"><scope>k4a::image</scope><name>~image</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

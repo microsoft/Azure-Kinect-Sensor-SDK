@@ -1,0 +1,175 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a__color__mode__info__t" kind="struct" language="C++" prot="public">
+    <compoundname>k4a_color_mode_info_t</compoundname>
+    <includes refid="k4atypes_8h" local="no">k4atypes.h</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_1a4895521e1b7853fa109f879ce50987e8" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_color_mode_info_t::struct_size</definition>
+        <argsstring></argsstring>
+        <name>struct_size</name>
+        <briefdescription>
+<para>Must be equal to sizeof(k4a_color_mode_info_t). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="913" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="913" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_a1e8e8a6f3366b24fec3c19e7d8840235_1a1e8e8a6f3366b24fec3c19e7d8840235" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_color_mode_info_t::struct_version</definition>
+        <argsstring></argsstring>
+        <name>struct_version</name>
+        <briefdescription>
+<para>Must be equal to 1. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Future API versions may define new structure versions. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="914" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="914" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_a9fef69bfa46d06807078769a4b2a0edc_1a9fef69bfa46d06807078769a4b2a0edc" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_color_mode_info_t::mode_id</definition>
+        <argsstring></argsstring>
+        <name>mode_id</name>
+        <briefdescription>
+<para>Mode identifier to use to select this mode. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>0 is reserved for disabling color </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="915" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="915" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_1a05fc49b96a51e6b50163300d598da05a" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_color_mode_info_t::width</definition>
+        <argsstring></argsstring>
+        <name>width</name>
+        <briefdescription>
+<para>Image width. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="916" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="916" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_1af86d62b6640ebf61a3285d4a3557cd89" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_color_mode_info_t::height</definition>
+        <argsstring></argsstring>
+        <name>height</name>
+        <briefdescription>
+<para>Image height. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="917" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="917" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_1a3d30e445ba9c7760d64678a0b1b84234" prot="public" static="no" mutable="no">
+        <type><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref></type>
+        <definition>k4a_image_format_t k4a_color_mode_info_t::native_format</definition>
+        <argsstring></argsstring>
+        <name>native_format</name>
+        <briefdescription>
+<para>Image format. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="918" column="24" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="918" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_1a782f8b3d400a467bf7a2f030aa11e44a" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_color_mode_info_t::horizontal_fov</definition>
+        <argsstring></argsstring>
+        <name>horizontal_fov</name>
+        <briefdescription>
+<para>Approximate horizontal field of view. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="919" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="919" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_1a1415e159824be7758b44706886c8988f" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_color_mode_info_t::vertical_fov</definition>
+        <argsstring></argsstring>
+        <name>vertical_fov</name>
+        <briefdescription>
+<para>Approximate vertical field of view. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="920" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="920" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_1ac5512dba7c946f9ff9fedd93efd7ab5b" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int k4a_color_mode_info_t::min_fps</definition>
+        <argsstring></argsstring>
+        <name>min_fps</name>
+        <briefdescription>
+<para>Minimum supported framerate. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="921" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="921" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__color__mode__info__t_1ac1256451ac7cf8c7a8836d2e4b490428" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int k4a_color_mode_info_t::max_fps</definition>
+        <argsstring></argsstring>
+        <name>max_fps</name>
+        <briefdescription>
+<para>Maximum supported ramerate. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="922" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="922" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="remark"><para>Color mode info type representing color mode info.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="911" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="912" bodyend="923"/>
+    <listofallmembers>
+      <member refid="structk4a__color__mode__info__t_1af86d62b6640ebf61a3285d4a3557cd89" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>height</name></member>
+      <member refid="structk4a__color__mode__info__t_1a782f8b3d400a467bf7a2f030aa11e44a" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>horizontal_fov</name></member>
+      <member refid="structk4a__color__mode__info__t_1ac1256451ac7cf8c7a8836d2e4b490428" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>max_fps</name></member>
+      <member refid="structk4a__color__mode__info__t_1ac5512dba7c946f9ff9fedd93efd7ab5b" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>min_fps</name></member>
+      <member refid="structk4a__color__mode__info__t_a9fef69bfa46d06807078769a4b2a0edc_1a9fef69bfa46d06807078769a4b2a0edc" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>mode_id</name></member>
+      <member refid="structk4a__color__mode__info__t_1a3d30e445ba9c7760d64678a0b1b84234" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>native_format</name></member>
+      <member refid="structk4a__color__mode__info__t_1a4895521e1b7853fa109f879ce50987e8" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>struct_size</name></member>
+      <member refid="structk4a__color__mode__info__t_a1e8e8a6f3366b24fec3c19e7d8840235_1a1e8e8a6f3366b24fec3c19e7d8840235" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>struct_version</name></member>
+      <member refid="structk4a__color__mode__info__t_1a1415e159824be7758b44706886c8988f" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>vertical_fov</name></member>
+      <member refid="structk4a__color__mode__info__t_1a05fc49b96a51e6b50163300d598da05a" prot="public" virt="non-virtual"><scope>k4a_color_mode_info_t</scope><name>width</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>
