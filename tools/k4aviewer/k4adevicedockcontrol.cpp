@@ -972,18 +972,19 @@ bool K4ADeviceDockControl::StartCameras()
                 //
                 pollingTimeout = SubordinateModeStartupTimeout;
             }
-            return PollSensor<k4a::capture>(
-                "Cameras",
-                pDevice,
-                pCameraDataSource,
-                pPaused,
-                pCamerasStarted,
-                pAbortInProgress,
-                [](k4a::device *device, k4a::capture *capture, std::chrono::milliseconds timeout) {
-                    return device->get_capture(capture, timeout);
-                },
-                [](k4a::device *device) { device->stop_cameras(); },
-                pollingTimeout);
+            return PollSensor<k4a::capture>("Cameras",
+                                            pDevice,
+                                            pCameraDataSource,
+                                            pPaused,
+                                            pCamerasStarted,
+                                            pAbortInProgress,
+                                            [](k4a::device *device,
+                                               k4a::capture *capture,
+                                               std::chrono::milliseconds timeout) {
+                                                return device->get_capture(capture, timeout);
+                                            },
+                                            [](k4a::device *device) { device->stop_cameras(); },
+                                            pollingTimeout);
         });
 
     return true;
@@ -991,13 +992,12 @@ bool K4ADeviceDockControl::StartCameras()
 
 void K4ADeviceDockControl::StopCameras()
 {
-    StopPollingThread(
-        &m_cameraPollingThread,
-        &m_device,
-        [](k4a::device *device) { device->stop_cameras(); },
-        &m_cameraDataSource,
-        &m_camerasStarted,
-        &m_camerasAbortInProgress);
+    StopPollingThread(&m_cameraPollingThread,
+                      &m_device,
+                      [](k4a::device *device) { device->stop_cameras(); },
+                      &m_cameraDataSource,
+                      &m_camerasStarted,
+                      &m_camerasAbortInProgress);
 }
 
 #ifdef K4A_INCLUDE_AUDIO
@@ -1073,18 +1073,19 @@ bool K4ADeviceDockControl::StartImu()
                 //
                 pollingTimeout = SubordinateModeStartupTimeout;
             }
-            return PollSensor<k4a_imu_sample_t>(
-                "IMU",
-                pDevice,
-                pImuDataSource,
-                pPaused,
-                pImuStarted,
-                pAbortInProgress,
-                [](k4a::device *device, k4a_imu_sample_t *sample, std::chrono::milliseconds timeout) {
-                    return device->get_imu_sample(sample, timeout);
-                },
-                [](k4a::device *device) { device->stop_imu(); },
-                pollingTimeout);
+            return PollSensor<k4a_imu_sample_t>("IMU",
+                                                pDevice,
+                                                pImuDataSource,
+                                                pPaused,
+                                                pImuStarted,
+                                                pAbortInProgress,
+                                                [](k4a::device *device,
+                                                   k4a_imu_sample_t *sample,
+                                                   std::chrono::milliseconds timeout) {
+                                                    return device->get_imu_sample(sample, timeout);
+                                                },
+                                                [](k4a::device *device) { device->stop_imu(); },
+                                                pollingTimeout);
         });
 
     return true;
@@ -1092,13 +1093,12 @@ bool K4ADeviceDockControl::StartImu()
 
 void K4ADeviceDockControl::StopImu()
 {
-    StopPollingThread(
-        &m_imuPollingThread,
-        &m_device,
-        [](k4a::device *device) { device->stop_imu(); },
-        &m_imuDataSource,
-        &m_imuStarted,
-        &m_imuAbortInProgress);
+    StopPollingThread(&m_imuPollingThread,
+                      &m_device,
+                      [](k4a::device *device) { device->stop_imu(); },
+                      &m_imuDataSource,
+                      &m_imuStarted,
+                      &m_imuAbortInProgress);
 }
 
 void K4ADeviceDockControl::SetViewType(K4AWindowSet::ViewType viewType)
