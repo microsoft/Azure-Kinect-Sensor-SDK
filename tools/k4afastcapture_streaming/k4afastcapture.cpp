@@ -226,6 +226,7 @@ void K4AFastCapture::Run(int streamingLength)
             // std::cout << "[Streaming Service] Timed out waiting for the capture" << std::endl;
             continue;
         case K4A_WAIT_RESULT_FAILED:
+        case K4A_WAIT_RESULT_UNSUPPORTED:
             std::cout << "[Streaming Service] Failed to get the capture" << std::endl;
             return;
         }

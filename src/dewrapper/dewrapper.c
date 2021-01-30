@@ -122,8 +122,8 @@ static void free_shared_depth_image(void *buffer, void *context)
 }
 
 static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
-                                              uint32_t fps_mode_id,
-                                              uint32_t depth_mode_id,
+                                              int32_t fps_mode_id,
+                                              int32_t depth_mode_id,
                                               int *depth_engine_max_compute_time_ms,
                                               size_t *depth_engine_output_buffer_size)
 {

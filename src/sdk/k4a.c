@@ -18,7 +18,7 @@
 #include <k4ainternal/logging.h>
 #include <k4ainternal/modes.h>
 #include <azure_c_shared_utility/tickcounter.h>
-#include <k4ainternal\usbcommand.h>
+#include <k4ainternal/usbcommand.h>
 
 // System dependencies
 #include <stdlib.h>
@@ -596,7 +596,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->color_mode_id < K4A_COLOR_RESOLUTION_OFF || config->color_mode_id > K4A_COLOR_RESOLUTION_3072P)
+        if (config->color_mode_id > K4A_COLOR_RESOLUTION_3072P)
         {
             result = K4A_RESULT_FAILED;
             LOG_ERROR("The configured color_resolution is not a valid k4a_color_resolution_t value.", 0);
@@ -605,7 +605,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
     if (K4A_SUCCEEDED(result))
     {
-        if (config->depth_mode_id < K4A_DEPTH_MODE_OFF || config->depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR)
+        if (config->depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR)
         {
             result = K4A_RESULT_FAILED;
             LOG_ERROR("The configured depth_mode is not a valid k4a_depth_mode_t value.", 0);
@@ -1350,7 +1350,7 @@ k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *
                                K4A_ABI_VERSION,
                                K4A_MSFT_VID,
                                K4A_DEPTH_PID,
-                               ​​​​​​K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU };
+                               K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU };
 
     SAFE_COPY_STRUCT(device_info, &info);
 
@@ -1384,7 +1384,7 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_id, 
 
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
 
-    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, { 0 } };
+    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
 
     int mode_count;
     if (k4a_device_get_color_mode_count(device_handle, &mode_count) != K4A_RESULT_SUCCEEDED)
@@ -1441,7 +1441,7 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_id, 
 
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
 
-    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, { 0 } };
+    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
 
     int mode_count;
     if (k4a_device_get_depth_mode_count(device_handle, &mode_count) != K4A_RESULT_SUCCEEDED)
@@ -1501,7 +1501,7 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_id, k4
 
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
 
-    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, { 0 } };
+    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
 
     int mode_count;
     if (k4a_device_get_fps_mode_count(device_handle, &mode_count) != K4A_RESULT_SUCCEEDED)

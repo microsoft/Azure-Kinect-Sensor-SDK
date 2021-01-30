@@ -420,6 +420,7 @@ int main(int argc, char **argv)
         printf("Timed out waiting for a capture\n");
         goto Exit;
     case K4A_WAIT_RESULT_FAILED:
+    case K4A_WAIT_RESULT_UNSUPPORTED:
         printf("Failed to read a capture\n");
         goto Exit;
     }
