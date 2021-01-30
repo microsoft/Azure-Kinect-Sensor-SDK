@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a__depth__mode__info__t" kind="struct" language="C++" prot="public">
+    <compoundname>k4a_depth_mode_info_t</compoundname>
+    <includes refid="k4atypes_8h" local="no">k4atypes.h</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1a9ec6ee2d22176e8014afed4d963df74e" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_depth_mode_info_t::struct_size</definition>
+        <argsstring></argsstring>
+        <name>struct_size</name>
+        <briefdescription>
+<para>Must be equal to sizeof(k4a_depth_mode_info_t). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="938" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="938" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_afcbfb4faaca9e687bd2c42f9136ef291_1afcbfb4faaca9e687bd2c42f9136ef291" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_depth_mode_info_t::struct_version</definition>
+        <argsstring></argsstring>
+        <name>struct_version</name>
+        <briefdescription>
+<para>Must be equal to 1. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Future API versions may define new structure versions. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="939" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="939" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_a17ad844ed8e299fb00cb9ef17acafaf7_1a17ad844ed8e299fb00cb9ef17acafaf7" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_depth_mode_info_t::mode_id</definition>
+        <argsstring></argsstring>
+        <name>mode_id</name>
+        <briefdescription>
+<para>Mode identifier to use to select this mode. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>0 is reserved for disabling depth. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="940" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="940" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1a0257e3cdd457132534b468a6979a4c78" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool k4a_depth_mode_info_t::passive_ir_only</definition>
+        <argsstring></argsstring>
+        <name>passive_ir_only</name>
+        <briefdescription>
+<para>True if only capturing passive IR. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="941" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="941" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1a16da38c2f40e63b65f61442cdad420d1" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_depth_mode_info_t::width</definition>
+        <argsstring></argsstring>
+        <name>width</name>
+        <briefdescription>
+<para>Image width. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="942" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="942" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1ab3490f6e4ebb2a67941682954318c56b" prot="public" static="no" mutable="no">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_depth_mode_info_t::height</definition>
+        <argsstring></argsstring>
+        <name>height</name>
+        <briefdescription>
+<para>Image height. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="943" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="943" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1aa05ecf7b3b9d610cf050823a15e1b7e2" prot="public" static="no" mutable="no">
+        <type><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref></type>
+        <definition>k4a_image_format_t k4a_depth_mode_info_t::native_format</definition>
+        <argsstring></argsstring>
+        <name>native_format</name>
+        <briefdescription>
+<para>Image format. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="944" column="24" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="944" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1aff9fb75449f496324397c9c6adf3e565" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_depth_mode_info_t::horizontal_fov</definition>
+        <argsstring></argsstring>
+        <name>horizontal_fov</name>
+        <briefdescription>
+<para>Approximate horizontal field of view. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="945" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="945" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1a93ed5718ce50dbd48f9cb468d6d2ca1d" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_depth_mode_info_t::vertical_fov</definition>
+        <argsstring></argsstring>
+        <name>vertical_fov</name>
+        <briefdescription>
+<para>Approximate vertical field of view. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="946" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="946" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1a7b1fe64bd337df9e602ff17cbef27cd6" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int k4a_depth_mode_info_t::min_fps</definition>
+        <argsstring></argsstring>
+        <name>min_fps</name>
+        <briefdescription>
+<para>Minimum supported framerate. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="947" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="947" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1a7b8cc91260c1f2861f184c0b766d8ea2" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int k4a_depth_mode_info_t::max_fps</definition>
+        <argsstring></argsstring>
+        <name>max_fps</name>
+        <briefdescription>
+<para>Maximum supported framerate. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="948" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="948" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1a967aec3ad67765bd0d0725f6059861a0" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int k4a_depth_mode_info_t::min_range</definition>
+        <argsstring></argsstring>
+        <name>min_range</name>
+        <briefdescription>
+<para>Min values expected for mode in millimeters. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="949" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="949" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__depth__mode__info__t_1a1b7a5f0667524df08e9d66008ba44e60" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int k4a_depth_mode_info_t::max_range</definition>
+        <argsstring></argsstring>
+        <name>max_range</name>
+        <briefdescription>
+<para>Max values expected for mode in millimeters. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="950" column="9" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="950" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="remark"><para>Depth mode info type representing depth mode info.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="936" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="937" bodyend="951"/>
+    <listofallmembers>
+      <member refid="structk4a__depth__mode__info__t_1ab3490f6e4ebb2a67941682954318c56b" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>height</name></member>
+      <member refid="structk4a__depth__mode__info__t_1aff9fb75449f496324397c9c6adf3e565" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>horizontal_fov</name></member>
+      <member refid="structk4a__depth__mode__info__t_1a7b8cc91260c1f2861f184c0b766d8ea2" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>max_fps</name></member>
+      <member refid="structk4a__depth__mode__info__t_1a1b7a5f0667524df08e9d66008ba44e60" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>max_range</name></member>
+      <member refid="structk4a__depth__mode__info__t_1a7b1fe64bd337df9e602ff17cbef27cd6" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>min_fps</name></member>
+      <member refid="structk4a__depth__mode__info__t_1a967aec3ad67765bd0d0725f6059861a0" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>min_range</name></member>
+      <member refid="structk4a__depth__mode__info__t_a17ad844ed8e299fb00cb9ef17acafaf7_1a17ad844ed8e299fb00cb9ef17acafaf7" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>mode_id</name></member>
+      <member refid="structk4a__depth__mode__info__t_1aa05ecf7b3b9d610cf050823a15e1b7e2" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>native_format</name></member>
+      <member refid="structk4a__depth__mode__info__t_1a0257e3cdd457132534b468a6979a4c78" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>passive_ir_only</name></member>
+      <member refid="structk4a__depth__mode__info__t_1a9ec6ee2d22176e8014afed4d963df74e" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>struct_size</name></member>
+      <member refid="structk4a__depth__mode__info__t_afcbfb4faaca9e687bd2c42f9136ef291_1afcbfb4faaca9e687bd2c42f9136ef291" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>struct_version</name></member>
+      <member refid="structk4a__depth__mode__info__t_1a93ed5718ce50dbd48f9cb468d6d2ca1d" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>vertical_fov</name></member>
+      <member refid="structk4a__depth__mode__info__t_1a16da38c2f40e63b65f61442cdad420d1" prot="public" virt="non-virtual"><scope>k4a_depth_mode_info_t</scope><name>width</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

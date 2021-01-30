@@ -1,0 +1,211 @@
+\hypertarget{classk4a_1_1transformation}{}\doxysection{k4a\+::transformation Class Reference}
+\label{classk4a_1_1transformation}\index{k4a::transformation@{k4a::transformation}}
+
+
+Wrapper for \mbox{\hyperlink{structk4a__transformation__t}{k4a\+\_\+transformation\+\_\+t}}.  
+
+
+
+
+{\ttfamily \#include $<$k4a/k4a.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classk4a_1_1transformation_abc5ca125a64e9702e80e2335a4303084_abc5ca125a64e9702e80e2335a4303084}{transformation}} (const \mbox{\hyperlink{structk4a__calibration__t}{k4a\+\_\+calibration\+\_\+t}} \&\mbox{\hyperlink{structk4a_1_1calibration}{calibration}}) noexcept
+\begin{DoxyCompactList}\small\item\em Creates a transformation associated with calibration. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classk4a_1_1transformation_a7b98768f8ee53d39f20ec1d79bfec39a_a7b98768f8ee53d39f20ec1d79bfec39a}{transformation}} (\mbox{\hyperlink{structk4a__transformation__t}{k4a\+\_\+transformation\+\_\+t}} handle=nullptr) noexcept
+\begin{DoxyCompactList}\small\item\em Creates a transformation from a \mbox{\hyperlink{structk4a__transformation__t}{k4a\+\_\+transformation\+\_\+t}} Takes ownership of the handle, i.\+e. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1transformation_a87a09b55a536a08f36233abfd5846b4f}\label{classk4a_1_1transformation_a87a09b55a536a08f36233abfd5846b4f}} 
+\mbox{\hyperlink{classk4a_1_1transformation_a87a09b55a536a08f36233abfd5846b4f}{transformation}} (\mbox{\hyperlink{classk4a_1_1transformation}{transformation}} \&\&other) noexcept
+\begin{DoxyCompactList}\small\item\em Moves another tranformation into a new transformation. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1transformation_adbd5e0eb9cc5c1f2f089c105f7194a56}\label{classk4a_1_1transformation_adbd5e0eb9cc5c1f2f089c105f7194a56}} 
+{\bfseries transformation} (const \mbox{\hyperlink{classk4a_1_1transformation}{transformation}} \&)=delete
+\item 
+\mbox{\Hypertarget{classk4a_1_1transformation_a2ae48e0963e332805b28b2d8659081b5}\label{classk4a_1_1transformation_a2ae48e0963e332805b28b2d8659081b5}} 
+\mbox{\hyperlink{classk4a_1_1transformation}{transformation}} \& \mbox{\hyperlink{classk4a_1_1transformation_a2ae48e0963e332805b28b2d8659081b5}{operator=}} (\mbox{\hyperlink{classk4a_1_1transformation}{transformation}} \&\&other) noexcept
+\begin{DoxyCompactList}\small\item\em Moves another image into this image; other is set to invalid. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1transformation_a6297f8afa4706d6c5b19727ca4d1f8a9}\label{classk4a_1_1transformation_a6297f8afa4706d6c5b19727ca4d1f8a9}} 
+\mbox{\hyperlink{classk4a_1_1transformation}{transformation}} \& \mbox{\hyperlink{classk4a_1_1transformation_a6297f8afa4706d6c5b19727ca4d1f8a9}{operator=}} (std\+::nullptr\+\_\+t) noexcept
+\begin{DoxyCompactList}\small\item\em Invalidates this transformation. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1transformation_af0be12aa12b01c82d1ef56505f17af63}\label{classk4a_1_1transformation_af0be12aa12b01c82d1ef56505f17af63}} 
+\mbox{\hyperlink{classk4a_1_1transformation}{transformation}} \& {\bfseries operator=} (const \mbox{\hyperlink{classk4a_1_1transformation}{transformation}} \&)=delete
+\item 
+\mbox{\Hypertarget{classk4a_1_1transformation_a0f938b04a6a4b3d6b15df85ec3dc0422}\label{classk4a_1_1transformation_a0f938b04a6a4b3d6b15df85ec3dc0422}} 
+void \mbox{\hyperlink{classk4a_1_1transformation_a0f938b04a6a4b3d6b15df85ec3dc0422}{destroy}} () noexcept
+\begin{DoxyCompactList}\small\item\em Invalidates this transformation. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1transformation_a84d7583dff4ba83f9ed162233f860418_a84d7583dff4ba83f9ed162233f860418}{depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&depth\+\_\+image, \mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$transformed\+\_\+depth\+\_\+image) const
+\begin{DoxyCompactList}\small\item\em Transforms the depth map into the geometry of the color camera. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classk4a_1_1image}{image}} \mbox{\hyperlink{classk4a_1_1transformation_ac3511565a1eedf5e22900f1fdc71c185_ac3511565a1eedf5e22900f1fdc71c185}{depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&depth\+\_\+image) const
+\begin{DoxyCompactList}\small\item\em Transforms the depth map into the geometry of the color camera. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1transformation_a81ead7ffe1c9540a2f91c364a749827d_a81ead7ffe1c9540a2f91c364a749827d}{depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera\+\_\+custom}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&depth\+\_\+image, const \mbox{\hyperlink{classk4a_1_1image}{image}} \&custom\+\_\+image, \mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$transformed\+\_\+depth\+\_\+image, \mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$transformed\+\_\+custom\+\_\+image, \mbox{\hyperlink{group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_ga06f55e23e1d260b069e89e4a9cd6f4ee}{k4a\+\_\+transformation\+\_\+interpolation\+\_\+type\+\_\+t}} interpolation\+\_\+type, uint32\+\_\+t invalid\+\_\+custom\+\_\+value) const
+\begin{DoxyCompactList}\small\item\em Transforms depth map and a custom image into the geometry of the color camera. \end{DoxyCompactList}\item 
+std\+::pair$<$ \mbox{\hyperlink{classk4a_1_1image}{image}}, \mbox{\hyperlink{classk4a_1_1image}{image}} $>$ \mbox{\hyperlink{classk4a_1_1transformation_a72eaf319f56076237371651dc483603e_a72eaf319f56076237371651dc483603e}{depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera\+\_\+custom}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&depth\+\_\+image, const \mbox{\hyperlink{classk4a_1_1image}{image}} \&custom\+\_\+image, \mbox{\hyperlink{group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_ga06f55e23e1d260b069e89e4a9cd6f4ee}{k4a\+\_\+transformation\+\_\+interpolation\+\_\+type\+\_\+t}} interpolation\+\_\+type, uint32\+\_\+t invalid\+\_\+custom\+\_\+value) const
+\begin{DoxyCompactList}\small\item\em Transforms depth map and a custom image into the geometry of the color camera. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1transformation_ae25f1d6159f91bda04e9026959f94b15_ae25f1d6159f91bda04e9026959f94b15}{color\+\_\+image\+\_\+to\+\_\+depth\+\_\+camera}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&depth\+\_\+image, const \mbox{\hyperlink{classk4a_1_1image}{image}} \&color\+\_\+image, \mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$transformed\+\_\+color\+\_\+image) const
+\begin{DoxyCompactList}\small\item\em Transforms the color image into the geometry of the depth camera. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classk4a_1_1image}{image}} \mbox{\hyperlink{classk4a_1_1transformation_a208b7009485b1d14ccebaade276a32dc_a208b7009485b1d14ccebaade276a32dc}{color\+\_\+image\+\_\+to\+\_\+depth\+\_\+camera}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&depth\+\_\+image, const \mbox{\hyperlink{classk4a_1_1image}{image}} \&color\+\_\+image) const
+\begin{DoxyCompactList}\small\item\em Transforms the color image into the geometry of the depth camera. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1transformation_aca376c8cca0f1157c3632b4f4c1a59ab_aca376c8cca0f1157c3632b4f4c1a59ab}{depth\+\_\+image\+\_\+to\+\_\+point\+\_\+cloud}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&depth\+\_\+image, \mbox{\hyperlink{group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_ga8d5fae13125f360be86c166684cdb5c5}{k4a\+\_\+calibration\+\_\+type\+\_\+t}} camera, \mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$xyz\+\_\+image) const
+\begin{DoxyCompactList}\small\item\em Transforms the depth image into 3 planar images representing X, Y and Z-\/coordinates of corresponding 3d points. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classk4a_1_1image}{image}} \mbox{\hyperlink{classk4a_1_1transformation_aeced431be8c6be8efaf8da92380dd423_aeced431be8c6be8efaf8da92380dd423}{depth\+\_\+image\+\_\+to\+\_\+point\+\_\+cloud}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&depth\+\_\+image, \mbox{\hyperlink{group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_ga8d5fae13125f360be86c166684cdb5c5}{k4a\+\_\+calibration\+\_\+type\+\_\+t}} camera) const
+\begin{DoxyCompactList}\small\item\em Transforms the depth image into 3 planar images representing X, Y and Z-\/coordinates of corresponding 3d points. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Wrapper for \mbox{\hyperlink{structk4a__transformation__t}{k4a\+\_\+transformation\+\_\+t}}. 
+
+Wraps a handle for a transformation. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classk4a_1_1transformation_abc5ca125a64e9702e80e2335a4303084_abc5ca125a64e9702e80e2335a4303084}\label{classk4a_1_1transformation_abc5ca125a64e9702e80e2335a4303084_abc5ca125a64e9702e80e2335a4303084}} 
+\index{k4a::transformation@{k4a::transformation}!transformation@{transformation}}
+\index{transformation@{transformation}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{transformation()}{transformation()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily k4a\+::transformation\+::transformation (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structk4a__calibration__t}{k4a\+\_\+calibration\+\_\+t}} \&}]{calibration }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Creates a transformation associated with calibration. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga853a1a5b6d521bbdf523a69e890c4f10_ga853a1a5b6d521bbdf523a69e890c4f10}{k4a\+\_\+transformation\+\_\+create}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1transformation_a7b98768f8ee53d39f20ec1d79bfec39a_a7b98768f8ee53d39f20ec1d79bfec39a}\label{classk4a_1_1transformation_a7b98768f8ee53d39f20ec1d79bfec39a_a7b98768f8ee53d39f20ec1d79bfec39a}} 
+\index{k4a::transformation@{k4a::transformation}!transformation@{transformation}}
+\index{transformation@{transformation}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{transformation()}{transformation()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily k4a\+::transformation\+::transformation (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__transformation__t}{k4a\+\_\+transformation\+\_\+t}}}]{handle = {\ttfamily nullptr} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Creates a transformation from a \mbox{\hyperlink{structk4a__transformation__t}{k4a\+\_\+transformation\+\_\+t}} Takes ownership of the handle, i.\+e. 
+
+you should not call k4a\+\_\+transformation\+\_\+destroy on the handle after giving it to the transformation; the transformation will take care of that. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classk4a_1_1transformation_a208b7009485b1d14ccebaade276a32dc_a208b7009485b1d14ccebaade276a32dc}\label{classk4a_1_1transformation_a208b7009485b1d14ccebaade276a32dc_a208b7009485b1d14ccebaade276a32dc}} 
+\index{k4a::transformation@{k4a::transformation}!color\_image\_to\_depth\_camera@{color\_image\_to\_depth\_camera}}
+\index{color\_image\_to\_depth\_camera@{color\_image\_to\_depth\_camera}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{color\_image\_to\_depth\_camera()}{color\_image\_to\_depth\_camera()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classk4a_1_1image}{image}} k4a\+::transformation\+::color\+\_\+image\+\_\+to\+\_\+depth\+\_\+camera (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{depth\+\_\+image,  }\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{color\+\_\+image }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Transforms the color image into the geometry of the depth camera. 
+
+Throws error on failure
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gaf3a941f07bb0185cd7a72699a648fc29_gaf3a941f07bb0185cd7a72699a648fc29}{k4a\+\_\+transformation\+\_\+color\+\_\+image\+\_\+to\+\_\+depth\+\_\+camera}} Creates a new \mbox{\hyperlink{classk4a_1_1image}{image}} with the output. 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1transformation_ae25f1d6159f91bda04e9026959f94b15_ae25f1d6159f91bda04e9026959f94b15}\label{classk4a_1_1transformation_ae25f1d6159f91bda04e9026959f94b15_ae25f1d6159f91bda04e9026959f94b15}} 
+\index{k4a::transformation@{k4a::transformation}!color\_image\_to\_depth\_camera@{color\_image\_to\_depth\_camera}}
+\index{color\_image\_to\_depth\_camera@{color\_image\_to\_depth\_camera}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{color\_image\_to\_depth\_camera()}{color\_image\_to\_depth\_camera()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void k4a\+::transformation\+::color\+\_\+image\+\_\+to\+\_\+depth\+\_\+camera (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{depth\+\_\+image,  }\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{color\+\_\+image,  }\item[{\mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$}]{transformed\+\_\+color\+\_\+image }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Transforms the color image into the geometry of the depth camera. 
+
+Throws error on failure
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gaf3a941f07bb0185cd7a72699a648fc29_gaf3a941f07bb0185cd7a72699a648fc29}{k4a\+\_\+transformation\+\_\+color\+\_\+image\+\_\+to\+\_\+depth\+\_\+camera}} Transforms the output in to the existing caller provided {\ttfamily transformed\+\_\+color\+\_\+image}. 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1transformation_ac3511565a1eedf5e22900f1fdc71c185_ac3511565a1eedf5e22900f1fdc71c185}\label{classk4a_1_1transformation_ac3511565a1eedf5e22900f1fdc71c185_ac3511565a1eedf5e22900f1fdc71c185}} 
+\index{k4a::transformation@{k4a::transformation}!depth\_image\_to\_color\_camera@{depth\_image\_to\_color\_camera}}
+\index{depth\_image\_to\_color\_camera@{depth\_image\_to\_color\_camera}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{depth\_image\_to\_color\_camera()}{depth\_image\_to\_color\_camera()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classk4a_1_1image}{image}} k4a\+::transformation\+::depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{depth\+\_\+image }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Transforms the depth map into the geometry of the color camera. 
+
+Throws error on failure
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gafacffb5f781a9c2df30d4a16241cd514_gafacffb5f781a9c2df30d4a16241cd514}{k4a\+\_\+transformation\+\_\+depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera}} Creates a new \mbox{\hyperlink{classk4a_1_1image}{image}} with the output. 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1transformation_a84d7583dff4ba83f9ed162233f860418_a84d7583dff4ba83f9ed162233f860418}\label{classk4a_1_1transformation_a84d7583dff4ba83f9ed162233f860418_a84d7583dff4ba83f9ed162233f860418}} 
+\index{k4a::transformation@{k4a::transformation}!depth\_image\_to\_color\_camera@{depth\_image\_to\_color\_camera}}
+\index{depth\_image\_to\_color\_camera@{depth\_image\_to\_color\_camera}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{depth\_image\_to\_color\_camera()}{depth\_image\_to\_color\_camera()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void k4a\+::transformation\+::depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{depth\+\_\+image,  }\item[{\mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$}]{transformed\+\_\+depth\+\_\+image }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Transforms the depth map into the geometry of the color camera. 
+
+Throws error on failure
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gafacffb5f781a9c2df30d4a16241cd514_gafacffb5f781a9c2df30d4a16241cd514}{k4a\+\_\+transformation\+\_\+depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera}} Transforms the output in to the existing caller provided {\ttfamily transformed\+\_\+depth\+\_\+image}. 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1transformation_a81ead7ffe1c9540a2f91c364a749827d_a81ead7ffe1c9540a2f91c364a749827d}\label{classk4a_1_1transformation_a81ead7ffe1c9540a2f91c364a749827d_a81ead7ffe1c9540a2f91c364a749827d}} 
+\index{k4a::transformation@{k4a::transformation}!depth\_image\_to\_color\_camera\_custom@{depth\_image\_to\_color\_camera\_custom}}
+\index{depth\_image\_to\_color\_camera\_custom@{depth\_image\_to\_color\_camera\_custom}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{depth\_image\_to\_color\_camera\_custom()}{depth\_image\_to\_color\_camera\_custom()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void k4a\+::transformation\+::depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera\+\_\+custom (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{depth\+\_\+image,  }\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{custom\+\_\+image,  }\item[{\mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$}]{transformed\+\_\+depth\+\_\+image,  }\item[{\mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$}]{transformed\+\_\+custom\+\_\+image,  }\item[{\mbox{\hyperlink{group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_ga06f55e23e1d260b069e89e4a9cd6f4ee}{k4a\+\_\+transformation\+\_\+interpolation\+\_\+type\+\_\+t}}}]{interpolation\+\_\+type,  }\item[{uint32\+\_\+t}]{invalid\+\_\+custom\+\_\+value }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Transforms depth map and a custom image into the geometry of the color camera. 
+
+Throws error on failure
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gac00dd00e7612a86382e3d0a130f276bb_gac00dd00e7612a86382e3d0a130f276bb}{k4a\+\_\+transformation\+\_\+depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera\+\_\+custom}} Transforms the output in to the existing caller provided {\ttfamily transformed\+\_\+depth\+\_\+image} {\ttfamily transformed\+\_\+custom\+\_\+image}. 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1transformation_a72eaf319f56076237371651dc483603e_a72eaf319f56076237371651dc483603e}\label{classk4a_1_1transformation_a72eaf319f56076237371651dc483603e_a72eaf319f56076237371651dc483603e}} 
+\index{k4a::transformation@{k4a::transformation}!depth\_image\_to\_color\_camera\_custom@{depth\_image\_to\_color\_camera\_custom}}
+\index{depth\_image\_to\_color\_camera\_custom@{depth\_image\_to\_color\_camera\_custom}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{depth\_image\_to\_color\_camera\_custom()}{depth\_image\_to\_color\_camera\_custom()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily std\+::pair$<$\mbox{\hyperlink{classk4a_1_1image}{image}}, \mbox{\hyperlink{classk4a_1_1image}{image}}$>$ k4a\+::transformation\+::depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera\+\_\+custom (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{depth\+\_\+image,  }\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{custom\+\_\+image,  }\item[{\mbox{\hyperlink{group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_ga06f55e23e1d260b069e89e4a9cd6f4ee}{k4a\+\_\+transformation\+\_\+interpolation\+\_\+type\+\_\+t}}}]{interpolation\+\_\+type,  }\item[{uint32\+\_\+t}]{invalid\+\_\+custom\+\_\+value }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Transforms depth map and a custom image into the geometry of the color camera. 
+
+Throws error on failure
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gac00dd00e7612a86382e3d0a130f276bb_gac00dd00e7612a86382e3d0a130f276bb}{k4a\+\_\+transformation\+\_\+depth\+\_\+image\+\_\+to\+\_\+color\+\_\+camera\+\_\+custom}} Creates a new \mbox{\hyperlink{classk4a_1_1image}{image}} with the output. 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1transformation_aeced431be8c6be8efaf8da92380dd423_aeced431be8c6be8efaf8da92380dd423}\label{classk4a_1_1transformation_aeced431be8c6be8efaf8da92380dd423_aeced431be8c6be8efaf8da92380dd423}} 
+\index{k4a::transformation@{k4a::transformation}!depth\_image\_to\_point\_cloud@{depth\_image\_to\_point\_cloud}}
+\index{depth\_image\_to\_point\_cloud@{depth\_image\_to\_point\_cloud}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{depth\_image\_to\_point\_cloud()}{depth\_image\_to\_point\_cloud()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classk4a_1_1image}{image}} k4a\+::transformation\+::depth\+\_\+image\+\_\+to\+\_\+point\+\_\+cloud (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{depth\+\_\+image,  }\item[{\mbox{\hyperlink{group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_ga8d5fae13125f360be86c166684cdb5c5}{k4a\+\_\+calibration\+\_\+type\+\_\+t}}}]{camera }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Transforms the depth image into 3 planar images representing X, Y and Z-\/coordinates of corresponding 3d points. 
+
+Throws error on failure.
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga7385eb4beb9d8892e8a88cf4feb3be70_ga7385eb4beb9d8892e8a88cf4feb3be70}{k4a\+\_\+transformation\+\_\+depth\+\_\+image\+\_\+to\+\_\+point\+\_\+cloud}} Creates a new \mbox{\hyperlink{classk4a_1_1image}{image}} with the output. 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1transformation_aca376c8cca0f1157c3632b4f4c1a59ab_aca376c8cca0f1157c3632b4f4c1a59ab}\label{classk4a_1_1transformation_aca376c8cca0f1157c3632b4f4c1a59ab_aca376c8cca0f1157c3632b4f4c1a59ab}} 
+\index{k4a::transformation@{k4a::transformation}!depth\_image\_to\_point\_cloud@{depth\_image\_to\_point\_cloud}}
+\index{depth\_image\_to\_point\_cloud@{depth\_image\_to\_point\_cloud}!k4a::transformation@{k4a::transformation}}
+\doxysubsubsection{\texorpdfstring{depth\_image\_to\_point\_cloud()}{depth\_image\_to\_point\_cloud()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void k4a\+::transformation\+::depth\+\_\+image\+\_\+to\+\_\+point\+\_\+cloud (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{depth\+\_\+image,  }\item[{\mbox{\hyperlink{group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_ga8d5fae13125f360be86c166684cdb5c5}{k4a\+\_\+calibration\+\_\+type\+\_\+t}}}]{camera,  }\item[{\mbox{\hyperlink{classk4a_1_1image}{image}} $\ast$}]{xyz\+\_\+image }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Transforms the depth image into 3 planar images representing X, Y and Z-\/coordinates of corresponding 3d points. 
+
+Throws error on failure.
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga7385eb4beb9d8892e8a88cf4feb3be70_ga7385eb4beb9d8892e8a88cf4feb3be70}{k4a\+\_\+transformation\+\_\+depth\+\_\+image\+\_\+to\+\_\+point\+\_\+cloud}} Transforms the output in to the existing caller provided {\ttfamily xyz\+\_\+image}. 
+\end{DoxySeeAlso}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+k4a.\+hpp\end{DoxyCompactItemize}

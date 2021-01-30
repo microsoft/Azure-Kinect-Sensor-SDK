@@ -1,0 +1,368 @@
+\hypertarget{classk4a_1_1image}{}\doxysection{k4a\+::image Class Reference}
+\label{classk4a_1_1image}\index{k4a::image@{k4a::image}}
+
+
+Wrapper for \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}.  
+
+
+
+
+{\ttfamily \#include $<$k4a/k4a.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classk4a_1_1image_ac9f26e8ea2dc561d64de0cabe004967e_ac9f26e8ea2dc561d64de0cabe004967e}{image}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} \mbox{\hyperlink{classk4a_1_1image_a88a5e67e8dd75677502e2421b3ba7c2c_a88a5e67e8dd75677502e2421b3ba7c2c}{handle}}=nullptr) noexcept
+\begin{DoxyCompactList}\small\item\em Creates an image from a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_aff608c45cc2a141c71a448607741df34}\label{classk4a_1_1image_aff608c45cc2a141c71a448607741df34}} 
+\mbox{\hyperlink{classk4a_1_1image_aff608c45cc2a141c71a448607741df34}{image}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&other) noexcept
+\begin{DoxyCompactList}\small\item\em Creates a shallow copy of another image. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_adb337f5ae0c5428a7d34876affdb5ae8}\label{classk4a_1_1image_adb337f5ae0c5428a7d34876affdb5ae8}} 
+\mbox{\hyperlink{classk4a_1_1image_adb337f5ae0c5428a7d34876affdb5ae8}{image}} (\mbox{\hyperlink{classk4a_1_1image}{image}} \&\&other) noexcept
+\begin{DoxyCompactList}\small\item\em Moves another image into a new image. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_a08a32ff87256a778ce77bfffb6568beb}\label{classk4a_1_1image_a08a32ff87256a778ce77bfffb6568beb}} 
+\mbox{\hyperlink{classk4a_1_1image}{image}} \& \mbox{\hyperlink{classk4a_1_1image_a08a32ff87256a778ce77bfffb6568beb}{operator=}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&other) noexcept
+\begin{DoxyCompactList}\small\item\em Sets image to a shallow copy of the other image. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_a6a4670119bd9a2b91f243c343d312a90}\label{classk4a_1_1image_a6a4670119bd9a2b91f243c343d312a90}} 
+\mbox{\hyperlink{classk4a_1_1image}{image}} \& \mbox{\hyperlink{classk4a_1_1image_a6a4670119bd9a2b91f243c343d312a90}{operator=}} (\mbox{\hyperlink{classk4a_1_1image}{image}} \&\&other) noexcept
+\begin{DoxyCompactList}\small\item\em Moves another image into this image; other is set to invalid. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_aa52fed26cdd34b9f63f3b219f7c1bc6d}\label{classk4a_1_1image_aa52fed26cdd34b9f63f3b219f7c1bc6d}} 
+\mbox{\hyperlink{classk4a_1_1image}{image}} \& \mbox{\hyperlink{classk4a_1_1image_aa52fed26cdd34b9f63f3b219f7c1bc6d}{operator=}} (std\+::nullptr\+\_\+t) noexcept
+\begin{DoxyCompactList}\small\item\em Invalidates this image. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_afcc26100d131a15edb5f4f87501c37bc}\label{classk4a_1_1image_afcc26100d131a15edb5f4f87501c37bc}} 
+bool \mbox{\hyperlink{classk4a_1_1image_afcc26100d131a15edb5f4f87501c37bc}{operator==}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&other) const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if two images refer to the same \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_aac0490a29722a1377564cbcc7642c0b4}\label{classk4a_1_1image_aac0490a29722a1377564cbcc7642c0b4}} 
+bool \mbox{\hyperlink{classk4a_1_1image_aac0490a29722a1377564cbcc7642c0b4}{operator==}} (std\+::nullptr\+\_\+t) const noexcept
+\begin{DoxyCompactList}\small\item\em Returns false if the image is valid, true otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_aa000850be81fbda9b9bbfdde0283ec7a}\label{classk4a_1_1image_aa000850be81fbda9b9bbfdde0283ec7a}} 
+bool \mbox{\hyperlink{classk4a_1_1image_aa000850be81fbda9b9bbfdde0283ec7a}{operator!=}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&other) const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if two images wrap different \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} instances, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_a76be4cef7e6661f3940f9b9adcc16840}\label{classk4a_1_1image_a76be4cef7e6661f3940f9b9adcc16840}} 
+bool \mbox{\hyperlink{classk4a_1_1image_a76be4cef7e6661f3940f9b9adcc16840}{operator!=}} (std\+::nullptr\+\_\+t) const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if the image is valid, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_a32b1ba1b4dc1f1190fa456250ee0e4a0}\label{classk4a_1_1image_a32b1ba1b4dc1f1190fa456250ee0e4a0}} 
+\mbox{\hyperlink{classk4a_1_1image_a32b1ba1b4dc1f1190fa456250ee0e4a0}{operator bool}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if the image is valid, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_a94f398595ba9086533e9d6afe74b38b5}\label{classk4a_1_1image_a94f398595ba9086533e9d6afe74b38b5}} 
+bool \mbox{\hyperlink{classk4a_1_1image_a94f398595ba9086533e9d6afe74b38b5}{is\+\_\+valid}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if the image is valid, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} \mbox{\hyperlink{classk4a_1_1image_a88a5e67e8dd75677502e2421b3ba7c2c_a88a5e67e8dd75677502e2421b3ba7c2c}{handle}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Returns the underlying \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} handle. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1image_a5654ce02204e255e11350c14cf1f4b89}\label{classk4a_1_1image_a5654ce02204e255e11350c14cf1f4b89}} 
+void \mbox{\hyperlink{classk4a_1_1image_a5654ce02204e255e11350c14cf1f4b89}{reset}} () noexcept
+\begin{DoxyCompactList}\small\item\em Releases the underlying \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}; the image is set to invalid. \end{DoxyCompactList}\item 
+uint8\+\_\+t $\ast$ \mbox{\hyperlink{classk4a_1_1image_af088c323209fecac22012e253dc3d9d1_af088c323209fecac22012e253dc3d9d1}{get\+\_\+buffer}} () noexcept
+\begin{DoxyCompactList}\small\item\em Get the image buffer. \end{DoxyCompactList}\item 
+const uint8\+\_\+t $\ast$ \mbox{\hyperlink{classk4a_1_1image_a6b68d771858ff5d1878f6f0c314a669e_a6b68d771858ff5d1878f6f0c314a669e}{get\+\_\+buffer}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image buffer. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{classk4a_1_1image_a681ade955c81f42d967d41dcbaf065d4_a681ade955c81f42d967d41dcbaf065d4}{get\+\_\+size}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image buffer size in bytes. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} \mbox{\hyperlink{classk4a_1_1image_aad5e858608f4109d7c3c8fa0f58cd6ac_aad5e858608f4109d7c3c8fa0f58cd6ac}{get\+\_\+format}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image format of the image. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classk4a_1_1image_a2ed85b2247946a21251c790071612904_a2ed85b2247946a21251c790071612904}{get\+\_\+width\+\_\+pixels}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image width in pixels. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classk4a_1_1image_a806880f3fe29f7b4833813138d40c0fa_a806880f3fe29f7b4833813138d40c0fa}{get\+\_\+height\+\_\+pixels}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image height in pixels. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classk4a_1_1image_a5e22c7875e15ecf102cc4cf4accb27c2_a5e22c7875e15ecf102cc4cf4accb27c2}{get\+\_\+stride\+\_\+bytes}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image stride in bytes. \end{DoxyCompactList}\item 
+std\+::chrono\+::microseconds \mbox{\hyperlink{classk4a_1_1image_a2d45cb5d26b004d0f93be7b3c130aabe_a2d45cb5d26b004d0f93be7b3c130aabe}{get\+\_\+device\+\_\+timestamp}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image\textquotesingle{}s device timestamp in microseconds. \end{DoxyCompactList}\item 
+std\+::chrono\+::nanoseconds \mbox{\hyperlink{classk4a_1_1image_aa691f71650646a9183352cae0c993e40_aa691f71650646a9183352cae0c993e40}{get\+\_\+system\+\_\+timestamp}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image\textquotesingle{}s system timestamp in nanoseconds. \end{DoxyCompactList}\item 
+std\+::chrono\+::microseconds \mbox{\hyperlink{classk4a_1_1image_a02849afc366ccb6e01d8a15ef284bea3_a02849afc366ccb6e01d8a15ef284bea3}{get\+\_\+exposure}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image exposure time in microseconds. \end{DoxyCompactList}\item 
+uint32\+\_\+t \mbox{\hyperlink{classk4a_1_1image_a98fc61c44d56d183125ddd1f519f4cc8_a98fc61c44d56d183125ddd1f519f4cc8}{get\+\_\+white\+\_\+balance}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image white balance in Kelvin (color images only) \end{DoxyCompactList}\item 
+uint32\+\_\+t \mbox{\hyperlink{classk4a_1_1image_a666dca56f2e7224488b95ac3b6ae8a6b_a666dca56f2e7224488b95ac3b6ae8a6b}{get\+\_\+iso\+\_\+speed}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the image\textquotesingle{}s ISO speed (color images only) \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1image_a867e09f47781f3f3dee0dac1d7dcc6d7_a867e09f47781f3f3dee0dac1d7dcc6d7}{set\+\_\+timestamp}} (std\+::chrono\+::microseconds timestamp) noexcept
+\begin{DoxyCompactList}\small\item\em Set the image\textquotesingle{}s timestamp in microseconds. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1image_aee70ef70051ec0ec28021e528c427758_aee70ef70051ec0ec28021e528c427758}{set\+\_\+exposure\+\_\+time}} (std\+::chrono\+::microseconds exposure) noexcept
+\begin{DoxyCompactList}\small\item\em Set the image\textquotesingle{}s exposure time in microseconds (color images only) \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1image_a4b6b1f96c49dbdf90b083181e4839c39_a4b6b1f96c49dbdf90b083181e4839c39}{set\+\_\+white\+\_\+balance}} (uint32\+\_\+t white\+\_\+balance) noexcept
+\begin{DoxyCompactList}\small\item\em Set the white balance of the image (color images only) \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1image_ab5857c281c7bafb0c14c1ecdc068280c_ab5857c281c7bafb0c14c1ecdc068280c}{set\+\_\+iso\+\_\+speed}} (uint32\+\_\+t iso\+\_\+speed) noexcept
+\begin{DoxyCompactList}\small\item\em Set the ISO speed of the image (color images only) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{classk4a_1_1image}{image}} \mbox{\hyperlink{classk4a_1_1image_a7a92d9119d57b57039946f6f7220d9a9_a7a92d9119d57b57039946f6f7220d9a9}{create}} (\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} format, int width\+\_\+pixels, int height\+\_\+pixels, int stride\+\_\+bytes)
+\begin{DoxyCompactList}\small\item\em Create a blank image Throws error on failure. \end{DoxyCompactList}\item 
+static \mbox{\hyperlink{classk4a_1_1image}{image}} \mbox{\hyperlink{classk4a_1_1image_a2885ff39ce74f193d5fe9fd1e92072ce_a2885ff39ce74f193d5fe9fd1e92072ce}{create\+\_\+from\+\_\+buffer}} (\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} format, int width\+\_\+pixels, int height\+\_\+pixels, int stride\+\_\+bytes, uint8\+\_\+t $\ast$buffer, size\+\_\+t buffer\+\_\+size, \mbox{\hyperlink{group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_ga1e290c645920c7674c6d36dcbb75909b}{k4a\+\_\+memory\+\_\+destroy\+\_\+cb\+\_\+t}} $\ast$buffer\+\_\+release\+\_\+cb, void $\ast$buffer\+\_\+release\+\_\+cb\+\_\+context)
+\begin{DoxyCompactList}\small\item\em Create an image from a pre-\/allocated buffer Throws error on failure. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Wrapper for \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. 
+
+Wraps a handle for an image. Copying/moving is cheap, copies are shallow.
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classk4a_1_1image_ac9f26e8ea2dc561d64de0cabe004967e_ac9f26e8ea2dc561d64de0cabe004967e}\label{classk4a_1_1image_ac9f26e8ea2dc561d64de0cabe004967e_ac9f26e8ea2dc561d64de0cabe004967e}} 
+\index{k4a::image@{k4a::image}!image@{image}}
+\index{image@{image}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{image()}{image()}}
+{\footnotesize\ttfamily k4a\+::image\+::image (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{handle = {\ttfamily nullptr} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Creates an image from a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. 
+
+Takes ownership of the handle, i.\+e. assuming that handle has a refcount of 1, you should not call k4a\+\_\+image\+\_\+release on the handle after giving it to the image; the image will take care of that. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classk4a_1_1image_a7a92d9119d57b57039946f6f7220d9a9_a7a92d9119d57b57039946f6f7220d9a9}\label{classk4a_1_1image_a7a92d9119d57b57039946f6f7220d9a9_a7a92d9119d57b57039946f6f7220d9a9}} 
+\index{k4a::image@{k4a::image}!create@{create}}
+\index{create@{create}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{create()}{create()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{classk4a_1_1image}{image}} k4a\+::image\+::create (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}}}]{format,  }\item[{int}]{width\+\_\+pixels,  }\item[{int}]{height\+\_\+pixels,  }\item[{int}]{stride\+\_\+bytes }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Create a blank image Throws error on failure. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}{k4a\+\_\+image\+\_\+create}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a2885ff39ce74f193d5fe9fd1e92072ce_a2885ff39ce74f193d5fe9fd1e92072ce}\label{classk4a_1_1image_a2885ff39ce74f193d5fe9fd1e92072ce_a2885ff39ce74f193d5fe9fd1e92072ce}} 
+\index{k4a::image@{k4a::image}!create\_from\_buffer@{create\_from\_buffer}}
+\index{create\_from\_buffer@{create\_from\_buffer}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{create\_from\_buffer()}{create\_from\_buffer()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{classk4a_1_1image}{image}} k4a\+::image\+::create\+\_\+from\+\_\+buffer (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}}}]{format,  }\item[{int}]{width\+\_\+pixels,  }\item[{int}]{height\+\_\+pixels,  }\item[{int}]{stride\+\_\+bytes,  }\item[{uint8\+\_\+t $\ast$}]{buffer,  }\item[{size\+\_\+t}]{buffer\+\_\+size,  }\item[{\mbox{\hyperlink{group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_ga1e290c645920c7674c6d36dcbb75909b}{k4a\+\_\+memory\+\_\+destroy\+\_\+cb\+\_\+t}} $\ast$}]{buffer\+\_\+release\+\_\+cb,  }\item[{void $\ast$}]{buffer\+\_\+release\+\_\+cb\+\_\+context }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Create an image from a pre-\/allocated buffer Throws error on failure. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a6b68d771858ff5d1878f6f0c314a669e_a6b68d771858ff5d1878f6f0c314a669e}\label{classk4a_1_1image_a6b68d771858ff5d1878f6f0c314a669e_a6b68d771858ff5d1878f6f0c314a669e}} 
+\index{k4a::image@{k4a::image}!get\_buffer@{get\_buffer}}
+\index{get\_buffer@{get\_buffer}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_buffer()}{get\_buffer()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily const uint8\+\_\+t$\ast$ k4a\+::image\+::get\+\_\+buffer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image buffer. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga2ef070cf4e543cd0f726478af332546e_ga2ef070cf4e543cd0f726478af332546e}{k4a\+\_\+image\+\_\+get\+\_\+buffer}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_af088c323209fecac22012e253dc3d9d1_af088c323209fecac22012e253dc3d9d1}\label{classk4a_1_1image_af088c323209fecac22012e253dc3d9d1_af088c323209fecac22012e253dc3d9d1}} 
+\index{k4a::image@{k4a::image}!get\_buffer@{get\_buffer}}
+\index{get\_buffer@{get\_buffer}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_buffer()}{get\_buffer()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily uint8\+\_\+t$\ast$ k4a\+::image\+::get\+\_\+buffer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image buffer. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga2ef070cf4e543cd0f726478af332546e_ga2ef070cf4e543cd0f726478af332546e}{k4a\+\_\+image\+\_\+get\+\_\+buffer}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a2d45cb5d26b004d0f93be7b3c130aabe_a2d45cb5d26b004d0f93be7b3c130aabe}\label{classk4a_1_1image_a2d45cb5d26b004d0f93be7b3c130aabe_a2d45cb5d26b004d0f93be7b3c130aabe}} 
+\index{k4a::image@{k4a::image}!get\_device\_timestamp@{get\_device\_timestamp}}
+\index{get\_device\_timestamp@{get\_device\_timestamp}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_device\_timestamp()}{get\_device\_timestamp()}}
+{\footnotesize\ttfamily std\+::chrono\+::microseconds k4a\+::image\+::get\+\_\+device\+\_\+timestamp (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image\textquotesingle{}s device timestamp in microseconds. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga318e115976ac441b513f6cf3c102a655_ga318e115976ac441b513f6cf3c102a655}{k4a\+\_\+image\+\_\+get\+\_\+device\+\_\+timestamp\+\_\+usec}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a02849afc366ccb6e01d8a15ef284bea3_a02849afc366ccb6e01d8a15ef284bea3}\label{classk4a_1_1image_a02849afc366ccb6e01d8a15ef284bea3_a02849afc366ccb6e01d8a15ef284bea3}} 
+\index{k4a::image@{k4a::image}!get\_exposure@{get\_exposure}}
+\index{get\_exposure@{get\_exposure}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_exposure()}{get\_exposure()}}
+{\footnotesize\ttfamily std\+::chrono\+::microseconds k4a\+::image\+::get\+\_\+exposure (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image exposure time in microseconds. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga54568ebab477f2534b3c4c92688344d9_ga54568ebab477f2534b3c4c92688344d9}{k4a\+\_\+image\+\_\+get\+\_\+exposure\+\_\+usec}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_aad5e858608f4109d7c3c8fa0f58cd6ac_aad5e858608f4109d7c3c8fa0f58cd6ac}\label{classk4a_1_1image_aad5e858608f4109d7c3c8fa0f58cd6ac_aad5e858608f4109d7c3c8fa0f58cd6ac}} 
+\index{k4a::image@{k4a::image}!get\_format@{get\_format}}
+\index{get\_format@{get\_format}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_format()}{get\_format()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} k4a\+::image\+::get\+\_\+format (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image format of the image. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga16f663cb93d8a8fa059fd551485f1315_ga16f663cb93d8a8fa059fd551485f1315}{k4a\+\_\+image\+\_\+get\+\_\+format}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a806880f3fe29f7b4833813138d40c0fa_a806880f3fe29f7b4833813138d40c0fa}\label{classk4a_1_1image_a806880f3fe29f7b4833813138d40c0fa_a806880f3fe29f7b4833813138d40c0fa}} 
+\index{k4a::image@{k4a::image}!get\_height\_pixels@{get\_height\_pixels}}
+\index{get\_height\_pixels@{get\_height\_pixels}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_height\_pixels()}{get\_height\_pixels()}}
+{\footnotesize\ttfamily int k4a\+::image\+::get\+\_\+height\+\_\+pixels (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image height in pixels. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga57ef7c5ce58812e176537476e4eb1764_ga57ef7c5ce58812e176537476e4eb1764}{k4a\+\_\+image\+\_\+get\+\_\+height\+\_\+pixels}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a666dca56f2e7224488b95ac3b6ae8a6b_a666dca56f2e7224488b95ac3b6ae8a6b}\label{classk4a_1_1image_a666dca56f2e7224488b95ac3b6ae8a6b_a666dca56f2e7224488b95ac3b6ae8a6b}} 
+\index{k4a::image@{k4a::image}!get\_iso\_speed@{get\_iso\_speed}}
+\index{get\_iso\_speed@{get\_iso\_speed}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_iso\_speed()}{get\_iso\_speed()}}
+{\footnotesize\ttfamily uint32\+\_\+t k4a\+::image\+::get\+\_\+iso\+\_\+speed (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image\textquotesingle{}s ISO speed (color images only) 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga5075f97b2de6cb0fee1725d5e9250879_ga5075f97b2de6cb0fee1725d5e9250879}{k4a\+\_\+image\+\_\+get\+\_\+white\+\_\+balance}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a681ade955c81f42d967d41dcbaf065d4_a681ade955c81f42d967d41dcbaf065d4}\label{classk4a_1_1image_a681ade955c81f42d967d41dcbaf065d4_a681ade955c81f42d967d41dcbaf065d4}} 
+\index{k4a::image@{k4a::image}!get\_size@{get\_size}}
+\index{get\_size@{get\_size}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_size()}{get\_size()}}
+{\footnotesize\ttfamily size\+\_\+t k4a\+::image\+::get\+\_\+size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image buffer size in bytes. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga814fd12783faf624e9357bbb3655643b_ga814fd12783faf624e9357bbb3655643b}{k4a\+\_\+image\+\_\+get\+\_\+size}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a5e22c7875e15ecf102cc4cf4accb27c2_a5e22c7875e15ecf102cc4cf4accb27c2}\label{classk4a_1_1image_a5e22c7875e15ecf102cc4cf4accb27c2_a5e22c7875e15ecf102cc4cf4accb27c2}} 
+\index{k4a::image@{k4a::image}!get\_stride\_bytes@{get\_stride\_bytes}}
+\index{get\_stride\_bytes@{get\_stride\_bytes}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_stride\_bytes()}{get\_stride\_bytes()}}
+{\footnotesize\ttfamily int k4a\+::image\+::get\+\_\+stride\+\_\+bytes (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image stride in bytes. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga18fa129b72b89ce8d13cd3e650af88e6_ga18fa129b72b89ce8d13cd3e650af88e6}{k4a\+\_\+image\+\_\+get\+\_\+stride\+\_\+bytes}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_aa691f71650646a9183352cae0c993e40_aa691f71650646a9183352cae0c993e40}\label{classk4a_1_1image_aa691f71650646a9183352cae0c993e40_aa691f71650646a9183352cae0c993e40}} 
+\index{k4a::image@{k4a::image}!get\_system\_timestamp@{get\_system\_timestamp}}
+\index{get\_system\_timestamp@{get\_system\_timestamp}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_system\_timestamp()}{get\_system\_timestamp()}}
+{\footnotesize\ttfamily std\+::chrono\+::nanoseconds k4a\+::image\+::get\+\_\+system\+\_\+timestamp (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image\textquotesingle{}s system timestamp in nanoseconds. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga98ba229d1ee1cf3b7c27a0f95e14826b_ga98ba229d1ee1cf3b7c27a0f95e14826b}{k4a\+\_\+image\+\_\+get\+\_\+system\+\_\+timestamp\+\_\+nsec}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a98fc61c44d56d183125ddd1f519f4cc8_a98fc61c44d56d183125ddd1f519f4cc8}\label{classk4a_1_1image_a98fc61c44d56d183125ddd1f519f4cc8_a98fc61c44d56d183125ddd1f519f4cc8}} 
+\index{k4a::image@{k4a::image}!get\_white\_balance@{get\_white\_balance}}
+\index{get\_white\_balance@{get\_white\_balance}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_white\_balance()}{get\_white\_balance()}}
+{\footnotesize\ttfamily uint32\+\_\+t k4a\+::image\+::get\+\_\+white\+\_\+balance (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image white balance in Kelvin (color images only) 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga5075f97b2de6cb0fee1725d5e9250879_ga5075f97b2de6cb0fee1725d5e9250879}{k4a\+\_\+image\+\_\+get\+\_\+white\+\_\+balance}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a2ed85b2247946a21251c790071612904_a2ed85b2247946a21251c790071612904}\label{classk4a_1_1image_a2ed85b2247946a21251c790071612904_a2ed85b2247946a21251c790071612904}} 
+\index{k4a::image@{k4a::image}!get\_width\_pixels@{get\_width\_pixels}}
+\index{get\_width\_pixels@{get\_width\_pixels}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{get\_width\_pixels()}{get\_width\_pixels()}}
+{\footnotesize\ttfamily int k4a\+::image\+::get\+\_\+width\+\_\+pixels (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the image width in pixels. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gab3df35a307588f272665328711342c06_gab3df35a307588f272665328711342c06}{k4a\+\_\+image\+\_\+get\+\_\+width\+\_\+pixels}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a88a5e67e8dd75677502e2421b3ba7c2c_a88a5e67e8dd75677502e2421b3ba7c2c}\label{classk4a_1_1image_a88a5e67e8dd75677502e2421b3ba7c2c_a88a5e67e8dd75677502e2421b3ba7c2c}} 
+\index{k4a::image@{k4a::image}!handle@{handle}}
+\index{handle@{handle}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{handle()}{handle()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} k4a\+::image\+::handle (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Returns the underlying \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} handle. 
+
+Note that this function does not increment the reference count on the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. The caller is responsible for incrementing the reference count on the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} if the caller needs the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} to outlive this C++ object. Otherwise, the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} will be destroyed by this C++ object. \mbox{\Hypertarget{classk4a_1_1image_aee70ef70051ec0ec28021e528c427758_aee70ef70051ec0ec28021e528c427758}\label{classk4a_1_1image_aee70ef70051ec0ec28021e528c427758_aee70ef70051ec0ec28021e528c427758}} 
+\index{k4a::image@{k4a::image}!set\_exposure\_time@{set\_exposure\_time}}
+\index{set\_exposure\_time@{set\_exposure\_time}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{set\_exposure\_time()}{set\_exposure\_time()}}
+{\footnotesize\ttfamily void k4a\+::image\+::set\+\_\+exposure\+\_\+time (\begin{DoxyParamCaption}\item[{std\+::chrono\+::microseconds}]{exposure }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Set the image\textquotesingle{}s exposure time in microseconds (color images only) 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga29954cc87d1fabc8651155f7baff5c9f_ga29954cc87d1fabc8651155f7baff5c9f}{k4a\+\_\+image\+\_\+set\+\_\+exposure\+\_\+time\+\_\+usec}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_ab5857c281c7bafb0c14c1ecdc068280c_ab5857c281c7bafb0c14c1ecdc068280c}\label{classk4a_1_1image_ab5857c281c7bafb0c14c1ecdc068280c_ab5857c281c7bafb0c14c1ecdc068280c}} 
+\index{k4a::image@{k4a::image}!set\_iso\_speed@{set\_iso\_speed}}
+\index{set\_iso\_speed@{set\_iso\_speed}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{set\_iso\_speed()}{set\_iso\_speed()}}
+{\footnotesize\ttfamily void k4a\+::image\+::set\+\_\+iso\+\_\+speed (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{iso\+\_\+speed }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Set the ISO speed of the image (color images only) 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga5a64f64515ff4dff317fec92a8427f45_ga5a64f64515ff4dff317fec92a8427f45}{k4a\+\_\+image\+\_\+set\+\_\+iso\+\_\+speed}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a867e09f47781f3f3dee0dac1d7dcc6d7_a867e09f47781f3f3dee0dac1d7dcc6d7}\label{classk4a_1_1image_a867e09f47781f3f3dee0dac1d7dcc6d7_a867e09f47781f3f3dee0dac1d7dcc6d7}} 
+\index{k4a::image@{k4a::image}!set\_timestamp@{set\_timestamp}}
+\index{set\_timestamp@{set\_timestamp}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{set\_timestamp()}{set\_timestamp()}}
+{\footnotesize\ttfamily void k4a\+::image\+::set\+\_\+timestamp (\begin{DoxyParamCaption}\item[{std\+::chrono\+::microseconds}]{timestamp }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Set the image\textquotesingle{}s timestamp in microseconds. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gacc2c4bf42956687a101937b77f8dfa21_gacc2c4bf42956687a101937b77f8dfa21}{k4a\+\_\+image\+\_\+set\+\_\+device\+\_\+timestamp\+\_\+usec}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1image_a4b6b1f96c49dbdf90b083181e4839c39_a4b6b1f96c49dbdf90b083181e4839c39}\label{classk4a_1_1image_a4b6b1f96c49dbdf90b083181e4839c39_a4b6b1f96c49dbdf90b083181e4839c39}} 
+\index{k4a::image@{k4a::image}!set\_white\_balance@{set\_white\_balance}}
+\index{set\_white\_balance@{set\_white\_balance}!k4a::image@{k4a::image}}
+\doxysubsubsection{\texorpdfstring{set\_white\_balance()}{set\_white\_balance()}}
+{\footnotesize\ttfamily void k4a\+::image\+::set\+\_\+white\+\_\+balance (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{white\+\_\+balance }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Set the white balance of the image (color images only) 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gad8c0bbccfd5086a7330bf897ae82561b_gad8c0bbccfd5086a7330bf897ae82561b}{k4a\+\_\+image\+\_\+set\+\_\+white\+\_\+balance}} 
+\end{DoxySeeAlso}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+k4a.\+hpp\end{DoxyCompactItemize}

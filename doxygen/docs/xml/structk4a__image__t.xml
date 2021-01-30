@@ -1,0 +1,1171 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a__image__t" kind="class" language="C++" prot="public">
+    <compoundname>k4a_image_t</compoundname>
+    <includes refid="k4a_8h" local="no">k4a/k4a.h</includes>
+      <sectiondef kind="related">
+      <memberdef kind="function" id="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_image_create</definition>
+        <argsstring>(k4a_image_format_t format, int width_pixels, int height_pixels, int stride_bytes, k4a_image_t *image_handle)</argsstring>
+        <name>k4a_image_create</name>
+        <param>
+          <type><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref></type>
+          <declname>format</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width_pixels</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>height_pixels</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>stride_bytes</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> *</type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Create an image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>format</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The format of the image that will be stored in this image container.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>width_pixels</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Width in pixels.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>height_pixels</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Height in pixels.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>stride_bytes</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The number of bytes per horizontal line of the image. If set to 0, the stride will be set to the minimum size given the <computeroutput>format</computeroutput> and <computeroutput>width_pixels</computeroutput>.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Pointer to store image handle in.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>This function is used to create images of formats that have consistent stride. The function is not suitable for compressed formats that may not be represented by the same number of bytes per line.</para>
+</simplesect>
+<simplesect kind="remark"><para>For most image formats, the function will allocate an image buffer of size <computeroutput>height_pixels</computeroutput> * <computeroutput>stride_bytes</computeroutput>. Buffers <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaf334f6c32b6b44d1f5df02a349f05288" kindref="member">K4A_IMAGE_FORMAT_COLOR_NV12</ref> format will allocate an additional <computeroutput>height_pixels</computeroutput> / 2 set of lines (each of <computeroutput>stride_bytes</computeroutput>). This function cannot be used to allocate <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddbaae172e7eecc6f4adfc318c789e49aaf9" kindref="member">K4A_IMAGE_FORMAT_COLOR_MJPG</ref> buffers.</para>
+</simplesect>
+<simplesect kind="remark"><para>To create an image object without the API allocating memory, or to represent an image that has a non-deterministic stride, use <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> is created with a reference count of 1.</para>
+</simplesect>
+<simplesect kind="remark"><para>When finished using the created image, release it with k4a_image_release.</para>
+</simplesect>
+<simplesect kind="return"><para>Returns <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> on success. Errors are indicated with <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref>.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="639" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="639" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1ga4b419a99aa2220b076a4520dc2afd1e5" kindref="member">k4a_result_t</ref></type>
+        <definition>k4a_result_t k4a_image_create_from_buffer</definition>
+        <argsstring>(k4a_image_format_t format, int width_pixels, int height_pixels, int stride_bytes, uint8_t *buffer, size_t buffer_size, k4a_memory_destroy_cb_t *buffer_release_cb, void *buffer_release_cb_context, k4a_image_t *image_handle)</argsstring>
+        <name>k4a_image_create_from_buffer</name>
+        <param>
+          <type><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref></type>
+          <declname>format</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width_pixels</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>height_pixels</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>stride_bytes</declname>
+        </param>
+        <param>
+          <type>uint8_t *</type>
+          <declname>buffer</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>buffer_size</declname>
+        </param>
+        <param>
+          <type><ref refid="group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_1ga1e290c645920c7674c6d36dcbb75909b" kindref="member">k4a_memory_destroy_cb_t</ref> *</type>
+          <declname>buffer_release_cb</declname>
+        </param>
+        <param>
+          <type>void *</type>
+          <declname>buffer_release_cb_context</declname>
+        </param>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> *</type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Create an image from a pre-allocated buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>format</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The format of the image that will be stored in this image container.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>width_pixels</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Width in pixels.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>height_pixels</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Height in pixels.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>stride_bytes</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The number of bytes per horizontal line of the image.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>buffer</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Pointer to a pre-allocated image buffer.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>buffer_size</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Size in bytes of the pre-allocated image buffer.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>buffer_release_cb</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Callback to the buffer free function, called when all references to the buffer have been released. This parameter is optional.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>buffer_release_cb_context</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Context for the buffer free function. This value will be called as a parameter to <computeroutput>buffer_release_cb</computeroutput> when the callback is invoked.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Pointer to store image handle in.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>This function creates a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> from a pre-allocated buffer. When all references to this object reach zero the provided <computeroutput>buffer_release_cb</computeroutput> callback function is called so that the memory can be released. If this function fails, the API will not use the memory provided in <computeroutput>buffer</computeroutput>, and the API will not call <computeroutput>buffer_release_cb</computeroutput>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> is created with a reference count of 1.</para>
+</simplesect>
+<simplesect kind="remark"><para>Release the reference on this function with <ref refid="group___functions_ga27c81863b13fafc3934a32935a014e9f_1ga27c81863b13fafc3934a32935a014e9f" kindref="member">k4a_image_release()</ref>.</para>
+</simplesect>
+<simplesect kind="return"><para>Returns <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3" kindref="member">K4A_RESULT_SUCCEEDED</ref> on success. Errors are indicated with <ref refid="group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_1gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed" kindref="member">K4A_RESULT_FAILED</ref> and error specific data can be found in the log.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="701" column="15" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="701" declcolumn="15"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga2ef070cf4e543cd0f726478af332546e_1ga2ef070cf4e543cd0f726478af332546e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t *</type>
+        <definition>uint8_t * k4a_image_get_buffer</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_buffer</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image buffer. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this buffer to access the raw image data.</para>
+</simplesect>
+<simplesect kind="return"><para>The function will return NULL if there is an error, and will normally return a pointer to the image buffer. Since all <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> instances are created with an image buffer, this function should only return NULL if the <computeroutput>image_handle</computeroutput> is invalid.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="734" column="10" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="734" declcolumn="10"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga814fd12783faf624e9357bbb3655643b_1ga814fd12783faf624e9357bbb3655643b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t k4a_image_get_size</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_size</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image buffer size. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this function to know what the size of the image buffer is returned by <ref refid="group___functions_ga2ef070cf4e543cd0f726478af332546e_1ga2ef070cf4e543cd0f726478af332546e" kindref="member">k4a_image_get_buffer()</ref>.</para>
+</simplesect>
+<simplesect kind="return"><para>The function will return 0 if there is an error, and will normally return the image size. Since all <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> instances are created with an image buffer, this function should only return 0 if the <computeroutput>image_handle</computeroutput> is invalid.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="759" column="9" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="759" declcolumn="9"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga16f663cb93d8a8fa059fd551485f1315_1ga16f663cb93d8a8fa059fd551485f1315" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref></type>
+        <definition>k4a_image_format_t k4a_image_get_format</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_format</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the format of the image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this function to determine the format of the image buffer.</para>
+</simplesect>
+<simplesect kind="return"><para>This function is not expected to fail, all <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>&apos;s are created with a known format. If the <computeroutput>image_handle</computeroutput> is invalid, the function will return <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52" kindref="member">K4A_IMAGE_FORMAT_CUSTOM</ref>.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="783" column="21" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="783" declcolumn="21"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gab3df35a307588f272665328711342c06_1gab3df35a307588f272665328711342c06" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int k4a_image_get_width_pixels</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_width_pixels</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image width in pixels. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>This function is not expected to fail, all <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>&apos;s are created with a known width. If the <computeroutput>image_handle</computeroutput> is invalid, the function will return 0.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="804" column="6" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="804" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga57ef7c5ce58812e176537476e4eb1764_1ga57ef7c5ce58812e176537476e4eb1764" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int k4a_image_get_height_pixels</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_height_pixels</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image height in pixels. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>This function is not expected to fail, all <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>&apos;s are created with a known height. If the <computeroutput>image_handle</computeroutput> is invalid, the function will return 0.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="825" column="6" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="825" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga18fa129b72b89ce8d13cd3e650af88e6_1ga18fa129b72b89ce8d13cd3e650af88e6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int k4a_image_get_stride_bytes</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_stride_bytes</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image stride in bytes. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>This function is not expected to fail, all <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>&apos;s are created with a known stride. If the <computeroutput>image_handle</computeroutput> is invalid, or the image&apos;s format does not have a stride, the function will return 0.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="846" column="6" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="846" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga5a0940fb8ecf418eb3a388412bd08643_1ga5a0940fb8ecf418eb3a388412bd08643" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>K4A_DEPRECATED_EXPORT uint64_t</type>
+        <definition>K4A_DEPRECATED_EXPORT uint64_t k4a_image_get_timestamp_usec</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_timestamp_usec</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image&apos;s device timestamp in microseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Returns the device timestamp of the image. Timestamps are recorded by the device and represent the mid-point of exposure. They may be used for relative comparison, but their absolute value has no defined meaning.</para>
+</simplesect>
+<simplesect kind="return"><para>If the <computeroutput>image_handle</computeroutput> is invalid or if no timestamp was set for the image, this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.</para>
+</simplesect>
+<xrefsect id="deprecated_1_deprecated000001"><xreftitle>Deprecated</xreftitle><xrefdescription><para>Deprecated starting in 1.2.0. Please use <ref refid="group___functions_ga318e115976ac441b513f6cf3c102a655_1ga318e115976ac441b513f6cf3c102a655" kindref="member">k4a_image_get_device_timestamp_usec()</ref>.</para>
+</xrefdescription></xrefsect></para>
+<para> 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="875" column="32" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="875" declcolumn="32"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga318e115976ac441b513f6cf3c102a655_1ga318e115976ac441b513f6cf3c102a655" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t k4a_image_get_device_timestamp_usec</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_device_timestamp_usec</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image&apos;s device timestamp in microseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Returns the device timestamp of the image, as captured by the hardware. Timestamps are recorded by the device and represent the mid-point of exposure. They may be used for relative comparison, but their absolute value has no defined meaning.</para>
+</simplesect>
+<simplesect kind="return"><para>If the <computeroutput>image_handle</computeroutput> is invalid or if no timestamp was set for the image, this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="901" column="11" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="901" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga98ba229d1ee1cf3b7c27a0f95e14826b_1ga98ba229d1ee1cf3b7c27a0f95e14826b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t k4a_image_get_system_timestamp_nsec</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_system_timestamp_nsec</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image&apos;s system timestamp in nanoseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Returns the system timestamp of the image. Timestamps are recorded by the host. They may be used for relative comparision, as they are relative to the corresponding system clock. The absolute value is a monotonic count from an arbitrary point in the past.</para>
+</simplesect>
+<simplesect kind="remark"><para>The system timestamp is captured at the moment host PC finishes receiving the image.</para>
+</simplesect>
+<simplesect kind="remark"><para>On Linux the system timestamp is read from clock_gettime(CLOCK_MONOTONIC), which measures realtime and is not impacted by adjustments to the system clock. It starts from an arbitrary point in the past. On Windows the system timestamp is read from QueryPerformanceCounter(), it also measures realtime and is not impacted by adjustments to the system clock. It also starts from an arbitrary point in the past.</para>
+</simplesect>
+<simplesect kind="return"><para>If the <computeroutput>image_handle</computeroutput> is invalid or if no timestamp was set for the image, this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="936" column="11" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="936" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga54568ebab477f2534b3c4c92688344d9_1ga54568ebab477f2534b3c4c92688344d9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t k4a_image_get_exposure_usec</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_exposure_usec</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image exposure in microseconds. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Returns an exposure time in microseconds. This is only supported on color image formats.</para>
+</simplesect>
+<simplesect kind="return"><para>If the <computeroutput>image_handle</computeroutput> is invalid, or no exposure was set on the image, the function will return 0. Otherwise, it will return the image exposure time in microseconds.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="960" column="11" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="960" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga5075f97b2de6cb0fee1725d5e9250879_1ga5075f97b2de6cb0fee1725d5e9250879" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_image_get_white_balance</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_white_balance</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image white balance. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Returns the image&apos;s white balance. This function is only valid for color captures, and not for depth or IR captures.</para>
+</simplesect>
+<simplesect kind="return"><para>Returns the image white balance in Kelvin. If <computeroutput>image_handle</computeroutput> is invalid, or the white balance was not set or not applicable to the image, the function will return 0.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="984" column="11" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="984" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga3626cef655d79190d2e002c3c4030872_1ga3626cef655d79190d2e002c3c4030872" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>uint32_t k4a_image_get_iso_speed</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_get_iso_speed</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Get the image ISO speed. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>This function is only valid for color captures, and not for depth or IR captures.</para>
+</simplesect>
+<simplesect kind="return"><para>Returns the ISO speed of the image. 0 indicates the ISO speed was not available or an error occurred.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1007" column="11" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1007" declcolumn="11"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gacc2c4bf42956687a101937b77f8dfa21_1gacc2c4bf42956687a101937b77f8dfa21" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_image_set_device_timestamp_usec</definition>
+        <argsstring>(k4a_image_t image_handle, uint64_t timestamp_usec)</argsstring>
+        <name>k4a_image_set_device_timestamp_usec</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <param>
+          <type>uint64_t</type>
+          <declname>timestamp_usec</declname>
+        </param>
+        <briefdescription>
+<para>Set the device time stamp, in microseconds, of the image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image to set the timestamp on.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>timestamp_usec</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Device timestamp of the image in microseconds.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this function in conjunction with <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref> to construct a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The device timestamp represents the mid-point of exposure of the image, as captured by the hardware.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1034" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1034" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga276298132ac76f56bf2c8b7589e38d63_1ga276298132ac76f56bf2c8b7589e38d63" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>K4A_DEPRECATED_EXPORT void</type>
+        <definition>K4A_DEPRECATED_EXPORT void k4a_image_set_timestamp_usec</definition>
+        <argsstring>(k4a_image_t image_handle, uint64_t timestamp_usec)</argsstring>
+        <name>k4a_image_set_timestamp_usec</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <param>
+          <type>uint64_t</type>
+          <declname>timestamp_usec</declname>
+        </param>
+        <briefdescription>
+<para>Set the device time stamp, in microseconds, of the image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image to set the timestamp on.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>timestamp_usec</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Device timestamp of the image in microseconds.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this function in conjunction with <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref> to construct a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The device timestamp represents the mid-point of exposure of the image, as captured by the hardware.</para>
+</simplesect>
+<xrefsect id="deprecated_1_deprecated000002"><xreftitle>Deprecated</xreftitle><xrefdescription><para>Deprecated starting in 1.2.0. Please use <ref refid="group___functions_gacc2c4bf42956687a101937b77f8dfa21_1gacc2c4bf42956687a101937b77f8dfa21" kindref="member">k4a_image_set_device_timestamp_usec()</ref>.</para>
+</xrefdescription></xrefsect></para>
+<para> 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1064" column="28" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1064" declcolumn="28"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gaf18827997835a77ac041d5a87203e5ef_1gaf18827997835a77ac041d5a87203e5ef" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_image_set_system_timestamp_nsec</definition>
+        <argsstring>(k4a_image_t image_handle, uint64_t timestamp_nsec)</argsstring>
+        <name>k4a_image_set_system_timestamp_nsec</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <param>
+          <type>uint64_t</type>
+          <declname>timestamp_nsec</declname>
+        </param>
+        <briefdescription>
+<para>Set the system time stamp, in nanoseconds, of the image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image to set the timestamp on.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>timestamp_nsec</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Timestamp of the image in nanoseconds.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this function in conjunction with <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref> to construct a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>The system timestamp is a high performance and increasing clock (from boot). The timestamp represents the time immediately after the image buffer was read by the host PC.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1092" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1092" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga617dac1d4664f8f4ead3013c1739ebb0_1ga617dac1d4664f8f4ead3013c1739ebb0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_image_set_exposure_usec</definition>
+        <argsstring>(k4a_image_t image_handle, uint64_t exposure_usec)</argsstring>
+        <name>k4a_image_set_exposure_usec</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <param>
+          <type>uint64_t</type>
+          <declname>exposure_usec</declname>
+        </param>
+        <briefdescription>
+<para>Set the exposure time, in microseconds, of the image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image to set the exposure time on.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>exposure_usec</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Exposure time of the image in microseconds.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this function in conjunction with <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref> to construct a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>. An exposure time of 0 is considered invalid. Only color image formats are expected to have a valid exposure time.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1117" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1117" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga29954cc87d1fabc8651155f7baff5c9f_1ga29954cc87d1fabc8651155f7baff5c9f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>K4A_DEPRECATED_EXPORT void</type>
+        <definition>K4A_DEPRECATED_EXPORT void k4a_image_set_exposure_time_usec</definition>
+        <argsstring>(k4a_image_t image_handle, uint64_t exposure_usec)</argsstring>
+        <name>k4a_image_set_exposure_time_usec</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <param>
+          <type>uint64_t</type>
+          <declname>exposure_usec</declname>
+        </param>
+        <briefdescription>
+<para>Set the exposure time, in microseconds, of the image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image to set the exposure time on.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>exposure_usec</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Exposure time of the image in microseconds.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this function in conjunction with <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref> to construct a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>. An exposure time of 0 is considered invalid. Only color image formats are expected to have a valid exposure time.</para>
+</simplesect>
+<xrefsect id="deprecated_1_deprecated000003"><xreftitle>Deprecated</xreftitle><xrefdescription><para>Deprecated starting in 1.2.0. Please use <ref refid="group___functions_ga617dac1d4664f8f4ead3013c1739ebb0_1ga617dac1d4664f8f4ead3013c1739ebb0" kindref="member">k4a_image_set_exposure_usec()</ref>.</para>
+</xrefdescription></xrefsect></para>
+<para> 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1145" column="28" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1145" declcolumn="28"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gad8c0bbccfd5086a7330bf897ae82561b_1gad8c0bbccfd5086a7330bf897ae82561b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_image_set_white_balance</definition>
+        <argsstring>(k4a_image_t image_handle, uint32_t white_balance)</argsstring>
+        <name>k4a_image_set_white_balance</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>white_balance</declname>
+        </param>
+        <briefdescription>
+<para>Set the white balance of the image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image to set the white balance on.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>white_balance</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>White balance of the image in degrees Kelvin.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this function in conjunction with <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref> to construct a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>. A white balance of 0 is considered invalid. White balance is only meaningful for color images, and not expected on depth or IR images.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1170" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1170" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga5a64f64515ff4dff317fec92a8427f45_1ga5a64f64515ff4dff317fec92a8427f45" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_image_set_iso_speed</definition>
+        <argsstring>(k4a_image_t image_handle, uint32_t iso_speed)</argsstring>
+        <name>k4a_image_set_iso_speed</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>iso_speed</declname>
+        </param>
+        <briefdescription>
+<para>Set the ISO speed of the image. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image to set the ISO speed on.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>iso_speed</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ISO speed of the image.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>Use this function in conjunction with <ref refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" kindref="member">k4a_image_create()</ref> or <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref> to construct a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>. An ISO speed of 0 is considered invalid. Only color images are expected to have a valid ISO speed.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1194" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1194" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_gae211d6b97d4ce1c752e8db9d5ea5b8b9_1gae211d6b97d4ce1c752e8db9d5ea5b8b9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_image_reference</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_reference</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Add a reference to the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>References manage the lifetime of the object. When the references reach zero the object is destroyed. A caller must not access the object after its reference is released.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1215" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1215" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="group___functions_ga27c81863b13fafc3934a32935a014e9f_1ga27c81863b13fafc3934a32935a014e9f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a_image_release</definition>
+        <argsstring>(k4a_image_t image_handle)</argsstring>
+        <name>k4a_image_release</name>
+        <param>
+          <type><ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref></type>
+          <declname>image_handle</declname>
+        </param>
+        <briefdescription>
+<para>Remove a reference from the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>image_handle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Handle of the image for which the get operation is performed on.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="remark"><para>References manage the lifetime of the object. When the references reach zero the object is destroyed. A caller must not access the object after its reference is released.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+  <requirement name="Library">k4a.lib</requirement>
+  <requirement name="DLL">k4a.dll</requirement>
+</requirements>
+ </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" line="1236" column="7" declfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.h" declline="1236" declcolumn="7"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Handle to an Azure Kinect image. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="remark"><para>A <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> manages an image buffer and associated metadata.</para>
+</simplesect>
+<simplesect kind="remark"><para>The memory associated with the image buffer in an <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> may have been allocated by the Azure Kinect APIs or by the application. If the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> was created by an Azure Kinect API, its memory will be freed when all references to the <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> are released. All images retrieved directly from a device will have been created by the API. An application can create a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> using memory that it has allocated using <ref refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" kindref="member">k4a_image_create_from_buffer()</ref>. In that case the memory is not freed when the references are released but instead the application is provided with a callback. Applications need to create a <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> to provide as an output to the <ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref> transformation functions.</para>
+</simplesect>
+<simplesect kind="remark"><para>An image has a number of metadata properties that can be set or retrieved using the accessor functions. Not all properties are applicable to images of all types. See the documentation for the individual accessors for more information on their applicability and meaning.</para>
+</simplesect>
+<simplesect kind="remark"><para>Images may be of one of the standard <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1gabd9688eb20d5cb878fd22d36de882ddb" kindref="member">k4a_image_format_t</ref> formats, or may be of format <ref refid="group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_1ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52" kindref="member">K4A_IMAGE_FORMAT_CUSTOM</ref>. The format defines how the underlying image buffer should be interpreted.</para>
+</simplesect>
+<simplesect kind="remark"><para>Images from a device are retrieved through a <ref refid="structk4a__capture__t" kindref="compound">k4a_capture_t</ref> object returned by <ref refid="group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_1ga4dac757a33657f4d3dbf1ae8b21c158a" kindref="member">k4a_device_get_capture()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>Images stored in a <ref refid="structk4a__capture__t" kindref="compound">k4a_capture_t</ref> are referenced by the <ref refid="structk4a__capture__t" kindref="compound">k4a_capture_t</ref> until they are replaced or the <ref refid="structk4a__capture__t" kindref="compound">k4a_capture_t</ref> is destroyed.</para>
+</simplesect>
+<simplesect kind="remark"><para>The caller must call <ref refid="group___functions_ga27c81863b13fafc3934a32935a014e9f_1ga27c81863b13fafc3934a32935a014e9f" kindref="member">k4a_image_release()</ref> to release its reference to any <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> that it receives from an Azure Kinect API.</para>
+</simplesect>
+<simplesect kind="remark"><para>Additional references to the image may be obtained with <ref refid="group___functions_gae211d6b97d4ce1c752e8db9d5ea5b8b9_1gae211d6b97d4ce1c752e8db9d5ea5b8b9" kindref="member">k4a_image_reference()</ref>.</para>
+</simplesect>
+<simplesect kind="remark"><para>An invalid <ref refid="structk4a__image__t" kindref="compound">k4a_image_t</ref> will be set to 0.</para>
+</simplesect>
+<simplesect kind="see"><para><ref refid="structk4a__capture__t" kindref="compound">k4a_capture_t</ref></para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="173" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="173" bodyend="173"/>
+    <listofallmembers>
+      <member refid="group___functions_ga859554581bb97a620ff8e92a893e71ef_1ga859554581bb97a620ff8e92a893e71ef" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_create</name></member>
+      <member refid="group___functions_gaf84f2a271bcf6afae429bbccd47071b3_1gaf84f2a271bcf6afae429bbccd47071b3" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_create_from_buffer</name></member>
+      <member refid="group___functions_ga2ef070cf4e543cd0f726478af332546e_1ga2ef070cf4e543cd0f726478af332546e" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_buffer</name></member>
+      <member refid="group___functions_ga318e115976ac441b513f6cf3c102a655_1ga318e115976ac441b513f6cf3c102a655" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_device_timestamp_usec</name></member>
+      <member refid="group___functions_ga54568ebab477f2534b3c4c92688344d9_1ga54568ebab477f2534b3c4c92688344d9" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_exposure_usec</name></member>
+      <member refid="group___functions_ga16f663cb93d8a8fa059fd551485f1315_1ga16f663cb93d8a8fa059fd551485f1315" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_format</name></member>
+      <member refid="group___functions_ga57ef7c5ce58812e176537476e4eb1764_1ga57ef7c5ce58812e176537476e4eb1764" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_height_pixels</name></member>
+      <member refid="group___functions_ga3626cef655d79190d2e002c3c4030872_1ga3626cef655d79190d2e002c3c4030872" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_iso_speed</name></member>
+      <member refid="group___functions_ga814fd12783faf624e9357bbb3655643b_1ga814fd12783faf624e9357bbb3655643b" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_size</name></member>
+      <member refid="group___functions_ga18fa129b72b89ce8d13cd3e650af88e6_1ga18fa129b72b89ce8d13cd3e650af88e6" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_stride_bytes</name></member>
+      <member refid="group___functions_ga98ba229d1ee1cf3b7c27a0f95e14826b_1ga98ba229d1ee1cf3b7c27a0f95e14826b" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_system_timestamp_nsec</name></member>
+      <member refid="group___functions_ga5a0940fb8ecf418eb3a388412bd08643_1ga5a0940fb8ecf418eb3a388412bd08643" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_timestamp_usec</name></member>
+      <member refid="group___functions_ga5075f97b2de6cb0fee1725d5e9250879_1ga5075f97b2de6cb0fee1725d5e9250879" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_white_balance</name></member>
+      <member refid="group___functions_gab3df35a307588f272665328711342c06_1gab3df35a307588f272665328711342c06" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_get_width_pixels</name></member>
+      <member refid="group___functions_gae211d6b97d4ce1c752e8db9d5ea5b8b9_1gae211d6b97d4ce1c752e8db9d5ea5b8b9" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_reference</name></member>
+      <member refid="group___functions_ga27c81863b13fafc3934a32935a014e9f_1ga27c81863b13fafc3934a32935a014e9f" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_release</name></member>
+      <member refid="group___functions_gacc2c4bf42956687a101937b77f8dfa21_1gacc2c4bf42956687a101937b77f8dfa21" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_set_device_timestamp_usec</name></member>
+      <member refid="group___functions_ga29954cc87d1fabc8651155f7baff5c9f_1ga29954cc87d1fabc8651155f7baff5c9f" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_set_exposure_time_usec</name></member>
+      <member refid="group___functions_ga617dac1d4664f8f4ead3013c1739ebb0_1ga617dac1d4664f8f4ead3013c1739ebb0" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_set_exposure_usec</name></member>
+      <member refid="group___functions_ga5a64f64515ff4dff317fec92a8427f45_1ga5a64f64515ff4dff317fec92a8427f45" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_set_iso_speed</name></member>
+      <member refid="group___functions_gaf18827997835a77ac041d5a87203e5ef_1gaf18827997835a77ac041d5a87203e5ef" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_set_system_timestamp_nsec</name></member>
+      <member refid="group___functions_ga276298132ac76f56bf2c8b7589e38d63_1ga276298132ac76f56bf2c8b7589e38d63" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_set_timestamp_usec</name></member>
+      <member refid="group___functions_gad8c0bbccfd5086a7330bf897ae82561b_1gad8c0bbccfd5086a7330bf897ae82561b" prot="public" virt="non-virtual"><scope>k4a_image_t</scope><name>k4a_image_set_white_balance</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

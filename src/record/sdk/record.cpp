@@ -11,7 +11,6 @@
 #include <k4ainternal/logging.h>
 #include <k4ainternal/common.h>
 
-// TODO: comment
 #include <cJSON.h>
 #include <locale.h> //cJSON.h need this set correctly.
 
@@ -342,11 +341,6 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    // TODO: remove after finished testing
-    // k4arecorder -l 10 -c 1080p -d NFOV_2X2BINNED -r 30 "D:\Neal Analytics\Microsoft\Kinect Recordings\output.mkv"
-    // k4arecorder -l 10 -c 1 -d 2 -r 2 "D:\Neal Analytics\Microsoft\Kinect Recordings\output.mkv"
-
-    // TODO: comment
     bool hasColorDevice = false;
     bool hasDepthDevice = false;
     if (K4A_SUCCEEDED(result) && device != NULL)
@@ -418,7 +412,6 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    // TODO: comment
     if (K4A_SUCCEEDED(result) && device != NULL && hasColorDevice)
     {
         const char *color_mode_info_str = "";
@@ -518,7 +511,6 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    // TODO: comment
     if (K4A_SUCCEEDED(result) && device != NULL && hasDepthDevice)
     {
         const char *depth_mode_info_str = "";
@@ -646,7 +638,6 @@ k4a_result_t k4a_record_create(const char *path,
         }
     }
 
-    // TODO: comment
     if (K4A_SUCCEEDED(result) && device != NULL && (hasColorDevice || hasDepthDevice))
     {
         const char *fps_mode_info_str = "";

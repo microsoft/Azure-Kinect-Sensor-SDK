@@ -1,0 +1,731 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="classk4a_1_1device" kind="class" language="C++" prot="public">
+    <compoundname>k4a::device</compoundname>
+    <includes refid="k4a_8hpp" local="no">k4a/k4a.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classk4a_1_1device_1a1aa4b9f5df566b5dcf269b4946121609" prot="private" static="no" mutable="no">
+        <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+        <definition>k4a_device_t k4a::device::m_handle</definition>
+        <argsstring></argsstring>
+        <name>m_handle</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1605" column="18" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1605" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classk4a_1_1device_a060093e3ad034aaeb05ea9dc69958a58_1a060093e3ad034aaeb05ea9dc69958a58" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::device::device</definition>
+        <argsstring>(k4a_device_t handle=nullptr) noexcept</argsstring>
+        <name>device</name>
+        <param>
+          <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+          <declname>handle</declname>
+          <defval>nullptr</defval>
+        </param>
+        <briefdescription>
+<para>Creates a device from a <ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref> Takes ownership of the handle, i.e. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>you should not call k4a_device_close on the handle after giving it to the device; the device will take care of that. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1088" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1088" bodyend="1088"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1a7543679a25b5761293869d1856d219aa" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::device::device</definition>
+        <argsstring>(device &amp;&amp;dev) noexcept</argsstring>
+        <name>device</name>
+        <param>
+          <type><ref refid="classk4a_1_1device" kindref="compound">device</ref> &amp;&amp;</type>
+          <declname>dev</declname>
+        </param>
+        <briefdescription>
+<para>Moves another device into a new device. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1092" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1092" bodyend="1095"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1a1fa84c8b8ee250c93489810ef4b6e05b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>k4a::device::device</definition>
+        <argsstring>(const device &amp;)=delete</argsstring>
+        <name>device</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1device" kindref="compound">device</ref> &amp;</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1097" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1a8fe9d10dae7aef6d6d786e88280a634e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::device::~device</definition>
+        <argsstring>()</argsstring>
+        <name>~device</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1099" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1099" bodyend="1102"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1af20f4c5988b3b4a8053bd63c3930b331" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classk4a_1_1device" kindref="compound">device</ref> &amp;</type>
+        <definition>device&amp; k4a::device::operator=</definition>
+        <argsstring>(const device &amp;)=delete</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1device" kindref="compound">device</ref> &amp;</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1104" column="12"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1aed3433182911420149e64721764df383" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1device" kindref="compound">device</ref> &amp;</type>
+        <definition>device&amp; k4a::device::operator=</definition>
+        <argsstring>(device &amp;&amp;dev) noexcept</argsstring>
+        <name>operator=</name>
+        <param>
+          <type><ref refid="classk4a_1_1device" kindref="compound">device</ref> &amp;&amp;</type>
+          <declname>dev</declname>
+        </param>
+        <briefdescription>
+<para>Moves another device into this device; other is set to invalid. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1108" column="12" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1108" bodyend="1117"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1a015a45ab5362697ef77ec4be2f387e31" prot="public" static="no" const="yes" explicit="yes" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::device::operator bool</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>operator bool</name>
+        <briefdescription>
+<para>Returns true if the device is valid, false otherwise. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1121" column="14" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1121" bodyend="1124"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1aece422ef7b2e662ceccebb4a990ed613" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::device::is_valid</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>is_valid</name>
+        <briefdescription>
+<para>Returns true if the device is valid, false otherwise. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1128" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1128" bodyend="1131"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a67c4cbd2cf6113228b5dfed56fef987b_1a67c4cbd2cf6113228b5dfed56fef987b" prot="public" static="no" const="yes" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref></type>
+        <definition>k4a_device_t k4a::device::handle</definition>
+        <argsstring>() const noexcept</argsstring>
+        <name>handle</name>
+        <briefdescription>
+<para>Returns the underlying <ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref> handle. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Note the <ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref> handle does not have a reference count will be destroyed when the C++ object is destroyed. The caller is responsible for ensuring the C++ object outlives this handle. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1138" column="18" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1138" bodyend="1141"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a1060f1cee688cbb125d112259b7b0739_1a1060f1cee688cbb125d112259b7b0739" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::device::close</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>close</name>
+        <briefdescription>
+<para>Closes a k4a device. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga7a3931d9a690b3971caaac83b43f9423_1ga7a3931d9a690b3971caaac83b43f9423" kindref="member">k4a_device_close</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1147" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1147" bodyend="1154"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e_1a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::device::get_capture</definition>
+        <argsstring>(capture *cap, std::chrono::milliseconds timeout)</argsstring>
+        <name>get_capture</name>
+        <param>
+          <type><ref refid="classk4a_1_1capture" kindref="compound">capture</ref> *</type>
+          <declname>cap</declname>
+        </param>
+        <param>
+          <type>std::chrono::milliseconds</type>
+          <declname>timeout</declname>
+        </param>
+        <briefdescription>
+<para>Reads a sensor capture into cap. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Returns true if a capture was read, false if the read timed out. Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_1ga4dac757a33657f4d3dbf1ae8b21c158a" kindref="member">k4a_device_get_capture</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1161" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1161" bodyend="1177"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a14c9e31b77fa4fc8e55054276e580cf8_1a14c9e31b77fa4fc8e55054276e580cf8" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::device::get_capture</definition>
+        <argsstring>(capture *cap)</argsstring>
+        <name>get_capture</name>
+        <param>
+          <type><ref refid="classk4a_1_1capture" kindref="compound">capture</ref> *</type>
+          <declname>cap</declname>
+        </param>
+        <briefdescription>
+<para>Reads a sensor capture into cap. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Returns true if a capture was read, false if the read timed out. Throws error on failure. This API assumes an inifinate timeout.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_1ga4dac757a33657f4d3dbf1ae8b21c158a" kindref="member">k4a_device_get_capture</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1184" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1184" bodyend="1187"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a59acd51c256b17441c6a2a4e335bc982_1a59acd51c256b17441c6a2a4e335bc982" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::device::get_imu_sample</definition>
+        <argsstring>(k4a_imu_sample_t *imu_sample, std::chrono::milliseconds timeout)</argsstring>
+        <name>get_imu_sample</name>
+        <param>
+          <type><ref refid="structk4a__imu__sample__t" kindref="compound">k4a_imu_sample_t</ref> *</type>
+          <declname>imu_sample</declname>
+        </param>
+        <param>
+          <type>std::chrono::milliseconds</type>
+          <declname>timeout</declname>
+        </param>
+        <briefdescription>
+<para>Reads an IMU sample. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Returns true if a sample was read, false if the read timed out. Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e_1ga8e5913b3bb94a453c7143bbd6e399a0e" kindref="member">k4a_device_get_imu_sample</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1194" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1194" bodyend="1208"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a5957d37c22bca085fe4a8da3d7444999_1a5957d37c22bca085fe4a8da3d7444999" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::device::get_imu_sample</definition>
+        <argsstring>(k4a_imu_sample_t *imu_sample)</argsstring>
+        <name>get_imu_sample</name>
+        <param>
+          <type><ref refid="structk4a__imu__sample__t" kindref="compound">k4a_imu_sample_t</ref> *</type>
+          <declname>imu_sample</declname>
+        </param>
+        <briefdescription>
+<para>Reads an IMU sample. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Returns true if a sample was read, false if the read timed out. Throws error on failure. This API assumes an infinate timeout.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e_1ga8e5913b3bb94a453c7143bbd6e399a0e" kindref="member">k4a_device_get_imu_sample</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1215" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1215" bodyend="1218"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a52c94d759b88a19421f9fce558c44c7b_1a52c94d759b88a19421f9fce558c44c7b" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::device::start_cameras</definition>
+        <argsstring>(const k4a_device_configuration_t *configuration)</argsstring>
+        <name>start_cameras</name>
+        <param>
+          <type>const <ref refid="structk4a__device__configuration__t" kindref="compound">k4a_device_configuration_t</ref> *</type>
+          <declname>configuration</declname>
+        </param>
+        <briefdescription>
+<para>Starts the K4A device&apos;s cameras Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gaad7a85e1e5471810262442fc4a8e217a_1gaad7a85e1e5471810262442fc4a8e217a" kindref="member">k4a_device_start_cameras</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1225" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1225" bodyend="1232"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a54390cae2a759ad9e36f47a30c223fd5_1a54390cae2a759ad9e36f47a30c223fd5" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::device::stop_cameras</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>stop_cameras</name>
+        <briefdescription>
+<para>Stops the K4A device&apos;s cameras. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_1ga4fa0e0a011a7105309ad97f081a5d6b8" kindref="member">k4a_device_stop_cameras</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1238" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1238" bodyend="1241"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_abc8bb828de9b48b10fefa5ca6b8482c7_1abc8bb828de9b48b10fefa5ca6b8482c7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::device::start_imu</definition>
+        <argsstring>()</argsstring>
+        <name>start_imu</name>
+        <briefdescription>
+<para>Starts the K4A IMU Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gaa855688659a69c0098ce9e0b2ffcc152_1gaa855688659a69c0098ce9e0b2ffcc152" kindref="member">k4a_device_start_imu</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1248" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1248" bodyend="1255"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a18f23e91f38643520228d784435938e5_1a18f23e91f38643520228d784435938e5" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::device::stop_imu</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>stop_imu</name>
+        <briefdescription>
+<para>Stops the K4A IMU. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga731c3ddd0833ce86d31e278992cf3453_1ga731c3ddd0833ce86d31e278992cf3453" kindref="member">k4a_device_stop_imu</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1261" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1261" bodyend="1264"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a452df45f6aa4ce3d8ae442bc1f2e7e7d_1a452df45f6aa4ce3d8ae442bc1f2e7e7d" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::string</type>
+        <definition>std::string k4a::device::get_serialnum</definition>
+        <argsstring>() const</argsstring>
+        <name>get_serialnum</name>
+        <briefdescription>
+<para>Get the K4A device serial number Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga798489af207ff1c99f2285ff6b08bc22_1ga798489af207ff1c99f2285ff6b08bc22" kindref="member">k4a_device_get_serialnum</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1271" column="17" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1271" bodyend="1296"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a4a0757363fc3e7937908f90b30f3666d_1a4a0757363fc3e7937908f90b30f3666d" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::device::get_color_control</definition>
+        <argsstring>(k4a_color_control_command_t command, k4a_color_control_mode_t *mode, int32_t *value) const</argsstring>
+        <name>get_color_control</name>
+        <param>
+          <type><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" kindref="member">k4a_color_control_command_t</ref></type>
+          <declname>command</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1ga3485402fc1bc5dc709e0d5859b6e8c88" kindref="member">k4a_color_control_mode_t</ref> *</type>
+          <declname>mode</declname>
+        </param>
+        <param>
+          <type>int32_t *</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+<para>Get the K4A color sensor control value Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga5cb97bc0db4ab28ad98c44e323da1cce_1ga5cb97bc0db4ab28ad98c44e323da1cce" kindref="member">k4a_device_get_color_control</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1303" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1303" bodyend="1310"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_af257d6c8181222823c7cfbdf57e032d7_1af257d6c8181222823c7cfbdf57e032d7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::device::set_color_control</definition>
+        <argsstring>(k4a_color_control_command_t command, k4a_color_control_mode_t mode, int32_t value)</argsstring>
+        <name>set_color_control</name>
+        <param>
+          <type><ref refid="group___enumerations_gafba23de13b10b11e413485e421aa0468_1gafba23de13b10b11e413485e421aa0468" kindref="member">k4a_color_control_command_t</ref></type>
+          <declname>command</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_1ga3485402fc1bc5dc709e0d5859b6e8c88" kindref="member">k4a_color_control_mode_t</ref></type>
+          <declname>mode</declname>
+        </param>
+        <param>
+          <type>int32_t</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+<para>Set the K4A color sensor control value Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gae81269489170b26b7f0bbe1a7f9d31d6_1gae81269489170b26b7f0bbe1a7f9d31d6" kindref="member">k4a_device_set_color_control</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1317" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1317" bodyend="1324"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a9d2c806f63893cb9486bd42bb634747f_1a9d2c806f63893cb9486bd42bb634747f" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; uint8_t &gt;</type>
+        <definition>std::vector&lt;uint8_t&gt; k4a::device::get_raw_calibration</definition>
+        <argsstring>() const</argsstring>
+        <name>get_raw_calibration</name>
+        <briefdescription>
+<para>Get the raw calibration blob for the entire K4A device. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga8c4e46642cee3115aeb0b33e2b43b24f_1ga8c4e46642cee3115aeb0b33e2b43b24f" kindref="member">k4a_device_get_raw_calibration</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1331" column="17" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1331" bodyend="1349"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a9d98c69e3202a347001630904d24f824_1a9d98c69e3202a347001630904d24f824" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="structk4a_1_1calibration" kindref="compound">calibration</ref></type>
+        <definition>calibration k4a::device::get_calibration</definition>
+        <argsstring>(uint32_t depth_mode_id, uint32_t color_mode_id) const</argsstring>
+        <name>get_calibration</name>
+        <param>
+          <type>uint32_t</type>
+          <declname>depth_mode_id</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>color_mode_id</declname>
+        </param>
+        <briefdescription>
+<para>Get the camera calibration for the entire K4A device, which is used for all transformation functions. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga2d9b1bea66eecbbf7b2d2868f913292b_1ga2d9b1bea66eecbbf7b2d2868f913292b" kindref="member">k4a_device_get_calibration</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1356" column="17" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1356" bodyend="1366"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_acaba6c5d8a28965882a4703e8806810a_1acaba6c5d8a28965882a4703e8806810a" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::device::is_sync_in_connected</definition>
+        <argsstring>() const</argsstring>
+        <name>is_sync_in_connected</name>
+        <briefdescription>
+<para>Get the device jack status for the synchronization in connector Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga0209ac87bfd055163677321b0304e962_1ga0209ac87bfd055163677321b0304e962" kindref="member">k4a_device_get_sync_jack</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1373" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1373" bodyend="1383"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_aec0191ecf75549f650af7ac61d0afbef_1aec0191ecf75549f650af7ac61d0afbef" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool k4a::device::is_sync_out_connected</definition>
+        <argsstring>() const</argsstring>
+        <name>is_sync_out_connected</name>
+        <briefdescription>
+<para>Get the device jack status for the synchronization out connector Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga0209ac87bfd055163677321b0304e962_1ga0209ac87bfd055163677321b0304e962" kindref="member">k4a_device_get_sync_jack</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1390" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1390" bodyend="1400"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a56dd0f20dcc26c014cdd8b47145a523b_1a56dd0f20dcc26c014cdd8b47145a523b" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="structk4a__hardware__version__t" kindref="compound">k4a_hardware_version_t</ref></type>
+        <definition>k4a_hardware_version_t k4a::device::get_version</definition>
+        <argsstring>() const</argsstring>
+        <name>get_version</name>
+        <briefdescription>
+<para>Get the version numbers of the K4A subsystems&apos; firmware Throws error on failure. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gaea1def0a70bfa64ba275534be945669e_1gaea1def0a70bfa64ba275534be945669e" kindref="member">k4a_device_get_version</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1407" column="28" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1407" bodyend="1417"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a29e30ddb733c36c78b9cba1158a2f048_1a29e30ddb733c36c78b9cba1158a2f048" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="structk4a__device__info__t" kindref="compound">k4a_device_info_t</ref></type>
+        <definition>k4a_device_info_t k4a::device::get_info</definition>
+        <argsstring>()</argsstring>
+        <name>get_info</name>
+        <briefdescription>
+<para>Gets info about a device. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gac274ccaf0d96578072026ac314893c11_1gac274ccaf0d96578072026ac314893c11" kindref="member">k4a_device_get_info</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1449" column="23" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1449" bodyend="1455"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1a5b5b320308f45e5a9f0a6c6187caf50c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; <ref refid="structk4a__color__mode__info__t" kindref="compound">k4a_color_mode_info_t</ref> &gt;</type>
+        <definition>std::vector&lt;k4a_color_mode_info_t&gt; k4a::device::get_color_modes</definition>
+        <argsstring>()</argsstring>
+        <name>get_color_modes</name>
+        <briefdescription>
+<para>Gets the available device color modes. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1460" column="17" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1460" bodyend="1480"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a6c4fcd4d9a5157294fd9e353f415c839_1a6c4fcd4d9a5157294fd9e353f415c839" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="structk4a__color__mode__info__t" kindref="compound">k4a_color_mode_info_t</ref></type>
+        <definition>k4a_color_mode_info_t k4a::device::get_color_mode</definition>
+        <argsstring>(int color_mode_id)</argsstring>
+        <name>get_color_mode</name>
+        <param>
+          <type>int</type>
+          <declname>color_mode_id</declname>
+        </param>
+        <briefdescription>
+<para>Gets a device color mode by mode id. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gae2c7f66152cf2eb2f1e9a207bce64647_1gae2c7f66152cf2eb2f1e9a207bce64647" kindref="member">k4a_device_get_color_mode</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1486" column="27" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1486" bodyend="1504"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1a5e2efe03105ccd328fb3469d3330fc96" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; <ref refid="structk4a__depth__mode__info__t" kindref="compound">k4a_depth_mode_info_t</ref> &gt;</type>
+        <definition>std::vector&lt;k4a_depth_mode_info_t&gt; k4a::device::get_depth_modes</definition>
+        <argsstring>()</argsstring>
+        <name>get_depth_modes</name>
+        <briefdescription>
+<para>Gets the available device depth modes. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1509" column="17" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1509" bodyend="1529"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_ab820baaa31768c2afb312a5da7d1b241_1ab820baaa31768c2afb312a5da7d1b241" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="structk4a__depth__mode__info__t" kindref="compound">k4a_depth_mode_info_t</ref></type>
+        <definition>k4a_depth_mode_info_t k4a::device::get_depth_mode</definition>
+        <argsstring>(int depth_mode_id)</argsstring>
+        <name>get_depth_mode</name>
+        <param>
+          <type>int</type>
+          <declname>depth_mode_id</declname>
+        </param>
+        <briefdescription>
+<para>Gets the device depth mode by mode id. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga0f6fb0b10b1c18fc934f70759aebbba5_1ga0f6fb0b10b1c18fc934f70759aebbba5" kindref="member">k4a_device_get_depth_mode</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1535" column="27" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1535" bodyend="1553"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_1a99627d618809010f9804577bbc57810a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; <ref refid="structk4a__fps__mode__info__t" kindref="compound">k4a_fps_mode_info_t</ref> &gt;</type>
+        <definition>std::vector&lt;k4a_fps_mode_info_t&gt; k4a::device::get_fps_modes</definition>
+        <argsstring>()</argsstring>
+        <name>get_fps_modes</name>
+        <briefdescription>
+<para>Get available device fps modes. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1558" column="17" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1558" bodyend="1578"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a1b7bb6d6a9c9a57872051a043784b92f_1a1b7bb6d6a9c9a57872051a043784b92f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="structk4a__fps__mode__info__t" kindref="compound">k4a_fps_mode_info_t</ref></type>
+        <definition>k4a_fps_mode_info_t k4a::device::get_fps_mode</definition>
+        <argsstring>(int fps_mode_id)</argsstring>
+        <name>get_fps_mode</name>
+        <param>
+          <type>int</type>
+          <declname>fps_mode_id</declname>
+        </param>
+        <briefdescription>
+<para>Gets the device fps mode by mode id. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga14956baf6db6ba2e936ae92e0413948a_1ga14956baf6db6ba2e936ae92e0413948a" kindref="member">k4a_device_get_fps_mode</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1584" column="25" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1584" bodyend="1602"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="classk4a_1_1device_a0094acf44bc68ab3d48f0851619d3467_1a0094acf44bc68ab3d48f0851619d3467" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1device" kindref="compound">device</ref></type>
+        <definition>static device k4a::device::open</definition>
+        <argsstring>(uint32_t index)</argsstring>
+        <name>open</name>
+        <param>
+          <type>uint32_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+<para>Open a k4a device. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_1ga3d4eb5dfbf4d576d4978b66ea419f113" kindref="member">k4a_device_open</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1424" column="19" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1424" bodyend="1434"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1device_a8e55f0b0001b72db094aaf613eb48c15_1a8e55f0b0001b72db094aaf613eb48c15" prot="public" static="yes" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>uint32_t</type>
+        <definition>static uint32_t k4a::device::get_installed_count</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>get_installed_count</name>
+        <briefdescription>
+<para>Gets the number of connected devices. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_gaf7d19df0f73f8e4dfaa21e1b4b719ecc_1gaf7d19df0f73f8e4dfaa21e1b4b719ecc" kindref="member">k4a_device_get_installed_count</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1440" column="21" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1440" bodyend="1443"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Wrapper for <ref refid="structk4a__device__t" kindref="compound">k4a_device_t</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Wraps a handle for a device. </para>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1080" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1081" bodyend="1606"/>
+    <listofallmembers>
+      <member refid="classk4a_1_1device_a1060f1cee688cbb125d112259b7b0739_1a1060f1cee688cbb125d112259b7b0739" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>close</name></member>
+      <member refid="classk4a_1_1device_a060093e3ad034aaeb05ea9dc69958a58_1a060093e3ad034aaeb05ea9dc69958a58" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>device</name></member>
+      <member refid="classk4a_1_1device_1a7543679a25b5761293869d1856d219aa" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>device</name></member>
+      <member refid="classk4a_1_1device_1a1fa84c8b8ee250c93489810ef4b6e05b" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>device</name></member>
+      <member refid="classk4a_1_1device_a9d98c69e3202a347001630904d24f824_1a9d98c69e3202a347001630904d24f824" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_calibration</name></member>
+      <member refid="classk4a_1_1device_a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e_1a591d2f9a0a1a25eaf7f2fc9cfc5b7c7e" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_capture</name></member>
+      <member refid="classk4a_1_1device_a14c9e31b77fa4fc8e55054276e580cf8_1a14c9e31b77fa4fc8e55054276e580cf8" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_capture</name></member>
+      <member refid="classk4a_1_1device_a4a0757363fc3e7937908f90b30f3666d_1a4a0757363fc3e7937908f90b30f3666d" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_color_control</name></member>
+      <member refid="classk4a_1_1device_a6c4fcd4d9a5157294fd9e353f415c839_1a6c4fcd4d9a5157294fd9e353f415c839" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_color_mode</name></member>
+      <member refid="classk4a_1_1device_1a5b5b320308f45e5a9f0a6c6187caf50c" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_color_modes</name></member>
+      <member refid="classk4a_1_1device_ab820baaa31768c2afb312a5da7d1b241_1ab820baaa31768c2afb312a5da7d1b241" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_depth_mode</name></member>
+      <member refid="classk4a_1_1device_1a5e2efe03105ccd328fb3469d3330fc96" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_depth_modes</name></member>
+      <member refid="classk4a_1_1device_a1b7bb6d6a9c9a57872051a043784b92f_1a1b7bb6d6a9c9a57872051a043784b92f" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_fps_mode</name></member>
+      <member refid="classk4a_1_1device_1a99627d618809010f9804577bbc57810a" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_fps_modes</name></member>
+      <member refid="classk4a_1_1device_a59acd51c256b17441c6a2a4e335bc982_1a59acd51c256b17441c6a2a4e335bc982" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_imu_sample</name></member>
+      <member refid="classk4a_1_1device_a5957d37c22bca085fe4a8da3d7444999_1a5957d37c22bca085fe4a8da3d7444999" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_imu_sample</name></member>
+      <member refid="classk4a_1_1device_a29e30ddb733c36c78b9cba1158a2f048_1a29e30ddb733c36c78b9cba1158a2f048" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_info</name></member>
+      <member refid="classk4a_1_1device_a8e55f0b0001b72db094aaf613eb48c15_1a8e55f0b0001b72db094aaf613eb48c15" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_installed_count</name></member>
+      <member refid="classk4a_1_1device_a9d2c806f63893cb9486bd42bb634747f_1a9d2c806f63893cb9486bd42bb634747f" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_raw_calibration</name></member>
+      <member refid="classk4a_1_1device_a452df45f6aa4ce3d8ae442bc1f2e7e7d_1a452df45f6aa4ce3d8ae442bc1f2e7e7d" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_serialnum</name></member>
+      <member refid="classk4a_1_1device_a56dd0f20dcc26c014cdd8b47145a523b_1a56dd0f20dcc26c014cdd8b47145a523b" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>get_version</name></member>
+      <member refid="classk4a_1_1device_a67c4cbd2cf6113228b5dfed56fef987b_1a67c4cbd2cf6113228b5dfed56fef987b" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>handle</name></member>
+      <member refid="classk4a_1_1device_acaba6c5d8a28965882a4703e8806810a_1acaba6c5d8a28965882a4703e8806810a" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>is_sync_in_connected</name></member>
+      <member refid="classk4a_1_1device_aec0191ecf75549f650af7ac61d0afbef_1aec0191ecf75549f650af7ac61d0afbef" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>is_sync_out_connected</name></member>
+      <member refid="classk4a_1_1device_1aece422ef7b2e662ceccebb4a990ed613" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>is_valid</name></member>
+      <member refid="classk4a_1_1device_1a1aa4b9f5df566b5dcf269b4946121609" prot="private" virt="non-virtual"><scope>k4a::device</scope><name>m_handle</name></member>
+      <member refid="classk4a_1_1device_a0094acf44bc68ab3d48f0851619d3467_1a0094acf44bc68ab3d48f0851619d3467" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>open</name></member>
+      <member refid="classk4a_1_1device_1a015a45ab5362697ef77ec4be2f387e31" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>operator bool</name></member>
+      <member refid="classk4a_1_1device_1af20f4c5988b3b4a8053bd63c3930b331" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>operator=</name></member>
+      <member refid="classk4a_1_1device_1aed3433182911420149e64721764df383" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>operator=</name></member>
+      <member refid="classk4a_1_1device_af257d6c8181222823c7cfbdf57e032d7_1af257d6c8181222823c7cfbdf57e032d7" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>set_color_control</name></member>
+      <member refid="classk4a_1_1device_a52c94d759b88a19421f9fce558c44c7b_1a52c94d759b88a19421f9fce558c44c7b" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>start_cameras</name></member>
+      <member refid="classk4a_1_1device_abc8bb828de9b48b10fefa5ca6b8482c7_1abc8bb828de9b48b10fefa5ca6b8482c7" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>start_imu</name></member>
+      <member refid="classk4a_1_1device_a54390cae2a759ad9e36f47a30c223fd5_1a54390cae2a759ad9e36f47a30c223fd5" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>stop_cameras</name></member>
+      <member refid="classk4a_1_1device_a18f23e91f38643520228d784435938e5_1a18f23e91f38643520228d784435938e5" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>stop_imu</name></member>
+      <member refid="classk4a_1_1device_1a8fe9d10dae7aef6d6d786e88280a634e" prot="public" virt="non-virtual"><scope>k4a::device</scope><name>~device</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

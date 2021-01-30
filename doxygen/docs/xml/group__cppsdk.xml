@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="group__cppsdk" kind="group">
+    <compoundname>cppsdk</compoundname>
+    <title>C++ Reference</title>
+    <innerclass refid="classk4a_1_1error" prot="public">k4a::error</innerclass>
+    <innerclass refid="classk4a_1_1image" prot="public">k4a::image</innerclass>
+    <innerclass refid="classk4a_1_1capture" prot="public">k4a::capture</innerclass>
+    <innerclass refid="structk4a_1_1calibration" prot="public">k4a::calibration</innerclass>
+    <innerclass refid="classk4a_1_1transformation" prot="public">k4a::transformation</innerclass>
+    <innerclass refid="classk4a_1_1device" prot="public">k4a::device</innerclass>
+    <briefdescription>
+<para>Functions part of the SDK. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

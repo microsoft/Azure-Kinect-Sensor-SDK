@@ -686,16 +686,16 @@ typedef enum
  */
 #define K4A_FAILED(_result_) (!K4A_SUCCEEDED(_result_))
 
-/** TODO: Fill in.
+/**
  *
  * \param T
- * TODO: Fill in
+ * Type of struct
  *
  * \param S
- * TODO: Fill in
+ * Instance of a struct of type T
  *
  * \remarks
- * TODO: Fill in
+ * Initializes a struct of type T with a struct size and a struct version.
  *
  * \xmlonly
  * <requirements>
@@ -859,10 +859,10 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
  * @{
  */
 
-/** TODO: Fill in.
+/**
  *
  * \remarks
- * TODO: Fill in
+ * Used by \sa k4a_device_info_t to store whether a device has a color camera, a depth camera and IMU.
  *
  * \xmlonly
  * <requirements>
@@ -877,10 +877,10 @@ typedef enum
     K4A_CAPABILITY_IMU = 4
 } device_capabilities​​;
 
-/** TODO: Fill in.
+/**
  *
  * \remarks
- * TODO: Fill in
+ * Stores the vendor id, the device id and device capabilities.  \sa device_capabilities
  *
  * \xmlonly
  * <requirements>
@@ -890,17 +890,17 @@ typedef enum
  */
 typedef struct _k4a_device_info_t
 {
-    uint32_t struct_size;    /**< TODO: Fill in. */
-    uint32_t struct_version; /**< TODO: Fill in. */
+    uint32_t struct_size;    /**< The size of this device info struct */
+    uint32_t struct_version; /**< The version of this device info struct */
     uint32_t vendor_id;      /**< 0 to 65535 : reserved for registered USB VID numbers. */
     uint32_t device_id;      /**< Vendor specific device ID. */
     uint32_t capabilities;   /**< Binary combination of capability flags. */
 } k4a_device_info_t;
 
-/** TODO: Fill in.
+/** 
  *
  * \remarks
- * TODO: Fill in
+ * Color mode info type representing color mode info.
  *
  * \xmlonly
  * <requirements>
@@ -922,10 +922,10 @@ typedef struct _k4a_color_mode_info_t
     int max_fps;                      /**< Maximum supported ramerate. */
 } k4a_color_mode_info_t;
 
-/** TODO: Fill in.
+/**
  *
  * \remarks
- * TODO: Fill in
+ * Depth mode info type representing depth mode info.
  *
  * \xmlonly
  * <requirements>
@@ -950,10 +950,10 @@ typedef struct _k4a_depth_mode_info_t
     int max_range;                    /**< Max values expected for mode in millimeters */
 } k4a_depth_mode_info_t;
 
-/** TODO: Fill in.
+/**
  *
  * \remarks
- * TODO: Fill in
+ * FPS mode info type representing fps mode info.
  *
  * \xmlonly
  * <requirements>
@@ -966,10 +966,9 @@ typedef struct _k4a_fps_mode_info_t
     uint32_t struct_size;    /**< Must be equal to sizeof(k4a_fps_mode_info_t). */
     uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
     uint32_t mode_id;        /**< Mode identifier to use to select this mode. */
-    int fps;                 /**< TODO: Fill in. */
+    int fps;                 /**< The frame rate per second. */
 } k4a_fps_mode_info_t;
 
-// TODO: redo comments for color, depth and fps?
 /** Configuration parameters for an Azure Kinect device.
  *
  * \remarks
@@ -989,7 +988,7 @@ typedef struct _k4a_device_configuration_t
      * Setting ::K4A_IMAGE_FORMAT_COLOR_BGRA32 for color_format will result in higher CPU utilization. */
     k4a_image_format_t color_format;
 
-    /** Image resolution to capture with the color camera. */
+    /** Capture mode for the color camera. */
     uint32_t color_mode_id;
 
     /** Capture mode for the depth camera. */
@@ -1284,10 +1283,10 @@ typedef struct _k4a_imu_sample_t
  * @{
  */
 
-/** TODO: Fill in.
+/**
  *
  * \remarks
- * TODO: Fill in
+ * The ABI version of the SDK implementation.
  *
  * \xmlonly
  * <requirements>
