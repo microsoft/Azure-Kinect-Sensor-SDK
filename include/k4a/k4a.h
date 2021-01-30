@@ -2287,12 +2287,12 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p device info was successfully written. ::K4A_RESULT_FAILED otherwise.
- * 
+ *
  * \remarks
- * The device info output contains the vendor id, the device id and available capabilities. 
+ * The device info output contains the vendor id, the device id and available capabilities.
  *
  * \sa k4a_device_t
- * 
+ *
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
@@ -2313,7 +2313,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_devi
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
- * 
+ *
  * \remarks
  * The mode count output is the number of available color modes for the device specified by device_handle.
  *
@@ -2342,9 +2342,10 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_hand
  * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
  *
  * \sa k4a_color_mode_info_t
- * 
+ *
  * \remarks
- * The color mode info output contains image resolution, native image format, horizontal and vertical fov and min and max fps. 
+ * The color mode info output contains image resolution, native image format, horizontal and vertical fov and min and
+ * max fps.
  *
  * \xmlonly
  * <requirements>
@@ -2368,7 +2369,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
- * 
+ *
  * \remarks
  * The mode count output is the number of available depth modes for the device specified by device_handle.
  *
@@ -2397,9 +2398,10 @@ K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_hand
  * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
  *
  * \sa k4a_depth_mode_info_t
- * 
+ *
  * \remarks
- * The depth mode info output contains image resolution, image native format, horizontal and vertical fov, min and max fps, min and max range and whether it is passive ir only.
+ * The depth mode info output contains image resolution, image native format, horizontal and vertical fov, min and max
+ * fps, min and max range and whether it is passive ir only.
  *
  * \xmlonly
  * <requirements>
@@ -2423,7 +2425,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
- * 
+ *
  * \remarks
  * The mode count output is the number of available fps modes for the device specified by device_handle.
  *
@@ -2452,7 +2454,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle
  * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
  *
  * \sa k4a_fps_mode_info_t
- * 
+ *
  * \remarks
  * The fps mode info contains the frame rate per second.
  *
