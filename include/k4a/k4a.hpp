@@ -1442,7 +1442,7 @@ public:
         return k4a_device_get_installed_count();
     }
 
-    /** TODO: Fill in.
+    /** Gets info about a device
      *
      * \sa k4a_device_get_info
      */
@@ -1454,9 +1454,8 @@ public:
         return info;
     }
 
-    /** TODO: Fill in.
+    /** Gets the available device color modes.
      *
-     * \sa k4a_device_get_color_mode_count
      */
     std::vector<k4a_color_mode_info_t> get_color_modes()
     {
@@ -1480,7 +1479,7 @@ public:
         return modes;
     }
 
-    /** TODO: Fill in.
+    /** Gets a device color mode by mode id.
      *
      * \sa k4a_device_get_color_mode
      */
@@ -1504,9 +1503,8 @@ public:
         return mode;
     }
 
-    /** TODO: Fill in.
+    /** Gets the available device depth modes.
      *
-     * \sa k4a_device_get_depth_mode_count
      */
     std::vector<k4a_depth_mode_info_t> get_depth_modes()
     {
@@ -1530,7 +1528,7 @@ public:
         return modes;
     }
 
-    /** TODO: Fill in.
+    /** Gets the device depth mode by mode id.
      *
      * \sa k4a_device_get_depth_mode
      */
@@ -1554,9 +1552,8 @@ public:
         return mode;
     }
 
-    /** TODO: Fill in.
+    /** Get available device fps modes.
      *
-     * \sa k4a_device_get_fps_mode_count
      */
     std::vector<k4a_fps_mode_info_t> get_fps_modes()
     {
@@ -1580,7 +1577,7 @@ public:
         return modes;
     }
 
-    /** TODO: Fill in.
+    /** Gets the device fps mode by mode id.
      *
      * \sa k4a_device_get_fps_mode
      */

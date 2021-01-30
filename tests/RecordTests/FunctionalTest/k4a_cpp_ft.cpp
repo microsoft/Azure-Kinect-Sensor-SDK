@@ -91,7 +91,6 @@ TEST_F(k4a_cpp_ft, k4a)
         calibration cal = kinect.get_calibration(depth_mode_info.mode_id, color_mode_info.mode_id);
         calibration cal2 = cal;
 
-        // TODO: double check this with develop branch
         ASSERT_EQ(cal.color_mode_id, cal2.color_mode_id);
     }
 

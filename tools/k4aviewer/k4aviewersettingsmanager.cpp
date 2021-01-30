@@ -48,8 +48,7 @@ constexpr char EnableMicrophoneTag[] = "EnableMicrophone";
 
 std::ostream &operator<<(std::ostream &s, const K4ADeviceConfiguration &val)
 {
-    // TODO: need to get the correct size
-    // static_assert(sizeof(k4a_device_configuration_t) == 36, "Need to add a new setting");
+    static_assert(sizeof(k4a_device_configuration_t) == 36, "Need to add a new setting");
     s << BeginDeviceConfigurationTag << std::endl;
     s << Separator << EnableColorCameraTag << Separator << val.EnableColorCamera << std::endl;
     s << Separator << EnableDepthCameraTag << Separator << val.EnableDepthCamera << std::endl;

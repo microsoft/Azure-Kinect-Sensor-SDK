@@ -1,0 +1,558 @@
+\hypertarget{structk4a__device__t}{}\doxysection{k4a\+\_\+device\+\_\+t Class Reference}
+\label{structk4a__device__t}\index{k4a\_device\_t@{k4a\_device\_t}}
+
+
+Handle to an Azure Kinect device.  
+
+
+
+
+{\ttfamily \#include $<$k4a/k4a.\+h$>$}
+
+\doxysubsection*{Related Functions}
+(Note that these are not member functions.) \begin{DoxyCompactItemize}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{group___functions_gaf7d19df0f73f8e4dfaa21e1b4b719ecc_gaf7d19df0f73f8e4dfaa21e1b4b719ecc}{k4a\+\_\+device\+\_\+get\+\_\+installed\+\_\+count}} (void)
+\begin{DoxyCompactList}\small\item\em Gets the number of connected devices. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open}} (uint32\+\_\+t index, \mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} $\ast$device\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Open an Azure Kinect device. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_ga7a3931d9a690b3971caaac83b43f9423_ga7a3931d9a690b3971caaac83b43f9423}{k4a\+\_\+device\+\_\+close}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Closes an Azure Kinect device. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_ga44c7c0c1cfba7c879e9e2da1a869e4ee}{k4a\+\_\+wait\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_ga4dac757a33657f4d3dbf1ae8b21c158a}{k4a\+\_\+device\+\_\+get\+\_\+capture}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} $\ast$capture\+\_\+handle, int32\+\_\+t timeout\+\_\+in\+\_\+ms)
+\begin{DoxyCompactList}\small\item\em Reads a sensor capture. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_ga44c7c0c1cfba7c879e9e2da1a869e4ee}{k4a\+\_\+wait\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e_ga8e5913b3bb94a453c7143bbd6e399a0e}{k4a\+\_\+device\+\_\+get\+\_\+imu\+\_\+sample}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, \mbox{\hyperlink{structk4a__imu__sample__t}{k4a\+\_\+imu\+\_\+sample\+\_\+t}} $\ast$imu\+\_\+sample, int32\+\_\+t timeout\+\_\+in\+\_\+ms)
+\begin{DoxyCompactList}\small\item\em Reads an IMU sample. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_gaad7a85e1e5471810262442fc4a8e217a_gaad7a85e1e5471810262442fc4a8e217a}{k4a\+\_\+device\+\_\+start\+\_\+cameras}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, const \mbox{\hyperlink{structk4a__device__configuration__t}{k4a\+\_\+device\+\_\+configuration\+\_\+t}} $\ast$config)
+\begin{DoxyCompactList}\small\item\em Starts color and depth camera capture. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_ga4fa0e0a011a7105309ad97f081a5d6b8}{k4a\+\_\+device\+\_\+stop\+\_\+cameras}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Stops the color and depth camera capture. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_gaa855688659a69c0098ce9e0b2ffcc152_gaa855688659a69c0098ce9e0b2ffcc152}{k4a\+\_\+device\+\_\+start\+\_\+imu}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Starts the IMU sample stream. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_ga731c3ddd0833ce86d31e278992cf3453_ga731c3ddd0833ce86d31e278992cf3453}{k4a\+\_\+device\+\_\+stop\+\_\+imu}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Stops the IMU capture. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_ga71b3cf304a2cd8fbac2f86c876deda5c}{k4a\+\_\+buffer\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga798489af207ff1c99f2285ff6b08bc22_ga798489af207ff1c99f2285ff6b08bc22}{k4a\+\_\+device\+\_\+get\+\_\+serialnum}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, char $\ast$serial\+\_\+number, size\+\_\+t $\ast$serial\+\_\+number\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Get the Azure Kinect device serial number. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_gaea1def0a70bfa64ba275534be945669e_gaea1def0a70bfa64ba275534be945669e}{k4a\+\_\+device\+\_\+get\+\_\+version}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, \mbox{\hyperlink{structk4a__hardware__version__t}{k4a\+\_\+hardware\+\_\+version\+\_\+t}} $\ast$version)
+\begin{DoxyCompactList}\small\item\em Get the version numbers of the device\textquotesingle{}s subsystems. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga70968e31e13aed0e2bef2009f169b901_ga70968e31e13aed0e2bef2009f169b901}{k4a\+\_\+device\+\_\+get\+\_\+color\+\_\+control\+\_\+capabilities}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, \mbox{\hyperlink{group___enumerations_gafba23de13b10b11e413485e421aa0468_gafba23de13b10b11e413485e421aa0468}{k4a\+\_\+color\+\_\+control\+\_\+command\+\_\+t}} command, bool $\ast$supports\+\_\+auto, int32\+\_\+t $\ast$min\+\_\+value, int32\+\_\+t $\ast$max\+\_\+value, int32\+\_\+t $\ast$step\+\_\+value, int32\+\_\+t $\ast$default\+\_\+value, \mbox{\hyperlink{group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_ga3485402fc1bc5dc709e0d5859b6e8c88}{k4a\+\_\+color\+\_\+control\+\_\+mode\+\_\+t}} $\ast$default\+\_\+mode)
+\begin{DoxyCompactList}\small\item\em Get the Azure Kinect color sensor control capabilities. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga5cb97bc0db4ab28ad98c44e323da1cce_ga5cb97bc0db4ab28ad98c44e323da1cce}{k4a\+\_\+device\+\_\+get\+\_\+color\+\_\+control}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, \mbox{\hyperlink{group___enumerations_gafba23de13b10b11e413485e421aa0468_gafba23de13b10b11e413485e421aa0468}{k4a\+\_\+color\+\_\+control\+\_\+command\+\_\+t}} command, \mbox{\hyperlink{group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_ga3485402fc1bc5dc709e0d5859b6e8c88}{k4a\+\_\+color\+\_\+control\+\_\+mode\+\_\+t}} $\ast$mode, int32\+\_\+t $\ast$value)
+\begin{DoxyCompactList}\small\item\em Get the Azure Kinect color sensor control value. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_gae81269489170b26b7f0bbe1a7f9d31d6_gae81269489170b26b7f0bbe1a7f9d31d6}{k4a\+\_\+device\+\_\+set\+\_\+color\+\_\+control}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, \mbox{\hyperlink{group___enumerations_gafba23de13b10b11e413485e421aa0468_gafba23de13b10b11e413485e421aa0468}{k4a\+\_\+color\+\_\+control\+\_\+command\+\_\+t}} command, \mbox{\hyperlink{group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_ga3485402fc1bc5dc709e0d5859b6e8c88}{k4a\+\_\+color\+\_\+control\+\_\+mode\+\_\+t}} mode, int32\+\_\+t value)
+\begin{DoxyCompactList}\small\item\em Set the Azure Kinect color sensor control value. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_ga71b3cf304a2cd8fbac2f86c876deda5c}{k4a\+\_\+buffer\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga8c4e46642cee3115aeb0b33e2b43b24f_ga8c4e46642cee3115aeb0b33e2b43b24f}{k4a\+\_\+device\+\_\+get\+\_\+raw\+\_\+calibration}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, uint8\+\_\+t $\ast$data, size\+\_\+t $\ast$data\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Get the raw calibration blob for the entire Azure Kinect device. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga2d9b1bea66eecbbf7b2d2868f913292b_ga2d9b1bea66eecbbf7b2d2868f913292b}{k4a\+\_\+device\+\_\+get\+\_\+calibration}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, const uint32\+\_\+t depth\+\_\+mode\+\_\+id, const uint32\+\_\+t color\+\_\+mode\+\_\+id, \mbox{\hyperlink{structk4a__calibration__t}{k4a\+\_\+calibration\+\_\+t}} $\ast$calibration)
+\begin{DoxyCompactList}\small\item\em Get the camera calibration for the entire Azure Kinect device. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga0209ac87bfd055163677321b0304e962_ga0209ac87bfd055163677321b0304e962}{k4a\+\_\+device\+\_\+get\+\_\+sync\+\_\+jack}} (\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} device\+\_\+handle, bool $\ast$sync\+\_\+in\+\_\+jack\+\_\+connected, bool $\ast$sync\+\_\+out\+\_\+jack\+\_\+connected)
+\begin{DoxyCompactList}\small\item\em Get the device jack status for the synchronization in and synchronization out connectors. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga3efe518a3de8c75c174cb97c84e12735_ga3efe518a3de8c75c174cb97c84e12735}{k4a\+\_\+calibration\+\_\+get\+\_\+from\+\_\+raw}} (char $\ast$raw\+\_\+calibration, size\+\_\+t raw\+\_\+calibration\+\_\+size, const uint32\+\_\+t depth\+\_\+mode\+\_\+id, const uint32\+\_\+t color\+\_\+mode\+\_\+id, \mbox{\hyperlink{structk4a__calibration__t}{k4a\+\_\+calibration\+\_\+t}} $\ast$calibration)
+\begin{DoxyCompactList}\small\item\em Get the camera calibration for a device from a raw calibration blob. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Handle to an Azure Kinect device. 
+
+\begin{DoxyRemark}{Remarks}
+Handles are created with \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}} and closed with \mbox{\hyperlink{group___functions_ga7a3931d9a690b3971caaac83b43f9423_ga7a3931d9a690b3971caaac83b43f9423}{k4a\+\_\+device\+\_\+close()}}. Invalid handles are set to 0.
+\end{DoxyRemark}
+ 
+
+\doxysubsection{Friends And Related Function Documentation}
+\mbox{\Hypertarget{group___functions_ga3efe518a3de8c75c174cb97c84e12735_ga3efe518a3de8c75c174cb97c84e12735}\label{group___functions_ga3efe518a3de8c75c174cb97c84e12735_ga3efe518a3de8c75c174cb97c84e12735}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_calibration\_get\_from\_raw@{k4a\_calibration\_get\_from\_raw}}
+\index{k4a\_calibration\_get\_from\_raw@{k4a\_calibration\_get\_from\_raw}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_calibration\_get\_from\_raw()}{k4a\_calibration\_get\_from\_raw()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+calibration\+\_\+get\+\_\+from\+\_\+raw (\begin{DoxyParamCaption}\item[{char $\ast$}]{raw\+\_\+calibration,  }\item[{size\+\_\+t}]{raw\+\_\+calibration\+\_\+size,  }\item[{const uint32\+\_\+t}]{depth\+\_\+mode\+\_\+id,  }\item[{const uint32\+\_\+t}]{color\+\_\+mode\+\_\+id,  }\item[{\mbox{\hyperlink{structk4a__calibration__t}{k4a\+\_\+calibration\+\_\+t}} $\ast$}]{calibration }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the camera calibration for a device from a raw calibration blob. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em raw\+\_\+calibration} & Raw calibration blob obtained from a device or recording. The raw calibration must be NULL terminated.\\
+\hline
+{\em raw\+\_\+calibration\+\_\+size} & The size, in bytes, of raw\+\_\+calibration including the NULL termination.\\
+\hline
+{\em depth\+\_\+mode\+\_\+id} & Mode in which depth camera is operated.\\
+\hline
+{\em color\+\_\+mode\+\_\+id} & Resolution in which color camera is operated.\\
+\hline
+{\em calibration} & Location to write the calibration.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if {\ttfamily calibration} was successfully written. \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}} otherwise.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+The {\ttfamily calibration} represents the data needed to transform between the camera views and is different for each operating {\ttfamily depth\+\_\+mode\+\_\+id} and {\ttfamily color\+\_\+mode\+\_\+id} the device is configured to operate in.
+
+The {\ttfamily calibration} output is used as input to all transformation functions.
+\end{DoxyRemark}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga3b6bf6dedbfe67468e2f895dcce68ed4_ga3b6bf6dedbfe67468e2f895dcce68ed4}{k4a\+\_\+calibration\+\_\+2d\+\_\+to\+\_\+2d()}} 
+
+\mbox{\hyperlink{group___functions_ga664602bdb48dab38117a6c1d14b880de_ga664602bdb48dab38117a6c1d14b880de}{k4a\+\_\+calibration\+\_\+2d\+\_\+to\+\_\+3d()}} 
+
+\mbox{\hyperlink{group___functions_ga2ed8b51d727425caa942aab190fc2ba9_ga2ed8b51d727425caa942aab190fc2ba9}{k4a\+\_\+calibration\+\_\+3d\+\_\+to\+\_\+2d()}} 
+
+\mbox{\hyperlink{group___functions_gaacd1eab997ef964b5e436afa5295726e_gaacd1eab997ef964b5e436afa5295726e}{k4a\+\_\+calibration\+\_\+3d\+\_\+to\+\_\+3d()}}
+\end{DoxySeeAlso}
+ \mbox{\Hypertarget{group___functions_ga7a3931d9a690b3971caaac83b43f9423_ga7a3931d9a690b3971caaac83b43f9423}\label{group___functions_ga7a3931d9a690b3971caaac83b43f9423_ga7a3931d9a690b3971caaac83b43f9423}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_close@{k4a\_device\_close}}
+\index{k4a\_device\_close@{k4a\_device\_close}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_close()}{k4a\_device\_close()}}
+{\footnotesize\ttfamily void k4a\+\_\+device\+\_\+close (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Closes an Azure Kinect device. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Once closed, the handle is no longer valid.
+
+Before closing the handle to the device, ensure that all \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} captures have been released with \mbox{\hyperlink{group___functions_ga0ed6f74ec403c3eac1b8ef3afb32cee6_ga0ed6f74ec403c3eac1b8ef3afb32cee6}{k4a\+\_\+capture\+\_\+release()}}.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga2d9b1bea66eecbbf7b2d2868f913292b_ga2d9b1bea66eecbbf7b2d2868f913292b}\label{group___functions_ga2d9b1bea66eecbbf7b2d2868f913292b_ga2d9b1bea66eecbbf7b2d2868f913292b}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_calibration@{k4a\_device\_get\_calibration}}
+\index{k4a\_device\_get\_calibration@{k4a\_device\_get\_calibration}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_calibration()}{k4a\_device\_get\_calibration()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+get\+\_\+calibration (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{const uint32\+\_\+t}]{depth\+\_\+mode\+\_\+id,  }\item[{const uint32\+\_\+t}]{color\+\_\+mode\+\_\+id,  }\item[{\mbox{\hyperlink{structk4a__calibration__t}{k4a\+\_\+calibration\+\_\+t}} $\ast$}]{calibration }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the camera calibration for the entire Azure Kinect device. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em depth\+\_\+mode\+\_\+id} & Mode in which depth camera is operated.\\
+\hline
+{\em color\+\_\+mode\+\_\+id} & Mode in which color camera is operated.\\
+\hline
+{\em calibration} & Location to write the calibration\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if {\ttfamily calibration} was successfully written. \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}} otherwise.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+The {\ttfamily calibration} represents the data needed to transform between the camera views and may be different for each operating {\ttfamily depth\+\_\+mode\+\_\+id} and {\ttfamily color\+\_\+mode\+\_\+id} the device is configured to operate in.
+
+The {\ttfamily calibration} output is used as input to all calibration and transformation functions.
+\end{DoxyRemark}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga3b6bf6dedbfe67468e2f895dcce68ed4_ga3b6bf6dedbfe67468e2f895dcce68ed4}{k4a\+\_\+calibration\+\_\+2d\+\_\+to\+\_\+2d()}} 
+
+\mbox{\hyperlink{group___functions_ga664602bdb48dab38117a6c1d14b880de_ga664602bdb48dab38117a6c1d14b880de}{k4a\+\_\+calibration\+\_\+2d\+\_\+to\+\_\+3d()}} 
+
+\mbox{\hyperlink{group___functions_ga2ed8b51d727425caa942aab190fc2ba9_ga2ed8b51d727425caa942aab190fc2ba9}{k4a\+\_\+calibration\+\_\+3d\+\_\+to\+\_\+2d()}} 
+
+\mbox{\hyperlink{group___functions_gaacd1eab997ef964b5e436afa5295726e_gaacd1eab997ef964b5e436afa5295726e}{k4a\+\_\+calibration\+\_\+3d\+\_\+to\+\_\+3d()}}
+\end{DoxySeeAlso}
+ \mbox{\Hypertarget{group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_ga4dac757a33657f4d3dbf1ae8b21c158a}\label{group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_ga4dac757a33657f4d3dbf1ae8b21c158a}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_capture@{k4a\_device\_get\_capture}}
+\index{k4a\_device\_get\_capture@{k4a\_device\_get\_capture}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_capture()}{k4a\_device\_get\_capture()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_ga44c7c0c1cfba7c879e9e2da1a869e4ee}{k4a\+\_\+wait\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+get\+\_\+capture (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{\mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} $\ast$}]{capture\+\_\+handle,  }\item[{int32\+\_\+t}]{timeout\+\_\+in\+\_\+ms }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Reads a sensor capture. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em capture\+\_\+handle} & If successful this contains a handle to a capture object. Caller must call \mbox{\hyperlink{group___functions_ga0ed6f74ec403c3eac1b8ef3afb32cee6_ga0ed6f74ec403c3eac1b8ef3afb32cee6}{k4a\+\_\+capture\+\_\+release()}} when its done using this capture.\\
+\hline
+{\em timeout\+\_\+in\+\_\+ms} & Specifies the time in milliseconds the function should block waiting for the capture. If set to 0, the function will return without blocking. Passing a value of \mbox{\hyperlink{group___definitions_gac012768169429fb54ba09f2964775cb9_gac012768169429fb54ba09f2964775cb9}{K4\+A\+\_\+\+WAIT\+\_\+\+INFINITE}} will block indefinitely until data is available, the device is disconnected, or another error occurs.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if a capture is returned. If a capture is not available before the timeout elapses, the function will return \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+TIMEOUT}}. All other failures will return \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea956d1d20b14de6ba0a0ed97955e75540}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+FAILED}}.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+Gets the next capture in the streamed sequence of captures from the camera. If a new capture is not currently available, this function will block until the timeout is reached. The SDK will buffer at least two captures worth of data before dropping the oldest capture. Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.
+
+Upon successfully reading a capture this function will return success and populate {\ttfamily capture}. If a capture is not available in the configured {\ttfamily timeout\+\_\+in\+\_\+ms}, then the API will return \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+TIMEOUT}}.
+
+If the call is successful and a capture is returned, callers must call \mbox{\hyperlink{group___functions_ga0ed6f74ec403c3eac1b8ef3afb32cee6_ga0ed6f74ec403c3eac1b8ef3afb32cee6}{k4a\+\_\+capture\+\_\+release()}} to return the allocated memory.
+
+This function needs to be called while the device is in a running state; after \mbox{\hyperlink{group___functions_gaad7a85e1e5471810262442fc4a8e217a_gaad7a85e1e5471810262442fc4a8e217a}{k4a\+\_\+device\+\_\+start\+\_\+cameras()}} is called and before \mbox{\hyperlink{group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_ga4fa0e0a011a7105309ad97f081a5d6b8}{k4a\+\_\+device\+\_\+stop\+\_\+cameras()}} is called.
+
+This function returns an error when an internal problem is encountered; such as loss of the USB connection, inability to allocate enough memory, and other unexpected issues. Any error returned by this function signals the end of streaming data, and caller should stop the stream using \mbox{\hyperlink{group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_ga4fa0e0a011a7105309ad97f081a5d6b8}{k4a\+\_\+device\+\_\+stop\+\_\+cameras()}}.
+
+If this function is waiting for data (non-\/zero timeout) when \mbox{\hyperlink{group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_ga4fa0e0a011a7105309ad97f081a5d6b8}{k4a\+\_\+device\+\_\+stop\+\_\+cameras()}} or \mbox{\hyperlink{group___functions_ga7a3931d9a690b3971caaac83b43f9423_ga7a3931d9a690b3971caaac83b43f9423}{k4a\+\_\+device\+\_\+close()}} is called on another thread, this function will return an error.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if a capture is returned. If a capture is not available before the timeout elapses, the function will return \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+TIMEOUT}}. All other failures will return \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea956d1d20b14de6ba0a0ed97955e75540}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+FAILED}}.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga5cb97bc0db4ab28ad98c44e323da1cce_ga5cb97bc0db4ab28ad98c44e323da1cce}\label{group___functions_ga5cb97bc0db4ab28ad98c44e323da1cce_ga5cb97bc0db4ab28ad98c44e323da1cce}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_color\_control@{k4a\_device\_get\_color\_control}}
+\index{k4a\_device\_get\_color\_control@{k4a\_device\_get\_color\_control}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_color\_control()}{k4a\_device\_get\_color\_control()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+get\+\_\+color\+\_\+control (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{\mbox{\hyperlink{group___enumerations_gafba23de13b10b11e413485e421aa0468_gafba23de13b10b11e413485e421aa0468}{k4a\+\_\+color\+\_\+control\+\_\+command\+\_\+t}}}]{command,  }\item[{\mbox{\hyperlink{group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_ga3485402fc1bc5dc709e0d5859b6e8c88}{k4a\+\_\+color\+\_\+control\+\_\+mode\+\_\+t}} $\ast$}]{mode,  }\item[{int32\+\_\+t $\ast$}]{value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the Azure Kinect color sensor control value. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em command} & Color sensor control command.\\
+\hline
+{\em mode} & Location to store the color sensor\textquotesingle{}s control mode. This mode represents whether the command is in automatic or manual mode.\\
+\hline
+{\em value} & Location to store the color sensor\textquotesingle{}s control value. This value is always written, but is only valid when the {\ttfamily mode} returned is \mbox{\hyperlink{group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b}{K4\+A\+\_\+\+COLOR\+\_\+\+CONTROL\+\_\+\+MODE\+\_\+\+MANUAL}} for the current {\ttfamily command}.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if the value was successfully returned, \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}} if an error occurred. \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13}{K4\+A\+\_\+\+RESULT\+\_\+\+UNSUPPORTED}} if the device does not support this operation.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+Each control command may be set to manual or automatic. See the definition of \mbox{\hyperlink{group___enumerations_gafba23de13b10b11e413485e421aa0468_gafba23de13b10b11e413485e421aa0468}{k4a\+\_\+color\+\_\+control\+\_\+command\+\_\+t}} on how to interpret the {\ttfamily value} for each command.
+
+Some control commands are only supported in manual mode. When a command is in automatic mode, the {\ttfamily value} for that command is not valid.
+
+Control values set on a device are reset only when the device is power cycled. The device will retain the settings even if the \mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} is closed or the application is restarted.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga70968e31e13aed0e2bef2009f169b901_ga70968e31e13aed0e2bef2009f169b901}\label{group___functions_ga70968e31e13aed0e2bef2009f169b901_ga70968e31e13aed0e2bef2009f169b901}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_color\_control\_capabilities@{k4a\_device\_get\_color\_control\_capabilities}}
+\index{k4a\_device\_get\_color\_control\_capabilities@{k4a\_device\_get\_color\_control\_capabilities}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_color\_control\_capabilities()}{k4a\_device\_get\_color\_control\_capabilities()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+get\+\_\+color\+\_\+control\+\_\+capabilities (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{\mbox{\hyperlink{group___enumerations_gafba23de13b10b11e413485e421aa0468_gafba23de13b10b11e413485e421aa0468}{k4a\+\_\+color\+\_\+control\+\_\+command\+\_\+t}}}]{command,  }\item[{bool $\ast$}]{supports\+\_\+auto,  }\item[{int32\+\_\+t $\ast$}]{min\+\_\+value,  }\item[{int32\+\_\+t $\ast$}]{max\+\_\+value,  }\item[{int32\+\_\+t $\ast$}]{step\+\_\+value,  }\item[{int32\+\_\+t $\ast$}]{default\+\_\+value,  }\item[{\mbox{\hyperlink{group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_ga3485402fc1bc5dc709e0d5859b6e8c88}{k4a\+\_\+color\+\_\+control\+\_\+mode\+\_\+t}} $\ast$}]{default\+\_\+mode }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the Azure Kinect color sensor control capabilities. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em command} & Color sensor control command.\\
+\hline
+{\em supports\+\_\+auto} & Location to store whether the color sensor\textquotesingle{}s control support auto mode or not. true if it supports auto mode, otherwise false.\\
+\hline
+{\em min\+\_\+value} & Location to store the color sensor\textquotesingle{}s control minimum value of /p command.\\
+\hline
+{\em max\+\_\+value} & Location to store the color sensor\textquotesingle{}s control maximum value of /p command.\\
+\hline
+{\em step\+\_\+value} & Location to store the color sensor\textquotesingle{}s control step value of /p command.\\
+\hline
+{\em default\+\_\+value} & Location to store the color sensor\textquotesingle{}s control default value of /p command.\\
+\hline
+{\em default\+\_\+mode} & Location to store the color sensor\textquotesingle{}s control default mode of /p command.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if the value was successfully returned, \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}} if an error occurred. \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13}{K4\+A\+\_\+\+RESULT\+\_\+\+UNSUPPORTED}} if the device does not support this operation.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e_ga8e5913b3bb94a453c7143bbd6e399a0e}\label{group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e_ga8e5913b3bb94a453c7143bbd6e399a0e}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_imu\_sample@{k4a\_device\_get\_imu\_sample}}
+\index{k4a\_device\_get\_imu\_sample@{k4a\_device\_get\_imu\_sample}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_imu\_sample()}{k4a\_device\_get\_imu\_sample()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_ga44c7c0c1cfba7c879e9e2da1a869e4ee}{k4a\+\_\+wait\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+get\+\_\+imu\+\_\+sample (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{\mbox{\hyperlink{structk4a__imu__sample__t}{k4a\+\_\+imu\+\_\+sample\+\_\+t}} $\ast$}]{imu\+\_\+sample,  }\item[{int32\+\_\+t}]{timeout\+\_\+in\+\_\+ms }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Reads an IMU sample. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em imu\+\_\+sample} & Pointer to the location for the API to write the IMU sample.\\
+\hline
+{\em timeout\+\_\+in\+\_\+ms} & Specifies the time in milliseconds the function should block waiting for the sample. If set to 0, the function will return without blocking. Passing a value of \mbox{\hyperlink{group___definitions_gac012768169429fb54ba09f2964775cb9_gac012768169429fb54ba09f2964775cb9}{K4\+A\+\_\+\+WAIT\+\_\+\+INFINITE}} will block indefinitely until data is available, the device is disconnected, or another error occurs.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea77ac95280b54f842a7735bbadc50f6ca}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if a sample is returned. If a sample is not available before the timeout elapses, the function will return \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+TIMEOUT}}. If a device does not support an IMU, then \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eeab95879b0cce3590b7e76255ce6f20a4a}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+UNSUPPORTED}} is returned. All other failures will return \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea956d1d20b14de6ba0a0ed97955e75540}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+FAILED}}.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+Gets the next sample in the streamed sequence of IMU samples from the device. If a new sample is not currently available, this function will block until the timeout is reached. The API will buffer at least two camera capture intervals worth of samples before dropping the oldest sample. Callers needing to capture all data need to ensure they read the data as fast as the data is being produced on average.
+
+Upon successfully reading a sample this function will return success and populate {\ttfamily imu\+\_\+sample}. If a sample is not available in the configured {\ttfamily timeout\+\_\+in\+\_\+ms}, then the API will return \mbox{\hyperlink{group___enumerations_ga44c7c0c1cfba7c879e9e2da1a869e4ee_gga44c7c0c1cfba7c879e9e2da1a869e4eea6bc6ba0069766499f7b791ba42a980c6}{K4\+A\+\_\+\+WAIT\+\_\+\+RESULT\+\_\+\+TIMEOUT}}.
+
+This function needs to be called while the device is in a running state; after \mbox{\hyperlink{group___functions_gaa855688659a69c0098ce9e0b2ffcc152_gaa855688659a69c0098ce9e0b2ffcc152}{k4a\+\_\+device\+\_\+start\+\_\+imu()}} is called and before \mbox{\hyperlink{group___functions_ga731c3ddd0833ce86d31e278992cf3453_ga731c3ddd0833ce86d31e278992cf3453}{k4a\+\_\+device\+\_\+stop\+\_\+imu()}} is called.
+
+This function returns an error when an internal problem is encountered; such as loss of the USB connection, inability to allocate enough memory, and other unexpected issues. Any error returned by this function signals the end of streaming data, and caller should stop the stream using \mbox{\hyperlink{group___functions_ga731c3ddd0833ce86d31e278992cf3453_ga731c3ddd0833ce86d31e278992cf3453}{k4a\+\_\+device\+\_\+stop\+\_\+imu()}}.
+
+If this function is waiting for data (non-\/zero timeout) when \mbox{\hyperlink{group___functions_ga731c3ddd0833ce86d31e278992cf3453_ga731c3ddd0833ce86d31e278992cf3453}{k4a\+\_\+device\+\_\+stop\+\_\+imu()}} or \mbox{\hyperlink{group___functions_ga7a3931d9a690b3971caaac83b43f9423_ga7a3931d9a690b3971caaac83b43f9423}{k4a\+\_\+device\+\_\+close()}} is called on another thread, this function will return an error.
+
+The memory the IMU sample is written to is allocated and owned by the caller, so there is no need to call an Azure Kinect API to free or release the sample.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_gaf7d19df0f73f8e4dfaa21e1b4b719ecc_gaf7d19df0f73f8e4dfaa21e1b4b719ecc}\label{group___functions_gaf7d19df0f73f8e4dfaa21e1b4b719ecc_gaf7d19df0f73f8e4dfaa21e1b4b719ecc}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_installed\_count@{k4a\_device\_get\_installed\_count}}
+\index{k4a\_device\_get\_installed\_count@{k4a\_device\_get\_installed\_count}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_installed\_count()}{k4a\_device\_get\_installed\_count()}}
+{\footnotesize\ttfamily uint32\+\_\+t k4a\+\_\+device\+\_\+get\+\_\+installed\+\_\+count (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Gets the number of connected devices. 
+
+\begin{DoxyReturn}{Returns}
+Number of sensors connected to the PC.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+This API counts the number of Azure Kinect devices connected to the host PC.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga8c4e46642cee3115aeb0b33e2b43b24f_ga8c4e46642cee3115aeb0b33e2b43b24f}\label{group___functions_ga8c4e46642cee3115aeb0b33e2b43b24f_ga8c4e46642cee3115aeb0b33e2b43b24f}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_raw\_calibration@{k4a\_device\_get\_raw\_calibration}}
+\index{k4a\_device\_get\_raw\_calibration@{k4a\_device\_get\_raw\_calibration}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_raw\_calibration()}{k4a\_device\_get\_raw\_calibration()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_ga71b3cf304a2cd8fbac2f86c876deda5c}{k4a\+\_\+buffer\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+get\+\_\+raw\+\_\+calibration (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{uint8\+\_\+t $\ast$}]{data,  }\item[{size\+\_\+t $\ast$}]{data\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the raw calibration blob for the entire Azure Kinect device. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em data} & Location to write the calibration data to. This field may optionally be set to NULL for the caller to query for the needed data size.\\
+\hline
+{\em data\+\_\+size} & On passing {\ttfamily data\+\_\+size} into the function this variable represents the available size of the {\ttfamily data} buffer. On return this variable is updated with the amount of data actually written to the buffer, or the size required to store the calibration buffer if {\ttfamily data} is NULL.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3}{K4\+A\+\_\+\+BUFFER\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if {\ttfamily data} was successfully written. If {\ttfamily data\+\_\+size} points to a buffer size that is too small to hold the output or {\ttfamily data} is NULL, \mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248}{K4\+A\+\_\+\+BUFFER\+\_\+\+RESULT\+\_\+\+TOO\+\_\+\+SMALL}} is returned and {\ttfamily data\+\_\+size} is updated to contain the minimum buffer size needed to capture the calibration data.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga798489af207ff1c99f2285ff6b08bc22_ga798489af207ff1c99f2285ff6b08bc22}\label{group___functions_ga798489af207ff1c99f2285ff6b08bc22_ga798489af207ff1c99f2285ff6b08bc22}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_serialnum@{k4a\_device\_get\_serialnum}}
+\index{k4a\_device\_get\_serialnum@{k4a\_device\_get\_serialnum}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_serialnum()}{k4a\_device\_get\_serialnum()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_ga71b3cf304a2cd8fbac2f86c876deda5c}{k4a\+\_\+buffer\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+get\+\_\+serialnum (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{char $\ast$}]{serial\+\_\+number,  }\item[{size\+\_\+t $\ast$}]{serial\+\_\+number\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the Azure Kinect device serial number. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em serial\+\_\+number} & Location to write the serial number to. If the function returns \mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3}{K4\+A\+\_\+\+BUFFER\+\_\+\+RESULT\+\_\+\+SUCCEEDED}}, this will be a NULL terminated string of ASCII characters. If this input is NULL {\ttfamily serial\+\_\+number\+\_\+size} will still be updated to return the size of the buffer needed to store the string.\\
+\hline
+{\em serial\+\_\+number\+\_\+size} & On input, the size of the {\ttfamily serial\+\_\+number} buffer if that pointer is not NULL. On output, this value is set to the actual number of bytes in the serial number (including the null terminator).\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A return of \mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_gga71b3cf304a2cd8fbac2f86c876deda5cab28733ec2d34368fbc91a2ee25545fc3}{K4\+A\+\_\+\+BUFFER\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} means that the {\ttfamily serial\+\_\+number} has been filled in. If the buffer is too small the function returns \mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248}{K4\+A\+\_\+\+BUFFER\+\_\+\+RESULT\+\_\+\+TOO\+\_\+\+SMALL}} and the size of the serial number is returned in the {\ttfamily serial\+\_\+number\+\_\+size} parameter. All other failures return \mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_gga71b3cf304a2cd8fbac2f86c876deda5ca29305af05427c7e739e910f02f72709a}{K4\+A\+\_\+\+BUFFER\+\_\+\+RESULT\+\_\+\+FAILED}}.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+Queries the device for its serial number. If the caller needs to know the size of the serial number to allocate memory, the function should be called once with a NULL {\ttfamily serial\+\_\+number} to get the needed size in the {\ttfamily serial\+\_\+number\+\_\+size} output, and then again with the allocated buffer.
+
+Only a complete serial number will be returned. If the caller\textquotesingle{}s buffer is too small, the function will return \mbox{\hyperlink{group___enumerations_ga71b3cf304a2cd8fbac2f86c876deda5c_gga71b3cf304a2cd8fbac2f86c876deda5ca37df229f19ce567914a8b8d15fc50248}{K4\+A\+\_\+\+BUFFER\+\_\+\+RESULT\+\_\+\+TOO\+\_\+\+SMALL}} without returning any data in {\ttfamily serial\+\_\+number}.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga0209ac87bfd055163677321b0304e962_ga0209ac87bfd055163677321b0304e962}\label{group___functions_ga0209ac87bfd055163677321b0304e962_ga0209ac87bfd055163677321b0304e962}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_sync\_jack@{k4a\_device\_get\_sync\_jack}}
+\index{k4a\_device\_get\_sync\_jack@{k4a\_device\_get\_sync\_jack}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_sync\_jack()}{k4a\_device\_get\_sync\_jack()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+get\+\_\+sync\+\_\+jack (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{bool $\ast$}]{sync\+\_\+in\+\_\+jack\+\_\+connected,  }\item[{bool $\ast$}]{sync\+\_\+out\+\_\+jack\+\_\+connected }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the device jack status for the synchronization in and synchronization out connectors. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em sync\+\_\+in\+\_\+jack\+\_\+connected} & Upon successful return this value will be set to true if a cable is connected to this sync in jack.\\
+\hline
+{\em sync\+\_\+out\+\_\+jack\+\_\+connected} & Upon successful return this value will be set to true if a cable is connected to this sync out jack.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if the connector status was successfully read. \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13}{K4\+A\+\_\+\+RESULT\+\_\+\+UNSUPPORTED}} if the device does not support this operation.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+If {\ttfamily sync\+\_\+out\+\_\+jack\+\_\+connected} is true then \mbox{\hyperlink{structk4a__device__configuration__t}{k4a\+\_\+device\+\_\+configuration\+\_\+t}} wired\+\_\+sync\+\_\+mode mode can be set to \mbox{\hyperlink{group___enumerations_ga6404c655dd8656efb745c6ee90da2505_gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c}{K4\+A\+\_\+\+WIRED\+\_\+\+SYNC\+\_\+\+MODE\+\_\+\+STANDALONE}} or \mbox{\hyperlink{group___enumerations_ga6404c655dd8656efb745c6ee90da2505_gga6404c655dd8656efb745c6ee90da2505a014b98f7b0c962a994abe1a472bf6697}{K4\+A\+\_\+\+WIRED\+\_\+\+SYNC\+\_\+\+MODE\+\_\+\+MASTER}}. If {\ttfamily sync\+\_\+in\+\_\+jack\+\_\+connected} is true then \mbox{\hyperlink{structk4a__device__configuration__t}{k4a\+\_\+device\+\_\+configuration\+\_\+t}} wired\+\_\+sync\+\_\+mode mode can be set to \mbox{\hyperlink{group___enumerations_ga6404c655dd8656efb745c6ee90da2505_gga6404c655dd8656efb745c6ee90da2505ad5e3a4dcef58c6d591a7d73a3a02602c}{K4\+A\+\_\+\+WIRED\+\_\+\+SYNC\+\_\+\+MODE\+\_\+\+STANDALONE}} or \mbox{\hyperlink{group___enumerations_ga6404c655dd8656efb745c6ee90da2505_gga6404c655dd8656efb745c6ee90da2505a8140f817b21902d275832a1ef6c216ca}{K4\+A\+\_\+\+WIRED\+\_\+\+SYNC\+\_\+\+MODE\+\_\+\+SUBORDINATE}}.
+\end{DoxyRemark}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gaad7a85e1e5471810262442fc4a8e217a_gaad7a85e1e5471810262442fc4a8e217a}{k4a\+\_\+device\+\_\+start\+\_\+cameras()}}
+\end{DoxySeeAlso}
+ \mbox{\Hypertarget{group___functions_gaea1def0a70bfa64ba275534be945669e_gaea1def0a70bfa64ba275534be945669e}\label{group___functions_gaea1def0a70bfa64ba275534be945669e_gaea1def0a70bfa64ba275534be945669e}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_get\_version@{k4a\_device\_get\_version}}
+\index{k4a\_device\_get\_version@{k4a\_device\_get\_version}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_get\_version()}{k4a\_device\_get\_version()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+get\+\_\+version (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{\mbox{\hyperlink{structk4a__hardware__version__t}{k4a\+\_\+hardware\+\_\+version\+\_\+t}} $\ast$}]{version }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the version numbers of the device\textquotesingle{}s subsystems. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em version} & Location to write the version info to.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A return of \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} means that the version structure has been filled in. All other failures return \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}}.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}\label{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_open@{k4a\_device\_open}}
+\index{k4a\_device\_open@{k4a\_device\_open}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_open()}{k4a\_device\_open()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+open (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{index,  }\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} $\ast$}]{device\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Open an Azure Kinect device. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em index} & The index of the device to open, starting with 0. Optionally pass in \mbox{\hyperlink{group___definitions_gaebe4c1071a8ba3b04e32d55c85cae72d_gaebe4c1071a8ba3b04e32d55c85cae72d}{K4\+A\+\_\+\+DEVICE\+\_\+\+DEFAULT}}.\\
+\hline
+{\em device\+\_\+handle} & Output parameter which on success will return a handle to the device.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if the device was opened successfully. \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}} if the device was not opened successfully.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+If successful, \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}} will return a device handle in the device\+\_\+handle parameter. This handle grants exclusive access to the device and may be used in the other Azure Kinect API calls.
+
+When done with the device, close the handle with \mbox{\hyperlink{group___functions_ga7a3931d9a690b3971caaac83b43f9423_ga7a3931d9a690b3971caaac83b43f9423}{k4a\+\_\+device\+\_\+close()}}
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_gae81269489170b26b7f0bbe1a7f9d31d6_gae81269489170b26b7f0bbe1a7f9d31d6}\label{group___functions_gae81269489170b26b7f0bbe1a7f9d31d6_gae81269489170b26b7f0bbe1a7f9d31d6}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_set\_color\_control@{k4a\_device\_set\_color\_control}}
+\index{k4a\_device\_set\_color\_control@{k4a\_device\_set\_color\_control}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_set\_color\_control()}{k4a\_device\_set\_color\_control()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+set\+\_\+color\+\_\+control (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{\mbox{\hyperlink{group___enumerations_gafba23de13b10b11e413485e421aa0468_gafba23de13b10b11e413485e421aa0468}{k4a\+\_\+color\+\_\+control\+\_\+command\+\_\+t}}}]{command,  }\item[{\mbox{\hyperlink{group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_ga3485402fc1bc5dc709e0d5859b6e8c88}{k4a\+\_\+color\+\_\+control\+\_\+mode\+\_\+t}}}]{mode,  }\item[{int32\+\_\+t}]{value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Set the Azure Kinect color sensor control value. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em command} & Color sensor control command.\\
+\hline
+{\em mode} & Color sensor control mode to set. This mode represents whether the command is in automatic or manual mode.\\
+\hline
+{\em value} & Value to set the color sensor\textquotesingle{}s control to. The value is only valid if {\ttfamily mode} is set to \mbox{\hyperlink{group___enumerations_ga3485402fc1bc5dc709e0d5859b6e8c88_gga3485402fc1bc5dc709e0d5859b6e8c88a094d94f9ec0640e085a7318c92205d1b}{K4\+A\+\_\+\+COLOR\+\_\+\+CONTROL\+\_\+\+MODE\+\_\+\+MANUAL}}, and is otherwise ignored.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} if the value was successfully set, \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}} if an error occurred. \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13}{K4\+A\+\_\+\+RESULT\+\_\+\+UNSUPPORTED}} if the device does not support this operation.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+Each control command may be set to manual or automatic. See the definition of \mbox{\hyperlink{group___enumerations_gafba23de13b10b11e413485e421aa0468_gafba23de13b10b11e413485e421aa0468}{k4a\+\_\+color\+\_\+control\+\_\+command\+\_\+t}} on how to interpret the {\ttfamily value} for each command.
+
+Some control commands are only supported in manual mode. When a command is in automatic mode, the {\ttfamily value} for that command is not valid.
+
+Control values set on a device are reset only when the device is power cycled. The device will retain the settings even if the \mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} is closed or the application is restarted.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_gaad7a85e1e5471810262442fc4a8e217a_gaad7a85e1e5471810262442fc4a8e217a}\label{group___functions_gaad7a85e1e5471810262442fc4a8e217a_gaad7a85e1e5471810262442fc4a8e217a}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_start\_cameras@{k4a\_device\_start\_cameras}}
+\index{k4a\_device\_start\_cameras@{k4a\_device\_start\_cameras}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_start\_cameras()}{k4a\_device\_start\_cameras()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+start\+\_\+cameras (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle,  }\item[{const \mbox{\hyperlink{structk4a__device__configuration__t}{k4a\+\_\+device\+\_\+configuration\+\_\+t}} $\ast$}]{config }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Starts color and depth camera capture. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+{\em config} & The configuration we want to run the device in. This can be initialized with \mbox{\hyperlink{group___definitions_ga4f693ace52a6eeec10cc6ca0350d6601_ga4f693ace52a6eeec10cc6ca0350d6601}{K4\+A\+\_\+\+DEVICE\+\_\+\+CONFIG\+\_\+\+INIT\+\_\+\+DISABLE\+\_\+\+ALL}}.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} is returned on success.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+Individual sensors configured to run will now start to stream captured data.
+
+It is not valid to call \mbox{\hyperlink{group___functions_gaad7a85e1e5471810262442fc4a8e217a_gaad7a85e1e5471810262442fc4a8e217a}{k4a\+\_\+device\+\_\+start\+\_\+cameras()}} a second time on the same \mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} until \mbox{\hyperlink{group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_ga4fa0e0a011a7105309ad97f081a5d6b8}{k4a\+\_\+device\+\_\+stop\+\_\+cameras()}} has been called.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_gaa855688659a69c0098ce9e0b2ffcc152_gaa855688659a69c0098ce9e0b2ffcc152}\label{group___functions_gaa855688659a69c0098ce9e0b2ffcc152_gaa855688659a69c0098ce9e0b2ffcc152}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_start\_imu@{k4a\_device\_start\_imu}}
+\index{k4a\_device\_start\_imu@{k4a\_device\_start\_imu}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_start\_imu()}{k4a\_device\_start\_imu()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+device\+\_\+start\+\_\+imu (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Starts the IMU sample stream. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} is returned on success. \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}} if the sensor is already running or a failure is encountered. If a device does not support an IMU, \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a7fdd637f1645c2d8ffeb9f5dfa028a13}{K4\+A\+\_\+\+RESULT\+\_\+\+UNSUPPORTED}} is returned.
+\end{DoxyReturn}
+\begin{DoxyRemark}{Remarks}
+Call this API to start streaming IMU data. It is not valid to call this function a second time on the same \mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}} until \mbox{\hyperlink{group___functions_ga731c3ddd0833ce86d31e278992cf3453_ga731c3ddd0833ce86d31e278992cf3453}{k4a\+\_\+device\+\_\+stop\+\_\+imu()}} has been called.
+
+This function is dependent on the state of the cameras. The color or depth camera must be started before the IMU. \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}} will be returned if one of the cameras is not running.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_ga4fa0e0a011a7105309ad97f081a5d6b8}\label{group___functions_ga4fa0e0a011a7105309ad97f081a5d6b8_ga4fa0e0a011a7105309ad97f081a5d6b8}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_stop\_cameras@{k4a\_device\_stop\_cameras}}
+\index{k4a\_device\_stop\_cameras@{k4a\_device\_stop\_cameras}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_stop\_cameras()}{k4a\_device\_stop\_cameras()}}
+{\footnotesize\ttfamily void k4a\+\_\+device\+\_\+stop\+\_\+cameras (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Stops the color and depth camera capture. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+The streaming of individual sensors stops as a result of this call. Once called, \mbox{\hyperlink{group___functions_gaad7a85e1e5471810262442fc4a8e217a_gaad7a85e1e5471810262442fc4a8e217a}{k4a\+\_\+device\+\_\+start\+\_\+cameras()}} may be called again to resume sensor streaming.
+
+This function may be called while another thread is blocking in \mbox{\hyperlink{group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_ga4dac757a33657f4d3dbf1ae8b21c158a}{k4a\+\_\+device\+\_\+get\+\_\+capture()}}. Calling this function while another thread is in that function will result in that function returning a failure.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga731c3ddd0833ce86d31e278992cf3453_ga731c3ddd0833ce86d31e278992cf3453}\label{group___functions_ga731c3ddd0833ce86d31e278992cf3453_ga731c3ddd0833ce86d31e278992cf3453}} 
+\index{k4a\_device\_t@{k4a\_device\_t}!k4a\_device\_stop\_imu@{k4a\_device\_stop\_imu}}
+\index{k4a\_device\_stop\_imu@{k4a\_device\_stop\_imu}!k4a\_device\_t@{k4a\_device\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_device\_stop\_imu()}{k4a\_device\_stop\_imu()}}
+{\footnotesize\ttfamily void k4a\+\_\+device\+\_\+stop\+\_\+imu (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__device__t}{k4a\+\_\+device\+\_\+t}}}]{device\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Stops the IMU capture. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em device\+\_\+handle} & Handle obtained by \mbox{\hyperlink{group___functions_ga3d4eb5dfbf4d576d4978b66ea419f113_ga3d4eb5dfbf4d576d4978b66ea419f113}{k4a\+\_\+device\+\_\+open()}}.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+The streaming of the IMU stops as a result of this call. Once called, \mbox{\hyperlink{group___functions_gaa855688659a69c0098ce9e0b2ffcc152_gaa855688659a69c0098ce9e0b2ffcc152}{k4a\+\_\+device\+\_\+start\+\_\+imu()}} may be called again to resume sensor streaming, so long as the cameras are running.
+
+This function may be called while another thread is blocking in \mbox{\hyperlink{group___functions_ga8e5913b3bb94a453c7143bbd6e399a0e_ga8e5913b3bb94a453c7143bbd6e399a0e}{k4a\+\_\+device\+\_\+get\+\_\+imu\+\_\+sample()}}. Calling this function while another thread is in that function will result in that function returning a failure.
+\end{DoxyRemark}
+ 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+k4atypes.\+h\item 
+k4a.\+h\end{DoxyCompactItemize}

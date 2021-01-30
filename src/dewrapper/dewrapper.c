@@ -588,8 +588,7 @@ void dewrapper_stop(dewrapper_t dewrapper_handle)
         THREADAPI_RESULT tresult = ThreadAPI_Join(thread, &thread_result);
         (void)K4A_RESULT_FROM_BOOL(tresult == THREADAPI_OK); // Trace the issue, but we don't return a failure
 
-        // TODO: watch out for whatever was supposed to happen by having set fps = -1
-        dewrapper->fps_mode_id = 2;   //
+        dewrapper->fps_mode_id = -1;
         dewrapper->depth_mode_id = 0; // K4A_DEPTH_MODE_OFF
     }
 

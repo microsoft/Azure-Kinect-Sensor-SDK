@@ -1,0 +1,68 @@
+\hypertarget{group___macros}{}\doxysection{Macros}
+\label{group___macros}\index{Macros@{Macros}}
+
+
+Public macros for API consumers.  
+
+
+
+
+\doxysubsection{Details}
+Public macros for API consumers. 
+
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{group___macros_ga8e5b48150bc243c6052793bd830c2fcd_ga8e5b48150bc243c6052793bd830c2fcd}{K4\+A\+\_\+\+SUCCEEDED}}(\+\_\+result\+\_\+)~(\+\_\+result\+\_\+ == \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}})
+\begin{DoxyCompactList}\small\item\em Validate that a k4a\+\_\+result\+\_\+t is successful. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{group___macros_ga7c2e32349135d008b6f836c571d434b4_ga7c2e32349135d008b6f836c571d434b4}{K4\+A\+\_\+\+FAILED}}(\+\_\+result\+\_\+)~(!\mbox{\hyperlink{group___macros_ga8e5b48150bc243c6052793bd830c2fcd_ga8e5b48150bc243c6052793bd830c2fcd}{K4\+A\+\_\+\+SUCCEEDED}}(\+\_\+result\+\_\+))
+\begin{DoxyCompactList}\small\item\em Validate that a k4a\+\_\+result\+\_\+t is failed. \end{DoxyCompactList}\item 
+\#define \mbox{\hyperlink{group___macros_gaeab021a840259ca3ad882bd080260224_gaeab021a840259ca3ad882bd080260224}{K4\+A\+\_\+\+INIT\+\_\+\+STRUCT}}(T,  S)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{group___macros_ga7c2e32349135d008b6f836c571d434b4_ga7c2e32349135d008b6f836c571d434b4}\label{group___macros_ga7c2e32349135d008b6f836c571d434b4_ga7c2e32349135d008b6f836c571d434b4}} 
+\index{Macros@{Macros}!K4A\_FAILED@{K4A\_FAILED}}
+\index{K4A\_FAILED@{K4A\_FAILED}!Macros@{Macros}}
+\doxysubsubsection{\texorpdfstring{K4A\_FAILED}{K4A\_FAILED}}
+{\footnotesize\ttfamily \#define K4\+A\+\_\+\+FAILED(\begin{DoxyParamCaption}\item[{}]{\+\_\+result\+\_\+ }\end{DoxyParamCaption})~(!\mbox{\hyperlink{group___macros_ga8e5b48150bc243c6052793bd830c2fcd_ga8e5b48150bc243c6052793bd830c2fcd}{K4\+A\+\_\+\+SUCCEEDED}}(\+\_\+result\+\_\+))}
+
+
+
+Validate that a k4a\+\_\+result\+\_\+t is failed. 
+
+ \mbox{\Hypertarget{group___macros_gaeab021a840259ca3ad882bd080260224_gaeab021a840259ca3ad882bd080260224}\label{group___macros_gaeab021a840259ca3ad882bd080260224_gaeab021a840259ca3ad882bd080260224}} 
+\index{Macros@{Macros}!K4A\_INIT\_STRUCT@{K4A\_INIT\_STRUCT}}
+\index{K4A\_INIT\_STRUCT@{K4A\_INIT\_STRUCT}!Macros@{Macros}}
+\doxysubsubsection{\texorpdfstring{K4A\_INIT\_STRUCT}{K4A\_INIT\_STRUCT}}
+{\footnotesize\ttfamily \#define K4\+A\+\_\+\+INIT\+\_\+\+STRUCT(\begin{DoxyParamCaption}\item[{}]{T,  }\item[{}]{S }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{    T S\{\};                                                                                                             \(\backslash\)}
+\DoxyCodeLine{    S.struct\_size = \textcolor{keyword}{sizeof}(T);                                                                                         \(\backslash\)}
+\DoxyCodeLine{    S.struct\_version = \mbox{\hyperlink{group___definitions_ga91dde801d6ce8feecfd317e330361eee_ga91dde801d6ce8feecfd317e330361eee}{K4A\_ABI\_VERSION}};}
+
+\end{DoxyCode}
+
+\begin{DoxyParams}{Parameters}
+{\em T} & Type of struct\\
+\hline
+{\em S} & Instance of a struct of type T\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Initializes a struct of type T with a struct size and a struct version.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___macros_ga8e5b48150bc243c6052793bd830c2fcd_ga8e5b48150bc243c6052793bd830c2fcd}\label{group___macros_ga8e5b48150bc243c6052793bd830c2fcd_ga8e5b48150bc243c6052793bd830c2fcd}} 
+\index{Macros@{Macros}!K4A\_SUCCEEDED@{K4A\_SUCCEEDED}}
+\index{K4A\_SUCCEEDED@{K4A\_SUCCEEDED}!Macros@{Macros}}
+\doxysubsubsection{\texorpdfstring{K4A\_SUCCEEDED}{K4A\_SUCCEEDED}}
+{\footnotesize\ttfamily \#define K4\+A\+\_\+\+SUCCEEDED(\begin{DoxyParamCaption}\item[{}]{\+\_\+result\+\_\+ }\end{DoxyParamCaption})~(\+\_\+result\+\_\+ == \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}})}
+
+
+
+Validate that a k4a\+\_\+result\+\_\+t is successful. 
+
+ 

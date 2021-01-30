@@ -1,0 +1,615 @@
+\hypertarget{structk4a__image__t}{}\doxysection{k4a\+\_\+image\+\_\+t Class Reference}
+\label{structk4a__image__t}\index{k4a\_image\_t@{k4a\_image\_t}}
+
+
+Handle to an Azure Kinect image.  
+
+
+
+
+{\ttfamily \#include $<$k4a/k4a.\+h$>$}
+
+\doxysubsection*{Related Functions}
+(Note that these are not member functions.) \begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}{k4a\+\_\+image\+\_\+create}} (\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} format, int width\+\_\+pixels, int height\+\_\+pixels, int stride\+\_\+bytes, \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} $\ast$image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Create an image. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer}} (\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} format, int width\+\_\+pixels, int height\+\_\+pixels, int stride\+\_\+bytes, uint8\+\_\+t $\ast$buffer, size\+\_\+t buffer\+\_\+size, \mbox{\hyperlink{group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_ga1e290c645920c7674c6d36dcbb75909b}{k4a\+\_\+memory\+\_\+destroy\+\_\+cb\+\_\+t}} $\ast$buffer\+\_\+release\+\_\+cb, void $\ast$buffer\+\_\+release\+\_\+cb\+\_\+context, \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} $\ast$image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Create an image from a pre-\/allocated buffer. \end{DoxyCompactList}\item 
+uint8\+\_\+t $\ast$ \mbox{\hyperlink{group___functions_ga2ef070cf4e543cd0f726478af332546e_ga2ef070cf4e543cd0f726478af332546e}{k4a\+\_\+image\+\_\+get\+\_\+buffer}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image buffer. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{group___functions_ga814fd12783faf624e9357bbb3655643b_ga814fd12783faf624e9357bbb3655643b}{k4a\+\_\+image\+\_\+get\+\_\+size}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image buffer size. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} \mbox{\hyperlink{group___functions_ga16f663cb93d8a8fa059fd551485f1315_ga16f663cb93d8a8fa059fd551485f1315}{k4a\+\_\+image\+\_\+get\+\_\+format}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the format of the image. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{group___functions_gab3df35a307588f272665328711342c06_gab3df35a307588f272665328711342c06}{k4a\+\_\+image\+\_\+get\+\_\+width\+\_\+pixels}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image width in pixels. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{group___functions_ga57ef7c5ce58812e176537476e4eb1764_ga57ef7c5ce58812e176537476e4eb1764}{k4a\+\_\+image\+\_\+get\+\_\+height\+\_\+pixels}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image height in pixels. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{group___functions_ga18fa129b72b89ce8d13cd3e650af88e6_ga18fa129b72b89ce8d13cd3e650af88e6}{k4a\+\_\+image\+\_\+get\+\_\+stride\+\_\+bytes}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image stride in bytes. \end{DoxyCompactList}\item 
+K4\+A\+\_\+\+DEPRECATED\+\_\+\+EXPORT uint64\+\_\+t \mbox{\hyperlink{group___functions_ga5a0940fb8ecf418eb3a388412bd08643_ga5a0940fb8ecf418eb3a388412bd08643}{k4a\+\_\+image\+\_\+get\+\_\+timestamp\+\_\+usec}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image\textquotesingle{}s device timestamp in microseconds. \end{DoxyCompactList}\item 
+uint64\+\_\+t \mbox{\hyperlink{group___functions_ga318e115976ac441b513f6cf3c102a655_ga318e115976ac441b513f6cf3c102a655}{k4a\+\_\+image\+\_\+get\+\_\+device\+\_\+timestamp\+\_\+usec}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image\textquotesingle{}s device timestamp in microseconds. \end{DoxyCompactList}\item 
+uint64\+\_\+t \mbox{\hyperlink{group___functions_ga98ba229d1ee1cf3b7c27a0f95e14826b_ga98ba229d1ee1cf3b7c27a0f95e14826b}{k4a\+\_\+image\+\_\+get\+\_\+system\+\_\+timestamp\+\_\+nsec}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image\textquotesingle{}s system timestamp in nanoseconds. \end{DoxyCompactList}\item 
+uint64\+\_\+t \mbox{\hyperlink{group___functions_ga54568ebab477f2534b3c4c92688344d9_ga54568ebab477f2534b3c4c92688344d9}{k4a\+\_\+image\+\_\+get\+\_\+exposure\+\_\+usec}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image exposure in microseconds. \end{DoxyCompactList}\item 
+uint32\+\_\+t \mbox{\hyperlink{group___functions_ga5075f97b2de6cb0fee1725d5e9250879_ga5075f97b2de6cb0fee1725d5e9250879}{k4a\+\_\+image\+\_\+get\+\_\+white\+\_\+balance}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image white balance. \end{DoxyCompactList}\item 
+uint32\+\_\+t \mbox{\hyperlink{group___functions_ga3626cef655d79190d2e002c3c4030872_ga3626cef655d79190d2e002c3c4030872}{k4a\+\_\+image\+\_\+get\+\_\+iso\+\_\+speed}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Get the image ISO speed. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_gacc2c4bf42956687a101937b77f8dfa21_gacc2c4bf42956687a101937b77f8dfa21}{k4a\+\_\+image\+\_\+set\+\_\+device\+\_\+timestamp\+\_\+usec}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle, uint64\+\_\+t timestamp\+\_\+usec)
+\begin{DoxyCompactList}\small\item\em Set the device time stamp, in microseconds, of the image. \end{DoxyCompactList}\item 
+K4\+A\+\_\+\+DEPRECATED\+\_\+\+EXPORT void \mbox{\hyperlink{group___functions_ga276298132ac76f56bf2c8b7589e38d63_ga276298132ac76f56bf2c8b7589e38d63}{k4a\+\_\+image\+\_\+set\+\_\+timestamp\+\_\+usec}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle, uint64\+\_\+t timestamp\+\_\+usec)
+\begin{DoxyCompactList}\small\item\em Set the device time stamp, in microseconds, of the image. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_gaf18827997835a77ac041d5a87203e5ef_gaf18827997835a77ac041d5a87203e5ef}{k4a\+\_\+image\+\_\+set\+\_\+system\+\_\+timestamp\+\_\+nsec}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle, uint64\+\_\+t timestamp\+\_\+nsec)
+\begin{DoxyCompactList}\small\item\em Set the system time stamp, in nanoseconds, of the image. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_ga617dac1d4664f8f4ead3013c1739ebb0_ga617dac1d4664f8f4ead3013c1739ebb0}{k4a\+\_\+image\+\_\+set\+\_\+exposure\+\_\+usec}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle, uint64\+\_\+t exposure\+\_\+usec)
+\begin{DoxyCompactList}\small\item\em Set the exposure time, in microseconds, of the image. \end{DoxyCompactList}\item 
+K4\+A\+\_\+\+DEPRECATED\+\_\+\+EXPORT void \mbox{\hyperlink{group___functions_ga29954cc87d1fabc8651155f7baff5c9f_ga29954cc87d1fabc8651155f7baff5c9f}{k4a\+\_\+image\+\_\+set\+\_\+exposure\+\_\+time\+\_\+usec}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle, uint64\+\_\+t exposure\+\_\+usec)
+\begin{DoxyCompactList}\small\item\em Set the exposure time, in microseconds, of the image. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_gad8c0bbccfd5086a7330bf897ae82561b_gad8c0bbccfd5086a7330bf897ae82561b}{k4a\+\_\+image\+\_\+set\+\_\+white\+\_\+balance}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle, uint32\+\_\+t white\+\_\+balance)
+\begin{DoxyCompactList}\small\item\em Set the white balance of the image. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_ga5a64f64515ff4dff317fec92a8427f45_ga5a64f64515ff4dff317fec92a8427f45}{k4a\+\_\+image\+\_\+set\+\_\+iso\+\_\+speed}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle, uint32\+\_\+t iso\+\_\+speed)
+\begin{DoxyCompactList}\small\item\em Set the ISO speed of the image. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_gae211d6b97d4ce1c752e8db9d5ea5b8b9_gae211d6b97d4ce1c752e8db9d5ea5b8b9}{k4a\+\_\+image\+\_\+reference}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Add a reference to the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___functions_ga27c81863b13fafc3934a32935a014e9f_ga27c81863b13fafc3934a32935a014e9f}{k4a\+\_\+image\+\_\+release}} (\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} image\+\_\+handle)
+\begin{DoxyCompactList}\small\item\em Remove a reference from the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Handle to an Azure Kinect image. 
+
+\begin{DoxyRemark}{Remarks}
+A \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} manages an image buffer and associated metadata.
+
+The memory associated with the image buffer in an \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} may have been allocated by the Azure Kinect APIs or by the application. If the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} was created by an Azure Kinect API, its memory will be freed when all references to the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} are released. All images retrieved directly from a device will have been created by the API. An application can create a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} using memory that it has allocated using \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer()}}. In that case the memory is not freed when the references are released but instead the application is provided with a callback. Applications need to create a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} to provide as an output to the \mbox{\hyperlink{structk4a__transformation__t}{k4a\+\_\+transformation\+\_\+t}} transformation functions.
+
+An image has a number of metadata properties that can be set or retrieved using the accessor functions. Not all properties are applicable to images of all types. See the documentation for the individual accessors for more information on their applicability and meaning.
+
+Images may be of one of the standard \mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} formats, or may be of format \mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52}{K4\+A\+\_\+\+IMAGE\+\_\+\+FORMAT\+\_\+\+CUSTOM}}. The format defines how the underlying image buffer should be interpreted.
+
+Images from a device are retrieved through a \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} object returned by \mbox{\hyperlink{group___functions_ga4dac757a33657f4d3dbf1ae8b21c158a_ga4dac757a33657f4d3dbf1ae8b21c158a}{k4a\+\_\+device\+\_\+get\+\_\+capture()}}.
+
+Images stored in a \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} are referenced by the \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} until they are replaced or the \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} is destroyed.
+
+The caller must call \mbox{\hyperlink{group___functions_ga27c81863b13fafc3934a32935a014e9f_ga27c81863b13fafc3934a32935a014e9f}{k4a\+\_\+image\+\_\+release()}} to release its reference to any \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} that it receives from an Azure Kinect API.
+
+Additional references to the image may be obtained with \mbox{\hyperlink{group___functions_gae211d6b97d4ce1c752e8db9d5ea5b8b9_gae211d6b97d4ce1c752e8db9d5ea5b8b9}{k4a\+\_\+image\+\_\+reference()}}.
+
+An invalid \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} will be set to 0.
+\end{DoxyRemark}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}}
+\end{DoxySeeAlso}
+ 
+
+\doxysubsection{Friends And Related Function Documentation}
+\mbox{\Hypertarget{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}\label{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_create@{k4a\_image\_create}}
+\index{k4a\_image\_create@{k4a\_image\_create}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_create()}{k4a\_image\_create()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+image\+\_\+create (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}}}]{format,  }\item[{int}]{width\+\_\+pixels,  }\item[{int}]{height\+\_\+pixels,  }\item[{int}]{stride\+\_\+bytes,  }\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} $\ast$}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Create an image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em format} & The format of the image that will be stored in this image container.\\
+\hline
+{\em width\+\_\+pixels} & Width in pixels.\\
+\hline
+{\em height\+\_\+pixels} & Height in pixels.\\
+\hline
+{\em stride\+\_\+bytes} & The number of bytes per horizontal line of the image. If set to 0, the stride will be set to the minimum size given the {\ttfamily format} and {\ttfamily width\+\_\+pixels}.\\
+\hline
+{\em image\+\_\+handle} & Pointer to store image handle in.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+This function is used to create images of formats that have consistent stride. The function is not suitable for compressed formats that may not be represented by the same number of bytes per line.
+
+For most image formats, the function will allocate an image buffer of size {\ttfamily height\+\_\+pixels} $\ast$ {\ttfamily stride\+\_\+bytes}. Buffers \mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_ggabd9688eb20d5cb878fd22d36de882ddbaf334f6c32b6b44d1f5df02a349f05288}{K4\+A\+\_\+\+IMAGE\+\_\+\+FORMAT\+\_\+\+COLOR\+\_\+\+NV12}} format will allocate an additional {\ttfamily height\+\_\+pixels} / 2 set of lines (each of {\ttfamily stride\+\_\+bytes}). This function cannot be used to allocate \mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_ggabd9688eb20d5cb878fd22d36de882ddbaae172e7eecc6f4adfc318c789e49aaf9}{K4\+A\+\_\+\+IMAGE\+\_\+\+FORMAT\+\_\+\+COLOR\+\_\+\+MJPG}} buffers.
+
+To create an image object without the API allocating memory, or to represent an image that has a non-\/deterministic stride, use \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer()}}.
+
+The \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} is created with a reference count of 1.
+
+When finished using the created image, release it with k4a\+\_\+image\+\_\+release.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+Returns \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} on success. Errors are indicated with \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}}.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}\label{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_create\_from\_buffer@{k4a\_image\_create\_from\_buffer}}
+\index{k4a\_image\_create\_from\_buffer@{k4a\_image\_create\_from\_buffer}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_create\_from\_buffer()}{k4a\_image\_create\_from\_buffer()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_ga4b419a99aa2220b076a4520dc2afd1e5}{k4a\+\_\+result\+\_\+t}} k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}}}]{format,  }\item[{int}]{width\+\_\+pixels,  }\item[{int}]{height\+\_\+pixels,  }\item[{int}]{stride\+\_\+bytes,  }\item[{uint8\+\_\+t $\ast$}]{buffer,  }\item[{size\+\_\+t}]{buffer\+\_\+size,  }\item[{\mbox{\hyperlink{group___prototypes_ga1e290c645920c7674c6d36dcbb75909b_ga1e290c645920c7674c6d36dcbb75909b}{k4a\+\_\+memory\+\_\+destroy\+\_\+cb\+\_\+t}} $\ast$}]{buffer\+\_\+release\+\_\+cb,  }\item[{void $\ast$}]{buffer\+\_\+release\+\_\+cb\+\_\+context,  }\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} $\ast$}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Create an image from a pre-\/allocated buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em format} & The format of the image that will be stored in this image container.\\
+\hline
+{\em width\+\_\+pixels} & Width in pixels.\\
+\hline
+{\em height\+\_\+pixels} & Height in pixels.\\
+\hline
+{\em stride\+\_\+bytes} & The number of bytes per horizontal line of the image.\\
+\hline
+{\em buffer} & Pointer to a pre-\/allocated image buffer.\\
+\hline
+{\em buffer\+\_\+size} & Size in bytes of the pre-\/allocated image buffer.\\
+\hline
+{\em buffer\+\_\+release\+\_\+cb} & Callback to the buffer free function, called when all references to the buffer have been released. This parameter is optional.\\
+\hline
+{\em buffer\+\_\+release\+\_\+cb\+\_\+context} & Context for the buffer free function. This value will be called as a parameter to {\ttfamily buffer\+\_\+release\+\_\+cb} when the callback is invoked.\\
+\hline
+{\em image\+\_\+handle} & Pointer to store image handle in.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+This function creates a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} from a pre-\/allocated buffer. When all references to this object reach zero the provided {\ttfamily buffer\+\_\+release\+\_\+cb} callback function is called so that the memory can be released. If this function fails, the API will not use the memory provided in {\ttfamily buffer}, and the API will not call {\ttfamily buffer\+\_\+release\+\_\+cb}.
+
+The \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} is created with a reference count of 1.
+
+Release the reference on this function with \mbox{\hyperlink{group___functions_ga27c81863b13fafc3934a32935a014e9f_ga27c81863b13fafc3934a32935a014e9f}{k4a\+\_\+image\+\_\+release()}}.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+Returns \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5a66d48bea75b8ddf1c568a824469da9d3}{K4\+A\+\_\+\+RESULT\+\_\+\+SUCCEEDED}} on success. Errors are indicated with \mbox{\hyperlink{group___enumerations_ga4b419a99aa2220b076a4520dc2afd1e5_gga4b419a99aa2220b076a4520dc2afd1e5aeddb129210ca398349f6b7323f1cfbed}{K4\+A\+\_\+\+RESULT\+\_\+\+FAILED}} and error specific data can be found in the log.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga2ef070cf4e543cd0f726478af332546e_ga2ef070cf4e543cd0f726478af332546e}\label{group___functions_ga2ef070cf4e543cd0f726478af332546e_ga2ef070cf4e543cd0f726478af332546e}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_buffer@{k4a\_image\_get\_buffer}}
+\index{k4a\_image\_get\_buffer@{k4a\_image\_get\_buffer}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_buffer()}{k4a\_image\_get\_buffer()}}
+{\footnotesize\ttfamily uint8\+\_\+t $\ast$ k4a\+\_\+image\+\_\+get\+\_\+buffer (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this buffer to access the raw image data.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+The function will return NULL if there is an error, and will normally return a pointer to the image buffer. Since all \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} instances are created with an image buffer, this function should only return NULL if the {\ttfamily image\+\_\+handle} is invalid.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga318e115976ac441b513f6cf3c102a655_ga318e115976ac441b513f6cf3c102a655}\label{group___functions_ga318e115976ac441b513f6cf3c102a655_ga318e115976ac441b513f6cf3c102a655}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_device\_timestamp\_usec@{k4a\_image\_get\_device\_timestamp\_usec}}
+\index{k4a\_image\_get\_device\_timestamp\_usec@{k4a\_image\_get\_device\_timestamp\_usec}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_device\_timestamp\_usec()}{k4a\_image\_get\_device\_timestamp\_usec()}}
+{\footnotesize\ttfamily uint64\+\_\+t k4a\+\_\+image\+\_\+get\+\_\+device\+\_\+timestamp\+\_\+usec (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image\textquotesingle{}s device timestamp in microseconds. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Returns the device timestamp of the image, as captured by the hardware. Timestamps are recorded by the device and represent the mid-\/point of exposure. They may be used for relative comparison, but their absolute value has no defined meaning.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+If the {\ttfamily image\+\_\+handle} is invalid or if no timestamp was set for the image, this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga54568ebab477f2534b3c4c92688344d9_ga54568ebab477f2534b3c4c92688344d9}\label{group___functions_ga54568ebab477f2534b3c4c92688344d9_ga54568ebab477f2534b3c4c92688344d9}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_exposure\_usec@{k4a\_image\_get\_exposure\_usec}}
+\index{k4a\_image\_get\_exposure\_usec@{k4a\_image\_get\_exposure\_usec}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_exposure\_usec()}{k4a\_image\_get\_exposure\_usec()}}
+{\footnotesize\ttfamily uint64\+\_\+t k4a\+\_\+image\+\_\+get\+\_\+exposure\+\_\+usec (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image exposure in microseconds. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Returns an exposure time in microseconds. This is only supported on color image formats.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+If the {\ttfamily image\+\_\+handle} is invalid, or no exposure was set on the image, the function will return 0. Otherwise, it will return the image exposure time in microseconds.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga16f663cb93d8a8fa059fd551485f1315_ga16f663cb93d8a8fa059fd551485f1315}\label{group___functions_ga16f663cb93d8a8fa059fd551485f1315_ga16f663cb93d8a8fa059fd551485f1315}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_format@{k4a\_image\_get\_format}}
+\index{k4a\_image\_get\_format@{k4a\_image\_get\_format}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_format()}{k4a\_image\_get\_format()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_gabd9688eb20d5cb878fd22d36de882ddb}{k4a\+\_\+image\+\_\+format\+\_\+t}} k4a\+\_\+image\+\_\+get\+\_\+format (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the format of the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this function to determine the format of the image buffer.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+This function is not expected to fail, all \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}\textquotesingle{}s are created with a known format. If the {\ttfamily image\+\_\+handle} is invalid, the function will return \mbox{\hyperlink{group___enumerations_gabd9688eb20d5cb878fd22d36de882ddb_ggabd9688eb20d5cb878fd22d36de882ddba10833e30171730f43eeff1dc8d7b0a52}{K4\+A\+\_\+\+IMAGE\+\_\+\+FORMAT\+\_\+\+CUSTOM}}.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga57ef7c5ce58812e176537476e4eb1764_ga57ef7c5ce58812e176537476e4eb1764}\label{group___functions_ga57ef7c5ce58812e176537476e4eb1764_ga57ef7c5ce58812e176537476e4eb1764}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_height\_pixels@{k4a\_image\_get\_height\_pixels}}
+\index{k4a\_image\_get\_height\_pixels@{k4a\_image\_get\_height\_pixels}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_height\_pixels()}{k4a\_image\_get\_height\_pixels()}}
+{\footnotesize\ttfamily int k4a\+\_\+image\+\_\+get\+\_\+height\+\_\+pixels (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image height in pixels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+This function is not expected to fail, all \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}\textquotesingle{}s are created with a known height. If the {\ttfamily image\+\_\+handle} is invalid, the function will return 0.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga3626cef655d79190d2e002c3c4030872_ga3626cef655d79190d2e002c3c4030872}\label{group___functions_ga3626cef655d79190d2e002c3c4030872_ga3626cef655d79190d2e002c3c4030872}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_iso\_speed@{k4a\_image\_get\_iso\_speed}}
+\index{k4a\_image\_get\_iso\_speed@{k4a\_image\_get\_iso\_speed}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_iso\_speed()}{k4a\_image\_get\_iso\_speed()}}
+{\footnotesize\ttfamily uint32\+\_\+t k4a\+\_\+image\+\_\+get\+\_\+iso\+\_\+speed (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image ISO speed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+This function is only valid for color captures, and not for depth or IR captures.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+Returns the ISO speed of the image. 0 indicates the ISO speed was not available or an error occurred.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga814fd12783faf624e9357bbb3655643b_ga814fd12783faf624e9357bbb3655643b}\label{group___functions_ga814fd12783faf624e9357bbb3655643b_ga814fd12783faf624e9357bbb3655643b}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_size@{k4a\_image\_get\_size}}
+\index{k4a\_image\_get\_size@{k4a\_image\_get\_size}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_size()}{k4a\_image\_get\_size()}}
+{\footnotesize\ttfamily size\+\_\+t k4a\+\_\+image\+\_\+get\+\_\+size (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image buffer size. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this function to know what the size of the image buffer is returned by \mbox{\hyperlink{group___functions_ga2ef070cf4e543cd0f726478af332546e_ga2ef070cf4e543cd0f726478af332546e}{k4a\+\_\+image\+\_\+get\+\_\+buffer()}}.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+The function will return 0 if there is an error, and will normally return the image size. Since all \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}} instances are created with an image buffer, this function should only return 0 if the {\ttfamily image\+\_\+handle} is invalid.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga18fa129b72b89ce8d13cd3e650af88e6_ga18fa129b72b89ce8d13cd3e650af88e6}\label{group___functions_ga18fa129b72b89ce8d13cd3e650af88e6_ga18fa129b72b89ce8d13cd3e650af88e6}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_stride\_bytes@{k4a\_image\_get\_stride\_bytes}}
+\index{k4a\_image\_get\_stride\_bytes@{k4a\_image\_get\_stride\_bytes}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_stride\_bytes()}{k4a\_image\_get\_stride\_bytes()}}
+{\footnotesize\ttfamily int k4a\+\_\+image\+\_\+get\+\_\+stride\+\_\+bytes (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image stride in bytes. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+This function is not expected to fail, all \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}\textquotesingle{}s are created with a known stride. If the {\ttfamily image\+\_\+handle} is invalid, or the image\textquotesingle{}s format does not have a stride, the function will return 0.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga98ba229d1ee1cf3b7c27a0f95e14826b_ga98ba229d1ee1cf3b7c27a0f95e14826b}\label{group___functions_ga98ba229d1ee1cf3b7c27a0f95e14826b_ga98ba229d1ee1cf3b7c27a0f95e14826b}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_system\_timestamp\_nsec@{k4a\_image\_get\_system\_timestamp\_nsec}}
+\index{k4a\_image\_get\_system\_timestamp\_nsec@{k4a\_image\_get\_system\_timestamp\_nsec}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_system\_timestamp\_nsec()}{k4a\_image\_get\_system\_timestamp\_nsec()}}
+{\footnotesize\ttfamily uint64\+\_\+t k4a\+\_\+image\+\_\+get\+\_\+system\+\_\+timestamp\+\_\+nsec (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image\textquotesingle{}s system timestamp in nanoseconds. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Returns the system timestamp of the image. Timestamps are recorded by the host. They may be used for relative comparision, as they are relative to the corresponding system clock. The absolute value is a monotonic count from an arbitrary point in the past.
+
+The system timestamp is captured at the moment host PC finishes receiving the image.
+
+On Linux the system timestamp is read from clock\+\_\+gettime(\+CLOCK\+\_\+\+MONOTONIC), which measures realtime and is not impacted by adjustments to the system clock. It starts from an arbitrary point in the past. On Windows the system timestamp is read from Query\+Performance\+Counter(), it also measures realtime and is not impacted by adjustments to the system clock. It also starts from an arbitrary point in the past.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+If the {\ttfamily image\+\_\+handle} is invalid or if no timestamp was set for the image, this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_ga5a0940fb8ecf418eb3a388412bd08643_ga5a0940fb8ecf418eb3a388412bd08643}\label{group___functions_ga5a0940fb8ecf418eb3a388412bd08643_ga5a0940fb8ecf418eb3a388412bd08643}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_timestamp\_usec@{k4a\_image\_get\_timestamp\_usec}}
+\index{k4a\_image\_get\_timestamp\_usec@{k4a\_image\_get\_timestamp\_usec}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_timestamp\_usec()}{k4a\_image\_get\_timestamp\_usec()}}
+{\footnotesize\ttfamily K4\+A\+\_\+\+DEPRECATED\+\_\+\+EXPORT uint64\+\_\+t k4a\+\_\+image\+\_\+get\+\_\+timestamp\+\_\+usec (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image\textquotesingle{}s device timestamp in microseconds. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Returns the device timestamp of the image. Timestamps are recorded by the device and represent the mid-\/point of exposure. They may be used for relative comparison, but their absolute value has no defined meaning.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+If the {\ttfamily image\+\_\+handle} is invalid or if no timestamp was set for the image, this function will return 0. It is also possible for 0 to be a valid timestamp originating from the beginning of a recording or the start of streaming.
+\end{DoxyReturn}
+\begin{DoxyRefDesc}{Deprecated}
+\item[\mbox{\hyperlink{deprecated__deprecated000001}{Deprecated}}]Deprecated starting in 1.\+2.\+0. Please use \mbox{\hyperlink{group___functions_ga318e115976ac441b513f6cf3c102a655_ga318e115976ac441b513f6cf3c102a655}{k4a\+\_\+image\+\_\+get\+\_\+device\+\_\+timestamp\+\_\+usec()}}.\end{DoxyRefDesc}
+
+
+ \mbox{\Hypertarget{group___functions_ga5075f97b2de6cb0fee1725d5e9250879_ga5075f97b2de6cb0fee1725d5e9250879}\label{group___functions_ga5075f97b2de6cb0fee1725d5e9250879_ga5075f97b2de6cb0fee1725d5e9250879}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_white\_balance@{k4a\_image\_get\_white\_balance}}
+\index{k4a\_image\_get\_white\_balance@{k4a\_image\_get\_white\_balance}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_white\_balance()}{k4a\_image\_get\_white\_balance()}}
+{\footnotesize\ttfamily uint32\+\_\+t k4a\+\_\+image\+\_\+get\+\_\+white\+\_\+balance (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image white balance. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Returns the image\textquotesingle{}s white balance. This function is only valid for color captures, and not for depth or IR captures.
+\end{DoxyRemark}
+\begin{DoxyReturn}{Returns}
+Returns the image white balance in Kelvin. If {\ttfamily image\+\_\+handle} is invalid, or the white balance was not set or not applicable to the image, the function will return 0.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_gab3df35a307588f272665328711342c06_gab3df35a307588f272665328711342c06}\label{group___functions_gab3df35a307588f272665328711342c06_gab3df35a307588f272665328711342c06}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_get\_width\_pixels@{k4a\_image\_get\_width\_pixels}}
+\index{k4a\_image\_get\_width\_pixels@{k4a\_image\_get\_width\_pixels}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_get\_width\_pixels()}{k4a\_image\_get\_width\_pixels()}}
+{\footnotesize\ttfamily int k4a\+\_\+image\+\_\+get\+\_\+width\+\_\+pixels (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Get the image width in pixels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+This function is not expected to fail, all \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}\textquotesingle{}s are created with a known width. If the {\ttfamily image\+\_\+handle} is invalid, the function will return 0.
+\end{DoxyReturn}
+ \mbox{\Hypertarget{group___functions_gae211d6b97d4ce1c752e8db9d5ea5b8b9_gae211d6b97d4ce1c752e8db9d5ea5b8b9}\label{group___functions_gae211d6b97d4ce1c752e8db9d5ea5b8b9_gae211d6b97d4ce1c752e8db9d5ea5b8b9}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_reference@{k4a\_image\_reference}}
+\index{k4a\_image\_reference@{k4a\_image\_reference}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_reference()}{k4a\_image\_reference()}}
+{\footnotesize\ttfamily void k4a\+\_\+image\+\_\+reference (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Add a reference to the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+References manage the lifetime of the object. When the references reach zero the object is destroyed. A caller must not access the object after its reference is released.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga27c81863b13fafc3934a32935a014e9f_ga27c81863b13fafc3934a32935a014e9f}\label{group___functions_ga27c81863b13fafc3934a32935a014e9f_ga27c81863b13fafc3934a32935a014e9f}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_release@{k4a\_image\_release}}
+\index{k4a\_image\_release@{k4a\_image\_release}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_release()}{k4a\_image\_release()}}
+{\footnotesize\ttfamily void k4a\+\_\+image\+\_\+release (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Remove a reference from the \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image for which the get operation is performed on.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+References manage the lifetime of the object. When the references reach zero the object is destroyed. A caller must not access the object after its reference is released.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_gacc2c4bf42956687a101937b77f8dfa21_gacc2c4bf42956687a101937b77f8dfa21}\label{group___functions_gacc2c4bf42956687a101937b77f8dfa21_gacc2c4bf42956687a101937b77f8dfa21}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_set\_device\_timestamp\_usec@{k4a\_image\_set\_device\_timestamp\_usec}}
+\index{k4a\_image\_set\_device\_timestamp\_usec@{k4a\_image\_set\_device\_timestamp\_usec}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_set\_device\_timestamp\_usec()}{k4a\_image\_set\_device\_timestamp\_usec()}}
+{\footnotesize\ttfamily void k4a\+\_\+image\+\_\+set\+\_\+device\+\_\+timestamp\+\_\+usec (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle,  }\item[{uint64\+\_\+t}]{timestamp\+\_\+usec }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Set the device time stamp, in microseconds, of the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image to set the timestamp on.\\
+\hline
+{\em timestamp\+\_\+usec} & Device timestamp of the image in microseconds.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this function in conjunction with \mbox{\hyperlink{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}{k4a\+\_\+image\+\_\+create()}} or \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer()}} to construct a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}.
+
+The device timestamp represents the mid-\/point of exposure of the image, as captured by the hardware.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga29954cc87d1fabc8651155f7baff5c9f_ga29954cc87d1fabc8651155f7baff5c9f}\label{group___functions_ga29954cc87d1fabc8651155f7baff5c9f_ga29954cc87d1fabc8651155f7baff5c9f}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_set\_exposure\_time\_usec@{k4a\_image\_set\_exposure\_time\_usec}}
+\index{k4a\_image\_set\_exposure\_time\_usec@{k4a\_image\_set\_exposure\_time\_usec}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_set\_exposure\_time\_usec()}{k4a\_image\_set\_exposure\_time\_usec()}}
+{\footnotesize\ttfamily K4\+A\+\_\+\+DEPRECATED\+\_\+\+EXPORT void k4a\+\_\+image\+\_\+set\+\_\+exposure\+\_\+time\+\_\+usec (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle,  }\item[{uint64\+\_\+t}]{exposure\+\_\+usec }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Set the exposure time, in microseconds, of the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image to set the exposure time on.\\
+\hline
+{\em exposure\+\_\+usec} & Exposure time of the image in microseconds.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this function in conjunction with \mbox{\hyperlink{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}{k4a\+\_\+image\+\_\+create()}} or \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer()}} to construct a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. An exposure time of 0 is considered invalid. Only color image formats are expected to have a valid exposure time.
+\end{DoxyRemark}
+\begin{DoxyRefDesc}{Deprecated}
+\item[\mbox{\hyperlink{deprecated__deprecated000003}{Deprecated}}]Deprecated starting in 1.\+2.\+0. Please use \mbox{\hyperlink{group___functions_ga617dac1d4664f8f4ead3013c1739ebb0_ga617dac1d4664f8f4ead3013c1739ebb0}{k4a\+\_\+image\+\_\+set\+\_\+exposure\+\_\+usec()}}.\end{DoxyRefDesc}
+
+
+ \mbox{\Hypertarget{group___functions_ga617dac1d4664f8f4ead3013c1739ebb0_ga617dac1d4664f8f4ead3013c1739ebb0}\label{group___functions_ga617dac1d4664f8f4ead3013c1739ebb0_ga617dac1d4664f8f4ead3013c1739ebb0}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_set\_exposure\_usec@{k4a\_image\_set\_exposure\_usec}}
+\index{k4a\_image\_set\_exposure\_usec@{k4a\_image\_set\_exposure\_usec}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_set\_exposure\_usec()}{k4a\_image\_set\_exposure\_usec()}}
+{\footnotesize\ttfamily void k4a\+\_\+image\+\_\+set\+\_\+exposure\+\_\+usec (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle,  }\item[{uint64\+\_\+t}]{exposure\+\_\+usec }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Set the exposure time, in microseconds, of the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image to set the exposure time on.\\
+\hline
+{\em exposure\+\_\+usec} & Exposure time of the image in microseconds.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this function in conjunction with \mbox{\hyperlink{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}{k4a\+\_\+image\+\_\+create()}} or \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer()}} to construct a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. An exposure time of 0 is considered invalid. Only color image formats are expected to have a valid exposure time.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga5a64f64515ff4dff317fec92a8427f45_ga5a64f64515ff4dff317fec92a8427f45}\label{group___functions_ga5a64f64515ff4dff317fec92a8427f45_ga5a64f64515ff4dff317fec92a8427f45}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_set\_iso\_speed@{k4a\_image\_set\_iso\_speed}}
+\index{k4a\_image\_set\_iso\_speed@{k4a\_image\_set\_iso\_speed}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_set\_iso\_speed()}{k4a\_image\_set\_iso\_speed()}}
+{\footnotesize\ttfamily void k4a\+\_\+image\+\_\+set\+\_\+iso\+\_\+speed (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle,  }\item[{uint32\+\_\+t}]{iso\+\_\+speed }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Set the ISO speed of the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image to set the ISO speed on.\\
+\hline
+{\em iso\+\_\+speed} & ISO speed of the image.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this function in conjunction with \mbox{\hyperlink{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}{k4a\+\_\+image\+\_\+create()}} or \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer()}} to construct a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. An ISO speed of 0 is considered invalid. Only color images are expected to have a valid ISO speed.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_gaf18827997835a77ac041d5a87203e5ef_gaf18827997835a77ac041d5a87203e5ef}\label{group___functions_gaf18827997835a77ac041d5a87203e5ef_gaf18827997835a77ac041d5a87203e5ef}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_set\_system\_timestamp\_nsec@{k4a\_image\_set\_system\_timestamp\_nsec}}
+\index{k4a\_image\_set\_system\_timestamp\_nsec@{k4a\_image\_set\_system\_timestamp\_nsec}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_set\_system\_timestamp\_nsec()}{k4a\_image\_set\_system\_timestamp\_nsec()}}
+{\footnotesize\ttfamily void k4a\+\_\+image\+\_\+set\+\_\+system\+\_\+timestamp\+\_\+nsec (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle,  }\item[{uint64\+\_\+t}]{timestamp\+\_\+nsec }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Set the system time stamp, in nanoseconds, of the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image to set the timestamp on.\\
+\hline
+{\em timestamp\+\_\+nsec} & Timestamp of the image in nanoseconds.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this function in conjunction with \mbox{\hyperlink{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}{k4a\+\_\+image\+\_\+create()}} or \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer()}} to construct a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}.
+
+The system timestamp is a high performance and increasing clock (from boot). The timestamp represents the time immediately after the image buffer was read by the host PC.
+\end{DoxyRemark}
+ \mbox{\Hypertarget{group___functions_ga276298132ac76f56bf2c8b7589e38d63_ga276298132ac76f56bf2c8b7589e38d63}\label{group___functions_ga276298132ac76f56bf2c8b7589e38d63_ga276298132ac76f56bf2c8b7589e38d63}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_set\_timestamp\_usec@{k4a\_image\_set\_timestamp\_usec}}
+\index{k4a\_image\_set\_timestamp\_usec@{k4a\_image\_set\_timestamp\_usec}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_set\_timestamp\_usec()}{k4a\_image\_set\_timestamp\_usec()}}
+{\footnotesize\ttfamily K4\+A\+\_\+\+DEPRECATED\+\_\+\+EXPORT void k4a\+\_\+image\+\_\+set\+\_\+timestamp\+\_\+usec (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle,  }\item[{uint64\+\_\+t}]{timestamp\+\_\+usec }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Set the device time stamp, in microseconds, of the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image to set the timestamp on.\\
+\hline
+{\em timestamp\+\_\+usec} & Device timestamp of the image in microseconds.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this function in conjunction with \mbox{\hyperlink{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}{k4a\+\_\+image\+\_\+create()}} or \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer()}} to construct a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}.
+
+The device timestamp represents the mid-\/point of exposure of the image, as captured by the hardware.
+\end{DoxyRemark}
+\begin{DoxyRefDesc}{Deprecated}
+\item[\mbox{\hyperlink{deprecated__deprecated000002}{Deprecated}}]Deprecated starting in 1.\+2.\+0. Please use \mbox{\hyperlink{group___functions_gacc2c4bf42956687a101937b77f8dfa21_gacc2c4bf42956687a101937b77f8dfa21}{k4a\+\_\+image\+\_\+set\+\_\+device\+\_\+timestamp\+\_\+usec()}}.\end{DoxyRefDesc}
+
+
+ \mbox{\Hypertarget{group___functions_gad8c0bbccfd5086a7330bf897ae82561b_gad8c0bbccfd5086a7330bf897ae82561b}\label{group___functions_gad8c0bbccfd5086a7330bf897ae82561b_gad8c0bbccfd5086a7330bf897ae82561b}} 
+\index{k4a\_image\_t@{k4a\_image\_t}!k4a\_image\_set\_white\_balance@{k4a\_image\_set\_white\_balance}}
+\index{k4a\_image\_set\_white\_balance@{k4a\_image\_set\_white\_balance}!k4a\_image\_t@{k4a\_image\_t}}
+\doxysubsubsection{\texorpdfstring{k4a\_image\_set\_white\_balance()}{k4a\_image\_set\_white\_balance()}}
+{\footnotesize\ttfamily void k4a\+\_\+image\+\_\+set\+\_\+white\+\_\+balance (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}}]{image\+\_\+handle,  }\item[{uint32\+\_\+t}]{white\+\_\+balance }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [related]}}
+
+
+
+Set the white balance of the image. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em image\+\_\+handle} & Handle of the image to set the white balance on.\\
+\hline
+{\em white\+\_\+balance} & White balance of the image in degrees Kelvin.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyRemark}{Remarks}
+Use this function in conjunction with \mbox{\hyperlink{group___functions_ga859554581bb97a620ff8e92a893e71ef_ga859554581bb97a620ff8e92a893e71ef}{k4a\+\_\+image\+\_\+create()}} or \mbox{\hyperlink{group___functions_gaf84f2a271bcf6afae429bbccd47071b3_gaf84f2a271bcf6afae429bbccd47071b3}{k4a\+\_\+image\+\_\+create\+\_\+from\+\_\+buffer()}} to construct a \mbox{\hyperlink{structk4a__image__t}{k4a\+\_\+image\+\_\+t}}. A white balance of 0 is considered invalid. White balance is only meaningful for color images, and not expected on depth or IR images.
+\end{DoxyRemark}
+ 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+k4atypes.\+h\item 
+k4a.\+h\end{DoxyCompactItemize}

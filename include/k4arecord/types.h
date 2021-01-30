@@ -154,7 +154,6 @@ typedef enum
  * @{
  */
 
-// TODO: redo comments for color, depth and fps?
 /** Structure containing the device configuration used to record.
  *
  * \see k4a_device_configuration_t
@@ -171,16 +170,16 @@ typedef struct _k4a_record_configuration_t
     /** Image format used to record the color camera. */
     k4a_image_format_t color_format;
 
-    /** Image resolution used to record the color camera. */
+    /** Mode info used to record the color camera. */
     k4a_color_mode_info_t color_mode_info;
 
-    /** Mode used to record the depth camera. */
+    /** Mode info used to record the depth camera. */
     k4a_depth_mode_info_t depth_mode_info;
 
     /** Frame rate used to record the color and depth camera. */
     k4a_fps_mode_info_t fps_mode_info;
 
-    // TODO: comment
+    /** Vender Id, Device Id and device Capabilities. */
     k4a_device_info_t device_info;
 
     /** True if the recording contains Color camera frames. */

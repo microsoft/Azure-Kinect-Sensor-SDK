@@ -16,7 +16,6 @@
 #include <turbojpeg.h>
 #include <libyuv.h>
 
-// TODO: comment
 #include <cJSON.h>
 #include <locale.h> //cJSON.h need this set correctly.
 
@@ -426,7 +425,6 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         LOG_WARNING("Device calibration is missing from recording.", 0);
     }
 
-    // TODO: comment
     uint32_t color_mode_id = K4A_COLOR_RESOLUTION_OFF;
     uint32_t depth_mode_id = K4A_DEPTH_MODE_OFF;
     uint32_t fps_mode_id = K4A_FRAMES_PER_SECOND_30;
@@ -637,8 +635,6 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         // Default to 30 fps if no video tracks are enabled.
         fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     }
-
-    // TODO: comment
 
     KaxTag *device_info_tag = get_tag(context, "K4A_DEVICE_INFO");
     KaxTag *color_mode_info_tag = get_tag(context, "K4A_COLOR_MODE_INFO");

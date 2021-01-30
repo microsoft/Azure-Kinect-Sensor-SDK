@@ -1,0 +1,469 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="classk4a_1_1transformation" kind="class" language="C++" prot="public">
+    <compoundname>k4a::transformation</compoundname>
+    <includes refid="k4a_8hpp" local="no">k4a/k4a.hpp</includes>
+    <innerclass refid="structk4a_1_1transformation_1_1resolution" prot="private">k4a::transformation::resolution</innerclass>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classk4a_1_1transformation_1a9bcfba68f7c8f0493c6e5cc2a8a95b55" prot="private" static="no" mutable="no">
+        <type><ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref></type>
+        <definition>k4a_transformation_t k4a::transformation::m_handle</definition>
+        <argsstring></argsstring>
+        <name>m_handle</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1065" column="26" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1065" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classk4a_1_1transformation_1a151f9eba9c0732b1bd662a93cfde928e" prot="private" static="no" mutable="no">
+        <type>resolution</type>
+        <definition>resolution k4a::transformation::m_color_resolution</definition>
+        <argsstring></argsstring>
+        <name>m_color_resolution</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1071" column="16" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1071" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classk4a_1_1transformation_1a9466951b01fa3092dd74abe9ea08c989" prot="private" static="no" mutable="no">
+        <type>resolution</type>
+        <definition>resolution k4a::transformation::m_depth_resolution</definition>
+        <argsstring></argsstring>
+        <name>m_depth_resolution</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1072" column="16" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1072" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="classk4a_1_1transformation_abc5ca125a64e9702e80e2335a4303084_1abc5ca125a64e9702e80e2335a4303084" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::transformation::transformation</definition>
+        <argsstring>(const k4a_calibration_t &amp;calibration) noexcept</argsstring>
+        <name>transformation</name>
+        <param>
+          <type>const <ref refid="structk4a__calibration__t" kindref="compound">k4a_calibration_t</ref> &amp;</type>
+          <declname>calibration</declname>
+        </param>
+        <briefdescription>
+<para>Creates a transformation associated with calibration. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga853a1a5b6d521bbdf523a69e890c4f10_1ga853a1a5b6d521bbdf523a69e890c4f10" kindref="member">k4a_transformation_create</ref> </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="823" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="823" bodyend="830"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_a7b98768f8ee53d39f20ec1d79bfec39a_1a7b98768f8ee53d39f20ec1d79bfec39a" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::transformation::transformation</definition>
+        <argsstring>(k4a_transformation_t handle=nullptr) noexcept</argsstring>
+        <name>transformation</name>
+        <param>
+          <type><ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref></type>
+          <declname>handle</declname>
+          <defval>nullptr</defval>
+        </param>
+        <briefdescription>
+<para>Creates a transformation from a <ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref> Takes ownership of the handle, i.e. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>you should not call k4a_transformation_destroy on the handle after giving it to the transformation; the transformation will take care of that. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="837" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="837" bodyend="837"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_1a87a09b55a536a08f36233abfd5846b4f" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::transformation::transformation</definition>
+        <argsstring>(transformation &amp;&amp;other) noexcept</argsstring>
+        <name>transformation</name>
+        <param>
+          <type><ref refid="classk4a_1_1transformation" kindref="compound">transformation</ref> &amp;&amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Moves another tranformation into a new transformation. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="841" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="841" bodyend="847"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_1adbd5e0eb9cc5c1f2f089c105f7194a56" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>k4a::transformation::transformation</definition>
+        <argsstring>(const transformation &amp;)=delete</argsstring>
+        <name>transformation</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1transformation" kindref="compound">transformation</ref> &amp;</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="849" column="5"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_1aa729a5f572e994705c0b1fbfaf791ee6" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>k4a::transformation::~transformation</definition>
+        <argsstring>()</argsstring>
+        <name>~transformation</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="851" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="851" bodyend="854"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_1a2ae48e0963e332805b28b2d8659081b5" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1transformation" kindref="compound">transformation</ref> &amp;</type>
+        <definition>transformation&amp; k4a::transformation::operator=</definition>
+        <argsstring>(transformation &amp;&amp;other) noexcept</argsstring>
+        <name>operator=</name>
+        <param>
+          <type><ref refid="classk4a_1_1transformation" kindref="compound">transformation</ref> &amp;&amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Moves another image into this image; other is set to invalid. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="858" column="20" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="858" bodyend="870"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_1a6297f8afa4706d6c5b19727ca4d1f8a9" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1transformation" kindref="compound">transformation</ref> &amp;</type>
+        <definition>transformation&amp; k4a::transformation::operator=</definition>
+        <argsstring>(std::nullptr_t) noexcept</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>std::nullptr_t</type>
+        </param>
+        <briefdescription>
+<para>Invalidates this transformation. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="874" column="20" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="874" bodyend="878"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_1af0be12aa12b01c82d1ef56505f17af63" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classk4a_1_1transformation" kindref="compound">transformation</ref> &amp;</type>
+        <definition>transformation&amp; k4a::transformation::operator=</definition>
+        <argsstring>(const transformation &amp;)=delete</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1transformation" kindref="compound">transformation</ref> &amp;</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="880" column="20"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_1a0f938b04a6a4b3d6b15df85ec3dc0422" prot="public" static="no" const="no" explicit="no" inline="yes" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::transformation::destroy</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>destroy</name>
+        <briefdescription>
+<para>Invalidates this transformation. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="884" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="884" bodyend="891"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_a84d7583dff4ba83f9ed162233f860418_1a84d7583dff4ba83f9ed162233f860418" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::transformation::depth_image_to_color_camera</definition>
+        <argsstring>(const image &amp;depth_image, image *transformed_depth_image) const</argsstring>
+        <name>depth_image_to_color_camera</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> *</type>
+          <declname>transformed_depth_image</declname>
+        </param>
+        <briefdescription>
+<para>Transforms the depth map into the geometry of the color camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_gafacffb5f781a9c2df30d4a16241cd514_1gafacffb5f781a9c2df30d4a16241cd514" kindref="member">k4a_transformation_depth_image_to_color_camera</ref> Transforms the output in to the existing caller provided <computeroutput>transformed_depth_image</computeroutput>. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="899" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="899" bodyend="908"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_ac3511565a1eedf5e22900f1fdc71c185_1ac3511565a1eedf5e22900f1fdc71c185" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1image" kindref="compound">image</ref></type>
+        <definition>image k4a::transformation::depth_image_to_color_camera</definition>
+        <argsstring>(const image &amp;depth_image) const</argsstring>
+        <name>depth_image_to_color_camera</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>depth_image</declname>
+        </param>
+        <briefdescription>
+<para>Transforms the depth map into the geometry of the color camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_gafacffb5f781a9c2df30d4a16241cd514_1gafacffb5f781a9c2df30d4a16241cd514" kindref="member">k4a_transformation_depth_image_to_color_camera</ref> Creates a new <ref refid="classk4a_1_1image" kindref="compound">image</ref> with the output. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="916" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="916" bodyend="925"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_a81ead7ffe1c9540a2f91c364a749827d_1a81ead7ffe1c9540a2f91c364a749827d" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::transformation::depth_image_to_color_camera_custom</definition>
+        <argsstring>(const image &amp;depth_image, const image &amp;custom_image, image *transformed_depth_image, image *transformed_custom_image, k4a_transformation_interpolation_type_t interpolation_type, uint32_t invalid_custom_value) const</argsstring>
+        <name>depth_image_to_color_camera_custom</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>custom_image</declname>
+        </param>
+        <param>
+          <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> *</type>
+          <declname>transformed_depth_image</declname>
+        </param>
+        <param>
+          <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> *</type>
+          <declname>transformed_custom_image</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1ga06f55e23e1d260b069e89e4a9cd6f4ee" kindref="member">k4a_transformation_interpolation_type_t</ref></type>
+          <declname>interpolation_type</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>invalid_custom_value</declname>
+        </param>
+        <briefdescription>
+<para>Transforms depth map and a custom image into the geometry of the color camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_gac00dd00e7612a86382e3d0a130f276bb_1gac00dd00e7612a86382e3d0a130f276bb" kindref="member">k4a_transformation_depth_image_to_color_camera_custom</ref> Transforms the output in to the existing caller provided <computeroutput>transformed_depth_image</computeroutput> <computeroutput>transformed_custom_image</computeroutput>. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="933" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="933" bodyend="951"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_a72eaf319f56076237371651dc483603e_1a72eaf319f56076237371651dc483603e" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::pair&lt; <ref refid="classk4a_1_1image" kindref="compound">image</ref>, <ref refid="classk4a_1_1image" kindref="compound">image</ref> &gt;</type>
+        <definition>std::pair&lt;image, image&gt; k4a::transformation::depth_image_to_color_camera_custom</definition>
+        <argsstring>(const image &amp;depth_image, const image &amp;custom_image, k4a_transformation_interpolation_type_t interpolation_type, uint32_t invalid_custom_value) const</argsstring>
+        <name>depth_image_to_color_camera_custom</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>custom_image</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga06f55e23e1d260b069e89e4a9cd6f4ee_1ga06f55e23e1d260b069e89e4a9cd6f4ee" kindref="member">k4a_transformation_interpolation_type_t</ref></type>
+          <declname>interpolation_type</declname>
+        </param>
+        <param>
+          <type>uint32_t</type>
+          <declname>invalid_custom_value</declname>
+        </param>
+        <briefdescription>
+<para>Transforms depth map and a custom image into the geometry of the color camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_gac00dd00e7612a86382e3d0a130f276bb_1gac00dd00e7612a86382e3d0a130f276bb" kindref="member">k4a_transformation_depth_image_to_color_camera_custom</ref> Creates a new <ref refid="classk4a_1_1image" kindref="compound">image</ref> with the output. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="960" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="960" bodyend="993"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_ae25f1d6159f91bda04e9026959f94b15_1ae25f1d6159f91bda04e9026959f94b15" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::transformation::color_image_to_depth_camera</definition>
+        <argsstring>(const image &amp;depth_image, const image &amp;color_image, image *transformed_color_image) const</argsstring>
+        <name>color_image_to_depth_camera</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>color_image</declname>
+        </param>
+        <param>
+          <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> *</type>
+          <declname>transformed_color_image</declname>
+        </param>
+        <briefdescription>
+<para>Transforms the color image into the geometry of the depth camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_gaf3a941f07bb0185cd7a72699a648fc29_1gaf3a941f07bb0185cd7a72699a648fc29" kindref="member">k4a_transformation_color_image_to_depth_camera</ref> Transforms the output in to the existing caller provided <computeroutput>transformed_color_image</computeroutput>. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1001" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1001" bodyend="1013"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_a208b7009485b1d14ccebaade276a32dc_1a208b7009485b1d14ccebaade276a32dc" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1image" kindref="compound">image</ref></type>
+        <definition>image k4a::transformation::color_image_to_depth_camera</definition>
+        <argsstring>(const image &amp;depth_image, const image &amp;color_image) const</argsstring>
+        <name>color_image_to_depth_camera</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>color_image</declname>
+        </param>
+        <briefdescription>
+<para>Transforms the color image into the geometry of the depth camera. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_gaf3a941f07bb0185cd7a72699a648fc29_1gaf3a941f07bb0185cd7a72699a648fc29" kindref="member">k4a_transformation_color_image_to_depth_camera</ref> Creates a new <ref refid="classk4a_1_1image" kindref="compound">image</ref> with the output. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1021" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1021" bodyend="1030"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_aca376c8cca0f1157c3632b4f4c1a59ab_1aca376c8cca0f1157c3632b4f4c1a59ab" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void k4a::transformation::depth_image_to_point_cloud</definition>
+        <argsstring>(const image &amp;depth_image, k4a_calibration_type_t camera, image *xyz_image) const</argsstring>
+        <name>depth_image_to_point_cloud</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>camera</declname>
+        </param>
+        <param>
+          <type><ref refid="classk4a_1_1image" kindref="compound">image</ref> *</type>
+          <declname>xyz_image</declname>
+        </param>
+        <briefdescription>
+<para>Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding 3d points. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga7385eb4beb9d8892e8a88cf4feb3be70_1ga7385eb4beb9d8892e8a88cf4feb3be70" kindref="member">k4a_transformation_depth_image_to_point_cloud</ref> Transforms the output in to the existing caller provided <computeroutput>xyz_image</computeroutput>. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1038" column="10" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1038" bodyend="1046"/>
+      </memberdef>
+      <memberdef kind="function" id="classk4a_1_1transformation_aeced431be8c6be8efaf8da92380dd423_1aeced431be8c6be8efaf8da92380dd423" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="classk4a_1_1image" kindref="compound">image</ref></type>
+        <definition>image k4a::transformation::depth_image_to_point_cloud</definition>
+        <argsstring>(const image &amp;depth_image, k4a_calibration_type_t camera) const</argsstring>
+        <name>depth_image_to_point_cloud</name>
+        <param>
+          <type>const <ref refid="classk4a_1_1image" kindref="compound">image</ref> &amp;</type>
+          <declname>depth_image</declname>
+        </param>
+        <param>
+          <type><ref refid="group___enumerations_ga8d5fae13125f360be86c166684cdb5c5_1ga8d5fae13125f360be86c166684cdb5c5" kindref="member">k4a_calibration_type_t</ref></type>
+          <declname>camera</declname>
+        </param>
+        <briefdescription>
+<para>Transforms the depth image into 3 planar images representing X, Y and Z-coordinates of corresponding 3d points. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Throws error on failure.</para>
+<para><simplesect kind="see"><para><ref refid="group___functions_ga7385eb4beb9d8892e8a88cf4feb3be70_1ga7385eb4beb9d8892e8a88cf4feb3be70" kindref="member">k4a_transformation_depth_image_to_point_cloud</ref> Creates a new <ref refid="classk4a_1_1image" kindref="compound">image</ref> with the output. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="1054" column="11" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="1054" bodyend="1062"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Wrapper for <ref refid="structk4a__transformation__t" kindref="compound">k4a_transformation_t</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Wraps a handle for a transformation. </para>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" line="816" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4a.hpp" bodystart="817" bodyend="1073"/>
+    <listofallmembers>
+      <member refid="classk4a_1_1transformation_ae25f1d6159f91bda04e9026959f94b15_1ae25f1d6159f91bda04e9026959f94b15" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>color_image_to_depth_camera</name></member>
+      <member refid="classk4a_1_1transformation_a208b7009485b1d14ccebaade276a32dc_1a208b7009485b1d14ccebaade276a32dc" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>color_image_to_depth_camera</name></member>
+      <member refid="classk4a_1_1transformation_a84d7583dff4ba83f9ed162233f860418_1a84d7583dff4ba83f9ed162233f860418" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>depth_image_to_color_camera</name></member>
+      <member refid="classk4a_1_1transformation_ac3511565a1eedf5e22900f1fdc71c185_1ac3511565a1eedf5e22900f1fdc71c185" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>depth_image_to_color_camera</name></member>
+      <member refid="classk4a_1_1transformation_a81ead7ffe1c9540a2f91c364a749827d_1a81ead7ffe1c9540a2f91c364a749827d" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>depth_image_to_color_camera_custom</name></member>
+      <member refid="classk4a_1_1transformation_a72eaf319f56076237371651dc483603e_1a72eaf319f56076237371651dc483603e" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>depth_image_to_color_camera_custom</name></member>
+      <member refid="classk4a_1_1transformation_aca376c8cca0f1157c3632b4f4c1a59ab_1aca376c8cca0f1157c3632b4f4c1a59ab" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>depth_image_to_point_cloud</name></member>
+      <member refid="classk4a_1_1transformation_aeced431be8c6be8efaf8da92380dd423_1aeced431be8c6be8efaf8da92380dd423" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>depth_image_to_point_cloud</name></member>
+      <member refid="classk4a_1_1transformation_1a0f938b04a6a4b3d6b15df85ec3dc0422" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>destroy</name></member>
+      <member refid="classk4a_1_1transformation_1a151f9eba9c0732b1bd662a93cfde928e" prot="private" virt="non-virtual"><scope>k4a::transformation</scope><name>m_color_resolution</name></member>
+      <member refid="classk4a_1_1transformation_1a9466951b01fa3092dd74abe9ea08c989" prot="private" virt="non-virtual"><scope>k4a::transformation</scope><name>m_depth_resolution</name></member>
+      <member refid="classk4a_1_1transformation_1a9bcfba68f7c8f0493c6e5cc2a8a95b55" prot="private" virt="non-virtual"><scope>k4a::transformation</scope><name>m_handle</name></member>
+      <member refid="classk4a_1_1transformation_1a2ae48e0963e332805b28b2d8659081b5" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>operator=</name></member>
+      <member refid="classk4a_1_1transformation_1a6297f8afa4706d6c5b19727ca4d1f8a9" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>operator=</name></member>
+      <member refid="classk4a_1_1transformation_1af0be12aa12b01c82d1ef56505f17af63" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>operator=</name></member>
+      <member refid="classk4a_1_1transformation_abc5ca125a64e9702e80e2335a4303084_1abc5ca125a64e9702e80e2335a4303084" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>transformation</name></member>
+      <member refid="classk4a_1_1transformation_a7b98768f8ee53d39f20ec1d79bfec39a_1a7b98768f8ee53d39f20ec1d79bfec39a" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>transformation</name></member>
+      <member refid="classk4a_1_1transformation_1a87a09b55a536a08f36233abfd5846b4f" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>transformation</name></member>
+      <member refid="classk4a_1_1transformation_1adbd5e0eb9cc5c1f2f089c105f7194a56" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>transformation</name></member>
+      <member refid="classk4a_1_1transformation_1aa729a5f572e994705c0b1fbfaf791ee6" prot="public" virt="non-virtual"><scope>k4a::transformation</scope><name>~transformation</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

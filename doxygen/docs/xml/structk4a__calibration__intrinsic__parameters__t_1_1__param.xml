@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a__calibration__intrinsic__parameters__t_1_1__param" kind="struct" language="C++" prot="public">
+    <compoundname>k4a_calibration_intrinsic_parameters_t::_param</compoundname>
+    <includes refid="k4atypes_8h" local="no">k4atypes.h</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1acdaf3c374353bc3347551b379ee4f83c" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::cx</definition>
+        <argsstring></argsstring>
+        <name>cx</name>
+        <briefdescription>
+<para>Principal point in image, x. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1095" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1095" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a033e90a9b862dddffc0e4e5f6d1f02b3" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::cy</definition>
+        <argsstring></argsstring>
+        <name>cy</name>
+        <briefdescription>
+<para>Principal point in image, y. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1096" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1096" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a8069e7da60119d09b9c7a37cf9f65d6a" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::fx</definition>
+        <argsstring></argsstring>
+        <name>fx</name>
+        <briefdescription>
+<para>Focal length x. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1097" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1097" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a88fcdda1ec2d887b03be4011d8442c6a" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::fy</definition>
+        <argsstring></argsstring>
+        <name>fy</name>
+        <briefdescription>
+<para>Focal length y. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1098" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1098" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a37e8c8a30e851f28a008c415504b92ed" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::k1</definition>
+        <argsstring></argsstring>
+        <name>k1</name>
+        <briefdescription>
+<para>k1 radial distortion coefficient </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1099" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1099" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1af543f06407c571b7329c3e35653db4aa" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::k2</definition>
+        <argsstring></argsstring>
+        <name>k2</name>
+        <briefdescription>
+<para>k2 radial distortion coefficient </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1100" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a7ec939246110c28e7bfb2f0b7004a208" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::k3</definition>
+        <argsstring></argsstring>
+        <name>k3</name>
+        <briefdescription>
+<para>k3 radial distortion coefficient </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1101" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1101" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a30f9b667e6661b737f98afa38ac47fd2" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::k4</definition>
+        <argsstring></argsstring>
+        <name>k4</name>
+        <briefdescription>
+<para>k4 radial distortion coefficient </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1102" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1ac5d1ce28acdba0f35cd3bbcc6a174f41" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::k5</definition>
+        <argsstring></argsstring>
+        <name>k5</name>
+        <briefdescription>
+<para>k5 radial distortion coefficient </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1103" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a3b36721c7c58ec9f3228809c2a92b263" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::k6</definition>
+        <argsstring></argsstring>
+        <name>k6</name>
+        <briefdescription>
+<para>k6 radial distortion coefficient </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1104" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1104" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a11b533b26b38b6cfd0e3b69c9aeade55" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::codx</definition>
+        <argsstring></argsstring>
+        <name>codx</name>
+        <briefdescription>
+<para>Center of distortion in Z=1 plane, x (only used for Rational6KT) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1105" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a0e3edc5180a9323a5f7d28c7f3cd7f65" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::cody</definition>
+        <argsstring></argsstring>
+        <name>cody</name>
+        <briefdescription>
+<para>Center of distortion in Z=1 plane, y (only used for Rational6KT) </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1106" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1106" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a80718603ed70e762dfe9aa01eccbcc6b" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::p2</definition>
+        <argsstring></argsstring>
+        <name>p2</name>
+        <briefdescription>
+<para>Tangential distortion coefficient 2. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1107" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1107" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a0967d84ba1f4ce82b47bfa2fa13a8360" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::p1</definition>
+        <argsstring></argsstring>
+        <name>p1</name>
+        <briefdescription>
+<para>Tangential distortion coefficient 1. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1108" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1108" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a91b39ee152b891ae79641ad8e6137adb" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float k4a_calibration_intrinsic_parameters_t::_param::metric_radius</definition>
+        <argsstring></argsstring>
+        <name>metric_radius</name>
+        <briefdescription>
+<para>Metric radius. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1109" column="15" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1109" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>individual parameter or array representation of intrinsic model. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1093" column="5" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1094" bodyend="1110"/>
+    <listofallmembers>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a11b533b26b38b6cfd0e3b69c9aeade55" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>codx</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a0e3edc5180a9323a5f7d28c7f3cd7f65" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>cody</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1acdaf3c374353bc3347551b379ee4f83c" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>cx</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a033e90a9b862dddffc0e4e5f6d1f02b3" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>cy</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a8069e7da60119d09b9c7a37cf9f65d6a" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>fx</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a88fcdda1ec2d887b03be4011d8442c6a" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>fy</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a37e8c8a30e851f28a008c415504b92ed" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>k1</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1af543f06407c571b7329c3e35653db4aa" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>k2</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a7ec939246110c28e7bfb2f0b7004a208" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>k3</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a30f9b667e6661b737f98afa38ac47fd2" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>k4</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1ac5d1ce28acdba0f35cd3bbcc6a174f41" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>k5</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a3b36721c7c58ec9f3228809c2a92b263" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>k6</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a91b39ee152b891ae79641ad8e6137adb" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>metric_radius</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a0967d84ba1f4ce82b47bfa2fa13a8360" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>p1</name></member>
+      <member refid="structk4a__calibration__intrinsic__parameters__t_1_1__param_1a80718603ed70e762dfe9aa01eccbcc6b" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsic_parameters_t::_param</scope><name>p2</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

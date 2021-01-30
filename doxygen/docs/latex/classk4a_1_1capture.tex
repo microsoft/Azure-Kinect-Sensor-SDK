@@ -1,0 +1,230 @@
+\hypertarget{classk4a_1_1capture}{}\doxysection{k4a\+::capture Class Reference}
+\label{classk4a_1_1capture}\index{k4a::capture@{k4a::capture}}
+
+
+Wrapper for \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}}.  
+
+
+
+
+{\ttfamily \#include $<$k4a/k4a.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classk4a_1_1capture_a713dcb3e3539e8d08f30be67b23b6ea8_a713dcb3e3539e8d08f30be67b23b6ea8}{capture}} (\mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} \mbox{\hyperlink{classk4a_1_1capture_a5e5a361b96542cc0206524b03ddaf95d_a5e5a361b96542cc0206524b03ddaf95d}{handle}}=nullptr) noexcept
+\begin{DoxyCompactList}\small\item\em Creates a capture from a \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} Takes ownership of the handle, i.\+e. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_a6da3c95c4331e4c25a8379f8e1feb97e}\label{classk4a_1_1capture_a6da3c95c4331e4c25a8379f8e1feb97e}} 
+\mbox{\hyperlink{classk4a_1_1capture_a6da3c95c4331e4c25a8379f8e1feb97e}{capture}} (const \mbox{\hyperlink{classk4a_1_1capture}{capture}} \&other) noexcept
+\begin{DoxyCompactList}\small\item\em Creates a shallow copy of another capture. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_aa06ed4ed8711325935e906a0414c1009}\label{classk4a_1_1capture_aa06ed4ed8711325935e906a0414c1009}} 
+\mbox{\hyperlink{classk4a_1_1capture_aa06ed4ed8711325935e906a0414c1009}{capture}} (\mbox{\hyperlink{classk4a_1_1capture}{capture}} \&\&other) noexcept
+\begin{DoxyCompactList}\small\item\em Moves another capture into a new capture. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_acda82ae99269039a2671ec29c7f7fa55}\label{classk4a_1_1capture_acda82ae99269039a2671ec29c7f7fa55}} 
+\mbox{\hyperlink{classk4a_1_1capture}{capture}} \& \mbox{\hyperlink{classk4a_1_1capture_acda82ae99269039a2671ec29c7f7fa55}{operator=}} (const \mbox{\hyperlink{classk4a_1_1capture}{capture}} \&other) noexcept
+\begin{DoxyCompactList}\small\item\em Sets capture to a shallow copy of the other image. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_ad297433d44328b7b2a60a90bd2f80268}\label{classk4a_1_1capture_ad297433d44328b7b2a60a90bd2f80268}} 
+\mbox{\hyperlink{classk4a_1_1capture}{capture}} \& \mbox{\hyperlink{classk4a_1_1capture_ad297433d44328b7b2a60a90bd2f80268}{operator=}} (\mbox{\hyperlink{classk4a_1_1capture}{capture}} \&\&other) noexcept
+\begin{DoxyCompactList}\small\item\em Moves another capture into this capture; other is set to invalid. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_a766690e9c9f045b552892971903bf578}\label{classk4a_1_1capture_a766690e9c9f045b552892971903bf578}} 
+\mbox{\hyperlink{classk4a_1_1capture}{capture}} \& \mbox{\hyperlink{classk4a_1_1capture_a766690e9c9f045b552892971903bf578}{operator=}} (std\+::nullptr\+\_\+t) noexcept
+\begin{DoxyCompactList}\small\item\em Invalidates this capture. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_aa25047bfa3d41a3e350b93dbead41b58}\label{classk4a_1_1capture_aa25047bfa3d41a3e350b93dbead41b58}} 
+bool \mbox{\hyperlink{classk4a_1_1capture_aa25047bfa3d41a3e350b93dbead41b58}{operator==}} (const \mbox{\hyperlink{classk4a_1_1capture}{capture}} \&other) const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if two captures refer to the same \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}}, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_a650a8677ba836694aac75a22683f3d9d}\label{classk4a_1_1capture_a650a8677ba836694aac75a22683f3d9d}} 
+bool \mbox{\hyperlink{classk4a_1_1capture_a650a8677ba836694aac75a22683f3d9d}{operator==}} (std\+::nullptr\+\_\+t) const noexcept
+\begin{DoxyCompactList}\small\item\em Returns false if the capture is valid, true otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_a34e5cc8621b5c782f79e8ad7a6d667b1}\label{classk4a_1_1capture_a34e5cc8621b5c782f79e8ad7a6d667b1}} 
+bool \mbox{\hyperlink{classk4a_1_1capture_a34e5cc8621b5c782f79e8ad7a6d667b1}{operator!=}} (const \mbox{\hyperlink{classk4a_1_1capture}{capture}} \&other) const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if two captures wrap different \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} instances, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_a1a5b1eac81bfd22a978f5c2ccbfc38a4}\label{classk4a_1_1capture_a1a5b1eac81bfd22a978f5c2ccbfc38a4}} 
+bool \mbox{\hyperlink{classk4a_1_1capture_a1a5b1eac81bfd22a978f5c2ccbfc38a4}{operator!=}} (std\+::nullptr\+\_\+t) const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if the capture is valid, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_a9b195bd62ed46c3138b88942ca8b6447}\label{classk4a_1_1capture_a9b195bd62ed46c3138b88942ca8b6447}} 
+\mbox{\hyperlink{classk4a_1_1capture_a9b195bd62ed46c3138b88942ca8b6447}{operator bool}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if the capture is valid, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_ab35642daed5d6d74f44b69806665573e}\label{classk4a_1_1capture_ab35642daed5d6d74f44b69806665573e}} 
+bool \mbox{\hyperlink{classk4a_1_1capture_ab35642daed5d6d74f44b69806665573e}{is\+\_\+valid}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Returns true if the capture is valid, false otherwise. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} \mbox{\hyperlink{classk4a_1_1capture_a5e5a361b96542cc0206524b03ddaf95d_a5e5a361b96542cc0206524b03ddaf95d}{handle}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Returns the underlying \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} handle. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classk4a_1_1capture_aa922aa6bae17310b4d73464a2486be92}\label{classk4a_1_1capture_aa922aa6bae17310b4d73464a2486be92}} 
+void \mbox{\hyperlink{classk4a_1_1capture_aa922aa6bae17310b4d73464a2486be92}{reset}} () noexcept
+\begin{DoxyCompactList}\small\item\em Releases the underlying \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}}; the capture is set to invalid. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classk4a_1_1image}{image}} \mbox{\hyperlink{classk4a_1_1capture_a885c87e3fdd40c567350bfece9c6969c_a885c87e3fdd40c567350bfece9c6969c}{get\+\_\+color\+\_\+image}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the color image associated with the capture. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classk4a_1_1image}{image}} \mbox{\hyperlink{classk4a_1_1capture_a36de50df5f36391e7ed606c0cb5607a2_a36de50df5f36391e7ed606c0cb5607a2}{get\+\_\+depth\+\_\+image}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the depth image associated with the capture. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classk4a_1_1image}{image}} \mbox{\hyperlink{classk4a_1_1capture_aa19b3af5fefbb2dc4dabd4a31c94d6fc_aa19b3af5fefbb2dc4dabd4a31c94d6fc}{get\+\_\+ir\+\_\+image}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get the IR image associated with the capture. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1capture_ac97e202cb82abcbd95cf584045233d64_ac97e202cb82abcbd95cf584045233d64}{set\+\_\+color\+\_\+image}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&color\+\_\+image) noexcept
+\begin{DoxyCompactList}\small\item\em Set / add a color image to the capture. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1capture_a6136c6d7369ebccbee2a65ef4d800f9e_a6136c6d7369ebccbee2a65ef4d800f9e}{set\+\_\+depth\+\_\+image}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&depth\+\_\+image) noexcept
+\begin{DoxyCompactList}\small\item\em Set / add a depth image to the capture. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1capture_aba19a0d0ff58f841223832422415c790_aba19a0d0ff58f841223832422415c790}{set\+\_\+ir\+\_\+image}} (const \mbox{\hyperlink{classk4a_1_1image}{image}} \&ir\+\_\+image) noexcept
+\begin{DoxyCompactList}\small\item\em Set / add an IR image to the capture. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classk4a_1_1capture_a462b292bdb1f7a525e461bc8a7d94510_a462b292bdb1f7a525e461bc8a7d94510}{set\+\_\+temperature\+\_\+c}} (float temperature\+\_\+c) noexcept
+\begin{DoxyCompactList}\small\item\em Set the temperature associated with the capture in Celsius. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{classk4a_1_1capture_a48bbcd6a4e69cf1c5574162d2d0f0d33_a48bbcd6a4e69cf1c5574162d2d0f0d33}{get\+\_\+temperature\+\_\+c}} () const noexcept
+\begin{DoxyCompactList}\small\item\em Get temperature (in Celsius) associated with the capture. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{classk4a_1_1capture}{capture}} \mbox{\hyperlink{classk4a_1_1capture_a92b8f943cef424490692fc6e76bfe3ec_a92b8f943cef424490692fc6e76bfe3ec}{create}} ()
+\begin{DoxyCompactList}\small\item\em Create an empty capture object. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Wrapper for \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}}. 
+
+Wraps a handle for a capture. Copying/moving is cheap, copies are shallow. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classk4a_1_1capture_a713dcb3e3539e8d08f30be67b23b6ea8_a713dcb3e3539e8d08f30be67b23b6ea8}\label{classk4a_1_1capture_a713dcb3e3539e8d08f30be67b23b6ea8_a713dcb3e3539e8d08f30be67b23b6ea8}} 
+\index{k4a::capture@{k4a::capture}!capture@{capture}}
+\index{capture@{capture}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{capture()}{capture()}}
+{\footnotesize\ttfamily k4a\+::capture\+::capture (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}}}]{handle = {\ttfamily nullptr} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Creates a capture from a \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} Takes ownership of the handle, i.\+e. 
+
+assuming that handle has a refcount of 1, you should not call k4a\+\_\+capture\+\_\+release on the handle after giving it to the capture; the capture will take care of that. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classk4a_1_1capture_a92b8f943cef424490692fc6e76bfe3ec_a92b8f943cef424490692fc6e76bfe3ec}\label{classk4a_1_1capture_a92b8f943cef424490692fc6e76bfe3ec_a92b8f943cef424490692fc6e76bfe3ec}} 
+\index{k4a::capture@{k4a::capture}!create@{create}}
+\index{create@{create}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{create()}{create()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{classk4a_1_1capture}{capture}} k4a\+::capture\+::create (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Create an empty capture object. 
+
+Throws error on failure.
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gaffbf32b4d014c31826d52de1c0c932cc_gaffbf32b4d014c31826d52de1c0c932cc}{k4a\+\_\+capture\+\_\+create}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1capture_a885c87e3fdd40c567350bfece9c6969c_a885c87e3fdd40c567350bfece9c6969c}\label{classk4a_1_1capture_a885c87e3fdd40c567350bfece9c6969c_a885c87e3fdd40c567350bfece9c6969c}} 
+\index{k4a::capture@{k4a::capture}!get\_color\_image@{get\_color\_image}}
+\index{get\_color\_image@{get\_color\_image}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{get\_color\_image()}{get\_color\_image()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classk4a_1_1image}{image}} k4a\+::capture\+::get\+\_\+color\+\_\+image (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the color image associated with the capture. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga683e440b5f22215a2de58d7fa140488c_ga683e440b5f22215a2de58d7fa140488c}{k4a\+\_\+capture\+\_\+get\+\_\+color\+\_\+image}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1capture_a36de50df5f36391e7ed606c0cb5607a2_a36de50df5f36391e7ed606c0cb5607a2}\label{classk4a_1_1capture_a36de50df5f36391e7ed606c0cb5607a2_a36de50df5f36391e7ed606c0cb5607a2}} 
+\index{k4a::capture@{k4a::capture}!get\_depth\_image@{get\_depth\_image}}
+\index{get\_depth\_image@{get\_depth\_image}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{get\_depth\_image()}{get\_depth\_image()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classk4a_1_1image}{image}} k4a\+::capture\+::get\+\_\+depth\+\_\+image (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the depth image associated with the capture. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gafa03513da96bf6b8c254fc11a04ee6d6_gafa03513da96bf6b8c254fc11a04ee6d6}{k4a\+\_\+capture\+\_\+get\+\_\+depth\+\_\+image}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1capture_aa19b3af5fefbb2dc4dabd4a31c94d6fc_aa19b3af5fefbb2dc4dabd4a31c94d6fc}\label{classk4a_1_1capture_aa19b3af5fefbb2dc4dabd4a31c94d6fc_aa19b3af5fefbb2dc4dabd4a31c94d6fc}} 
+\index{k4a::capture@{k4a::capture}!get\_ir\_image@{get\_ir\_image}}
+\index{get\_ir\_image@{get\_ir\_image}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{get\_ir\_image()}{get\_ir\_image()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classk4a_1_1image}{image}} k4a\+::capture\+::get\+\_\+ir\+\_\+image (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get the IR image associated with the capture. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga1531c3fa76a7c174b8f2eab24de91794_ga1531c3fa76a7c174b8f2eab24de91794}{k4a\+\_\+capture\+\_\+get\+\_\+ir\+\_\+image}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1capture_a48bbcd6a4e69cf1c5574162d2d0f0d33_a48bbcd6a4e69cf1c5574162d2d0f0d33}\label{classk4a_1_1capture_a48bbcd6a4e69cf1c5574162d2d0f0d33_a48bbcd6a4e69cf1c5574162d2d0f0d33}} 
+\index{k4a::capture@{k4a::capture}!get\_temperature\_c@{get\_temperature\_c}}
+\index{get\_temperature\_c@{get\_temperature\_c}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{get\_temperature\_c()}{get\_temperature\_c()}}
+{\footnotesize\ttfamily float k4a\+::capture\+::get\+\_\+temperature\+\_\+c (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Get temperature (in Celsius) associated with the capture. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gacc45836ed4a9cd055c37f51ffca4f992_gacc45836ed4a9cd055c37f51ffca4f992}{k4a\+\_\+capture\+\_\+get\+\_\+temperature\+\_\+c}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1capture_a5e5a361b96542cc0206524b03ddaf95d_a5e5a361b96542cc0206524b03ddaf95d}\label{classk4a_1_1capture_a5e5a361b96542cc0206524b03ddaf95d_a5e5a361b96542cc0206524b03ddaf95d}} 
+\index{k4a::capture@{k4a::capture}!handle@{handle}}
+\index{handle@{handle}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{handle()}{handle()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} k4a\+::capture\+::handle (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Returns the underlying \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} handle. 
+
+Note that this function does not increment the reference count on the \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}}. The caller is responsible for incrementing the reference count on the \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} if the caller needs the \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} to outlive this C++ object. Otherwise, the \mbox{\hyperlink{structk4a__capture__t}{k4a\+\_\+capture\+\_\+t}} will be destroyed by this C++ object. \mbox{\Hypertarget{classk4a_1_1capture_ac97e202cb82abcbd95cf584045233d64_ac97e202cb82abcbd95cf584045233d64}\label{classk4a_1_1capture_ac97e202cb82abcbd95cf584045233d64_ac97e202cb82abcbd95cf584045233d64}} 
+\index{k4a::capture@{k4a::capture}!set\_color\_image@{set\_color\_image}}
+\index{set\_color\_image@{set\_color\_image}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{set\_color\_image()}{set\_color\_image()}}
+{\footnotesize\ttfamily void k4a\+::capture\+::set\+\_\+color\+\_\+image (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{color\+\_\+image }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Set / add a color image to the capture. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga28824350a175d8eeba7c7a7d2753c2cf_ga28824350a175d8eeba7c7a7d2753c2cf}{k4a\+\_\+capture\+\_\+set\+\_\+color\+\_\+image}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1capture_a6136c6d7369ebccbee2a65ef4d800f9e_a6136c6d7369ebccbee2a65ef4d800f9e}\label{classk4a_1_1capture_a6136c6d7369ebccbee2a65ef4d800f9e_a6136c6d7369ebccbee2a65ef4d800f9e}} 
+\index{k4a::capture@{k4a::capture}!set\_depth\_image@{set\_depth\_image}}
+\index{set\_depth\_image@{set\_depth\_image}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{set\_depth\_image()}{set\_depth\_image()}}
+{\footnotesize\ttfamily void k4a\+::capture\+::set\+\_\+depth\+\_\+image (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{depth\+\_\+image }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Set / add a depth image to the capture. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_gad28b520b45096dd430d2a14b6052ebae_gad28b520b45096dd430d2a14b6052ebae}{k4a\+\_\+capture\+\_\+set\+\_\+depth\+\_\+image}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1capture_aba19a0d0ff58f841223832422415c790_aba19a0d0ff58f841223832422415c790}\label{classk4a_1_1capture_aba19a0d0ff58f841223832422415c790_aba19a0d0ff58f841223832422415c790}} 
+\index{k4a::capture@{k4a::capture}!set\_ir\_image@{set\_ir\_image}}
+\index{set\_ir\_image@{set\_ir\_image}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{set\_ir\_image()}{set\_ir\_image()}}
+{\footnotesize\ttfamily void k4a\+::capture\+::set\+\_\+ir\+\_\+image (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classk4a_1_1image}{image}} \&}]{ir\+\_\+image }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Set / add an IR image to the capture. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga473abb7de733bf5f53329f3b1a86594c_ga473abb7de733bf5f53329f3b1a86594c}{k4a\+\_\+capture\+\_\+set\+\_\+ir\+\_\+image}} 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{classk4a_1_1capture_a462b292bdb1f7a525e461bc8a7d94510_a462b292bdb1f7a525e461bc8a7d94510}\label{classk4a_1_1capture_a462b292bdb1f7a525e461bc8a7d94510_a462b292bdb1f7a525e461bc8a7d94510}} 
+\index{k4a::capture@{k4a::capture}!set\_temperature\_c@{set\_temperature\_c}}
+\index{set\_temperature\_c@{set\_temperature\_c}!k4a::capture@{k4a::capture}}
+\doxysubsubsection{\texorpdfstring{set\_temperature\_c()}{set\_temperature\_c()}}
+{\footnotesize\ttfamily void k4a\+::capture\+::set\+\_\+temperature\+\_\+c (\begin{DoxyParamCaption}\item[{float}]{temperature\+\_\+c }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
+
+
+
+Set the temperature associated with the capture in Celsius. 
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{group___functions_ga262b1df45e7b33dd4ea95e81d52a3a9c_ga262b1df45e7b33dd4ea95e81d52a3a9c}{k4a\+\_\+capture\+\_\+set\+\_\+temperature\+\_\+c}} 
+\end{DoxySeeAlso}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+k4a.\+hpp\end{DoxyCompactItemize}

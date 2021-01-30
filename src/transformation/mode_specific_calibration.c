@@ -67,7 +67,7 @@ transformation_get_mode_specific_depth_camera_calibration(const k4a_calibration_
                                                           k4a_calibration_camera_t *mode_specific_camera_calibration)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, raw_camera_calibration == NULL);
-    // TODO: Read this from calibration data instead of hardcoding.
+
     if (K4A_FAILED(K4A_RESULT_FROM_BOOL(raw_camera_calibration->resolution_width == 1024 &&
                                         raw_camera_calibration->resolution_height == 1024)))
     {

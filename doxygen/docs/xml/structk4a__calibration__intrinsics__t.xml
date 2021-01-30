@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.1" xml:lang="en-US">
+  <compounddef id="structk4a__calibration__intrinsics__t" kind="struct" language="C++" prot="public">
+    <compoundname>k4a_calibration_intrinsics_t</compoundname>
+    <includes refid="k4atypes_8h" local="no">k4atypes.h</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structk4a__calibration__intrinsics__t_1abf7247b67cdc839e09ab226498f22294" prot="public" static="no" mutable="no">
+        <type><ref refid="group___enumerations_ga1c33fe57cf4e99fcfd556be60fce4d35_1ga1c33fe57cf4e99fcfd556be60fce4d35" kindref="member">k4a_calibration_model_type_t</ref></type>
+        <definition>k4a_calibration_model_type_t k4a_calibration_intrinsics_t::type</definition>
+        <argsstring></argsstring>
+        <name>type</name>
+        <briefdescription>
+<para>Type of calibration model used. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1133" column="34" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1133" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsics__t_1a2e0654444a6d350ce3e5e19ffdb3c7f6" prot="public" static="no" mutable="no">
+        <type>unsigned int</type>
+        <definition>unsigned int k4a_calibration_intrinsics_t::parameter_count</definition>
+        <argsstring></argsstring>
+        <name>parameter_count</name>
+        <briefdescription>
+<para>Number of valid entries in parameters. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1134" column="18" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1134" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structk4a__calibration__intrinsics__t_1a0b48309440647746ea36015cd618bbba" prot="public" static="no" mutable="no">
+        <type><ref refid="unionk4a__calibration__intrinsic__parameters__t" kindref="compound">k4a_calibration_intrinsic_parameters_t</ref></type>
+        <definition>k4a_calibration_intrinsic_parameters_t k4a_calibration_intrinsics_t::parameters</definition>
+        <argsstring></argsstring>
+        <name>parameters</name>
+        <briefdescription>
+<para>Calibration parameters. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1135" column="44" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1135" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Camera sensor intrinsic calibration data. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="remark"><para>Intrinsic calibration represents the internal optical properties of the camera.</para>
+</simplesect>
+<simplesect kind="remark"><para>Azure Kinect devices are calibrated with Brown Conrady which is compatible with OpenCV.</para>
+</simplesect>
+ 
+<requirements>
+  <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+</requirements>
+ </para>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="3">
+        <label>k4a_calibration_intrinsic_parameters_t::_param</label>
+        <link refid="structk4a__calibration__intrinsic__parameters__t_1_1__param"/>
+      </node>
+      <node id="1">
+        <label>k4a_calibration_intrinsics_t</label>
+        <link refid="structk4a__calibration__intrinsics__t"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>parameters</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>k4a_calibration_intrinsic_parameters_t</label>
+        <link refid="unionk4a__calibration__intrinsic__parameters__t"/>
+        <childnode refid="3" relation="usage">
+          <edgelabel>param</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" line="1131" column="1" bodyfile="D:/Neal Analytics/Microsoft/Azure-Kinect-Sensor-SDK/include/k4a/k4atypes.h" bodystart="1132" bodyend="1136"/>
+    <listofallmembers>
+      <member refid="structk4a__calibration__intrinsics__t_1a2e0654444a6d350ce3e5e19ffdb3c7f6" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsics_t</scope><name>parameter_count</name></member>
+      <member refid="structk4a__calibration__intrinsics__t_1a0b48309440647746ea36015cd618bbba" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsics_t</scope><name>parameters</name></member>
+      <member refid="structk4a__calibration__intrinsics__t_1abf7247b67cdc839e09ab226498f22294" prot="public" virt="non-virtual"><scope>k4a_calibration_intrinsics_t</scope><name>type</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

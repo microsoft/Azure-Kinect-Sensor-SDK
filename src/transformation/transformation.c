@@ -110,7 +110,6 @@ static bool transformation_is_pixel_within_image(const float p[2], const int wid
     return p[0] >= 0 && p[0] < width && p[1] >= 0 && p[1] < height;
 }
 
-// TODO: should this be replaced with depth mode info properties?
 static k4a_result_t transformation_create_depth_camera_pinhole(const k4a_calibration_t *calibration,
                                                                k4a_transformation_pinhole_t *pinhole)
 {

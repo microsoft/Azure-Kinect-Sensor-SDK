@@ -1586,7 +1586,6 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
                                                               uint8_t *data,
                                                               size_t *data_size);
 
-// TODO: update comments
 /** Get the camera calibration for the entire Azure Kinect device.
  *
  * \param device_handle
@@ -1596,7 +1595,7 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
  * Mode in which depth camera is operated.
  *
  * \param color_mode_id
- * Resolution in which color camera is operated.
+ * Mode in which color camera is operated.
  *
  * \param calibration
  * Location to write the calibration
@@ -2278,17 +2277,22 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
                                                                       const k4a_calibration_type_t camera,
                                                                       k4a_image_t xyz_image);
 
-/** TODO: Fill in.
+/**
  *
  * \param device_handle
- * TODO: Fill in.
+ * Handle obtained by k4a_device_open().
  *
  * \param device_info
- * TODO: Fill in.
+ * Location to write the device info.
  *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p device info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * 
  * \remarks
- * TODO: Fill in
+ * The device info output contains the vendor id, the device id and available capabilities. 
  *
+ * \sa k4a_device_t
+ * 
  * \xmlonly
  * <requirements>
  *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
@@ -2299,16 +2303,19 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
  */
 K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info);
 
-/** TODO: Fill in.
+/**
  *
  * \param device_handle
- * TODO: Fill in.
+ * Handle obtained by k4a_device_open().
  *
  * \param mode_count
- * TODO: Fill in.
+ * Location to write the color mode count.
  *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * 
  * \remarks
- * TODO: Fill in
+ * The mode count output is the number of available color modes for the device specified by device_handle.
  *
  * \xmlonly
  * <requirements>
@@ -2320,19 +2327,24 @@ K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_devi
  */
 K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count);
 
-/** TODO: Fill in.
+/**
  *
  * \param device_handle
- * TODO: Fill in.
+ * Handle obtained by k4a_device_open().
  *
- * \param mode_index
- * TODO: Fill in.
+ * \param mode_id
+ * Id for color mode info.
  *
  * \param mode_info
- * TODO: Fill in.
+ * Location to write the color mode info.
  *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \sa k4a_color_mode_info_t
+ * 
  * \remarks
- * TODO: Fill in
+ * The color mode info output contains image resolution, native image format, horizontal and vertical fov and min and max fps. 
  *
  * \xmlonly
  * <requirements>
@@ -2343,19 +2355,22 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_hand
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
-                                                  int mode_index,
+                                                  int mode_id,
                                                   k4a_color_mode_info_t *mode_info);
 
-/** TODO: Fill in.
+/**
  *
  * \param device_handle
- * TODO: Fill in.
+ * Handle obtained by k4a_device_open().
  *
  * \param mode_count
- * TODO: Fill in.
+ * Location to write the depth mode count.
  *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * 
  * \remarks
- * TODO: Fill in
+ * The mode count output is the number of available depth modes for the device specified by device_handle.
  *
  * \xmlonly
  * <requirements>
@@ -2367,19 +2382,24 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
  */
 K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count);
 
-/** TODO: Fill in.
+/**
  *
  * \param device_handle
- * TODO: Fill in.
+ * Handle obtained by k4a_device_open().
  *
- * \param mode_index
- * TODO: Fill in.
+ * \param mode_id
+ * Id for mode info.
  *
  * \param mode_info
- * TODO: Fill in.
+ * Location to write the depth mode info.
  *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \sa k4a_depth_mode_info_t
+ * 
  * \remarks
- * TODO: Fill in
+ * The depth mode info output contains image resolution, image native format, horizontal and vertical fov, min and max fps, min and max range and whether it is passive ir only.
  *
  * \xmlonly
  * <requirements>
@@ -2390,19 +2410,22 @@ K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_hand
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
-                                                  int mode_index,
+                                                  int mode_id,
                                                   k4a_depth_mode_info_t *mode_info);
 
-/** TODO: Fill in.
+/**
  *
  * \param device_handle
- * TODO: Fill in.
+ * Handle obtained by k4a_device_open().
  *
  * \param mode_count
- * TODO: Fill in.
+ * Location to write the fps mode count.
  *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * 
  * \remarks
- * TODO: Fill in
+ * The mode count output is the number of available fps modes for the device specified by device_handle.
  *
  * \xmlonly
  * <requirements>
@@ -2414,19 +2437,24 @@ K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
  */
 K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count);
 
-/** TODO: Fill in.
+/**
  *
  * \param device_handle
- * TODO: Fill in.
+ * Handle obtained by k4a_device_open().
  *
- * \param mode_index
- * TODO: Fill in.
+ * \param mode_id
+ * Id for mode info.
  *
  * \param mode_info
- * TODO: Fill in.
+ * Location to write the fps mode info.
  *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \sa k4a_fps_mode_info_t
+ * 
  * \remarks
- * TODO: Fill in
+ * The fps mode info contains the frame rate per second.
  *
  * \xmlonly
  * <requirements>
@@ -2437,7 +2465,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
-                                                int mode_index,
+                                                int mode_id,
                                                 k4a_fps_mode_info_t *mode_info);
 
 /**
