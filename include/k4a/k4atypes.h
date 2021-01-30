@@ -897,7 +897,7 @@ typedef struct _k4a_device_info_t
     uint32_t capabilities;   /**< Binary combination of capability flags. */
 } k4a_device_info_t;
 
-/** 
+/**
  *
  * \remarks
  * Color mode info type representing color mode info.
