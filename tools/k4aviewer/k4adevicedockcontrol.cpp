@@ -650,9 +650,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     //                            !(m_config.EnableDepthCamera && m_config.depth_mode_id ==
     //                            K4A_DEPTH_MODE_WFOV_UNBINNED);
 
-    // TODO: Uncomment if enableFramerate is going to be used.
-    // It is commented out for now to allow compilation in Linux without warning/error.
-    // const bool enableFramerate = !deviceIsStarted && (m_config.EnableColorCamera || m_config.EnableDepthCamera);
+    const bool enableFramerate = !deviceIsStarted && (m_config.EnableColorCamera || m_config.EnableDepthCamera);
 
     bool framerateUpdated = false;
 
