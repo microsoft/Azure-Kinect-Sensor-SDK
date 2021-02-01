@@ -1,7 +1,7 @@
 # Camera Calibration and Registration ReadMe
 
 Here we supply examples for the user to run camera calibration on a single camera, and registration
-to identify spacial relationships between different cameras.
+to identify spatial relationships between different cameras.
 
 ## Installation
 
@@ -43,7 +43,7 @@ These scripts enable developers to do two things: Calibrate a given camera, and 
 
 2. How to calibrate a camera.
    1. Calibration typically requires about 30 images and relies on the Brown Conrady distortion model.
-   2. The script `calibrate.py` is designed to take in command line arguments so it can be used personally collected data without modification. If you want to work with the provided example, simply run: python `calibrate.py.` For further details please see [Camera Calibration](https://docs.opencv.org/master/dc/dbb/tutorial_py_calibration.html) in the OpenCV documentation.
+   2. The script `calibrate.py` is designed to take in command line arguments so it can be used personally collected data without modification. For further details please see [Camera Calibration](https://docs.opencv.org/master/dc/dbb/tutorial_py_calibration.html) in the OpenCV documentation.
    3. If you already have a collected set of data, run the calibration code this way:
 
       ``` windows
@@ -61,8 +61,7 @@ The script `register.py`, like `calibrate.py` is designed to take in command lin
         * Example: RGB and IR images taken simultaneously.
         * ![Color Image](example_files/registration/color-0.jpg "Color Image")
         * ![IR Image](example_files\registration/ir-0.png "IR Image")
-   3. To run the onboard example, run: `full_path\register.py`
-   4. If you already have a collected set of data, run the calibration code this way:
+   3. If you already have a collected set of data, run the calibration code this way:
 
         ``` windows
         python <full_path>\register.py --img-a <full_path_img_a> --img-b <full_path_img_b> `
@@ -70,4 +69,4 @@ The script `register.py`, like `calibrate.py` is designed to take in command lin
         --calib-b <full_path_calibration_b> --out-dir <full_path_calibration_b>
         ```
 
-   5. If successful, the code will print out the rotation and translation matrix from camera B to camera A and save the calibration blob as a json.
+   4. If successful, the code will print out the rotation and translation matrix from camera B to camera A and save the calibration blob as a json.

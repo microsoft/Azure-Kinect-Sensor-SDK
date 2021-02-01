@@ -38,5 +38,5 @@ if __name__ == "__main__":
                      args.template,
                      init_calfile=args.calib_file)
   print(f"RMS: the overall RMS re-projection error in pixels: {rms}")
-  print(f"opencv cal calibration matrix: {calib_matrix}")
-  print(f"opencv cal distortion coeffs: {dist_coeffs}")
+  print(f"\nopencv cal calibration matrix:\n{calib_matrix}")
+  print(f"\nopencv cal distortion coeffs:\n{dist_coeffs}")

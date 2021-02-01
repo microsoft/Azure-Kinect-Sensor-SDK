@@ -262,7 +262,11 @@ def detect_markers(img: np.ndarray,
                                       aruco_ids,
                                       img,
                                       board)
-  if charuco_corners is None:
+    if charuco_corners is None:
+      charuco_corners = []
+      charuco_ids = []
+      warnings.warn("No charuco corners detected in image.")
+  else:
     charuco_corners = []
     charuco_ids = []
     warnings.warn("No charuco corners detected in image.")
