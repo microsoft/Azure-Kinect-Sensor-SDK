@@ -728,7 +728,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             device_config = k4a.DeviceConfiguration()
             device_config.color_format = k4a.EImageFormat.COLOR_BGRA32
             device_config.color_resolution = k4a.EColorResolution.RES_1080P
-            device_config.depth_mode = 1 # NFOV_2X2BINNED
+            device_config.depth_mode_id = 1 # NFOV_2X2BINNED
             device_config.fps_mode_id = 1 # FPS_15
             device_config.synchronized_images_only = True
             device_config.depth_delay_off_color_usec = 0
@@ -871,7 +871,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_ctypes_device_get_calibration(self):
         with self.lock:
-            depth_modes = range(1, 6)
+            depth_modes_ids = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -883,12 +883,12 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             calibration = k4a._bindings.k4a._Calibration()
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
-                    with self.subTest(depth_mode = depth_mode, color_resolution = color_resolution):
+                    with self.subTest(depth_mode_id = depth_mode_id, color_resolution = color_resolution):
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
-                            depth_mode,
+                            depth_mode_id,
                             color_resolution,
                             ctypes.byref(calibration))
 
@@ -920,7 +920,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             self.assertEqual(status, k4a.EBufferStatus.SUCCEEDED)
 
             # Now get the calibration from the buffer.
-            depth_modes = range(1, 6)
+            depth_modes_ids = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -933,13 +933,13 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_char))
             calibration = k4a._bindings.k4a._Calibration()
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
-                    with self.subTest(depth_mode = depth_mode, color_resolution = color_resolution):
+                    with self.subTest(depth_mode_id = depth_mode_id, color_resolution = color_resolution):
                         status = k4a._bindings.k4a.k4a_calibration_get_from_raw(
                             buffer,
                             buffer_size,
-                            depth_mode,
+                            depth_mode_id,
                             color_resolution,
                             ctypes.byref(calibration))
 
@@ -948,7 +948,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_3d_to_3d(self):
         with self.lock:
 
-            depth_mode = 1 # NFOV_2X2BINNED
+            depth_mode_id = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
             source_camera = k4a.ECalibrationType.COLOR
             target_camera = k4a.ECalibrationType.DEPTH
@@ -959,7 +959,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             status = k4a._bindings.k4a.k4a_device_get_calibration(
                 self.device_handle,
-                depth_mode,
+                depth_mode_id,
                 color_resolution,
                 ctypes.byref(calibration))
 
@@ -983,7 +983,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_2d_to_3d(self):
         with self.lock:
 
-            depth_mode = 1 # NFOV_2X2BINNED
+            depth_mode_id = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
             source_camera = k4a.ECalibrationType.COLOR
             target_camera = k4a.ECalibrationType.DEPTH
@@ -996,7 +996,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             status = k4a._bindings.k4a.k4a_device_get_calibration(
                 self.device_handle,
-                depth_mode,
+                depth_mode_id,
                 color_resolution,
                 ctypes.byref(calibration))
 
@@ -1018,7 +1018,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_3d_to_2d(self):
         with self.lock:
 
-            depth_mode = 1 # NFOV_2X2BINNED
+            depth_mode_id = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
             source_camera = k4a.ECalibrationType.COLOR
             target_camera = k4a.ECalibrationType.DEPTH
@@ -1030,7 +1030,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             status = k4a._bindings.k4a.k4a_device_get_calibration(
                 self.device_handle,
-                depth_mode,
+                depth_mode_id,
                 color_resolution,
                 ctypes.byref(calibration))
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1050,7 +1050,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_2d_to_2d(self):
         with self.lock:
 
-            depth_mode = 1 # NFOV_2X2BINNED
+            depth_mode_id = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
             source_camera = k4a.ECalibrationType.COLOR
             target_camera = k4a.ECalibrationType.DEPTH
@@ -1063,7 +1063,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             status = k4a._bindings.k4a.k4a_device_get_calibration(
                 self.device_handle,
-                depth_mode,
+                depth_mode_id,
                 color_resolution,
                 ctypes.byref(calibration))
 
@@ -1089,7 +1089,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_color_2d_to_depth_2d(self):
         with self.lock:
 
-            depth_mode = 1 # NFOV_2X2BINNED
+            depth_mode_id = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
 
             calibration = k4a._bindings.k4a._Calibration()
@@ -1098,7 +1098,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             status = k4a._bindings.k4a.k4a_device_get_calibration(
                 self.device_handle,
-                depth_mode,
+                depth_mode_id,
                 color_resolution,
                 ctypes.byref(calibration))
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1107,7 +1107,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             capture = test_config.get_capture(self.device_handle,
                 k4a.EImageFormat.COLOR_BGRA32,
                 color_resolution,
-                depth_mode)
+                depth_mode_id)
 
             depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
             self.assertIsNotNone(depth_image)
@@ -1135,7 +1135,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_3d_to_3d(self):
         with self.lock:
 
-            depth_modes = range(1, 6)
+            depth_modes_ids = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1154,18 +1154,18 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             source_point = k4a._bindings.k4a._Float3(300, 300, 500)
             target_point = k4a._bindings.k4a._Float3()
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
                     for source_camera in calibration_types:
                         for target_camera in calibration_types:
-                            with self.subTest(depth_mode = depth_mode, 
+                            with self.subTest(depth_mode_id = depth_mode_id, 
                                 color_resolution = color_resolution,
                                 source_camera = source_camera,
                                 target_camera = target_camera):
 
                                 status = k4a._bindings.k4a.k4a_device_get_calibration(
                                     self.device_handle,
-                                    depth_mode,
+                                    depth_mode_id,
                                     color_resolution,
                                     ctypes.byref(calibration))
 
@@ -1189,7 +1189,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_2d_to_3d(self):
         with self.lock:
 
-            depth_modes = range(1, 6)
+            depth_modes_ids = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1210,18 +1210,18 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             target_point = k4a._bindings.k4a._Float3()
             valid_int_flag = ctypes.c_int(0)
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
                     for source_camera in calibration_types:
                         for target_camera in calibration_types:
-                            with self.subTest(depth_mode = depth_mode, 
+                            with self.subTest(depth_mode_id = depth_mode_id, 
                                 color_resolution = color_resolution,
                                 source_camera = source_camera,
                                 target_camera = target_camera):
 
                                 status = k4a._bindings.k4a.k4a_device_get_calibration(
                                     self.device_handle,
-                                    depth_mode,
+                                    depth_mode_id,
                                     color_resolution,
                                     ctypes.byref(calibration))
 
@@ -1243,7 +1243,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_3d_to_2d(self):
         with self.lock:
 
-            depth_modes = range(1, 6)
+            depth_modes_ids = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1263,18 +1263,18 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             target_point = k4a._bindings.k4a._Float2()
             valid_int_flag = ctypes.c_int(0)
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
                     for source_camera in calibration_types:
                         for target_camera in calibration_types:
-                            with self.subTest(depth_mode = depth_mode, 
+                            with self.subTest(depth_mode_id = depth_mode_id, 
                                 color_resolution = color_resolution,
                                 source_camera = source_camera,
                                 target_camera = target_camera):
 
                                 status = k4a._bindings.k4a.k4a_device_get_calibration(
                                     self.device_handle,
-                                    depth_mode,
+                                    depth_mode_id,
                                     color_resolution,
                                     ctypes.byref(calibration))
                                 self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1294,7 +1294,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_2d_to_2d(self):
         with self.lock:
 
-            depth_modes = range(1, 6)
+            depth_modes_ids = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1315,18 +1315,18 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             target_point = k4a._bindings.k4a._Float2()
             valid_int_flag = ctypes.c_int(0)
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
                     for source_camera in calibration_types:
                         for target_camera in calibration_types:
-                            with self.subTest(depth_mode = depth_mode, 
+                            with self.subTest(depth_mode_id = depth_mode_id, 
                                 color_resolution = color_resolution,
                                 source_camera = source_camera,
                                 target_camera = target_camera):
 
                                 status = k4a._bindings.k4a.k4a_device_get_calibration(
                                     self.device_handle,
-                                    depth_mode,
+                                    depth_mode_id,
                                     color_resolution,
                                     ctypes.byref(calibration))
 
@@ -1355,7 +1355,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_color_2d_to_depth_2d(self):
         with self.lock:
 
-            depth_modes = range(1, 5)
+            depth_modes_ids = range(1, 5)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1369,14 +1369,14 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             target_point = k4a._bindings.k4a._Float2()
             valid_int_flag = ctypes.c_int(0)
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
-                    with self.subTest(depth_mode = depth_mode, 
+                    with self.subTest(depth_mode_id = depth_mode_id, 
                         color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
-                            depth_mode,
+                            depth_mode_id,
                             color_resolution,
                             ctypes.byref(calibration))
                         self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1385,7 +1385,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
                         capture = test_config.get_capture(self.device_handle,
                             k4a.EImageFormat.COLOR_BGRA32,
                             color_resolution,
-                            depth_mode)
+                            depth_mode_id)
 
                         depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
                         self.assertIsNotNone(depth_image)
@@ -1413,7 +1413,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_create_destroy(self):
         with self.lock:
 
-            depth_modes = range(1, 6)
+            depth_modes_ids = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1425,14 +1425,14 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             calibration = k4a._bindings.k4a._Calibration()
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
-                    with self.subTest(depth_mode = depth_mode, 
+                    with self.subTest(depth_mode_id = depth_mode_id, 
                         color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
-                            depth_mode,
+                            depth_mode_id,
                             color_resolution,
                             ctypes.byref(calibration))
 
@@ -1445,14 +1445,14 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_depth_image_to_color_camera(self):
         with self.lock:
 
-            depth_mode = 1 # NFOV_2X2BINNED
+            depth_mode_id = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
 
             calibration = k4a._bindings.k4a._Calibration()
 
             status = k4a._bindings.k4a.k4a_device_get_calibration(
                 self.device_handle,
-                depth_mode,
+                depth_mode_id,
                 color_resolution,
                 ctypes.byref(calibration))
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1464,7 +1464,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             capture = test_config.get_capture(self.device_handle,
                 k4a.EImageFormat.COLOR_BGRA32,
                 color_resolution,
-                depth_mode)
+                depth_mode_id)
 
             depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
             image_format = k4a._bindings.k4a.k4a_image_get_format(depth_image)
@@ -1501,14 +1501,14 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_depth_image_to_color_camera_custom(self):
         with self.lock:
 
-            depth_mode = 1 # NFOV_2X2BINNED
+            depth_mode_id = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
 
             calibration = k4a._bindings.k4a._Calibration()
 
             status = k4a._bindings.k4a.k4a_device_get_calibration(
                 self.device_handle,
-                depth_mode,
+                depth_mode_id,
                 color_resolution,
                 ctypes.byref(calibration))
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1520,7 +1520,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             capture = test_config.get_capture(self.device_handle,
                 k4a.EImageFormat.COLOR_BGRA32,
                 color_resolution,
-                depth_mode)
+                depth_mode_id)
 
             # Get color image width and height.
             color_image = k4a._bindings.k4a.k4a_capture_get_color_image(capture)
@@ -1588,14 +1588,14 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_color_image_to_depth_camera(self):
         with self.lock:
 
-            depth_mode = 1 # NFOV_2X2BINNED
+            depth_mode_id = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
 
             calibration = k4a._bindings.k4a._Calibration()
 
             status = k4a._bindings.k4a.k4a_device_get_calibration(
                 self.device_handle,
-                depth_mode,
+                depth_mode_id,
                 color_resolution,
                 ctypes.byref(calibration))
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1607,7 +1607,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             capture = test_config.get_capture(self.device_handle,
                 k4a.EImageFormat.COLOR_BGRA32,
                 color_resolution,
-                depth_mode)
+                depth_mode_id)
 
             depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
             color_image = k4a._bindings.k4a.k4a_capture_get_color_image(capture)
@@ -1645,14 +1645,14 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_depth_image_to_point_cloud(self):
         with self.lock:
         
-            depth_mode = 1 # NFOV_2X2BINNED
+            depth_mode_id = 1 # NFOV_2X2BINNED
             calibration = k4a._bindings.k4a._Calibration()
 
             # Get a capture and depth image.
             capture = test_config.get_capture(self.device_handle,
                 k4a.EImageFormat.COLOR_BGRA32,
                 k4a.EColorResolution.RES_1080P,
-                depth_mode)
+                depth_mode_id)
 
             depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
 
@@ -1675,7 +1675,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             # Get a transformation.
             status = k4a._bindings.k4a.k4a_device_get_calibration(
                 self.device_handle,
-                depth_mode,
+                depth_mode_id,
                 k4a.EColorResolution.RES_1080P,
                 ctypes.byref(calibration))
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1700,7 +1700,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_transformation_depth_image_to_color_camera(self):
         with self.lock:
 
-            depth_modes = range(1, 5)
+            depth_modes_ids = range(1, 5)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1712,14 +1712,14 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             calibration = k4a._bindings.k4a._Calibration()
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
-                    with self.subTest(depth_mode = depth_mode, 
+                    with self.subTest(depth_mode_id = depth_mode_id, 
                         color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
-                            depth_mode,
+                            depth_mode_id,
                             color_resolution,
                             ctypes.byref(calibration))
                         self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1731,7 +1731,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
                         capture = test_config.get_capture(self.device_handle,
                             k4a.EImageFormat.COLOR_BGRA32,
                             color_resolution,
-                            depth_mode)
+                            depth_mode_id)
 
                         depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
                         image_format = k4a._bindings.k4a.k4a_image_get_format(depth_image)
@@ -1768,7 +1768,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_transformation_depth_image_to_color_camera_custom(self):
         with self.lock:
 
-            depth_modes = range(1, 5)
+            depth_modes_ids = range(1, 5)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1780,14 +1780,14 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             calibration = k4a._bindings.k4a._Calibration()
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
-                    with self.subTest(depth_mode = depth_mode, 
+                    with self.subTest(depth_mode_id = depth_mode_id, 
                         color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
-                            depth_mode,
+                            depth_mode_id,
                             color_resolution,
                             ctypes.byref(calibration))
                         self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1799,7 +1799,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
                         capture = test_config.get_capture(self.device_handle,
                             k4a.EImageFormat.COLOR_BGRA32,
                             color_resolution,
-                            depth_mode)
+                            depth_mode_id)
 
                         # Get color image width and height.
                         color_image = k4a._bindings.k4a.k4a_capture_get_color_image(capture)
@@ -1867,7 +1867,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_transformation_color_image_to_depth_camera(self):
         with self.lock:
 
-            depth_modes = range(1, 5)
+            depth_modes_ids = range(1, 5)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1879,14 +1879,14 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             calibration = k4a._bindings.k4a._Calibration()
 
-            for depth_mode in depth_modes:
+            for depth_mode_id in depth_modes_ids:
                 for color_resolution in color_resolutions:
-                    with self.subTest(depth_mode = depth_mode, 
+                    with self.subTest(depth_mode_id = depth_mode_id, 
                         color_resolution = color_resolution):
 
                         status = k4a._bindings.k4a.k4a_device_get_calibration(
                             self.device_handle,
-                            depth_mode,
+                            depth_mode_id,
                             color_resolution,
                             ctypes.byref(calibration))
                         self.assertTrue(k4a.K4A_SUCCEEDED(status))
@@ -1898,7 +1898,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
                         capture = test_config.get_capture(self.device_handle,
                             k4a.EImageFormat.COLOR_BGRA32,
                             color_resolution,
-                            depth_mode)
+                            depth_mode_id)
 
                         depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
                         color_image = k4a._bindings.k4a.k4a_capture_get_color_image(capture)
@@ -1936,9 +1936,9 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_transformation_depth_image_to_point_cloud(self):
         with self.lock:
         
-            depth_modes = range(1, 5)
-            for depth_mode in depth_modes:
-                with self.subTest(depth_mode = depth_mode):
+            depth_modes_ids = range(1, 5)
+            for depth_mode_id in depth_modes_ids:
+                with self.subTest(depth_mode_id = depth_mode_id):
                 
                     calibration = k4a._bindings.k4a._Calibration()
 
@@ -1946,7 +1946,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
                     capture = test_config.get_capture(self.device_handle,
                         k4a.EImageFormat.COLOR_BGRA32,
                         k4a.EColorResolution.RES_1080P,
-                        depth_mode)
+                        depth_mode_id)
 
                     depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
 
@@ -1969,7 +1969,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
                     # Get a transformation.
                     status = k4a._bindings.k4a.k4a_device_get_calibration(
                         self.device_handle,
-                        depth_mode,
+                        depth_mode_id,
                         k4a.EColorResolution.RES_1080P,
                         ctypes.byref(calibration))
                     self.assertTrue(k4a.K4A_SUCCEEDED(status))

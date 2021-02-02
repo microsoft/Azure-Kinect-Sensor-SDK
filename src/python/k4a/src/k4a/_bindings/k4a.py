@@ -379,12 +379,12 @@ k4a_device_get_raw_calibration.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctype
 
 
 #K4A_EXPORT k4a_status_t k4a_device_get_calibration(k4a_device_t device_handle,
-#                                                   const k4a_depth_mode_t depth_mode,
+#                                                   const uint32_t depth_mode_id,
 #                                                   const k4a_color_resolution_t color_resolution,
 #                                                   k4a_calibration_t *calibration);
 k4a_device_get_calibration = _k4a_lib.k4a_device_get_calibration
 k4a_device_get_calibration.restype = EStatus
-k4a_device_get_calibration.argtypes = (_DeviceHandle, _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(_Calibration))
+k4a_device_get_calibration.argtypes = (_DeviceHandle, _ctypes.c_uint32, _ctypes.c_int, _ctypes.POINTER(_Calibration))
 
 
 #K4A_EXPORT k4a_status_t k4a_device_get_sync_jack(k4a_device_t device_handle,
@@ -397,13 +397,13 @@ k4a_device_get_sync_jack.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctypes.c_bo
 
 #K4A_EXPORT k4a_status_t k4a_calibration_get_from_raw(char *raw_calibration,
 #                                                     size_t raw_calibration_size,
-#                                                     const k4a_depth_mode_t depth_mode,
+#                                                     const uint32_t depth_mode_id,
 #                                                     const k4a_color_resolution_t color_resolution,
 #                                                     k4a_calibration_t *calibration);
 k4a_calibration_get_from_raw = _k4a_lib.k4a_calibration_get_from_raw
 k4a_calibration_get_from_raw.restype = EStatus
 k4a_calibration_get_from_raw.argtypes = (_ctypes.POINTER(_ctypes.c_char), 
-    _ctypes.c_ulonglong, _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(_Calibration))
+    _ctypes.c_ulonglong, _ctypes.c_uint32, _ctypes.c_int, _ctypes.POINTER(_Calibration))
 
 
 #K4A_EXPORT k4a_status_t k4a_calibration_3d_to_3d(const k4a_calibration_t *calibration,

@@ -232,7 +232,7 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_api_get_calibration(self):
     
-        depth_modes = range(1, 6)
+        depth_mode_ids = range(1, 6)
         color_resolutions = [
             k4a.EColorResolution.RES_3072P,
             k4a.EColorResolution.RES_2160P,
@@ -242,14 +242,14 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
             k4a.EColorResolution.RES_720P,
         ]
         
-        for depth_mode in depth_modes:
+        for depth_mode_id in depth_mode_ids:
             for color_resolution in color_resolutions:
                 with self.subTest(
-                    depth_mode = depth_mode, 
+                    depth_mode_id = depth_mode_id, 
                     color_resolution = color_resolution):
                     
                     calibration = self.device.get_calibration(
-                        depth_mode,
+                        depth_mode_id,
                         color_resolution)
                         
                     self.assertIsNotNone(calibration)
@@ -724,7 +724,7 @@ class Test_Functional_API_Calibration_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_api_get_calibration_from_device(self):
     
-        depth_modes = range(1, 6)
+        depth_mode_ids = range(1, 6)
         color_resolutions = [
             k4a.EColorResolution.RES_3072P,
             k4a.EColorResolution.RES_2160P,
@@ -734,14 +734,14 @@ class Test_Functional_API_Calibration_AzureKinect(unittest.TestCase):
             k4a.EColorResolution.RES_720P,
         ]
         
-        for depth_mode in depth_modes:
+        for depth_mode_id in depth_mode_ids:
             for color_resolution in color_resolutions:
                 with self.subTest(
-                    depth_mode = depth_mode, 
+                    depth_mode_id = depth_mode_id, 
                     color_resolution = color_resolution):
     
                     calibration = self.device.get_calibration(
-                        depth_mode,
+                        depth_mode_id,
                         color_resolution)
                     self.assertIsNotNone(calibration)
                     self.assertIsInstance(calibration, k4a.Calibration)
@@ -750,7 +750,7 @@ class Test_Functional_API_Calibration_AzureKinect(unittest.TestCase):
         raw_calibration = self.device.get_raw_calibration()
         self.assertIsNotNone(raw_calibration)
 
-        depth_modes = range(1, 6)
+        depth_mode_ids = range(1, 6)
         color_resolutions = [
             k4a.EColorResolution.RES_3072P,
             k4a.EColorResolution.RES_2160P,
@@ -760,15 +760,15 @@ class Test_Functional_API_Calibration_AzureKinect(unittest.TestCase):
             k4a.EColorResolution.RES_720P,
         ]
         
-        for depth_mode in depth_modes:
+        for depth_mode_id in depth_mode_ids:
             for color_resolution in color_resolutions:
                 with self.subTest(
-                    depth_mode = depth_mode, 
+                    depth_mode_id = depth_mode_id, 
                     color_resolution = color_resolution):
 
                     calibration = k4a.Calibration.create_from_raw(
                         raw_calibration,
-                        depth_mode,
+                        depth_mode_id,
                         color_resolution)
 
                     self.assertIsNotNone(calibration)
@@ -779,7 +779,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     '''Test Transformation class for Azure Kinect device.
     '''
 
-    depth_modes = range(1, 6)
+    depth_mode_ids = range(1, 6)
     color_resolutions = [
         k4a.EColorResolution.RES_3072P,
         k4a.EColorResolution.RES_2160P,
@@ -817,14 +817,14 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
         
     def test_functional_fast_api_point_3d_to_point_3d(self):
 
-        depth_mode = 1 # NFOV_2X2BINNED
+        depth_mode_id = 1 # NFOV_2X2BINNED
         color_resolution = k4a.EColorResolution.RES_720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
 
         # Get calibration.
         calibration = self.device.get_calibration(
-            depth_mode,
+            depth_mode_id,
             color_resolution)
 
         # Create transformation.
@@ -842,14 +842,14 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_api_pixel_2d_to_point_3d(self):
 
-        depth_mode = 1 # NFOV_2X2BINNED
+        depth_mode_id = 1 # NFOV_2X2BINNED
         color_resolution = k4a.EColorResolution.RES_720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
 
         # Get calibration.
         calibration = self.device.get_calibration(
-            depth_mode,
+            depth_mode_id,
             color_resolution)
 
         # Create transformation.
@@ -868,14 +868,14 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_api_point_3d_to_pixel_2d(self):
 
-        depth_mode = 1 # NFOV_2X2BINNED
+        depth_mode_id = 1 # NFOV_2X2BINNED
         color_resolution = k4a.EColorResolution.RES_720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
 
         # Get calibration.
         calibration = self.device.get_calibration(
-            depth_mode,
+            depth_mode_id,
             color_resolution)
 
         # Create transformation.
@@ -892,14 +892,14 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_api_pixel_2d_to_pixel_2d(self):
 
-        depth_mode = 1 # NFOV_2X2BINNED
+        depth_mode_id = 1 # NFOV_2X2BINNED
         color_resolution = k4a.EColorResolution.RES_720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
 
         # Get calibration.
         calibration = self.device.get_calibration(
-            depth_mode,
+            depth_mode_id,
             color_resolution)
 
         # Create transformation.
@@ -917,7 +917,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     
     def test_functional_fast_api_color_2d_to_depth_2d(self):
 
-        depth_mode = 1 # NFOV_2X2BINNED
+        depth_mode_id = 1 # NFOV_2X2BINNED
         color_resolution = k4a.EColorResolution.RES_720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
@@ -926,7 +926,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
         device_config = k4a.DeviceConfiguration(
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_resolution = color_resolution,
-            depth_mode = depth_mode,
+            depth_mode_id = depth_mode_id,
             fps_mode_id = 1, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
@@ -940,7 +940,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
         # Get calibration.
         calibration = self.device.get_calibration(
-            depth_mode,
+            depth_mode_id,
             color_resolution)
 
         # Create transformation.
@@ -956,14 +956,14 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_api_depth_image_to_color_camera(self):
 
-        depth_mode = 1 # NFOV_2X2BINNED
+        depth_mode_id = 1 # NFOV_2X2BINNED
         color_resolution = k4a.EColorResolution.RES_720P
 
         # Get a depth image.
         device_config = k4a.DeviceConfiguration(
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_resolution = color_resolution,
-            depth_mode = depth_mode,
+            depth_mode_id = depth_mode_id,
             fps_mode_id = 1, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
@@ -979,7 +979,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
         # Get calibration.
         calibration = self.device.get_calibration(
-            depth_mode,
+            depth_mode_id,
             color_resolution)
 
         # Create transformation.
@@ -992,14 +992,14 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_api_depth_image_to_color_camera_custom(self):
 
-        depth_mode = 1 # NFOV_2X2BINNED
+        depth_mode_id = 1 # NFOV_2X2BINNED
         color_resolution = k4a.EColorResolution.RES_720P
 
         # Get a depth image.
         device_config = k4a.DeviceConfiguration(
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_resolution = color_resolution,
-            depth_mode = depth_mode,
+            depth_mode_id = depth_mode_id,
             fps_mode_id = 1, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
@@ -1022,7 +1022,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
         # Get calibration.
         calibration = self.device.get_calibration(
-            depth_mode,
+            depth_mode_id,
             color_resolution)
 
         # Create transformation.
@@ -1041,14 +1041,14 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_api_color_image_to_depth_camera(self):
 
-        depth_mode = 1 # NFOV_2X2BINNED
+        depth_mode_id = 1 # NFOV_2X2BINNED
         color_resolution = k4a.EColorResolution.RES_720P
 
         # Get a depth and color image.
         device_config = k4a.DeviceConfiguration(
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_resolution = color_resolution,
-            depth_mode = depth_mode,
+            depth_mode_id = depth_mode_id,
             fps_mode_id = 1, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
@@ -1064,7 +1064,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
         # Get calibration.
         calibration = self.device.get_calibration(
-            depth_mode,
+            depth_mode_id,
             color_resolution)
 
         # Create transformation.
@@ -1079,14 +1079,14 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_api_depth_image_to_point_cloud(self):
 
-        depth_mode = 1 # NFOV_2X2BINNED
+        depth_mode_id = 1 # NFOV_2X2BINNED
         color_resolution = k4a.EColorResolution.RES_720P
 
         # Get a depth image.
         device_config = k4a.DeviceConfiguration(
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_resolution = color_resolution,
-            depth_mode = depth_mode,
+            depth_mode_id = depth_mode_id,
             fps_mode_id = 1, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
@@ -1102,7 +1102,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
         # Get calibration.
         calibration = self.device.get_calibration(
-            depth_mode,
+            depth_mode_id,
             color_resolution)
 
         # Create transformation.
@@ -1122,18 +1122,18 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_point_3d_to_point_3d(self):
 
-        for depth_mode in Test_Transformation_AzureKinect.depth_modes:
+        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
                 for source_camera in Test_Transformation_AzureKinect.calibration_types:
                     for target_camera in Test_Transformation_AzureKinect.calibration_types:
-                        with self.subTest(depth_mode = depth_mode, 
+                        with self.subTest(depth_mode_id = depth_mode_id, 
                             color_resolution = color_resolution,
                             source_camera = source_camera,
                             target_camera = target_camera):
 
                             # Get calibration.
                             calibration = self.device.get_calibration(
-                                depth_mode,
+                                depth_mode_id,
                                 color_resolution)
 
                             # Create transformation.
@@ -1151,18 +1151,18 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_pixel_2d_to_point_3d(self):
 
-        for depth_mode in Test_Transformation_AzureKinect.depth_modes:
+        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
                 for source_camera in Test_Transformation_AzureKinect.calibration_types:
                     for target_camera in Test_Transformation_AzureKinect.calibration_types:
-                        with self.subTest(depth_mode = depth_mode, 
+                        with self.subTest(depth_mode_id = depth_mode_id, 
                             color_resolution = color_resolution,
                             source_camera = source_camera,
                             target_camera = target_camera):
 
                             # Get calibration.
                             calibration = self.device.get_calibration(
-                                depth_mode,
+                                depth_mode_id,
                                 color_resolution)
 
                             # Create transformation.
@@ -1181,18 +1181,18 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_point_3d_to_pixel_2d(self):
 
-        for depth_mode in Test_Transformation_AzureKinect.depth_modes:
+        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
                 for source_camera in Test_Transformation_AzureKinect.calibration_types:
                     for target_camera in Test_Transformation_AzureKinect.calibration_types:
-                        with self.subTest(depth_mode = depth_mode, 
+                        with self.subTest(depth_mode_id = depth_mode_id, 
                             color_resolution = color_resolution,
                             source_camera = source_camera,
                             target_camera = target_camera):
 
                             # Get calibration.
                             calibration = self.device.get_calibration(
-                                depth_mode,
+                                depth_mode_id,
                                 color_resolution)
 
                             # Create transformation.
@@ -1209,18 +1209,18 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_pixel_2d_to_pixel_2d(self):
 
-        for depth_mode in Test_Transformation_AzureKinect.depth_modes:
+        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
                 for source_camera in Test_Transformation_AzureKinect.calibration_types:
                     for target_camera in Test_Transformation_AzureKinect.calibration_types:
-                        with self.subTest(depth_mode = depth_mode, 
+                        with self.subTest(depth_mode_id = depth_mode_id, 
                             color_resolution = color_resolution,
                             source_camera = source_camera,
                             target_camera = target_camera):
 
                             # Get calibration.
                             calibration = self.device.get_calibration(
-                                depth_mode,
+                                depth_mode_id,
                                 color_resolution)
 
                             # Create transformation.
@@ -1238,11 +1238,11 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     
     def test_functional_api_color_2d_to_depth_2d(self):
 
-        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
                 for source_camera in Test_Transformation_AzureKinect.calibration_types:
                     for target_camera in Test_Transformation_AzureKinect.calibration_types:
-                        with self.subTest(depth_mode = depth_mode, 
+                        with self.subTest(depth_mode_id = depth_mode_id, 
                             color_resolution = color_resolution,
                             source_camera = source_camera,
                             target_camera = target_camera):
@@ -1251,7 +1251,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
                             device_config = k4a.DeviceConfiguration(
                                 color_format = k4a.EImageFormat.COLOR_BGRA32,
                                 color_resolution = color_resolution,
-                                depth_mode = depth_mode,
+                                depth_mode_id = depth_mode_id,
                                 fps_mode_id = k4a.EFramesPerSecond.FPS_15,
                                 synchronized_images_only = True,
                                 depth_delay_off_color_usec = 0,
@@ -1265,7 +1265,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
                             # Get calibration.
                             calibration = self.device.get_calibration(
-                                depth_mode,
+                                depth_mode_id,
                                 color_resolution)
 
                             # Create transformation.
@@ -1281,16 +1281,16 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_depth_image_to_color_camera(self):
 
-        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
-                with self.subTest(depth_mode = depth_mode, 
+                with self.subTest(depth_mode_id = depth_mode_id, 
                     color_resolution = color_resolution):
 
                     # Get a depth image.
                     device_config = k4a.DeviceConfiguration(
                         color_format = k4a.EImageFormat.COLOR_BGRA32,
                         color_resolution = color_resolution,
-                        depth_mode = depth_mode,
+                        depth_mode_id = depth_mode_id,
                         fps_mode_id = k4a.EFramesPerSecond.FPS_15,
                         synchronized_images_only = True,
                         depth_delay_off_color_usec = 0,
@@ -1306,7 +1306,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
                     # Get calibration.
                     calibration = self.device.get_calibration(
-                        depth_mode,
+                        depth_mode_id,
                         color_resolution)
 
                     # Create transformation.
@@ -1319,16 +1319,16 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_depth_image_to_color_camera_custom(self):
 
-        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
-                with self.subTest(depth_mode = depth_mode, 
+                with self.subTest(depth_mode_id = depth_mode_id, 
                     color_resolution = color_resolution):
 
                     # Get a depth image.
                     device_config = k4a.DeviceConfiguration(
                         color_format = k4a.EImageFormat.COLOR_BGRA32,
                         color_resolution = color_resolution,
-                        depth_mode = depth_mode,
+                        depth_mode_id = depth_mode_id,
                         fps_mode_id = k4a.EFramesPerSecond.FPS_15,
                         synchronized_images_only = True,
                         depth_delay_off_color_usec = 0,
@@ -1351,7 +1351,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
                     # Get calibration.
                     calibration = self.device.get_calibration(
-                        depth_mode,
+                        depth_mode_id,
                         color_resolution)
 
                     # Create transformation.
@@ -1370,16 +1370,16 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_color_image_to_depth_camera(self):
 
-        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
-                with self.subTest(depth_mode = depth_mode, 
+                with self.subTest(depth_mode_id = depth_mode_id, 
                     color_resolution = color_resolution):
 
                     # Get a depth and color image.
                     device_config = k4a.DeviceConfiguration(
                         color_format = k4a.EImageFormat.COLOR_BGRA32,
                         color_resolution = color_resolution,
-                        depth_mode = depth_mode,
+                        depth_mode_id = depth_mode_id,
                         fps_mode_id = k4a.EFramesPerSecond.FPS_15,
                         synchronized_images_only = True,
                         depth_delay_off_color_usec = 0,
@@ -1395,7 +1395,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
                     # Get calibration.
                     calibration = self.device.get_calibration(
-                        depth_mode,
+                        depth_mode_id,
                         color_resolution)
 
                     # Create transformation.
@@ -1410,16 +1410,16 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_depth_image_to_point_cloud(self):
 
-        for depth_mode in Test_Transformation_AzureKinect.depth_modes[:4]:
+        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
             for color_resolution in Test_Transformation_AzureKinect.color_resolutions:
-                with self.subTest(depth_mode = depth_mode, 
+                with self.subTest(depth_mode_id = depth_mode_id, 
                     color_resolution = color_resolution):
 
                     # Get a depth image.
                     device_config = k4a.DeviceConfiguration(
                         color_format = k4a.EImageFormat.COLOR_BGRA32,
                         color_resolution = color_resolution,
-                        depth_mode = depth_mode,
+                        depth_mode_id = depth_mode_id,
                         fps_mode_id = k4a.EFramesPerSecond.FPS_15,
                         synchronized_images_only = True,
                         depth_delay_off_color_usec = 0,
@@ -1435,7 +1435,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
                     # Get calibration.
                     calibration = self.device.get_calibration(
-                        depth_mode,
+                        depth_mode_id,
                         color_resolution)
 
                     # Create transformation.

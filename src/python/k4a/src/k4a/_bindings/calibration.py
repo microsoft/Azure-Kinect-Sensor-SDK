@@ -46,14 +46,14 @@ class Calibration:
     @staticmethod
     def create_from_raw(
         raw_calibration:bytearray,
-        depth_mode:int,
+        depth_mode_id:int,
         color_resolution:EColorResolution):
         '''! Get the camera calibration for a device from a raw calibration blob.
 
         @param raw_calibration (bytearray): Raw calibration blob obtained from
             a device or recording. The raw calibration must be NULL terminated.
 
-        @param depth_mode (int): Mode in which depth camera is operated.
+        @param depth_mode_id (int): Mode in which depth camera is operated.
 
         @param color_resolution (EColorResolution): Resolution in which color 
             camera is operated.
@@ -62,7 +62,7 @@ class Calibration:
 
         @remarks
         - The calibration represents the data needed to transform between the
-            camera views and is different for each operating @p depth_mode and 
+            camera views and is different for each operating @p depth_mode_id and 
             @p color_resolution the device is configured to operate in.
 
         @remarks
@@ -80,7 +80,7 @@ class Calibration:
 
         # Get the _Calibration struct from the raw buffer.
         if (isinstance(raw_calibration, bytearray) and
-            isinstance(depth_mode, int) and
+            isinstance(depth_mode_id, int) and
             isinstance(color_resolution, EColorResolution)):
 
             buffer_size_bytes = _ctypes.c_ulonglong(len(raw_calibration))
@@ -91,7 +91,7 @@ class Calibration:
             status = k4a_calibration_get_from_raw(
                 cbufferptr,
                 buffer_size_bytes,
-                depth_mode,
+                depth_mode_id,
                 color_resolution,
                 _ctypes.byref(_calibration))
 
@@ -116,8 +116,8 @@ class Calibration:
         return self._calibration.extrinsics
 
     @property
-    def depth_mode(self):
-        return self._calibration.depth_mode
+    def depth_mode_id(self):
+        return self._calibration.depth_mode_id
 
     @property
     def color_resolution(self):

@@ -610,12 +610,12 @@ class Device:
         return buffer
 
     def get_calibration(self,
-        depth_mode:int,
+        depth_mode_id:int,
         color_resolution:EColorResolution)->Calibration:
         '''! Get the camera calibration for the entire Azure Kinect device for
             a specific depth mode and color resolution.
 
-        @param depth_mode (int): The mode in which the depth camera is
+        @param depth_mode_id (int): The mode in which the depth camera is
             operated.
 
         @param color_resolution (EColorResolution): The resolution in which the
@@ -629,7 +629,7 @@ class Device:
         @remarks 
         - The calibration represents the data needed to transform 
             between the camera views and may be different for each operating 
-            @p depth_mode and @p color_resolution the device is configured to 
+            @p depth_mode_id and @p color_resolution the device is configured to 
             operate in.
 
         @remarks 
@@ -645,7 +645,7 @@ class Device:
         _calibration = _Calibration()
         status = k4a_device_get_calibration(
             self.__device_handle,
-            depth_mode,
+            depth_mode_id,
             color_resolution,
             _ctypes.byref(_calibration))
 
