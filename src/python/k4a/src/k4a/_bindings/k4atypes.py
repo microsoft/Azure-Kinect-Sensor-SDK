@@ -97,29 +97,6 @@ class ELogLevel(_IntEnum):
 
 
 @_unique
-class EColorResolution(_IntEnum):
-    '''! Color sensor resolutions, width * height and aspect ratio.
-
-    Name                            | Description
-    ------------------------------- | -----------------------------------------
-    EColorResolution.OFF            | Color camera will be turned off.
-    EColorResolution.RES_720P       | 1280 * 720  16:9.
-    EColorResolution.RES_1080P      | 1920 * 1080 16:9.
-    EColorResolution.RES_1440P      | 2560 * 1440 16:9.
-    EColorResolution.RES_1536P      | 2048 * 1536 4:3.
-    EColorResolution.RES_2160P      | 3840 * 2160 16:9.
-    EColorResolution.RES_3072P      | 4096 * 3072 4:3.
-    '''
-    OFF = 0
-    RES_720P = _auto()
-    RES_1080P = _auto()
-    RES_1440P = _auto()
-    RES_1536P = _auto()
-    RES_2160P = _auto()
-    RES_3072P = _auto()
-
-
-@_unique
 class EImageFormat(_IntEnum):
     '''! Image format type.
     
@@ -575,7 +552,7 @@ class DeviceConfiguration(_ctypes.Structure):
 
     <tr>
     <td> color_resolution </td>
-    <td> EColorResolution </td>
+    <td> int </td>
     <td> Image resolution to capture with the color camera.
     </td>
     </tr>
@@ -671,7 +648,7 @@ class DeviceConfiguration(_ctypes.Structure):
 
     def __init__(self, 
         color_format:EImageFormat=EImageFormat.CUSTOM,
-        color_resolution:EColorResolution=EColorResolution.RES_720P,
+        color_resolution:int=1, # 720P
         depth_mode_id:int=0, # OFF
         fps_mode_id:int=0, # FPS_5
         synchronized_images_only:bool=True,
@@ -1077,7 +1054,7 @@ class _EmptyClass:
 
 DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
     color_format = EImageFormat.COLOR_MJPG,
-    color_resolution = EColorResolution.OFF,
+    color_resolution = 0, # OFF
     depth_mode_id = 0, # OFF
     fps_mode_id = 2, # FPS_30
     synchronized_images_only = False,
@@ -1088,7 +1065,7 @@ DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_2160P,
+    color_resolution = 5, # 2160P
     depth_mode_id = 4, # WFOV_UNBINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1099,7 +1076,7 @@ DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_2160P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_2160P,
+    color_resolution = 5, # 2160P
     depth_mode_id = 3, # WFOV_2X2BINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1110,7 +1087,7 @@ DEVICE_CONFIG_BGRA32_2160P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_2160P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_2160P,
+    color_resolution = 5, # 2160P
     depth_mode_id = 2, # NFOV_UNBINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1121,7 +1098,7 @@ DEVICE_CONFIG_BGRA32_2160P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_2160P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_2160P,
+    color_resolution = 5, # 2160P
     depth_mode_id = 1, # NFOV_2X2BINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1132,7 +1109,7 @@ DEVICE_CONFIG_BGRA32_2160P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_1080P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_1080P,
+    color_resolution = 2, # RES_1080P
     depth_mode_id = 4, # WFOV_UNBINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1143,7 +1120,7 @@ DEVICE_CONFIG_BGRA32_1080P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_1080P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_1080P,
+    color_resolution = 2, # RES_1080P
     depth_mode_id = 3, # WFOV_2X2BINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1154,7 +1131,7 @@ DEVICE_CONFIG_BGRA32_1080P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_1080P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_1080P,
+    color_resolution = 2, # RES_1080P
     depth_mode_id = 2, # NFOV_UNBINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1165,7 +1142,7 @@ DEVICE_CONFIG_BGRA32_1080P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_1080P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_1080P,
+    color_resolution = 2, # RES_1080P
     depth_mode_id = 1, # NFOV_2X2BINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,

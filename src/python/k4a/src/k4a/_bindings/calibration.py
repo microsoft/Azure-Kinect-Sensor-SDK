@@ -10,7 +10,7 @@ Kinect For Azure SDK.
 
 import ctypes as _ctypes
 
-from .k4atypes import _Calibration, EStatus, EColorResolution, _Calibration
+from .k4atypes import _Calibration, EStatus, _Calibration
 
 from .k4a import k4a_calibration_get_from_raw
 
@@ -47,7 +47,7 @@ class Calibration:
     def create_from_raw(
         raw_calibration:bytearray,
         depth_mode_id:int,
-        color_resolution:EColorResolution):
+        color_resolution:int):
         '''! Get the camera calibration for a device from a raw calibration blob.
 
         @param raw_calibration (bytearray): Raw calibration blob obtained from
@@ -55,7 +55,7 @@ class Calibration:
 
         @param depth_mode_id (int): Mode in which depth camera is operated.
 
-        @param color_resolution (EColorResolution): Resolution in which color 
+        @param color_resolution (int): Resolution in which color 
             camera is operated.
 
         @returns Calibration: A Calibration instance.
@@ -81,7 +81,7 @@ class Calibration:
         # Get the _Calibration struct from the raw buffer.
         if (isinstance(raw_calibration, bytearray) and
             isinstance(depth_mode_id, int) and
-            isinstance(color_resolution, EColorResolution)):
+            isinstance(color_resolution, int)):
 
             buffer_size_bytes = _ctypes.c_ulonglong(len(raw_calibration))
             cbuffer = (_ctypes.c_uint8 * buffer_size_bytes.value).from_buffer(raw_calibration)

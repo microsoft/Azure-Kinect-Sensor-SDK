@@ -53,7 +53,7 @@ These tests should be run on every pull request.
       
 To run the unit tests:
       
-      python -m pytest tests -k unit
+      python -m pytest tests -k unit -v
       
 To capture the results, use an additional --junit-xml=./test_results.xml option.
 
@@ -66,11 +66,11 @@ There are 2 types of functional tests:
       
 To run the functional_fast tests:
 
-      python -m pytest tests -k functional_fast
+      python -m pytest tests -k functional_fast -v
       
 To run all functional tests:
 
-      python -m pytest tests -k functional
+      python -m pytest tests -k functional -v
       
 To capture the results, use an additional --junit-xml=./test_results.xml option.
 
@@ -82,7 +82,7 @@ These tests should be run on every pull request.
       
 To run the performance tests:
       
-      python -m pytest tests -k perf
+      python -m pytest tests -k perf -v
       
 To capture the results, use an additional --junit-xml=./test_results.xml option.
 

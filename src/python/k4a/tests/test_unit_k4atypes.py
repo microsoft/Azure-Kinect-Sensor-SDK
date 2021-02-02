@@ -64,17 +64,6 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.ELogLevel.OFF, next(enum_values))
         self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
-    def test_unit_EColorResolution(self):
-        enum_values = get_enum_values(len(k4a.EColorResolution))
-        self.assertEqual(k4a.EColorResolution.OFF, next(enum_values))
-        self.assertEqual(k4a.EColorResolution.RES_720P, next(enum_values))
-        self.assertEqual(k4a.EColorResolution.RES_1080P, next(enum_values))
-        self.assertEqual(k4a.EColorResolution.RES_1440P, next(enum_values))
-        self.assertEqual(k4a.EColorResolution.RES_1536P, next(enum_values))
-        self.assertEqual(k4a.EColorResolution.RES_2160P, next(enum_values))
-        self.assertEqual(k4a.EColorResolution.RES_3072P, next(enum_values))
-        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
-
     def test_unit_EImageFormat(self):
         enum_values = get_enum_values(len(k4a.EImageFormat))
         self.assertEqual(k4a.EImageFormat.COLOR_MJPG, next(enum_values))

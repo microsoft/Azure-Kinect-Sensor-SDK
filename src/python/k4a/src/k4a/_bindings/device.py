@@ -37,8 +37,7 @@ from os import linesep as _newline
 
 from .k4atypes import _DeviceHandle, HardwareVersion, EStatus, EBufferStatus, \
     _EmptyClass, EColorControlCommand, EColorControlMode, ImuSample, \
-    EWaitStatus, DeviceConfiguration, _CaptureHandle, EColorResolution, \
-    _Calibration, ImuSample
+    EWaitStatus, DeviceConfiguration, _CaptureHandle, _Calibration, ImuSample
 
 from .k4a import k4a_device_get_installed_count, k4a_device_open, \
     k4a_device_get_serialnum, k4a_device_get_version, \
@@ -611,14 +610,14 @@ class Device:
 
     def get_calibration(self,
         depth_mode_id:int,
-        color_resolution:EColorResolution)->Calibration:
+        color_resolution:int)->Calibration:
         '''! Get the camera calibration for the entire Azure Kinect device for
             a specific depth mode and color resolution.
 
         @param depth_mode_id (int): The mode in which the depth camera is
             operated.
 
-        @param color_resolution (EColorResolution): The resolution in which the
+        @param color_resolution (int): The resolution in which the
             color camera is operated.
 
         @returns Calibration: A Calibration instance containing the calibration
@@ -637,9 +636,6 @@ class Device:
             Transformation class and functions.
         '''
         calibration = None
-
-        if not isinstance(color_resolution, EColorResolution):
-            color_resolution = EColorResolution(color_resolution)
 
         # Get ctypes calibration struct.
         _calibration = _Calibration()

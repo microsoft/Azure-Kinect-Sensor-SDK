@@ -233,15 +233,7 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_get_calibration(self):
     
         depth_mode_ids = range(1, 6)
-        color_resolutions = [
-            k4a.EColorResolution.RES_3072P,
-            k4a.EColorResolution.RES_2160P,
-            k4a.EColorResolution.RES_1536P,
-            k4a.EColorResolution.RES_1440P,
-            k4a.EColorResolution.RES_1080P,
-            k4a.EColorResolution.RES_720P,
-        ]
-        
+        color_resolutions = range(1, 7)
         for depth_mode_id in depth_mode_ids:
             for color_resolution in color_resolutions:
                 with self.subTest(
@@ -725,15 +717,7 @@ class Test_Functional_API_Calibration_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_get_calibration_from_device(self):
     
         depth_mode_ids = range(1, 6)
-        color_resolutions = [
-            k4a.EColorResolution.RES_3072P,
-            k4a.EColorResolution.RES_2160P,
-            k4a.EColorResolution.RES_1536P,
-            k4a.EColorResolution.RES_1440P,
-            k4a.EColorResolution.RES_1080P,
-            k4a.EColorResolution.RES_720P,
-        ]
-        
+        color_resolutions = range(1, 7)
         for depth_mode_id in depth_mode_ids:
             for color_resolution in color_resolutions:
                 with self.subTest(
@@ -751,14 +735,7 @@ class Test_Functional_API_Calibration_AzureKinect(unittest.TestCase):
         self.assertIsNotNone(raw_calibration)
 
         depth_mode_ids = range(1, 6)
-        color_resolutions = [
-            k4a.EColorResolution.RES_3072P,
-            k4a.EColorResolution.RES_2160P,
-            k4a.EColorResolution.RES_1536P,
-            k4a.EColorResolution.RES_1440P,
-            k4a.EColorResolution.RES_1080P,
-            k4a.EColorResolution.RES_720P,
-        ]
+        color_resolutions = range(1, 7)
         
         for depth_mode_id in depth_mode_ids:
             for color_resolution in color_resolutions:
@@ -780,15 +757,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     '''
 
     depth_mode_ids = range(1, 6)
-    color_resolutions = [
-        k4a.EColorResolution.RES_3072P,
-        k4a.EColorResolution.RES_2160P,
-        k4a.EColorResolution.RES_1536P,
-        k4a.EColorResolution.RES_1440P,
-        k4a.EColorResolution.RES_1080P,
-        k4a.EColorResolution.RES_720P,
-    ]
-
+    color_resolutions = range(1, 7)
     calibration_types = [
         k4a.ECalibrationType.COLOR,
         k4a.ECalibrationType.DEPTH
@@ -803,7 +772,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
         cls.calibration = cls.device.get_calibration(
             4, # WFOV_UNBINNED
-            k4a.EColorResolution.RES_2160P)
+            5) # 2160P
 
     @classmethod
     def tearDownClass(cls):
@@ -818,7 +787,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_point_3d_to_point_3d(self):
 
         depth_mode_id = 1 # NFOV_2X2BINNED
-        color_resolution = k4a.EColorResolution.RES_720P
+        color_resolution = 1 # 720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
 
@@ -843,7 +812,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_pixel_2d_to_point_3d(self):
 
         depth_mode_id = 1 # NFOV_2X2BINNED
-        color_resolution = k4a.EColorResolution.RES_720P
+        color_resolution = 1 # 720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
 
@@ -869,7 +838,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_point_3d_to_pixel_2d(self):
 
         depth_mode_id = 1 # NFOV_2X2BINNED
-        color_resolution = k4a.EColorResolution.RES_720P
+        color_resolution = 1 # 720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
 
@@ -893,7 +862,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_pixel_2d_to_pixel_2d(self):
 
         depth_mode_id = 1 # NFOV_2X2BINNED
-        color_resolution = k4a.EColorResolution.RES_720P
+        color_resolution = 1 # 720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
 
@@ -918,7 +887,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_color_2d_to_depth_2d(self):
 
         depth_mode_id = 1 # NFOV_2X2BINNED
-        color_resolution = k4a.EColorResolution.RES_720P
+        color_resolution = 1 # 720P
         source_camera = k4a.ECalibrationType.COLOR
         target_camera = k4a.ECalibrationType.DEPTH
 
@@ -957,7 +926,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_depth_image_to_color_camera(self):
 
         depth_mode_id = 1 # NFOV_2X2BINNED
-        color_resolution = k4a.EColorResolution.RES_720P
+        color_resolution = 1 # 720P
 
         # Get a depth image.
         device_config = k4a.DeviceConfiguration(
@@ -993,7 +962,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_depth_image_to_color_camera_custom(self):
 
         depth_mode_id = 1 # NFOV_2X2BINNED
-        color_resolution = k4a.EColorResolution.RES_720P
+        color_resolution = 1 # 720P
 
         # Get a depth image.
         device_config = k4a.DeviceConfiguration(
@@ -1042,7 +1011,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_color_image_to_depth_camera(self):
 
         depth_mode_id = 1 # NFOV_2X2BINNED
-        color_resolution = k4a.EColorResolution.RES_720P
+        color_resolution = 1 # 720P
 
         # Get a depth and color image.
         device_config = k4a.DeviceConfiguration(
@@ -1080,7 +1049,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_depth_image_to_point_cloud(self):
 
         depth_mode_id = 1 # NFOV_2X2BINNED
-        color_resolution = k4a.EColorResolution.RES_720P
+        color_resolution = 1 # 720P
 
         # Get a depth image.
         device_config = k4a.DeviceConfiguration(
