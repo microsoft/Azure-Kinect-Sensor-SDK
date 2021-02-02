@@ -27,10 +27,17 @@ def simple_viewer():
     # In order to start capturing frames, need to start the cameras.
     # The start_cameras() function requires a device configuration which
     # specifies the modes in which to put the color and depth cameras.
-    # For convenience, the k4a package pre-defines some configurations
-    # for common usage of the Azure Kinect device, but the user can
-    # modify the values to set the device in their preferred modes.
-    device_config = k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_2X2BINNED_FPS15
+    device_config = k4a.DeviceConfiguration(
+        color_format=k4a.EImageFormat.COLOR_BGRA32,
+        color_mode_id=5, # 2160P
+        depth_mode_id=3, # WFOV_2X2BINNED
+        fps_mode_id=1, # FPS_15
+        synchronized_images_only=True,
+        depth_delay_off_color_usec=0,
+        wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+        subordinate_delay_off_master_usec=0,
+        disable_streaming_indicator=False)
+
     device.start_cameras(device_config)
 
     # Get a capture.

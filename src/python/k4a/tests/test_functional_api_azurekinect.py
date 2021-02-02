@@ -112,8 +112,18 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_get_capture(self):
 
         # Start the cameras.
-        status = self.device.start_cameras(
-            k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
+        device_config = k4a.DeviceConfiguration(
+            color_format=k4a.EImageFormat.COLOR_BGRA32,
+            color_mode_id=5, # 2160P
+            depth_mode_id=4, # WFOV_UNBINNED
+            fps_mode_id=1, # FPS_15
+            synchronized_images_only=True,
+            depth_delay_off_color_usec=0,
+            wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+            subordinate_delay_off_master_usec=0,
+            disable_streaming_indicator=False)
+
+        status = self.device.start_cameras(device_config)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         # Get a capture, waiting indefinitely.
@@ -126,8 +136,18 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
     def test_functional_fast_api_get_imu_sample(self):
 
         # Start the cameras.
-        status = self.device.start_cameras(
-            k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
+        device_config = k4a.DeviceConfiguration(
+            color_format=k4a.EImageFormat.COLOR_BGRA32,
+            color_mode_id=5, # 2160P
+            depth_mode_id=4, # WFOV_UNBINNED
+            fps_mode_id=1, # FPS_15
+            synchronized_images_only=True,
+            depth_delay_off_color_usec=0,
+            wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+            subordinate_delay_off_master_usec=0,
+            disable_streaming_indicator=False)
+
+        status = self.device.start_cameras(device_config)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         # Start the imu.
@@ -165,13 +185,35 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
         self.assertIsInstance(sync_in_connected, bool)
 
     def test_functional_fast_api_start_stop_cameras(self):
-        status = self.device.start_cameras(k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
+        device_config = k4a.DeviceConfiguration(
+            color_format=k4a.EImageFormat.COLOR_BGRA32,
+            color_mode_id=5, # 2160P
+            depth_mode_id=4, # WFOV_UNBINNED
+            fps_mode_id=1, # FPS_15
+            synchronized_images_only=True,
+            depth_delay_off_color_usec=0,
+            wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+            subordinate_delay_off_master_usec=0,
+            disable_streaming_indicator=False)
+
+        status = self.device.start_cameras(device_config)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         self.device.stop_cameras()
 
     def test_functional_fast_api_start_stop_imu(self):
-        status = self.device.start_cameras(k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
+        device_config = k4a.DeviceConfiguration(
+            color_format=k4a.EImageFormat.COLOR_BGRA32,
+            color_mode_id=5, # 2160P
+            depth_mode_id=4, # WFOV_UNBINNED
+            fps_mode_id=1, # FPS_15
+            synchronized_images_only=True,
+            depth_delay_off_color_usec=0,
+            wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+            subordinate_delay_off_master_usec=0,
+            disable_streaming_indicator=False)
+
+        status = self.device.start_cameras(device_config)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         status = self.device.start_imu()
@@ -269,8 +311,18 @@ class Test_Functional_API_Capture_AzureKinect(unittest.TestCase):
         del cls.device
 
     def setUp(self):
-        status = self.device.start_cameras(
-            k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
+        device_config = k4a.DeviceConfiguration(
+            color_format=k4a.EImageFormat.COLOR_BGRA32,
+            color_mode_id=5, # 2160P
+            depth_mode_id=4, # WFOV_UNBINNED
+            fps_mode_id=1, # FPS_15
+            synchronized_images_only=True,
+            depth_delay_off_color_usec=0,
+            wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+            subordinate_delay_off_master_usec=0,
+            disable_streaming_indicator=False)
+
+        status = self.device.start_cameras(device_config)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         self.capture = self.device.get_capture(-1)
@@ -489,8 +541,18 @@ class Test_Functional_API_Image_AzureKinect(unittest.TestCase):
         del cls.device
 
     def setUp(self):
-        status = self.device.start_cameras(
-            k4a.DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15)
+        device_config = k4a.DeviceConfiguration(
+            color_format=k4a.EImageFormat.COLOR_BGRA32,
+            color_mode_id=5, # 2160P
+            depth_mode_id=4, # WFOV_UNBINNED
+            fps_mode_id=1, # FPS_15
+            synchronized_images_only=True,
+            depth_delay_off_color_usec=0,
+            wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+            subordinate_delay_off_master_usec=0,
+            disable_streaming_indicator=False)
+
+        status = self.device.start_cameras(device_config)
         self.assertEqual(status, k4a.EStatus.SUCCEEDED)
 
         self.capture = self.device.get_capture(-1)

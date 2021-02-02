@@ -33,7 +33,7 @@ def the_basics():
     device_config = k4a.DeviceConfiguration(
         color_format=k4a.EImageFormat.COLOR_BGRA32,
         color_mode_id=2, # 1080P
-        depth_mode=3, # WFOV_2X2BINNED
+        depth_mode_id=3, # WFOV_2X2BINNED
         fps_mode_id=1, # FPS_15
         synchronized_images_only=True,
         depth_delay_off_color_usec=0,

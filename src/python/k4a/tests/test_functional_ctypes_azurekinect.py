@@ -182,7 +182,17 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_device_get_imu_sample(self):
         with self.lock:
 
-            device_config = k4a.DEVICE_CONFIG_BGRA32_1080P_NFOV_2X2BINNED_FPS15
+            device_config = k4a.DeviceConfiguration(
+                color_format=k4a.EImageFormat.COLOR_BGRA32,
+                color_mode_id=2, # 1080P
+                depth_mode_id=1, # NFOV_2X2BINNED
+                fps_mode_id=1, # FPS_15
+                synchronized_images_only=True,
+                depth_delay_off_color_usec=0,
+                wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+                subordinate_delay_off_master_usec=0,
+                disable_streaming_indicator=False)
+
             status = k4a._bindings.k4a.k4a_device_start_cameras(self.device_handle, ctypes.byref(device_config))
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
@@ -742,7 +752,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_ctypes_device_start_cameras_stop_cameras_DEFAULT_DISABLE(self):
         with self.lock:
-            device_config = k4a.DEVICE_CONFIG_DISABLE_ALL
+            device_config = k4a.DeviceConfiguration()
             status = k4a._bindings.k4a.k4a_device_start_cameras(self.device_handle, ctypes.byref(device_config))
             self.assertTrue(k4a.K4A_FAILED(status)) # Seems to fail when DISABLE_ALL config is used.
             k4a._bindings.k4a.k4a_device_stop_cameras(self.device_handle)
@@ -750,7 +760,17 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_device_start_imu_stop_imu(self):
         with self.lock:
 
-            device_config = k4a.DEVICE_CONFIG_BGRA32_1080P_NFOV_2X2BINNED_FPS15
+            device_config = k4a.DeviceConfiguration(
+                color_format=k4a.EImageFormat.COLOR_BGRA32,
+                color_mode_id=2, # 1080P
+                depth_mode_id=1, # NFOV_2X2BINNED
+                fps_mode_id=1, # FPS_15
+                synchronized_images_only=True,
+                depth_delay_off_color_usec=0,
+                wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+                subordinate_delay_off_master_usec=0,
+                disable_streaming_indicator=False)
+
             status = k4a._bindings.k4a.k4a_device_start_cameras(self.device_handle, ctypes.byref(device_config))
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
 

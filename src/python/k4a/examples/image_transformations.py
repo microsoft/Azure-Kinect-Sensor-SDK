@@ -56,7 +56,17 @@ def image_transformations():
         # For convenience, the k4a package pre-defines some configurations
         # for common usage of the Azure Kinect device, but the user can
         # modify the values to set the device in their preferred modes.
-        device_config = k4a.DEVICE_CONFIG_BGRA32_1080P_WFOV_2X2BINNED_FPS15
+        device_config = k4a.DeviceConfiguration(
+        color_format=k4a.EImageFormat.COLOR_BGRA32,
+        color_mode_id=2, # 1080P
+        depth_mode_id=3, # WFOV_2X2BINNED
+        fps_mode_id=1, # FPS_15
+        synchronized_images_only=True,
+        depth_delay_off_color_usec=0,
+        wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+        subordinate_delay_off_master_usec=0,
+        disable_streaming_indicator=False)
+
         status = device.start_cameras(device_config)
         if status != k4a.EStatus.SUCCEEDED:
             raise IOError("Failed to start cameras.")
@@ -66,7 +76,7 @@ def image_transformations():
         # depth mode and color camera resolution. Thankfully, this is part
         # of the device configuration used in the start_cameras() function.
         calibration = device.get_calibration(
-            depth_mode=device_config.depth_mode,
+            depth_mode_id=device_config.depth_mode,
             color_mode_id=device_config.color_mode_id)
 
         # Create a Transformation object using the calibration object as param.
