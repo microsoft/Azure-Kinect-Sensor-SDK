@@ -47,7 +47,7 @@ class Calibration:
     def create_from_raw(
         raw_calibration:bytearray,
         depth_mode_id:int,
-        color_resolution:int):
+        color_mode_id:int):
         '''! Get the camera calibration for a device from a raw calibration blob.
 
         @param raw_calibration (bytearray): Raw calibration blob obtained from
@@ -55,7 +55,7 @@ class Calibration:
 
         @param depth_mode_id (int): Mode in which depth camera is operated.
 
-        @param color_resolution (int): Resolution in which color 
+        @param color_mode_id (int): Resolution in which color 
             camera is operated.
 
         @returns Calibration: A Calibration instance.
@@ -63,7 +63,7 @@ class Calibration:
         @remarks
         - The calibration represents the data needed to transform between the
             camera views and is different for each operating @p depth_mode_id and 
-            @p color_resolution the device is configured to operate in.
+            @p color_mode_id the device is configured to operate in.
 
         @remarks
         - The function Device.get_raw_calibration() retrieves the raw
@@ -81,7 +81,7 @@ class Calibration:
         # Get the _Calibration struct from the raw buffer.
         if (isinstance(raw_calibration, bytearray) and
             isinstance(depth_mode_id, int) and
-            isinstance(color_resolution, int)):
+            isinstance(color_mode_id, int)):
 
             buffer_size_bytes = _ctypes.c_ulonglong(len(raw_calibration))
             cbuffer = (_ctypes.c_uint8 * buffer_size_bytes.value).from_buffer(raw_calibration)
@@ -92,7 +92,7 @@ class Calibration:
                 cbufferptr,
                 buffer_size_bytes,
                 depth_mode_id,
-                color_resolution,
+                color_mode_id,
                 _ctypes.byref(_calibration))
 
             if status == EStatus.SUCCEEDED:
@@ -120,7 +120,7 @@ class Calibration:
         return self._calibration.depth_mode_id
 
     @property
-    def color_resolution(self):
-        return self._calibration.color_resolution
+    def color_mode_id(self):
+        return self._calibration.color_mode_id
 
     # ###############

@@ -32,7 +32,7 @@ def the_basics():
     # fps_mode_id, and EWiredSyncMode.
     device_config = k4a.DeviceConfiguration(
         color_format=k4a.EImageFormat.COLOR_BGRA32,
-        color_resolution=k4a.EColorResolution.RES_1080P,
+        color_mode_id=2, # 1080P
         depth_mode=3, # WFOV_2X2BINNED
         fps_mode_id=1, # FPS_15
         synchronized_images_only=True,

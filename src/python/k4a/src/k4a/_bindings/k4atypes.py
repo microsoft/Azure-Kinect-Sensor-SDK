@@ -551,7 +551,7 @@ class DeviceConfiguration(_ctypes.Structure):
     </tr>
 
     <tr>
-    <td> color_resolution </td>
+    <td> color_mode_id </td>
     <td> int </td>
     <td> Image resolution to capture with the color camera.
     </td>
@@ -636,7 +636,7 @@ class DeviceConfiguration(_ctypes.Structure):
     '''
     _fields_= [
         ("color_format", _ctypes.c_int),
-        ("color_resolution", _ctypes.c_int),
+        ("color_mode_id", _ctypes.c_int),
         ("depth_mode_id", _ctypes.c_int),
         ("fps_mode_id", _ctypes.c_int),
         ("synchronized_images_only", _ctypes.c_bool),
@@ -648,7 +648,7 @@ class DeviceConfiguration(_ctypes.Structure):
 
     def __init__(self, 
         color_format:EImageFormat=EImageFormat.CUSTOM,
-        color_resolution:int=1, # 720P
+        color_mode_id:int=1, # 720P
         depth_mode_id:int=0, # OFF
         fps_mode_id:int=0, # FPS_5
         synchronized_images_only:bool=True,
@@ -658,7 +658,7 @@ class DeviceConfiguration(_ctypes.Structure):
         disable_streaming_indicator:bool=False):
 
         self.color_format = color_format
-        self.color_resolution = color_resolution
+        self.color_mode_id = color_mode_id
         self.depth_mode_id = depth_mode_id
         self.fps_mode_id = fps_mode_id
         self.synchronized_images_only = synchronized_images_only
@@ -670,7 +670,7 @@ class DeviceConfiguration(_ctypes.Structure):
     def __str__(self):
         return ''.join([
             'color_format=%d, ',
-            'color_resolution=%d, ',
+            'color_mode_id=%d, ',
             'depth_mode_id=%d, ',
             'fps_mode_id=%d, ',
             'synchronized_images_only=%s, ',
@@ -679,7 +679,7 @@ class DeviceConfiguration(_ctypes.Structure):
             'subordinate_delay_off_master_usec=%d, ',
             'disable_streaming_indicator=%s']) % (
             self.color_format,
-            self.color_resolution,
+            self.color_mode_id,
             self.depth_mode_id,
             self.fps_mode_id,
             self.synchronized_images_only,
@@ -862,7 +862,7 @@ class _Calibration(_ctypes.Structure):
         ("color_camera_calibration", CalibrationCamera),
         ("extrinsics", (CalibrationExtrinsics * ECalibrationType.NUM_TYPES) * ECalibrationType.NUM_TYPES),
         ("depth_mode_id", _ctypes.c_int),
-        ("color_resolution", _ctypes.c_int),
+        ("color_mode_id", _ctypes.c_int),
     ]
 
     def __str__(self):
@@ -879,9 +879,9 @@ class _Calibration(_ctypes.Structure):
 
         s = ''.join([s,
             'depth_mode_id=%d, ',
-            'color_resolution=%d']) % (
+            'color_mode_id=%d']) % (
                 self.depth_mode_id,
-                self.color_resolution
+                self.color_mode_id
             )
 
         return s
@@ -1054,7 +1054,7 @@ class _EmptyClass:
 
 DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
     color_format = EImageFormat.COLOR_MJPG,
-    color_resolution = 0, # OFF
+    color_mode_id = 0, # OFF
     depth_mode_id = 0, # OFF
     fps_mode_id = 2, # FPS_30
     synchronized_images_only = False,
@@ -1065,7 +1065,7 @@ DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = 5, # 2160P
+    color_mode_id = 5, # 2160P
     depth_mode_id = 4, # WFOV_UNBINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1076,7 +1076,7 @@ DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_2160P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = 5, # 2160P
+    color_mode_id = 5, # 2160P
     depth_mode_id = 3, # WFOV_2X2BINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1087,7 +1087,7 @@ DEVICE_CONFIG_BGRA32_2160P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_2160P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = 5, # 2160P
+    color_mode_id = 5, # 2160P
     depth_mode_id = 2, # NFOV_UNBINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1098,7 +1098,7 @@ DEVICE_CONFIG_BGRA32_2160P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_2160P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = 5, # 2160P
+    color_mode_id = 5, # 2160P
     depth_mode_id = 1, # NFOV_2X2BINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1109,7 +1109,7 @@ DEVICE_CONFIG_BGRA32_2160P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_1080P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = 2, # RES_1080P
+    color_mode_id = 2, # RES_1080P
     depth_mode_id = 4, # WFOV_UNBINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1120,7 +1120,7 @@ DEVICE_CONFIG_BGRA32_1080P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_1080P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = 2, # RES_1080P
+    color_mode_id = 2, # RES_1080P
     depth_mode_id = 3, # WFOV_2X2BINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1131,7 +1131,7 @@ DEVICE_CONFIG_BGRA32_1080P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_1080P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = 2, # RES_1080P
+    color_mode_id = 2, # RES_1080P
     depth_mode_id = 2, # NFOV_UNBINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
@@ -1142,7 +1142,7 @@ DEVICE_CONFIG_BGRA32_1080P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
 
 DEVICE_CONFIG_BGRA32_1080P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = 2, # RES_1080P
+    color_mode_id = 2, # RES_1080P
     depth_mode_id = 1, # NFOV_2X2BINNED
     fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,

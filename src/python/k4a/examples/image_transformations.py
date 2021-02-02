@@ -67,7 +67,7 @@ def image_transformations():
         # of the device configuration used in the start_cameras() function.
         calibration = device.get_calibration(
             depth_mode=device_config.depth_mode,
-            color_resolution=device_config.color_resolution)
+            color_mode_id=device_config.color_mode_id)
 
         # Create a Transformation object using the calibration object as param.
         transform = k4a.Transformation(calibration)
