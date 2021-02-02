@@ -64,16 +64,6 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.ELogLevel.OFF, next(enum_values))
         self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
-    def test_unit_EDepthMode(self):
-        enum_values = get_enum_values(len(k4a.EDepthMode))
-        self.assertEqual(k4a.EDepthMode.OFF, next(enum_values))
-        self.assertEqual(k4a.EDepthMode.NFOV_2X2BINNED, next(enum_values))
-        self.assertEqual(k4a.EDepthMode.NFOV_UNBINNED, next(enum_values))
-        self.assertEqual(k4a.EDepthMode.WFOV_2X2BINNED, next(enum_values))
-        self.assertEqual(k4a.EDepthMode.WFOV_UNBINNED, next(enum_values))
-        self.assertEqual(k4a.EDepthMode.PASSIVE_IR, next(enum_values))
-        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
-
     def test_unit_EColorResolution(self):
         enum_values = get_enum_values(len(k4a.EColorResolution))
         self.assertEqual(k4a.EColorResolution.OFF, next(enum_values))

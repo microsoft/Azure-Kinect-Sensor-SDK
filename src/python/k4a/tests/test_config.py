@@ -33,7 +33,7 @@ def glb_print_message(context:ctypes.c_void_p,
 def get_capture(device_handle:k4a._bindings.k4atypes._DeviceHandle,
                 color_format:k4a.EImageFormat,
                 color_resolution:k4a.EColorResolution,
-                depth_mode:k4a.EDepthMode)->k4a._bindings.k4atypes._CaptureHandle:
+                depth_mode:int)->k4a._bindings.k4atypes._CaptureHandle:
 
     global glb_capture
     global glb_color_format

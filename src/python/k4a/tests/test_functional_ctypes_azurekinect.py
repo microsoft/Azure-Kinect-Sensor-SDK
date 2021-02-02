@@ -17,7 +17,7 @@ def get_1080p_bgr32_nfov_2x2binned(device_handle):
     return test_config.get_capture(device_handle,
         k4a.EImageFormat.COLOR_BGRA32,
         k4a.EColorResolution.RES_1080P,
-        k4a.EDepthMode.NFOV_2X2BINNED)
+        1) # NFOV_2X2BINNED
 
 
 def k4a_device_get_color_control_capability(
@@ -728,7 +728,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             device_config = k4a.DeviceConfiguration()
             device_config.color_format = k4a.EImageFormat.COLOR_BGRA32
             device_config.color_resolution = k4a.EColorResolution.RES_1080P
-            device_config.depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            device_config.depth_mode = 1 # NFOV_2X2BINNED
             device_config.fps_mode_id = 1 # FPS_15
             device_config.synchronized_images_only = True
             device_config.depth_delay_off_color_usec = 0
@@ -871,14 +871,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
     def test_functional_fast_ctypes_device_get_calibration(self):
         with self.lock:
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-                k4a.EDepthMode.PASSIVE_IR,
-            ]
-
+            depth_modes = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -927,14 +920,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             self.assertEqual(status, k4a.EBufferStatus.SUCCEEDED)
 
             # Now get the calibration from the buffer.
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-                k4a.EDepthMode.PASSIVE_IR,
-            ]
-
+            depth_modes = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -962,7 +948,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_3d_to_3d(self):
         with self.lock:
 
-            depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            depth_mode = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
             source_camera = k4a.ECalibrationType.COLOR
             target_camera = k4a.ECalibrationType.DEPTH
@@ -997,7 +983,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_2d_to_3d(self):
         with self.lock:
 
-            depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            depth_mode = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
             source_camera = k4a.ECalibrationType.COLOR
             target_camera = k4a.ECalibrationType.DEPTH
@@ -1032,7 +1018,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_3d_to_2d(self):
         with self.lock:
 
-            depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            depth_mode = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
             source_camera = k4a.ECalibrationType.COLOR
             target_camera = k4a.ECalibrationType.DEPTH
@@ -1064,7 +1050,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_2d_to_2d(self):
         with self.lock:
 
-            depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            depth_mode = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
             source_camera = k4a.ECalibrationType.COLOR
             target_camera = k4a.ECalibrationType.DEPTH
@@ -1103,7 +1089,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_calibration_color_2d_to_depth_2d(self):
         with self.lock:
 
-            depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            depth_mode = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
 
             calibration = k4a._bindings.k4a._Calibration()
@@ -1149,14 +1135,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_3d_to_3d(self):
         with self.lock:
 
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-                k4a.EDepthMode.PASSIVE_IR,
-            ]
-
+            depth_modes = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1210,14 +1189,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_2d_to_3d(self):
         with self.lock:
 
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-                k4a.EDepthMode.PASSIVE_IR,
-            ]
-
+            depth_modes = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1271,14 +1243,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_3d_to_2d(self):
         with self.lock:
 
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-                k4a.EDepthMode.PASSIVE_IR,
-            ]
-
+            depth_modes = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1329,14 +1294,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_2d_to_2d(self):
         with self.lock:
 
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-                k4a.EDepthMode.PASSIVE_IR,
-            ]
-
+            depth_modes = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1397,13 +1355,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_calibration_color_2d_to_depth_2d(self):
         with self.lock:
 
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-            ]
-
+            depth_modes = range(1, 5)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1461,14 +1413,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_create_destroy(self):
         with self.lock:
 
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-                k4a.EDepthMode.PASSIVE_IR,
-            ]
-
+            depth_modes = range(1, 6)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1500,7 +1445,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_depth_image_to_color_camera(self):
         with self.lock:
 
-            depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            depth_mode = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
 
             calibration = k4a._bindings.k4a._Calibration()
@@ -1556,7 +1501,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_depth_image_to_color_camera_custom(self):
         with self.lock:
 
-            depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            depth_mode = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
 
             calibration = k4a._bindings.k4a._Calibration()
@@ -1643,7 +1588,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_color_image_to_depth_camera(self):
         with self.lock:
 
-            depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
+            depth_mode = 1 # NFOV_2X2BINNED
             color_resolution = k4a.EColorResolution.RES_720P
 
             calibration = k4a._bindings.k4a._Calibration()
@@ -1700,8 +1645,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_transformation_depth_image_to_point_cloud(self):
         with self.lock:
         
-            depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
-            
+            depth_mode = 1 # NFOV_2X2BINNED
             calibration = k4a._bindings.k4a._Calibration()
 
             # Get a capture and depth image.
@@ -1756,13 +1700,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_transformation_depth_image_to_color_camera(self):
         with self.lock:
 
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-            ]
-
+            depth_modes = range(1, 5)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1830,13 +1768,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_transformation_depth_image_to_color_camera_custom(self):
         with self.lock:
 
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-            ]
-
+            depth_modes = range(1, 5)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -1935,13 +1867,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_transformation_color_image_to_depth_camera(self):
         with self.lock:
 
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-            ]
-
+            depth_modes = range(1, 5)
             color_resolutions = [
                 k4a.EColorResolution.RES_3072P,
                 k4a.EColorResolution.RES_2160P,
@@ -2010,13 +1936,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_ctypes_transformation_depth_image_to_point_cloud(self):
         with self.lock:
         
-            depth_modes = [
-                k4a.EDepthMode.NFOV_2X2BINNED,
-                k4a.EDepthMode.NFOV_UNBINNED,
-                k4a.EDepthMode.WFOV_2X2BINNED,
-                k4a.EDepthMode.WFOV_UNBINNED,
-            ]
-
+            depth_modes = range(1, 5)
             for depth_mode in depth_modes:
                 with self.subTest(depth_mode = depth_mode):
                 
