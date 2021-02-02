@@ -14,10 +14,10 @@ import k4a
 
 def get_enum_values(n, start_value = 0):
     value = start_value
-    while(value < n):
+    while(value < n + start_value):
         yield value
         value = value + 1
-
+    
 
 class TestEnums(unittest.TestCase):
     '''Test enum instantiation and values to ensure they are not broken.
@@ -35,18 +35,24 @@ class TestEnums(unittest.TestCase):
         enum_values = get_enum_values(len(k4a.EStatus))
         self.assertEqual(k4a.EStatus.SUCCEEDED, next(enum_values))
         self.assertEqual(k4a.EStatus.FAILED, next(enum_values))
+        self.assertEqual(k4a.EStatus.UNSUPPORTED, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EBufferStatus(self):
         enum_values = get_enum_values(len(k4a.EBufferStatus))
         self.assertEqual(k4a.EBufferStatus.SUCCEEDED, next(enum_values))
         self.assertEqual(k4a.EBufferStatus.FAILED, next(enum_values))
         self.assertEqual(k4a.EBufferStatus.BUFFER_TOO_SMALL, next(enum_values))
+        self.assertEqual(k4a.EBufferStatus.UNSUPPORTED, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EWaitStatus(self):
         enum_values = get_enum_values(len(k4a.EWaitStatus))
         self.assertEqual(k4a.EWaitStatus.SUCCEEDED, next(enum_values))
         self.assertEqual(k4a.EWaitStatus.FAILED, next(enum_values))
         self.assertEqual(k4a.EWaitStatus.TIMEOUT, next(enum_values))
+        self.assertEqual(k4a.EWaitStatus.UNSUPPORTED, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_ELogLevel(self):
         enum_values = get_enum_values(len(k4a.ELogLevel))
@@ -56,6 +62,7 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.ELogLevel.INFO, next(enum_values))
         self.assertEqual(k4a.ELogLevel.TRACE, next(enum_values))
         self.assertEqual(k4a.ELogLevel.OFF, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EDepthMode(self):
         enum_values = get_enum_values(len(k4a.EDepthMode))
@@ -65,6 +72,7 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.EDepthMode.WFOV_2X2BINNED, next(enum_values))
         self.assertEqual(k4a.EDepthMode.WFOV_UNBINNED, next(enum_values))
         self.assertEqual(k4a.EDepthMode.PASSIVE_IR, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EColorResolution(self):
         enum_values = get_enum_values(len(k4a.EColorResolution))
@@ -75,6 +83,7 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.EColorResolution.RES_1536P, next(enum_values))
         self.assertEqual(k4a.EColorResolution.RES_2160P, next(enum_values))
         self.assertEqual(k4a.EColorResolution.RES_3072P, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EImageFormat(self):
         enum_values = get_enum_values(len(k4a.EImageFormat))
@@ -87,17 +96,20 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.EImageFormat.CUSTOM8, next(enum_values))
         self.assertEqual(k4a.EImageFormat.CUSTOM16, next(enum_values))
         self.assertEqual(k4a.EImageFormat.CUSTOM, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_ETransformInterpolationType(self):
         enum_values = get_enum_values(len(k4a.ETransformInterpolationType))
         self.assertEqual(k4a.ETransformInterpolationType.NEAREST, next(enum_values))
         self.assertEqual(k4a.ETransformInterpolationType.LINEAR, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EFramesPerSecond(self):
         enum_values = get_enum_values(len(k4a.EFramesPerSecond))
         self.assertEqual(k4a.EFramesPerSecond.FPS_5, next(enum_values))
         self.assertEqual(k4a.EFramesPerSecond.FPS_15, next(enum_values))
         self.assertEqual(k4a.EFramesPerSecond.FPS_30, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EColorControlCommand(self):
         enum_values = get_enum_values(len(k4a.EColorControlCommand))
@@ -111,17 +123,20 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.EColorControlCommand.BACKLIGHT_COMPENSATION, next(enum_values))
         self.assertEqual(k4a.EColorControlCommand.GAIN, next(enum_values))
         self.assertEqual(k4a.EColorControlCommand.POWERLINE_FREQUENCY, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EColorControlMode(self):
         enum_values = get_enum_values(len(k4a.EColorControlMode))
         self.assertEqual(k4a.EColorControlMode.AUTO, next(enum_values))
         self.assertEqual(k4a.EColorControlMode.MANUAL, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EWiredSyncMode(self):
         enum_values = get_enum_values(len(k4a.EWiredSyncMode))
         self.assertEqual(k4a.EWiredSyncMode.STANDALONE, next(enum_values))
         self.assertEqual(k4a.EWiredSyncMode.MASTER, next(enum_values))
         self.assertEqual(k4a.EWiredSyncMode.SUBORDINATE, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_ECalibrationType(self):
         enum_values = get_enum_values(len(k4a.ECalibrationType), start_value = -1)
@@ -131,6 +146,7 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.ECalibrationType.GYRO, next(enum_values))
         self.assertEqual(k4a.ECalibrationType.ACCEL, next(enum_values))
         self.assertEqual(k4a.ECalibrationType.NUM_TYPES, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_ECalibrationModelType(self):
         enum_values = get_enum_values(len(k4a.ECalibrationModelType))
@@ -139,17 +155,20 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.ECalibrationModelType.LENS_DISTORTION_MODEL_POLYNOMIAL_3K, next(enum_values))
         self.assertEqual(k4a.ECalibrationModelType.LENS_DISTORTION_MODEL_RATIONAL_6KT, next(enum_values))
         self.assertEqual(k4a.ECalibrationModelType.LENS_DISTORTION_MODEL_BROWN_CONRADY, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EFirmwareBuild(self):
         enum_values = get_enum_values(len(k4a.EFirmwareBuild))
         self.assertEqual(k4a.EFirmwareBuild.RELEASE, next(enum_values))
         self.assertEqual(k4a.EFirmwareBuild.DEBUG, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EFirmwareSignature(self):
         enum_values = get_enum_values(len(k4a.EFirmwareSignature))
         self.assertEqual(k4a.EFirmwareSignature.MSFT, next(enum_values))
         self.assertEqual(k4a.EFirmwareSignature.TEST, next(enum_values))
         self.assertEqual(k4a.EFirmwareSignature.UNSIGNED, next(enum_values))
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_K4A_SUCCEEDED_True(self):
         self.assertTrue(k4a.K4A_SUCCEEDED(k4a.EStatus.SUCCEEDED))

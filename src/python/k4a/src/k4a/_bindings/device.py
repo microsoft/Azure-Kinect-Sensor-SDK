@@ -440,8 +440,9 @@ class Device:
     def start_imu(self)->EStatus:
         '''! Starts the IMU sample stream.
 
-        @returns EStatus: EStatus.SUCCEEDED is returned on success, and
-            EStatus.FAILED is returned otherwise.
+        @returns EStatus: EStatus.SUCCEEDED is returned on success,
+            EStatus.FAILED on failure, and EStatus.UNSUPPORTED if the device
+            does not support this operation.
 
         @remarks
         - Call this API to start streaming IMU data. It is not valid
@@ -542,7 +543,8 @@ class Device:
             control. The value is only valid if @p color_ctrl_mode is set to
             EColorControlMode.MANUAL, and is otherwise ignored.
 
-        @returns EStatus.SUCCEEDED if successful, EStatus.FAILED otherwise.
+        @returns EStatus.SUCCEEDED if successful, EStatus.FAILED if unsuccessful,
+            or EStatus.UNSUPPORTED if the device does not support this operation.
 
         @remarks 
         - Each control command may be set to manual or automatic. See 

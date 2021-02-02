@@ -30,13 +30,15 @@ else:
 class EStatus(_IntEnum):
     '''! Result code returned by Azure Kinect APIs.
 
-    Name              | Description
-    ----------------- | -------------------------------------------------------
-    EStatus.SUCCEEDED | Successful status.
-    EStatus.FAILED    | Failed status.
+    Name                | Description
+    ------------------- | -----------------------------------------------------
+    EStatus.SUCCEEDED   | Successful status.
+    EStatus.FAILED      | Failed status.
+    EStatus.UNSUPPORTED | Unsupported operation.
     '''
     SUCCEEDED = 0
     FAILED = _auto()
+    UNSUPPORTED = _auto()
 
 
 @_unique
@@ -48,10 +50,12 @@ class EBufferStatus(_IntEnum):
     EBufferStatus.SUCCEEDED         | Successful buffer request status.
     EBufferStatus.FAILED            | Failed buffer request status.
     EBufferStatus.BUFFER_TOO_SMALL  | Buffer is too small.
+    EBufferStatus.UNSUPPORTED       | Unsupported operation.
     '''
     SUCCEEDED = 0
     FAILED = _auto()
     BUFFER_TOO_SMALL = _auto()
+    UNSUPPORTED = _auto()
 
 
 @_unique
@@ -63,10 +67,12 @@ class EWaitStatus(_IntEnum):
     EWaitStatus.SUCCEEDED           | Successful result status.
     EWaitStatus.FAILED              | Failed result status.
     EWaitStatus.TIMEOUT             | The request timed out.
+    EWaitStatus.UNSUPPORTED         | Unsupported operation.
     '''
     SUCCEEDED = 0
     FAILED = _auto()
     TIMEOUT = _auto()
+    UNSUPPORTED = _auto()
 
 
 @_unique
