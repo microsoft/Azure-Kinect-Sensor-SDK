@@ -57,7 +57,7 @@ def get_capture(device_handle:k4a._bindings.k4atypes._DeviceHandle,
         device_config.color_format = color_format
         device_config.color_resolution = color_resolution
         device_config.depth_mode = depth_mode
-        device_config.camera_fps = k4a.EFramesPerSecond.FPS_15
+        device_config.fps_mode_id = 1 # FPS_15
         device_config.synchronized_images_only = True
         device_config.depth_delay_off_color_usec = 0
         device_config.wired_sync_mode = k4a.EWiredSyncMode.STANDALONE

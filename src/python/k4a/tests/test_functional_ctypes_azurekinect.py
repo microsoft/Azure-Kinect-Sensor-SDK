@@ -8,7 +8,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 import unittest
 import ctypes
-from time import sleep
     
 import k4a
 import test_config
@@ -730,7 +729,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             device_config.color_format = k4a.EImageFormat.COLOR_BGRA32
             device_config.color_resolution = k4a.EColorResolution.RES_1080P
             device_config.depth_mode = k4a.EDepthMode.NFOV_2X2BINNED
-            device_config.camera_fps = k4a.EFramesPerSecond.FPS_15
+            device_config.fps_mode_id = 1 # FPS_15
             device_config.synchronized_images_only = True
             device_config.depth_delay_off_color_usec = 0
             device_config.wired_sync_mode = k4a.EWiredSyncMode.STANDALONE

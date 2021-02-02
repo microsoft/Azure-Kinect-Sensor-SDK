@@ -104,13 +104,6 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.ETransformInterpolationType.LINEAR, next(enum_values))
         self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
-    def test_unit_EFramesPerSecond(self):
-        enum_values = get_enum_values(len(k4a.EFramesPerSecond))
-        self.assertEqual(k4a.EFramesPerSecond.FPS_5, next(enum_values))
-        self.assertEqual(k4a.EFramesPerSecond.FPS_15, next(enum_values))
-        self.assertEqual(k4a.EFramesPerSecond.FPS_30, next(enum_values))
-        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
-
     def test_unit_EColorControlCommand(self):
         enum_values = get_enum_values(len(k4a.EColorControlCommand))
         self.assertEqual(k4a.EColorControlCommand.EXPOSURE_TIME_ABSOLUTE, next(enum_values))

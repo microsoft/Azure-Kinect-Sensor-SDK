@@ -280,26 +280,6 @@ class ETransformInterpolationType(_IntEnum):
 
 
 @_unique
-class EFramesPerSecond(_IntEnum):
-    '''! Color and depth sensor frame rate.
-
-    This enumeration is used to select the desired frame rate to operate the
-    cameras. The actual frame rate may vary slightly due to dropped data, 
-    synchronization variation between devices, clock accuracy, or if the camera
-    exposure priority mode causes reduced frame rate.
-
-    Name                            | Description
-    ------------------------------- | -----------------------------------------
-    EFramesPerSecond.FPS_5          | 5 frames per second.
-    EFramesPerSecond.FPS_15         | 15 frames per second.
-    EFramesPerSecond.FPS_30         | 30 frames per second.
-    '''
-    FPS_5 = 0
-    FPS_15 = _auto()
-    FPS_30 = _auto()
-
-
-@_unique
 class EColorControlCommand(_IntEnum):
     '''! Color sensor control commands
 
@@ -637,8 +617,8 @@ class DeviceConfiguration(_ctypes.Structure):
     </tr>
 
     <tr>
-    <td> camera_fps </td>
-    <td> EFramesPerSecond </td>
+    <td> fps_mode_id </td>
+    <td> int </td>
     <td> Desired frame rate for the color and depth camera.
     </td>
     </tr>
@@ -710,7 +690,7 @@ class DeviceConfiguration(_ctypes.Structure):
         ("color_format", _ctypes.c_int),
         ("color_resolution", _ctypes.c_int),
         ("depth_mode", _ctypes.c_int),
-        ("camera_fps", _ctypes.c_int),
+        ("fps_mode_id", _ctypes.c_int),
         ("synchronized_images_only", _ctypes.c_bool),
         ("depth_delay_off_color_usec", _ctypes.c_int32),
         ("wired_sync_mode", _ctypes.c_int),
@@ -722,7 +702,7 @@ class DeviceConfiguration(_ctypes.Structure):
         color_format:EImageFormat=EImageFormat.CUSTOM,
         color_resolution:EColorResolution=EColorResolution.RES_720P,
         depth_mode:EDepthMode=EDepthMode.OFF,
-        camera_fps:EFramesPerSecond=EFramesPerSecond.FPS_5,
+        fps_mode_id:int=0, # FPS_5
         synchronized_images_only:bool=True,
         depth_delay_off_color_usec:int=0,
         wired_sync_mode:EWiredSyncMode=EWiredSyncMode.STANDALONE,
@@ -732,7 +712,7 @@ class DeviceConfiguration(_ctypes.Structure):
         self.color_format = color_format
         self.color_resolution = color_resolution
         self.depth_mode = depth_mode
-        self.camera_fps = camera_fps
+        self.fps_mode_id = fps_mode_id
         self.synchronized_images_only = synchronized_images_only
         self.depth_delay_off_color_usec = depth_delay_off_color_usec
         self.wired_sync_mode = wired_sync_mode
@@ -744,7 +724,7 @@ class DeviceConfiguration(_ctypes.Structure):
             'color_format=%d, ',
             'color_resolution=%d, ',
             'depth_mode=%d, ',
-            'camera_fps=%d, ',
+            'fps_mode_id=%d, ',
             'synchronized_images_only=%s, ',
             'depth_delay_off_color_usec=%d, ',
             'wired_sync_mode=%d, ',
@@ -753,7 +733,7 @@ class DeviceConfiguration(_ctypes.Structure):
             self.color_format,
             self.color_resolution,
             self.depth_mode,
-            self.camera_fps,
+            self.fps_mode_id,
             self.synchronized_images_only,
             self.depth_delay_off_color_usec,
             self.wired_sync_mode,
@@ -1128,7 +1108,7 @@ DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
     color_format = EImageFormat.COLOR_MJPG,
     color_resolution = EColorResolution.OFF,
     depth_mode = EDepthMode.OFF,
-    camera_fps = EFramesPerSecond.FPS_30,
+    fps_mode_id = 2, # FPS_30
     synchronized_images_only = False,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -1139,7 +1119,7 @@ DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
     color_resolution = EColorResolution.RES_2160P,
     depth_mode = EDepthMode.WFOV_UNBINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
+    fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -1150,7 +1130,7 @@ DEVICE_CONFIG_BGRA32_2160P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
     color_resolution = EColorResolution.RES_2160P,
     depth_mode = EDepthMode.WFOV_2X2BINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
+    fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -1161,7 +1141,7 @@ DEVICE_CONFIG_BGRA32_2160P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
     color_resolution = EColorResolution.RES_2160P,
     depth_mode = EDepthMode.NFOV_UNBINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
+    fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -1172,7 +1152,7 @@ DEVICE_CONFIG_BGRA32_2160P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
     color_resolution = EColorResolution.RES_2160P,
     depth_mode = EDepthMode.NFOV_2X2BINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
+    fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -1183,7 +1163,7 @@ DEVICE_CONFIG_BGRA32_1080P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
     color_resolution = EColorResolution.RES_1080P,
     depth_mode = EDepthMode.WFOV_UNBINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
+    fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -1194,7 +1174,7 @@ DEVICE_CONFIG_BGRA32_1080P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
     color_resolution = EColorResolution.RES_1080P,
     depth_mode = EDepthMode.WFOV_2X2BINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
+    fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -1205,7 +1185,7 @@ DEVICE_CONFIG_BGRA32_1080P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
     color_resolution = EColorResolution.RES_1080P,
     depth_mode = EDepthMode.NFOV_UNBINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
+    fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,
@@ -1216,7 +1196,7 @@ DEVICE_CONFIG_BGRA32_1080P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
     color_format = EImageFormat.COLOR_BGRA32,
     color_resolution = EColorResolution.RES_1080P,
     depth_mode = EDepthMode.NFOV_2X2BINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
+    fps_mode_id = 1, # FPS_15
     synchronized_images_only = True,
     depth_delay_off_color_usec = 0,
     wired_sync_mode = EWiredSyncMode.STANDALONE,

@@ -29,12 +29,12 @@ def the_basics():
     # The start_cameras() function requires a device configuration which
     # specifies the modes in which to put the color and depth cameras.
     # See DeviceConfiguration, EImageFormat, EColorResolution, EDepthMode,
-    # EFramesPerSecond, and EWiredSyncMode.
+    # fps_mode_id, and EWiredSyncMode.
     device_config = k4a.DeviceConfiguration(
         color_format=k4a.EImageFormat.COLOR_BGRA32,
         color_resolution=k4a.EColorResolution.RES_1080P,
         depth_mode=k4a.EDepthMode.WFOV_2X2BINNED,
-        camera_fps=k4a.EFramesPerSecond.FPS_15,
+        fps_mode_id=1, # FPS_15,
         synchronized_images_only=True,
         depth_delay_off_color_usec=0,
         wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
