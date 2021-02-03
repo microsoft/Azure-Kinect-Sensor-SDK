@@ -174,6 +174,102 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
         )
         self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
+    def test_functional_fast_ctypes_device_get_info(self):
+        device_info = k4a.DeviceInfo()
+        status = k4a._bindings.k4a.k4a_device_get_info(
+            self.device_handle, ctypes.byref(device_info))
+
+        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+        self.assertEqual(device_info.vendor_id, 0x045E)
+        self.assertEqual(device_info.device_id, 0x097C)
+        self.assertEqual(device_info.capabilities, 
+            k4a.EDeviceCapabilities.IMU | k4a.EDeviceCapabilities.COLOR | k4a.EDeviceCapabilities.DEPTH)
+
+    def test_functional_fast_ctypes_device_get_color_mode_count(self):
+        color_mode_count = ctypes.c_int(0)
+        status = k4a._bindings.k4a.k4a_device_get_color_mode_count(
+            self.device_handle, ctypes.byref(color_mode_count))
+
+        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+        self.assertGreater(color_mode_count.value, 0)
+
+    def test_functional_fast_ctypes_device_get_color_mode(self):
+        color_mode_count = ctypes.c_int(0)
+        status = k4a._bindings.k4a.k4a_device_get_color_mode_count(
+            self.device_handle, ctypes.byref(color_mode_count))
+
+        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+        self.assertGreater(color_mode_count.value, 0)
+
+        for mode in range(color_mode_count.value):
+            color_mode_info = k4a.ColorModeInfo()
+            status = k4a._bindings.k4a.k4a_device_get_color_mode(
+                self.device_handle, ctypes.c_int(mode), ctypes.byref(color_mode_info))
+            
+            self.assertTrue(k4a.K4A_SUCCEEDED(status))
+            self.assertEqual(color_mode_info.struct_size, 40)
+
+            if color_mode_info.mode_id > 0:
+                self.assertGreaterEqual(color_mode_info.horizontal_fov, 0.0)
+                self.assertLessEqual(color_mode_info.horizontal_fov, 360.0)
+                self.assertGreaterEqual(color_mode_info.vertical_fov, 0.0)
+                self.assertLessEqual(color_mode_info.vertical_fov, 360.0)
+
+    def test_functional_fast_ctypes_device_get_depth_mode_count(self):
+        depth_mode_count = ctypes.c_int(0)
+        status = k4a._bindings.k4a.k4a_device_get_depth_mode_count(
+            self.device_handle, ctypes.byref(depth_mode_count))
+
+        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+        self.assertGreater(depth_mode_count.value, 0)
+
+    def test_functional_fast_ctypes_device_get_depth_mode(self):
+        depth_mode_count = ctypes.c_int(0)
+        status = k4a._bindings.k4a.k4a_device_get_depth_mode_count(
+            self.device_handle, ctypes.byref(depth_mode_count))
+
+        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+        self.assertGreater(depth_mode_count.value, 0)
+
+        for mode in range(depth_mode_count.value):
+            depth_mode_info = k4a.DepthModeInfo()
+            status = k4a._bindings.k4a.k4a_device_get_depth_mode(
+                self.device_handle, ctypes.c_int(mode), ctypes.byref(depth_mode_info))
+            
+            self.assertTrue(k4a.K4A_SUCCEEDED(status))
+            self.assertEqual(depth_mode_info.struct_size, 52)
+
+            if depth_mode_info.mode_id > 0:
+                self.assertGreaterEqual(depth_mode_info.horizontal_fov, 0.0)
+                self.assertLessEqual(depth_mode_info.horizontal_fov, 360.0)
+                self.assertGreaterEqual(depth_mode_info.vertical_fov, 0.0)
+                self.assertLessEqual(depth_mode_info.vertical_fov, 360.0)
+
+    def test_functional_fast_ctypes_device_get_fps_mode_count(self):
+        fps_mode_count = ctypes.c_int(0)
+        status = k4a._bindings.k4a.k4a_device_get_fps_mode_count(
+            self.device_handle, ctypes.byref(fps_mode_count))
+
+        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+        self.assertGreater(fps_mode_count.value, 0)
+
+    def test_functional_fast_ctypes_device_get_fps_mode(self):
+        fps_mode_count = ctypes.c_int(0)
+        status = k4a._bindings.k4a.k4a_device_get_fps_mode_count(
+            self.device_handle, ctypes.byref(fps_mode_count))
+
+        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+        self.assertGreater(fps_mode_count.value, 0)
+
+        for mode in range(fps_mode_count.value):
+            fps_mode_info = k4a.FPSModeInfo()
+            status = k4a._bindings.k4a.k4a_device_get_fps_mode(
+                self.device_handle, ctypes.c_int(mode), ctypes.byref(fps_mode_info))
+            
+            self.assertTrue(k4a.K4A_SUCCEEDED(status))
+            self.assertEqual(fps_mode_info.struct_size, 16)
+            self.assertGreater(fps_mode_info.fps, 0)
+
     def test_functional_fast_ctypes_device_get_capture(self):
         with self.lock:
             capture = get_1080p_bgr32_nfov_2x2binned(self.device_handle)

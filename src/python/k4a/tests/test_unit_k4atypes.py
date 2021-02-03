@@ -64,6 +64,13 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.ELogLevel.OFF, next(enum_values))
         self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
+    def test_unit_EDeviceCapabilities(self):
+        enum_values = get_enum_values(len(k4a.EDeviceCapabilities), 1)
+        self.assertEqual(k4a.EDeviceCapabilities.DEPTH, 1), next(enum_values)
+        self.assertEqual(k4a.EDeviceCapabilities.COLOR, 2), next(enum_values)
+        self.assertEqual(k4a.EDeviceCapabilities.IMU, 4), next(enum_values)
+        self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
+
     def test_unit_EImageFormat(self):
         enum_values = get_enum_values(len(k4a.EImageFormat))
         self.assertEqual(k4a.EImageFormat.COLOR_MJPG, next(enum_values))
@@ -177,70 +184,141 @@ class TestStructs(unittest.TestCase):
         transformation_handle = k4a._bindings.k4a._TransformationHandle()
         self.assertIsInstance(transformation_handle, k4a._bindings.k4a._TransformationHandle)
 
+    def test_unit_DeviceInfo(self):
+        device_info = k4a.DeviceInfo()
+        self.assertIsNotNone(device_info)
+        self.assertEqual(len(device_info._fields_), 5)
+
+        s = device_info.__str__()
+        self.assertIsInstance(s, str)
+
+    def test_unit_ColorModeInfo(self):
+        color_mode_info = k4a.ColorModeInfo()
+        self.assertIsNotNone(color_mode_info)
+        self.assertEqual(len(color_mode_info._fields_), 10)
+
+        s = color_mode_info.__str__()
+        self.assertIsInstance(s, str)
+
+    def test_unit_DepthModeInfo(self):
+        depth_mode_info = k4a.DepthModeInfo()
+        self.assertIsNotNone(depth_mode_info)
+        self.assertEqual(len(depth_mode_info._fields_), 13)
+
+        s = depth_mode_info.__str__()
+        self.assertIsInstance(s, str)
+
+    def test_unit_FPSModeInfo(self):
+        fps_mode_info = k4a.FPSModeInfo()
+        self.assertIsNotNone(fps_mode_info)
+        self.assertEqual(len(fps_mode_info._fields_), 4)
+
+        s = fps_mode_info.__str__()
+        self.assertIsInstance(s, str)
+
     def test_unit_DeviceConfiguration(self):
         device_config = k4a.DeviceConfiguration()
         self.assertIsNotNone(device_config)
         self.assertEqual(len(device_config._fields_), 9)
+
+        s = device_config.__str__()
+        self.assertIsInstance(s, str)
 
     def test_unit_CalibrationExtrinsics(self):
         calibration_extrinsics = k4a.CalibrationExtrinsics()
         self.assertIsNotNone(calibration_extrinsics)
         self.assertEqual(len(calibration_extrinsics._fields_), 2)
 
+        s = calibration_extrinsics.__str__()
+        self.assertIsInstance(s, str)
+
     def test_unit_CalibrationIntrinsicParam(self):
         calib_intrinsic = k4a.CalibrationIntrinsicParam()
         self.assertIsNotNone(calib_intrinsic)
         self.assertEqual(len(calib_intrinsic._fields_), 15)
+
+        s = calib_intrinsic.__str__()
+        self.assertIsInstance(s, str)
 
     def test_unit_CalibrationIntrinsics(self):
         calib_intrinsic = k4a.CalibrationIntrinsics()
         self.assertIsNotNone(calib_intrinsic)
         self.assertEqual(len(calib_intrinsic._fields_), 3)
 
+        s = calib_intrinsic.__str__()
+        self.assertIsInstance(s, str)
+
     def test_unit_CalibrationCamera(self):
         camera_calibration = k4a.CalibrationCamera()
         self.assertIsNotNone(camera_calibration)
         self.assertEqual(len(camera_calibration._fields_), 5)
+
+        s = camera_calibration.__str__()
+        self.assertIsInstance(s, str)
 
     def test_unit__Calibration(self):
         calibration = k4a._bindings.k4a._Calibration()
         self.assertIsNotNone(calibration)
         self.assertEqual(len(calibration._fields_), 5)
 
+        s = calibration.__str__()
+        self.assertIsInstance(s, str)
+
     def test_unit_Version(self):
         version = k4a.Version()
         self.assertIsNotNone(version)
         self.assertEqual(len(version._fields_), 3)
+
+        s = version.__str__()
+        self.assertIsInstance(s, str)
 
     def test_unit_HardwareVersion(self):
         version = k4a.HardwareVersion()
         self.assertIsNotNone(version)
         self.assertEqual(len(version._fields_), 6)
 
+        s = version.__str__()
+        self.assertIsInstance(s, str)
+
     def test_unit__XY(self):
         xy = k4a._bindings.k4atypes._XY()
         self.assertIsNotNone(xy)
         self.assertEqual(len(xy._fields_), 2)
+
+        s = xy.__str__()
+        self.assertIsInstance(s, str)
 
     def test_unit__Float2(self):
         xy = k4a._bindings.k4a._Float2()
         self.assertIsNotNone(xy)
         self.assertEqual(len(xy._fields_), 2)
 
+        s = xy.__str__()
+        self.assertIsInstance(s, str)
+
     def test_unit__XYZ(self):
         xyz = k4a._bindings.k4atypes._XYZ()
         self.assertIsNotNone(xyz)
         self.assertEqual(len(xyz._fields_), 3)
+
+        s = xyz.__str__()
+        self.assertIsInstance(s, str)
 
     def test_unit__Float3(self):
         xyz = k4a._bindings.k4a._Float3()
         self.assertIsNotNone(xyz)
         self.assertEqual(len(xyz._fields_), 2)
 
+        s = xyz.__str__()
+        self.assertIsInstance(s, str)
+
     def test_unit_ImuSample(self):
         imu = k4a.ImuSample()
         self.assertIsNotNone(imu)
         self.assertEqual(len(imu._fields_), 5)
+
+        s = imu.__str__()
+        self.assertIsInstance(s, str)
 
 
 if __name__ == '__main__':

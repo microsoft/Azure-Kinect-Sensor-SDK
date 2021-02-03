@@ -26,6 +26,30 @@ else:
     _FUNCTYPE = _ctypes.CFUNCTYPE
 
 
+'''! The ABI version of the SDK implementation.
+
+@remarks This must be equivalent to the value in k4atypes.h.
+
+@note Users should not modify this value.
+'''
+K4A_ABI_VERSION = 1
+
+
+'''! The index to use to connect to a default device.
+
+@note Users should not modify this value.
+'''
+K4A_DEVICE_DEFAULT = 0
+
+
+'''! The value to use in functions that accept a timeout argument to signify to
+the function to wait forever.
+
+@note Users should not modify this value.
+'''
+K4A_WAIT_INFINITE = -1
+
+
 @_unique
 class EStatus(_IntEnum):
     '''! Result code returned by Azure Kinect APIs.
@@ -94,6 +118,23 @@ class ELogLevel(_IntEnum):
     INFO = _auto()
     TRACE = _auto()
     OFF = _auto()
+
+
+@_unique
+class EDeviceCapabilities(_IntEnum):
+    '''! Defines capabilities of a device. 
+
+    @note This is used in bitmaps so the values should take on powers of 2.
+
+    Name                            | Description
+    ------------------------------- | -----------------------------------------
+    EDeviceCapabilities.DEPTH       | The device has a depth sensor.
+    EDeviceCapabilities.COLOR       | The device has a color camera.
+    EDeviceCapabilities.IMU         | The device has an IMU.
+    '''
+    DEPTH = 1
+    COLOR = 2
+    IMU = 4
 
 
 @_unique
@@ -528,6 +569,260 @@ class __handle_k4a_transformation_t(_ctypes.Structure):
 _TransformationHandle = _ctypes.POINTER(__handle_k4a_transformation_t)
 
 
+'''! Device information.
+
+    Name           | Type  | Description
+    -------------- | ----- | ----------------------------------------------
+    struct_size    | int   | The size in bytes of this struct.
+    struct_version | int   | The version of this struct.
+    vendor_id      | int   | The unique vendor ID of the device.
+    device_id      | int   | The ID of the device (i.e. product ID, PID).
+    capabilities   | int   | A bitmap of device capabilities.
+    '''
+class DeviceInfo(_ctypes.Structure):
+    _fields_= [
+        ("struct_size", _ctypes.c_uint32),
+        ("struct_version", _ctypes.c_uint32),
+        ("vendor_id", _ctypes.c_uint32),
+        ("device_id", _ctypes.c_uint32),
+        ("capabilities", _ctypes.c_uint32),
+    ]
+
+    def __init__(self, 
+        struct_size:int=20, # Size of this struct in bytes.
+        struct_version:int=K4A_ABI_VERSION,
+        vendor_id:int=0,
+        device_id:int=0,
+        capabilities:int=0):
+
+        self.struct_size = struct_size
+        self.struct_version = struct_version
+        self.vendor_id = vendor_id
+        self.device_id = device_id
+        self.capabilities = capabilities
+
+    def __str__(self):
+        return ''.join([
+            'struct_size=%d, ',
+            'struct_version=%d, ',
+            'vendor_id=%d, ',
+            'device_id=%d, ',
+            'capabilities=%d']) % (
+            self.struct_size,
+            self.struct_version,
+            self.vendor_id,
+            self.device_id,
+            self.capabilities)
+
+
+'''! Color mode information.
+
+    Name           | Type  | Description
+    -------------- | ----- | ----------------------------------------------
+    struct_size    | int   | The size in bytes of this struct.
+    struct_version | int   | The version of this struct.
+    mode_id        | int   | The mode identifier to use to select a color mode. 0 is reserved for off.
+    width          | int   | The image width in pixels.
+    height         | int   | The image height in pixels.
+    native_format  | EImageFormat | The default image format.
+    horizontal_fov | float | The approximate horizontal field of view in degrees.
+    vertical_fov   | float | The approximate vertical field of view in degrees.
+    min_fps        | int   | The minimum supported frame rate.
+    max_fps        | int   | The maximum supported frame rate.
+    '''
+class ColorModeInfo(_ctypes.Structure):
+    _fields_= [
+        ("struct_size", _ctypes.c_uint32),
+        ("struct_version", _ctypes.c_uint32),
+        ("mode_id", _ctypes.c_uint32),
+        ("width", _ctypes.c_uint32),
+        ("height", _ctypes.c_uint32),
+        ("native_format", _ctypes.c_uint32),
+        ("horizontal_fov", _ctypes.c_float),
+        ("vertical_fov", _ctypes.c_float),
+        ("min_fps", _ctypes.c_int),
+        ("max_fps", _ctypes.c_int),
+    ]
+
+    def __init__(self, 
+        struct_size:int=40, # Size of this struct in bytes.
+        struct_version:int=K4A_ABI_VERSION,
+        mode_id:int=0,
+        width:int=0,
+        height:int=0,
+        native_format:EImageFormat=EImageFormat.COLOR_MJPG,
+        horizontal_fov:float=0,
+        vertical_fov:float=0,
+        min_fps:int=0,
+        max_fps:int=0):
+
+        self.struct_size = struct_size
+        self.struct_version = struct_version
+        self.mode_id = mode_id
+        self.width = width
+        self.height = height
+        self.native_format = native_format
+        self.horizontal_fov = horizontal_fov
+        self.vertical_fov = vertical_fov
+        self.min_fps = min_fps
+        self.max_fps = max_fps
+
+    def __str__(self):
+        return ''.join([
+            'struct_size=%d, ',
+            'struct_version=%d, ',
+            'mode_id=%d, ',
+            'width=%d, ',
+            'height=%d, ',
+            'native_format=%s, ',
+            'horizontal_fov=%f, ',
+            'vertical_fov=%f, ',
+            'min_fps=%d, ',
+            'max_fps=%d']) % (
+            self.struct_size,
+            self.struct_version,
+            self.mode_id,
+            self.width,
+            self.height,
+            self.native_format,
+            self.horizontal_fov,
+            self.vertical_fov,
+            self.min_fps,
+            self.max_fps)
+
+
+'''! Depth mode information.
+
+    Name            | Type  | Description
+    --------------- | ----- | ----------------------------------------------
+    struct_size     | int   | The size in bytes of this struct.
+    struct_version  | int   | The version of this struct.
+    mode_id         | int   | The mode identifier to use to select a depth mode. 0 is reserved for off.
+    passive_ir_only | bool  | True if only capturing passive IR.
+    width           | int   | The image width in pixels.
+    height          | int   | The image height in pixels.
+    native_format   | EImageFormat | The default image format.
+    horizontal_fov  | float | The approximate horizontal field of view in degrees.
+    vertical_fov    | float | The approximate vertical field of view in degrees.
+    min_fps         | int   | The minimum supported frame rate.
+    max_fps         | int   | The maximum supported frame rate.
+    min_range       | int   | The minimum expected depth value in millimeters.
+    max_range       | int   | The maximum expected depth value in millimeters.
+    '''
+class DepthModeInfo(_ctypes.Structure):
+    _fields_= [
+        ("struct_size", _ctypes.c_uint32),
+        ("struct_version", _ctypes.c_uint32),
+        ("mode_id", _ctypes.c_uint32),
+        ("passive_ir_only", _ctypes.c_bool),
+        ("width", _ctypes.c_uint32),
+        ("height", _ctypes.c_uint32),
+        ("native_format", _ctypes.c_uint32),
+        ("horizontal_fov", _ctypes.c_float),
+        ("vertical_fov", _ctypes.c_float),
+        ("min_fps", _ctypes.c_int),
+        ("max_fps", _ctypes.c_int),
+        ("min_range", _ctypes.c_int),
+        ("max_range", _ctypes.c_int),
+    ]
+
+    def __init__(self, 
+        struct_size:int=52, # Size of this struct in bytes (in C).
+        struct_version:int=K4A_ABI_VERSION,
+        mode_id:int=0,
+        passive_ir_only:bool=False,
+        width:int=0,
+        height:int=0,
+        native_format:EImageFormat=EImageFormat.COLOR_MJPG,
+        horizontal_fov:float=0,
+        vertical_fov:float=0,
+        min_fps:int=0,
+        max_fps:int=0,
+        min_range:int=0,
+        max_range:int=0):
+
+        self.struct_size = struct_size
+        self.struct_version = struct_version
+        self.mode_id = mode_id
+        self.passive_ir_only = passive_ir_only
+        self.width = width
+        self.height = height
+        self.native_format = native_format
+        self.horizontal_fov = horizontal_fov
+        self.vertical_fov = vertical_fov
+        self.min_fps = min_fps
+        self.max_fps = max_fps
+
+    def __str__(self):
+        return ''.join([
+            'struct_size=%d, ',
+            'struct_version=%d, ',
+            'mode_id=%d, ',
+            'passive_ir_only=%s, ',
+            'width=%d, ',
+            'height=%d, ',
+            'native_format=%s, ',
+            'horizontal_fov=%f, ',
+            'vertical_fov=%f, ',
+            'min_fps=%d, ',
+            'max_fps=%d, ',
+            'min_range=%d, ',
+            'max_range=%d']) % (
+            self.struct_size,
+            self.struct_version,
+            self.mode_id,
+            self.passive_ir_only,
+            self.width,
+            self.height,
+            self.native_format,
+            self.horizontal_fov,
+            self.vertical_fov,
+            self.min_fps,
+            self.max_fps,
+            self.min_range,
+            self.max_range)
+
+
+'''! FPS mode information for specifying frame rates.
+
+    Name            | Type  | Description
+    --------------- | ----- | ----------------------------------------------
+    struct_size     | int   | The size in bytes of this struct.
+    struct_version  | int   | The version of this struct.
+    mode_id         | int   | The mode identifier to use to select an FPS mode.
+    fps             | int   | The frame rate per second.
+    '''
+class FPSModeInfo(_ctypes.Structure):
+    _fields_= [
+        ("struct_size", _ctypes.c_uint32),
+        ("struct_version", _ctypes.c_uint32),
+        ("mode_id", _ctypes.c_uint32),
+        ("fps", _ctypes.c_int32),
+    ]
+
+    def __init__(self, 
+        struct_size:int=16, # Size of this struct in bytes.
+        struct_version:int=K4A_ABI_VERSION,
+        mode_id:int=0,
+        fps:int=0):
+
+        self.struct_size = struct_size
+        self.struct_version = struct_version
+        self.mode_id = mode_id
+        self.fps = fps
+
+    def __str__(self):
+        return ''.join([
+            'struct_size=%d, ',
+            'struct_version=%d, ',
+            'mode_id=%d, ',
+            'fps=%d']) % (
+            self.struct_size,
+            self.struct_version,
+            self.mode_id,
+            self.fps)
+
+
 class DeviceConfiguration(_ctypes.Structure):
     '''! Configuration parameters for an Azure Kinect device.
 
@@ -669,13 +964,13 @@ class DeviceConfiguration(_ctypes.Structure):
 
     def __str__(self):
         return ''.join([
-            'color_format=%d, ',
+            'color_format=%s, ',
             'color_mode_id=%d, ',
             'depth_mode_id=%d, ',
             'fps_mode_id=%d, ',
             'synchronized_images_only=%s, ',
             'depth_delay_off_color_usec=%d, ',
-            'wired_sync_mode=%d, ',
+            'wired_sync_mode=%s, ',
             'subordinate_delay_off_master_usec=%d, ',
             'disable_streaming_indicator=%s']) % (
             self.color_format,

@@ -46,12 +46,6 @@ except Exception as ee:
 
 # Map _ctypes symbols to functions in the k4a.dll.
 
-#K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
-k4a_device_get_installed_count = _k4a_lib.k4a_device_get_installed_count
-k4a_device_get_installed_count.restype = _ctypes.c_uint32
-k4a_device_get_installed_count.argtypes = None
-
-
 #K4A_EXPORT k4a_status_t k4a_set_debug_message_handler(logging_message_cb *message_cb,
 #                                                      void *message_cb_context,
 #                                                      k4a_log_level_t min_level);
@@ -66,6 +60,12 @@ k4a_set_allocator.restype = EStatus
 k4a_set_allocator.argtypes = (_memory_allocate_cb, _memory_destroy_cb,)
 
 
+#K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
+k4a_device_get_installed_count = _k4a_lib.k4a_device_get_installed_count
+k4a_device_get_installed_count.restype = _ctypes.c_uint32
+k4a_device_get_installed_count.argtypes = None
+
+
 #K4A_EXPORT k4a_status_t k4a_device_open(uint32_t index, k4a_device_t *device_handle);
 k4a_device_open = _k4a_lib.k4a_device_open
 k4a_device_open.restype = EStatus
@@ -76,6 +76,54 @@ k4a_device_open.argtypes = (_ctypes.c_uint32, _ctypes.POINTER(_DeviceHandle))
 k4a_device_close = _k4a_lib.k4a_device_close
 k4a_device_close.restype = None
 k4a_device_close.argtypes = (_DeviceHandle,)
+
+
+#K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info);
+k4a_device_get_info = _k4a_lib.k4a_device_get_info
+k4a_device_get_info.restype = EStatus
+k4a_device_get_info.argtypes = (_DeviceHandle, _ctypes.POINTER(DeviceInfo))
+
+
+#K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count);
+k4a_device_get_color_mode_count = _k4a_lib.k4a_device_get_color_mode_count
+k4a_device_get_color_mode_count.restype = EStatus
+k4a_device_get_color_mode_count.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctypes.c_int))
+
+
+#K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
+#                                                  int mode_id,
+#                                                  k4a_color_mode_info_t *mode_info);
+k4a_device_get_color_mode = _k4a_lib.k4a_device_get_color_mode
+k4a_device_get_color_mode.restype = EStatus
+k4a_device_get_color_mode.argtypes = (_DeviceHandle, _ctypes.c_int, _ctypes.POINTER(ColorModeInfo))
+
+
+#K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count);
+k4a_device_get_depth_mode_count = _k4a_lib.k4a_device_get_depth_mode_count
+k4a_device_get_depth_mode_count.restype = EStatus
+k4a_device_get_depth_mode_count.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctypes.c_int))
+
+
+#K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
+#                                                  int mode_id,
+#                                                  k4a_depth_mode_info_t *mode_info);
+k4a_device_get_depth_mode = _k4a_lib.k4a_device_get_depth_mode
+k4a_device_get_depth_mode.restype = EStatus
+k4a_device_get_depth_mode.argtypes = (_DeviceHandle, _ctypes.c_int, _ctypes.POINTER(DepthModeInfo))
+
+
+#K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count);
+k4a_device_get_fps_mode_count = _k4a_lib.k4a_device_get_fps_mode_count
+k4a_device_get_fps_mode_count.restype = EStatus
+k4a_device_get_fps_mode_count.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctypes.c_int))
+
+
+#K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
+#                                                  int mode_id,
+#                                                  k4a_fps_mode_info_t *mode_info);
+k4a_device_get_fps_mode = _k4a_lib.k4a_device_get_fps_mode
+k4a_device_get_fps_mode.restype = EStatus
+k4a_device_get_fps_mode.argtypes = (_DeviceHandle, _ctypes.c_int, _ctypes.POINTER(FPSModeInfo))
 
 
 #K4A_EXPORT k4a_wait_status_t k4a_device_get_capture(k4a_device_t device_handle,
