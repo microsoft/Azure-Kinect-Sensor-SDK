@@ -37,7 +37,8 @@ from os import linesep as _newline
 
 from .k4atypes import _DeviceHandle, HardwareVersion, EStatus, EBufferStatus, \
     _EmptyClass, EColorControlCommand, EColorControlMode, ImuSample, \
-    EWaitStatus, DeviceConfiguration, _CaptureHandle, _Calibration, ImuSample
+    EWaitStatus, DeviceConfiguration, _CaptureHandle, _Calibration, ImuSample, \
+    DeviceInfo, DepthModeInfo, ColorModeInfo, FPSModeInfo
 
 from .k4a import k4a_device_get_installed_count, k4a_device_open, \
     k4a_device_get_serialnum, k4a_device_get_version, \
@@ -46,7 +47,10 @@ from .k4a import k4a_device_get_installed_count, k4a_device_open, \
     k4a_device_start_cameras, k4a_device_stop_cameras, \
     k4a_device_start_imu, k4a_device_stop_imu, \
     k4a_device_set_color_control, k4a_device_get_raw_calibration, \
-    k4a_device_get_sync_jack, k4a_device_get_capture, k4a_device_get_calibration
+    k4a_device_get_sync_jack, k4a_device_get_capture, k4a_device_get_calibration, \
+    k4a_device_get_info, k4a_device_get_color_mode_count, k4a_device_get_color_mode, \
+    k4a_device_get_depth_mode_count, k4a_device_get_depth_mode, \
+    k4a_device_get_fps_mode_count, k4a_device_get_fps_mode
 
 from .capture import Capture
 from .calibration import Calibration
@@ -278,6 +282,105 @@ class Device:
         self.stop_cameras()
         self.stop_imu()
         k4a_device_close(self.__device_handle)
+
+    def get_device_info(self)->DeviceInfo:
+        '''! Get device information and capabilities.
+
+        @returns A DeviceInfo instance, or None if failed.
+        '''
+        device_info = DeviceInfo()
+        status = k4a_device_get_info(
+            self.__device_handle,
+            _ctypes.byref(device_info))
+
+        if status != EStatus.SUCCEEDED:
+            device_info = None
+
+        return device_info
+
+    def get_color_modes(self)->list:
+        '''! Get a list of all available ColorModeInfo.
+
+        @returns A list of all available ColorModeInfo, or None if failed.
+        '''
+        color_mode_infos = list()
+
+        num_color_modes = _ctypes.c_int(0)
+        status = k4a_device_get_color_mode_count(
+            self.__device_handle,
+            _ctypes.byref(num_color_modes))
+
+        if status == EStatus.SUCCEEDED:
+            for mode_index in range(num_color_modes.value):
+                color_mode_info = ColorModeInfo()
+                status = k4a_device_get_color_mode(
+                    self.__device_handle,
+                    mode_index,
+                    _ctypes.byref(color_mode_info))
+
+                if status == EStatus.SUCCEEDED:
+                    color_mode_infos.append(color_mode_info)
+
+        elif status == EStatus.FAILED:
+            color_mode_infos = None
+
+        return color_mode_infos
+
+    def get_depth_modes(self)->list:
+        '''! Get a list of all available DepthModeInfo.
+
+        @returns A list of all available DepthModeInfo, or None if failed.
+        '''
+        depth_mode_infos = list()
+
+        num_depth_modes = _ctypes.c_int(0)
+        status = k4a_device_get_depth_mode_count(
+            self.__device_handle,
+            _ctypes.byref(num_depth_modes))
+
+        if status == EStatus.SUCCEEDED:
+            for mode_index in range(num_depth_modes.value):
+                depth_mode_info = DepthModeInfo()
+                status = k4a_device_get_depth_mode(
+                    self.__device_handle,
+                    mode_index,
+                    _ctypes.byref(depth_mode_info))
+
+                if status == EStatus.SUCCEEDED:
+                    depth_mode_infos.append(depth_mode_info)
+
+        elif status == EStatus.FAILED:
+            depth_mode_infos = None
+
+        return depth_mode_infos
+
+    def get_fps_modes(self)->list:
+        '''! Get a list of all available FPSModeInfo.
+
+        @returns A list of all available FPSModeInfo, or None if failed.
+        '''
+        fps_mode_infos = list()
+
+        num_fps_modes = _ctypes.c_int(0)
+        status = k4a_device_get_fps_mode_count(
+            self.__device_handle,
+            _ctypes.byref(num_fps_modes))
+
+        if status == EStatus.SUCCEEDED:
+            for mode_index in range(num_fps_modes.value):
+                fps_mode_info = FPSModeInfo()
+                status = k4a_device_get_fps_mode(
+                    self.__device_handle,
+                    mode_index,
+                    _ctypes.byref(fps_mode_info))
+
+                if status == EStatus.SUCCEEDED:
+                    fps_mode_infos.append(fps_mode_info)
+
+        elif status == EStatus.FAILED:
+            fps_mode_infos = None
+
+        return fps_mode_infos
 
     def get_capture(self, timeout_ms:int)->Capture:
         '''! Reads a sensor capture.

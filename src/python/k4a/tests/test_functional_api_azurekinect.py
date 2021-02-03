@@ -109,6 +109,66 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
             Test_Functional_API_Device_AzureKinect.set_serial_number, 
             self.device, "not settable")
 
+    def test_functional_fast_api_get_device_info(self):
+        device_info = self.device.get_device_info()
+        self.assertIsNotNone(device_info)
+        self.assertIsInstance(device_info, k4a.DeviceInfo)
+        self.assertNotEqual(device_info.struct_size, 0)
+        self.assertNotEqual(device_info.struct_version, 0)
+        self.assertNotEqual(device_info.vendor_id, 0)
+        self.assertNotEqual(device_info.capabilities, 0)
+
+    def test_functional_fast_api_get_depth_modes(self):
+        depth_modes = self.device.get_depth_modes()
+        self.assertIsNotNone(depth_modes)
+        self.assertIsInstance(depth_modes, list)
+        self.assertNotEqual(len(depth_modes), 0)
+
+        for depth_mode in depth_modes:
+            self.assertIsInstance(depth_mode, k4a.DepthModeInfo)
+            self.assertNotEqual(depth_mode.struct_size, 0)
+            self.assertNotEqual(depth_mode.struct_version, 0)
+
+            if depth_mode.mode_id != 0:
+                self.assertGreater(depth_mode.width, 0)
+                self.assertGreater(depth_mode.height, 0)
+                self.assertGreaterEqual(depth_mode.horizontal_fov, 0.0)
+                self.assertLessEqual(depth_mode.horizontal_fov, 360.0)
+                self.assertGreaterEqual(depth_mode.vertical_fov, 0.0)
+                self.assertLessEqual(depth_mode.vertical_fov, 360.0)
+                self.assertGreaterEqual(depth_mode.min_range, 0.0)
+
+    def test_functional_fast_api_get_color_modes(self):
+        color_modes = self.device.get_color_modes()
+        self.assertIsNotNone(color_modes)
+        self.assertIsInstance(color_modes, list)
+        self.assertNotEqual(len(color_modes), 0)
+
+        for color_mode in color_modes:
+            self.assertIsInstance(color_mode, k4a.ColorModeInfo)
+            self.assertNotEqual(color_mode.struct_size, 0)
+            self.assertNotEqual(color_mode.struct_version, 0)
+
+            if color_mode.mode_id != 0:
+                self.assertGreater(color_mode.width, 0)
+                self.assertGreater(color_mode.height, 0)
+                self.assertGreaterEqual(color_mode.horizontal_fov, 0.0)
+                self.assertLessEqual(color_mode.horizontal_fov, 360.0)
+                self.assertGreaterEqual(color_mode.vertical_fov, 0.0)
+                self.assertLessEqual(color_mode.vertical_fov, 360.0)
+
+    def test_functional_fast_api_get_fps_modes(self):
+        fps_modes = self.device.get_fps_modes()
+        self.assertIsNotNone(fps_modes)
+        self.assertIsInstance(fps_modes, list)
+        self.assertNotEqual(len(fps_modes), 0)
+
+        for fps_mode in fps_modes:
+            self.assertIsInstance(fps_mode, k4a.FPSModeInfo)
+            self.assertNotEqual(fps_mode.struct_size, 0)
+            self.assertNotEqual(fps_mode.struct_version, 0)
+            self.assertGreaterEqual(fps_mode.fps, 0)
+
     def test_functional_fast_api_get_capture(self):
 
         # Start the cameras.

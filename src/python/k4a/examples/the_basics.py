@@ -28,13 +28,18 @@ def the_basics():
     # In order to start capturing frames, need to start the cameras.
     # The start_cameras() function requires a device configuration which
     # specifies the modes in which to put the color and depth cameras.
-    # See DeviceConfiguration, EImageFormat, color_mode_id, depth_mode_id,
-    # fps_mode_id, and EWiredSyncMode.
+    
+    # But first, we have to get the depth modes, color modes, and fps modes. 
+    # These are used in a DeviceConfiguration.
+    depth_modes = device.get_depth_modes()
+    color_modes = device.get_color_modes()
+    fps_modes = device.get_fps_modes()
+
     device_config = k4a.DeviceConfiguration(
         color_format=k4a.EImageFormat.COLOR_BGRA32,
-        color_mode_id=2, # 1080P
-        depth_mode_id=3, # WFOV_2X2BINNED
-        fps_mode_id=1, # FPS_15
+        color_mode_id=color_modes[2].mode_id, # 1080P
+        depth_mode_id=depth_modes[3].mode_id, # WFOV_2X2BINNED
+        fps_mode_id=fps_modes[1].mode_id,     # FPS_15
         synchronized_images_only=True,
         depth_delay_off_color_usec=0,
         wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,

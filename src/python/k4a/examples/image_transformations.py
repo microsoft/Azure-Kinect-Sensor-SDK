@@ -56,16 +56,20 @@ def image_transformations():
         # For convenience, the k4a package pre-defines some configurations
         # for common usage of the Azure Kinect device, but the user can
         # modify the values to set the device in their preferred modes.
+        depth_modes = device.get_depth_modes()
+        color_modes = device.get_color_modes()
+        fps_modes = device.get_fps_modes()
+
         device_config = k4a.DeviceConfiguration(
-        color_format=k4a.EImageFormat.COLOR_BGRA32,
-        color_mode_id=2, # 1080P
-        depth_mode_id=3, # WFOV_2X2BINNED
-        fps_mode_id=1, # FPS_15
-        synchronized_images_only=True,
-        depth_delay_off_color_usec=0,
-        wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
-        subordinate_delay_off_master_usec=0,
-        disable_streaming_indicator=False)
+            color_format=k4a.EImageFormat.COLOR_BGRA32,
+            color_mode_id=color_modes[2].mode_id, # 1080P
+            depth_mode_id=depth_modes[3].mode_id, # WFOV_2X2BINNED
+            fps_mode_id=fps_modes[1].mode_id,     # FPS_15
+            synchronized_images_only=True,
+            depth_delay_off_color_usec=0,
+            wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
+            subordinate_delay_off_master_usec=0,
+            disable_streaming_indicator=False)
 
         status = device.start_cameras(device_config)
         if status != k4a.EStatus.SUCCEEDED:
