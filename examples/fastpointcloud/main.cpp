@@ -146,8 +146,46 @@ int main(int argc, char **argv)
         goto Exit;
     }
 
-    config.depth_mode_id = 3; // K4A_DEPTH_MODE_WFOV_2X2BINNED
-    config.fps_mode_id = 2;   // K4A_FRAMES_PER_SECOND_30
+    // TODO: example in c++
+    int depth_mode_id = 0;
+    int fps_mode_id = 0;
+
+    // get depth modes
+    std::vector<k4a_depth_mode_info_t> depth_modes = device.get_depth_modes();
+    // get count of depth modes
+    int depth_modes_count = depth_modes.size();
+    // for each depth mode
+    for (int i = 0; i < depth_modes_count; i++)
+    {
+        // does it meet this condition?
+        if (depth_modes[i].height >= 512 && depth_modes[i].horizontal_fov >= 120) // K4A_DEPTH_MODE_WFOV_2X2BINNED
+        {
+            // set the depth mode id and break
+            depth_mode_id = depth_modes[i].mode_id;
+            break;
+        }
+    }
+
+    // get fps modes
+    std::vector<k4a_fps_mode_info_t> fps_modes = device.get_fps_modes();
+    // store highestFPSAvailable
+    int heighestFPSAvailable = 0;
+    // get count of fps modes
+    int fps_modes_count = fps_modes.size();
+    // for each fps mode
+    for (int i = 0; i < fps_modes_count; i++)
+    {
+        // does it meet this condition?
+        if (fps_modes[i].fps >= heighestFPSAvailable) // K4A_FRAMES_PER_SECOND_30
+        {
+            // set the heighestFPSAvailable and set the fps mode id
+            heighestFPSAvailable = fps_modes[i].fps;
+            fps_mode_id = fps_modes[i].mode_id;
+        }
+    }
+
+    config.depth_mode_id = depth_mode_id; 
+    config.fps_mode_id = fps_mode_id;   
 
     k4a_calibration_t calibration;
     if (K4A_RESULT_SUCCEEDED !=
