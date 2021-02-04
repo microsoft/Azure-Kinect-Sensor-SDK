@@ -134,6 +134,199 @@ K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *
  */
 K4A_EXPORT k4a_result_t k4a_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memory_destroy_cb_t free);
 
+/** Get the device info and capabilities.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param device_info
+ * Location to write the device info.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p device info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \remarks
+ * The device info output contains the vendor id, the device id and available capabilities.
+ *
+ * \sa k4a_device_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info);
+
+/** Get the number of valid color modes.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_count
+ * Location to write the color mode count.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \remarks
+ * The mode count output is the number of available color modes for the device specified by device_handle.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count);
+
+/** Get the color mode info for a specified index.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_id
+ * Id for color mode info.
+ *
+ * \param mode_info
+ * Location to write the color mode info.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \sa k4a_color_mode_info_t
+ *
+ * \remarks
+ * The color mode info output contains image resolution, native image format, horizontal and vertical fov and min and
+ * max fps.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
+                                                  int mode_id,
+                                                  k4a_color_mode_info_t *mode_info);
+
+/** Get the number of valid depth modes.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_count
+ * Location to write the depth mode count.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \remarks
+ * The mode count output is the number of available depth modes for the device specified by device_handle.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count);
+
+/** Get the depth mode info for a specified index.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_id
+ * Id for mode info.
+ *
+ * \param mode_info
+ * Location to write the depth mode info.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \sa k4a_depth_mode_info_t
+ *
+ * \remarks
+ * The depth mode info output contains image resolution, image native format, horizontal and vertical fov, min and max
+ * fps, min and max range and whether it is passive ir only.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
+                                                  int mode_id,
+                                                  k4a_depth_mode_info_t *mode_info);
+
+/** Get the number of valid fps modes.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_count
+ * Location to write the fps mode count.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \remarks
+ * The mode count output is the number of available fps modes for the device specified by device_handle.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count);
+
+/** Get the fps mode info for a specified index.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_id
+ * Id for mode info.
+ *
+ * \param mode_info
+ * Location to write the fps mode info.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \sa k4a_fps_mode_info_t
+ *
+ * \remarks
+ * The fps mode info contains the frame rate per second.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
+                                                int mode_id,
+                                                k4a_fps_mode_info_t *mode_info);
+
 /** Open an Azure Kinect device.
  *
  * \param index
@@ -2276,200 +2469,7 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
                                                                       const k4a_image_t depth_image,
                                                                       const k4a_calibration_type_t camera,
                                                                       k4a_image_t xyz_image);
-
-/**
- *
- * \param device_handle
- * Handle obtained by k4a_device_open().
- *
- * \param device_info
- * Location to write the device info.
- *
- * \returns
- * ::K4A_RESULT_SUCCEEDED if \p device info was successfully written. ::K4A_RESULT_FAILED otherwise.
- *
- * \remarks
- * The device info output contains the vendor id, the device id and available capabilities.
- *
- * \sa k4a_device_t
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
- *   <requirement name="Library">k4a.lib</requirement>
- *   <requirement name="DLL">k4a.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info);
-
-/**
- *
- * \param device_handle
- * Handle obtained by k4a_device_open().
- *
- * \param mode_count
- * Location to write the color mode count.
- *
- * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
- *
- * \remarks
- * The mode count output is the number of available color modes for the device specified by device_handle.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
- *   <requirement name="Library">k4a.lib</requirement>
- *   <requirement name="DLL">k4a.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count);
-
-/**
- *
- * \param device_handle
- * Handle obtained by k4a_device_open().
- *
- * \param mode_id
- * Id for color mode info.
- *
- * \param mode_info
- * Location to write the color mode info.
- *
- * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
- *
- * \sa k4a_color_mode_info_t
- *
- * \remarks
- * The color mode info output contains image resolution, native image format, horizontal and vertical fov and min and
- * max fps.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
- *   <requirement name="Library">k4a.lib</requirement>
- *   <requirement name="DLL">k4a.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
-                                                  int mode_id,
-                                                  k4a_color_mode_info_t *mode_info);
-
-/**
- *
- * \param device_handle
- * Handle obtained by k4a_device_open().
- *
- * \param mode_count
- * Location to write the depth mode count.
- *
- * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
- *
- * \remarks
- * The mode count output is the number of available depth modes for the device specified by device_handle.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
- *   <requirement name="Library">k4a.lib</requirement>
- *   <requirement name="DLL">k4a.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count);
-
-/**
- *
- * \param device_handle
- * Handle obtained by k4a_device_open().
- *
- * \param mode_id
- * Id for mode info.
- *
- * \param mode_info
- * Location to write the depth mode info.
- *
- * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
- *
- * \sa k4a_depth_mode_info_t
- *
- * \remarks
- * The depth mode info output contains image resolution, image native format, horizontal and vertical fov, min and max
- * fps, min and max range and whether it is passive ir only.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
- *   <requirement name="Library">k4a.lib</requirement>
- *   <requirement name="DLL">k4a.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
-                                                  int mode_id,
-                                                  k4a_depth_mode_info_t *mode_info);
-
-/**
- *
- * \param device_handle
- * Handle obtained by k4a_device_open().
- *
- * \param mode_count
- * Location to write the fps mode count.
- *
- * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
- *
- * \remarks
- * The mode count output is the number of available fps modes for the device specified by device_handle.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
- *   <requirement name="Library">k4a.lib</requirement>
- *   <requirement name="DLL">k4a.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count);
-
-/**
- *
- * \param device_handle
- * Handle obtained by k4a_device_open().
- *
- * \param mode_id
- * Id for mode info.
- *
- * \param mode_info
- * Location to write the fps mode info.
- *
- * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
- *
- * \sa k4a_fps_mode_info_t
- *
- * \remarks
- * The fps mode info contains the frame rate per second.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
- *   <requirement name="Library">k4a.lib</requirement>
- *   <requirement name="DLL">k4a.dll</requirement>
- * </requirements>
- * \endxmlonly
- */
-K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
-                                                int mode_id,
-                                                k4a_fps_mode_info_t *mode_info);
-
+                                                                      
 /**
  * @}
  */
