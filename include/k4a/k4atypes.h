@@ -881,7 +881,7 @@ typedef enum
     K4A_CAPABILITY_IMU = 4
 } device_capabilities;
 
-/** Stores the vendor id, the device id and device capabilities.  
+/** Stores the vendor id, the device id and device capabilities.
  *
  * \sa device_capabilities
  *
