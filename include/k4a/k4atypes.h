@@ -875,7 +875,7 @@ typedef enum
     K4A_CAPABILITY_DEPTH = 1,
     K4A_CAPABILITY_COLOR = 2,
     K4A_CAPABILITY_IMU = 4
-} device_capabilities;
+} k4a_device_capabilities_t;
 
 /**
  *

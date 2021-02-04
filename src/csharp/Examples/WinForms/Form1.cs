@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -43,11 +44,35 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
         {
             using (Device device = Device.Open(0))
             {
+                List<ColorModeInfo> colorModes = device.GetColorModes();
+                List<DepthModeInfo> depthModes = device.GetDepthModes();
+
+                int colorModeId = 0;
+                int depthModeId = 0;
+
+                foreach(ColorModeInfo colorModeInfo in colorModes)
+                {
+                    if(colorModeInfo.ModeId > 0)
+                    {
+                        colorModeId = colorModeInfo.ModeId;
+                        break;
+                    }
+                }
+
+                foreach (DepthModeInfo depthModeInfo in depthModes)
+                {
+                    if (depthModeInfo.ModeId > 0)
+                    {
+                        depthModeId = depthModeInfo.ModeId;
+                        break;
+                    }
+                }
+
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorResolution = ColorResolution.R720p,
-                    DepthMode = DepthMode.NFOV_2x2Binned,
+                    ColorModeId = colorModeId,
+                    DepthModeId = depthModeId,
                     SynchronizedImagesOnly = true,
                 });
 

@@ -22,19 +22,19 @@ namespace Microsoft.Azure.Kinect.Sensor
         public ImageFormat ColorFormat { get; set; } = ImageFormat.ColorMJPG;
 
         /// <summary>
-        /// Gets or sets the image resolution to capture with the color camera.
+        /// Gets or sets the color mode id to capture with the color camera.
         /// </summary>
-        public ColorResolution ColorResolution { get; set; } = ColorResolution.Off;
+        public int ColorModeId { get; set; } = 0; // 0 = Off
 
         /// <summary>
-        /// Gets or sets the capture mode for the depth camera.
+        /// Gets or sets the capture mode id for the depth camera.
         /// </summary>
-        public DepthMode DepthMode { get; set; } = DepthMode.Off;
+        public int DepthModeId { get; set; } = 0; // 0 = Off
 
         /// <summary>
-        /// Gets or sets the desired frame rate for the color and depth cameras.
+        /// Gets or sets the desired frame rate id for the color and depth cameras.
         /// </summary>
-        public FPS CameraFPS { get; set; } = FPS.FPS30;
+        public int FPSModeId { get; set; } = 0;
 
         /// <summary>
         /// Gets or sets a value indicating whether to only return synchronized depth and color images.
@@ -80,9 +80,9 @@ namespace Microsoft.Azure.Kinect.Sensor
             return new NativeMethods.k4a_device_configuration_t
             {
                 color_format = this.ColorFormat,
-                color_resolution = this.ColorResolution,
-                depth_mode = this.DepthMode,
-                camera_fps = this.CameraFPS,
+                color_mode_id = (uint) this.ColorModeId,
+                depth_mode_id = (uint) this.DepthModeId,
+                fps_mode_id = (uint) this.FPSModeId,
                 synchronized_images_only = this.SynchronizedImagesOnly,
                 depth_delay_off_color_usec = depth_delay_off_color_usec,
                 wired_sync_mode = this.WiredSyncMode,

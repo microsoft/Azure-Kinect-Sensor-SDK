@@ -130,6 +130,7 @@ typedef enum
     K4A_STREAM_RESULT_SUCCEEDED = 0, /**< The result was successful. */
     K4A_STREAM_RESULT_FAILED,        /**< The result was a failure. */
     K4A_STREAM_RESULT_EOF,           /**< The end of the data stream was reached. */
+    K4A_STREAM_RESULT_UNSUPPORTED,   /**< The result was unsupported. */
 } k4a_stream_result_t;
 
 /** Playback seeking positions.

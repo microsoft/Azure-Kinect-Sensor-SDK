@@ -34,6 +34,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             K4A_BUFFER_RESULT_SUCCEEDED = 0,
             K4A_BUFFER_RESULT_FAILED,
             K4A_BUFFER_RESULT_TOO_SMALL,
+            K4A_BUFFER_RESULT_UNSUPPORTED,
         }
 
         [NativeReference]
@@ -42,6 +43,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             K4A_WAIT_RESULT_SUCCEEDED = 0,
             K4A_WAIT_RESULT_FAILED,
             K4A_WAIT_RESULT_TIMEOUT,
+            K4A_WAIT_RESULT_UNSUPPORTED,
         }
 
         [NativeReference]
@@ -49,6 +51,7 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             K4A_RESULT_SUCCEEDED = 0,
             K4A_RESULT_FAILED,
+            K4A_RESULT_UNSUPPORTED,
         }
 
         [NativeReference]
@@ -57,6 +60,15 @@ namespace Microsoft.Azure.Kinect.Sensor
             K4A_STREAM_RESULT_SUCCEEDED = 0,
             K4A_STREAM_RESULT_FAILED,
             K4A_STREAM_RESULT_EOF,
+            K4A_STREAM_RESULT_UNSUPPORTED,
+        }
+
+        [NativeReference]
+        public enum k4a_device_capabilities_t
+        {
+            K4A_CAPABILITY_DEPTH = 1,
+            K4A_CAPABILITY_COLOR = 2,
+            K4A_CAPABILITY_IMU = 4,
         }
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
@@ -120,8 +132,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         public static extern k4a_result_t k4a_calibration_get_from_raw(
             byte[] raw_calibration,
             UIntPtr raw_calibration_size,
-            DepthMode depth_mode,
-            ColorResolution color_resolution,
+            uint depth_mode_id,
+            uint color_mode_id,
             out Calibration calibration);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
@@ -252,8 +264,8 @@ namespace Microsoft.Azure.Kinect.Sensor
         [NativeReference]
         public static extern k4a_result_t k4a_device_get_calibration(
             k4a_device_t device_handle,
-            DepthMode depth_mode,
-            ColorResolution color_resolution,
+            uint depth_mode_id,
+            uint color_mode_id,
             out Calibration calibration);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
@@ -390,6 +402,34 @@ namespace Microsoft.Azure.Kinect.Sensor
             IntPtr message_cb_context,
             LogLevel min_level);
 
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_device_get_info(k4a_device_t device_handle, out DeviceInfo device_info);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, out int mode_count);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_id, out ColorModeInfo mode_info);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, out int mode_count);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_id, out DepthModeInfo mode_info);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, out int mode_count);
+
+        [DllImport("k4a", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_id, out FPSModeInfo mode_info);
+
         [NativeReference]
         [StructLayout(LayoutKind.Sequential)]
         public struct k4a_version_t
@@ -434,9 +474,9 @@ namespace Microsoft.Azure.Kinect.Sensor
         public struct k4a_device_configuration_t
         {
             public ImageFormat color_format;
-            public ColorResolution color_resolution;
-            public DepthMode depth_mode;
-            public FPS camera_fps;
+            public uint color_mode_id;
+            public uint depth_mode_id;
+            public uint fps_mode_id;
             public bool synchronized_images_only;
             public int depth_delay_off_color_usec;
             public WiredSyncMode wired_sync_mode;
