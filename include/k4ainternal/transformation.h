@@ -8,7 +8,6 @@
 #define K4ATRANSFORMATION_H
 
 #include <k4a/k4atypes.h>
-#include <k4ainternal/modes.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -189,12 +188,12 @@ transformation_depth_image_to_point_cloud(k4a_transformation_t transformation_ha
 // Mode specific calibration
 k4a_result_t
 transformation_get_mode_specific_depth_camera_calibration(const k4a_calibration_camera_t *raw_camera_calibration,
-                                                          const k4a_depth_mode_t depth_mode,
+                                                          const uint32_t depth_mode_id,
                                                           k4a_calibration_camera_t *mode_specific_camera_calibration);
 
 k4a_result_t
 transformation_get_mode_specific_color_camera_calibration(const k4a_calibration_camera_t *raw_camera_calibration,
-                                                          const k4a_color_resolution_t color_resolution,
+                                                          const uint32_t color_mode_id,
                                                           k4a_calibration_camera_t *mode_specific_camera_calibration);
 
 k4a_result_t

@@ -9,6 +9,7 @@
 #include <k4ainternal/deloader.h>
 #include <k4ainternal/tewrapper.h>
 #include <k4ainternal/image.h>
+#include <k4ainternal/modes.h>
 #include <k4a/k4a.h>
 
 // System dependencies
