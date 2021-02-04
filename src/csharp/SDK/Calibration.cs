@@ -45,14 +45,14 @@ namespace Microsoft.Azure.Kinect.Sensor
         public Extrinsics[] DeviceExtrinsics;
 
         /// <summary>
-        /// Depth camera mode for which calibration was obtained.
+        /// Depth camera mode id for which calibration was obtained.
         /// </summary>
-        public DepthMode DepthMode;
+        public int DepthModeId; // TODO: will an int work for an uint when passing back to c/c++?
 
         /// <summary>
-        /// Color camera resolution for which calibration was obtained.
+        /// Color camera mode id for which calibration was obtained.
         /// </summary>
-        public ColorResolution ColorResolution;
+        public int ColorModeId; // TODO: will an int work for an uint when passing back to c/c++?
 
 #pragma warning restore CA1051 // Do not declare visible instance fields
 
@@ -85,14 +85,14 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <param name="depthMode">Mode in which depth camera is operated.</param>
         /// <param name="colorResolution">Resolution in which the color camera is operated.</param>
         /// <returns>Calibration object.</returns>
-        public static Calibration GetFromRaw(byte[] raw, DepthMode depthMode, ColorResolution colorResolution)
+        public static Calibration GetFromRaw(byte[] raw, uint depthModeId, uint colorModeId)
         {
             Calibration calibration = default;
             AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_calibration_get_from_raw(
                 raw,
                 (UIntPtr)raw.Length,
-                depthMode,
-                colorResolution,
+                depthModeId,
+                colorModeId,
                 out calibration));
 
             return calibration;
@@ -245,8 +245,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             return this.DepthCameraCalibration.Equals(other.DepthCameraCalibration) &&
                    this.ColorCameraCalibration.Equals(other.ColorCameraCalibration) &&
                    EqualityComparer<Extrinsics[]>.Default.Equals(this.DeviceExtrinsics, other.DeviceExtrinsics) &&
-                   this.DepthMode == other.DepthMode &&
-                   this.ColorResolution == other.ColorResolution;
+                   this.DepthModeId == other.DepthModeId &&
+                   this.ColorModeId == other.ColorModeId;
         }
 
         /// <inheritdoc/>
@@ -256,8 +256,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             hashCode = (hashCode * -1521134295) + EqualityComparer<CameraCalibration>.Default.GetHashCode(this.DepthCameraCalibration);
             hashCode = (hashCode * -1521134295) + EqualityComparer<CameraCalibration>.Default.GetHashCode(this.ColorCameraCalibration);
             hashCode = (hashCode * -1521134295) + EqualityComparer<Extrinsics[]>.Default.GetHashCode(this.DeviceExtrinsics);
-            hashCode = (hashCode * -1521134295) + this.DepthMode.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.ColorResolution.GetHashCode();
+            hashCode = (hashCode * -1521134295) + this.DepthModeId.GetHashCode();
+            hashCode = (hashCode * -1521134295) + this.ColorModeId.GetHashCode();
             return hashCode;
         }
     }

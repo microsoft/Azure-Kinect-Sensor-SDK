@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 #include <k4a/k4a.h>
-
 #include <stdio.h>
-
 #include <vector>
 using namespace std;
 

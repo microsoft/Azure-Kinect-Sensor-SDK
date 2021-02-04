@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
@@ -42,13 +43,39 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
         {
             using (Device device = Device.Open(0))
             {
+                List<ColorModeInfo> colorModes = device.GetColorModes();
+                List<DepthModeInfo> depthModes = device.GetDepthModes();
+                List<FPSModeInfo> fpsModes = device.GetFPSModes();
+
+                int colorModeId = 0;
+                int depthModeId = 0;
+                int fpsModeId = 0;
+
+                foreach (ColorModeInfo colorModeInfo in colorModes)
+                {
+                    if (colorModeInfo.Height >= 720)
+                    {
+                        colorModeId = colorModeInfo.ModeId;
+                        break;
+                    }
+                }
+
+                foreach (DepthModeInfo depthModeInfo in depthModes)
+                {
+                    if (depthModeInfo.Height >= 512 && depthModeInfo.HorizontalFOV >= 120)
+                    {
+                        depthModeId = depthModeInfo.ModeId;
+                        break;
+                    }
+                }
+
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorResolution = ColorResolution.R720p,
-                    DepthMode = DepthMode.WFOV_2x2Binned,
+                    ColorModeId = colorModeId,
+                    DepthModeId = depthModeId,
                     SynchronizedImagesOnly = true,
-                    CameraFPS = FPS.FPS30,
+                    FPSModeId = fpsModeId,
                 });
 
                 int colorWidth = device.GetCalibration().ColorCameraCalibration.ResolutionWidth;
