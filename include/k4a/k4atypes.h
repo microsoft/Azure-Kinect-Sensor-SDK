@@ -859,10 +859,14 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
  * @{
  */
 
-/**
+/** Device capabilities.
  *
  * \remarks
- * Used by \sa k4a_device_info_t to store whether a device has a color camera, a depth camera and IMU.
+ * Used by \p k4a_device_info_t to store whether a device has a color camera, a depth camera, and IMU.
+ *
+ * \note
+ * These are used in a bitmap, so the values should be unique powers of 2. These values should not be
+ * modified; if a new capability is available, a new enum field should be defined.
  *
  * \xmlonly
  * <requirements>
@@ -877,10 +881,9 @@ typedef enum
     K4A_CAPABILITY_IMU = 4
 } k4a_device_capabilities_t;
 
-/**
+/** Stores the vendor id, the device id and device capabilities.  
  *
- * \remarks
- * Stores the vendor id, the device id and device capabilities.  \sa device_capabilities
+ * \sa device_capabilities
  *
  * \xmlonly
  * <requirements>
@@ -897,10 +900,11 @@ typedef struct _k4a_device_info_t
     uint32_t capabilities;   /**< Binary combination of capability flags. */
 } k4a_device_info_t;
 
-/**
+/** Color mode info type representing color mode info.
  *
  * \remarks
- * Color mode info type representing color mode info.
+ * The mode_id field is used in k4a_device_configuration_t and passed to k4a_device_start_cameras().
+ * This sets the device to a specific color mode of operation with properties specified in this struct.
  *
  * \xmlonly
  * <requirements>
@@ -922,10 +926,11 @@ typedef struct _k4a_color_mode_info_t
     int max_fps;                      /**< Maximum supported ramerate. */
 } k4a_color_mode_info_t;
 
-/**
+/** Depth mode info type representing depth mode info.
  *
  * \remarks
- * Depth mode info type representing depth mode info.
+ * The mode_id field is used in k4a_device_configuration_t and passed to k4a_device_start_cameras().
+ * This sets the device to a specific depth mode of operation with depth properties specified in this struct.
  *
  * \xmlonly
  * <requirements>
@@ -950,10 +955,11 @@ typedef struct _k4a_depth_mode_info_t
     int max_range;                    /**< Max values expected for mode in millimeters */
 } k4a_depth_mode_info_t;
 
-/**
+/** Frames per second (fps) mode info type representing fps mode info.
  *
  * \remarks
- * FPS mode info type representing fps mode info.
+ * The mode_id field is used in k4a_device_configuration_t and passed to k4a_device_start_cameras().
+ * This sets the device to a specific fps specified by the fps field in this struct.
  *
  * \xmlonly
  * <requirements>
@@ -1283,10 +1289,10 @@ typedef struct _k4a_imu_sample_t
  * @{
  */
 
-/**
+/** The ABI version of the SDK implementation.
  *
  * \remarks
- * The ABI version of the SDK implementation.
+ * Vendors that modify the public API of this SDK should change the value.
  *
  * \xmlonly
  * <requirements>
