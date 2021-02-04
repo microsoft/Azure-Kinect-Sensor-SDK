@@ -2469,7 +2469,7 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transf
                                                                       const k4a_image_t depth_image,
                                                                       const k4a_calibration_type_t camera,
                                                                       k4a_image_t xyz_image);
-                                                                      
+
 /**
  * @}
  */
