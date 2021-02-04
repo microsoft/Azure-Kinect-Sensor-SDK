@@ -668,8 +668,8 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 if (device_info_json_capabilities != nullptr && cJSON_IsNumber(device_info_json_capabilities))
                 {
                     uint32_t capabilities = (uint32_t)device_info_json_capabilities->valuedouble;
-                    hasDepthDevice = (capabilities & 0x0001) == 1;
-                    hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+                    hasDepthDevice = (capabilities & 0x0001) == 1;      // Depth is bit 0, so no right shift needed.
+                    hasColorDevice = ((capabilities >> 1) & 0x01) == 1; // Color is bit 1, so shift right by 1.
                     device_info.capabilities = capabilities;
                 }
                 else
