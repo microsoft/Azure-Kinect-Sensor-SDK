@@ -69,6 +69,16 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                     }
                 }
 
+                int heightestFPSAvailable = 0;
+                foreach (FPSModeInfo fpsModeInfo in fpsModes)
+                {
+                    if(fpsModeInfo.FPS > heightestFPSAvailable)
+                    {
+                        heightestFPSAvailable = fpsModeInfo.FPS;
+                        fpsModeId = fpsModeInfo.ModeId;
+                    }
+                }
+
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
