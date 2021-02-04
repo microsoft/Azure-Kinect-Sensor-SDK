@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Microsoft.Azure.Kinect.Sensor
@@ -78,12 +79,12 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Gets the depth mode the device is currently set to.
         /// </summary>
-        public DepthMode CurrentDepthMode { get; private set; } = DepthMode.Off;
+        public int CurrentDepthModeId { get; private set; } = 0; // 0 = Off
 
         /// <summary>
         /// Gets the color resolution the device is currently set to.
         /// </summary>
-        public ColorResolution CurrentColorResolution { get; private set; } = ColorResolution.Off;
+        public int CurrentColorModeId { get; private set; } = 0; // 0 = Off
 
         /// <summary>
         /// Gets a value indicating whether gets the Sync In jack is connected.
@@ -192,10 +193,10 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Gets the calibration of the device.
         /// </summary>
-        /// <param name="depthMode">Depth mode for the calibration.</param>
-        /// <param name="colorResolution">Color camera resolution for the calibration.</param>
+        /// <param name="depthModeId">Depth mode id for the calibration.</param>
+        /// <param name="colorModeId">Color modes id for the calibration.</param>
         /// <returns>Calibration object.</returns>
-        public Calibration GetCalibration(DepthMode depthMode, ColorResolution colorResolution)
+        public Calibration GetCalibration(int depthModeId, int colorModeId)
         {
             lock (this)
             {
@@ -205,7 +206,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
 
                 Calibration calibration = default;
-                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_calibration(this.handle, depthMode, colorResolution, out calibration));
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_calibration(this.handle, (uint) depthModeId, (uint) colorModeId, out calibration));
                 return calibration;
             }
         }
@@ -216,12 +217,12 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <returns>Calibration object.</returns>
         public Calibration GetCalibration()
         {
-            if (this.CurrentColorResolution == ColorResolution.Off && this.CurrentDepthMode == DepthMode.Off)
+            if (this.CurrentColorModeId == 0 && this.CurrentDepthModeId == 0)
             {
                 throw new AzureKinectException("Cameras not started");
             }
 
-            return this.GetCalibration(this.CurrentDepthMode, this.CurrentColorResolution);
+            return this.GetCalibration(this.CurrentDepthModeId, this.CurrentColorModeId);
         }
 
         /// <summary>
@@ -439,8 +440,8 @@ namespace Microsoft.Azure.Kinect.Sensor
                 NativeMethods.k4a_device_configuration_t nativeConfig = configuration.GetNativeConfiguration();
                 AzureKinectStartCamerasException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_start_cameras(this.handle, ref nativeConfig));
 
-                this.CurrentDepthMode = configuration.DepthMode;
-                this.CurrentColorResolution = configuration.ColorResolution;
+                this.CurrentDepthModeId = configuration.DepthModeId;
+                this.CurrentColorModeId = configuration.ColorModeId;
             }
         }
 
@@ -458,8 +459,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 NativeMethods.k4a_device_stop_cameras(this.handle);
 
-                this.CurrentDepthMode = DepthMode.Off;
-                this.CurrentColorResolution = ColorResolution.Off;
+                this.CurrentDepthModeId = 0;
+                this.CurrentColorModeId = 0;
             }
         }
 
@@ -492,6 +493,144 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
 
                 NativeMethods.k4a_device_stop_imu(this.handle);
+            }
+        }
+
+        public DeviceInfo GetInfo()
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Device));
+                }
+
+                DeviceInfo deviceInfo = default;
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_info(this.handle, out deviceInfo));
+                return deviceInfo;
+            }
+        }
+
+        public List<ColorModeInfo> GetColorModes()
+        {
+            List<ColorModeInfo> colorModes = new List<ColorModeInfo>();
+
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Device));
+                }
+
+                int colorModeInfoCount = 0;
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_color_mode_count(this.handle, out colorModeInfoCount));
+                for (int i = 0; i < colorModeInfoCount; i++)
+                {
+                    ColorModeInfo colorModeInfo = this.GetColorMode(i);
+                    if (colorModeInfo != null)
+                    {
+                        colorModes.Add(colorModeInfo);
+                    }
+                }
+            }
+
+            return colorModes;
+        }
+
+        public ColorModeInfo GetColorMode(int colorModeId)
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Device));
+                }
+
+                ColorModeInfo colorModeInfo = default;
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_color_mode(this.handle, colorModeId, out colorModeInfo));
+                return colorModeInfo;
+            }
+        }
+
+        public List<DepthModeInfo> GetDepthModes()
+        {
+            List<DepthModeInfo> depthModes = new List<DepthModeInfo>();
+
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Device));
+                }
+
+                int depthModeInfoCount = 0;
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_depth_mode_count(this.handle, out depthModeInfoCount));
+                for (int i = 0; i < depthModeInfoCount; i++)
+                {
+                    DepthModeInfo depthModeInfo = this.GetDepthMode(i);
+                    if (depthModeInfo != null)
+                    {
+                        depthModes.Add(depthModeInfo);
+                    }
+                }
+            }
+
+            return depthModes;
+        }
+
+        public DepthModeInfo GetDepthMode(int depthModeId)
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Device));
+                }
+
+                DepthModeInfo depthModeInfo = default;
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_depth_mode(this.handle, depthModeId, out depthModeInfo));
+                return depthModeInfo;
+            }
+        }
+
+        public List<FPSModeInfo> GetFPSModes()
+        {
+            List<FPSModeInfo> fpsModes = new List<FPSModeInfo>();
+
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Device));
+                }
+
+                int fpsModeInfoCount = 0;
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_fps_mode_count(this.handle, out fpsModeInfoCount));
+                for (int i = 0; i < fpsModeInfoCount; i++)
+                {
+                    FPSModeInfo fpsModeInfo = this.GetFPSMode(i);
+                    if (fpsModeInfo != null)
+                    {
+                        fpsModes.Add(fpsModeInfo);
+                    }
+                }
+            }
+
+            return fpsModes;
+        }
+
+        public FPSModeInfo GetFPSMode(int fpsModeId)
+        {
+            lock (this)
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(nameof(Device));
+                }
+
+                FPSModeInfo fpsModeInfo = default;
+                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_fps_mode(this.handle, fpsModeId, out fpsModeInfo));
+                return fpsModeInfo;
             }
         }
 
