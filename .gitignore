@@ -304,4 +304,3 @@ __pycache__/
 /.settings
 *.project
 *.cproject
-/doxygen/Doxyfile.in.modified
