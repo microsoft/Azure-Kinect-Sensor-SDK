@@ -878,7 +878,8 @@ typedef enum
 {
     K4A_CAPABILITY_DEPTH = 1,
     K4A_CAPABILITY_COLOR = 2,
-    K4A_CAPABILITY_IMU = 4
+    K4A_CAPABILITY_IMU = 4,
+    K4A_CAPABILITY_MICROPHONE = 8,
 } k4a_device_capabilities_t;
 
 /** Stores the vendor id, the device id and device capabilities.
