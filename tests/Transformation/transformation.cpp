@@ -7,7 +7,6 @@
 // Module being tested
 #include <k4a/k4a.h>
 #include <k4ainternal/transformation.h>
-#include <k4ainternal/common.h>
 #include <k4ainternal/image.h>
 
 using namespace testing;

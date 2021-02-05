@@ -5,7 +5,6 @@
 
 #include <cstdio>
 #include <k4arecord/record.h>
-#include <k4ainternal/common.h>
 #include <k4ainternal/matroska_write.h>
 
 using namespace testing;

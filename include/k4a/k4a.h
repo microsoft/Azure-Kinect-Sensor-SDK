@@ -182,15 +182,15 @@ K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_devi
  * </requirements>
  * \endxmlonly
  */
-K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, int *mode_count);
+K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, uint32_t *mode_count);
 
 /** Get the color mode info for a specified index.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
  *
- * \param mode_id
- * Id for color mode info.
+ * \param mode_index
+ * The index of the color mode to get.
  *
  * \param mode_info
  * Location to write the color mode info.
@@ -199,6 +199,12 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_hand
  * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
  *
  * \sa k4a_color_mode_info_t
+ *
+ * \sa k4a_device_get_color_mode_count
+ *
+ * \remarks
+ * The mode_index parameter has valid values [0, N-1] where N is the value returned by
+ * k4a_device_get_color_mode_count().
  *
  * \remarks
  * The color mode info output contains image resolution, native image format, horizontal and vertical fov and min and
@@ -213,7 +219,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_hand
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
-                                                  int mode_id,
+                                                  uint32_t mode_index,
                                                   k4a_color_mode_info_t *mode_info);
 
 /** Get the number of valid depth modes.
@@ -238,15 +244,15 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
  * </requirements>
  * \endxmlonly
  */
-K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count);
+K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, uint32_t *mode_count);
 
 /** Get the depth mode info for a specified index.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
  *
- * \param mode_id
- * Id for mode info.
+ * \param mode_index
+ * The index of the color mode to get.
  *
  * \param mode_info
  * Location to write the depth mode info.
@@ -255,6 +261,12 @@ K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_hand
  * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
  *
  * \sa k4a_depth_mode_info_t
+ *
+ * \sa k4a_device_get_depth_mode_count
+ *
+ * \remarks
+ * The mode_index parameter has valid values [0, N-1] where N is the value returned by
+ * k4a_device_get_depth_mode_count().
  *
  * \remarks
  * The depth mode info output contains image resolution, image native format, horizontal and vertical fov, min and max
@@ -269,7 +281,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_hand
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
-                                                  int mode_id,
+                                                  uint32_t mode_index,
                                                   k4a_depth_mode_info_t *mode_info);
 
 /** Get the number of valid fps modes.
@@ -294,15 +306,15 @@ K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
  * </requirements>
  * \endxmlonly
  */
-K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count);
+K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, uint32_t *mode_count);
 
 /** Get the fps mode info for a specified index.
  *
  * \param device_handle
  * Handle obtained by k4a_device_open().
  *
- * \param mode_id
- * Id for mode info.
+ * \param mode_index
+ * The index of the color mode to get.
  *
  * \param mode_info
  * Location to write the fps mode info.
@@ -311,6 +323,11 @@ K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle
  * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
  *
  * \sa k4a_fps_mode_info_t
+ *
+ * \sa k4a_device_get_fps_mode_count
+ *
+ * \remarks
+ * The mode_index parameter has valid values [0, N-1] where N is the value returned by k4a_device_get_fps_mode_count().
  *
  * \remarks
  * The fps mode info contains the frame rate per second.
@@ -324,7 +341,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
-                                                int mode_id,
+                                                uint32_t mode_id,
                                                 k4a_fps_mode_info_t *mode_info);
 
 /** Open an Azure Kinect device.

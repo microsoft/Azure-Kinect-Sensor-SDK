@@ -727,22 +727,13 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         {
             // InputScalar doesn't do bounds-checks, so we have to do it ourselves whenever
             // the user interacts with the control
-            //
-            int maxDepthDelay = 0;
-            switch (m_config.fps_mode_id)
+            uint32_t fps_int = k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(m_config.fps_mode_id));
+            if (fps_int == 0)
             {
-            case 2: // 2 = K4A_FRAMES_PER_SECOND_30
-                maxDepthDelay = std::micro::den / 30;
-                break;
-            case 1: // 1 = K4A_FRAMES_PER_SECOND_15
-                maxDepthDelay = std::micro::den / 15;
-                break;
-            case 0: // 0 = K4A_FRAMES_PER_SECOND_5
-                maxDepthDelay = std::micro::den / 5;
-                break;
-            default:
                 throw std::logic_error("Invalid framerate!");
             }
+
+            int maxDepthDelay = std::micro::den / fps_int;
             m_config.DepthDelayOffColorUsec = std::max(m_config.DepthDelayOffColorUsec, -maxDepthDelay);
             m_config.DepthDelayOffColorUsec = std::min(m_config.DepthDelayOffColorUsec, maxDepthDelay);
         }

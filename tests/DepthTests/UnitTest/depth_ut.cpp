@@ -5,7 +5,6 @@
 #include <ut_calibration_data.h>
 
 // Module being tested
-#include <k4ainternal/common.h>
 #include <k4ainternal/depth.h>
 #include <k4ainternal/depth_mcu.h>
 #include <k4ainternal/calibration.h>

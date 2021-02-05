@@ -4,7 +4,6 @@
 #include <utcommon.h>
 
 #include <k4ainternal/rwlock.h>
-#include <k4ainternal/common.h>
 #include <gtest/gtest.h>
 
 #include <azure_c_shared_utility/threadapi.h>

@@ -3,7 +3,6 @@
 
 //************************ Includes *****************************
 #include <k4a/k4a.h>
-#include <k4ainternal/common.h>
 #include <k4ainternal/logging.h>
 #include <gtest/gtest.h>
 #include <utcommon.h>

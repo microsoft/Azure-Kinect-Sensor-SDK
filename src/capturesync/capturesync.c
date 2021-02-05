@@ -8,7 +8,7 @@
 #include <k4ainternal/handle.h>
 #include <k4ainternal/queue.h>
 #include <k4ainternal/logging.h>
-#include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 
 #include <azure_c_shared_utility/lock.h>
 #include <azure_c_shared_utility/envvariable.h>

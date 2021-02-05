@@ -3,6 +3,7 @@
 
 #include "k4afastcapture.h"
 #include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 #include <string>
 
 using namespace k4afastcapture;

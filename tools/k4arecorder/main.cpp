@@ -133,14 +133,14 @@ static int string_compare(const char *s1, const char *s2)
 
                         if (hasColorDevice)
                         {
-                            int color_mode_count = 0;
+                            uint32_t color_mode_count = 0;
                             k4a_device_get_color_mode_count(device, &color_mode_count);
                             if (color_mode_count > 0)
                             {
                                 std::cout << std::endl;
                                 std::cout << "\tColor modes: \tid = description" << std::endl;
                                 std::cout << "\t\t\t----------------" << std::endl;
-                                for (int j = 0; j < color_mode_count; j++)
+                                for (uint32_t j = 0; j < color_mode_count; j++)
                                 {
                                     k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t),
                                                                               K4A_ABI_VERSION,
@@ -172,14 +172,14 @@ static int string_compare(const char *s1, const char *s2)
 
                         if (hasDepthDevice)
                         {
-                            int depth_mode_count = 0;
+                            uint32_t depth_mode_count = 0;
                             k4a_device_get_depth_mode_count(device, &depth_mode_count);
                             if (depth_mode_count > 0)
                             {
                                 std::cout << std::endl;
                                 std::cout << "\tDepth modes: \tid = description" << std::endl;
                                 std::cout << "\t\t\t----------------" << std::endl;
-                                for (int j = 0; j < depth_mode_count; j++)
+                                for (uint32_t j = 0; j < depth_mode_count; j++)
                                 {
                                     k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t),
                                                                               K4A_ABI_VERSION,
@@ -218,14 +218,14 @@ static int string_compare(const char *s1, const char *s2)
 
                         if (hasColorDevice || hasDepthDevice)
                         {
-                            int fps_mode_count = 0;
+                            uint32_t fps_mode_count = 0;
                             k4a_device_get_fps_mode_count(device, &fps_mode_count);
                             if (fps_mode_count > 0)
                             {
                                 std::cout << std::endl;
                                 std::cout << "\tFPS modes: \tid = description" << std::endl;
                                 std::cout << "\t\t\t----------------" << std::endl;
-                                for (int j = 0; j < fps_mode_count; j++)
+                                for (uint32_t j = 0; j < fps_mode_count; j++)
                                 {
                                     k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t),
                                                                           K4A_ABI_VERSION,
@@ -283,7 +283,7 @@ static k4a_result_t get_color_mode_info(k4a_device_t device,
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    int mode_count = 0;
+    uint32_t mode_count = 0;
     k4a_device_get_color_mode_count(device, &mode_count);
     if (mode_count > 0)
     {
@@ -293,7 +293,7 @@ static k4a_result_t get_color_mode_info(k4a_device_t device,
         }
         if (*mode_id == -1)
         {
-            for (int i = 1; i < mode_count; i++)
+            for (uint32_t i = 1; i < mode_count; i++)
             {
                 k4a_color_mode_info_t mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
                 if (K4A_SUCCEEDED(k4a_device_get_color_mode(device, i, &mode_info)))
@@ -325,13 +325,13 @@ static k4a_result_t get_depth_mode_info(k4a_device_t device, int32_t *mode_id, k
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    int mode_count = 0;
+    uint32_t mode_count = 0;
     k4a_device_get_depth_mode_count(device, &mode_count);
     if (mode_count > 0)
     {
         if (*mode_id == -1)
         {
-            for (int i = 1; i < mode_count; i++)
+            for (uint32_t i = 1; i < mode_count; i++)
             {
                 k4a_depth_mode_info_t mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
                 if (K4A_SUCCEEDED(k4a_device_get_depth_mode(device, i, &mode_info)))
@@ -361,21 +361,21 @@ static k4a_result_t get_depth_mode_info(k4a_device_t device, int32_t *mode_id, k
 }
 
 static k4a_result_t get_fps_mode_info(k4a_device_t device,
-                                      int32_t *fps_mode_id,
+                                      uint32_t *fps_mode_id,
                                       k4a_color_mode_info_t *color_mode_info,
                                       k4a_depth_mode_info_t *depth_mode_info,
                                       k4a_fps_mode_info_t *fps_mode_info)
 {
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    int mode_count = 0;
+    uint32_t mode_count = 0;
     k4a_device_get_fps_mode_count(device, &mode_count);
     if (mode_count > 0)
     {
         if (*fps_mode_id == -1)
         {
             int max_fps = 0;
-            for (int i = 1; i < mode_count; i++)
+            for (uint32_t i = 1; i < mode_count; i++)
             {
                 k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
                 if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
@@ -398,8 +398,8 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
                  depth_mode_info->max_range >= 2500))
             {
                 int fps = 0;
-                int mode_id = 0;
-                for (int i = 1; i < mode_count; i++)
+                uint32_t mode_id = 0;
+                for (uint32_t i = 1; i < mode_count; i++)
                 {
                     std::cout << i << std::endl;
                     k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
@@ -788,8 +788,11 @@ int main(int argc, char **argv)
                     return 1;
                 }
 
-                if (!K4A_SUCCEEDED(get_fps_mode_info(
-                        device, &recording_fps_mode, &color_mode_info, &depth_mode_info, &fps_mode_info)))
+                if (!K4A_SUCCEEDED(get_fps_mode_info(device,
+                                                     &static_cast<uint32_t>(recording_fps_mode),
+                                                     &color_mode_info,
+                                                     &depth_mode_info,
+                                                     &fps_mode_info)))
                 {
                     std::cout << "Error finding valid framerate for recording camera settings." << std::endl;
                     return 1;
