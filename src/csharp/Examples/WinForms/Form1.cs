@@ -44,36 +44,58 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
         {
             using (Device device = Device.Open(0))
             {
-                List<ColorModeInfo> colorModes = device.GetColorModes();
-                List<DepthModeInfo> depthModes = device.GetDepthModes();
+                // We need to provide mode ids for color, depth and fps for the device configuration passed to the device start cameras method.
 
+                // 1. Start out with the mode ids to 0.  0 means Off for mode ids.  Either color or depth may remain off, both not both.  Fps may not remain off.
                 int colorModeId = 0;
                 int depthModeId = 0;
+                int fpsModeId = 0;
 
-                foreach(ColorModeInfo colorModeInfo in colorModes)
+                // 2. Get the available modes for device using the modes methods.
+                List<ColorModeInfo> colorModes = device.GetColorModes();
+                List<FPSModeInfo> fpsModes = device.GetFPSModes();
+                List<DepthModeInfo> depthModes = device.GetDepthModes();
+
+                // 3. For this example, let's find the first color mode that isn't the Off mode.
+                foreach (ColorModeInfo colorModeInfo in colorModes)
                 {
-                    if(colorModeInfo.ModeId > 0)
+                    if (colorModeInfo.ModeId != 0)
                     {
                         colorModeId = colorModeInfo.ModeId;
                         break;
                     }
                 }
 
+                // 4. For this example, let's find the first depth mode that isn't the Off mode.
                 foreach (DepthModeInfo depthModeInfo in depthModes)
                 {
-                    if (depthModeInfo.ModeId > 0)
+                    if (depthModeInfo.ModeId != 0)
                     {
                         depthModeId = depthModeInfo.ModeId;
                         break;
                     }
                 }
 
+                // 5. For this example, let's find the fps mode with the heighest frames per second.
+                int heightestFPSAvailable = 0;
+                foreach (FPSModeInfo fpsModeInfo in fpsModes)
+                {
+                    if (fpsModeInfo.FPS > heightestFPSAvailable)
+                    {
+                        heightestFPSAvailable = fpsModeInfo.FPS;
+                        fpsModeId = fpsModeInfo.ModeId;
+                    }
+                }
+
+                // 6. If either a color or depth mode was found that met our example conditions and as long as there was at least one fps mode (there should always be),
+                // then the mode ids will be valid parameters for the device configuration passed into the device start camera function.
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
                     ColorModeId = colorModeId,
                     DepthModeId = depthModeId,
                     SynchronizedImagesOnly = true,
+                    FPSModeId = fpsModeId,
                 });
 
                 Stopwatch sw = new Stopwatch();
