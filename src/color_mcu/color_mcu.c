@@ -3,7 +3,6 @@
 
 // This library *
 #include <k4ainternal/color_mcu.h>
-#include <k4ainternal/common.h>
 
 // System dependencies
 #include <stdlib.h>

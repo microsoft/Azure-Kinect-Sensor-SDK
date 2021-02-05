@@ -23,6 +23,7 @@
 #include "k4awindowmanager.h"
 #include "k4aimugraphdatagenerator.h"
 #include <k4ainternal/math.h>
+#include <k4ainternal/modes.h>
 
 using namespace k4aviewer;
 namespace
@@ -55,21 +56,9 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
 
     m_fpsLabel = fpsSS.str();
 
-    switch (m_recordConfiguration.fps_mode_info.mode_id)
-    {
-    case 0: // 0 = K4A_FRAMES_PER_SECOND_5
-        m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 5));
-        break;
-
-    case 1: // 1 = K4A_FRAMES_PER_SECOND_15
-        m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 15));
-        break;
-
-    case 2: // 2 = K4A_FRAMES_PER_SECOND_30
-    default:
-        m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 30));
-        break;
-    }
+    // Get fps value from the fps mode.
+    uint32_t fps_int = k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(m_recordConfiguration.fps_mode_info.mode_id));
+    m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * fps_int));
 
     constexpr char noneStr[] = "(None)";
 

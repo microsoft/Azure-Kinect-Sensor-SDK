@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 #include "mfcamerareader.h"
-#include <k4ainternal/common.h>
 #include <k4ainternal/capture.h>
 #include <cfgmgr32.h>
 #include <initguid.h>

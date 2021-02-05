@@ -3,6 +3,7 @@
 
 //************************ Includes *****************************
 #include <k4a/k4a.h>
+#include <k4ainternal/modes.h>
 #include <k4ainternal/usbcommand.h>
 #include "Cli.h"
 #include "Main.h"
