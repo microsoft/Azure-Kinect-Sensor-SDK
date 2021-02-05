@@ -497,6 +497,10 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <summary>
+        /// Get the Device Info.
+        /// </summary>
+        /// <returns>The Device Info.</returns>
         public DeviceInfo GetInfo()
         {
             lock (this)
@@ -521,6 +525,10 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <summary>
+        /// Lists the ColorMode Info.
+        /// </summary>
+        /// <returns>The ColorMode Info.</returns>
         public List<ColorModeInfo> GetColorModes()
         {
             List<ColorModeInfo> colorModes = new List<ColorModeInfo>();
@@ -549,6 +557,11 @@ namespace Microsoft.Azure.Kinect.Sensor
             return colorModes;
         }
 
+        /// <summary>
+        /// Get the ColorMode Info.
+        /// </summary>
+        /// <param name="colorModeId">colorModeid</param>
+        /// <returns>The ColorMode Info.</returns>
         public ColorModeInfo GetColorMode(int colorModeId)
         {
             lock (this)
@@ -577,6 +590,10 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <summary>
+        /// Lists the DepthMode Info.
+        /// </summary>
+        /// <returns>The DepthModes.</returns>
         public List<DepthModeInfo> GetDepthModes()
         {
             List<DepthModeInfo> depthModes = new List<DepthModeInfo>();
@@ -604,6 +621,11 @@ namespace Microsoft.Azure.Kinect.Sensor
             return depthModes;
         }
 
+        /// <summary>
+        /// Get the DepthMode Info.
+        /// </summary>
+        /// <param name="depthModeId">depthModeId</param>
+        /// <returns>The DepthMode Info.</returns>
         public DepthModeInfo GetDepthMode(int depthModeId)
         {
             lock (this)
@@ -636,6 +658,10 @@ namespace Microsoft.Azure.Kinect.Sensor
             }
         }
 
+        /// <summary>
+        /// Lists the FPSMode Info.
+        /// </summary>
+        /// <returns>The FPSModes.</returns>
         public List<FPSModeInfo> GetFPSModes()
         {
             List<FPSModeInfo> fpsModes = new List<FPSModeInfo>();
@@ -663,6 +689,11 @@ namespace Microsoft.Azure.Kinect.Sensor
             return fpsModes;
         }
 
+        /// <summary>
+        /// Get the FPShMode Info.
+        /// </summary>
+        /// <param name="fpsModeId">fpsModeId</param>
+        /// <returns>The FPSMode Info.</returns>
         public FPSModeInfo GetFPSMode(int fpsModeId)
         {
             lock (this)
