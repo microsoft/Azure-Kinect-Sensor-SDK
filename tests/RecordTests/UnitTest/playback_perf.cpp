@@ -3,7 +3,6 @@
 
 #include <utcommon.h>
 #include <k4a/k4a.h>
-#include <k4ainternal/common.h>
 #include <k4ainternal/matroska_common.h>
 
 #include "test_helpers.h"

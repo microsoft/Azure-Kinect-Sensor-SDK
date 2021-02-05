@@ -10,7 +10,7 @@
 #include <k4a/k4a.h>
 #include <k4a/k4atypes.h>
 #include <k4ainternal/matroska_read.h>
-#include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/usbcommand.h>
 
@@ -613,23 +613,16 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     context->sync_period_ns = frame_period_ns;
     if (frame_period_ns > 0)
     {
-        switch (1_s / frame_period_ns)
+        k4a_fps_t fps_t = k4a_convert_uint_to_fps(static_cast<uint32_t>(1_s / frame_period_ns));
+        if (fps_t == K4A_FRAMES_PER_SECOND_0)
         {
-        case 5:
-            fps_mode_id = K4A_FRAMES_PER_SECOND_5;
-            break;
-        case 15:
-            fps_mode_id = K4A_FRAMES_PER_SECOND_15;
-            break;
-        case 30:
-            fps_mode_id = K4A_FRAMES_PER_SECOND_30;
-            break;
-        default:
             LOG_ERROR("Unsupported recording frame period: %llu ns (%llu fps)",
                       frame_period_ns,
                       (1_s / frame_period_ns));
             return K4A_RESULT_FAILED;
         }
+
+        fps_mode_id = static_cast<uint32_t>(fps_t);
     }
     else
     {

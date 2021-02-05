@@ -9,7 +9,7 @@
 #include <k4arecord/record.h>
 #include <k4ainternal/matroska_write.h>
 #include <k4ainternal/logging.h>
-#include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 
 #include <cJSON.h>
 #include <locale.h> //cJSON.h need this set correctly.
@@ -48,9 +48,8 @@ k4a_result_t k4a_record_create(const char *path,
     if (K4A_SUCCEEDED(result))
     {
         context->device_config = device_config;
-
         context->timecode_scale = MATROSKA_TIMESCALE_NS;
-        context->camera_fps = k4a_convert_fps_to_uint(device_config.fps_mode_id);
+        context->camera_fps = k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(device_config.fps_mode_id));
         if (context->camera_fps == 0)
         {
             // Set camera FPS to 30 if no cameras are enabled so IMU can still be written.

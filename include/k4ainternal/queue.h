@@ -9,7 +9,7 @@
 
 #include <k4a/k4atypes.h>
 #include <k4ainternal/capture.h>
-#include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 
 #include <assert.h>
 

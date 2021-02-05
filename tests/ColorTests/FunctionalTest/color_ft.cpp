@@ -1010,7 +1010,7 @@ TEST_P(color_control_test, control_test)
 TEST_F(color_functional_test, colorModeInfo)
 {
     K4A_INIT_STRUCT(k4a_color_mode_info_t, colorModeInfo)
-    int colorModeCount = 0;
+    uint32_t colorModeCount = 0;
 
     // Test invalid arguments.
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode_count(NULL, &colorModeCount))
@@ -1030,14 +1030,11 @@ TEST_F(color_functional_test, colorModeInfo)
         << "Couldn't get color mode count.\n";
 
     // Test invalid color mode index.
-    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode(m_device, -1, &colorModeInfo))
-        << "Unexpected return value for color mode index less than 0.\n";
-
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode(m_device, colorModeCount, &colorModeInfo))
         << "Unexpected return value for color mode index greater than number of depth modes.\n";
 
     // Get color mode info.
-    for (int d = 0; d < colorModeCount; ++d)
+    for (uint32_t d = 0; d < colorModeCount; ++d)
     {
         colorModeInfo = { colorModeInfo.struct_size, colorModeInfo.struct_version, 0 };
 

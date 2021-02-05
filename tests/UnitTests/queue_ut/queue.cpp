@@ -6,7 +6,6 @@
 #include <k4ainternal/allocator.h>
 #include <k4ainternal/image.h>
 #include <k4ainternal/queue.h>
-#include <k4ainternal/common.h>
 #include <gtest/gtest.h>
 
 #include <azure_c_shared_utility/lock.h>

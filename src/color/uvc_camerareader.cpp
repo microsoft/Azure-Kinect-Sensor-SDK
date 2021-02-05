@@ -1,6 +1,5 @@
 #include "uvc_camerareader.h"
 #include "ksmetadata.h"
-#include <k4ainternal/common.h>
 #include <k4ainternal/capture.h>
 
 #define COLOR_CAMERA_VID 0x045e
