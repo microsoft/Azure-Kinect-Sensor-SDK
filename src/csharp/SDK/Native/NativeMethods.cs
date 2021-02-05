@@ -71,6 +71,20 @@ namespace Microsoft.Azure.Kinect.Sensor
             K4A_CAPABILITY_IMU = 4,
         }
 
+        [NativeReference]
+        public enum k4a_image_format_t
+        {
+            K4A_IMAGE_FORMAT_COLOR_MJPG = 0,
+            K4A_IMAGE_FORMAT_COLOR_NV12,
+            K4A_IMAGE_FORMAT_COLOR_YUY2,
+            K4A_IMAGE_FORMAT_COLOR_BGRA32,
+            K4A_IMAGE_FORMAT_DEPTH16,
+            K4A_IMAGE_FORMAT_IR16,
+            K4A_IMAGE_FORMAT_CUSTOM8,
+            K4A_IMAGE_FORMAT_CUSTOM16,
+            K4A_IMAGE_FORMAT_CUSTOM,
+        }
+
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern k4a_result_t k4a_set_allocator(
@@ -404,7 +418,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_info(k4a_device_t device_handle, out DeviceInfo device_info);
+        public static extern k4a_result_t k4a_device_get_info(k4a_device_t device_handle, out k4a_device_info_t device_info);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -412,7 +426,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_id, out ColorModeInfo mode_info);
+        public static extern k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_id, out k4a_color_mode_info_t mode_info);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -420,7 +434,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_id, out DepthModeInfo mode_info);
+        public static extern k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_id, out k4a_depth_mode_info_t mode_info);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -428,7 +442,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_id, out FPSModeInfo mode_info);
+        public static extern k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_id, out k4a_fps_mode_info_t mode_info);
 
         [NativeReference]
         [StructLayout(LayoutKind.Sequential)]
@@ -482,6 +496,62 @@ namespace Microsoft.Azure.Kinect.Sensor
             public WiredSyncMode wired_sync_mode;
             public uint subordinate_delay_off_master_usec;
             public bool disable_streaming_indicator;
+        }
+
+        [NativeReference]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct k4a_device_info_t
+        {
+            public uint struct_size;
+            public uint struct_version;
+            public uint vendor_id;
+            public uint device_id;
+            public uint capabilities;
+        }
+
+        [NativeReference]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct k4a_color_mode_info_t
+        {
+            public uint struct_size;
+            public uint struct_version;
+            public uint mode_id;
+            public uint width;
+            public uint height;
+            public k4a_image_format_t native_format;
+            public float horizontal_fov;
+            public float vertical_fov;
+            public int min_fps;
+            public int max_fps;
+        }
+
+        [NativeReference]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct k4a_depth_mode_info_t
+        {
+            public uint struct_size;
+            public uint struct_version;
+            public uint mode_id;
+            public bool passive_ir_only;
+            public uint width;
+            public uint height;
+            public k4a_image_format_t native_format;
+            public float horizontal_fov;
+            public float vertical_fov;
+            public int min_fps;
+            public int max_fps;
+            public int min_range;
+            public int max_range;
+        }
+
+        [NativeReference]
+        [StructLayout(LayoutKind.Sequential)]
+        public struct k4a_fps_mode_info_t
+        {
+            public uint struct_size;
+            public uint struct_version;
+            public uint mode_id;
+            public int fps;
         }
 
         public class k4a_device_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
