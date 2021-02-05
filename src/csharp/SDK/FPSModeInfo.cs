@@ -10,16 +10,38 @@ using static Microsoft.Azure.Kinect.Sensor.NativeMethods;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
+    /// <summary>
+    /// Represents the configuration to run a color and/or depth device in.
+    /// </summary>
+    /// <remarks>
+    /// Gets or sets the FPS Mode Info.
+    /// </remarks>
     public class FPSModeInfo
     {
+        /// <summary>
+        /// Gets or sets the Struct Size.
+        /// </summary>
         public int StructSize { get; set; } = 16;
 
+        /// <summary>
+        /// Gets or sets the Struct Version.
+        /// </summary>
         public int StructVersion { get; set; } = 1;
 
+        /// <summary>
+        /// Gets or sets the ModeId.
+        /// </summary>
         public int ModeId { get; set; } = 0;
 
+        /// <summary>
+        /// Gets or sets the FPS.
+        /// </summary>
         public int FPS { get; set; } = 0;
 
+        /// <summary>
+        ///  Get the equivalent native configuration struct.
+        /// </summary>
+        /// <returns>k4a_fps_mode_info_t.</returns>
         internal k4a_fps_mode_info_t GetNativeConfiguration()
         {
             return new k4a_fps_mode_info_t

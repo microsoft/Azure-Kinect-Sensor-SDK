@@ -10,18 +10,43 @@ using static Microsoft.Azure.Kinect.Sensor.NativeMethods;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
+    /// <summary>
+    /// Represents the configuration to run an Azure Kinect device in.
+    /// </summary>
+    /// <remarks>
+    /// Gets or sets the Device Info.
+    /// </remarks>
     public class DeviceInfo
     {
+        /// <summary>
+        /// Gets or sets Struct Size.
+        /// </summary>
         public int StructSize { get; set; } = 20;
 
+        /// <summary>
+        /// Gets or sets the Struct Version.
+        /// </summary>
         public int StructVersion { get; set; } = 1;
 
+        /// <summary>
+        /// Gets or sets the Vendor Id.
+        /// </summary>
         public int VendorId { get; set; } = 0;
 
+        /// <summary>
+        /// Gets or sets the Device Id.
+        /// </summary>
         public int DeviceId { get; set; } = 0;
 
+        /// <summary>
+        /// Gets or sets the Capabilities.
+        /// </summary>
         public int Capabilities { get; set; } = 0;
 
+        /// <summary>
+        /// Get the equivalent native configuration structure.
+        /// </summary>
+        /// <returns>k4a_device_info_t.</returns>
         internal k4a_device_info_t GetNativeConfiguration()
         {
             return new k4a_device_info_t
