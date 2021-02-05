@@ -6,76 +6,47 @@
 //------------------------------------------------------------------------------
 using System;
 using System.Runtime.InteropServices;
+using static Microsoft.Azure.Kinect.Sensor.NativeMethods;
 
 namespace Microsoft.Azure.Kinect.Sensor
 {
-    [StructLayout(LayoutKind.Sequential)]
-    [Native.NativeReference("k4a_color_mode_info_t")]
-    public class ColorModeInfo : IEquatable<ColorModeInfo>
+    public class ColorModeInfo
     {
-        public int StructSize { get; set; }
+        public int StructSize { get; set; } = 40;
 
-        public int StructVersion { get; set; }
+        public int StructVersion { get; set; } = 1;
 
-        public int ModeId { get; set; }
+        public int ModeId { get; set; } = 0;
 
-        public int Width { get; set; }
+        public int Width { get; set; } = 0;
 
-        public int Height { get; set; }
+        public int Height { get; set; } = 0;
 
-        public ImageFormat NativeFormat { get; set; }
+        public ImageFormat NativeFormat { get; set; } = ImageFormat.ColorMJPG;
 
-        public float HorizontalFOV { get; set; }
+        public float HorizontalFOV { get; set; } = 0;
 
-        public float VerticalFOV { get; set; }
+        public float VerticalFOV { get; set; } = 0;
 
-        public int MinFPS { get; set; }
+        public int MinFPS { get; set; } = 0;
 
-        public int MaxFPS { get; set; }
+        public int MaxFPS { get; set; } = 0;
 
-        public static bool operator ==(ColorModeInfo left, ColorModeInfo right)
+        internal k4a_color_mode_info_t GetNativeConfiguration()
         {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(ColorModeInfo left, ColorModeInfo right)
-        {
-            return !(left == right);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is ColorModeInfo colorModeInfo && this.Equals(colorModeInfo);
-        }
-
-        public bool Equals(ColorModeInfo other)
-        {
-            return this.StructSize == other.StructSize &&
-                this.StructVersion == other.StructVersion &&
-                this.ModeId == other.ModeId &&
-                this.Width == other.Width &&
-                this.Height == other.Height &&
-                this.NativeFormat == other.NativeFormat &&
-                this.HorizontalFOV == other.HorizontalFOV &&
-                this.VerticalFOV == other.VerticalFOV &&
-                this.MinFPS == other.MinFPS &&
-                this.MaxFPS == other.MaxFPS;
-        }
-
-        public override int GetHashCode()
-        {
-            int hashCode = -454809512;
-            hashCode = (hashCode * -1521134295) + this.StructSize.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.StructVersion.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.ModeId.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.Width.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.Height.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.NativeFormat.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.HorizontalFOV.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.VerticalFOV.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.MinFPS.GetHashCode();
-            hashCode = (hashCode * -1521134295) + this.MaxFPS.GetHashCode();
-            return hashCode;
+            return new k4a_color_mode_info_t
+            {
+                struct_size = (uint)this.StructSize,
+                struct_version = (uint)this.StructVersion,
+                mode_id = (uint)this.ModeId,
+                width = (uint)this.Width,
+                height = (uint)this.Height,
+                native_format = (k4a_image_format_t)this.NativeFormat,
+                horizontal_fov = this.HorizontalFOV,
+                vertical_fov = this.VerticalFOV,
+                min_fps = this.MinFPS,
+                max_fps = this.MaxFPS,
+            };
         }
     }
 }

@@ -44,8 +44,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
             using (Device device = Device.Open(0))
             {
                 List<ColorModeInfo> colorModes = device.GetColorModes();
-                List<DepthModeInfo> depthModes = device.GetDepthModes();
                 List<FPSModeInfo> fpsModes = device.GetFPSModes();
+                List<DepthModeInfo> depthModes = device.GetDepthModes();
 
                 int colorModeId = 0;
                 int depthModeId = 0;
