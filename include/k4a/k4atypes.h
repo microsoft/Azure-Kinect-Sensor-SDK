@@ -271,6 +271,29 @@ typedef enum
     K4A_LOG_LEVEL_OFF,          /**< No logging is performed */
 } k4a_log_level_t;
 
+/** Device capabilities.
+ *
+ * \remarks
+ * Used by \p k4a_device_info_t to store whether a device has a color camera, a depth camera, and IMU.
+ *
+ * \note
+ * These are used in a bitmap, so the values should be unique powers of 2. These values should not be
+ * modified; if a new capability is available, a new enum field should be defined.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef enum
+{
+    K4A_CAPABILITY_DEPTH = 1,
+    K4A_CAPABILITY_COLOR = 2,
+    K4A_CAPABILITY_IMU = 4,
+    K4A_CAPABILITY_MICROPHONE = 8,
+} device_capabilities;
+
 /** Image format type.
  *
  * \remarks
@@ -858,29 +881,6 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
  *
  * @{
  */
-
-/** Device capabilities.
- *
- * \remarks
- * Used by \p k4a_device_info_t to store whether a device has a color camera, a depth camera, and IMU.
- *
- * \note
- * These are used in a bitmap, so the values should be unique powers of 2. These values should not be
- * modified; if a new capability is available, a new enum field should be defined.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-typedef enum
-{
-    K4A_CAPABILITY_DEPTH = 1,
-    K4A_CAPABILITY_COLOR = 2,
-    K4A_CAPABILITY_IMU = 4,
-    K4A_CAPABILITY_MICROPHONE = 8,
-} k4a_device_capabilities_t;
 
 /** Stores the vendor id, the device id and device capabilities.
  *
