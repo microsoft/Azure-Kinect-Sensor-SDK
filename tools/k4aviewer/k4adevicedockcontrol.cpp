@@ -727,7 +727,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         {
             // InputScalar doesn't do bounds-checks, so we have to do it ourselves whenever
             // the user interacts with the control
-            uint32_t fps_int = k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(m_config.fps_mode_id));
+            uint32_t fps_int = m_config.fps_mode_id;
             if (fps_int == 0)
             {
                 throw std::logic_error("Invalid framerate!");

@@ -144,7 +144,7 @@ k4a_result_t color_start(color_t color_handle, const k4a_device_configuration_t 
         return K4A_RESULT_FAILED;
     }
 
-    fps = k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(config->fps_mode_id));
+    fps = static_cast<uint32_t>(config->fps_mode_id);
     if (fps == 0)
     {
         LOG_ERROR("camera_fps %d is invalid", config->fps_mode_id);

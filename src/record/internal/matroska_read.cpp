@@ -613,7 +613,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     context->sync_period_ns = frame_period_ns;
     if (frame_period_ns > 0)
     {
-        k4a_fps_t fps_t = k4a_convert_uint_to_fps(static_cast<uint32_t>(1_s / frame_period_ns));
+        k4a_fps_t fps_t = static_cast<k4a_fps_t>(static_cast<uint32_t>(1_s / frame_period_ns));
         if (fps_t == K4A_FRAMES_PER_SECOND_0)
         {
             LOG_ERROR("Unsupported recording frame period: %llu ns (%llu fps)",

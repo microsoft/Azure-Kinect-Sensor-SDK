@@ -737,7 +737,7 @@ TEST_P(latency_perf, testTest)
                      disable_synchronization ? disable_synchronization : "0",
                      get_string_from_color_format(as.color_format),
                      get_string_from_color_resolution(as.color_resolution),
-                     k4a_convert_fps_to_uint(as.fps),
+                     (uint32_t)as.fps,
                      get_string_from_depth_mode(as.depth_mode),
                      g_capture_count,
                      g_manual_exposure,

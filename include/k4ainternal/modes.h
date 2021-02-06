@@ -78,86 +78,11 @@ typedef enum
 // Be sure to update k4a_fps_to_string in k4a.c if enum values are added.
 typedef enum
 {
-    K4A_FRAMES_PER_SECOND_0 = 0, /**< 0 FPS */
-    K4A_FRAMES_PER_SECOND_5,     /**< 5 FPS */
-    K4A_FRAMES_PER_SECOND_15,    /**< 15 FPS */
-    K4A_FRAMES_PER_SECOND_30,    /**< 30 FPS */
-    K4A_FRAMES_PER_SECOND_COUNT, /**< Must be last entry. */
+    K4A_FRAMES_PER_SECOND_0 = 0,   /**< 0 FPS */
+    K4A_FRAMES_PER_SECOND_5 = 5,   /**< 5 FPS */
+    K4A_FRAMES_PER_SECOND_15 = 15, /**< 15 FPS */
+    K4A_FRAMES_PER_SECOND_30 = 30, /**< 30 FPS */
 } k4a_fps_t;
-
-/** Convert k4a_fps_t enum to the actual frame rate value.
- *
- * \remarks
- * K4A_FRAMES_PER_SECOND_30 will be converted to 30.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">modes.h (include k4ainternal/modes.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
-{
-    uint32_t fps_int = 0;
-
-    switch (fps)
-    {
-    case K4A_FRAMES_PER_SECOND_0:
-        fps_int = 0;
-        break;
-    case K4A_FRAMES_PER_SECOND_5:
-        fps_int = 5;
-        break;
-    case K4A_FRAMES_PER_SECOND_15:
-        fps_int = 15;
-        break;
-    case K4A_FRAMES_PER_SECOND_30:
-        fps_int = 30;
-        break;
-    default:
-        fps_int = 0;
-        break;
-    }
-
-    return fps_int;
-}
-
-/** Convert frame rate value to the corresponding k4a_fps_t enum.
- *
- * \remarks
- * 30 will be converted to K4A_FRAMES_PER_SECOND_30.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">modes.h (include k4ainternal/modes.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-inline static k4a_fps_t k4a_convert_uint_to_fps(uint32_t fps_in)
-{
-    k4a_fps_t fps_t = K4A_FRAMES_PER_SECOND_0;
-
-    switch (fps_in)
-    {
-    case 0:
-        fps_t = K4A_FRAMES_PER_SECOND_0;
-        break;
-    case 5:
-        fps_t = K4A_FRAMES_PER_SECOND_5;
-        break;
-    case 15:
-        fps_t = K4A_FRAMES_PER_SECOND_15;
-        break;
-    case 30:
-        fps_t = K4A_FRAMES_PER_SECOND_30;
-        break;
-    default:
-        fps_t = K4A_FRAMES_PER_SECOND_0;
-        break;
-    }
-
-    return fps_t;
-}
 
 /** Return the image width and height for the corresponding k4a_color_resolution_t enum.
  *
@@ -212,6 +137,7 @@ inline static bool k4a_convert_resolution_to_width_height(k4a_color_resolution_t
         break;
     default:
         resolutionFound = false;
+        break;
     }
 
     if (resolutionFound)
@@ -308,6 +234,7 @@ inline static bool k4a_convert_resolution_to_fov(k4a_color_resolution_t resoluti
         break;
     default:
         resolutionFound = false;
+        break;
     }
 
     if (resolutionFound)
@@ -400,6 +327,7 @@ inline static bool k4a_convert_depth_mode_to_width_height(k4a_depth_mode_t mode_
         break;
     default:
         modeFound = false;
+        break;
     }
 
     if (modeFound)
@@ -490,6 +418,7 @@ inline static bool k4a_convert_depth_mode_to_fov(k4a_depth_mode_t mode_id, float
         break;
     default:
         modeFound = false;
+        break;
     }
 
     if (modeFound)
@@ -582,6 +511,7 @@ inline static bool k4a_convert_depth_mode_to_min_max_range(k4a_depth_mode_t mode
         break;
     default:
         modeFound = false;
+        break;
     }
 
     if (modeFound)
