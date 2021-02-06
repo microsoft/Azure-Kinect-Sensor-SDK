@@ -526,16 +526,26 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
 #if defined(__aarch64__) || defined(_M_ARM64)
         // Jetson Nano can't handle 2 30FPS streams
         printf("Using 5 or 15FPS for ARM64 build\n");
-        int frame_rate_rand = (int)RAND_VALUE(0, 1) + 1;
+        int frame_rate_rand = (int)RAND_VALUE(0, 1) + 1; // +1 because 0 is reserved for K4A_FRAMES_PER_SECOND_0
 #else
         printf("Using 5, 15, or 30FPS for AMD64/x86 build\n");
-        int frame_rate_rand = (int)RAND_VALUE(0, 2) + 1;
+        int frame_rate_rand = (int)RAND_VALUE(0, 2) + 1; // +1 because 0 is reserved for K4A_FRAMES_PER_SECOND_0
 #endif
-
-        g_frame_rate = k4a_convert_uint_to_fps(frame_rate_rand);
+        switch (frame_rate_rand)
+        {
+        case 1:
+            g_frame_rate = K4A_FRAMES_PER_SECOND_5;
+            break;
+        case 2:
+            g_frame_rate = K4A_FRAMES_PER_SECOND_15;
+            break;
+        case 3:
+            g_frame_rate = K4A_FRAMES_PER_SECOND_30;
+            break;
+        }
     }
 
-    int32_t fps_in_usec = 1000000 / (int32_t)k4a_convert_fps_to_uint(g_frame_rate);
+    int32_t fps_in_usec = 1000000 / (int32_t)g_frame_rate;
     if (g_m_depth_delay == 0)
     {
         g_m_depth_delay = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);

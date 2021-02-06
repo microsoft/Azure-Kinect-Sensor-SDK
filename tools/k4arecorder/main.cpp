@@ -232,7 +232,10 @@ static int string_compare(const char *s1, const char *s2)
                                                                           0 };
                                     if (k4a_device_get_fps_mode(device, j, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
                                     {
-                                        std::cout << "\t\t\t" << j << " = " << fps_mode_info.fps << std::endl;
+                                        if (fps_mode_info.fps > 0)
+                                        {
+                                            std::cout << "\t\t\t" << j << " = " << fps_mode_info.fps << std::endl;
+                                        }
                                     }
                                 }
                             }

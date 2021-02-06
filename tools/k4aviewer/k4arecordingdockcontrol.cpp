@@ -57,7 +57,7 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     m_fpsLabel = fpsSS.str();
 
     // Get fps value from the fps mode.
-    uint32_t fps_int = k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(m_recordConfiguration.fps_mode_info.mode_id));
+    uint32_t fps_int = m_recordConfiguration.fps_mode_info.mode_id;
     m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * fps_int));
 
     constexpr char noneStr[] = "(None)";

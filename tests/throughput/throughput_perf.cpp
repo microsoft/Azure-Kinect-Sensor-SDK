@@ -295,7 +295,7 @@ TEST_P(throughput_perf, testTest)
         printf("Auto Exposure\n");
     }
 
-    fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(as.fps));
+    fps_in_usec = HZ_TO_PERIOD_US((uint32_t)as.fps);
 
     config.color_format = as.color_format;
     config.color_mode_id = as.color_resolution;
@@ -646,7 +646,7 @@ TEST_P(throughput_perf, testTest)
                  as.test_name,
                  get_string_from_color_format(as.color_format),
                  get_string_from_color_resolution(as.color_resolution),
-                 k4a_convert_fps_to_uint(as.fps),
+                 (uint32_t)as.fps,
                  get_string_from_depth_mode(as.depth_mode),
                  g_capture_count,
                  both_count,
