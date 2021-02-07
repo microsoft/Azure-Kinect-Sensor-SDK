@@ -952,8 +952,8 @@ typedef struct _k4a_depth_mode_info_t
     float vertical_fov;               /**< Approximate vertical field of view. */
     int min_fps;                      /**< Minimum supported framerate. */
     int max_fps;                      /**< Maximum supported framerate. */
-    int min_range;                    /**< Min values expected for mode in millimeters */
-    int max_range;                    /**< Max values expected for mode in millimeters */
+    uint32_t min_range;               /**< Min values expected for mode in millimeters */
+    uint32_t max_range;               /**< Max values expected for mode in millimeters */
 } k4a_depth_mode_info_t;
 
 /** Frames per second (fps) mode info type representing fps mode info.
