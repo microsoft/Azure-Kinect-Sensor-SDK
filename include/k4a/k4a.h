@@ -169,7 +169,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_devi
  * Location to write the color mode count.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
  *
  * \remarks
  * The mode count output is the number of available color modes for the device specified by device_handle.
@@ -196,7 +196,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_hand
  * Location to write the color mode info.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
  *
  * \sa k4a_color_mode_info_t
  *
@@ -231,7 +231,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
  * Location to write the depth mode count.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
  *
  * \remarks
  * The mode count output is the number of available depth modes for the device specified by device_handle.
@@ -258,7 +258,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_hand
  * Location to write the depth mode info.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
  *
  * \sa k4a_depth_mode_info_t
  *
@@ -293,7 +293,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
  * Location to write the fps mode count.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
  *
  * \remarks
  * The mode count output is the number of available fps modes for the device specified by device_handle.
@@ -320,7 +320,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle
  * Location to write the fps mode info.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
  *
  * \sa k4a_fps_mode_info_t
  *

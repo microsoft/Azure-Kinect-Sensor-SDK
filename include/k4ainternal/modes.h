@@ -7,6 +7,8 @@
 #ifndef MODES_H
 #define MODES_H
 
+#include <k4a/k4atypes.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -84,6 +86,39 @@ typedef enum
     K4A_FRAMES_PER_SECOND_30 = 30, /**< 30 FPS */
 } k4a_fps_t;
 
+// Create a static array of color modes. Let the struct_size and variable fields be 0 for now.
+// These values refer specifically to Azure Kinect device.
+static const k4a_color_mode_info_t device_color_modes[] = {
+    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_OFF, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 },
+    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_720P, 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_1080P, 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_1440P, 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_1536P, 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
+    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_2160P, 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_3072P, 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 }
+};
+
+// An alias so the lines below will not get too long.
+#define _DEPTH16 K4A_IMAGE_FORMAT_DEPTH16
+
+// Create a static array of depth modes. Let the struct_size and variable fields be 0 for now.
+// These values refer specifically to Azure Kinect device.
+static const k4a_depth_mode_info_t device_depth_modes[] = {
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_OFF, false, 0, 0, _DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_NFOV_2X2BINNED, false, 320, 288, _DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_NFOV_UNBINNED, false, 640, 576, _DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_WFOV_2X2BINNED, false, 512, 512, _DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_WFOV_UNBINNED, false, 1024, 1024, _DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_PASSIVE_IR, true, 1024, 1024, _DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100 }
+};
+
+// Create a static array of fps modes. Let the struct_size and variable fields be 0 for now.
+// These values refer specifically to Azure Kinect device.
+static const k4a_fps_mode_info_t device_fps_modes[] = { { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_0, 0 },
+                                                        { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_5, 5 },
+                                                        { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_15, 15 },
+                                                        { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_30, 30 } };
+
 /** Return the image width and height for the corresponding k4a_color_resolution_t enum.
  *
  * \xmlonly
@@ -96,54 +131,23 @@ inline static bool k4a_convert_resolution_to_width_height(k4a_color_resolution_t
                                                           uint32_t *width_out,
                                                           uint32_t *height_out)
 {
+    bool resolutionFound = false;
+
     if (width_out == NULL || height_out == NULL)
     {
-        return false;
+        return resolutionFound;
     }
 
-    uint32_t width = 0;
-    uint32_t height = 0;
-    bool resolutionFound = true;
-
-    switch (resolution)
+    // Search device_color_modes array for the given resolution.
+    for (size_t n = 0; n < sizeof(device_color_modes) / sizeof(device_color_modes[0]); ++n)
     {
-    case K4A_COLOR_RESOLUTION_OFF:
-        width = 0;
-        height = 0;
-        break;
-    case K4A_COLOR_RESOLUTION_720P:
-        width = 1280;
-        height = 720;
-        break;
-    case K4A_COLOR_RESOLUTION_1080P:
-        width = 1920;
-        height = 1080;
-        break;
-    case K4A_COLOR_RESOLUTION_1440P:
-        width = 2560;
-        height = 1440;
-        break;
-    case K4A_COLOR_RESOLUTION_1536P:
-        width = 2048;
-        height = 1536;
-        break;
-    case K4A_COLOR_RESOLUTION_2160P:
-        width = 3840;
-        height = 2160;
-        break;
-    case K4A_COLOR_RESOLUTION_3072P:
-        width = 4096;
-        height = 3072;
-        break;
-    default:
-        resolutionFound = false;
-        break;
-    }
-
-    if (resolutionFound)
-    {
-        *width_out = width;
-        *height_out = height;
+        if (device_color_modes[n].mode_id == (uint32_t)resolution)
+        {
+            *width_out = device_color_modes[n].width;
+            *height_out = device_color_modes[n].height;
+            resolutionFound = true;
+            break;
+        }
     }
 
     return resolutionFound;
@@ -193,54 +197,23 @@ inline static bool k4a_convert_resolution_to_fov(k4a_color_resolution_t resoluti
                                                  float *horizontal_fov,
                                                  float *vertical_fov)
 {
+    bool resolutionFound = false;
+
     if (horizontal_fov == NULL || vertical_fov == NULL)
     {
-        return false;
+        return resolutionFound;
     }
 
-    float hor_fov = 0.0f;
-    float ver_fov = 0.0f;
-    bool resolutionFound = true;
-
-    switch (resolution)
+    // Search device_color_modes array for the given resolution.
+    for (size_t n = 0; n < sizeof(device_color_modes) / sizeof(device_color_modes[0]); ++n)
     {
-    case K4A_COLOR_RESOLUTION_OFF:
-        hor_fov = 0;
-        ver_fov = 0;
-        break;
-    case K4A_COLOR_RESOLUTION_720P:
-        hor_fov = 90.0f;
-        ver_fov = 59.0f;
-        break;
-    case K4A_COLOR_RESOLUTION_1080P:
-        hor_fov = 90.0f;
-        ver_fov = 59.0f;
-        break;
-    case K4A_COLOR_RESOLUTION_1440P:
-        hor_fov = 90.0f;
-        ver_fov = 59.0f;
-        break;
-    case K4A_COLOR_RESOLUTION_1536P:
-        hor_fov = 90.0f;
-        ver_fov = 74.3f;
-        break;
-    case K4A_COLOR_RESOLUTION_2160P:
-        hor_fov = 90.0f;
-        ver_fov = 59.0f;
-        break;
-    case K4A_COLOR_RESOLUTION_3072P:
-        hor_fov = 90.0f;
-        ver_fov = 74.3f;
-        break;
-    default:
-        resolutionFound = false;
-        break;
-    }
-
-    if (resolutionFound)
-    {
-        *horizontal_fov = hor_fov;
-        *vertical_fov = ver_fov;
+        if (device_color_modes[n].mode_id == (uint32_t)resolution)
+        {
+            *horizontal_fov = device_color_modes[n].horizontal_fov;
+            *vertical_fov = device_color_modes[n].vertical_fov;
+            resolutionFound = true;
+            break;
+        }
     }
 
     return resolutionFound;
@@ -290,50 +263,23 @@ inline static bool k4a_convert_depth_mode_to_width_height(k4a_depth_mode_t mode_
                                                           uint32_t *width_out,
                                                           uint32_t *height_out)
 {
+    bool modeFound = false;
+
     if (width_out == NULL || height_out == NULL)
     {
-        return false;
+        return modeFound;
     }
 
-    uint32_t width = 0;
-    uint32_t height = 0;
-    bool modeFound = true;
-
-    switch (mode_id)
+    // Search device_depth_modes array for the given resolution.
+    for (size_t n = 0; n < sizeof(device_depth_modes) / sizeof(device_depth_modes[0]); ++n)
     {
-    case K4A_DEPTH_MODE_OFF:
-        width = 0;
-        height = 0;
-        break;
-    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-        width = 320;
-        height = 288;
-        break;
-    case K4A_DEPTH_MODE_NFOV_UNBINNED:
-        width = 640;
-        height = 576;
-        break;
-    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-        width = 512;
-        height = 512;
-        break;
-    case K4A_DEPTH_MODE_WFOV_UNBINNED:
-        width = 1024;
-        height = 1024;
-        break;
-    case K4A_DEPTH_MODE_PASSIVE_IR:
-        width = 1024;
-        height = 1024;
-        break;
-    default:
-        modeFound = false;
-        break;
-    }
-
-    if (modeFound)
-    {
-        *width_out = width;
-        *height_out = height;
+        if (device_depth_modes[n].mode_id == (uint32_t)mode_id)
+        {
+            *width_out = device_depth_modes[n].width;
+            *height_out = device_depth_modes[n].height;
+            modeFound = true;
+            break;
+        }
     }
 
     return modeFound;
@@ -381,50 +327,23 @@ inline static uint32_t k4a_depth_mode_height(k4a_depth_mode_t mode_id)
  */
 inline static bool k4a_convert_depth_mode_to_fov(k4a_depth_mode_t mode_id, float *horizontal_fov, float *vertical_fov)
 {
+    bool modeFound = false;
+
     if (horizontal_fov == NULL || vertical_fov == NULL)
     {
-        return false;
+        return modeFound;
     }
 
-    float hor_fov = 0.0f;
-    float ver_fov = 0.0f;
-    bool modeFound = true;
-
-    switch (mode_id)
+    // Search device_depth_modes array for the given resolution.
+    for (size_t n = 0; n < sizeof(device_depth_modes) / sizeof(device_depth_modes[0]); ++n)
     {
-    case K4A_DEPTH_MODE_OFF:
-        hor_fov = 0;
-        ver_fov = 0;
-        break;
-    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-        hor_fov = 75.0f;
-        ver_fov = 65.0f;
-        break;
-    case K4A_DEPTH_MODE_NFOV_UNBINNED:
-        hor_fov = 75.0f;
-        ver_fov = 65.0f;
-        break;
-    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-        hor_fov = 120.0f;
-        ver_fov = 120.0f;
-        break;
-    case K4A_DEPTH_MODE_WFOV_UNBINNED:
-        hor_fov = 120.0f;
-        ver_fov = 120.0f;
-        break;
-    case K4A_DEPTH_MODE_PASSIVE_IR:
-        hor_fov = 120.0f;
-        ver_fov = 120.0f;
-        break;
-    default:
-        modeFound = false;
-        break;
-    }
-
-    if (modeFound)
-    {
-        *horizontal_fov = hor_fov;
-        *vertical_fov = ver_fov;
+        if (device_depth_modes[n].mode_id == (uint32_t)mode_id)
+        {
+            *horizontal_fov = device_depth_modes[n].horizontal_fov;
+            *vertical_fov = device_depth_modes[n].vertical_fov;
+            modeFound = true;
+            break;
+        }
     }
 
     return modeFound;
@@ -474,50 +393,23 @@ inline static bool k4a_convert_depth_mode_to_min_max_range(k4a_depth_mode_t mode
                                                            uint32_t *min_range,
                                                            uint32_t *max_range)
 {
+    bool modeFound = false;
+
     if (min_range == NULL || max_range == NULL)
     {
-        return false;
+        return modeFound;
     }
 
-    uint32_t min_range_temp = 0;
-    uint32_t max_range_temp = 0;
-    bool modeFound = true;
-
-    switch (mode_id)
+    // Search device_depth_modes array for the given resolution.
+    for (size_t n = 0; n < sizeof(device_depth_modes) / sizeof(device_depth_modes[0]); ++n)
     {
-    case K4A_DEPTH_MODE_OFF:
-        min_range_temp = 0;
-        max_range_temp = 0;
-        break;
-    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-        min_range_temp = 500;
-        max_range_temp = 5800;
-        break;
-    case K4A_DEPTH_MODE_NFOV_UNBINNED:
-        min_range_temp = 500;
-        max_range_temp = 4000;
-        break;
-    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-        min_range_temp = 250;
-        max_range_temp = 3000;
-        break;
-    case K4A_DEPTH_MODE_WFOV_UNBINNED:
-        min_range_temp = 250;
-        max_range_temp = 2500;
-        break;
-    case K4A_DEPTH_MODE_PASSIVE_IR:
-        min_range_temp = 0;
-        max_range_temp = 0;
-        break;
-    default:
-        modeFound = false;
-        break;
-    }
-
-    if (modeFound)
-    {
-        *min_range = min_range_temp;
-        *max_range = max_range_temp;
+        if (device_depth_modes[n].mode_id == (uint32_t)mode_id)
+        {
+            *min_range = device_depth_modes[n].min_range;
+            *max_range = device_depth_modes[n].max_range;
+            modeFound = true;
+            break;
+        }
     }
 
     return modeFound;
