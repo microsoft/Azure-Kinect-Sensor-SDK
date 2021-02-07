@@ -14,6 +14,7 @@ void SampleRecordings::SetUp()
     k4a_device_configuration_t record_config_empty = {};
     record_config_empty.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
     record_config_empty.depth_mode_id = K4A_DEPTH_MODE_OFF;
+    record_config_empty.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
 
     k4a_device_configuration_t record_config_full = {};
     record_config_full.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
