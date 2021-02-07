@@ -101,6 +101,7 @@ static void RunStreamConfig(k4a_device_t device, uint32_t expected_fps)
         // start. This is directly related to how the IMU module uses "color_camera_start_tick"
         config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         config.depth_mode_id = K4A_DEPTH_MODE_PASSIVE_IR;
+        config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_imu(device));
         ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_imu_sample(device, &imu_sample, timeout_ms));
