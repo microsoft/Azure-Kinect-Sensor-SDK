@@ -383,11 +383,11 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
         // These are specific for Azure Kinect device.
         if (K4A_SUCCEEDED(result) && static_cast<uint32_t>(*fps_mode_id) == fps_mode_info->mode_id)
         {
-            if (color_mode_info->height >= 3072 ||
-                (depth_mode_info->height >= 1024 && depth_mode_info->horizontal_fov >= 120.0f &&
-                 depth_mode_info->vertical_fov >= 120.0f && depth_mode_info->min_range >= 250 &&
-                 depth_mode_info->max_range >= 2500) &&
-                    fps_mode_info->fps > 15)
+            if ((color_mode_info->height >= 3072 ||
+                 (depth_mode_info->height >= 1024 && depth_mode_info->horizontal_fov >= 120.0f &&
+                  depth_mode_info->vertical_fov >= 120.0f && depth_mode_info->min_range >= 250 &&
+                  depth_mode_info->max_range >= 2500)) &&
+                fps_mode_info->fps > 15)
             {
                 // Find the maximum FPS available that is less than or equal to 15 FPS.
                 int fps = 0;

@@ -133,6 +133,7 @@ TEST_F(k4a_cpp_ft, k4a)
         k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
         config.color_mode_id = 2; // K4A_COLOR_RESOLUTION_1080P
         config.depth_mode_id = 5; // K4A_DEPTH_MODE_PASSIVE_IR
+        config.fps_mode_id = 30;  // K4A_FRAMES_PER_SECOND_30
         config.synchronized_images_only = true;
         kinect.start_cameras(&config);
         kinect.start_imu();
@@ -273,6 +274,7 @@ static void test_record(void)
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.color_mode_id = 2; // K4A_COLOR_RESOLUTION_1080P
     config.depth_mode_id = 2; // K4A_DEPTH_MODE_NFOV_UNBINNED
+    config.fps_mode_id = 30;  // K4A_FRAMES_PER_SECOND_30
     config.synchronized_images_only = true;
     kinect.start_cameras(&config);
     kinect.start_imu();
