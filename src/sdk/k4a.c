@@ -1286,90 +1286,6 @@ k4a_result_t k4a_transformation_depth_image_to_point_cloud(k4a_transformation_t 
                                                                 &xyz_image_descriptor));
 }
 
-// Create a static array of color modes. Let the struct_size and variable fields be 0 for now.
-k4a_color_mode_info_t device_color_modes[] = {
-    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_OFF, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 },
-    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_720P, 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_1080P, 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_1440P, 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_1536P, 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
-    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_2160P, 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-    { 0, K4A_ABI_VERSION, K4A_COLOR_RESOLUTION_3072P, 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 }
-};
-
-k4a_depth_mode_info_t device_depth_modes[] =
-    { { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_OFF, false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 },
-      { 0,
-        K4A_ABI_VERSION,
-        K4A_DEPTH_MODE_NFOV_2X2BINNED,
-        false,
-        320,
-        288,
-        K4A_IMAGE_FORMAT_DEPTH16,
-        75.0f,
-        65.0f,
-        5,
-        30,
-        500,
-        5800 },
-      { 0,
-        K4A_ABI_VERSION,
-        K4A_DEPTH_MODE_NFOV_UNBINNED,
-        false,
-        640,
-        576,
-        K4A_IMAGE_FORMAT_DEPTH16,
-        75.0f,
-        65.0f,
-        5,
-        30,
-        500,
-        4000 },
-      { 0,
-        K4A_ABI_VERSION,
-        K4A_DEPTH_MODE_WFOV_2X2BINNED,
-        false,
-        512,
-        512,
-        K4A_IMAGE_FORMAT_DEPTH16,
-        120.0f,
-        120.0f,
-        5,
-        30,
-        250,
-        3000 },
-      { 0,
-        K4A_ABI_VERSION,
-        K4A_DEPTH_MODE_WFOV_UNBINNED,
-        false,
-        1024,
-        1024,
-        K4A_IMAGE_FORMAT_DEPTH16,
-        120.0f,
-        120.0f,
-        5,
-        30,
-        250,
-        2500 },
-      { 0,
-        K4A_ABI_VERSION,
-        K4A_DEPTH_MODE_PASSIVE_IR,
-        true,
-        1024,
-        1024,
-        K4A_IMAGE_FORMAT_DEPTH16,
-        120.0f,
-        120.0f,
-        5,
-        30,
-        0,
-        100 } };
-
-k4a_fps_mode_info_t device_fps_modes[] = { { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_0, 0 },
-                                           { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_5, 5 },
-                                           { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_15, 15 },
-                                           { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_30, 30 } };
-
 k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info)
 {
     if (!device_info)
@@ -1403,6 +1319,7 @@ k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, uint32_
     k4a_result_t result = K4A_RESULT_FAILED;
     if (NULL != mode_count)
     {
+        // device_color_modes is statically defined in <k4ainternal/modes.h>.
         *mode_count = sizeof(device_color_modes) / sizeof(device_color_modes[0]);
         result = K4A_RESULT_SUCCEEDED;
     }
@@ -1439,7 +1356,7 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
         return K4A_RESULT_FAILED;
     }
 
-    // Get the corresponding color mode info.
+    // Get the corresponding color mode info. device_color_modes is statically defined in <k4ainternal/modes.h>.
     k4a_color_mode_info_t color_mode_info = device_color_modes[mode_index];
     color_mode_info.struct_size = (uint32_t)sizeof(k4a_color_mode_info_t);
     SAFE_COPY_STRUCT(mode_info, &color_mode_info);
@@ -1453,6 +1370,7 @@ k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, uint32_
     k4a_result_t result = K4A_RESULT_FAILED;
     if (NULL != mode_count)
     {
+        // device_depth_modes is statically defined in <k4ainternal/modes.h>.
         *mode_count = sizeof(device_depth_modes) / sizeof(device_depth_modes[0]);
         result = K4A_RESULT_SUCCEEDED;
     }
@@ -1489,7 +1407,7 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
         return K4A_RESULT_FAILED;
     }
 
-    // Get the corresponding depth mode info.
+    // Get the corresponding depth mode info. device_depth_modes is statically defined in <k4ainternal/modes.h>.
     k4a_depth_mode_info_t depth_mode_info = device_depth_modes[mode_index];
     depth_mode_info.struct_size = (uint32_t)sizeof(k4a_depth_mode_info_t);
     SAFE_COPY_STRUCT(mode_info, &depth_mode_info);
@@ -1503,6 +1421,7 @@ k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, uint32_t 
     k4a_result_t result = K4A_RESULT_FAILED;
     if (NULL != mode_count)
     {
+        // device_fps_modes is statically defined in <k4ainternal/modes.h>.
         *mode_count = sizeof(device_fps_modes) / sizeof(device_fps_modes[0]);
         result = K4A_RESULT_SUCCEEDED;
     }
@@ -1536,7 +1455,7 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_i
         return K4A_RESULT_FAILED;
     }
 
-    // Get the corresponding fps mode info.
+    // Get the corresponding fps mode info. device_fps_modes is statically defined in <k4ainternal/modes.h>.
     k4a_fps_mode_info_t fps_mode_info = device_fps_modes[mode_index];
     fps_mode_info.struct_size = (uint32_t)sizeof(k4a_fps_mode_info_t);
     SAFE_COPY_STRUCT(mode_info, &fps_mode_info);
