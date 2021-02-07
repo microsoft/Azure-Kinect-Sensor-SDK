@@ -441,7 +441,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         {
             if (!imageFormatSupportsHighResolution)
             {
-                m_config.color_mode_id = 1; // 1 = K4A_COLOR_RESOLUTION_720P
+                m_config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
                 K4AViewerLogManager::Instance()
                     .Log(K4A_LOG_LEVEL_WARNING,
                          __FILE__,
@@ -663,7 +663,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     std::vector<std::pair<int, std::string>> fps_mode_items;
     std::vector<k4a_fps_mode_info_t> fps_modes = m_device.get_fps_modes();
     size_t fps_modes_size = fps_modes.size();
-    for (size_t f = 0; f < fps_modes_size; f++)
+    for (size_t f = 1; f < fps_modes_size; f++) // Start at index 1; index 0 is reserved for 0 FPS.
     {
         k4a_fps_mode_info_t fps_mode = fps_modes[f];
         int fps = (int)fps_mode.fps;
