@@ -8,6 +8,7 @@
 #include <utility>
 
 #include <k4a/k4a.hpp>
+#include <k4ainternal/modes.h>
 #include "k4asourceselectiondockcontrol.h"
 
 namespace k4aviewer
@@ -18,14 +19,7 @@ namespace k4aviewer
 //
 inline std::pair<int, int> GetColorDimensions(k4a_color_mode_info_t color_mode_info)
 {
-    if (K4ASourceSelectionDockControl::SelectedDevice != -1)
-    {
-        return { (int)color_mode_info.width, (int)color_mode_info.height };
-    }
-    else
-    {
-        throw std::logic_error("No device selected!");
-    }
+    return { (int)color_mode_info.width, (int)color_mode_info.height };
 }
 
 // Gets the dimensions of the depth images that the depth camera will produce for a
@@ -33,14 +27,7 @@ inline std::pair<int, int> GetColorDimensions(k4a_color_mode_info_t color_mode_i
 //
 inline std::pair<int, int> GetDepthDimensions(k4a_depth_mode_info_t depth_mode_info)
 {
-    if (K4ASourceSelectionDockControl::SelectedDevice != -1)
-    {
-        return { (int)depth_mode_info.width, (int)depth_mode_info.height };
-    }
-    else
-    {
-        throw std::logic_error("No device selected!");
-    }
+    return { (int)depth_mode_info.width, (int)depth_mode_info.height };
 }
 
 // Gets the range of values that we expect to see from the depth camera
@@ -48,20 +35,13 @@ inline std::pair<int, int> GetDepthDimensions(k4a_depth_mode_info_t depth_mode_i
 //
 inline std::pair<uint16_t, uint16_t> GetDepthModeRange(k4a_depth_mode_info_t depth_mode_info)
 {
-    if (K4ASourceSelectionDockControl::SelectedDevice != -1)
+    if (!depth_mode_info.passive_ir_only)
     {
-        if (!depth_mode_info.passive_ir_only)
-        {
-            return { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range };
-        }
-        else
-        {
-            throw std::logic_error("Invalid depth mode!");
-        }
+        return { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range };
     }
     else
     {
-        throw std::logic_error("No device selected!");
+        throw std::logic_error("Invalid depth mode!");
     }
 }
 
@@ -70,20 +50,13 @@ inline std::pair<uint16_t, uint16_t> GetDepthModeRange(k4a_depth_mode_info_t dep
 //
 inline std::pair<uint16_t, uint16_t> GetIrLevels(k4a_depth_mode_info_t depth_mode_info)
 {
-    if (depth_mode_info.mode_id == 0) // K4A_DEPTH_MODE_OFF
+    if (depth_mode_info.mode_id == K4A_DEPTH_MODE_OFF)
     {
         throw std::logic_error("Invalid depth mode!");
     }
-    else if (depth_mode_info.passive_ir_only) // K4A_DEPTH_MODE_PASSIVE_IR
+    else if (depth_mode_info.passive_ir_only)
     {
-        if (K4ASourceSelectionDockControl::SelectedDevice != -1)
-        {
-            return { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range };
-        }
-        else
-        {
-            throw std::logic_error("No device selected!");
-        }
+        return { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range };
     }
     else
     {
