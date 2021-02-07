@@ -623,7 +623,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     if (colorResolutionUpdated || m_firstRun)
     {
-        if (m_config.color_mode_id == 6) // 6 = K4A_COLOR_RESOLUTION_3072P
+        if (m_config.color_mode_id == K4A_COLOR_RESOLUTION_3072P)
         {
             K4AViewerLogManager::Instance().Log(K4A_LOG_LEVEL_WARNING,
                                                 __FILE__,
@@ -633,9 +633,9 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
     }
     if (depthModeUpdated || m_firstRun)
     {
-        if (m_config.depth_mode_id == 4) // 4 = K4A_DEPTH_MODE_WFOV_UNBINNED
+        if (m_config.depth_mode_id == K4A_DEPTH_MODE_WFOV_UNBINNED)
         {
-            m_config.fps_mode_id = 1; // 1 = K4A_FRAMES_PER_SECOND_15
+            m_config.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
             K4AViewerLogManager::Instance().Log(K4A_LOG_LEVEL_WARNING,
                                                 __FILE__,
                                                 __LINE__,
@@ -859,8 +859,8 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
         ImGui::Separator();
 
-        const bool pointCloudViewerAvailable = m_config.EnableDepthCamera && m_config.depth_mode_id != 5 &&
-                                               m_camerasStarted; // 5 = K4A_DEPTH_MODE_PASSIVE_IR
+        const bool pointCloudViewerAvailable = m_config.EnableDepthCamera &&
+                                               m_config.depth_mode_id != K4A_DEPTH_MODE_PASSIVE_IR && m_camerasStarted;
 
         K4AWindowSet::ShowModeSelector(&m_currentViewType,
                                        true,
