@@ -40,7 +40,7 @@ int main()
         k4a_device_get_depth_mode(dev.handle(), 3, &depth_mode_info); // K4A_DEPTH_MODE_WFOV_2X2BINNED
 
         k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-        k4a_device_get_fps_mode(dev.handle(), 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
+        k4a_device_get_fps_mode(dev.handle(), 3, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
 
         // Start the device
         //
