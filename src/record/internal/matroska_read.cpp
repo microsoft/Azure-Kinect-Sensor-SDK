@@ -661,7 +661,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *device_info_json_capabilities = cJSON_GetObjectItem(device_info_json, "capabilities");
                 if (device_info_json_capabilities != nullptr && cJSON_IsNumber(device_info_json_capabilities))
                 {
-                    uint32_t capabilities = (uint32_t)device_info_json_capabilities->valuedouble;
+                    uint32_t capabilities = (uint32_t)device_info_json_capabilities->valueint;
                     hasDepthDevice = (capabilities & 0x0001) == 1;      // Depth is bit 0, so no right shift needed.
                     hasColorDevice = ((capabilities >> 1) & 0x01) == 1; // Color is bit 1, so shift right by 1.
                     device_info.capabilities = capabilities;
@@ -674,7 +674,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *device_info_json_device_id = cJSON_GetObjectItem(device_info_json, "device_id");
                 if (device_info_json_device_id != nullptr && cJSON_IsNumber(device_info_json_device_id))
                 {
-                    device_info.device_id = (uint32_t)device_info_json_device_id->valuedouble;
+                    device_info.device_id = (uint32_t)device_info_json_device_id->valueint;
                 }
                 else
                 {
@@ -684,7 +684,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *device_info_json_vendor_id = cJSON_GetObjectItem(device_info_json, "vendor_id");
                 if (device_info_json_vendor_id != nullptr && cJSON_IsNumber(device_info_json_vendor_id))
                 {
-                    device_info.vendor_id = (uint32_t)device_info_json_vendor_id->valuedouble;
+                    device_info.vendor_id = (uint32_t)device_info_json_vendor_id->valueint;
                 }
                 else
                 {
@@ -726,7 +726,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_mode_id = cJSON_GetObjectItem(color_mode_info_json, "mode_id");
                 if (color_mode_info_json_mode_id != nullptr && cJSON_IsNumber(color_mode_info_json_mode_id))
                 {
-                    color_mode_info.mode_id = (uint32_t)color_mode_info_json_mode_id->valuedouble;
+                    color_mode_info.mode_id = (uint32_t)color_mode_info_json_mode_id->valueint;
                 }
                 else
                 {
@@ -736,7 +736,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_width = cJSON_GetObjectItem(color_mode_info_json, "width");
                 if (color_mode_info_json_width != nullptr && cJSON_IsNumber(color_mode_info_json_width))
                 {
-                    color_mode_info.width = (uint32_t)color_mode_info_json_width->valuedouble;
+                    color_mode_info.width = (uint32_t)color_mode_info_json_width->valueint;
                 }
                 else
                 {
@@ -746,7 +746,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_height = cJSON_GetObjectItem(color_mode_info_json, "height");
                 if (color_mode_info_json_height != nullptr && cJSON_IsNumber(color_mode_info_json_height))
                 {
-                    color_mode_info.height = (uint32_t)color_mode_info_json_height->valuedouble;
+                    color_mode_info.height = (uint32_t)color_mode_info_json_height->valueint;
                 }
                 else
                 {
@@ -758,7 +758,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 if (color_mode_info_json_native_format != nullptr && cJSON_IsNumber(color_mode_info_json_native_format))
                 {
                     color_mode_info.native_format = (k4a_image_format_t)(
-                                                        int)color_mode_info_json_native_format->valuedouble;
+                                                        int)color_mode_info_json_native_format->valueint;
                 }
                 else
                 {
@@ -791,7 +791,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_min_fps = cJSON_GetObjectItem(color_mode_info_json, "min_fps");
                 if (color_mode_info_json_min_fps != nullptr && cJSON_IsNumber(color_mode_info_json_min_fps))
                 {
-                    color_mode_info.min_fps = (int)color_mode_info_json_min_fps->valuedouble;
+                    color_mode_info.min_fps = (int)color_mode_info_json_min_fps->valueint;
                 }
                 else
                 {
@@ -801,7 +801,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_max_fps = cJSON_GetObjectItem(color_mode_info_json, "max_fps");
                 if (color_mode_info_json_max_fps != nullptr && cJSON_IsNumber(color_mode_info_json_max_fps))
                 {
-                    color_mode_info.max_fps = (int)color_mode_info_json_max_fps->valuedouble;
+                    color_mode_info.max_fps = (int)color_mode_info_json_max_fps->valueint;
                 }
                 else
                 {
@@ -864,7 +864,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_mode_id = cJSON_GetObjectItem(depth_mode_info_json, "mode_id");
                 if (depth_mode_info_json_mode_id != nullptr && cJSON_IsNumber(depth_mode_info_json_mode_id))
                 {
-                    depth_mode_info.mode_id = (uint32_t)depth_mode_info_json_mode_id->valuedouble;
+                    depth_mode_info.mode_id = (uint32_t)depth_mode_info_json_mode_id->valueint;
                 }
                 else
                 {
@@ -886,7 +886,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_width = cJSON_GetObjectItem(depth_mode_info_json, "width");
                 if (depth_mode_info_json_width != nullptr && cJSON_IsNumber(depth_mode_info_json_width))
                 {
-                    depth_mode_info.width = (uint32_t)depth_mode_info_json_width->valuedouble;
+                    depth_mode_info.width = (uint32_t)depth_mode_info_json_width->valueint;
                 }
                 else
                 {
@@ -896,7 +896,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_height = cJSON_GetObjectItem(depth_mode_info_json, "height");
                 if (depth_mode_info_json_height != nullptr && cJSON_IsNumber(depth_mode_info_json_height))
                 {
-                    depth_mode_info.height = (uint32_t)depth_mode_info_json_height->valuedouble;
+                    depth_mode_info.height = (uint32_t)depth_mode_info_json_height->valueint;
                 }
                 else
                 {
@@ -908,7 +908,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 if (depth_mode_info_json_native_format != nullptr && cJSON_IsNumber(depth_mode_info_json_native_format))
                 {
                     depth_mode_info.native_format = (k4a_image_format_t)(
-                                                        int)depth_mode_info_json_native_format->valuedouble;
+                                                        int)depth_mode_info_json_native_format->valueint;
                 }
                 else
                 {
@@ -941,7 +941,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_min_fps = cJSON_GetObjectItem(depth_mode_info_json, "min_fps");
                 if (depth_mode_info_json_min_fps != nullptr && cJSON_IsNumber(depth_mode_info_json_min_fps))
                 {
-                    depth_mode_info.min_fps = (int)depth_mode_info_json_min_fps->valuedouble;
+                    depth_mode_info.min_fps = (int)depth_mode_info_json_min_fps->valueint;
                 }
                 else
                 {
@@ -951,7 +951,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_max_fps = cJSON_GetObjectItem(depth_mode_info_json, "max_fps");
                 if (depth_mode_info_json_max_fps != nullptr && cJSON_IsNumber(depth_mode_info_json_max_fps))
                 {
-                    depth_mode_info.max_fps = (int)depth_mode_info_json_max_fps->valuedouble;
+                    depth_mode_info.max_fps = (int)depth_mode_info_json_max_fps->valueint;
                 }
                 else
                 {
@@ -961,7 +961,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_min_range = cJSON_GetObjectItem(depth_mode_info_json, "min_range");
                 if (depth_mode_info_json_min_range != nullptr && cJSON_IsNumber(depth_mode_info_json_min_range))
                 {
-                    depth_mode_info.min_range = (int)depth_mode_info_json_min_range->valuedouble;
+                    depth_mode_info.min_range = (uint32_t)depth_mode_info_json_min_range->valueint;
                 }
                 else
                 {
@@ -971,7 +971,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_max_range = cJSON_GetObjectItem(depth_mode_info_json, "max_range");
                 if (depth_mode_info_json_max_range != nullptr && cJSON_IsNumber(depth_mode_info_json_max_range))
                 {
-                    depth_mode_info.max_range = (int)depth_mode_info_json_max_range->valuedouble;
+                    depth_mode_info.max_range = (uint32_t)depth_mode_info_json_max_range->valueint;
                 }
                 else
                 {
@@ -1037,7 +1037,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *fps_mode_info_json_mode_id = cJSON_GetObjectItem(fps_mode_info_json, "mode_id");
                 if (fps_mode_info_json_mode_id != nullptr && cJSON_IsNumber(fps_mode_info_json_mode_id))
                 {
-                    fps_mode_info.mode_id = (uint32_t)fps_mode_info_json_mode_id->valuedouble;
+                    fps_mode_info.mode_id = (uint32_t)fps_mode_info_json_mode_id->valueint;
                 }
                 else
                 {
@@ -1047,7 +1047,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *fps_mode_info_json_fps = cJSON_GetObjectItem(fps_mode_info_json, "fps");
                 if (fps_mode_info_json_fps != nullptr && cJSON_IsNumber(fps_mode_info_json_fps))
                 {
-                    fps_mode_info.fps = (uint32_t)fps_mode_info_json_fps->valuedouble;
+                    fps_mode_info.fps = (uint32_t)fps_mode_info_json_fps->valueint;
                 }
                 else
                 {
