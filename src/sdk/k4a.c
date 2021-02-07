@@ -1339,7 +1339,9 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
         return K4A_RESULT_FAILED;
     }
 
-    if (mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
+    // If the struct size or version is not recognized, return unsupported status.
+    if (mode_info->struct_size != (uint32_t)sizeof(k4a_color_mode_info_t) ||
+        mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
     {
         return K4A_RESULT_UNSUPPORTED;
     }
@@ -1350,7 +1352,6 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
     {
         return K4A_RESULT_FAILED;
     }
-
     if (mode_index >= mode_count)
     {
         return K4A_RESULT_FAILED;
@@ -1390,7 +1391,9 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
         return K4A_RESULT_FAILED;
     }
 
-    if (mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
+    // If the struct size or version is not recognized, return unsupported status.
+    if (mode_info->struct_size != (uint32_t)sizeof(k4a_depth_mode_info_t) ||
+        mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
     {
         return K4A_RESULT_UNSUPPORTED;
     }
@@ -1401,7 +1404,6 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
     {
         return K4A_RESULT_FAILED;
     }
-
     if (mode_index >= mode_count)
     {
         return K4A_RESULT_FAILED;
@@ -1438,7 +1440,10 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_i
     {
         return K4A_RESULT_FAILED;
     }
-    if (mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
+
+    // If the struct size or version is not recognized, return unsupported status.
+    if (mode_info->struct_size != (uint32_t)sizeof(k4a_fps_mode_info_t) ||
+        mode_info->struct_version != (uint32_t)K4A_ABI_VERSION)
     {
         return K4A_RESULT_UNSUPPORTED;
     }
@@ -1449,7 +1454,6 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_i
     {
         return K4A_RESULT_FAILED;
     }
-
     if (mode_index >= mode_count)
     {
         return K4A_RESULT_FAILED;
