@@ -17,8 +17,11 @@
 #include <csignal>
 #include <math.h>
 #include <k4ainternal/math.h>
+#include <k4ainternal/common.h>
 
 static time_t exiting_timestamp;
+
+#define INVALID_AND_NOT_USER_DEFINED -1
 
 static void signal_handler(int s)
 {
@@ -147,7 +150,7 @@ static int string_compare(const char *s1, const char *s2)
                                                                               0 };
                                     if (k4a_device_get_color_mode(device, j, &color_mode_info) == K4A_RESULT_SUCCEEDED)
                                     {
-                                        std::cout << "\t\t\t" << j << " = ";
+                                        std::cout << "\t\t\t" << color_mode_info.mode_id << " = ";
                                         if (j == 0)
                                         {
                                             std::cout << "OFF" << std::endl;
@@ -186,7 +189,7 @@ static int string_compare(const char *s1, const char *s2)
                                                                               0 };
                                     if (k4a_device_get_depth_mode(device, j, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
                                     {
-                                        std::cout << "\t\t\t" << j << " = ";
+                                        std::cout << "\t\t\t" << depth_mode_info.mode_id << " = ";
                                         if (j == 0)
                                         {
                                             std::cout << "OFF" << std::endl;
@@ -195,20 +198,17 @@ static int string_compare(const char *s1, const char *s2)
                                         {
                                             int width = depth_mode_info.width;
                                             int height = depth_mode_info.height;
-                                            float fov = depth_mode_info.horizontal_fov;
+                                            float hfov = depth_mode_info.horizontal_fov;
+                                            float vfov = depth_mode_info.vertical_fov;
                                             if (depth_mode_info.passive_ir_only)
                                             {
                                                 std::cout << "Passive IR" << std::endl;
                                             }
                                             else
                                             {
-                                                if (height < 1000)
-                                                {
-                                                    std::cout << " ";
-                                                }
                                                 std::cout << width << "x";
                                                 std::cout << height << ", ";
-                                                std::cout << fov << "Deg" << std::endl;
+                                                std::cout << hfov << " Deg hfov x " << vfov << " Deg vfov" << std::endl;
                                             }
                                         }
                                     }
@@ -234,7 +234,8 @@ static int string_compare(const char *s1, const char *s2)
                                     {
                                         if (fps_mode_info.fps > 0)
                                         {
-                                            std::cout << "\t\t\t" << j << " = " << fps_mode_info.fps << std::endl;
+                                            std::cout << "\t\t\t" << fps_mode_info.mode_id << " = " << fps_mode_info.fps
+                                                      << " frames per second" << std::endl;
                                         }
                                     }
                                 }
@@ -284,41 +285,34 @@ static k4a_result_t get_color_mode_info(k4a_device_t device,
                                         k4a_image_format_t image_format,
                                         k4a_color_mode_info_t *color_mode_info)
 {
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    k4a_result_t result = K4A_RESULT_FAILED;
+    color_mode_info->mode_id = 0;
 
     uint32_t mode_count = 0;
-    k4a_device_get_color_mode_count(device, &mode_count);
-    if (mode_count > 0)
+    result = k4a_device_get_color_mode_count(device, &mode_count);
+    if (K4A_SUCCEEDED(result) && mode_count > 0)
     {
         if (image_format == K4A_IMAGE_FORMAT_COLOR_NV12 || image_format == K4A_IMAGE_FORMAT_COLOR_YUY2)
         {
-            *mode_id = -1;
+            *mode_id = INVALID_AND_NOT_USER_DEFINED;
         }
-        if (*mode_id == -1)
+
+        // Go through the list of color modes and find the one that matches the mode_id.
+        k4a_color_mode_info_t mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+        for (uint32_t n = 0; n < mode_count; ++n)
         {
-            for (uint32_t i = 1; i < mode_count; i++)
+            result = k4a_device_get_color_mode(device, n, &mode_info);
+            if (K4A_SUCCEEDED(result) && mode_info.height > 0)
             {
-                k4a_color_mode_info_t mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
-                if (K4A_SUCCEEDED(k4a_device_get_color_mode(device, i, &mode_info)))
+                // If the mode_id is not provided by the user, just use the first non-zero height mode.
+                if (*mode_id == INVALID_AND_NOT_USER_DEFINED || static_cast<uint32_t>(*mode_id) == mode_info.mode_id)
                 {
-                    if (mode_info.height <= 720)
-                    {
-                        *mode_id = i;
-                        break;
-                    }
+                    SAFE_COPY_STRUCT(color_mode_info, &mode_info);
+                    *mode_id = mode_info.mode_id;
+                    break;
                 }
             }
         }
-
-        result = k4a_device_get_color_mode(device, *mode_id, color_mode_info);
-        if (result == K4A_RESULT_FAILED)
-        {
-            color_mode_info->mode_id = 0;
-        }
-    }
-    else
-    {
-        result = K4A_RESULT_FAILED;
     }
 
     return result;
@@ -326,113 +320,96 @@ static k4a_result_t get_color_mode_info(k4a_device_t device,
 
 static k4a_result_t get_depth_mode_info(k4a_device_t device, int32_t *mode_id, k4a_depth_mode_info_t *depth_mode_info)
 {
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    k4a_result_t result = K4A_RESULT_FAILED;
+    depth_mode_info->mode_id = 0;
 
     uint32_t mode_count = 0;
-    k4a_device_get_depth_mode_count(device, &mode_count);
-    if (mode_count > 0)
+    result = k4a_device_get_depth_mode_count(device, &mode_count);
+    if (K4A_SUCCEEDED(result) && mode_count > 0)
     {
-        if (*mode_id == -1)
+        // Go through the list of depth modes and find the one that matches the mode_id.
+        k4a_depth_mode_info_t mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
+        for (uint32_t n = 0; n < mode_count; ++n)
         {
-            for (uint32_t i = 1; i < mode_count; i++)
+            result = k4a_device_get_depth_mode(device, n, &mode_info);
+            if (K4A_SUCCEEDED(result) && mode_info.height > 0)
             {
-                k4a_depth_mode_info_t mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
-                if (K4A_SUCCEEDED(k4a_device_get_depth_mode(device, i, &mode_info)))
+                // If the mode_id is not provided by the user, just use the first non-zero height mode.
+                if (*mode_id == INVALID_AND_NOT_USER_DEFINED || static_cast<uint32_t>(*mode_id) == mode_info.mode_id)
                 {
-                    if (mode_info.width > 320 && mode_info.height > 288 && mode_info.horizontal_fov < 120.0f &&
-                        mode_info.vertical_fov < 120.0f)
-                    {
-                        *mode_id = i;
-                        break;
-                    }
+                    SAFE_COPY_STRUCT(depth_mode_info, &mode_info);
+                    *mode_id = mode_info.mode_id;
+                    break;
                 }
             }
         }
-
-        result = k4a_device_get_depth_mode(device, *mode_id, depth_mode_info);
-        if (result == K4A_RESULT_FAILED)
-        {
-            depth_mode_info->mode_id = 0;
-        }
-    }
-    else
-    {
-        result = K4A_RESULT_FAILED;
     }
 
     return result;
 }
 
 static k4a_result_t get_fps_mode_info(k4a_device_t device,
-                                      uint32_t *fps_mode_id,
+                                      int32_t *fps_mode_id,
                                       k4a_color_mode_info_t *color_mode_info,
                                       k4a_depth_mode_info_t *depth_mode_info,
                                       k4a_fps_mode_info_t *fps_mode_info)
 {
-    k4a_result_t result = K4A_RESULT_SUCCEEDED;
+    k4a_result_t result = K4A_RESULT_FAILED;
+    fps_mode_info->mode_id = 0;
 
     uint32_t mode_count = 0;
-    k4a_device_get_fps_mode_count(device, &mode_count);
-    if (mode_count > 0)
+    result = k4a_device_get_fps_mode_count(device, &mode_count);
+    if (K4A_SUCCEEDED(result) && mode_count > 0)
     {
-        if (*fps_mode_id == -1)
+        // Go through the list of depth modes and find the one that matches the mode_id.
+        for (uint32_t n = 0; n < mode_count; ++n)
         {
-            int max_fps = 0;
-            for (uint32_t i = 1; i < mode_count; i++)
+            k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
+            result = k4a_device_get_fps_mode(device, n, &mode_info);
+            if (K4A_SUCCEEDED(result) && mode_info.fps > 0)
             {
-                k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-                if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
+                // If the mode_id is not provided by the user, just use the first non-zero fps mode.
+                if (*fps_mode_id == INVALID_AND_NOT_USER_DEFINED ||
+                    static_cast<uint32_t>(*fps_mode_id) == mode_info.mode_id)
                 {
-                    if (mode_info.fps > max_fps)
-                    {
-                        *fps_mode_id = i;
-                        max_fps = mode_info.fps;
-                    }
+                    SAFE_COPY_STRUCT(fps_mode_info, &mode_info);
+                    *fps_mode_id = mode_info.mode_id;
+                    break;
                 }
             }
         }
 
-        result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
-        if (K4A_SUCCEEDED(result))
+        // There may be some contraint on the fps modes for a given color and depth modes.
+        // These are specific for Azure Kinect device.
+        if (K4A_SUCCEEDED(result) && static_cast<uint32_t>(*fps_mode_id) == fps_mode_info->mode_id)
         {
             if (color_mode_info->height >= 3072 ||
                 (depth_mode_info->height >= 1024 && depth_mode_info->horizontal_fov >= 120.0f &&
                  depth_mode_info->vertical_fov >= 120.0f && depth_mode_info->min_range >= 250 &&
-                 depth_mode_info->max_range >= 2500))
+                 depth_mode_info->max_range >= 2500) &&
+                    fps_mode_info->fps > 15)
             {
+                // Find the maximum FPS available that is less than or equal to 15 FPS.
                 int fps = 0;
-                uint32_t mode_id = 0;
-                for (uint32_t i = 1; i < mode_count; i++)
+                for (uint32_t n = 0; n < mode_count; ++n)
                 {
-                    std::cout << i << std::endl;
                     k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-                    if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, i, &mode_info)))
+                    result = k4a_device_get_fps_mode(device, n, &mode_info);
+                    if (K4A_SUCCEEDED(result) && mode_info.fps <= 15)
                     {
-                        std::cout << mode_info.fps << std::endl;
-                        if ((fps == 0 || mode_info.fps > fps) && mode_info.fps <= 15)
+                        if (fps == 0 || mode_info.fps > fps)
                         {
-                            mode_id = i;
+                            SAFE_COPY_STRUCT(fps_mode_info, &mode_info);
+                            *fps_mode_id = mode_info.mode_id;
                             fps = mode_info.fps;
+                            break;
                         }
                     }
                 }
 
                 std::cout << "Warning: reduced frame rate down to " << fps << "." << std::endl;
-                if (mode_id != 0 && mode_id != *fps_mode_id)
-                {
-                    *fps_mode_id = mode_id;
-                    result = k4a_device_get_fps_mode(device, *fps_mode_id, fps_mode_info);
-                }
-                else
-                {
-                    result = K4A_RESULT_FAILED;
-                }
             }
         }
-    }
-    else
-    {
-        result = K4A_RESULT_FAILED;
     }
 
     return result;
@@ -441,11 +418,11 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
 int main(int argc, char **argv)
 {
     int device_index = 0;
-    int recording_length = -1;
+    int recording_length = INVALID_AND_NOT_USER_DEFINED;
     k4a_image_format_t recording_color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    int32_t recording_color_mode = -1;
-    int32_t recording_depth_mode = -1;
-    int32_t recording_fps_mode = -1;
+    int32_t recording_color_mode = INVALID_AND_NOT_USER_DEFINED;
+    int32_t recording_depth_mode = INVALID_AND_NOT_USER_DEFINED;
+    int32_t recording_fps_mode = INVALID_AND_NOT_USER_DEFINED;
     bool recording_imu_enabled = true;
     k4a_wired_sync_mode_t wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
     int32_t depth_delay_off_color_usec = 0;
@@ -733,7 +710,7 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    if (recording_color_mode == -1 && recording_depth_mode == -1)
+    if (recording_color_mode == INVALID_AND_NOT_USER_DEFINED && recording_depth_mode == INVALID_AND_NOT_USER_DEFINED)
     {
         std::cout << "A recording requires either a color or a depth device." << std::endl;
         return 1;
@@ -791,11 +768,8 @@ int main(int argc, char **argv)
                     return 1;
                 }
 
-                if (!K4A_SUCCEEDED(get_fps_mode_info(device,
-                                                     &static_cast<uint32_t>(recording_fps_mode),
-                                                     &color_mode_info,
-                                                     &depth_mode_info,
-                                                     &fps_mode_info)))
+                if (!K4A_SUCCEEDED(get_fps_mode_info(
+                        device, &recording_fps_mode, &color_mode_info, &depth_mode_info, &fps_mode_info)))
                 {
                     std::cout << "Error finding valid framerate for recording camera settings." << std::endl;
                     return 1;
