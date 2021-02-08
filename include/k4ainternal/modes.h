@@ -99,17 +99,17 @@ static const k4a_color_mode_info_t device_color_modes[] = {
 };
 
 // An alias so the lines below will not get too long.
-#define _DEPTH16 K4A_IMAGE_FORMAT_DEPTH16
+#define DEPTH16 K4A_IMAGE_FORMAT_DEPTH16
 
 // Create a static array of depth modes. Let the struct_size and variable fields be 0 for now.
 // These values refer specifically to Azure Kinect device.
 static const k4a_depth_mode_info_t device_depth_modes[] = {
-    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_OFF, false, 0, 0, _DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 },
-    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_NFOV_2X2BINNED, false, 320, 288, _DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800 },
-    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_NFOV_UNBINNED, false, 640, 576, _DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 },
-    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_WFOV_2X2BINNED, false, 512, 512, _DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000 },
-    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_WFOV_UNBINNED, false, 1024, 1024, _DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500 },
-    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_PASSIVE_IR, true, 1024, 1024, _DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100 }
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_OFF, false, 0, 0, DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_NFOV_2X2BINNED, false, 320, 288, DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_NFOV_UNBINNED, false, 640, 576, DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_WFOV_2X2BINNED, false, 512, 512, DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_WFOV_UNBINNED, false, 1024, 1024, DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500 },
+    { 0, K4A_ABI_VERSION, K4A_DEPTH_MODE_PASSIVE_IR, true, 1024, 1024, DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100 }
 };
 
 // Create a static array of fps modes. Let the struct_size and variable fields be 0 for now.
