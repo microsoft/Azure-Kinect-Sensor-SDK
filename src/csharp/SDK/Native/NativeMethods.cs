@@ -69,6 +69,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             K4A_CAPABILITY_DEPTH = 1,
             K4A_CAPABILITY_COLOR = 2,
             K4A_CAPABILITY_IMU = 4,
+            K4A_CAPABILITY_MICROPHONE = 8,
         }
 
         [NativeReference]
@@ -422,27 +423,27 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, out int mode_count);
+        public static extern k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, out uint mode_count);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, int mode_id, out k4a_color_mode_info_t mode_info);
+        public static extern k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, uint mode_id, out k4a_color_mode_info_t mode_info);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, out int mode_count);
+        public static extern k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, out uint mode_count);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_id, out k4a_depth_mode_info_t mode_info);
+        public static extern k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, uint mode_id, out k4a_depth_mode_info_t mode_info);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, out int mode_count);
+        public static extern k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, out uint mode_count);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, int mode_id, out k4a_fps_mode_info_t mode_info);
+        public static extern k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint mode_id, out k4a_fps_mode_info_t mode_info);
 
         [NativeReference]
         [StructLayout(LayoutKind.Sequential)]
@@ -540,8 +541,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             public float vertical_fov;
             public int min_fps;
             public int max_fps;
-            public int min_range;
-            public int max_range;
+            public uint min_range;
+            public uint max_range;
         }
 
         [NativeReference]
