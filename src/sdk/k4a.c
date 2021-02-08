@@ -1463,7 +1463,7 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, int mode_id, 
             depth_mode_info.max_fps = device_depth_modes[mode_id].max_fps;
             depth_mode_info.min_range = device_depth_modes[mode_id].min_range;
             depth_mode_info.max_range = device_depth_modes[mode_id].max_range;
-            depth_mode_info.passive_ir_only = device_depth_modes[mode_id].passive_ir_only;
+            depth_mode_info.passive_ir_only = device_depth_modes[mode_id].passive_ir_only ? true : false;
 
             SAFE_COPY_STRUCT(mode_info, &depth_mode_info);
 
