@@ -8,7 +8,6 @@
 #define COMMON_H
 
 #include <k4a/k4atypes.h>
-#include <k4ainternal/modes.h>
 #include <assert.h>
 
 #ifdef __cplusplus
@@ -61,113 +60,10 @@ Assumes size comes before version */
 /* Safe setting a value in a struct */
 #define SAFE_SET_MEMBER(S, M, NEW_VALUE)                                                                               \
     if (HAS_MEMBER(S, M))                                                                                              \
-        (S)->M = (NEW_VALUE);
+    (S)->M = (NEW_VALUE)
+
 /* Safe getting a value from a struct */
-#define SAFE_GET_MEMBER(S, M, DEFAULT_VALUE) (HAS_MEMBER(S, M) ? ((S)->M) : (DEFAULT_VALUE));
-
-inline static uint32_t k4a_convert_fps_to_uint(int fps)
-{
-    uint32_t fps_int = 0;
-    switch (fps)
-    {
-    case K4A_FRAMES_PER_SECOND_5:
-        fps_int = 5;
-        break;
-    case K4A_FRAMES_PER_SECOND_15:
-        fps_int = 15;
-        break;
-    case K4A_FRAMES_PER_SECOND_30:
-        fps_int = 30;
-        break;
-    default:
-        assert(0);
-        fps_int = 0;
-        break;
-    }
-    return fps_int;
-}
-
-inline static bool k4a_convert_resolution_to_width_height(k4a_color_resolution_t resolution,
-                                                          uint32_t *width_out,
-                                                          uint32_t *height_out)
-{
-    uint32_t width = 0;
-    uint32_t height = 0;
-    switch (resolution)
-    {
-    case K4A_COLOR_RESOLUTION_720P:
-        width = 1280;
-        height = 720;
-        break;
-    case K4A_COLOR_RESOLUTION_1080P:
-        width = 1920;
-        height = 1080;
-        break;
-    case K4A_COLOR_RESOLUTION_1440P:
-        width = 2560;
-        height = 1440;
-        break;
-    case K4A_COLOR_RESOLUTION_1536P:
-        width = 2048;
-        height = 1536;
-        break;
-    case K4A_COLOR_RESOLUTION_2160P:
-        width = 3840;
-        height = 2160;
-        break;
-    case K4A_COLOR_RESOLUTION_3072P:
-        width = 4096;
-        height = 3072;
-        break;
-    default:
-        return false;
-    }
-
-    if (width_out != NULL)
-        *width_out = width;
-    if (height_out != NULL)
-        *height_out = height;
-    return true;
-}
-
-inline static bool k4a_convert_depth_mode_to_width_height(k4a_depth_mode_t mode,
-                                                          uint32_t *width_out,
-                                                          uint32_t *height_out)
-{
-    uint32_t width = 0;
-    uint32_t height = 0;
-    switch (mode)
-    {
-    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-        width = 320;
-        height = 288;
-        break;
-    case K4A_DEPTH_MODE_NFOV_UNBINNED:
-        width = 640;
-        height = 576;
-        break;
-    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-        width = 512;
-        height = 512;
-        break;
-    case K4A_DEPTH_MODE_WFOV_UNBINNED:
-        width = 1024;
-        height = 1024;
-        break;
-    case K4A_DEPTH_MODE_PASSIVE_IR:
-        width = 1024;
-        height = 1024;
-        break;
-    default:
-        return false;
-    }
-
-    if (width_out != NULL)
-        *width_out = width;
-    if (height_out != NULL)
-        *height_out = height;
-    return true;
-}
+#define SAFE_GET_MEMBER(S, M, DEFAULT_VALUE) (HAS_MEMBER(S, M) ? ((S)->M) : (DEFAULT_VALUE))
 
 inline static bool k4a_is_version_greater_or_equal(k4a_version_t *fw_version_l, k4a_version_t *fw_version_r)
 {

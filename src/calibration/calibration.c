@@ -5,7 +5,6 @@
 #include <k4ainternal/calibration.h>
 
 // Dependent libraries
-#include <k4ainternal/common.h>
 #include <cJSON.h>
 #include <locale.h> //cJSON.h need this set correctly.
 

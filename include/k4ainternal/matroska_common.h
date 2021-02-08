@@ -9,6 +9,7 @@
 
 #include <k4arecord/types.h>
 #include <k4ainternal/handle.h>
+#include <k4ainternal/modes.h>
 #include <list>
 #include <fstream>
 #include <memory>

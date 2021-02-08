@@ -6,6 +6,7 @@
 
 // Dependent libraries
 #include <k4ainternal/logging.h>
+#include <k4ainternal/modes.h>
 #include <azure_c_shared_utility/threadapi.h>
 
 // System dependencies
@@ -289,21 +290,11 @@ k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, uint32_t fps_mod
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, depthmcu_t, depthmcu_handle);
     depthmcu_context_t *depthmcu = depthmcu_t_get_context(depthmcu_handle);
-    uint32_t fps;
 
     // Translate FPS to values understood by sensor module
-    switch (fps_mode_id)
+    uint32_t fps = (uint32_t)fps_mode_id;
+    if (fps == 0)
     {
-    case K4A_FRAMES_PER_SECOND_30:
-        fps = 30;
-        break;
-    case K4A_FRAMES_PER_SECOND_15:
-        fps = 15;
-        break;
-    case K4A_FRAMES_PER_SECOND_5:
-        fps = 5;
-        break;
-    default:
         LOG_ERROR("Invalid FPS %d", fps_mode_id);
         return K4A_RESULT_FAILED;
     }

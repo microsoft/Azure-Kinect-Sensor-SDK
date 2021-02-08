@@ -4,7 +4,6 @@
 #include <utcommon.h>
 
 // Module being tested
-#include <k4ainternal/common.h>
 #include <k4ainternal/logging.h>
 #include <azure_c_shared_utility/lock.h>
 #include <azure_c_shared_utility/tickcounter.h>

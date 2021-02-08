@@ -6,7 +6,6 @@
 #include <k4ainternal/imu.h>
 
 // Dependent libraries
-#include <k4ainternal/common.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/math.h>
 #include <k4ainternal/queue.h>

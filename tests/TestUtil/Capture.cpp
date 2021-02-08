@@ -7,6 +7,7 @@
 #include <k4ainternal/capture.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/usbcommand.h>
+#include <k4ainternal/modes.h>
 #include <assert.h>
 
 #include "Cli.h"
