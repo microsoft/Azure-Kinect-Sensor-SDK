@@ -47,9 +47,9 @@ int main(int argc, char ** /*argv*/)
         return 1;
     }
 
-    config.depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
-    config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
-    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.depth_mode = 3;       // K4A_DEPTH_MODE_WFOV_2X2BINNED;
+    config.color_resolution = 2; // K4A_COLOR_RESOLUTION_1080P;
+    config.camera_fps = 30;      // K4A_FRAMES_PER_SECOND_30;
 
     k4a_calibration_t calibration;
     if (K4A_RESULT_SUCCEEDED !=

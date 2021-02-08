@@ -10,7 +10,7 @@
 #include <k4a/k4a.h>
 #include <k4a/k4atypes.h>
 #include <k4ainternal/matroska_read.h>
-#include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/usbcommand.h>
 
@@ -426,6 +426,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
         LOG_WARNING("Device calibration is missing from recording.", 0);
     }
 
+    // Make some reasonable assumptions: Color is OFF, Depth is OFF, and FPS is 30.
     uint32_t color_mode_id = K4A_COLOR_RESOLUTION_OFF;
     uint32_t depth_mode_id = K4A_DEPTH_MODE_OFF;
     uint32_t fps_mode_id = K4A_FRAMES_PER_SECOND_30;
@@ -613,23 +614,16 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     context->sync_period_ns = frame_period_ns;
     if (frame_period_ns > 0)
     {
-        switch (1_s / frame_period_ns)
+        k4a_fps_t fps_t = static_cast<k4a_fps_t>(static_cast<uint32_t>(1_s / frame_period_ns));
+        if (fps_t == K4A_FRAMES_PER_SECOND_0)
         {
-        case 5:
-            fps_mode_id = K4A_FRAMES_PER_SECOND_5;
-            break;
-        case 15:
-            fps_mode_id = K4A_FRAMES_PER_SECOND_15;
-            break;
-        case 30:
-            fps_mode_id = K4A_FRAMES_PER_SECOND_30;
-            break;
-        default:
             LOG_ERROR("Unsupported recording frame period: %llu ns (%llu fps)",
                       frame_period_ns,
                       (1_s / frame_period_ns));
             return K4A_RESULT_FAILED;
         }
+
+        fps_mode_id = static_cast<uint32_t>(fps_t);
     }
     else
     {
@@ -667,9 +661,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *device_info_json_capabilities = cJSON_GetObjectItem(device_info_json, "capabilities");
                 if (device_info_json_capabilities != nullptr && cJSON_IsNumber(device_info_json_capabilities))
                 {
-                    uint32_t capabilities = (uint32_t)device_info_json_capabilities->valuedouble;
-                    hasDepthDevice = (capabilities & 0x0001) == 1;
-                    hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+                    uint32_t capabilities = (uint32_t)device_info_json_capabilities->valueint;
+                    hasDepthDevice = (capabilities & 0x0001) == 1;      // Depth is bit 0, so no right shift needed.
+                    hasColorDevice = ((capabilities >> 1) & 0x01) == 1; // Color is bit 1, so shift right by 1.
                     device_info.capabilities = capabilities;
                 }
                 else
@@ -680,7 +674,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *device_info_json_device_id = cJSON_GetObjectItem(device_info_json, "device_id");
                 if (device_info_json_device_id != nullptr && cJSON_IsNumber(device_info_json_device_id))
                 {
-                    device_info.device_id = (uint32_t)device_info_json_device_id->valuedouble;
+                    device_info.device_id = (uint32_t)device_info_json_device_id->valueint;
                 }
                 else
                 {
@@ -690,7 +684,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *device_info_json_vendor_id = cJSON_GetObjectItem(device_info_json, "vendor_id");
                 if (device_info_json_vendor_id != nullptr && cJSON_IsNumber(device_info_json_vendor_id))
                 {
-                    device_info.vendor_id = (uint32_t)device_info_json_vendor_id->valuedouble;
+                    device_info.vendor_id = (uint32_t)device_info_json_vendor_id->valueint;
                 }
                 else
                 {
@@ -732,7 +726,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_mode_id = cJSON_GetObjectItem(color_mode_info_json, "mode_id");
                 if (color_mode_info_json_mode_id != nullptr && cJSON_IsNumber(color_mode_info_json_mode_id))
                 {
-                    color_mode_info.mode_id = (uint32_t)color_mode_info_json_mode_id->valuedouble;
+                    color_mode_info.mode_id = (uint32_t)color_mode_info_json_mode_id->valueint;
                 }
                 else
                 {
@@ -742,7 +736,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_width = cJSON_GetObjectItem(color_mode_info_json, "width");
                 if (color_mode_info_json_width != nullptr && cJSON_IsNumber(color_mode_info_json_width))
                 {
-                    color_mode_info.width = (uint32_t)color_mode_info_json_width->valuedouble;
+                    color_mode_info.width = (uint32_t)color_mode_info_json_width->valueint;
                 }
                 else
                 {
@@ -752,7 +746,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_height = cJSON_GetObjectItem(color_mode_info_json, "height");
                 if (color_mode_info_json_height != nullptr && cJSON_IsNumber(color_mode_info_json_height))
                 {
-                    color_mode_info.height = (uint32_t)color_mode_info_json_height->valuedouble;
+                    color_mode_info.height = (uint32_t)color_mode_info_json_height->valueint;
                 }
                 else
                 {
@@ -764,7 +758,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 if (color_mode_info_json_native_format != nullptr && cJSON_IsNumber(color_mode_info_json_native_format))
                 {
                     color_mode_info.native_format = (k4a_image_format_t)(
-                                                        int)color_mode_info_json_native_format->valuedouble;
+                                                        int)color_mode_info_json_native_format->valueint;
                 }
                 else
                 {
@@ -797,7 +791,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_min_fps = cJSON_GetObjectItem(color_mode_info_json, "min_fps");
                 if (color_mode_info_json_min_fps != nullptr && cJSON_IsNumber(color_mode_info_json_min_fps))
                 {
-                    color_mode_info.min_fps = (int)color_mode_info_json_min_fps->valuedouble;
+                    color_mode_info.min_fps = (int)color_mode_info_json_min_fps->valueint;
                 }
                 else
                 {
@@ -807,7 +801,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_max_fps = cJSON_GetObjectItem(color_mode_info_json, "max_fps");
                 if (color_mode_info_json_max_fps != nullptr && cJSON_IsNumber(color_mode_info_json_max_fps))
                 {
-                    color_mode_info.max_fps = (int)color_mode_info_json_max_fps->valuedouble;
+                    color_mode_info.max_fps = (int)color_mode_info_json_max_fps->valueint;
                 }
                 else
                 {
@@ -833,44 +827,26 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     if (!K4A_SUCCEEDED(color_mode_info_result))
     {
-        struct _recording_color_modes
-        {
-            uint32_t mode_id;
-            uint32_t width;
-            uint32_t height;
-            k4a_image_format_t native_format;
-            float horizontal_fov;
-            float vertical_fov;
-            int min_fps;
-            int max_fps;
-        } recording_color_modes[] = { { 0, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 }, // color mode will be turned
-                                                                                            // off
-                                      { 1, 1280, 720, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                                      { 2, 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                                      { 3, 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                                      { 4, 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
-                                      { 5, 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
-                                      { 6, 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 } };
-
-        int mode_count = sizeof(recording_color_modes) / sizeof(recording_color_modes[0]);
+        // device_color_modes is statically defined in <k4ainternal/modes.h>.
+        int mode_count = sizeof(device_color_modes) / sizeof(device_color_modes[0]);
         int color_mode_index = 0;
         for (int i = 0; i < mode_count; i++)
         {
-            if (recording_color_modes[i].mode_id == color_mode_id)
+            if (device_color_modes[i].mode_id == color_mode_id)
             {
                 color_mode_index = i;
                 break;
             }
         }
 
-        color_mode_info.mode_id = recording_color_modes[color_mode_index].mode_id;
-        color_mode_info.width = recording_color_modes[color_mode_index].width;
-        color_mode_info.height = recording_color_modes[color_mode_index].height;
-        color_mode_info.native_format = recording_color_modes[color_mode_index].native_format;
-        color_mode_info.horizontal_fov = recording_color_modes[color_mode_index].horizontal_fov;
-        color_mode_info.vertical_fov = recording_color_modes[color_mode_index].vertical_fov;
-        color_mode_info.min_fps = recording_color_modes[color_mode_index].min_fps;
-        color_mode_info.max_fps = recording_color_modes[color_mode_index].max_fps;
+        color_mode_info.mode_id = device_color_modes[color_mode_index].mode_id;
+        color_mode_info.width = device_color_modes[color_mode_index].width;
+        color_mode_info.height = device_color_modes[color_mode_index].height;
+        color_mode_info.native_format = device_color_modes[color_mode_index].native_format;
+        color_mode_info.horizontal_fov = device_color_modes[color_mode_index].horizontal_fov;
+        color_mode_info.vertical_fov = device_color_modes[color_mode_index].vertical_fov;
+        color_mode_info.min_fps = device_color_modes[color_mode_index].min_fps;
+        color_mode_info.max_fps = device_color_modes[color_mode_index].max_fps;
     }
 
     context->record_config.color_mode_info = color_mode_info;
@@ -888,7 +864,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_mode_id = cJSON_GetObjectItem(depth_mode_info_json, "mode_id");
                 if (depth_mode_info_json_mode_id != nullptr && cJSON_IsNumber(depth_mode_info_json_mode_id))
                 {
-                    depth_mode_info.mode_id = (uint32_t)depth_mode_info_json_mode_id->valuedouble;
+                    depth_mode_info.mode_id = (uint32_t)depth_mode_info_json_mode_id->valueint;
                 }
                 else
                 {
@@ -910,7 +886,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_width = cJSON_GetObjectItem(depth_mode_info_json, "width");
                 if (depth_mode_info_json_width != nullptr && cJSON_IsNumber(depth_mode_info_json_width))
                 {
-                    depth_mode_info.width = (uint32_t)depth_mode_info_json_width->valuedouble;
+                    depth_mode_info.width = (uint32_t)depth_mode_info_json_width->valueint;
                 }
                 else
                 {
@@ -920,7 +896,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_height = cJSON_GetObjectItem(depth_mode_info_json, "height");
                 if (depth_mode_info_json_height != nullptr && cJSON_IsNumber(depth_mode_info_json_height))
                 {
-                    depth_mode_info.height = (uint32_t)depth_mode_info_json_height->valuedouble;
+                    depth_mode_info.height = (uint32_t)depth_mode_info_json_height->valueint;
                 }
                 else
                 {
@@ -932,7 +908,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 if (depth_mode_info_json_native_format != nullptr && cJSON_IsNumber(depth_mode_info_json_native_format))
                 {
                     depth_mode_info.native_format = (k4a_image_format_t)(
-                                                        int)depth_mode_info_json_native_format->valuedouble;
+                                                        int)depth_mode_info_json_native_format->valueint;
                 }
                 else
                 {
@@ -965,7 +941,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_min_fps = cJSON_GetObjectItem(depth_mode_info_json, "min_fps");
                 if (depth_mode_info_json_min_fps != nullptr && cJSON_IsNumber(depth_mode_info_json_min_fps))
                 {
-                    depth_mode_info.min_fps = (int)depth_mode_info_json_min_fps->valuedouble;
+                    depth_mode_info.min_fps = (int)depth_mode_info_json_min_fps->valueint;
                 }
                 else
                 {
@@ -975,7 +951,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_max_fps = cJSON_GetObjectItem(depth_mode_info_json, "max_fps");
                 if (depth_mode_info_json_max_fps != nullptr && cJSON_IsNumber(depth_mode_info_json_max_fps))
                 {
-                    depth_mode_info.max_fps = (int)depth_mode_info_json_max_fps->valuedouble;
+                    depth_mode_info.max_fps = (int)depth_mode_info_json_max_fps->valueint;
                 }
                 else
                 {
@@ -985,7 +961,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_min_range = cJSON_GetObjectItem(depth_mode_info_json, "min_range");
                 if (depth_mode_info_json_min_range != nullptr && cJSON_IsNumber(depth_mode_info_json_min_range))
                 {
-                    depth_mode_info.min_range = (int)depth_mode_info_json_min_range->valuedouble;
+                    depth_mode_info.min_range = (uint32_t)depth_mode_info_json_min_range->valueint;
                 }
                 else
                 {
@@ -995,7 +971,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_max_range = cJSON_GetObjectItem(depth_mode_info_json, "max_range");
                 if (depth_mode_info_json_max_range != nullptr && cJSON_IsNumber(depth_mode_info_json_max_range))
                 {
-                    depth_mode_info.max_range = (int)depth_mode_info_json_max_range->valuedouble;
+                    depth_mode_info.max_range = (uint32_t)depth_mode_info_json_max_range->valueint;
                 }
                 else
                 {
@@ -1021,51 +997,29 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     if (!K4A_SUCCEEDED(depth_mode_info_result))
     {
-        struct _recording_depth_modes
-        {
-            uint32_t mode_id;
-            uint32_t width;
-            uint32_t height;
-            k4a_image_format_t native_format;
-            float horizontal_fov;
-            float vertical_fov;
-            int min_fps;
-            int max_fps;
-            int min_range;
-            int max_range;
-            bool passive_ir_only;
-        } recording_depth_modes[] =
-            { { 0, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0, false }, // depth mode
-                                                                                    // will be
-                                                                                    // turned off
-              { 1, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800, false },
-              { 2, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000, false },
-              { 3, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000, false },
-              { 4, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500, false },
-              { 5, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100, false } };
-
-        int mode_count = sizeof(recording_depth_modes) / sizeof(recording_depth_modes[0]);
+        // device_depth_modes is statically defined in <k4ainternal/modes.h>.
+        int mode_count = sizeof(device_depth_modes) / sizeof(device_depth_modes[0]);
         int depth_mode_index = 0;
         for (int i = 0; i < mode_count; i++)
         {
-            if (recording_depth_modes[i].mode_id == depth_mode_id)
+            if (device_depth_modes[i].mode_id == depth_mode_id)
             {
                 depth_mode_index = i;
                 break;
             }
         }
 
-        depth_mode_info.mode_id = recording_depth_modes[depth_mode_index].mode_id;
-        depth_mode_info.width = recording_depth_modes[depth_mode_index].width;
-        depth_mode_info.height = recording_depth_modes[depth_mode_index].height;
-        depth_mode_info.native_format = recording_depth_modes[depth_mode_index].native_format;
-        depth_mode_info.horizontal_fov = recording_depth_modes[depth_mode_index].horizontal_fov;
-        depth_mode_info.vertical_fov = recording_depth_modes[depth_mode_index].vertical_fov;
-        depth_mode_info.min_fps = recording_depth_modes[depth_mode_index].min_fps;
-        depth_mode_info.max_fps = recording_depth_modes[depth_mode_index].max_fps;
-        depth_mode_info.min_range = recording_depth_modes[depth_mode_index].min_range;
-        depth_mode_info.max_range = recording_depth_modes[depth_mode_index].max_range;
-        depth_mode_info.passive_ir_only = recording_depth_modes[depth_mode_index].passive_ir_only;
+        depth_mode_info.mode_id = device_depth_modes[depth_mode_index].mode_id;
+        depth_mode_info.width = device_depth_modes[depth_mode_index].width;
+        depth_mode_info.height = device_depth_modes[depth_mode_index].height;
+        depth_mode_info.native_format = device_depth_modes[depth_mode_index].native_format;
+        depth_mode_info.horizontal_fov = device_depth_modes[depth_mode_index].horizontal_fov;
+        depth_mode_info.vertical_fov = device_depth_modes[depth_mode_index].vertical_fov;
+        depth_mode_info.min_fps = device_depth_modes[depth_mode_index].min_fps;
+        depth_mode_info.max_fps = device_depth_modes[depth_mode_index].max_fps;
+        depth_mode_info.min_range = device_depth_modes[depth_mode_index].min_range;
+        depth_mode_info.max_range = device_depth_modes[depth_mode_index].max_range;
+        depth_mode_info.passive_ir_only = device_depth_modes[depth_mode_index].passive_ir_only;
     }
 
     context->record_config.depth_mode_info = depth_mode_info;
@@ -1083,7 +1037,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *fps_mode_info_json_mode_id = cJSON_GetObjectItem(fps_mode_info_json, "mode_id");
                 if (fps_mode_info_json_mode_id != nullptr && cJSON_IsNumber(fps_mode_info_json_mode_id))
                 {
-                    fps_mode_info.mode_id = (uint32_t)fps_mode_info_json_mode_id->valuedouble;
+                    fps_mode_info.mode_id = (uint32_t)fps_mode_info_json_mode_id->valueint;
                 }
                 else
                 {
@@ -1093,7 +1047,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *fps_mode_info_json_fps = cJSON_GetObjectItem(fps_mode_info_json, "fps");
                 if (fps_mode_info_json_fps != nullptr && cJSON_IsNumber(fps_mode_info_json_fps))
                 {
-                    fps_mode_info.fps = (uint32_t)fps_mode_info_json_fps->valuedouble;
+                    fps_mode_info.fps = (uint32_t)fps_mode_info_json_fps->valueint;
                 }
                 else
                 {
@@ -1119,25 +1073,20 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     if (!K4A_SUCCEEDED(fps_mode_info_result))
     {
-        struct _recording_fps_modes
-        {
-            uint32_t mode_id;
-            int fps;
-        } recording_fps_modes[] = { { 0, 5 }, { 1, 15 }, { 2, 30 } };
-
-        int mode_count = sizeof(recording_fps_modes) / sizeof(recording_fps_modes[0]);
+        // device_fps_modes is statically defined in <k4ainternal/modes.h>.
+        int mode_count = sizeof(device_fps_modes) / sizeof(device_fps_modes[0]);
         int fps_mode_index = 0;
         for (int i = 0; i < mode_count; i++)
         {
-            if (recording_fps_modes[i].mode_id == fps_mode_id)
+            if (device_fps_modes[i].mode_id == fps_mode_id)
             {
                 fps_mode_index = i;
                 break;
             }
         }
 
-        fps_mode_info.mode_id = recording_fps_modes[fps_mode_index].mode_id;
-        fps_mode_info.fps = recording_fps_modes[fps_mode_index].fps;
+        fps_mode_info.mode_id = device_fps_modes[fps_mode_index].mode_id;
+        fps_mode_info.fps = device_fps_modes[fps_mode_index].fps;
     }
 
     context->record_config.fps_mode_info = fps_mode_info;

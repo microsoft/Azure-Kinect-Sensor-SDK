@@ -8,7 +8,6 @@
 #include <k4a/k4a.h>
 #include <k4arecord/playback.h>
 #include <k4ainternal/matroska_read.h>
-#include <k4ainternal/common.h>
 
 using namespace k4arecord;
 using namespace LIBMATROSKA_NAMESPACE;

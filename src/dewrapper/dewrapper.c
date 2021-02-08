@@ -8,6 +8,7 @@
 #include <k4ainternal/queue.h>
 #include <k4ainternal/calibration.h>
 #include <k4ainternal/deloader.h>
+#include <k4ainternal/modes.h>
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/condition.h>
 #include <azure_c_shared_utility/tickcounter.h>
@@ -137,7 +138,7 @@ static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
     assert(dewrapper->calibration_memory != NULL);
 
     // Max comput time is the configured FPS
-    *depth_engine_max_compute_time_ms = HZ_TO_PERIOD_MS(k4a_convert_fps_to_uint(fps_mode_id));
+    *depth_engine_max_compute_time_ms = HZ_TO_PERIOD_MS((uint32_t)fps_mode_id);
     result = K4A_RESULT_FROM_BOOL(*depth_engine_max_compute_time_ms != 0);
 
     if (K4A_SUCCEEDED(result))
@@ -588,8 +589,8 @@ void dewrapper_stop(dewrapper_t dewrapper_handle)
         THREADAPI_RESULT tresult = ThreadAPI_Join(thread, &thread_result);
         (void)K4A_RESULT_FROM_BOOL(tresult == THREADAPI_OK); // Trace the issue, but we don't return a failure
 
-        dewrapper->fps_mode_id = -1;
-        dewrapper->depth_mode_id = 0; // K4A_DEPTH_MODE_OFF
+        dewrapper->fps_mode_id = K4A_FRAMES_PER_SECOND_0;
+        dewrapper->depth_mode_id = K4A_DEPTH_MODE_OFF;
     }
 
     queue_disable(dewrapper->queue);

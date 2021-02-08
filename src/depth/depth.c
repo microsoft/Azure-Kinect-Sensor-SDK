@@ -10,7 +10,6 @@
 #include <stdbool.h>
 
 // Dependent libraries
-#include <k4ainternal/common.h>
 #include <k4ainternal/dewrapper.h>
 
 // System dependencies
