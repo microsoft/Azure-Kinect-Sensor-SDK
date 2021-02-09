@@ -97,7 +97,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 struct_size = (uint)this.StructSize,
                 struct_version = (uint)this.StructVersion,
                 mode_id = (uint)this.ModeId,
-                passive_ir_only = this.PassiveIROnly,
+                passive_ir_only = Convert.ToByte(this.PassiveIROnly),
                 width = (uint)this.Width,
                 height = (uint)this.Height,
                 native_format = (NativeMethods.k4a_image_format_t)this.NativeFormat,
@@ -105,8 +105,8 @@ namespace Microsoft.Azure.Kinect.Sensor
                 vertical_fov = this.VerticalFOV,
                 min_fps = this.MinFPS,
                 max_fps = this.MaxFPS,
-                min_range = this.MinRange,
-                max_range = this.MaxRange,
+                min_range = (uint)this.MinRange,
+                max_range = (uint)this.MaxRange,
             };
         }
     }

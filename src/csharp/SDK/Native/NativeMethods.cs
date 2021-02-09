@@ -533,7 +533,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             public uint struct_size;
             public uint struct_version;
             public uint mode_id;
-            public bool passive_ir_only;
+            public byte passive_ir_only;
             public uint width;
             public uint height;
             public k4a_image_format_t native_format;

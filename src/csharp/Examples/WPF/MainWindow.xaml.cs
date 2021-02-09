@@ -45,56 +45,30 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
             {
                 // We need to provide mode ids for color, depth and fps for the device configuration passed to the device start cameras method.
 
-                // 1. Start out with the mode ids to 0.  0 means Off for mode ids.  Either color or depth may remain off, both not both.  Fps may not remain off.
-                int colorModeId = 0;
-                int depthModeId = 0;
-                int fpsModeId = 0;
-
-                // 2. Get the available modes for device using the modes methods.
+                // 1. Get the available modes for device using the get modes methods.
                 List<ColorModeInfo> colorModes = device.GetColorModes();
                 List<FPSModeInfo> fpsModes = device.GetFPSModes();
                 List<DepthModeInfo> depthModes = device.GetDepthModes();
 
-                // 3. For this example, let's find the first color mode with an image height of at least 720.
-                foreach (ColorModeInfo colorModeInfo in colorModes)
-                {
-                    if (colorModeInfo.Height >= 720)
-                    {
-                        colorModeId = colorModeInfo.ModeId;
-                        break;
-                    }
-                }
+                // 2. For this example, let's find the first color mode with an image height of at least 720.
+                ColorModeInfo colorModeInfo = colorModes.Find(c => c.Height >= 1080);
 
-                // 4. For this example, let's find the first depth mode with an image height of at least 512 and a horizontal fov of at least 120.
-                foreach (DepthModeInfo depthModeInfo in depthModes)
-                {
-                    if (depthModeInfo.Height >= 512 && depthModeInfo.HorizontalFOV >= 120)
-                    {
-                        depthModeId = depthModeInfo.ModeId;
-                        break;
-                    }
-                }
+                // 3. For this example, let's find the first depth mode with an image height of at least 512 and a horizontal fov of at least 120.
+                DepthModeInfo depthModeInfo = depthModes.Find(d => d.Height >= 512 && d.HorizontalFOV >= 120);
 
-                // 5. For this example, let's find the fps mode with the heighest frames per second.
-                int heightestFPSAvailable = 0;
-                foreach (FPSModeInfo fpsModeInfo in fpsModes)
-                {
-                    if (fpsModeInfo.FPS > heightestFPSAvailable)
-                    {
-                        heightestFPSAvailable = fpsModeInfo.FPS;
-                        fpsModeId = fpsModeInfo.ModeId;
-                    }
-                }
+                // 4. For this example, let's find the fps mode with the heighest frames per second.
+                fpsModes.Sort((a, b) => b.FPS.CompareTo(a.FPS));
+                FPSModeInfo fpsModeInfo = fpsModes.Find(f => f.ModeId != 0);
 
-                // 6. If either a color or depth mode was found that met our example conditions and as long as there was at least one fps mode (there should always be),
+                // 5. If either a color or depth mode was found that met our example conditions and as long as there was at least one fps mode (there should always be),
                 // then the mode ids will be valid parameters for the device configuration passed into the device start camera function.
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorModeId = colorModeId,
-                    DepthModeId = depthModeId,
+                    ColorModeId = colorModeInfo.ModeId,
+                    DepthModeId = depthModeInfo.ModeId,
                     SynchronizedImagesOnly = true,
-                    FPSModeId = fpsModeId,
+                    FPSModeId = fpsModeInfo.ModeId,
                 });
 
                 int colorWidth = device.GetCalibration().ColorCameraCalibration.ResolutionWidth;
