@@ -35,7 +35,7 @@ def simple_viewer():
         color_format=k4a.EImageFormat.COLOR_BGRA32,
         color_mode_id=color_modes[5].mode_id, # 2160P
         depth_mode_id=depth_modes[3].mode_id, # WFOV_2X2BINNED
-        fps_mode_id=fps_modes[1].mode_id,     # FPS_15
+        fps_mode_id=fps_modes[2].mode_id,     # FPS_15
         synchronized_images_only=True,
         depth_delay_off_color_usec=0,
         wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,

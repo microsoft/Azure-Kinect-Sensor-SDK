@@ -315,6 +315,8 @@ class Device:
 
     def get_color_modes(self)->list:
         '''! Get a list of all available ColorModeInfo.
+        
+        \note The color mode with mode_id equal to 0 is reserved for "Color Off".
 
         @returns A list of all available ColorModeInfo, or None if failed.
         '''
@@ -343,6 +345,8 @@ class Device:
 
     def get_depth_modes(self)->list:
         '''! Get a list of all available DepthModeInfo.
+        
+        \note The depth mode with mode_id equal to 0 is reserved for "Depth Off".
 
         @returns A list of all available DepthModeInfo, or None if failed.
         '''
@@ -371,6 +375,8 @@ class Device:
 
     def get_fps_modes(self)->list:
         '''! Get a list of all available FPSModeInfo.
+        
+        \note The fps mode with mode_id equal to 0 is reserved for "0 frames per second".
 
         @returns A list of all available FPSModeInfo, or None if failed.
         '''
