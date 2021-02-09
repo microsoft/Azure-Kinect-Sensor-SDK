@@ -37,8 +37,9 @@ from os import linesep as _newline
 
 from .k4atypes import _DeviceHandle, HardwareVersion, EStatus, EBufferStatus, \
     _EmptyClass, EColorControlCommand, EColorControlMode, ImuSample, \
-    EWaitStatus, DeviceConfiguration, _CaptureHandle, _Calibration, ImuSample, \
-    DeviceInfo, DepthModeInfo, ColorModeInfo, FPSModeInfo
+    EWaitStatus, EDeviceCapabilities, DeviceConfiguration, _CaptureHandle, \
+    _Calibration, ImuSample, DeviceInfo, DepthModeInfo, ColorModeInfo, \
+    FPSModeInfo, DeviceInfo
 
 from .k4a import k4a_device_get_installed_count, k4a_device_open, \
     k4a_device_get_serialnum, k4a_device_get_version, \
@@ -103,6 +104,7 @@ class Device:
         self.__device_handle = None
         self._serial_number = None
         self._hardware_version = None
+        self._device_info = None
         self._color_ctrl_cap = None
         self._sync_out_connected = None
         self._sync_in_connected = None
@@ -131,6 +133,7 @@ class Device:
         del self.__device_handle
         del self._serial_number
         del self._hardware_version
+        del self._device_info
         del self._color_ctrl_cap
         del self._sync_out_connected
         del self._sync_in_connected
@@ -138,6 +141,7 @@ class Device:
         self.__device_handle = None
         self._serial_number = None
         self._hardware_version = None
+        self._device_info = None
         self._color_ctrl_cap = None
         self._sync_out_connected = None
         self._sync_in_connected = None
@@ -146,11 +150,13 @@ class Device:
         return ''.join([
             'serial_number=%s, ', _newline,
             'hardware_version=%s, ', _newline,
+            'device_info=%s ', _newline,
             'color_control_capabilities=%s, ', _newline,
             'sync_out_connected=%s, ', _newline,
             'sync_in_connected=%s']) % (
             self._serial_number,
             self._hardware_version.__str__(),
+            self._device_info.__str__(),
             self._color_ctrl_cap.__str__(),
             self._sync_out_connected,
             self._sync_in_connected)
@@ -187,6 +193,7 @@ class Device:
         device.__device_handle = _DeviceHandle()
         device._serial_number = None
         device._hardware_version = HardwareVersion()
+        device._device_info = DeviceInfo()
         device._color_ctrl_cap = _EmptyClass()
 
         # Open device and save device handle.
@@ -220,6 +227,14 @@ class Device:
 
             if status != EStatus.SUCCEEDED:
                 device._hardware_version = HardwareVersion()
+                
+            # Get device info.
+            status = k4a_device_get_info(
+                device.__device_handle,
+                _ctypes.byref(device._device_info))
+                
+            if status != EStatus.SUCCEEDED:
+                device._device_info = DeviceInfo()
 
             # Create a dictionary of color control capabilities.
             color_control_commands = [
@@ -770,6 +785,14 @@ class Device:
     @hardware_version.deleter
     def hardware_version(self):
         del self._hardware_version
+        
+    @property
+    def device_info(self):
+        return self._device_info
+
+    @device_info.deleter
+    def device_info(self):
+        del self._device_info
 
     @property
     def color_ctrl_cap(self):

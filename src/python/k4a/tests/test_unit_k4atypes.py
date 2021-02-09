@@ -69,6 +69,7 @@ class TestEnums(unittest.TestCase):
         self.assertEqual(k4a.EDeviceCapabilities.DEPTH, 1), next(enum_values)
         self.assertEqual(k4a.EDeviceCapabilities.COLOR, 2), next(enum_values)
         self.assertEqual(k4a.EDeviceCapabilities.IMU, 4), next(enum_values)
+        self.assertEqual(k4a.EDeviceCapabilities.MICROPHONE, 8), next(enum_values)
         self.assertRaises(StopIteration, next, enum_values) # Must be last assert.
 
     def test_unit_EImageFormat(self):

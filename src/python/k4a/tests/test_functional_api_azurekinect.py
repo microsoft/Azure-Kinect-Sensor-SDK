@@ -108,6 +108,15 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
         self.assertRaises(AttributeError, 
             Test_Functional_API_Device_AzureKinect.set_serial_number, 
             self.device, "not settable")
+            
+    def test_functional_fast_api_get_device_info_property(self):
+        device_info = self.device.device_info
+        self.assertIsNotNone(device_info)
+        self.assertIsInstance(device_info, k4a.DeviceInfo)
+        self.assertNotEqual(device_info.struct_size, 0)
+        self.assertNotEqual(device_info.struct_version, 0)
+        self.assertNotEqual(device_info.vendor_id, 0)
+        self.assertNotEqual(device_info.capabilities, 0)
 
     def test_functional_fast_api_get_device_info(self):
         device_info = self.device.get_device_info()
@@ -176,7 +185,7 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
             color_format=k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id=5, # 2160P
             depth_mode_id=4, # WFOV_UNBINNED
-            fps_mode_id=1, # FPS_15
+            fps_mode_id=15, # FPS_15
             synchronized_images_only=True,
             depth_delay_off_color_usec=0,
             wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
@@ -200,7 +209,7 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
             color_format=k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id=5, # 2160P
             depth_mode_id=4, # WFOV_UNBINNED
-            fps_mode_id=1, # FPS_15
+            fps_mode_id=15, # FPS_15
             synchronized_images_only=True,
             depth_delay_off_color_usec=0,
             wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
@@ -249,7 +258,7 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
             color_format=k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id=5, # 2160P
             depth_mode_id=4, # WFOV_UNBINNED
-            fps_mode_id=1, # FPS_15
+            fps_mode_id=15, # FPS_15
             synchronized_images_only=True,
             depth_delay_off_color_usec=0,
             wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
@@ -266,7 +275,7 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
             color_format=k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id=5, # 2160P
             depth_mode_id=4, # WFOV_UNBINNED
-            fps_mode_id=1, # FPS_15
+            fps_mode_id=15, # FPS_15
             synchronized_images_only=True,
             depth_delay_off_color_usec=0,
             wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
@@ -375,7 +384,7 @@ class Test_Functional_API_Capture_AzureKinect(unittest.TestCase):
             color_format=k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id=5, # 2160P
             depth_mode_id=4, # WFOV_UNBINNED
-            fps_mode_id=1, # FPS_15
+            fps_mode_id=15, # FPS_15
             synchronized_images_only=True,
             depth_delay_off_color_usec=0,
             wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
@@ -605,7 +614,7 @@ class Test_Functional_API_Image_AzureKinect(unittest.TestCase):
             color_format=k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id=5, # 2160P
             depth_mode_id=4, # WFOV_UNBINNED
-            fps_mode_id=1, # FPS_15
+            fps_mode_id=15, # FPS_15
             synchronized_images_only=True,
             depth_delay_off_color_usec=0,
             wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
@@ -1018,7 +1027,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id = color_mode_id,
             depth_mode_id = depth_mode_id,
-            fps_mode_id = 1, # FPS_15
+            fps_mode_id = 15, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
             wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
@@ -1055,7 +1064,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id = color_mode_id,
             depth_mode_id = depth_mode_id,
-            fps_mode_id = 1, # FPS_15
+            fps_mode_id = 15, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
             wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
@@ -1091,7 +1100,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id = color_mode_id,
             depth_mode_id = depth_mode_id,
-            fps_mode_id = 1, # FPS_15
+            fps_mode_id = 15, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
             wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
@@ -1140,7 +1149,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id = color_mode_id,
             depth_mode_id = depth_mode_id,
-            fps_mode_id = 1, # FPS_15
+            fps_mode_id = 15, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
             wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
@@ -1178,7 +1187,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
             color_format = k4a.EImageFormat.COLOR_BGRA32,
             color_mode_id = color_mode_id,
             depth_mode_id = depth_mode_id,
-            fps_mode_id = 1, # FPS_15
+            fps_mode_id = 15, # FPS_15
             synchronized_images_only = True,
             depth_delay_off_color_usec = 0,
             wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
@@ -1343,7 +1352,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
                                 color_format = k4a.EImageFormat.COLOR_BGRA32,
                                 color_mode_id = color_mode_id,
                                 depth_mode_id = depth_mode_id,
-                                fps_mode_id = k4a.EFramesPerSecond.FPS_15,
+                                fps_mode_id = 15,
                                 synchronized_images_only = True,
                                 depth_delay_off_color_usec = 0,
                                 wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
@@ -1382,7 +1391,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
                         color_format = k4a.EImageFormat.COLOR_BGRA32,
                         color_mode_id = color_mode_id,
                         depth_mode_id = depth_mode_id,
-                        fps_mode_id = k4a.EFramesPerSecond.FPS_15,
+                        fps_mode_id = 15,
                         synchronized_images_only = True,
                         depth_delay_off_color_usec = 0,
                         wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
@@ -1420,7 +1429,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
                         color_format = k4a.EImageFormat.COLOR_BGRA32,
                         color_mode_id = color_mode_id,
                         depth_mode_id = depth_mode_id,
-                        fps_mode_id = k4a.EFramesPerSecond.FPS_15,
+                        fps_mode_id = 15,
                         synchronized_images_only = True,
                         depth_delay_off_color_usec = 0,
                         wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
@@ -1471,7 +1480,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
                         color_format = k4a.EImageFormat.COLOR_BGRA32,
                         color_mode_id = color_mode_id,
                         depth_mode_id = depth_mode_id,
-                        fps_mode_id = k4a.EFramesPerSecond.FPS_15,
+                        fps_mode_id = 15,
                         synchronized_images_only = True,
                         depth_delay_off_color_usec = 0,
                         wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,
@@ -1511,7 +1520,7 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
                         color_format = k4a.EImageFormat.COLOR_BGRA32,
                         color_mode_id = color_mode_id,
                         depth_mode_id = depth_mode_id,
-                        fps_mode_id = k4a.EFramesPerSecond.FPS_15,
+                        fps_mode_id = 15,
                         synchronized_images_only = True,
                         depth_delay_off_color_usec = 0,
                         wired_sync_mode = k4a.EWiredSyncMode.STANDALONE,

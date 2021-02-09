@@ -183,7 +183,8 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
         self.assertEqual(device_info.vendor_id, 0x045E)
         self.assertEqual(device_info.device_id, 0x097C)
         self.assertEqual(device_info.capabilities, 
-            k4a.EDeviceCapabilities.IMU | k4a.EDeviceCapabilities.COLOR | k4a.EDeviceCapabilities.DEPTH)
+            k4a.EDeviceCapabilities.MICROPHONE | k4a.EDeviceCapabilities.IMU | 
+            k4a.EDeviceCapabilities.COLOR | k4a.EDeviceCapabilities.DEPTH)
 
     def test_functional_fast_ctypes_device_get_color_mode_count(self):
         color_mode_count = ctypes.c_int(0)
@@ -204,7 +205,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
         for mode in range(color_mode_count.value):
             color_mode_info = k4a.ColorModeInfo()
             status = k4a._bindings.k4a.k4a_device_get_color_mode(
-                self.device_handle, ctypes.c_int(mode), ctypes.byref(color_mode_info))
+                self.device_handle, ctypes.c_uint32(mode), ctypes.byref(color_mode_info))
             
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
             self.assertEqual(color_mode_info.struct_size, 40)
@@ -234,7 +235,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
         for mode in range(depth_mode_count.value):
             depth_mode_info = k4a.DepthModeInfo()
             status = k4a._bindings.k4a.k4a_device_get_depth_mode(
-                self.device_handle, ctypes.c_int(mode), ctypes.byref(depth_mode_info))
+                self.device_handle, ctypes.c_uint32(mode), ctypes.byref(depth_mode_info))
             
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
             self.assertEqual(depth_mode_info.struct_size, 52)
@@ -264,11 +265,15 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
         for mode in range(fps_mode_count.value):
             fps_mode_info = k4a.FPSModeInfo()
             status = k4a._bindings.k4a.k4a_device_get_fps_mode(
-                self.device_handle, ctypes.c_int(mode), ctypes.byref(fps_mode_info))
+                self.device_handle, ctypes.c_uint32(mode), ctypes.byref(fps_mode_info))
             
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
             self.assertEqual(fps_mode_info.struct_size, 16)
-            self.assertGreater(fps_mode_info.fps, 0)
+            
+            if (fps_mode_info.mode_id == 0):
+                self.assertEqual(fps_mode_info.fps, 0)
+            else:
+                self.assertGreater(fps_mode_info.fps, 0)
 
     def test_functional_fast_ctypes_device_get_capture(self):
         with self.lock:
@@ -282,7 +287,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
                 color_format=k4a.EImageFormat.COLOR_BGRA32,
                 color_mode_id=2, # 1080P
                 depth_mode_id=1, # NFOV_2X2BINNED
-                fps_mode_id=1, # FPS_15
+                fps_mode_id=15, # FPS_15
                 synchronized_images_only=True,
                 depth_delay_off_color_usec=0,
                 wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
@@ -835,7 +840,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             device_config.color_format = k4a.EImageFormat.COLOR_BGRA32
             device_config.color_mode_id = 2 # 1080P
             device_config.depth_mode_id = 1 # NFOV_2X2BINNED
-            device_config.fps_mode_id = 1 # FPS_15
+            device_config.fps_mode_id = 15 # FPS_15
             device_config.synchronized_images_only = True
             device_config.depth_delay_off_color_usec = 0
             device_config.wired_sync_mode = k4a.EWiredSyncMode.STANDALONE
@@ -860,7 +865,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
                 color_format=k4a.EImageFormat.COLOR_BGRA32,
                 color_mode_id=2, # 1080P
                 depth_mode_id=1, # NFOV_2X2BINNED
-                fps_mode_id=1, # FPS_15
+                fps_mode_id=15, # FPS_15
                 synchronized_images_only=True,
                 depth_delay_off_color_usec=0,
                 wired_sync_mode=k4a.EWiredSyncMode.STANDALONE,
@@ -1469,15 +1474,34 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
                         self.assertTrue(k4a.K4A_SUCCEEDED(status))
                         self.assertEqual(valid_int_flag.value, 1)
-
+                        
     def test_functional_fast_ctypes_transformation_create_destroy(self):
         with self.lock:
 
-            depth_modes_ids = range(1, 6)
+            depth_mode_id = 1
+            color_mode_id = 1
+            calibration = k4a._bindings.k4a._Calibration()
+
+            status = k4a._bindings.k4a.k4a_device_get_calibration(
+                self.device_handle,
+                depth_mode_id,
+                color_mode_id,
+                ctypes.byref(calibration))
+
+            self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+            transformation = k4a._bindings.k4a.k4a_transformation_create(ctypes.byref(calibration))
+            self.assertIsNotNone(transformation) # Might not be a valid assert.
+            k4a._bindings.k4a.k4a_transformation_destroy(transformation)
+
+    def test_functional_ctypes_transformation_create_destroy(self):
+        with self.lock:
+
+            depth_mode_ids = range(1, 6)
             color_mode_ids = range(1, 7)
             calibration = k4a._bindings.k4a._Calibration()
 
-            for depth_mode_id in depth_modes_ids:
+            for depth_mode_id in depth_mode_ids:
                 for color_mode_id in color_mode_ids:
                     with self.subTest(depth_mode_id = depth_mode_id, 
                         color_mode_id = color_mode_id):

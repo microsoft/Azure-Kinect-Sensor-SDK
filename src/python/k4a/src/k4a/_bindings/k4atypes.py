@@ -131,10 +131,12 @@ class EDeviceCapabilities(_IntEnum):
     EDeviceCapabilities.DEPTH       | The device has a depth sensor.
     EDeviceCapabilities.COLOR       | The device has a color camera.
     EDeviceCapabilities.IMU         | The device has an IMU.
+    EDeviceCapabilities.MICROPHONE  | The device has a microphone.
     '''
     DEPTH = 1
     COLOR = 2
     IMU = 4
+    MICROPHONE = 8
 
 
 @_unique
@@ -722,8 +724,8 @@ class DepthModeInfo(_ctypes.Structure):
         ("vertical_fov", _ctypes.c_float),
         ("min_fps", _ctypes.c_int),
         ("max_fps", _ctypes.c_int),
-        ("min_range", _ctypes.c_int),
-        ("max_range", _ctypes.c_int),
+        ("min_range", _ctypes.c_uint32),
+        ("max_range", _ctypes.c_uint32),
     ]
 
     def __init__(self, 
@@ -931,9 +933,9 @@ class DeviceConfiguration(_ctypes.Structure):
     '''
     _fields_= [
         ("color_format", _ctypes.c_int),
-        ("color_mode_id", _ctypes.c_int),
-        ("depth_mode_id", _ctypes.c_int),
-        ("fps_mode_id", _ctypes.c_int),
+        ("color_mode_id", _ctypes.c_uint32),
+        ("depth_mode_id", _ctypes.c_uint32),
+        ("fps_mode_id", _ctypes.c_uint32),
         ("synchronized_images_only", _ctypes.c_bool),
         ("depth_delay_off_color_usec", _ctypes.c_int32),
         ("wired_sync_mode", _ctypes.c_int),
@@ -943,9 +945,9 @@ class DeviceConfiguration(_ctypes.Structure):
 
     def __init__(self, 
         color_format:EImageFormat=EImageFormat.CUSTOM,
-        color_mode_id:int=1, # 720P
+        color_mode_id:int=0, # 720P
         depth_mode_id:int=0, # OFF
-        fps_mode_id:int=0, # FPS_5
+        fps_mode_id:int=0, # FPS_0
         synchronized_images_only:bool=True,
         depth_delay_off_color_usec:int=0,
         wired_sync_mode:EWiredSyncMode=EWiredSyncMode.STANDALONE,

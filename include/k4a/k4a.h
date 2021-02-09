@@ -1454,7 +1454,7 @@ K4A_EXPORT void k4a_image_release(k4a_image_t image_handle);
  * The configuration we want to run the device in. This can be initialized with ::K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED is returned on success.
+ * ::K4A_RESULT_SUCCEEDED is returned on success, ::K4A_RESULT_FAILED otherwise.
  *
  * \relates k4a_device_t
  *

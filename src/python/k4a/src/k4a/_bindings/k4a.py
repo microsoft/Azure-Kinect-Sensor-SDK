@@ -91,11 +91,11 @@ k4a_device_get_color_mode_count.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctyp
 
 
 #K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
-#                                                  int mode_id,
+#                                                  uint32_t mode_id,
 #                                                  k4a_color_mode_info_t *mode_info);
 k4a_device_get_color_mode = _k4a_lib.k4a_device_get_color_mode
 k4a_device_get_color_mode.restype = EStatus
-k4a_device_get_color_mode.argtypes = (_DeviceHandle, _ctypes.c_int, _ctypes.POINTER(ColorModeInfo))
+k4a_device_get_color_mode.argtypes = (_DeviceHandle, _ctypes.c_uint32, _ctypes.POINTER(ColorModeInfo))
 
 
 #K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, int *mode_count);
@@ -105,11 +105,11 @@ k4a_device_get_depth_mode_count.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctyp
 
 
 #K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
-#                                                  int mode_id,
+#                                                  uint32_t mode_id,
 #                                                  k4a_depth_mode_info_t *mode_info);
 k4a_device_get_depth_mode = _k4a_lib.k4a_device_get_depth_mode
 k4a_device_get_depth_mode.restype = EStatus
-k4a_device_get_depth_mode.argtypes = (_DeviceHandle, _ctypes.c_int, _ctypes.POINTER(DepthModeInfo))
+k4a_device_get_depth_mode.argtypes = (_DeviceHandle, _ctypes.c_uint32, _ctypes.POINTER(DepthModeInfo))
 
 
 #K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, int *mode_count);
@@ -119,11 +119,11 @@ k4a_device_get_fps_mode_count.argtypes = (_DeviceHandle, _ctypes.POINTER(_ctypes
 
 
 #K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
-#                                                  int mode_id,
+#                                                  uint32_t mode_id,
 #                                                  k4a_fps_mode_info_t *mode_info);
 k4a_device_get_fps_mode = _k4a_lib.k4a_device_get_fps_mode
 k4a_device_get_fps_mode.restype = EStatus
-k4a_device_get_fps_mode.argtypes = (_DeviceHandle, _ctypes.c_int, _ctypes.POINTER(FPSModeInfo))
+k4a_device_get_fps_mode.argtypes = (_DeviceHandle, _ctypes.c_uint32, _ctypes.POINTER(FPSModeInfo))
 
 
 #K4A_EXPORT k4a_wait_status_t k4a_device_get_capture(k4a_device_t device_handle,
@@ -346,7 +346,7 @@ k4a_image_release.argtypes=(_ImageHandle,)
 
 #K4A_EXPORT k4a_status_t k4a_device_start_cameras(k4a_device_t device_handle, const k4a_device_configuration_t *config);
 k4a_device_start_cameras = _k4a_lib.k4a_device_start_cameras
-k4a_device_start_cameras.restype = EWaitStatus
+k4a_device_start_cameras.restype = EStatus
 k4a_device_start_cameras.argtypes = (_DeviceHandle, _ctypes.POINTER(DeviceConfiguration))
 
 
