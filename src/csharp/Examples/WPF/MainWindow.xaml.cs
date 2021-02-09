@@ -50,7 +50,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 List<FPSModeInfo> fpsModes = device.GetFPSModes();
                 List<DepthModeInfo> depthModes = device.GetDepthModes();
 
-                // 2. For this example, let's find the first color mode with an image height of at least 720.
+                // 2. For this example, let's find the first color mode with an image height of at least 1080.
                 ColorModeInfo colorModeInfo = colorModes.Find(c => c.Height >= 1080);
 
                 // 3. For this example, let's find the first depth mode with an image height of at least 512 and a horizontal fov of at least 120.
