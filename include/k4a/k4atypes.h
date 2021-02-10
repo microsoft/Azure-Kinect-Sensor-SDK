@@ -1330,7 +1330,7 @@ typedef struct _k4a_imu_sample_t
  * \endxmlonly
  */
 static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL =
-    { K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 2, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false };
+    { K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false };
 
 /**
  * @}

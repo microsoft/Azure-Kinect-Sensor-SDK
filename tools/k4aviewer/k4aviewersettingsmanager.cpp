@@ -83,7 +83,6 @@ std::istream &operator>>(std::istream &s, K4ADeviceConfiguration &val)
 
     while (variableTag != EndDeviceConfigurationTag && s)
     {
-        // TODO: need to get the correct size
         // static_assert(sizeof(K4ADeviceConfiguration) == 36, "Need to add a new setting");
 
         variableTag.clear();
