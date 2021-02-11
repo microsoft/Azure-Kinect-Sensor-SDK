@@ -10,6 +10,7 @@
 #include "texture.h"
 #include "viewerwindow.h"
 
+using namespace std;
 using namespace viewer;
 
 void ColorizeDepthImage(const k4a::image &depthImage,
@@ -33,14 +34,74 @@ int main()
 
         k4a::device dev = k4a::device::open(K4A_DEVICE_DEFAULT);
 
+        // 1. declare mode infos
         k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
-        k4a_device_get_color_mode(dev.handle(), 1, &color_mode_info); // K4A_COLOR_RESOLUTION_720P
-
         k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
-        k4a_device_get_depth_mode(dev.handle(), 3, &depth_mode_info); // K4A_DEPTH_MODE_WFOV_2X2BINNED
-
         k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-        k4a_device_get_fps_mode(dev.handle(), 3, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
+
+        // 2. get the device modes
+        vector<k4a_color_mode_info_t> color_modes = dev.get_color_modes();
+        vector<k4a_depth_mode_info_t> depth_modes = dev.get_depth_modes();
+        vector<k4a_fps_mode_info_t> fps_modes = dev.get_fps_modes();
+
+        // 3. get the size of modes
+        uint32_t color_mode_size = (uint32_t)color_modes.size();
+        uint32_t depth_mode_size = (uint32_t)depth_modes.size();
+        uint32_t fps_mode_size = (uint32_t)fps_modes.size();
+
+        // 4. find the mode ids you want
+        if (color_mode_size > 1)
+        {
+            for (uint32_t c = 1; c < color_mode_size; c++)
+            {
+                if (color_modes[c].height >= 720)
+                {
+                    color_mode_info = color_modes[c];
+                    break;
+                }
+            }
+        }
+
+        if (depth_mode_size > 1)
+        {
+            for (uint32_t d = 1; d < depth_mode_size; d++)
+            {
+                if (depth_modes[d].height <= 512 && depth_modes[d].vertical_fov >= 120)
+                {
+                    depth_mode_info = depth_modes[d];
+                    break;
+                }
+            }
+        }
+
+        if (fps_mode_size > 1)
+        {
+            uint32_t max_fps = 0;
+            uint32_t fps_mode_id = 0;
+            for (uint32_t f = 1; f < fps_mode_size; f++)
+            {
+                if (fps_modes[f].fps >= (int)max_fps)
+                {
+                    max_fps = (uint32_t)fps_modes[f].fps;
+                    fps_mode_id = f;
+                }
+            }
+            fps_mode_info = fps_modes[fps_mode_id];
+        }
+
+        // 5. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set
+        // to 0
+        if (fps_mode_info.mode_id == 0)
+        {
+            cout << "Fps mode id must not be set to 0 (Off)" << endl;
+            exit(-1);
+        }
+
+        if (color_mode_info.mode_id == 0 && depth_mode_info.mode_id == 0)
+        {
+            cout << "Either color mode id or depth mode id must not be set to 0 (Off)" << endl;
+            exit(-1);
+        }
 
         // Start the device
         //
