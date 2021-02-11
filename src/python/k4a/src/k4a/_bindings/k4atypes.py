@@ -1332,16 +1332,49 @@ class ImuSample(_ctypes.Structure):
             self.gyro_timestamp_usec)
 
 
-# An empty class for appending fields dynamically.
-class _EmptyClass:
-    
+class ColorControlCapability():
+    '''! Color control capabilities.
+
+    Name                | Type      | Description
+    ------------- | -------------------- | ---------------------------------------------
+    command       | EColorControlCommand | The type of color control command.
+    supports_auto | bool      | True if the capability supports auto-level.
+    min_value     | int       | The minimum value of the capability.
+    max_value     | int       | The maximum value of the capability.
+    step_value    | int       | The step value of the capability.
+    default_value | int       | The default value of the capability.
+    default_mode  | EColorControlMode | The default mode of the command, AUTO or MANUAL.
+    '''
+    def __init__(self, 
+        command:EColorControlCommand,
+        supports_auto:bool=True,
+        min_value:int=0,
+        max_value:int=0,
+        step_value:int=0,
+        default_value:int=0,
+        default_mode:EColorControlMode=EColorControlMode.AUTO):
+
+        self.command = command
+        self.supports_auto = supports_auto
+        self.min_value = min_value
+        self.max_value = max_value
+        self.step_value = step_value
+        self.default_value = default_value
+        self.default_mode = default_mode
+
     def __str__(self):
-        keys = list(self.__dict__.keys())
-        tempstr = ''
-
-        if len(keys) > 0:
-            for n in range(len(keys)-1):
-                tempstr = tempstr + str(keys[n]) + "=" + str(self.__dict__[keys[n]]) + ", "
-            tempstr = tempstr + str(keys[len(keys)-1]) + "=" + str(self.__dict__[keys[len(keys)-1]])
-
-        return tempstr
+        return ''.join([
+            'command=%s, ',
+            'supports_auto=%s, ',
+            'min_value=%d, ',
+            'max_value=%d, ',
+            'step_value=%d, ',
+            'default_value=%d, ',
+            'default_mode=%s']) % (
+            self.command,
+            self.supports_auto,
+            self.min_value,
+            self.max_value,
+            self.step_value,
+            self.default_value,
+            self.default_mode)

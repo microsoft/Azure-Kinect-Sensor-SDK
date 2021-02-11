@@ -34,12 +34,13 @@ give you access to all the classes and enums used in the API.
 
 import ctypes as _ctypes
 from os import linesep as _newline
+from math import log2
 
 from .k4atypes import _DeviceHandle, HardwareVersion, EStatus, EBufferStatus, \
-    _EmptyClass, EColorControlCommand, EColorControlMode, ImuSample, \
+    EColorControlCommand, EColorControlMode, ImuSample, \
     EWaitStatus, EDeviceCapabilities, DeviceConfiguration, _CaptureHandle, \
     _Calibration, ImuSample, DeviceInfo, DepthModeInfo, ColorModeInfo, \
-    FPSModeInfo, DeviceInfo
+    FPSModeInfo, DeviceInfo, ColorControlCapability
 
 from .k4a import k4a_device_get_installed_count, k4a_device_open, \
     k4a_device_get_serialnum, k4a_device_get_version, \
@@ -57,26 +58,6 @@ from .capture import Capture
 from .calibration import Calibration
 
 
-def _read_sync_jack_helper(device_handle:_DeviceHandle)->(bool, bool):
-    
-    retval = (False, False)
-    
-    # Read the sync jack.
-    sync_in = _ctypes.c_bool(0)
-    sync_out = _ctypes.c_bool(0)
-    
-    status = k4a_device_get_sync_jack(
-        device_handle,
-        _ctypes.byref(sync_in),
-        _ctypes.byref(sync_out)
-    )
-
-    if status == EStatus.SUCCEEDED:
-        retval = (sync_in.value, sync_out.value)
-
-    return retval
-
-
 class Device:
     '''! A class that represents a connected Azure Kinect device.
 
@@ -84,9 +65,7 @@ class Device:
     ------------------ | ---- | --- | -----------------------------------------
     serial_number      | str  | R   | The unique serial number of the device.
     hardware_version   | HardwareVersion | R   | The hardware versions in the device.
-    color_ctrl_cap     | dict | R   | The color control capabilities of the device.
-    sync_out_connected | bool | R   | True if the sync out is connected.
-    sync_in_connected  | bool | R   | True if the sync in is connected.
+    device_info        | DeviceInfo | R   | The device product IDs and capabilities.
 
     @remarks 
     - Use the static factory function open() to get a connected 
@@ -105,9 +84,6 @@ class Device:
         self._serial_number = None
         self._hardware_version = None
         self._device_info = None
-        self._color_ctrl_cap = None
-        self._sync_out_connected = None
-        self._sync_in_connected = None
 
     # Allow syntax "with k4a.Depth.open() as device:"
     def __enter__(self):
@@ -134,32 +110,20 @@ class Device:
         del self._serial_number
         del self._hardware_version
         del self._device_info
-        del self._color_ctrl_cap
-        del self._sync_out_connected
-        del self._sync_in_connected
 
         self.__device_handle = None
         self._serial_number = None
         self._hardware_version = None
         self._device_info = None
-        self._color_ctrl_cap = None
-        self._sync_out_connected = None
-        self._sync_in_connected = None
 
     def __str__(self):
         return ''.join([
             'serial_number=%s, ', _newline,
             'hardware_version=%s, ', _newline,
-            'device_info=%s ', _newline,
-            'color_control_capabilities=%s, ', _newline,
-            'sync_out_connected=%s, ', _newline,
-            'sync_in_connected=%s']) % (
+            'device_info=%s ']) % (
             self._serial_number,
             self._hardware_version.__str__(),
-            self._device_info.__str__(),
-            self._color_ctrl_cap.__str__(),
-            self._sync_out_connected,
-            self._sync_in_connected)
+            self._device_info.__str__())
 
     @staticmethod
     def get_device_count()->int:
@@ -194,7 +158,6 @@ class Device:
         device._serial_number = None
         device._hardware_version = HardwareVersion()
         device._device_info = DeviceInfo()
-        device._color_ctrl_cap = _EmptyClass()
 
         # Open device and save device handle.
         status = k4a_device_open(
@@ -236,51 +199,6 @@ class Device:
             if status != EStatus.SUCCEEDED:
                 device._device_info = DeviceInfo()
 
-            # Create a dictionary of color control capabilities.
-            color_control_commands = [
-                EColorControlCommand.BACKLIGHT_COMPENSATION,
-                EColorControlCommand.BRIGHTNESS,
-                EColorControlCommand.CONTRAST,
-                EColorControlCommand.EXPOSURE_TIME_ABSOLUTE,
-                EColorControlCommand.GAIN,
-                EColorControlCommand.POWERLINE_FREQUENCY,
-                EColorControlCommand.SATURATION,
-                EColorControlCommand.SHARPNESS,
-                EColorControlCommand.WHITEBALANCE
-            ]
-
-            supports_auto = _ctypes.c_bool(False)
-            min_value = _ctypes.c_int32(0)
-            max_value = _ctypes.c_int32(0)
-            step_value = _ctypes.c_int32(0)
-            default_value = _ctypes.c_int32(0)
-            color_control_mode = _ctypes.c_int32(EColorControlMode.AUTO.value)
-
-            for command in color_control_commands:
-
-                status = k4a_device_get_color_control_capabilities(
-                    device.__device_handle,
-                    command,
-                    _ctypes.byref(supports_auto),
-                    _ctypes.byref(min_value),
-                    _ctypes.byref(max_value),
-                    _ctypes.byref(step_value),
-                    _ctypes.byref(default_value),
-                    _ctypes.byref(color_control_mode))
-
-                if (status == EStatus.SUCCEEDED):
-                    device._color_ctrl_cap.__dict__[command] = _EmptyClass()
-                    device._color_ctrl_cap.__dict__[command].supports_auto = bool(supports_auto.value)
-                    device._color_ctrl_cap.__dict__[command].min_value = int(min_value.value)
-                    device._color_ctrl_cap.__dict__[command].max_value = int(max_value.value)
-                    device._color_ctrl_cap.__dict__[command].step_value = int(step_value.value)
-                    device._color_ctrl_cap.__dict__[command].default_value = int(default_value.value)
-                    device._color_ctrl_cap.__dict__[command].default_mode = EColorControlMode(color_control_mode.value)
-        
-            # Read the sync jack.
-            (device._sync_in_connected, device._sync_out_connected) = \
-                _read_sync_jack_helper(device.__device_handle)
-
         return device
 
     def close(self):
@@ -293,12 +211,11 @@ class Device:
         - Before deleting a Device object, ensure that all Captures have
             been deleted to ensure that all memory is freed.
         '''
-
         self.stop_cameras()
         self.stop_imu()
         k4a_device_close(self.__device_handle)
 
-    def get_device_info(self)->DeviceInfo:
+    def _get_device_info(self)->DeviceInfo:
         '''! Get device information and capabilities.
 
         @returns A DeviceInfo instance, or None if failed.
@@ -338,7 +255,8 @@ class Device:
                 if status == EStatus.SUCCEEDED:
                     color_mode_infos.append(color_mode_info)
 
-        elif status == EStatus.FAILED:
+        # If there are no color modes, return None.
+        if (len(color_mode_infos) == 0):
             color_mode_infos = None
 
         return color_mode_infos
@@ -368,7 +286,8 @@ class Device:
                 if status == EStatus.SUCCEEDED:
                     depth_mode_infos.append(depth_mode_info)
 
-        elif status == EStatus.FAILED:
+        # If there are no color modes, return None.
+        if (len(depth_mode_infos) == 0):
             depth_mode_infos = None
 
         return depth_mode_infos
@@ -398,7 +317,8 @@ class Device:
                 if status == EStatus.SUCCEEDED:
                     fps_mode_infos.append(fps_mode_info)
 
-        elif status == EStatus.FAILED:
+         # If there are no color modes, return None.
+        if (len(fps_mode_infos) == 0):
             fps_mode_infos = None
 
         return fps_mode_infos
@@ -595,6 +515,83 @@ class Device:
         '''
         k4a_device_stop_imu(self.__device_handle)
 
+    def get_color_control_capabilities(self)->tuple:
+        '''! Get the device color control capability.
+
+        @returns (list, dict): A list of ColorControlCapability. It also
+            returns the same information in a dictionary. If the device
+            does not support a color camera, then (None, None) may be returned.
+        
+        @remarks Each control command may be set to manual or automatic. See the 
+            definition of @ref EColorControlCommand on how to interpret the value
+            for each command.
+            
+        @remarks Some control commands are only supported in manual mode. When a 
+            command is in automatic mode, the value for that command is not valid.
+        '''
+        # Get device capabilities and check if it supports COLOR.
+        if (self.device_info.capabilities >> int(log2(EDeviceCapabilities.COLOR)) & 0x0001) == 0:
+            return (None, None)
+
+        ret_list = list()
+        ret_dict = dict()
+
+        # Get color control capabilities.
+        color_control_commands = [
+            EColorControlCommand.BACKLIGHT_COMPENSATION,
+            EColorControlCommand.BRIGHTNESS,
+            EColorControlCommand.CONTRAST,
+            EColorControlCommand.EXPOSURE_TIME_ABSOLUTE,
+            EColorControlCommand.GAIN,
+            EColorControlCommand.POWERLINE_FREQUENCY,
+            EColorControlCommand.SATURATION,
+            EColorControlCommand.SHARPNESS,
+            EColorControlCommand.WHITEBALANCE
+        ]
+
+        for command in color_control_commands:
+
+            c_command = _ctypes.c_int(command)
+            supports_auto = _ctypes.c_bool(False)
+            min_value = _ctypes.c_int32(0)
+            max_value = _ctypes.c_int32(0)
+            step_value = _ctypes.c_int32(0)
+            default_value = _ctypes.c_int32(0)
+            color_control_mode = _ctypes.c_int(0)
+
+            status = k4a_device_get_color_control_capabilities(
+                self.__device_handle,
+                c_command,
+                _ctypes.byref(supports_auto),
+                _ctypes.byref(min_value),
+                _ctypes.byref(max_value),
+                _ctypes.byref(step_value),
+                _ctypes.byref(default_value),
+                _ctypes.byref(color_control_mode))
+
+            if (status == EStatus.SUCCEEDED):
+
+                capability = ColorControlCapability(
+                    command=EColorControlCommand(c_command.value),
+                    supports_auto=bool(supports_auto.value),
+                    min_value=int(min_value.value),
+                    max_value=int(max_value.value),
+                    step_value=int(step_value.value),
+                    default_value=int(default_value.value),
+                    default_mode=EColorControlMode(color_control_mode.value))
+
+                ret_list.append(capability)
+                ret_dict[EColorControlCommand(command.value)] = capability
+
+        if (len(ret_list) == 0):
+            ret_list = None
+
+        if (len(ret_dict) == 0):
+            ret_dict = None
+
+        return ret_list, ret_dict
+
+
     def get_color_control(self, 
         color_ctrl_command:EColorControlCommand)->(int, EColorControlMode):
         '''! Get the Azure Kinect color sensor control.
@@ -638,7 +635,7 @@ class Device:
         
         status = k4a_device_get_color_control(
             self.__device_handle,
-            color_ctrl_command,
+            command,
             _ctypes.byref(mode),
             _ctypes.byref(color_ctrl_value))
 
@@ -687,6 +684,33 @@ class Device:
 
         return status
 
+    def get_sync_jack(self)->(bool, bool):
+        '''! Get the statuc of sync jacks (if available).
+
+        @returns (bool, bool): If the sync in port is connected, the first
+            value is True. Otherwise it is False. If the sync out port is
+            connected, the second value is True. Otherwise it is False.
+        '''
+    
+        sync_in_ret = False
+        sync_out_ret = False
+        
+        # Read the sync jack.
+        sync_in = _ctypes.c_bool(0)
+        sync_out = _ctypes.c_bool(0)
+        
+        status = k4a_device_get_sync_jack(
+            self.__device_handle,
+            _ctypes.byref(sync_in),
+            _ctypes.byref(sync_out)
+        )
+
+        if status == EStatus.SUCCEEDED:
+            sync_in_ret = sync_in.value
+            sync_out_ret = sync_out.value
+
+        return sync_in_ret, sync_out_ret
+
     def get_raw_calibration(self)->bytearray:
         '''! Get the raw calibration blob for the entire Azure Kinect device.
 
@@ -714,8 +738,6 @@ class Device:
         
         if status != EBufferStatus.BUFFER_TOO_SMALL:
             return buffer
-
-        print(buffer_size_bytes.value)
 
         # Create buffer of the correct size and get the raw calibration data.
         buffer = bytearray(buffer_size_bytes.value)
@@ -800,33 +822,4 @@ class Device:
     def device_info(self):
         del self._device_info
 
-    @property
-    def color_ctrl_cap(self):
-        return self._color_ctrl_cap
-
-    @color_ctrl_cap.deleter
-    def color_ctrl_cap(self):
-        del self._color_ctrl_cap
-
-    @property
-    def sync_in_connected(self):
-        # Read the sync jack.
-        (self._sync_in_connected, self._sync_out_connected) = \
-            _read_sync_jack_helper(self.__device_handle)
-        return self._sync_in_connected
-
-    @sync_in_connected.deleter
-    def sync_in_connected(self):
-        del self._sync_in_connected
-
-    @property
-    def sync_out_connected(self):
-        # Read the sync jack.
-        (self._sync_in_connected, self._sync_out_connected) = \
-            _read_sync_jack_helper(self.__device_handle)
-        return self._sync_out_connected
-
-    @sync_out_connected.deleter
-    def sync_out_connected(self):
-        del self._sync_out_connected
     # ###############

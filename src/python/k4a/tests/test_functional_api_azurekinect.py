@@ -22,11 +22,12 @@ def k4a_device_set_and_get_color_control(
     saved_value = 0
 
     # Get the step size.
-    supports_auto = device.color_ctrl_cap.__dict__[color_control_command].supports_auto
-    min_value = device.color_ctrl_cap.__dict__[color_control_command].min_value
-    max_value = device.color_ctrl_cap.__dict__[color_control_command].max_value
-    step_value = device.color_ctrl_cap.__dict__[color_control_command].step_value
-    default_value = device.color_ctrl_cap.__dict__[color_control_command].default_value
+    cap_list, cap_dict = device.get_color_control_capabilities()
+    supports_auto = cap_dict[color_control_command].supports_auto
+    min_value = cap_dict[color_control_command].min_value
+    max_value = cap_dict[color_control_command].max_value
+    step_value = cap_dict[color_control_command].step_value
+    default_value = cap_dict[color_control_command].default_value
     mode = k4a.EColorControlMode.MANUAL
 
     # Read the original value.
@@ -59,7 +60,7 @@ def k4a_device_set_and_get_color_control(
     return (status1, status2, saved_value, saved_value_readback, new_value, new_value_readback)
 
 
-class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
+class Test_Functional_Fast_API_Device_AzureKinect(unittest.TestCase):
     '''Test Device class for Azure Kinect device.
     '''
 
@@ -98,16 +99,6 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
         serial_number = self.device.serial_number
         self.assertIsInstance(serial_number, str)
         self.assertGreater(len(serial_number), 0)
-
-    # Helper method for test_set_serial_number().
-    @staticmethod
-    def set_serial_number(device:k4a.Device, serial_number:str):
-        device.serial_number = serial_number
-
-    def test_functional_fast_api_set_serial_number(self):
-        self.assertRaises(AttributeError, 
-            Test_Functional_API_Device_AzureKinect.set_serial_number, 
-            self.device, "not settable")
             
     def test_functional_fast_api_get_device_info_property(self):
         device_info = self.device.device_info
@@ -242,16 +233,21 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
         self.assertNotEqual(str(hardware_version), 0)
 
     def test_functional_fast_api_get_color_ctrl_cap(self):
-        color_ctrl_cap = self.device.color_ctrl_cap
-        self.assertNotEqual(str(color_ctrl_cap), 0)
+        color_ctrl_caps, color_ctrl_caps_dict = self.device.get_color_control_capabilities()
+        self.assertIsInstance(color_ctrl_caps, list)
+        self.assertIsInstance(color_ctrl_caps_dict, dict)
+        
+        for cap in color_ctrl_caps:
+            self.assertIsInstance(cap, k4a.ColorControlCapability)
+            self.assertNotEqual(str(cap), 0)
 
-    def test_functional_fast_api_get_sync_out_connected(self):
-        sync_out_connected = self.device.sync_out_connected
-        self.assertIsInstance(sync_out_connected, bool)
+        for entry in color_ctrl_caps_dict:
+            self.assertIsInstance(color_ctrl_caps_dict[entry], k4a.ColorControlCapability)
 
-    def test_functional_fast_api_get_sync_in_connected(self):
-        sync_in_connected = self.device.sync_in_connected
-        self.assertIsInstance(sync_in_connected, bool)
+    def test_functional_fast_api_get_sync_jack_connected(self):
+        (sync_in, sync_out) = self.device.get_sync_jack()
+        self.assertIsInstance(sync_in, bool)
+        self.assertIsInstance(sync_out, bool)
 
     def test_functional_fast_api_start_stop_cameras(self):
         device_config = k4a.DeviceConfiguration(
@@ -359,7 +355,7 @@ class Test_Functional_API_Device_AzureKinect(unittest.TestCase):
                     self.assertIsInstance(calibration, k4a.Calibration)
 
 
-class Test_Functional_API_Capture_AzureKinect(unittest.TestCase):
+class Test_Functional_Fast_API_Capture_AzureKinect(unittest.TestCase):
     '''Test Capture class for Azure Kinect device.
     '''
 
@@ -589,7 +585,7 @@ class Test_Functional_API_Capture_AzureKinect(unittest.TestCase):
         self.assertIs(ir3, ir2)
 
 
-class Test_Functional_API_Image_AzureKinect(unittest.TestCase):
+class Test_Functional_Fast_API_Image_AzureKinect(unittest.TestCase):
     '''Test Image class for Azure Kinect device.
     '''
 
@@ -825,7 +821,7 @@ class Test_Functional_API_Image_AzureKinect(unittest.TestCase):
         self.assertEqual(iso_speed, 100)
 
 
-class Test_Functional_API_Calibration_AzureKinect(unittest.TestCase):
+class Test_Functional_Fast_API_Calibration_AzureKinect(unittest.TestCase):
     '''Test Calibration class for Azure Kinect device.
     '''
 
@@ -883,16 +879,9 @@ class Test_Functional_API_Calibration_AzureKinect(unittest.TestCase):
                     self.assertIsInstance(calibration, k4a.Calibration)
 
 
-class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
+class Test_Functional_Fast_API_Transformation_AzureKinect(unittest.TestCase):
     '''Test Transformation class for Azure Kinect device.
     '''
-
-    depth_mode_ids = range(1, 6)
-    color_mode_ids = range(1, 7)
-    calibration_types = [
-        k4a.ECalibrationType.COLOR,
-        k4a.ECalibrationType.DEPTH
-    ]
 
     @classmethod
     def setUpClass(cls):
@@ -1219,6 +1208,38 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     # The following tests may take a long time. 
     # It is not recommended to run them frequently.
     #
+
+class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
+    '''Test Transformation class for Azure Kinect device.
+    '''
+
+    depth_mode_ids = range(1, 6)
+    color_mode_ids = range(1, 7)
+    calibration_types = [
+        k4a.ECalibrationType.COLOR,
+        k4a.ECalibrationType.DEPTH
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.device = k4a.Device.open()
+        assert(cls.device is not None)
+
+        cls.lock = test_config.glb_lock
+
+        cls.calibration = cls.device.get_calibration(
+            4, # WFOV_UNBINNED
+            5) # 2160P
+
+    @classmethod
+    def tearDownClass(cls):
+
+        # Stop the cameras and imus before closing device.
+        cls.device.stop_cameras()
+        cls.device.stop_imu()
+        cls.device.close()
+        del cls.device
+        del cls.calibration
 
     def test_functional_api_point_3d_to_point_3d(self):
 

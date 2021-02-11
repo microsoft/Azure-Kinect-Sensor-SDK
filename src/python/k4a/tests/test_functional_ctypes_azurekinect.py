@@ -119,7 +119,7 @@ def k4a_device_set_and_get_color_control(
         saved_value, saved_value_readback, new_value, new_value_readback)
 
 
-class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
+class Test_Functional_Fast_Ctypes_AzureKinect(unittest.TestCase):
     '''Test k4a functions requiring a device handle for Azure Kinect device.
     '''
 
@@ -1236,244 +1236,6 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
 
             self.assertTrue(k4a.K4A_SUCCEEDED(status))
             self.assertEqual(valid_int_flag.value, 1)
-
-    def test_functional_ctypes_calibration_3d_to_3d(self):
-        with self.lock:
-
-            depth_modes_ids = range(1, 6)
-            color_mode_ids = range(1, 7)
-            calibration_types = [
-                k4a.ECalibrationType.COLOR,
-                k4a.ECalibrationType.DEPTH
-            ]
-
-            calibration = k4a._bindings.k4a._Calibration()
-            source_point = k4a._bindings.k4a._Float3(300, 300, 500)
-            target_point = k4a._bindings.k4a._Float3()
-
-            for depth_mode_id in depth_modes_ids:
-                for color_mode_id in color_mode_ids:
-                    for source_camera in calibration_types:
-                        for target_camera in calibration_types:
-                            with self.subTest(depth_mode_id = depth_mode_id, 
-                                color_mode_id = color_mode_id,
-                                source_camera = source_camera,
-                                target_camera = target_camera):
-
-                                status = k4a._bindings.k4a.k4a_device_get_calibration(
-                                    self.device_handle,
-                                    depth_mode_id,
-                                    color_mode_id,
-                                    ctypes.byref(calibration))
-
-                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
-
-                                # Transform source point from source_camera to target_camera.
-                                status = k4a._bindings.k4a.k4a_calibration_3d_to_3d(
-                                    ctypes.byref(calibration),
-                                    ctypes.byref(source_point),
-                                    source_camera,
-                                    target_camera,
-                                    ctypes.byref(target_point))
-
-                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
-
-                                if source_camera == target_camera:
-                                    self.assertAlmostEqual(source_point.xyz.x, target_point.xyz.x)
-                                    self.assertAlmostEqual(source_point.xyz.y, target_point.xyz.y)
-                                    self.assertAlmostEqual(source_point.xyz.z, target_point.xyz.z)
-
-    def test_functional_ctypes_calibration_2d_to_3d(self):
-        with self.lock:
-
-            depth_modes_ids = range(1, 6)
-            color_mode_ids = range(1, 7)
-            calibration_types = [
-                k4a.ECalibrationType.COLOR,
-                k4a.ECalibrationType.DEPTH
-            ]
-
-            calibration = k4a._bindings.k4a._Calibration()
-            source_point = k4a._bindings.k4a._Float2(300, 300)
-            depth_mm = 500.0
-            target_point = k4a._bindings.k4a._Float3()
-            valid_int_flag = ctypes.c_int(0)
-
-            for depth_mode_id in depth_modes_ids:
-                for color_mode_id in color_mode_ids:
-                    for source_camera in calibration_types:
-                        for target_camera in calibration_types:
-                            with self.subTest(depth_mode_id = depth_mode_id, 
-                                color_mode_id = color_mode_id,
-                                source_camera = source_camera,
-                                target_camera = target_camera):
-
-                                status = k4a._bindings.k4a.k4a_device_get_calibration(
-                                    self.device_handle,
-                                    depth_mode_id,
-                                    color_mode_id,
-                                    ctypes.byref(calibration))
-
-                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
-
-                                # Transform source point from source_camera to target_camera.
-                                status = k4a._bindings.k4a.k4a_calibration_2d_to_3d(
-                                    ctypes.byref(calibration),
-                                    ctypes.byref(source_point),
-                                    ctypes.c_float(depth_mm),
-                                    ctypes.c_int(source_camera),
-                                    ctypes.c_int(target_camera),
-                                    ctypes.byref(target_point),
-                                    ctypes.byref(valid_int_flag))
-
-                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
-                                self.assertEqual(valid_int_flag.value, 1)
-
-    def test_functional_ctypes_calibration_3d_to_2d(self):
-        with self.lock:
-
-            depth_modes_ids = range(1, 6)
-            color_mode_ids = range(1, 7)
-            calibration_types = [
-                k4a.ECalibrationType.COLOR,
-                k4a.ECalibrationType.DEPTH
-            ]
-
-            calibration = k4a._bindings.k4a._Calibration()
-            source_point = k4a._bindings.k4a._Float3(300, 300, 500)
-            target_point = k4a._bindings.k4a._Float2()
-            valid_int_flag = ctypes.c_int(0)
-
-            for depth_mode_id in depth_modes_ids:
-                for color_mode_id in color_mode_ids:
-                    for source_camera in calibration_types:
-                        for target_camera in calibration_types:
-                            with self.subTest(depth_mode_id = depth_mode_id, 
-                                color_mode_id = color_mode_id,
-                                source_camera = source_camera,
-                                target_camera = target_camera):
-
-                                status = k4a._bindings.k4a.k4a_device_get_calibration(
-                                    self.device_handle,
-                                    depth_mode_id,
-                                    color_mode_id,
-                                    ctypes.byref(calibration))
-                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
-
-                                # Transform source point from source_camera to target_camera.
-                                status = k4a._bindings.k4a.k4a_calibration_3d_to_2d(
-                                    ctypes.byref(calibration),
-                                    ctypes.byref(source_point),
-                                    source_camera,
-                                    target_camera,
-                                    ctypes.byref(target_point),
-                                    ctypes.byref(valid_int_flag))
-
-                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
-                                self.assertEqual(valid_int_flag.value, 1)
-
-    def test_functional_ctypes_calibration_2d_to_2d(self):
-        with self.lock:
-
-            depth_modes_ids = range(1, 6)
-            color_mode_ids = range(1, 7)
-            calibration_types = [
-                k4a.ECalibrationType.COLOR,
-                k4a.ECalibrationType.DEPTH
-            ]
-
-            calibration = k4a._bindings.k4a._Calibration()
-            source_point = k4a._bindings.k4a._Float2(300, 300)
-            depth_mm = 500
-            target_point = k4a._bindings.k4a._Float2()
-            valid_int_flag = ctypes.c_int(0)
-
-            for depth_mode_id in depth_modes_ids:
-                for color_mode_id in color_mode_ids:
-                    for source_camera in calibration_types:
-                        for target_camera in calibration_types:
-                            with self.subTest(depth_mode_id = depth_mode_id, 
-                                color_mode_id = color_mode_id,
-                                source_camera = source_camera,
-                                target_camera = target_camera):
-
-                                status = k4a._bindings.k4a.k4a_device_get_calibration(
-                                    self.device_handle,
-                                    depth_mode_id,
-                                    color_mode_id,
-                                    ctypes.byref(calibration))
-
-                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
-
-                                # Transform source point from source_camera to target_camera.
-                                status = k4a._bindings.k4a.k4a_calibration_2d_to_2d(
-                                    ctypes.byref(calibration),
-                                    ctypes.byref(source_point),
-                                    depth_mm,
-                                    source_camera,
-                                    target_camera,
-                                    ctypes.byref(target_point),
-                                    ctypes.byref(valid_int_flag))
-
-                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
-                                self.assertEqual(valid_int_flag.value, 1)
-
-                                if source_camera == target_camera:
-                                    self.assertAlmostEqual(source_point.xy.x, target_point.xy.x)
-                                    self.assertAlmostEqual(source_point.xy.y, target_point.xy.y)
-
-    # This test is data dependent. It may fail based on scene content.
-    # It is favorable to point the camera at a flat wall about 30 cm away.
-    # Perhaps it's better to generate synthetic data.
-    def test_functional_ctypes_calibration_color_2d_to_depth_2d(self):
-        with self.lock:
-
-            depth_modes_ids = range(1, 5)
-            color_mode_ids = range(1, 7)
-            calibration = k4a._bindings.k4a._Calibration()
-            target_point = k4a._bindings.k4a._Float2()
-            valid_int_flag = ctypes.c_int(0)
-
-            for depth_mode_id in depth_modes_ids:
-                for color_mode_id in color_mode_ids:
-                    with self.subTest(depth_mode_id = depth_mode_id, 
-                        color_mode_id = color_mode_id):
-
-                        status = k4a._bindings.k4a.k4a_device_get_calibration(
-                            self.device_handle,
-                            depth_mode_id,
-                            color_mode_id,
-                            ctypes.byref(calibration))
-                        self.assertTrue(k4a.K4A_SUCCEEDED(status))
-
-                        # Get a depth image.
-                        capture = test_config.get_capture(self.device_handle,
-                            k4a.EImageFormat.COLOR_BGRA32,
-                            color_mode_id,
-                            depth_mode_id)
-
-                        depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
-                        self.assertIsNotNone(depth_image)
-
-                        # Get color image width and height to specify the source point.
-                        color_image = k4a._bindings.k4a.k4a_capture_get_color_image(capture)
-                        width_pixels = k4a._bindings.k4a.k4a_image_get_width_pixels(color_image)
-                        height_pixels = k4a._bindings.k4a.k4a_image_get_height_pixels(color_image)
-                        source_point = k4a._bindings.k4a._Float2(width_pixels/4, height_pixels/4)
-
-                        # Transform source point from source_camera to target_camera.
-                        status = k4a._bindings.k4a.k4a_calibration_color_2d_to_depth_2d(
-                            ctypes.byref(calibration),
-                            ctypes.byref(source_point),
-                            depth_image,
-                            ctypes.byref(target_point),
-                            ctypes.byref(valid_int_flag))
-
-                        k4a._bindings.k4a.k4a_image_release(depth_image)
-                        k4a._bindings.k4a.k4a_image_release(color_image)
-
-                        self.assertTrue(k4a.K4A_SUCCEEDED(status))
-                        self.assertEqual(valid_int_flag.value, 1)
                         
     def test_functional_fast_ctypes_transformation_create_destroy(self):
         with self.lock:
@@ -1493,30 +1255,6 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             transformation = k4a._bindings.k4a.k4a_transformation_create(ctypes.byref(calibration))
             self.assertIsNotNone(transformation) # Might not be a valid assert.
             k4a._bindings.k4a.k4a_transformation_destroy(transformation)
-
-    def test_functional_ctypes_transformation_create_destroy(self):
-        with self.lock:
-
-            depth_mode_ids = range(1, 6)
-            color_mode_ids = range(1, 7)
-            calibration = k4a._bindings.k4a._Calibration()
-
-            for depth_mode_id in depth_mode_ids:
-                for color_mode_id in color_mode_ids:
-                    with self.subTest(depth_mode_id = depth_mode_id, 
-                        color_mode_id = color_mode_id):
-
-                        status = k4a._bindings.k4a.k4a_device_get_calibration(
-                            self.device_handle,
-                            depth_mode_id,
-                            color_mode_id,
-                            ctypes.byref(calibration))
-
-                        self.assertTrue(k4a.K4A_SUCCEEDED(status))
-
-                        transformation = k4a._bindings.k4a.k4a_transformation_create(ctypes.byref(calibration))
-                        self.assertIsNotNone(transformation) # Might not be a valid assert.
-                        k4a._bindings.k4a.k4a_transformation_destroy(transformation)
 
     def test_functional_fast_ctypes_transformation_depth_image_to_color_camera(self):
         with self.lock:
@@ -1773,6 +1511,31 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             k4a._bindings.k4a.k4a_image_release(xyz_image)
             k4a._bindings.k4a.k4a_image_release(depth_image)
 
+class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
+    '''Test k4a functions requiring a device handle for Azure Kinect device.
+    '''
+
+    @classmethod
+    def setUpClass(cls):
+        cls.device_handle = k4a._bindings.k4a._DeviceHandle()
+        status = k4a._bindings.k4a.k4a_device_open(ctypes.c_uint32(0), ctypes.byref(cls.device_handle))
+        assert(k4a.K4A_SUCCEEDED(status))
+
+        cls.lock = test_config.glb_lock
+
+    @classmethod
+    def tearDownClass(cls):
+
+        if test_config.glb_capture is not None:
+            k4a._bindings.k4a.k4a_capture_release(test_config.glb_capture)
+            test_config.glb_capture = None
+
+        # Stop the cameras and imus before closing device.
+        k4a._bindings.k4a.k4a_device_stop_cameras(cls.device_handle)
+        k4a._bindings.k4a.k4a_device_stop_imu(cls.device_handle)
+        k4a._bindings.k4a.k4a_device_close(cls.device_handle)
+
+    
     def test_functional_ctypes_transformation_depth_image_to_color_camera(self):
         with self.lock:
 
@@ -2042,6 +1805,269 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
                     k4a._bindings.k4a.k4a_transformation_destroy(transformation)
                     k4a._bindings.k4a.k4a_image_release(xyz_image)
                     k4a._bindings.k4a.k4a_image_release(depth_image)
+
+    
+    def test_functional_ctypes_transformation_create_destroy(self):
+        with self.lock:
+
+            depth_mode_ids = range(1, 6)
+            color_mode_ids = range(1, 7)
+            calibration = k4a._bindings.k4a._Calibration()
+
+            for depth_mode_id in depth_mode_ids:
+                for color_mode_id in color_mode_ids:
+                    with self.subTest(depth_mode_id = depth_mode_id, 
+                        color_mode_id = color_mode_id):
+
+                        status = k4a._bindings.k4a.k4a_device_get_calibration(
+                            self.device_handle,
+                            depth_mode_id,
+                            color_mode_id,
+                            ctypes.byref(calibration))
+
+                        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+                        transformation = k4a._bindings.k4a.k4a_transformation_create(ctypes.byref(calibration))
+                        self.assertIsNotNone(transformation) # Might not be a valid assert.
+                        k4a._bindings.k4a.k4a_transformation_destroy(transformation)
+
+    def test_functional_ctypes_calibration_3d_to_3d(self):
+        with self.lock:
+
+            depth_modes_ids = range(1, 6)
+            color_mode_ids = range(1, 7)
+            calibration_types = [
+                k4a.ECalibrationType.COLOR,
+                k4a.ECalibrationType.DEPTH
+            ]
+
+            calibration = k4a._bindings.k4a._Calibration()
+            source_point = k4a._bindings.k4a._Float3(300, 300, 500)
+            target_point = k4a._bindings.k4a._Float3()
+
+            for depth_mode_id in depth_modes_ids:
+                for color_mode_id in color_mode_ids:
+                    for source_camera in calibration_types:
+                        for target_camera in calibration_types:
+                            with self.subTest(depth_mode_id = depth_mode_id, 
+                                color_mode_id = color_mode_id,
+                                source_camera = source_camera,
+                                target_camera = target_camera):
+
+                                status = k4a._bindings.k4a.k4a_device_get_calibration(
+                                    self.device_handle,
+                                    depth_mode_id,
+                                    color_mode_id,
+                                    ctypes.byref(calibration))
+
+                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+                                # Transform source point from source_camera to target_camera.
+                                status = k4a._bindings.k4a.k4a_calibration_3d_to_3d(
+                                    ctypes.byref(calibration),
+                                    ctypes.byref(source_point),
+                                    source_camera,
+                                    target_camera,
+                                    ctypes.byref(target_point))
+
+                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+                                if source_camera == target_camera:
+                                    self.assertAlmostEqual(source_point.xyz.x, target_point.xyz.x)
+                                    self.assertAlmostEqual(source_point.xyz.y, target_point.xyz.y)
+                                    self.assertAlmostEqual(source_point.xyz.z, target_point.xyz.z)
+
+    def test_functional_ctypes_calibration_2d_to_3d(self):
+        with self.lock:
+
+            depth_modes_ids = range(1, 6)
+            color_mode_ids = range(1, 7)
+            calibration_types = [
+                k4a.ECalibrationType.COLOR,
+                k4a.ECalibrationType.DEPTH
+            ]
+
+            calibration = k4a._bindings.k4a._Calibration()
+            source_point = k4a._bindings.k4a._Float2(300, 300)
+            depth_mm = 500.0
+            target_point = k4a._bindings.k4a._Float3()
+            valid_int_flag = ctypes.c_int(0)
+
+            for depth_mode_id in depth_modes_ids:
+                for color_mode_id in color_mode_ids:
+                    for source_camera in calibration_types:
+                        for target_camera in calibration_types:
+                            with self.subTest(depth_mode_id = depth_mode_id, 
+                                color_mode_id = color_mode_id,
+                                source_camera = source_camera,
+                                target_camera = target_camera):
+
+                                status = k4a._bindings.k4a.k4a_device_get_calibration(
+                                    self.device_handle,
+                                    depth_mode_id,
+                                    color_mode_id,
+                                    ctypes.byref(calibration))
+
+                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+                                # Transform source point from source_camera to target_camera.
+                                status = k4a._bindings.k4a.k4a_calibration_2d_to_3d(
+                                    ctypes.byref(calibration),
+                                    ctypes.byref(source_point),
+                                    ctypes.c_float(depth_mm),
+                                    ctypes.c_int(source_camera),
+                                    ctypes.c_int(target_camera),
+                                    ctypes.byref(target_point),
+                                    ctypes.byref(valid_int_flag))
+
+                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
+                                self.assertEqual(valid_int_flag.value, 1)
+
+    def test_functional_ctypes_calibration_3d_to_2d(self):
+        with self.lock:
+
+            depth_modes_ids = range(1, 6)
+            color_mode_ids = range(1, 7)
+            calibration_types = [
+                k4a.ECalibrationType.COLOR,
+                k4a.ECalibrationType.DEPTH
+            ]
+
+            calibration = k4a._bindings.k4a._Calibration()
+            source_point = k4a._bindings.k4a._Float3(300, 300, 500)
+            target_point = k4a._bindings.k4a._Float2()
+            valid_int_flag = ctypes.c_int(0)
+
+            for depth_mode_id in depth_modes_ids:
+                for color_mode_id in color_mode_ids:
+                    for source_camera in calibration_types:
+                        for target_camera in calibration_types:
+                            with self.subTest(depth_mode_id = depth_mode_id, 
+                                color_mode_id = color_mode_id,
+                                source_camera = source_camera,
+                                target_camera = target_camera):
+
+                                status = k4a._bindings.k4a.k4a_device_get_calibration(
+                                    self.device_handle,
+                                    depth_mode_id,
+                                    color_mode_id,
+                                    ctypes.byref(calibration))
+                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+                                # Transform source point from source_camera to target_camera.
+                                status = k4a._bindings.k4a.k4a_calibration_3d_to_2d(
+                                    ctypes.byref(calibration),
+                                    ctypes.byref(source_point),
+                                    source_camera,
+                                    target_camera,
+                                    ctypes.byref(target_point),
+                                    ctypes.byref(valid_int_flag))
+
+                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
+                                self.assertEqual(valid_int_flag.value, 1)
+
+    def test_functional_ctypes_calibration_2d_to_2d(self):
+        with self.lock:
+
+            depth_modes_ids = range(1, 6)
+            color_mode_ids = range(1, 7)
+            calibration_types = [
+                k4a.ECalibrationType.COLOR,
+                k4a.ECalibrationType.DEPTH
+            ]
+
+            calibration = k4a._bindings.k4a._Calibration()
+            source_point = k4a._bindings.k4a._Float2(300, 300)
+            depth_mm = 500
+            target_point = k4a._bindings.k4a._Float2()
+            valid_int_flag = ctypes.c_int(0)
+
+            for depth_mode_id in depth_modes_ids:
+                for color_mode_id in color_mode_ids:
+                    for source_camera in calibration_types:
+                        for target_camera in calibration_types:
+                            with self.subTest(depth_mode_id = depth_mode_id, 
+                                color_mode_id = color_mode_id,
+                                source_camera = source_camera,
+                                target_camera = target_camera):
+
+                                status = k4a._bindings.k4a.k4a_device_get_calibration(
+                                    self.device_handle,
+                                    depth_mode_id,
+                                    color_mode_id,
+                                    ctypes.byref(calibration))
+
+                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+                                # Transform source point from source_camera to target_camera.
+                                status = k4a._bindings.k4a.k4a_calibration_2d_to_2d(
+                                    ctypes.byref(calibration),
+                                    ctypes.byref(source_point),
+                                    depth_mm,
+                                    source_camera,
+                                    target_camera,
+                                    ctypes.byref(target_point),
+                                    ctypes.byref(valid_int_flag))
+
+                                self.assertTrue(k4a.K4A_SUCCEEDED(status))
+                                self.assertEqual(valid_int_flag.value, 1)
+
+                                if source_camera == target_camera:
+                                    self.assertAlmostEqual(source_point.xy.x, target_point.xy.x)
+                                    self.assertAlmostEqual(source_point.xy.y, target_point.xy.y)
+
+    # This test is data dependent. It may fail based on scene content.
+    # It is favorable to point the camera at a flat wall about 30 cm away.
+    # Perhaps it's better to generate synthetic data.
+    def test_functional_ctypes_calibration_color_2d_to_depth_2d(self):
+        with self.lock:
+
+            depth_modes_ids = range(1, 5)
+            color_mode_ids = range(1, 7)
+            calibration = k4a._bindings.k4a._Calibration()
+            target_point = k4a._bindings.k4a._Float2()
+            valid_int_flag = ctypes.c_int(0)
+
+            for depth_mode_id in depth_modes_ids:
+                for color_mode_id in color_mode_ids:
+                    with self.subTest(depth_mode_id = depth_mode_id, 
+                        color_mode_id = color_mode_id):
+
+                        status = k4a._bindings.k4a.k4a_device_get_calibration(
+                            self.device_handle,
+                            depth_mode_id,
+                            color_mode_id,
+                            ctypes.byref(calibration))
+                        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+                        # Get a depth image.
+                        capture = test_config.get_capture(self.device_handle,
+                            k4a.EImageFormat.COLOR_BGRA32,
+                            color_mode_id,
+                            depth_mode_id)
+
+                        depth_image = k4a._bindings.k4a.k4a_capture_get_depth_image(capture)
+                        self.assertIsNotNone(depth_image)
+
+                        # Get color image width and height to specify the source point.
+                        color_image = k4a._bindings.k4a.k4a_capture_get_color_image(capture)
+                        width_pixels = k4a._bindings.k4a.k4a_image_get_width_pixels(color_image)
+                        height_pixels = k4a._bindings.k4a.k4a_image_get_height_pixels(color_image)
+                        source_point = k4a._bindings.k4a._Float2(width_pixels/4, height_pixels/4)
+
+                        # Transform source point from source_camera to target_camera.
+                        status = k4a._bindings.k4a.k4a_calibration_color_2d_to_depth_2d(
+                            ctypes.byref(calibration),
+                            ctypes.byref(source_point),
+                            depth_image,
+                            ctypes.byref(target_point),
+                            ctypes.byref(valid_int_flag))
+
+                        k4a._bindings.k4a.k4a_image_release(depth_image)
+                        k4a._bindings.k4a.k4a_image_release(color_image)
+
+                        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+                        self.assertEqual(valid_int_flag.value, 1)
 
 if __name__ == '__main__':
     unittest.main()

@@ -321,6 +321,14 @@ class TestStructs(unittest.TestCase):
         s = imu.__str__()
         self.assertIsInstance(s, str)
 
+    def test_unit_ColorControlCapability(self):
+        capability = k4a.ColorControlCapability(k4a.EColorControlCommand.BRIGHTNESS)
+        self.assertIsNotNone(capability)
+        self.assertEqual(len(capability.__dict__), 7)
+
+        s = capability.__str__()
+        self.assertIsInstance(s, str)
+
 
 if __name__ == '__main__':
     unittest.main()

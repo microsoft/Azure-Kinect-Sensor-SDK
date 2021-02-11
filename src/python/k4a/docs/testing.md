@@ -53,7 +53,7 @@ These tests should be run on every pull request.
       
 To run the unit tests:
       
-      python -m pytest tests -k unit -v
+      python -m pytest tests -k test_unit -v
       
 To capture the results, use an additional --junit-xml=./test_results.xml option.
 
