@@ -70,7 +70,7 @@ int main(int argc, char **argv)
     k4a_device_get_depth_mode(device, 2, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_BINNED
 
     k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-    k4a_device_get_fps_mode(device, 3, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
+    k4a_device_get_fps_mode(device, 30, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
 
     k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     device_config.depth_mode_id = depth_mode_info.mode_id;
