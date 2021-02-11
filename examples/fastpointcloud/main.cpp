@@ -151,7 +151,6 @@ int main(int argc, char **argv)
         goto Exit;
     }
 
-
     // 2. initialize default mode ids
     uint32_t color_mode_id = 0;
     uint32_t depth_mode_id = 0;
@@ -161,8 +160,20 @@ int main(int argc, char **argv)
     uint32_t depth_mode_count = 0;
     uint32_t fps_mode_count = 0;
 
+    if (!k4a_device_get_depth_mode_count(device, &depth_mode_count) == K4A_RESULT_SUCCEEDED)
+    {
+        cout << "Failed to get depth mode count" << endl;
+        exit(-1);
+    }
+
+    if (!k4a_device_get_fps_mode_count(device, &fps_mode_count) == K4A_RESULT_SUCCEEDED)
+    {
+        cout << "Failed to get fps mode count" << endl;
+        exit(-1);
+    }
+
     // 4. find the mode ids you want
-    if (depth_mode_count > 0)
+    if (depth_mode_count > 1)
     {
         for (uint32_t d = 1; d < depth_mode_count; d++)
         {
@@ -178,7 +189,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (fps_mode_count > 0)
+    if (fps_mode_count > 1)
     {
         uint32_t max_fps = 0;
         for (uint32_t f = 1; f < fps_mode_count; f++)
