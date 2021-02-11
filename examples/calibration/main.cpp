@@ -64,7 +64,7 @@ static void print_calibration()
         k4a_device_get_depth_mode(device, 2, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_UNBINNED
 
         k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-        k4a_device_get_fps_mode(device, 2, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
+        k4a_device_get_fps_mode(device, 3, &fps_mode_info); // K4A_FRAMES_PER_SECOND_30
 
         // get calibration
         if (K4A_RESULT_SUCCEEDED !=

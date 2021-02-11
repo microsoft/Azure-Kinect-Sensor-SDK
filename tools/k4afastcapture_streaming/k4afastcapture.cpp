@@ -3,6 +3,7 @@
 
 #include "k4afastcapture.h"
 #include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 #include <string>
 
 using namespace k4afastcapture;
@@ -191,7 +192,7 @@ void K4AFastCapture::Run(int streamingLength)
     k4a_image_t depth_image = NULL;
     k4a_image_t color_image = NULL;
 
-    uint32_t camera_fps = k4a_convert_fps_to_uint((k4a_fps_t)m_deviceConfig.fps_mode_id);
+    uint32_t camera_fps = m_deviceConfig.fps_mode_id;
     uint32_t remainingFrames = UINT32_MAX;
     if (streamingLength >= 0)
     {

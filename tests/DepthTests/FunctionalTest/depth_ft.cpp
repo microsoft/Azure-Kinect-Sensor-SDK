@@ -586,7 +586,7 @@ TEST_F(depth_ft, deviceInfo)
 TEST_F(depth_ft, deviceModeInfo)
 {
     K4A_INIT_STRUCT(k4a_depth_mode_info_t, depthModeInfo)
-    int depthModeCount = 0;
+    uint32_t depthModeCount = 0;
 
     // Test invalid arguments.
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_depth_mode_count(NULL, &depthModeCount))
@@ -606,14 +606,11 @@ TEST_F(depth_ft, deviceModeInfo)
         << "Couldn't get depth mode count.\n";
 
     // Test invalid depth mode index.
-    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_depth_mode(m_device, -1, &depthModeInfo))
-        << "Unexpected return value for depth mode index less than 0.\n";
-
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_depth_mode(m_device, depthModeCount, &depthModeInfo))
         << "Unexpected return value for depth mode index greater than number of depth modes.\n";
 
     // Get depth mode info.
-    for (int d = 0; d < depthModeCount; ++d)
+    for (uint32_t d = 0; d < depthModeCount; ++d)
     {
         depthModeInfo = { depthModeInfo.struct_size, depthModeInfo.struct_version, 0 };
 
@@ -639,7 +636,7 @@ TEST_F(depth_ft, deviceModeInfo)
 TEST_F(depth_ft, fpsModeInfo)
 {
     K4A_INIT_STRUCT(k4a_fps_mode_info_t, fpsModeInfo)
-    int fpsModeCount = 0;
+    uint32_t fpsModeCount = 0;
 
     // Test invalid arguments.
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_fps_mode_count(NULL, &fpsModeCount))
@@ -659,14 +656,11 @@ TEST_F(depth_ft, fpsModeInfo)
         << "Couldn't get fps mode count.\n";
 
     // Test invalid depth mode index.
-    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_fps_mode(m_device, -1, &fpsModeInfo))
-        << "Unexpected return value for fps mode index less than 0.\n";
-
     ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_fps_mode(m_device, fpsModeCount, &fpsModeInfo))
         << "Unexpected return value for fps mode index greater than number of depth modes.\n";
 
     // Get fps mode info.
-    for (int d = 0; d < fpsModeCount; ++d)
+    for (uint32_t d = 0; d < fpsModeCount; ++d)
     {
         fpsModeInfo = { fpsModeInfo.struct_size, fpsModeInfo.struct_version, 0 };
 

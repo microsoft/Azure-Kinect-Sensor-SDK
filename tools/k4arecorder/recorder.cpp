@@ -8,28 +8,8 @@
 #include <algorithm>
 
 #include <k4a/k4a.h>
+#include <k4ainternal/modes.h>
 #include <k4arecord/record.h>
-
-inline static uint32_t k4a_convert_fps_mode_id_to_uint(uint32_t fps_mode_id)
-{
-    uint32_t fps_int;
-    switch (fps_mode_id)
-    {
-    case 0: // 0 = K4A_FRAMES_PER_SECOND_5
-        fps_int = 5;
-        break;
-    case 1: // 1 = K4A_FRAMES_PER_SECOND_15
-        fps_int = 15;
-        break;
-    case 2: // 2 = K4A_FRAMES_PER_SECOND_30
-        fps_int = 30;
-        break;
-    default:
-        fps_int = 0;
-        break;
-    }
-    return fps_int;
-}
 
 // call k4a_device_close on every failed CHECK
 #define CHECK(x, device)                                                                                               \
@@ -83,11 +63,10 @@ int do_recording(uint8_t device_index,
               << "; A: " << version_info.audio.major << "." << version_info.audio.minor << "."
               << version_info.audio.iteration << std::endl;
 
-    uint32_t camera_fps = k4a_convert_fps_mode_id_to_uint(device_config->fps_mode_id);
+    uint32_t camera_fps = static_cast<uint32_t>(device_config->fps_mode_id);
 
-    if (camera_fps <= 0 ||
-        (device_config->color_mode_id == 0 && device_config->depth_mode_id == 0)) // 0 = K4A_COLOR_RESOLUTION_OFF, 0 =
-                                                                                  // K4A_DEPTH_MODE_OFF
+    if (camera_fps <= 0 || (device_config->color_mode_id == K4A_COLOR_RESOLUTION_OFF &&
+                            device_config->depth_mode_id == K4A_DEPTH_MODE_OFF))
     {
         std::cerr << "Either the color or depth modes must be enabled to record." << std::endl;
         return 1;

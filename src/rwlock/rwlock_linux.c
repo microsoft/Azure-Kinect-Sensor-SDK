@@ -4,8 +4,6 @@
 // This library
 #include <k4ainternal/rwlock.h>
 
-#include <k4ainternal/common.h>
-
 // System dependencies
 #include <assert.h>
 #include <pthread.h>

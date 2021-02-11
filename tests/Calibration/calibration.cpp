@@ -7,7 +7,6 @@
 // Module being tested
 #include <k4ainternal/calibration.h>
 #include <k4ainternal/depth_mcu.h>
-#include <k4ainternal/common.h>
 
 using namespace testing;
 

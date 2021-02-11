@@ -517,7 +517,7 @@ static k4a_device_configuration_t get_default_config()
     camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
     camera_config.color_mode_id = 1; // K4A_COLOR_RESOLUTION_720P
     camera_config.depth_mode_id = 4; // K4A_DEPTH_MODE_WFOV_UNBINNED // No need for depth during calibration
-    camera_config.fps_mode_id = 1;   // K4A_FRAMES_PER_SECOND_15 // Don't use all USB bandwidth
+    camera_config.fps_mode_id = 15;  // K4A_FRAMES_PER_SECOND_15 // Don't use all USB bandwidth
     camera_config.subordinate_delay_off_master_usec = 0; // Must be zero for master
     camera_config.synchronized_images_only = true;
     return camera_config;

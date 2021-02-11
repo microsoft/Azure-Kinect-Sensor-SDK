@@ -13,6 +13,7 @@
 
 // Library headers
 //
+#include <k4ainternal/modes.h>
 
 // Project headers
 //
@@ -286,12 +287,47 @@ k4a_device_configuration_t K4ADeviceConfiguration::ToK4ADeviceConfiguration(k4a:
 
     deviceConfig.color_format = ColorFormat;
 
-    k4a_depth_mode_info_t depth_mode_info = device->get_depth_mode(EnableDepthCamera ? depth_mode_id :
-                                                                                       0); // 0 = K4A_DEPTH_MODE_OFF
-    k4a_color_mode_info_t color_mode_info = device->get_color_mode(EnableColorCamera ? color_mode_id :
-                                                                                       0); // 0 =
-                                                                                           // K4A_COLOR_RESOLUTION_OFF
-    k4a_fps_mode_info_t fps_mode_info = device->get_fps_mode(fps_mode_id);
+    // Translate depth_mode_id to the device's available depth modes.
+    k4a_depth_mode_t depth_mode_to_find = (EnableDepthCamera) ? static_cast<k4a_depth_mode_t>(depth_mode_id) :
+                                                                K4A_DEPTH_MODE_OFF;
+    std::vector<k4a_depth_mode_info_t> depthModes = device->get_depth_modes();
+    k4a_depth_mode_info_t depth_mode_info = depthModes[0]; // Default to the first one on the list (Depth OFF).
+    for (auto &depthMode : depthModes)
+    {
+        if (depthMode.mode_id == static_cast<uint32_t>(depth_mode_to_find))
+        {
+            depth_mode_info = depthMode;
+            break;
+        }
+    }
+
+    // Translate color_mode_id to the device's available color modes.
+    k4a_color_resolution_t color_mode_to_find = (EnableColorCamera) ?
+                                                    static_cast<k4a_color_resolution_t>(color_mode_id) :
+                                                    K4A_COLOR_RESOLUTION_OFF;
+    std::vector<k4a_color_mode_info_t> colorModes = device->get_color_modes();
+    k4a_color_mode_info_t color_mode_info = colorModes[0]; // Default to the first one on the list (Color OFF).
+    for (auto &colorMode : colorModes)
+    {
+        if (colorMode.mode_id == static_cast<uint32_t>(color_mode_to_find))
+        {
+            color_mode_info = colorMode;
+            break;
+        }
+    }
+
+    // Translate fps_mode_id to the device's available fps modes.
+    k4a_fps_t fps_mode_to_find = static_cast<k4a_fps_t>(fps_mode_id);
+    std::vector<k4a_fps_mode_info_t> fpsModes = device->get_fps_modes();
+    k4a_fps_mode_info_t fps_mode_info = fpsModes[0]; // Default to the first one on the list.
+    for (auto &fpsMode : fpsModes)
+    {
+        if (fpsMode.mode_id == static_cast<uint32_t>(fps_mode_to_find))
+        {
+            fps_mode_info = fpsMode;
+            break;
+        }
+    }
 
     deviceConfig.color_mode_id = color_mode_info.mode_id;
     deviceConfig.depth_mode_id = depth_mode_info.mode_id;

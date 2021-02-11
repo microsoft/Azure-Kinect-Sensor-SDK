@@ -9,7 +9,7 @@
 
 #include <k4a/k4atypes.h>
 #include <k4ainternal/capture.h>
-#include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 
 #include <assert.h>
 
@@ -29,7 +29,7 @@ extern "C" {
 
 /** Default queue depth for 30 FPS.
  */
-#define QUEUE_DEFAULT_SIZE QUEUE_CALC_DEPTH(k4a_convert_fps_to_uint(K4A_FRAMES_PER_SECOND_30), QUEUE_DEFAULT_DEPTH_USEC)
+#define QUEUE_DEFAULT_SIZE QUEUE_CALC_DEPTH((uint32_t)K4A_FRAMES_PER_SECOND_30, QUEUE_DEFAULT_DEPTH_USEC)
 
 /** Handle to the queue module.
  *
