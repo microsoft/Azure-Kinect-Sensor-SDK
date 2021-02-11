@@ -158,8 +158,8 @@ int main(int argc, char **argv)
     k4a_device_configuration_t secondary_config = get_subordinate_config();
 
     // Construct all the things that we'll need whether or not we are running with 1 or 2 cameras
-    k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode,
-                                                                                     main_config.color_resolution);
+    k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode_id,
+                                                                                     main_config.color_mode_id);
 
     // Set up a transformation. DO THIS OUTSIDE OF YOUR MAIN LOOP! Constructing transformations involves time-intensive
     // hardware setup and should not change once you have a rigid setup, so only call it once or it will run very
@@ -513,11 +513,101 @@ Transformation stereo_calibration(const k4a::calibration &main_calib,
 //
 static k4a_device_configuration_t get_default_config()
 {
+    // 1. Using the first device (expecting that all cameras can support these basic modes)
+    k4a_device_t device = NULL;
+    if (K4A_RESULT_SUCCEEDED != k4a_device_open(0, &device))
+    {
+        cout << deviceIndex << ": Failed to open device" << endl;
+        exit(-1);
+    }
+
+    // 2. initialize default mode ids
+    uint32_t color_mode_id = 0;
+    uint32_t depth_mode_id = 0;
+    uint32_t fps_mode_id = 0;
+
+    // 3. get the count of modes
+    uint32_t color_mode_count = 0;
+    uint32_t depth_mode_count = 0;
+    uint32_t fps_mode_count = 0;
+
+    // 4. find the mode ids you want
+    if (color_mode_count > 0)
+    {
+        for (int c = 1; c < color_mode_count; c++)
+        {
+            k4a_color_mode_info_t color_mode = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+            if (k4a_device_get_color_mode(device, c, &color_mode) == K4A_RESULT_SUCCEEDED)
+            {
+                if (color_mode.height >= 720)
+                {
+                    color_mode_id = c;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (depth_mode_count > 0)
+    {
+        for (int d = 1; d < depth_mode_count; d++)
+        {
+            k4a_depth_mode_info_t depth_mode = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
+            if (k4a_device_get_depth_mode(device, d, &depth_mode) == K4A_RESULT_SUCCEEDED)
+            {
+                if (depth_mode.height >= 1024 && depth_mode.vertical_fov <= 120)
+                {
+                    depth_mode_id = d;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (fps_mode_count > 0)
+    {
+        for (int f = 1; f < fps_mode_count; f++)
+        {
+            k4a_fps_mode_info_t fps_mode = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
+            if (k4a_device_get_fps_mode(device, f, &fps_mode) == K4A_RESULT_SUCCEEDED)
+            {
+                if (fps_mode.fps >= 15)
+                {
+                    fps_mode_id = f;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 5. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
+    if (fps_mode_id == 0)
+    {
+        cout << "Fps mode id must not be set to 0 (Off)" << endl;
+        exit(-1);
+    }
+
+    if (color_mode_id == 0 && depth_mode_id == 0)
+    {
+        cout << "Either color mode id or depth mode id must not be set to 0 (Off)" << endl;
+        exit(-1);
+    }
+
+    // 6. use the mode ids to get the modes
+    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+    k4a_device_get_color_mode(device, color_mode_id, &color_mode_info);
+
+    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
+    k4a_device_get_depth_mode(device, depth_mode_id, &depth_mode_info);
+
+    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
+    k4a_device_get_fps_mode(device, fps_mode_id, &fps_mode_info);
+
     k4a_device_configuration_t camera_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-    camera_config.color_mode_id = 1; // K4A_COLOR_RESOLUTION_720P
-    camera_config.depth_mode_id = 4; // K4A_DEPTH_MODE_WFOV_UNBINNED // No need for depth during calibration
-    camera_config.fps_mode_id = 15;  // K4A_FRAMES_PER_SECOND_15 // Don't use all USB bandwidth
+    camera_config.color_mode_id = color_mode_id;
+    camera_config.depth_mode_id = depth_mode_id;
+    camera_config.fps_mode_id = fps_mode_id;
     camera_config.subordinate_delay_off_master_usec = 0; // Must be zero for master
     camera_config.synchronized_images_only = true;
     return camera_config;
