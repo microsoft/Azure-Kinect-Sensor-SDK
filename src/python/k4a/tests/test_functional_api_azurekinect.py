@@ -110,7 +110,7 @@ class Test_Functional_Fast_API_Device_AzureKinect(unittest.TestCase):
         self.assertNotEqual(device_info.capabilities, 0)
 
     def test_functional_fast_api_get_device_info(self):
-        device_info = self.device.get_device_info()
+        device_info = self.device.device_info
         self.assertIsNotNone(device_info)
         self.assertIsInstance(device_info, k4a.DeviceInfo)
         self.assertNotEqual(device_info.struct_size, 0)
@@ -1243,10 +1243,10 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_point_3d_to_point_3d(self):
 
-        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids:
-            for color_mode_id in Test_Transformation_AzureKinect.color_mode_ids:
-                for source_camera in Test_Transformation_AzureKinect.calibration_types:
-                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+        for depth_mode_id in Test_Functional_API_Transformation_AzureKinect.depth_mode_ids:
+            for color_mode_id in Test_Functional_API_Transformation_AzureKinect.color_mode_ids:
+                for source_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
                         with self.subTest(depth_mode_id = depth_mode_id, 
                             color_mode_id = color_mode_id,
                             source_camera = source_camera,
@@ -1272,10 +1272,10 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_pixel_2d_to_point_3d(self):
 
-        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids:
-            for color_mode_id in Test_Transformation_AzureKinect.color_mode_ids:
-                for source_camera in Test_Transformation_AzureKinect.calibration_types:
-                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+        for depth_mode_id in Test_Functional_API_Transformation_AzureKinect.depth_mode_ids:
+            for color_mode_id in Test_Functional_API_Transformation_AzureKinect.color_mode_ids:
+                for source_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
                         with self.subTest(depth_mode_id = depth_mode_id, 
                             color_mode_id = color_mode_id,
                             source_camera = source_camera,
@@ -1302,10 +1302,10 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_point_3d_to_pixel_2d(self):
 
-        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids:
-            for color_mode_id in Test_Transformation_AzureKinect.color_mode_ids:
-                for source_camera in Test_Transformation_AzureKinect.calibration_types:
-                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+        for depth_mode_id in Test_Functional_API_Transformation_AzureKinect.depth_mode_ids:
+            for color_mode_id in Test_Functional_API_Transformation_AzureKinect.color_mode_ids:
+                for source_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
                         with self.subTest(depth_mode_id = depth_mode_id, 
                             color_mode_id = color_mode_id,
                             source_camera = source_camera,
@@ -1330,10 +1330,10 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_pixel_2d_to_pixel_2d(self):
 
-        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids:
-            for color_mode_id in Test_Transformation_AzureKinect.color_mode_ids:
-                for source_camera in Test_Transformation_AzureKinect.calibration_types:
-                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+        for depth_mode_id in Test_Functional_API_Transformation_AzureKinect.depth_mode_ids:
+            for color_mode_id in Test_Functional_API_Transformation_AzureKinect.color_mode_ids:
+                for source_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
                         with self.subTest(depth_mode_id = depth_mode_id, 
                             color_mode_id = color_mode_id,
                             source_camera = source_camera,
@@ -1359,10 +1359,10 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
     
     def test_functional_api_color_2d_to_depth_2d(self):
 
-        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
-            for color_mode_id in Test_Transformation_AzureKinect.color_mode_ids:
-                for source_camera in Test_Transformation_AzureKinect.calibration_types:
-                    for target_camera in Test_Transformation_AzureKinect.calibration_types:
+        for depth_mode_id in Test_Functional_API_Transformation_AzureKinect.depth_mode_ids[:4]:
+            for color_mode_id in Test_Functional_API_Transformation_AzureKinect.color_mode_ids:
+                for source_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
+                    for target_camera in Test_Functional_API_Transformation_AzureKinect.calibration_types:
                         with self.subTest(depth_mode_id = depth_mode_id, 
                             color_mode_id = color_mode_id,
                             source_camera = source_camera,
@@ -1402,8 +1402,8 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_depth_image_to_color_camera(self):
 
-        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
-            for color_mode_id in Test_Transformation_AzureKinect.color_mode_ids:
+        for depth_mode_id in Test_Functional_API_Transformation_AzureKinect.depth_mode_ids[:4]:
+            for color_mode_id in Test_Functional_API_Transformation_AzureKinect.color_mode_ids:
                 with self.subTest(depth_mode_id = depth_mode_id, 
                     color_mode_id = color_mode_id):
 
@@ -1440,8 +1440,8 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_depth_image_to_color_camera_custom(self):
 
-        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
-            for color_mode_id in Test_Transformation_AzureKinect.color_mode_ids:
+        for depth_mode_id in Test_Functional_API_Transformation_AzureKinect.depth_mode_ids[:4]:
+            for color_mode_id in Test_Functional_API_Transformation_AzureKinect.color_mode_ids:
                 with self.subTest(depth_mode_id = depth_mode_id, 
                     color_mode_id = color_mode_id):
 
@@ -1491,8 +1491,8 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_color_image_to_depth_camera(self):
 
-        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
-            for color_mode_id in Test_Transformation_AzureKinect.color_mode_ids:
+        for depth_mode_id in Test_Functional_API_Transformation_AzureKinect.depth_mode_ids[:4]:
+            for color_mode_id in Test_Functional_API_Transformation_AzureKinect.color_mode_ids:
                 with self.subTest(depth_mode_id = depth_mode_id, 
                     color_mode_id = color_mode_id):
 
@@ -1531,8 +1531,8 @@ class Test_Functional_API_Transformation_AzureKinect(unittest.TestCase):
 
     def test_functional_api_depth_image_to_point_cloud(self):
 
-        for depth_mode_id in Test_Transformation_AzureKinect.depth_mode_ids[:4]:
-            for color_mode_id in Test_Transformation_AzureKinect.color_mode_ids:
+        for depth_mode_id in Test_Functional_API_Transformation_AzureKinect.depth_mode_ids[:4]:
+            for color_mode_id in Test_Functional_API_Transformation_AzureKinect.color_mode_ids:
                 with self.subTest(depth_mode_id = depth_mode_id, 
                     color_mode_id = color_mode_id):
 
