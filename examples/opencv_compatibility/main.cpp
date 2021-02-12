@@ -33,7 +33,7 @@ int main(int argc, char ** /*argv*/)
     // 2. initialize device capabilities
     bool hasDepthDevice = false;
     bool hasColorDevice = false;
-    
+
     // 3. initialize default mode ids
     uint32_t color_mode_id = 0;
     uint32_t depth_mode_id = 0;
@@ -68,7 +68,7 @@ int main(int argc, char ** /*argv*/)
     // 5. get available modes from device info
     if (!k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
     {
-        cout << "Failed to get device info" << endl;
+        printf("Failed to get device info\n");
         exit(-1);
     }
 
@@ -80,19 +80,19 @@ int main(int argc, char ** /*argv*/)
 
     if (hasColorDevice && !k4a_device_get_color_mode_count(device, &color_mode_count) == K4A_RESULT_SUCCEEDED)
     {
-        cout << "Failed to get color mode count" << endl;
+        printf("Failed to get color mode count\n");
         exit(-1);
     }
 
     if (hasDepthDevice && !k4a_device_get_depth_mode_count(device, &depth_mode_count) == K4A_RESULT_SUCCEEDED)
     {
-        cout << "Failed to get depth mode count" << endl;
+        printf("Failed to get depth mode count\n");
         exit(-1);
     }
 
     if (!k4a_device_get_fps_mode_count(device, &fps_mode_count) == K4A_RESULT_SUCCEEDED)
     {
-        cout << "Failed to get fps mode count" << endl;
+        printf("Failed to get fps mode count\n");
         exit(-1);
     }
 
@@ -149,13 +149,13 @@ int main(int argc, char ** /*argv*/)
     // 7. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
     if (fps_mode_id == 0)
     {
-        cout << "Fps mode id must not be set to 0 (Off)" << endl;
+        printf("Fps mode id must not be set to 0 (Off)\n");
         exit(-1);
     }
 
     if (color_mode_id == 0 && depth_mode_id == 0)
     {
-        cout << "Either color mode id or depth mode id must not be set to 0 (Off)" << endl;
+        printf("Either color mode id or depth mode id must not be set to 0 (Off)\n");
         exit(-1);
     }
 
