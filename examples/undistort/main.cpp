@@ -357,9 +357,10 @@ int main(int argc, char **argv)
     k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
 
     // 2. initialize device capabilities
+    uint32_t capabilities = 0;
     bool hasDepthDevice = false;
     bool hasColorDevice = false;
-    
+
     // 3. initialize default mode ids
     uint32_t color_mode_id = 0;
     uint32_t depth_mode_id = 0;
@@ -408,7 +409,7 @@ int main(int argc, char **argv)
 
     // Capabilities is a bitmask in which bit 0 is depth and bit 1 is color.  See k4a_device_capabilities_t in
     // k4atypes.h.
-    uint32_t capabilities = device_info.capabilities;
+    capabilities = device_info.capabilities;
     hasDepthDevice = (capabilities & 0x0001) == 1;
     hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
 
