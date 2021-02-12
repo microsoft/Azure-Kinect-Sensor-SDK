@@ -292,7 +292,7 @@ typedef enum
     K4A_CAPABILITY_COLOR = 2,
     K4A_CAPABILITY_IMU = 4,
     K4A_CAPABILITY_MICROPHONE = 8,
-} device_capabilities;
+} k4a_device_capabilities_t;
 
 /** Image format type.
  *
@@ -884,7 +884,7 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
 
 /** Stores the vendor id, the device id and device capabilities.
  *
- * \sa device_capabilities
+ * \sa k4a_device_capabilities_t
  *
  * \xmlonly
  * <requirements>
@@ -1337,7 +1337,7 @@ typedef struct _k4a_imu_sample_t
  * \endxmlonly
  */
 static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL =
-    { K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 2, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false };
+    { K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false };
 
 /**
  * @}
