@@ -564,7 +564,6 @@ static k4a_device_configuration_t get_default_config()
         exit(-1);
     }
 
-
     // 5. find the mode ids you want
     if (hasColorDevice && color_mode_count > 1)
     {
