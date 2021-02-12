@@ -66,7 +66,8 @@ static void print_calibration()
             exit(-1);
         }
 
-        // Capabilities is a bitmask in which bit 0 is depth and bit 1 is color.  See k4a_device_capabilities_t in k4atypes.h.
+        // Capabilities is a bitmask in which bit 0 is depth and bit 1 is color.  See k4a_device_capabilities_t in
+        // k4atypes.h.
         uint32_t capabilities = device_info.capabilities;
         bool hasDepthDevice = (capabilities & 0x0001) == 1;
         bool hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
@@ -154,7 +155,8 @@ static void print_calibration()
             }
         }
 
-        // 6. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
+        // 6. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set
+        // to 0
         if (fps_mode_id == 0)
         {
             cout << "Fps mode id must not be set to 0 (Off)" << endl;
