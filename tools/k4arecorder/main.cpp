@@ -722,7 +722,6 @@ int main(int argc, char **argv)
         k4a_device_t device;
         if (K4A_SUCCEEDED(k4a_device_open(device_index, &device)))
         {
-
             bool hasColorDevice = false;
             bool hasDepthDevice = false;
             bool hasIMUDevice = false;
@@ -766,6 +765,36 @@ int main(int argc, char **argv)
                 {
                     std::cout << "A recording requires either a color or a depth device." << std::endl;
                     return 1;
+                }
+
+                if (recording_fps_mode == INVALID_AND_NOT_USER_DEFINED)
+                {
+                    uint32_t fps_mode_count = 0;
+
+                    if (!k4a_device_get_fps_mode_count(device, &fps_mode_count) == K4A_RESULT_SUCCEEDED)
+                    {
+                        printf("Failed to get fps mode count\n");
+                        exit(-1);
+                    }
+
+                    if (fps_mode_count > 1)
+                    {
+                        uint32_t fps_mode_id = 0;
+                        uint32_t max_fps = 0;
+                        for (uint32_t f = 1; f < fps_mode_count; f++)
+                        {
+                            k4a_fps_mode_info_t fps_mode = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
+                            if (k4a_device_get_fps_mode(device, f, &fps_mode) == K4A_RESULT_SUCCEEDED)
+                            {
+                                if (fps_mode.fps >= (int)max_fps)
+                                {
+                                    max_fps = (uint32_t)fps_mode.fps;
+                                    fps_mode_id = f;
+                                }
+                            }
+                        }
+                        recording_fps_mode = fps_mode_id;
+                    }
                 }
 
                 if (!K4A_SUCCEEDED(get_fps_mode_info(

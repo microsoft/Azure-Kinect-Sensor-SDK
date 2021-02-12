@@ -34,23 +34,32 @@ int main()
 
         k4a::device dev = k4a::device::open(K4A_DEVICE_DEFAULT);
 
-        // 1. declare mode infos
+        // 1. get available modes from device info
+        k4a_device_info_t device_info = dev.get_info();
+
+        // Capabilities is a bitmask in which bit 0 is depth and bit 1 is color.  See k4a_device_capabilities_t in
+        // k4atypes.h.
+        uint32_t capabilities = device_info.capabilities;
+        bool hasDepthDevice = (capabilities & 0x0001) == 1;
+        bool hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+
+        // 2. declare mode infos
         k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
         k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
 
-        // 2. get the device modes
+        // 3. get the device modes
         vector<k4a_color_mode_info_t> color_modes = dev.get_color_modes();
         vector<k4a_depth_mode_info_t> depth_modes = dev.get_depth_modes();
         vector<k4a_fps_mode_info_t> fps_modes = dev.get_fps_modes();
 
-        // 3. get the size of modes
+        // 4. get the size of modes
         uint32_t color_mode_size = (uint32_t)color_modes.size();
         uint32_t depth_mode_size = (uint32_t)depth_modes.size();
         uint32_t fps_mode_size = (uint32_t)fps_modes.size();
 
-        // 4. find the mode ids you want
-        if (color_mode_size > 1)
+        // 5. find the mode ids you want
+        if (hasColorDevice && color_mode_size > 1)
         {
             for (uint32_t c = 1; c < color_mode_size; c++)
             {
@@ -62,7 +71,7 @@ int main()
             }
         }
 
-        if (depth_mode_size > 1)
+        if (hasDepthDevice && depth_mode_size > 1)
         {
             for (uint32_t d = 1; d < depth_mode_size; d++)
             {
@@ -89,7 +98,7 @@ int main()
             fps_mode_info = fps_modes[fps_mode_id];
         }
 
-        // 5. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set
+        // 6. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set
         // to 0
         if (fps_mode_info.mode_id == 0)
         {
