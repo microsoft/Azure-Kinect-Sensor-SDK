@@ -35,7 +35,6 @@ int main(int argc, char **argv)
     uint32_t depth_mode_count = 0;
     uint32_t fps_mode_count = 0;
 
-
     if (argc < 2)
     {
         printf("%s FRAMECOUNT\n", argv[0]);
