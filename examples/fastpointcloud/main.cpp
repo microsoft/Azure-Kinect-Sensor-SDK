@@ -142,6 +142,15 @@ int main(int argc, char **argv)
     k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
     k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
 
+    // 3. initialize default mode ids
+    uint32_t color_mode_id = 0;
+    uint32_t depth_mode_id = 0;
+    uint32_t fps_mode_id = 0;
+
+    // 4. get the count of modes
+    uint32_t depth_mode_count = 0;
+    uint32_t fps_mode_count = 0;
+
     if (argc != 2)
     {
         printf("fastpointcloud.exe <output file>\n");
@@ -164,15 +173,6 @@ int main(int argc, char **argv)
         printf("Failed to open device\n");
         goto Exit;
     }
-
-    // 3. initialize default mode ids
-    uint32_t color_mode_id = 0;
-    uint32_t depth_mode_id = 0;
-    uint32_t fps_mode_id = 0;
-
-    // 4. get the count of modes
-    uint32_t depth_mode_count = 0;
-    uint32_t fps_mode_count = 0;
 
     if (hasDepthDevice && !k4a_device_get_depth_mode_count(device, &depth_mode_count) == K4A_RESULT_SUCCEEDED)
     {

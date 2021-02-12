@@ -214,8 +214,8 @@ int main(int argc, char **argv)
                                                                             calibration_timeout);
 
         k4a::calibration secondary_calibration =
-            capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode,
-                                                                        secondary_config.color_resolution);
+            capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode_id,
+                                                                        secondary_config.color_mode_id);
         // Get the transformation from secondary depth to secondary color using its calibration object
         Transformation tr_secondary_depth_to_secondary_color = get_depth_to_color_transformation_from_calibration(
             secondary_calibration);
@@ -517,7 +517,7 @@ static k4a_device_configuration_t get_default_config()
     k4a_device_t device = NULL;
     if (K4A_RESULT_SUCCEEDED != k4a_device_open(0, &device))
     {
-        cout << deviceIndex << ": Failed to open device" << endl;
+        cout << 0 << ": Failed to open device" << endl;
         exit(-1);
     }
 
@@ -568,7 +568,7 @@ static k4a_device_configuration_t get_default_config()
     // 5. find the mode ids you want
     if (hasColorDevice && color_mode_count > 1)
     {
-        for (int c = 1; c < color_mode_count; c++)
+        for (uint32_t c = 1; c < color_mode_count; c++)
         {
             k4a_color_mode_info_t color_mode = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
             if (k4a_device_get_color_mode(device, c, &color_mode) == K4A_RESULT_SUCCEEDED)
@@ -584,7 +584,7 @@ static k4a_device_configuration_t get_default_config()
 
     if (hasDepthDevice && depth_mode_count > 1)
     {
-        for (int d = 1; d < depth_mode_count; d++)
+        for (uint32_t d = 1; d < depth_mode_count; d++)
         {
             k4a_depth_mode_info_t depth_mode = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
             if (k4a_device_get_depth_mode(device, d, &depth_mode) == K4A_RESULT_SUCCEEDED)
@@ -600,7 +600,7 @@ static k4a_device_configuration_t get_default_config()
 
     if (fps_mode_count > 1)
     {
-        for (int f = 1; f < fps_mode_count; f++)
+        for (uint32_t f = 1; f < fps_mode_count; f++)
         {
             k4a_fps_mode_info_t fps_mode = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
             if (k4a_device_get_fps_mode(device, f, &fps_mode) == K4A_RESULT_SUCCEEDED)
@@ -691,12 +691,12 @@ static Transformation calibrate_devices(MultiDeviceCapturer &capturer,
                                         float chessboard_square_length,
                                         double calibration_timeout)
 {
-    k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode,
-                                                                                     main_config.color_resolution);
+    k4a::calibration main_calibration = capturer.get_master_device().get_calibration(main_config.depth_mode_id,
+                                                                                     main_config.color_mode_id);
 
     k4a::calibration secondary_calibration =
-        capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode,
-                                                                    secondary_config.color_resolution);
+        capturer.get_subordinate_device_by_index(0).get_calibration(secondary_config.depth_mode_id,
+                                                                    secondary_config.color_mode_id);
     vector<vector<cv::Point2f>> main_chessboard_corners_list;
     vector<vector<cv::Point2f>> secondary_chessboard_corners_list;
     std::chrono::time_point<std::chrono::system_clock> start_time = std::chrono::system_clock::now();
