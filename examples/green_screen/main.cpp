@@ -521,23 +521,38 @@ static k4a_device_configuration_t get_default_config()
         exit(-1);
     }
 
-    // 2. initialize default mode ids
+    // 2. get available modes from device info
+    k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
+
+    if (!k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
+    {
+        cout << "Failed to get device info" << endl;
+        exit(-1);
+    }
+
+    // Capabilities is a bitmask in which bit 0 is depth and bit 1 is color.  See k4a_device_capabilities_t in
+    // k4atypes.h.
+    uint32_t capabilities = device_info.capabilities;
+    bool hasDepthDevice = (capabilities & 0x0001) == 1;
+    bool hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+
+    // 3. initialize default mode ids
     uint32_t color_mode_id = 0;
     uint32_t depth_mode_id = 0;
     uint32_t fps_mode_id = 0;
 
-    // 3. get the count of modes
+    // 4. get the count of modes
     uint32_t color_mode_count = 0;
     uint32_t depth_mode_count = 0;
     uint32_t fps_mode_count = 0;
 
-    if (!k4a_device_get_color_mode_count(device, &color_mode_count) == K4A_RESULT_SUCCEEDED)
+    if (hasColorDevice && !k4a_device_get_color_mode_count(device, &color_mode_count) == K4A_RESULT_SUCCEEDED)
     {
         cout << "Failed to get color mode count" << endl;
         exit(-1);
     }
 
-    if (!k4a_device_get_depth_mode_count(device, &depth_mode_count) == K4A_RESULT_SUCCEEDED)
+    if (hasDepthDevice && !k4a_device_get_depth_mode_count(device, &depth_mode_count) == K4A_RESULT_SUCCEEDED)
     {
         cout << "Failed to get depth mode count" << endl;
         exit(-1);
@@ -550,8 +565,8 @@ static k4a_device_configuration_t get_default_config()
     }
 
 
-    // 4. find the mode ids you want
-    if (color_mode_count > 1)
+    // 5. find the mode ids you want
+    if (hasColorDevice && color_mode_count > 1)
     {
         for (int c = 1; c < color_mode_count; c++)
         {
@@ -567,7 +582,7 @@ static k4a_device_configuration_t get_default_config()
         }
     }
 
-    if (depth_mode_count > 1)
+    if (hasDepthDevice && depth_mode_count > 1)
     {
         for (int d = 1; d < depth_mode_count; d++)
         {
@@ -599,7 +614,7 @@ static k4a_device_configuration_t get_default_config()
         }
     }
 
-    // 5. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
+    // 6. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
     if (fps_mode_id == 0)
     {
         cout << "Fps mode id must not be set to 0 (Off)" << endl;
@@ -612,12 +627,18 @@ static k4a_device_configuration_t get_default_config()
         exit(-1);
     }
 
-    // 6. use the mode ids to get the modes
+    // 7. use the mode ids to get the modes
     k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
-    k4a_device_get_color_mode(device, color_mode_id, &color_mode_info);
+    if (hasColorDevice)
+    {
+        k4a_device_get_color_mode(device, color_mode_id, &color_mode_info);
+    }
 
     k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
-    k4a_device_get_depth_mode(device, depth_mode_id, &depth_mode_info);
+    if (hasDepthDevice)
+    {
+        k4a_device_get_depth_mode(device, depth_mode_id, &depth_mode_info);
+    }
 
     k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
     k4a_device_get_fps_mode(device, fps_mode_id, &fps_mode_info);

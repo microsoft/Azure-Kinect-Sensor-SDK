@@ -292,7 +292,7 @@ typedef enum
     K4A_CAPABILITY_COLOR = 2,
     K4A_CAPABILITY_IMU = 4,
     K4A_CAPABILITY_MICROPHONE = 8,
-} device_capabilities;
+} k4a_device_capabilities_t;
 
 /** Image format type.
  *
@@ -884,7 +884,7 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
 
 /** Stores the vendor id, the device id and device capabilities.
  *
- * \sa device_capabilities
+ * \sa k4a_device_capabilities_t
  *
  * \xmlonly
  * <requirements>
