@@ -92,31 +92,17 @@ int main(int argc, char **argv)
             {
                 int32_t frame_rate;
                 frame_rate = (int32_t)strtol(argv[i + 1], NULL, 10);
-                if (frame_rate == 5)
-                {
-                    g_frame_rate = K4A_FRAMES_PER_SECOND_5;
-                }
-                else if (frame_rate == 15)
-                {
-                    g_frame_rate = K4A_FRAMES_PER_SECOND_15;
-                }
-                else if (frame_rate == 30)
-                {
-                    g_frame_rate = K4A_FRAMES_PER_SECOND_30;
-                }
-                else if (frame_rate == K4A_FRAMES_PER_SECOND_5 || frame_rate == K4A_FRAMES_PER_SECOND_15 ||
-                         frame_rate == K4A_FRAMES_PER_SECOND_30)
-                {
-                    g_frame_rate = (k4a_fps_t)frame_rate;
-                }
-                else
+                g_frame_rate = k4a_convert_uint_to_fps(static_cast<uint32_t>(frame_rate));
+
+                if (g_frame_rate == K4A_FRAMES_PER_SECOND_0)
                 {
                     printf("Error: --fps parameter invalid: %d\n", frame_rate);
                     error = true;
                 }
+
                 if (!error)
                 {
-                    printf("Setting frame_rate = %d\n", g_frame_rate);
+                    printf("Setting frame_rate = %d\n", frame_rate);
                     i++;
                 }
             }
