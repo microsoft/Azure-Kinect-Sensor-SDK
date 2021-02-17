@@ -91,7 +91,7 @@ TEST_F(playback_ut, open_large_file)
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 0, 1000, 1000 };
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.mode_id);
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.fps);
     size_t i = 0;
     for (; i < 50; i++)
     {
@@ -176,7 +176,7 @@ TEST_F(playback_ut, open_delay_offset_file)
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 0, 10000, 10000 };
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.mode_id);
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.fps);
 
     // Read forward
     for (size_t i = 0; i < test_frame_count; i++)
@@ -283,7 +283,7 @@ TEST_F(playback_ut, playback_seek_test)
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 0, 1000, 1000 };
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.mode_id);
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.fps);
 
     k4a_imu_sample_t imu_sample = { 0 };
     uint64_t imu_timestamp = 1150;
@@ -551,7 +551,7 @@ TEST_F(playback_ut, open_skipped_frames_file)
     k4a_capture_t capture = NULL;
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 1000000, 1001000, 1001000 };
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.mode_id);
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.fps);
 
     // Test initial state
     stream_result = k4a_playback_get_previous_capture(handle, &capture);
@@ -843,7 +843,7 @@ TEST_F(playback_ut, open_start_offset_file)
     k4a_stream_result_t stream_result = K4A_STREAM_RESULT_FAILED;
     uint64_t timestamps[3] = { 1000000, 1000000, 1000000 };
     uint64_t imu_timestamp = 1001150;
-    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.mode_id);
+    uint64_t timestamp_delta = HZ_TO_PERIOD_US(config.fps_mode_info.fps);
     uint64_t last_timestamp = k4a_playback_get_recording_length_usec(handle) +
                               (uint64_t)config.start_timestamp_offset_usec;
     ASSERT_EQ(last_timestamp, (uint64_t)config.start_timestamp_offset_usec + 3333150);
