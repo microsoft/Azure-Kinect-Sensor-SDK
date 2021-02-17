@@ -119,6 +119,62 @@ static const k4a_fps_mode_info_t device_fps_modes[] = { { 0, K4A_ABI_VERSION, K4
                                                         { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_15, 15 },
                                                         { 0, K4A_ABI_VERSION, K4A_FRAMES_PER_SECOND_30, 30 } };
 
+/** Convert k4a_fps_t enum to the actual frame rate value.
+ *
+ * \remarks
+ * If the fps enum is not valid, then 0 fps is returned.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">modes.h (include k4ainternal/modes.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
+{
+    uint32_t fpsValue = 0;
+
+    // Search device_color_modes array for the given resolution.
+    for (size_t n = 0; n < sizeof(device_fps_modes) / sizeof(device_fps_modes[0]); ++n)
+    {
+        if ((k4a_fps_t)(device_fps_modes[n].mode_id) == fps)
+        {
+            fpsValue = (uint32_t)(device_fps_modes[n].fps);
+            break;
+        }
+    }
+
+    return fpsValue;
+}
+
+/** Convert frame rate value to the corresponding k4a_fps_t enum.
+ *
+ * \remarks
+ * If the fps value does not correspond to a k4a_fps_t enum, then K4A_FRAME_PER_SECOND_0 is returned.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">modes.h (include k4ainternal/modes.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+inline static k4a_fps_t k4a_convert_uint_to_fps(uint32_t fps_in)
+{
+    k4a_fps_t fps_t = K4A_FRAMES_PER_SECOND_0;
+
+    // Search device_color_modes array for the given resolution.
+    for (size_t n = 0; n < sizeof(device_fps_modes) / sizeof(device_fps_modes[0]); ++n)
+    {
+        if ((uint32_t)device_fps_modes[n].fps == fps_in)
+        {
+            fps_t = (k4a_fps_t)(device_fps_modes[n].mode_id);
+            break;
+        }
+    }
+
+    return fps_t;
+}
+
 /** Return the image width and height for the corresponding k4a_color_resolution_t enum.
  *
  * \xmlonly
