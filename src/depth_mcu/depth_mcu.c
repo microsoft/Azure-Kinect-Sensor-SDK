@@ -292,7 +292,7 @@ k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, uint32_t fps_mod
     depthmcu_context_t *depthmcu = depthmcu_t_get_context(depthmcu_handle);
 
     // Translate FPS to values understood by sensor module
-    uint32_t fps = (uint32_t)fps_mode_id;
+    uint32_t fps = k4a_convert_fps_to_uint((k4a_fps_t)fps_mode_id);
     if (fps == 0)
     {
         LOG_ERROR("Invalid FPS %d", fps_mode_id);
