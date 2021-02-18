@@ -1,3 +1,5 @@
+#include <k4ainternal/usb_device_ids.h>
+
 #include "color_mock_libuvc.h"
 
 using namespace testing;
@@ -87,7 +89,7 @@ void EXPECT_uvc_find_device(MockLibUVC &mockLibUVC, const char *serial_number)
                 }
                 else
                 {
-                    if (vid == 0x045e && pid == 0x097d && strcmp(sn, serial_number) == 0)
+                    if (vid == K4A_MSFT_VID && pid == K4A_RGB_PID && strcmp(sn, serial_number) == 0)
                     {
                         *dev = g_uvc_device;
                         g_device_ref_count++;

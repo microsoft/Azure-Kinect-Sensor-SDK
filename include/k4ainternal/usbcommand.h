@@ -35,10 +35,6 @@ typedef enum
 
 K4A_DECLARE_HANDLE(usbcmd_t);
 
-#define K4A_MSFT_VID 0x045E
-#define K4A_RGB_PID 0x097D
-#define K4A_DEPTH_PID 0x097C
-
 /** Delivers a sample to the registered callback function when a capture is ready for processing.
  *
  * \param result
