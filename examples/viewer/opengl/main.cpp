@@ -36,12 +36,8 @@ int main()
 
         // 1. get available modes from device info
         k4a_device_info_t device_info = dev.get_info();
-
-        // Capabilities is a bitmask in which bit 0 is depth and bit 1 is color.  See k4a_device_capabilities_t in
-        // k4atypes.h.
-        uint32_t capabilities = device_info.capabilities;
-        bool hasDepthDevice = (capabilities & 0x0001) == 1;
-        bool hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+        bool hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
+        bool hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
 
         // 2. declare mode infos
         k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };

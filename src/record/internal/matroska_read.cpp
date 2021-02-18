@@ -661,10 +661,9 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *device_info_json_capabilities = cJSON_GetObjectItem(device_info_json, "capabilities");
                 if (device_info_json_capabilities != nullptr && cJSON_IsNumber(device_info_json_capabilities))
                 {
-                    uint32_t capabilities = (uint32_t)device_info_json_capabilities->valueint;
-                    hasDepthDevice = (capabilities & 0x0001) == 1;      // Depth is bit 0, so no right shift needed.
-                    hasColorDevice = ((capabilities >> 1) & 0x01) == 1; // Color is bit 1, so shift right by 1.
-                    device_info.capabilities = capabilities;
+                    device_info.capabilities.value = (uint32_t)device_info_json_capabilities->valueint;
+                    hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
+                    hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
                 }
                 else
                 {
@@ -707,7 +706,8 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     {
         device_info.device_id = K4A_DEPTH_PID;
         device_info.vendor_id = K4A_MSFT_VID;
-        device_info.capabilities = K4A_CAPABILITY_IMU | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_DEPTH;
+        device_info.capabilities.value = K4A_CAPABILITY_IMU | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_DEPTH |
+                                         K4A_CAPABILITY_MICROPHONE;
     }
 
     context->record_config.device_info = device_info;
