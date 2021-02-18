@@ -571,7 +571,7 @@ TEST_F(depth_ft, deviceInfo)
         << "Device info struct size invalid\n";
     EXPECT_NE(deviceInfo.vendor_id, static_cast<uint32_t>(0)) << "Device info vendor id invalid\n";
     EXPECT_NE(deviceInfo.device_id, static_cast<uint32_t>(0)) << "Device info device id invalid\n";
-    EXPECT_GT(deviceInfo.capabilities, static_cast<uint32_t>(0))
+    EXPECT_GT(deviceInfo.capabilities.value, static_cast<uint32_t>(0))
         << "Device info capabilities must be greater than 0.\n";
 }
 

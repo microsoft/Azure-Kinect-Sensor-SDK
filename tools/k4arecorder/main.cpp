@@ -94,11 +94,10 @@ static int string_compare(const char *s1, const char *s2)
                     bool hasColorDevice = false;
                     bool hasDepthDevice = false;
                     bool hasIMUDevice = false;
-                    uint32_t capabilities = (uint32_t)device_info.capabilities;
 
-                    hasDepthDevice = (capabilities & 0x0001) == 1;
-                    hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
-                    hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;
+                    hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
+                    hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
+                    hasIMUDevice = (device_info.capabilities.bitmap.bHasIMU == 1);
 
                     k4a_hardware_version_t version_info;
                     if (K4A_SUCCEEDED(k4a_device_get_version(device, &version_info)))
@@ -265,11 +264,9 @@ static k4a_result_t get_device_info(k4a_device_t device, bool *hasDepthDevice, b
     k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
     if (k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
     {
-        uint32_t capabilities = (uint32_t)device_info.capabilities;
-
-        *hasDepthDevice = (capabilities & 0x0001) == 1;
-        *hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
-        *hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;
+        *hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
+        *hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
+        *hasIMUDevice = (device_info.capabilities.bitmap.bHasIMU == 1);
 
         return K4A_RESULT_SUCCEEDED;
     }
