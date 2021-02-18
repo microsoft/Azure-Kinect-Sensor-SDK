@@ -145,11 +145,10 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
     bool hasColorDevice = false;
     bool hasDepthDevice = false;
     bool hasIMUDevice = false;
-    uint32_t capabilities = (uint32_t)m_recordConfiguration.device_info.capabilities;
 
-    hasDepthDevice = (capabilities & 0x0001) == 1;      // Depth is bit 0, so no right shift needed.
-    hasColorDevice = ((capabilities >> 1) & 0x01) == 1; // Color is bit 1, so shift right by 1.
-    hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;   // IMU is bit 2, so shift right by 2.
+    hasDepthDevice = (m_recordConfiguration.device_info.capabilities.bitmap.bHasDepth == 1);
+    hasColorDevice = (m_recordConfiguration.device_info.capabilities.bitmap.bHasColor == 1);
+    hasIMUDevice = (m_recordConfiguration.device_info.capabilities.bitmap.bHasIMU == 1);
 
     ImGui::TextUnformatted(m_filenameLabel.c_str());
     ImGui::SameLine();

@@ -348,13 +348,12 @@ k4a_result_t k4a_record_create(const char *path,
 
         if (K4A_SUCCEEDED(device_info_result))
         {
-            uint32_t capabilities = device_info.capabilities;
-            hasDepthDevice = (capabilities & 0x0001) == 1;
-            hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
+            hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
+            hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
 
             cJSON *device_info_json = cJSON_CreateObject();
 
-            if (cJSON_AddNumberToObject(device_info_json, "capabilities", device_info.capabilities) == NULL)
+            if (cJSON_AddNumberToObject(device_info_json, "capabilities", device_info.capabilities.value) == NULL)
             {
                 device_info_result = K4A_RESULT_FAILED;
             }

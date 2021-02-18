@@ -898,7 +898,21 @@ typedef struct _k4a_device_info_t
     uint32_t struct_version; /**< The version of this device info struct */
     uint32_t vendor_id;      /**< 0 to 65535 : reserved for registered USB VID numbers. */
     uint32_t device_id;      /**< Vendor specific device ID. */
-    uint32_t capabilities;   /**< Binary combination of capability flags. */
+
+    union
+    {
+        uint32_t value; /**< Unsigned int value of the binary combination of capability flags. */
+        struct
+        {
+            uint32_t bHasDepth : 1; /**< Bit value of 1 specifies the device has depth sensor.*/
+            uint32_t bHasColor : 1; /**< Bit value of 1 specifies the device has color sensor.*/
+            uint32_t bHasIMU : 1;   /**< Bit value of 1 specifies the device has IMU sensor.*/
+            uint32_t bHasMic : 1;   /**< Bit value of 1 specifies the device has microphone.*/
+            uint32_t resv : 28;
+        } bitmap; /**< Bitmap of binary combination of capability flags. */
+
+    } capabilities; /**< Binary combination of capability flags. */
+
 } k4a_device_info_t;
 
 /** Color mode info type representing color mode info.
