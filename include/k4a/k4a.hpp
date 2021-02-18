@@ -1446,7 +1446,7 @@ public:
      *
      * \sa k4a_device_get_info
      */
-    k4a_device_info_t get_info()
+    k4a_device_info_t get_info() const
     {
         K4A_INIT_STRUCT(k4a_device_info_t, info);
         k4a_device_get_info(m_handle, &info);
@@ -1457,7 +1457,7 @@ public:
     /** Gets the available device color modes.
      *
      */
-    std::vector<k4a_color_mode_info_t> get_color_modes()
+    std::vector<k4a_color_mode_info_t> get_color_modes() const
     {
         K4A_INIT_STRUCT(k4a_color_mode_info_t, mode);
 
@@ -1483,7 +1483,7 @@ public:
      *
      * \sa k4a_device_get_color_mode
      */
-    k4a_color_mode_info_t get_color_mode(uint32_t color_mode_index)
+    k4a_color_mode_info_t get_color_mode(uint32_t color_mode_index) const
     {
         K4A_INIT_STRUCT(k4a_color_mode_info_t, mode);
 
@@ -1506,7 +1506,7 @@ public:
     /** Gets the available device depth modes.
      *
      */
-    std::vector<k4a_depth_mode_info_t> get_depth_modes()
+    std::vector<k4a_depth_mode_info_t> get_depth_modes() const
     {
         K4A_INIT_STRUCT(k4a_depth_mode_info_t, mode);
 
@@ -1532,7 +1532,7 @@ public:
      *
      * \sa k4a_device_get_depth_mode
      */
-    k4a_depth_mode_info_t get_depth_mode(uint32_t depth_mode_index)
+    k4a_depth_mode_info_t get_depth_mode(uint32_t depth_mode_index) const
     {
         K4A_INIT_STRUCT(k4a_depth_mode_info_t, mode);
 
@@ -1555,7 +1555,7 @@ public:
     /** Get available device fps modes.
      *
      */
-    std::vector<k4a_fps_mode_info_t> get_fps_modes()
+    std::vector<k4a_fps_mode_info_t> get_fps_modes() const
     {
         K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
 
@@ -1581,7 +1581,7 @@ public:
      *
      * \sa k4a_device_get_fps_mode
      */
-    k4a_fps_mode_info_t get_fps_mode(uint32_t fps_mode_index)
+    k4a_fps_mode_info_t get_fps_mode(uint32_t fps_mode_index) const
     {
         K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
 
