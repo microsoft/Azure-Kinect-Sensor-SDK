@@ -17,7 +17,7 @@
 #include <k4ainternal/logging.h>
 #include <k4ainternal/modes.h>
 #include <azure_c_shared_utility/tickcounter.h>
-#include <k4ainternal/usbcommand.h>
+#include <k4ainternal/usb_device_ids.h>
 
 // System dependencies
 #include <stdlib.h>

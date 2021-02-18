@@ -16,6 +16,7 @@
 
 // Library headers
 //
+#include <k4ainternal/usb_device_ids.h>
 
 // Shut off windows.h's min/max macros so they don't conflict with the STL min/max functions, which
 // are used in some of the k4aviewer headers
@@ -230,8 +231,8 @@ HRESULT GetSerialNumberToContainerIdMap(std::map<std::string, GUID> *result)
         const auto vid = uint16_t(std::stoul(vidStr, nullptr, baseHex));
         const auto pid = uint16_t(std::stoul(pidStr, nullptr, baseHex));
 
-        constexpr uint16_t depthCameraVid = 0x045E;
-        constexpr uint16_t depthCameraPid = 0x097C;
+        constexpr uint16_t depthCameraVid = K4A_MSFT_VID;
+        constexpr uint16_t depthCameraPid = K4A_DEPTH_PID;
 
         if (vid != depthCameraVid || pid != depthCameraPid)
         {

@@ -12,7 +12,7 @@
 #include <k4ainternal/matroska_read.h>
 #include <k4ainternal/modes.h>
 #include <k4ainternal/logging.h>
-#include <k4ainternal/usbcommand.h>
+#include <k4ainternal/usb_device_ids.h>
 
 #include <turbojpeg.h>
 #include <libyuv.h>

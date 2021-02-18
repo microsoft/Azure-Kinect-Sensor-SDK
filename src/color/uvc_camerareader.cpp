@@ -1,9 +1,7 @@
 #include "uvc_camerareader.h"
 #include "ksmetadata.h"
 #include <k4ainternal/capture.h>
-
-#define COLOR_CAMERA_VID 0x045e
-#define COLOR_CAMERA_PID 0x097d // K4A
+#include <k4ainternal/usb_device_ids.h>
 
 #define UVC_AUTO_EXPOSURE_MODE_MANUAL 1            // manual exposure time, manual iris
 #define UVC_AUTO_EXPOSURE_MODE_AUTO 2              // auto exposure time,
@@ -48,7 +46,7 @@ k4a_result_t UVCCameraReader::Init(const char *serialNumber)
     }
 
     // Find K4A Color Camera
-    res = uvc_find_device(m_pContext, &m_pDevice, COLOR_CAMERA_VID, COLOR_CAMERA_PID, serialNumber);
+    res = uvc_find_device(m_pContext, &m_pDevice, K4A_MSFT_VID, K4A_RGB_PID, serialNumber);
     if (res < 0)
     {
         LOG_ERROR("Can't find UVC device: %s", uvc_strerror(res));
