@@ -84,7 +84,7 @@ static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *color_mod
             {
                 if (color_mode_info.height >= 1080)
                 {
-                    *color_mode_id = c;
+                    *color_mode_id = color_mode_info.mode_id;
                     break;
                 }
             }
@@ -99,7 +99,7 @@ static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *color_mod
             {
                 if (depth_mode_info.height >= 576 && depth_mode_info.vertical_fov <= 65)
                 {
-                    *depth_mode_id = d;
+                    *depth_mode_id = depth_mode_info.mode_id;
                     break;
                 }
             }

@@ -507,8 +507,14 @@ Transformation stereo_calibration(const k4a::calibration &main_calib,
 static k4a_result_t
 get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *depth_mode_id, uint32_t *fps_mode_id)
 {
-    // 1. get available modes from device info
+
+    // 1. declare device info and depth and color modes
+    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
+    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
     k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
+
+    // 1. get available modes from device info
     if (!k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
     {
         cout << "Failed to get device info" << endl;
@@ -550,7 +556,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
             {
                 if (color_mode.height >= 720)
                 {
-                    *color_mode_id = c;
+                    *color_mode_id = color_mode_info.mode_id;
                     break;
                 }
             }
@@ -565,7 +571,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
             {
                 if (depth_mode_info.height >= 1024 && depth_mode_info.vertical_fov <= 120)
                 {
-                    *depth_mode_id = d;
+                    *depth_mode_id = depth_mode_info.mode_id;
                     break;
                 }
             }
