@@ -113,7 +113,6 @@ static void write_point_cloud(const char *file_name, const k4a_image_t point_clo
 static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *depth_mode_id, uint32_t *fps_mode_id)
 {
     // 1. declare device info and depth and color modes
-    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
     k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
     k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
 
