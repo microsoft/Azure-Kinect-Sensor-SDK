@@ -51,6 +51,7 @@ target_link_libraries(k4a PRIVATE
     k4ainternal::image
     k4ainternal::imu
     k4ainternal::logging
+	k4ainternal::modes
     k4ainternal::queue
     k4ainternal::transformation)
 

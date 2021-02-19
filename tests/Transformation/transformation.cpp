@@ -41,12 +41,12 @@ protected:
 
         // device_depth_modes is statically defined in <k4ainternal/modes.h>.
         // device_depth_modes[3] is the mode for K4A_DEPTH_MODE_WFOV_2X2BINNED.
-        k4a_depth_mode_info_t depth_mode_info = device_depth_modes[3];
+        k4a_depth_mode_info_t depth_mode_info = k4a_get_device_depth_mode(3);
         depth_mode_info.struct_size = sizeof(k4a_depth_mode_info_t);
 
         // device_color_modes is statically defined in <k4ainternal/modes.h>.
         // device_color_modes[5] is the mode for K4A_COLOR_RESOLUTION_2160P.
-        k4a_color_mode_info_t color_mode_info = device_color_modes[5];
+        k4a_color_mode_info_t color_mode_info = k4a_get_device_color_mode(5);
         color_mode_info.struct_size = sizeof(k4a_color_mode_info_t);
 
         k4a_result_t result = k4a_calibration_get_from_raw(g_test_json,

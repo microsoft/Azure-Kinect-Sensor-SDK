@@ -7,6 +7,7 @@ target_link_libraries(transformation_ut PRIVATE
     azure::aziotsharedutil
     gtest::gtest
     k4ainternal::image
+	k4ainternal::modes
     k4ainternal::transformation
     k4ainternal::utcommon
     k4a::k4a)

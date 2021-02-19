@@ -827,26 +827,17 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     if (!K4A_SUCCEEDED(color_mode_info_result))
     {
-        // device_color_modes is statically defined in <k4ainternal/modes.h>.
-        int mode_count = sizeof(device_color_modes) / sizeof(device_color_modes[0]);
-        int color_mode_index = 0;
+        int mode_count = (int)k4a_get_device_color_modes_count();
+        k4a_color_mode_info_t color_mode;
         for (int i = 0; i < mode_count; i++)
         {
-            if (device_color_modes[i].mode_id == color_mode_id)
+            color_mode = k4a_get_device_color_mode(i);
+            if (color_mode.mode_id == color_mode_id)
             {
-                color_mode_index = i;
+                SAFE_COPY_STRUCT(&color_mode_info, &color_mode);
                 break;
             }
         }
-
-        color_mode_info.mode_id = device_color_modes[color_mode_index].mode_id;
-        color_mode_info.width = device_color_modes[color_mode_index].width;
-        color_mode_info.height = device_color_modes[color_mode_index].height;
-        color_mode_info.native_format = device_color_modes[color_mode_index].native_format;
-        color_mode_info.horizontal_fov = device_color_modes[color_mode_index].horizontal_fov;
-        color_mode_info.vertical_fov = device_color_modes[color_mode_index].vertical_fov;
-        color_mode_info.min_fps = device_color_modes[color_mode_index].min_fps;
-        color_mode_info.max_fps = device_color_modes[color_mode_index].max_fps;
     }
 
     context->record_config.color_mode_info = color_mode_info;
@@ -997,29 +988,17 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
 
     if (!K4A_SUCCEEDED(depth_mode_info_result))
     {
-        // device_depth_modes is statically defined in <k4ainternal/modes.h>.
-        int mode_count = sizeof(device_depth_modes) / sizeof(device_depth_modes[0]);
-        int depth_mode_index = 0;
+        int mode_count = (int)k4a_get_device_depth_modes_count();
+        k4a_depth_mode_info_t depth_mode;
         for (int i = 0; i < mode_count; i++)
         {
-            if (device_depth_modes[i].mode_id == depth_mode_id)
+            depth_mode = k4a_get_device_depth_mode(i);
+            if (depth_mode.mode_id == depth_mode_id)
             {
-                depth_mode_index = i;
+                SAFE_COPY_STRUCT(&depth_mode_info, &depth_mode);
                 break;
             }
         }
-
-        depth_mode_info.mode_id = device_depth_modes[depth_mode_index].mode_id;
-        depth_mode_info.width = device_depth_modes[depth_mode_index].width;
-        depth_mode_info.height = device_depth_modes[depth_mode_index].height;
-        depth_mode_info.native_format = device_depth_modes[depth_mode_index].native_format;
-        depth_mode_info.horizontal_fov = device_depth_modes[depth_mode_index].horizontal_fov;
-        depth_mode_info.vertical_fov = device_depth_modes[depth_mode_index].vertical_fov;
-        depth_mode_info.min_fps = device_depth_modes[depth_mode_index].min_fps;
-        depth_mode_info.max_fps = device_depth_modes[depth_mode_index].max_fps;
-        depth_mode_info.min_range = device_depth_modes[depth_mode_index].min_range;
-        depth_mode_info.max_range = device_depth_modes[depth_mode_index].max_range;
-        depth_mode_info.passive_ir_only = device_depth_modes[depth_mode_index].passive_ir_only;
     }
 
     context->record_config.depth_mode_info = depth_mode_info;
@@ -1074,19 +1053,17 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
     if (!K4A_SUCCEEDED(fps_mode_info_result))
     {
         // device_fps_modes is statically defined in <k4ainternal/modes.h>.
-        int mode_count = sizeof(device_fps_modes) / sizeof(device_fps_modes[0]);
-        int fps_mode_index = 0;
+        int mode_count = (int)k4a_get_device_fps_modes_count();
+        k4a_fps_mode_info_t fps_mode;
         for (int i = 0; i < mode_count; i++)
         {
-            if (device_fps_modes[i].mode_id == fps_mode_id)
+            fps_mode = k4a_get_device_fps_mode(i);
+            if (fps_mode.mode_id == fps_mode_id)
             {
-                fps_mode_index = i;
+                SAFE_COPY_STRUCT(&fps_mode_info, &fps_mode);
                 break;
             }
         }
-
-        fps_mode_info.mode_id = device_fps_modes[fps_mode_index].mode_id;
-        fps_mode_info.fps = device_fps_modes[fps_mode_index].fps;
     }
 
     context->record_config.fps_mode_info = fps_mode_info;

@@ -12,6 +12,7 @@ add_library(k4a_transformation STATIC
 # Dependencies of this library
 target_link_libraries(k4a_transformation PUBLIC 
     k4ainternal::math
+	k4ainternal::modes
     k4ainternal::deloader
     k4ainternal::tewrapper
     )

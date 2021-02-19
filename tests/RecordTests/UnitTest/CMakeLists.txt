@@ -13,12 +13,14 @@ target_link_libraries(record_ut PRIVATE
 )
 
 target_link_libraries(playback_ut PRIVATE
+	k4ainternal::modes
     k4ainternal::utcommon
     k4ainternal::playback
     k4a::k4arecord
 )
 
 target_link_libraries(playback_perf PRIVATE
+	k4ainternal::modes
     k4ainternal::utcommon
     k4ainternal::playback
     k4a::k4arecord
