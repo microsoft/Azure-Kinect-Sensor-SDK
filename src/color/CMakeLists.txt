@@ -25,6 +25,7 @@ target_include_directories(k4a_color PUBLIC
 # Dependencies of this library
 target_link_libraries(k4a_color PUBLIC
                       k4ainternal::logging
+                      k4ainternal::modes
                       ${K4A_COLOR_SYSTEM_DEPENDENCIES})
 
 # Define alias for other targets to link against
