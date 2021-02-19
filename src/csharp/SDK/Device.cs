@@ -512,15 +512,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 DeviceInfo deviceInfo = new DeviceInfo();
                 k4a_device_info_t device_info = deviceInfo.GetNativeConfiguration();
-                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_info(this.handle, out device_info));
-                deviceInfo = new DeviceInfo
-                {
-                    StructSize = (int)device_info.struct_size,
-                    StructVersion = (int)device_info.struct_version,
-                    VendorId = (int)device_info.vendor_id,
-                    DeviceId = (int)device_info.device_id,
-                    Capabilities = (int)device_info.capabilities,
-                };
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_info(this.handle, out device_info));
+                deviceInfo.SetUsingNativeConfiguration(device_info);
                 return deviceInfo;
             }
         }
@@ -541,7 +534,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_color_mode_count(this.handle, out colorModeInfoCount));
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_color_mode_count(this.handle, out colorModeInfoCount));
             }
 
             for (int i = 0; i < colorModeInfoCount; i++)
@@ -572,20 +565,8 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
                 ColorModeInfo colorModeInfo = new ColorModeInfo();
                 k4a_color_mode_info_t color_mode_info = colorModeInfo.GetNativeConfiguration();
-                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_color_mode(this.handle, (uint)colorModeId, out color_mode_info));
-                colorModeInfo = new ColorModeInfo
-                {
-                    StructSize = (int)color_mode_info.struct_size,
-                    StructVersion = (int)color_mode_info.struct_version,
-                    ModeId = (int)color_mode_info.mode_id,
-                    Width = (int)color_mode_info.width,
-                    Height = (int)color_mode_info.height,
-                    NativeFormat = (ImageFormat)color_mode_info.native_format,
-                    HorizontalFOV = color_mode_info.horizontal_fov,
-                    VerticalFOV = color_mode_info.vertical_fov,
-                    MinFPS = color_mode_info.min_fps,
-                    MaxFPS = color_mode_info.max_fps,
-                };
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_color_mode(this.handle, (uint)colorModeId, out color_mode_info));
+                colorModeInfo.SetUsingNativeConfiguration(color_mode_info);
                 return colorModeInfo;
             }
         }
@@ -606,7 +587,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_depth_mode_count(this.handle, out depthModeInfoCount));
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_depth_mode_count(this.handle, out depthModeInfoCount));
             }
 
             for (int i = 0; i < depthModeInfoCount; i++)
@@ -637,23 +618,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 DepthModeInfo depthModeInfo = new DepthModeInfo();
                 k4a_depth_mode_info_t depth_mode_info = depthModeInfo.GetNativeConfiguration();
-                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_depth_mode(this.handle, (uint)depthModeId, out depth_mode_info));
-                depthModeInfo = new DepthModeInfo
-                {
-                    StructSize = (int)depth_mode_info.struct_size,
-                    StructVersion = (int)depth_mode_info.struct_version,
-                    ModeId = (int)depth_mode_info.mode_id,
-                    PassiveIROnly = Convert.ToBoolean(depth_mode_info.passive_ir_only),
-                    Width = (int)depth_mode_info.width,
-                    Height = (int)depth_mode_info.height,
-                    NativeFormat = (ImageFormat)depth_mode_info.native_format,
-                    HorizontalFOV = depth_mode_info.horizontal_fov,
-                    VerticalFOV = depth_mode_info.vertical_fov,
-                    MinFPS = depth_mode_info.min_fps,
-                    MaxFPS = depth_mode_info.max_fps,
-                    MinRange = (int)depth_mode_info.min_range,
-                    MaxRange = (int)depth_mode_info.max_range,
-                };
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_depth_mode(this.handle, (uint)depthModeId, out depth_mode_info));
+                depthModeInfo.SetUsingNativeConfiguration(depth_mode_info);
                 return depthModeInfo;
             }
         }
@@ -674,7 +640,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                     throw new ObjectDisposedException(nameof(Device));
                 }
 
-                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_fps_mode_count(this.handle, out fpsModeInfoCount));
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_fps_mode_count(this.handle, out fpsModeInfoCount));
             }
 
             for (int i = 0; i < fpsModeInfoCount; i++)
@@ -705,14 +671,8 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 FPSModeInfo fpsModeInfo = new FPSModeInfo();
                 k4a_fps_mode_info_t fps_mode_info = fpsModeInfo.GetNativeConfiguration();
-                AzureKinectException.ThrowIfNotSuccess(() => NativeMethods.k4a_device_get_fps_mode(this.handle, (uint)fpsModeId, out fps_mode_info));
-                fpsModeInfo = new FPSModeInfo
-                {
-                    StructSize = (int)fps_mode_info.struct_size,
-                    StructVersion = (int)fps_mode_info.struct_version,
-                    ModeId = (int)fps_mode_info.mode_id,
-                    FPS = fps_mode_info.fps,
-                };
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_fps_mode(this.handle, (uint)fpsModeId, out fps_mode_info));
+                fpsModeInfo.SetUsingNativeConfiguration(fps_mode_info);
                 return fpsModeInfo;
             }
         }

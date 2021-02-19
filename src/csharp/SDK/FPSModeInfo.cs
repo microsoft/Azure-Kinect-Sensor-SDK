@@ -52,5 +52,17 @@ namespace Microsoft.Azure.Kinect.Sensor
                 fps = this.FPS,
             };
         }
+
+        /// <summary>
+        /// Set properties using native configuration struct.
+        /// </summary>
+        /// <param name="fpsModeInfo">fpsModeInfo.</param>
+        internal void SetUsingNativeConfiguration(k4a_fps_mode_info_t fpsModeInfo)
+        {
+            this.StructSize = (int)fpsModeInfo.struct_size;
+            this.StructVersion = (int)fpsModeInfo.struct_version;
+            this.ModeId = (int)fpsModeInfo.mode_id;
+            this.FPS = fpsModeInfo.fps;
+        }
     }
 }

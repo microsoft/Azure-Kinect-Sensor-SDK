@@ -84,9 +84,27 @@ namespace Microsoft.Azure.Kinect.Sensor
                 native_format = (k4a_image_format_t)this.NativeFormat,
                 horizontal_fov = this.HorizontalFOV,
                 vertical_fov = this.VerticalFOV,
-                min_fps = this.MinFPS,
-                max_fps = this.MaxFPS,
+                min_fps = (uint)this.MinFPS,
+                max_fps = (uint)this.MaxFPS,
             };
+        }
+
+        /// <summary>
+        /// Set properties using native configuration struct.
+        /// </summary>
+        /// <param name="colorModeInfo">colorModeInfo.</param>
+        internal void SetUsingNativeConfiguration(k4a_color_mode_info_t colorModeInfo)
+        {
+            this.StructSize = (int)colorModeInfo.struct_size;
+            this.StructVersion = (int)colorModeInfo.struct_version;
+            this.ModeId = (int)colorModeInfo.mode_id;
+            this.Width = (int)colorModeInfo.width;
+            this.Height = (int)colorModeInfo.height;
+            this.NativeFormat = (ImageFormat)colorModeInfo.native_format;
+            this.HorizontalFOV = colorModeInfo.horizontal_fov;
+            this.VerticalFOV = colorModeInfo.vertical_fov;
+            this.MinFPS = (int)colorModeInfo.min_fps;
+            this.MaxFPS = (int)colorModeInfo.max_fps;
         }
     }
 }
