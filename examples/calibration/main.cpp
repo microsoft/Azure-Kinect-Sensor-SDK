@@ -85,19 +85,19 @@ static void print_calibration()
         uint32_t depth_mode_count = 0;
         uint32_t fps_mode_count = 0;
 
-        if (hasColorDevice && !k4a_device_get_color_mode_count(device, &color_mode_count) == K4A_RESULT_SUCCEEDED)
+        if (hasColorDevice && !K4A_SUCCEEDED(k4a_device_get_color_mode_count(device, &color_mode_count)))
         {
             cout << "Failed to get color mode count" << endl;
             exit(-1);
         }
 
-        if (hasDepthDevice && !k4a_device_get_depth_mode_count(device, &depth_mode_count) == K4A_RESULT_SUCCEEDED)
+        if (hasDepthDevice && !K4A_SUCCEEDED(k4a_device_get_depth_mode_count(device, &depth_mode_count)))
         {
             cout << "Failed to get depth mode count" << endl;
             exit(-1);
         }
 
-        if (!k4a_device_get_fps_mode_count(device, &fps_mode_count) == K4A_RESULT_SUCCEEDED)
+        if (!K4A_SUCCEEDED(k4a_device_get_fps_mode_count(device, &fps_mode_count)))
         {
             cout << "Failed to get fps mode count" << endl;
             exit(-1);
@@ -179,8 +179,8 @@ static void print_calibration()
         k4a_device_get_fps_mode(device, fps_mode_id, &fps_mode_info);
 
         // get calibration
-        if (K4A_RESULT_SUCCEEDED !=
-            k4a_device_get_calibration(device, depth_mode_info.mode_id, color_mode_info.mode_id, &calibration))
+        if (!K4A_SUCCEEDED(
+                k4a_device_get_calibration(device, depth_mode_info.mode_id, color_mode_info.mode_id, &calibration)))
         {
             cout << "Failed to get calibration" << endl;
             exit(-1);

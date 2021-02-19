@@ -791,7 +791,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_min_fps = cJSON_GetObjectItem(color_mode_info_json, "min_fps");
                 if (color_mode_info_json_min_fps != nullptr && cJSON_IsNumber(color_mode_info_json_min_fps))
                 {
-                    color_mode_info.min_fps = (int)color_mode_info_json_min_fps->valueint;
+                    color_mode_info.min_fps = (uint32_t)color_mode_info_json_min_fps->valueint;
                 }
                 else
                 {
@@ -801,7 +801,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *color_mode_info_json_max_fps = cJSON_GetObjectItem(color_mode_info_json, "max_fps");
                 if (color_mode_info_json_max_fps != nullptr && cJSON_IsNumber(color_mode_info_json_max_fps))
                 {
-                    color_mode_info.max_fps = (int)color_mode_info_json_max_fps->valueint;
+                    color_mode_info.max_fps = (uint32_t)color_mode_info_json_max_fps->valueint;
                 }
                 else
                 {
@@ -932,7 +932,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_min_fps = cJSON_GetObjectItem(depth_mode_info_json, "min_fps");
                 if (depth_mode_info_json_min_fps != nullptr && cJSON_IsNumber(depth_mode_info_json_min_fps))
                 {
-                    depth_mode_info.min_fps = (int)depth_mode_info_json_min_fps->valueint;
+                    depth_mode_info.min_fps = (uint32_t)depth_mode_info_json_min_fps->valueint;
                 }
                 else
                 {
@@ -942,7 +942,7 @@ k4a_result_t parse_recording_config(k4a_playback_context_t *context)
                 const cJSON *depth_mode_info_json_max_fps = cJSON_GetObjectItem(depth_mode_info_json, "max_fps");
                 if (depth_mode_info_json_max_fps != nullptr && cJSON_IsNumber(depth_mode_info_json_max_fps))
                 {
-                    depth_mode_info.max_fps = (int)depth_mode_info_json_max_fps->valueint;
+                    depth_mode_info.max_fps = (uint32_t)depth_mode_info_json_max_fps->valueint;
                 }
                 else
                 {
