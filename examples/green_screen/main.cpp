@@ -504,40 +504,21 @@ Transformation stereo_calibration(const k4a::calibration &main_calib,
     return tr;
 }
 
-// The following functions provide the configurations that should be used for each camera.
-// NOTE: For best results both cameras should have the same configuration (framerate, resolution, color and depth
-// modes). Additionally the both master and subordinate should have the same exposure and power line settings. Exposure
-// settings can be different but the subordinate must have a longer exposure from master. To synchronize a master and
-// subordinate with different exposures the user should set `subordinate_delay_off_master_usec = ((subordinate exposure
-// time) - (master exposure time))/2`.
-//
-static k4a_device_configuration_t get_default_config()
+static k4a_result_t
+get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *depth_mode_id, uint32_t *fps_mode_id)
 {
-    // 1. Using the first device (expecting that all cameras can support these basic modes)
-    k4a_device_t device = NULL;
-    if (K4A_RESULT_SUCCEEDED != k4a_device_open(0, &device))
-    {
-        cout << 0 << ": Failed to open device" << endl;
-        exit(-1);
-    }
-
-    // 2. get available modes from device info
+    // 1. get available modes from device info
     k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
     if (!k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
     {
         cout << "Failed to get device info" << endl;
-        exit(-1);
+        return K4A_RESULT_FAILED;
     }
 
     bool hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
     bool hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
 
-    // 3. initialize default mode ids
-    uint32_t color_mode_id = 0;
-    uint32_t depth_mode_id = 0;
-    uint32_t fps_mode_id = 0;
-
-    // 4. get the count of modes
+    // 2. get the count of modes
     uint32_t color_mode_count = 0;
     uint32_t depth_mode_count = 0;
     uint32_t fps_mode_count = 0;
@@ -545,32 +526,31 @@ static k4a_device_configuration_t get_default_config()
     if (hasColorDevice && !K4A_SUCCEEDED(k4a_device_get_color_mode_count(device, &color_mode_count)))
     {
         cout << "Failed to get color mode count" << endl;
-        exit(-1);
+        return K4A_RESULT_FAILED;
     }
 
     if (hasDepthDevice && !K4A_SUCCEEDED(k4a_device_get_depth_mode_count(device, &depth_mode_count)))
     {
         cout << "Failed to get depth mode count" << endl;
-        exit(-1);
+        return K4A_RESULT_FAILED;
     }
 
     if (!k4a_device_get_fps_mode_count(device, &fps_mode_count) == K4A_RESULT_SUCCEEDED)
     {
         cout << "Failed to get fps mode count" << endl;
-        exit(-1);
+        return K4A_RESULT_FAILED;
     }
 
-    // 5. find the mode ids you want
+    // 3. find the mode ids you want
     if (hasColorDevice && color_mode_count > 1)
     {
         for (uint32_t c = 1; c < color_mode_count; c++)
         {
-            k4a_color_mode_info_t color_mode = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
-            if (k4a_device_get_color_mode(device, c, &color_mode) == K4A_RESULT_SUCCEEDED)
+            if (k4a_device_get_color_mode(device, c, &color_mode_info) == K4A_RESULT_SUCCEEDED)
             {
                 if (color_mode.height >= 720)
                 {
-                    color_mode_id = c;
+                    *color_mode_id = c;
                     break;
                 }
             }
@@ -581,12 +561,11 @@ static k4a_device_configuration_t get_default_config()
     {
         for (uint32_t d = 1; d < depth_mode_count; d++)
         {
-            k4a_depth_mode_info_t depth_mode = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
             if (k4a_device_get_depth_mode(device, d, &depth_mode) == K4A_RESULT_SUCCEEDED)
             {
-                if (depth_mode.height >= 1024 && depth_mode.vertical_fov <= 120)
+                if (depth_mode_info.height >= 1024 && depth_mode_info.vertical_fov <= 120)
                 {
-                    depth_mode_id = d;
+                    *depth_mode_id = d;
                     break;
                 }
             }
@@ -597,46 +576,58 @@ static k4a_device_configuration_t get_default_config()
     {
         for (uint32_t f = 1; f < fps_mode_count; f++)
         {
-            k4a_fps_mode_info_t fps_mode = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-            if (k4a_device_get_fps_mode(device, f, &fps_mode) == K4A_RESULT_SUCCEEDED)
+            if (k4a_device_get_fps_mode(device, f, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
             {
-                if (fps_mode.fps >= 15)
+                if (fps_mode_info.fps >= 15)
                 {
-                    fps_mode_id = f;
+                    *fps_mode_id = f;
                     break;
                 }
             }
         }
     }
 
-    // 6. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
-    if (fps_mode_id == 0)
+    // 4. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
+    if (*fps_mode_id == 0)
     {
         cout << "Fps mode id must not be set to 0 (Off)" << endl;
-        exit(-1);
+        return K4A_RESULT_FAILED;
     }
 
-    if (color_mode_id == 0 && depth_mode_id == 0)
+    if (*color_mode_id == 0 && *depth_mode_id == 0)
     {
         cout << "Either color mode id or depth mode id must not be set to 0 (Off)" << endl;
+        return K4A_RESULT_FAILED;
+    }
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
+// The following functions provide the configurations that should be used for each camera.
+// NOTE: For best results both cameras should have the same configuration (framerate, resolution, color and depth
+// modes). Additionally the both master and subordinate should have the same exposure and power line settings. Exposure
+// settings can be different but the subordinate must have a longer exposure from master. To synchronize a master and
+// subordinate with different exposures the user should set `subordinate_delay_off_master_usec = ((subordinate exposure
+// time) - (master exposure time))/2`.
+//
+static k4a_device_configuration_t get_default_config()
+{
+    uint32_t color_mode_id = 0;
+    uint32_t depth_mode_id = 0;
+    uint32_t fps_mode_id = 0;
+
+    k4a_device_t device = NULL;
+    if (K4A_RESULT_SUCCEEDED != k4a_device_open(0, &device))
+    {
+        cout << 0 << ": Failed to open device" << endl;
         exit(-1);
     }
 
-    // 7. use the mode ids to get the modes
-    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
-    if (hasColorDevice)
+    if (!K4A_SUCCEEDED(get_device_mode_ids(device, &color_mode_id, &depth_mode_id, &fps_mode_id)))
     {
-        k4a_device_get_color_mode(device, color_mode_id, &color_mode_info);
+        cout << "Failed to get device mode ids" << endl;
+        exit(-1);
     }
-
-    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
-    if (hasDepthDevice)
-    {
-        k4a_device_get_depth_mode(device, depth_mode_id, &depth_mode_info);
-    }
-
-    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-    k4a_device_get_fps_mode(device, fps_mode_id, &fps_mode_info);
 
     k4a_device_configuration_t camera_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     camera_config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;

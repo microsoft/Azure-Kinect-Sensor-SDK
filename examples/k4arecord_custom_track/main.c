@@ -50,6 +50,111 @@ void fill_bitmap_header(uint32_t width, uint32_t height, BITMAPINFOHEADER *out)
     out->biClrImportant = 0;
 }
 
+static k4a_result_t
+get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *depth_mode_id, uint32_t *fps_mode_id)
+{
+    // 1. get available modes from device info
+    k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
+    if (!k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
+    {
+        printf("Failed to get device info");
+        return K4A_RESULT_FAILED;
+    }
+
+    bool hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
+    bool hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
+
+    // 2. declare mode infos
+    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
+    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
+
+    // 3. get the count of modes
+    uint32_t color_mode_count = 0;
+    uint32_t depth_mode_count = 0;
+    uint32_t fps_mode_count = 0;
+
+    if (hasColorDevice && !K4A_SUCCEEDED(k4a_device_get_color_mode_count(device, &color_mode_count)))
+    {
+        printf("Failed to get color mode count\n");
+        return K4A_RESULT_FAILED;
+    }
+
+    if (hasDepthDevice && !K4A_SUCCEEDED(k4a_device_get_depth_mode_count(device, &depth_mode_count)))
+    {
+        printf("Failed to get depth mode count\n");
+        return K4A_RESULT_FAILED;
+    }
+
+    if (!k4a_device_get_fps_mode_count(device, &fps_mode_count) == K4A_RESULT_SUCCEEDED)
+    {
+        printf("Failed to get fps mode count\n");
+        return K4A_RESULT_FAILED;
+    }
+
+    // 4. find the mode ids you want
+    if (hasColorDevice && color_mode_count > 1)
+    {
+        for (uint32_t c = 1; c < color_mode_count; c++)
+        {
+            if (k4a_device_get_color_mode(device, c, &color_mode_info) == K4A_RESULT_SUCCEEDED)
+            {
+                if (color_mode_info.mode_id == 0)
+                {
+                    *color_mode_id = c;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (hasDepthDevice && depth_mode_count > 1)
+    {
+        for (uint32_t d = 1; d < depth_mode_count; d++)
+        {
+            if (k4a_device_get_depth_mode(device, d, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
+            {
+                if (depth_mode_info.height <= 288 && depth_mode_info.vertical_fov <= 65)
+                {
+                    *depth_mode_id = d;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (fps_mode_count > 1)
+    {
+        uint32_t max_fps = 0;
+        for (uint32_t f = 1; f < fps_mode_count; f++)
+        {
+            if (k4a_device_get_fps_mode(device, f, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
+            {
+                if (fps_mode_info.fps >= (int)max_fps)
+                {
+                    max_fps = (uint32_t)fps_mode_info.fps;
+                    *fps_mode_id = f;
+                }
+            }
+        }
+    }
+
+    // 5. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
+    if (*fps_mode_id == 0)
+    {
+        printf("Fps mode id must not be set to 0 (Off)\n");
+        return K4A_RESULT_FAILED;
+    }
+
+    if (*color_mode_id == 0 && *depth_mode_id == 0)
+    {
+        printf("Either color mode id or depth mode id must not be set to 0 (Off)\n");
+        return K4A_RESULT_FAILED;
+    }
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 int main(int argc, char **argv)
 {
     if (argc < 2)
@@ -63,127 +168,19 @@ int main(int argc, char **argv)
     k4a_device_t device;
     VERIFY(k4a_device_open(0, &device));
 
-    // 1. get available modes from device info
-    k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
-    if (!k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
-    {
-        printf("Failed to get device info");
-        exit(-1);
-    }
-
-    bool hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
-    bool hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
-
-    // 2. declare mode infos
-    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
-    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
-    k4a_fps_mode_info_t fps_mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-
-    // 3. initialize default mode ids
     uint32_t color_mode_id = 0;
     uint32_t depth_mode_id = 0;
     uint32_t fps_mode_id = 0;
 
-    // 4. get the count of modes
-    uint32_t color_mode_count = 0;
-    uint32_t depth_mode_count = 0;
-    uint32_t fps_mode_count = 0;
-
-    if (hasColorDevice && !K4A_SUCCEEDED(k4a_device_get_color_mode_count(device, &color_mode_count)))
+    if (!K4A_SUCCEEDED(get_device_mode_ids(device, &color_mode_id, &depth_mode_id, &fps_mode_id)))
     {
-        printf("Failed to get color mode count\n");
+        printf("Failed to get device mode ids\n");
         exit(-1);
     }
-
-    if (hasDepthDevice && !K4A_SUCCEEDED(k4a_device_get_depth_mode_count(device, &depth_mode_count)))
-    {
-        printf("Failed to get depth mode count\n");
-        exit(-1);
-    }
-
-    if (!k4a_device_get_fps_mode_count(device, &fps_mode_count) == K4A_RESULT_SUCCEEDED)
-    {
-        printf("Failed to get fps mode count\n");
-        exit(-1);
-    }
-
-    // 5. find the mode ids you want
-    if (hasColorDevice && color_mode_count > 1)
-    {
-        for (uint32_t c = 1; c < color_mode_count; c++)
-        {
-            k4a_color_mode_info_t color_mode = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
-            if (k4a_device_get_color_mode(device, c, &color_mode) == K4A_RESULT_SUCCEEDED)
-            {
-                if (color_mode.mode_id == 0)
-                {
-                    color_mode_id = c;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (hasDepthDevice && depth_mode_count > 1)
-    {
-        for (uint32_t d = 1; d < depth_mode_count; d++)
-        {
-            k4a_depth_mode_info_t depth_mode = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
-            if (k4a_device_get_depth_mode(device, d, &depth_mode) == K4A_RESULT_SUCCEEDED)
-            {
-                if (depth_mode.height <= 288 && depth_mode.vertical_fov <= 65)
-                {
-                    depth_mode_id = d;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (fps_mode_count > 1)
-    {
-        uint32_t max_fps = 0;
-        for (uint32_t f = 1; f < fps_mode_count; f++)
-        {
-            k4a_fps_mode_info_t fps_mode = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
-            if (k4a_device_get_fps_mode(device, f, &fps_mode) == K4A_RESULT_SUCCEEDED)
-            {
-                if (fps_mode.fps >= (int)max_fps)
-                {
-                    max_fps = (uint32_t)fps_mode.fps;
-                    fps_mode_id = f;
-                }
-            }
-        }
-    }
-
-    // 6. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
-    if (fps_mode_id == 0)
-    {
-        printf("Fps mode id must not be set to 0 (Off)\n");
-        exit(-1);
-    }
-
-    if (color_mode_id == 0 && depth_mode_id == 0)
-    {
-        printf("Either color mode id or depth mode id must not be set to 0 (Off)\n");
-        exit(-1);
-    }
-
-    // 6. use the mode ids to get the modes
-    if (hasColorDevice)
-    {
-        k4a_device_get_color_mode(device, color_mode_id, &color_mode_info);
-    }
-    if (hasDepthDevice)
-    {
-        k4a_device_get_depth_mode(device, depth_mode_id, &depth_mode_info);
-    }
-    k4a_device_get_fps_mode(device, fps_mode_id, &fps_mode_info);
 
     k4a_device_configuration_t device_config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-    device_config.depth_mode_id = depth_mode_info.mode_id;
-    device_config.fps_mode_id = fps_mode_info.mode_id;
+    device_config.depth_mode_id = depth_mode_id;
+    device_config.fps_mode_id = fps_mode_id;
 
     VERIFY(k4a_device_start_cameras(device, &device_config));
 
@@ -209,7 +206,7 @@ int main(int argc, char **argv)
     // Add a custom video track to store processed depth images.
     // Read the depth resolution from the camera configuration so we can create our custom track with the same size.
     k4a_calibration_t sensor_calibration;
-    VERIFY(k4a_device_get_calibration(device, depth_mode_info.mode_id, color_mode_info.mode_id, &sensor_calibration));
+    VERIFY(k4a_device_get_calibration(device, depth_mode_id, color_mode_id, &sensor_calibration));
     uint32_t depth_width = (uint32_t)sensor_calibration.depth_camera_calibration.resolution_width;
     uint32_t depth_height = (uint32_t)sensor_calibration.depth_camera_calibration.resolution_height;
 
