@@ -1356,7 +1356,7 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
         return K4A_RESULT_FAILED;
     }
 
-    // Get the corresponding color mode info. device_color_modes is statically defined in <k4ainternal/modes.h>.
+    // Get the corresponding color mode info.
     k4a_color_mode_info_t color_mode_info = k4a_get_device_color_mode(mode_index);
     SAFE_COPY_STRUCT(mode_info, &color_mode_info);
     return K4A_RESULT_SUCCEEDED;
@@ -1406,7 +1406,7 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
         return K4A_RESULT_FAILED;
     }
 
-    // Get the corresponding depth mode info. device_depth_modes is statically defined in <k4ainternal/modes.h>.
+    // Get the corresponding depth mode info.
     k4a_depth_mode_info_t depth_mode_info = k4a_get_device_depth_mode(mode_index);
     SAFE_COPY_STRUCT(mode_info, &depth_mode_info);
     return K4A_RESULT_SUCCEEDED;
@@ -1454,7 +1454,7 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_i
         return K4A_RESULT_FAILED;
     }
 
-    // Get the corresponding fps mode info. device_fps_modes is statically defined in <k4ainternal/modes.h>.
+    // Get the corresponding fps mode info.
     k4a_fps_mode_info_t fps_mode_info = k4a_get_device_fps_mode(mode_index);
     SAFE_COPY_STRUCT(mode_info, &fps_mode_info);
     return K4A_RESULT_SUCCEEDED;
