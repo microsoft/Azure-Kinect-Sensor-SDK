@@ -24,6 +24,7 @@ endif()
 add_executable(color_ut color_ut.cpp ${COLOR_MOCK_SOURCE})
 
 target_link_libraries(color_ut PRIVATE
+	k4ainternal::modes
     k4ainternal::utcommon
 
     # Link k4ainternal::color without transitive dependencies

@@ -10,6 +10,7 @@ target_link_libraries(throughput_perf PRIVATE
     gtest::gtest
     k4a::k4a
     k4ainternal::logging
+	k4ainternal::modes
     k4ainternal::utcommon)
 
 k4a_add_tests(TARGET throughput_perf HARDWARE_REQUIRED TEST_TYPE PERF)

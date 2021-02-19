@@ -12,6 +12,7 @@ target_link_libraries(depth_ut PRIVATE
     k4ainternal::calibration
     k4ainternal::image
     k4ainternal::logging
+	k4ainternal::modes
     k4ainternal::queue)
 
 # Include the PUBLIC and INTERFACE directories specified by k4ainternal::depth

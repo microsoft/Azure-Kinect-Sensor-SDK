@@ -13,6 +13,7 @@ target_include_directories(k4a_depth_mcu PUBLIC
 target_link_libraries(k4a_depth_mcu PUBLIC 
     k4ainternal::image
     k4ainternal::logging
+	k4ainternal::modes
     k4ainternal::usb_cmd)
 
 # Define alias for other targets to link against

@@ -1319,8 +1319,7 @@ k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, uint32_
     k4a_result_t result = K4A_RESULT_FAILED;
     if (NULL != mode_count)
     {
-        // device_color_modes is statically defined in <k4ainternal/modes.h>.
-        *mode_count = sizeof(device_color_modes) / sizeof(device_color_modes[0]);
+        *mode_count = k4a_get_device_color_modes_count();
         result = K4A_RESULT_SUCCEEDED;
     }
 
@@ -1358,8 +1357,7 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
     }
 
     // Get the corresponding color mode info. device_color_modes is statically defined in <k4ainternal/modes.h>.
-    k4a_color_mode_info_t color_mode_info = device_color_modes[mode_index];
-    color_mode_info.struct_size = (uint32_t)sizeof(k4a_color_mode_info_t);
+    k4a_color_mode_info_t color_mode_info = k4a_get_device_color_mode(mode_index);
     SAFE_COPY_STRUCT(mode_info, &color_mode_info);
     return K4A_RESULT_SUCCEEDED;
 }
@@ -1371,8 +1369,7 @@ k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, uint32_
     k4a_result_t result = K4A_RESULT_FAILED;
     if (NULL != mode_count)
     {
-        // device_depth_modes is statically defined in <k4ainternal/modes.h>.
-        *mode_count = sizeof(device_depth_modes) / sizeof(device_depth_modes[0]);
+        *mode_count = k4a_get_device_depth_modes_count();
         result = K4A_RESULT_SUCCEEDED;
     }
 
@@ -1410,8 +1407,7 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
     }
 
     // Get the corresponding depth mode info. device_depth_modes is statically defined in <k4ainternal/modes.h>.
-    k4a_depth_mode_info_t depth_mode_info = device_depth_modes[mode_index];
-    depth_mode_info.struct_size = (uint32_t)sizeof(k4a_depth_mode_info_t);
+    k4a_depth_mode_info_t depth_mode_info = k4a_get_device_depth_mode(mode_index);
     SAFE_COPY_STRUCT(mode_info, &depth_mode_info);
     return K4A_RESULT_SUCCEEDED;
 }
@@ -1423,8 +1419,7 @@ k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, uint32_t 
     k4a_result_t result = K4A_RESULT_FAILED;
     if (NULL != mode_count)
     {
-        // device_fps_modes is statically defined in <k4ainternal/modes.h>.
-        *mode_count = sizeof(device_fps_modes) / sizeof(device_fps_modes[0]);
+        *mode_count = k4a_get_device_fps_modes_count();
         result = K4A_RESULT_SUCCEEDED;
     }
 
@@ -1460,8 +1455,7 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_i
     }
 
     // Get the corresponding fps mode info. device_fps_modes is statically defined in <k4ainternal/modes.h>.
-    k4a_fps_mode_info_t fps_mode_info = device_fps_modes[mode_index];
-    fps_mode_info.struct_size = (uint32_t)sizeof(k4a_fps_mode_info_t);
+    k4a_fps_mode_info_t fps_mode_info = k4a_get_device_fps_mode(mode_index);
     SAFE_COPY_STRUCT(mode_info, &fps_mode_info);
     return K4A_RESULT_SUCCEEDED;
 }
