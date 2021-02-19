@@ -116,14 +116,15 @@ static k4a_result_t transformation_create_depth_camera_pinhole(const k4a_calibra
 {
     float fov_degrees[2];
 
-    // device_depth_modes is statically defined in k4ainternal/modes.h.
     bool fov_found = false;
-    for (size_t n = 0; n < sizeof(device_depth_modes) / sizeof(device_depth_modes[0]); ++n)
+    k4a_depth_mode_info_t depth_mode;
+    for (size_t n = 0; n < k4a_get_device_depth_modes_count(); ++n)
     {
-        if (device_depth_modes[n].mode_id == calibration->depth_mode_id)
+        depth_mode = k4a_get_device_depth_mode((uint32_t)n);
+        if (depth_mode.mode_id == calibration->depth_mode_id)
         {
-            fov_degrees[0] = device_depth_modes[n].horizontal_fov;
-            fov_degrees[1] = device_depth_modes[n].vertical_fov;
+            fov_degrees[0] = depth_mode.horizontal_fov;
+            fov_degrees[1] = depth_mode.vertical_fov;
             fov_found = true;
             break;
         }
