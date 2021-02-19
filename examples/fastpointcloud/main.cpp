@@ -151,7 +151,7 @@ static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *depth_mod
             {
                 if (depth_mode.height >= 512 && depth_mode.vertical_fov >= 120)
                 {
-                    *depth_mode_id = depth_mode_info.mode_id;
+                    *depth_mode_id = depth_mode.mode_id;
                     break;
                 }
             }
