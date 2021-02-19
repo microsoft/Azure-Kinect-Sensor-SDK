@@ -1300,12 +1300,12 @@ k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4a_device_info_t info = { sizeof(k4a_device_info_t),
+    k4a_device_info_t info = { (uint32_t)sizeof(k4a_device_info_t),
                                K4A_ABI_VERSION,
                                K4A_MSFT_VID,
                                K4A_DEPTH_PID,
-                               K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU |
-                                   K4A_CAPABILITY_MICROPHONE };
+                               { K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU |
+                                 K4A_CAPABILITY_MICROPHONE } };
 
     SAFE_COPY_STRUCT(device_info, &info);
 
