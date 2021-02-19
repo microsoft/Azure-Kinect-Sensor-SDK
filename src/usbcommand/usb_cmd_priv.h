@@ -12,6 +12,7 @@
 #include <stdbool.h>
 // This library
 #include <k4ainternal/usbcommand.h>
+#include <k4ainternal/usb_device_ids.h>
 
 // Dependent libraries
 #include <k4ainternal/allocator.h>

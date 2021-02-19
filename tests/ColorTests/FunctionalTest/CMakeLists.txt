@@ -5,6 +5,7 @@ add_executable(color_ft color_ft.cpp)
 
 target_link_libraries(color_ft PRIVATE 
     k4a::k4a
+	k4ainternal::modes
     k4ainternal::utcommon
     gtest::gtest
     azure::aziotsharedutil)
