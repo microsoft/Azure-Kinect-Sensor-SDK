@@ -101,7 +101,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
             {
                 if (color_mode_info.mode_id == 0)
                 {
-                    *color_mode_id = c;
+                    *color_mode_id = color_mode_info.mode_id;
                     break;
                 }
             }
@@ -116,7 +116,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
             {
                 if (depth_mode_info.height <= 288 && depth_mode_info.vertical_fov <= 65)
                 {
-                    *depth_mode_id = d;
+                    *depth_mode_id = depth_mode_info.mode_id;
                     break;
                 }
             }
@@ -133,7 +133,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
                 if (fps_mode_info.fps >= (int)max_fps)
                 {
                     max_fps = (uint32_t)fps_mode_info.fps;
-                    *fps_mode_id = f;
+                    *fps_mode_id = fps_mode_info.mode_id;
                 }
             }
         }

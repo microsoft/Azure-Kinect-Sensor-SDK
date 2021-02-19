@@ -152,7 +152,7 @@ static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *depth_mod
             {
                 if (depth_mode.height >= 512 && depth_mode.vertical_fov >= 120)
                 {
-                    *depth_mode_id = d;
+                    *depth_mode_id = depth_mode_info.mode_id;
                     break;
                 }
             }
@@ -169,7 +169,7 @@ static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *depth_mod
                 if (fps_mode_info.fps >= (int)max_fps)
                 {
                     max_fps = (uint32_t)fps_mode_info.fps;
-                    *fps_mode_id = f;
+                    *fps_mode_id = fps_mode_info.mode_id;
                 }
             }
         }
