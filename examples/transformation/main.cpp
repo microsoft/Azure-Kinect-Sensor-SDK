@@ -177,13 +177,13 @@ static int capture(std::string output_dir, uint8_t deviceId = K4A_DEVICE_DEFAULT
     hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
     hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
 
-    if (hasColorDevice && !k4a_device_get_color_mode_count(device, &color_mode_count) == K4A_RESULT_SUCCEEDED)
+    if (hasColorDevice && !K4A_SUCCEEDED(k4a_device_get_color_mode_count(device, &color_mode_count)))
     {
         cout << "Failed to get color mode count" << endl;
         exit(-1);
     }
 
-    if (hasDepthDevice && !k4a_device_get_depth_mode_count(device, &depth_mode_count) == K4A_RESULT_SUCCEEDED)
+    if (hasDepthDevice && !K4A_SUCCEEDED(k4a_device_get_depth_mode_count(device, &depth_mode_count)))
     {
         cout << "Failed to get depth mode count" << endl;
         exit(-1);

@@ -170,7 +170,7 @@ int main(int argc, char **argv)
         goto Exit;
     }
 
-    if (hasDepthDevice && !k4a_device_get_depth_mode_count(device, &depth_mode_count) == K4A_RESULT_SUCCEEDED)
+    if (hasDepthDevice && !K4A_SUCCEEDED(k4a_device_get_depth_mode_count(device, &depth_mode_count)))
     {
         cout << "Failed to get depth mode count" << endl;
         exit(-1);

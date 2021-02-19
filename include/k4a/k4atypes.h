@@ -937,8 +937,8 @@ typedef struct _k4a_color_mode_info_t
     k4a_image_format_t native_format; /**< Image format. */
     float horizontal_fov;             /**< Approximate horizontal field of view. */
     float vertical_fov;               /**< Approximate vertical field of view. */
-    int min_fps;                      /**< Minimum supported framerate. */
-    int max_fps;                      /**< Maximum supported ramerate. */
+    uint32_t min_fps;                 /**< Minimum supported framerate. */
+    uint32_t max_fps;                 /**< Maximum supported ramerate. */
 } k4a_color_mode_info_t;
 
 /** Depth mode info type representing depth mode info.
@@ -964,8 +964,8 @@ typedef struct _k4a_depth_mode_info_t
     k4a_image_format_t native_format; /**< Image format. */
     float horizontal_fov;             /**< Approximate horizontal field of view. */
     float vertical_fov;               /**< Approximate vertical field of view. */
-    int min_fps;                      /**< Minimum supported framerate. */
-    int max_fps;                      /**< Maximum supported framerate. */
+    uint32_t min_fps;                 /**< Minimum supported framerate. */
+    uint32_t max_fps;                 /**< Maximum supported framerate. */
     uint32_t min_range;               /**< Min values expected for mode in millimeters */
     uint32_t max_range;               /**< Max values expected for mode in millimeters */
 } k4a_depth_mode_info_t;

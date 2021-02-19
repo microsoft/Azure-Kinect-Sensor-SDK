@@ -103,11 +103,32 @@ namespace Microsoft.Azure.Kinect.Sensor
                 native_format = (NativeMethods.k4a_image_format_t)this.NativeFormat,
                 horizontal_fov = this.HorizontalFOV,
                 vertical_fov = this.VerticalFOV,
-                min_fps = this.MinFPS,
-                max_fps = this.MaxFPS,
+                min_fps = (uint)this.MinFPS,
+                max_fps = (uint)this.MaxFPS,
                 min_range = (uint)this.MinRange,
                 max_range = (uint)this.MaxRange,
             };
+        }
+
+        /// <summary>
+        /// Set properties using native configuration struct.
+        /// </summary>
+        /// <param name="depthModeInfo">depthModeInfo.</param>
+        internal void SetUsingNativeConfiguration(k4a_depth_mode_info_t depthModeInfo)
+        {
+            this.StructSize = (int)depthModeInfo.struct_size;
+            this.StructVersion = (int)depthModeInfo.struct_version;
+            this.ModeId = (int)depthModeInfo.mode_id;
+            this.PassiveIROnly = Convert.ToBoolean(depthModeInfo.passive_ir_only);
+            this.Width = (int)depthModeInfo.width;
+            this.Height = (int)depthModeInfo.height;
+            this.NativeFormat = (ImageFormat)depthModeInfo.native_format;
+            this.HorizontalFOV = depthModeInfo.horizontal_fov;
+            this.VerticalFOV = depthModeInfo.vertical_fov;
+            this.MinFPS = (int)depthModeInfo.min_fps;
+            this.MaxFPS = (int)depthModeInfo.max_fps;
+            this.MinRange = (int)depthModeInfo.min_range;
+            this.MaxRange = (int)depthModeInfo.max_range;
         }
     }
 }

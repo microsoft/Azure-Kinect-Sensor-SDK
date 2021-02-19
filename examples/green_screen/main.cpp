@@ -542,13 +542,13 @@ static k4a_device_configuration_t get_default_config()
     uint32_t depth_mode_count = 0;
     uint32_t fps_mode_count = 0;
 
-    if (hasColorDevice && !k4a_device_get_color_mode_count(device, &color_mode_count) == K4A_RESULT_SUCCEEDED)
+    if (hasColorDevice && !K4A_SUCCEEDED(k4a_device_get_color_mode_count(device, &color_mode_count)))
     {
         cout << "Failed to get color mode count" << endl;
         exit(-1);
     }
 
-    if (hasDepthDevice && !k4a_device_get_depth_mode_count(device, &depth_mode_count) == K4A_RESULT_SUCCEEDED)
+    if (hasDepthDevice && !K4A_SUCCEEDED(k4a_device_get_depth_mode_count(device, &depth_mode_count)))
     {
         cout << "Failed to get depth mode count" << endl;
         exit(-1);

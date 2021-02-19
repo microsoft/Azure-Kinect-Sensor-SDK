@@ -51,12 +51,25 @@ namespace Microsoft.Azure.Kinect.Sensor
         {
             return new k4a_device_info_t
             {
-                struct_size = (uint) this.StructSize,
-                struct_version = (uint) this.StructVersion,
-                vendor_id = (uint) this.VendorId,
-                device_id = (uint) this.DeviceId,
-                capabilities = (uint) this.Capabilities,
+                struct_size = (uint)this.StructSize,
+                struct_version = (uint)this.StructVersion,
+                vendor_id = (uint)this.VendorId,
+                device_id = (uint)this.DeviceId,
+                capabilities = (uint)this.Capabilities,
             };
+        }
+
+        /// <summary>
+        /// Set properties using native configuration struct.
+        /// </summary>
+        /// <param name="deviceInfo">deviceInfo.</param>
+        internal void SetUsingNativeConfiguration(k4a_device_info_t deviceInfo)
+        {
+            this.StructSize = (int)deviceInfo.struct_size;
+            this.StructVersion = (int)deviceInfo.struct_version;
+            this.VendorId = (int)deviceInfo.vendor_id;
+            this.DeviceId = (int)deviceInfo.device_id;
+            this.Capabilities = (int)deviceInfo.capabilities;
         }
     }
 }

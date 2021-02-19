@@ -522,8 +522,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             public k4a_image_format_t native_format;
             public float horizontal_fov;
             public float vertical_fov;
-            public int min_fps;
-            public int max_fps;
+            public uint min_fps;
+            public uint max_fps;
         }
 
         [NativeReference]
@@ -539,8 +539,8 @@ namespace Microsoft.Azure.Kinect.Sensor
             public k4a_image_format_t native_format;
             public float horizontal_fov;
             public float vertical_fov;
-            public int min_fps;
-            public int max_fps;
+            public uint min_fps;
+            public uint max_fps;
             public uint min_range;
             public uint max_range;
         }
