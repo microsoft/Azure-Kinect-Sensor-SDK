@@ -19,9 +19,9 @@ namespace Microsoft.Azure.Kinect.Sensor
     public class DepthModeInfo
     {
         /// <summary>
-        /// Gets or sets the Struct Size.
+        /// Gets or sets the Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_depth_mode_info_t k4atypes.h.
         /// </summary>
-        public int StructSize { get; set; } = 52;
+        public int StructSize { get; set; } = depthModeInfoInfoStructSize;
 
         /// <summary>
         /// Gets or sets the Struct Version.

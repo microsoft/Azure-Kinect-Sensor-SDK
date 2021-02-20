@@ -17,6 +17,11 @@ namespace Microsoft.Azure.Kinect.Sensor
 #pragma warning disable SA1602 // Enumeration items should be documented
     internal static class NativeMethods
     {
+        public const int deviceInfoStructSize = 20;
+        public const int colorModeInfoStructSize = 40;
+        public const int depthModeInfoInfoStructSize = 52;
+        public const int fpsModeInfoStructSize = 16;
+
         private const CallingConvention k4aCallingConvention = CallingConvention.Cdecl;
 
         [UnmanagedFunctionPointer(k4aCallingConvention)]
