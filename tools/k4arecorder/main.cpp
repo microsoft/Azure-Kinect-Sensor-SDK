@@ -387,7 +387,7 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
                 fps_mode_info->fps > 15)
             {
                 // Find the maximum FPS available that is less than or equal to 15 FPS.
-                int fps = 0;
+                uint32_t fps = 0;
                 for (uint32_t n = 0; n < mode_count; ++n)
                 {
                     k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };

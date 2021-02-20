@@ -10,7 +10,6 @@
 #include "texture.h"
 #include "viewerwindow.h"
 
-using namespace std;
 using namespace viewer;
 
 void ColorizeDepthImage(const k4a::image &depthImage,
@@ -24,25 +23,28 @@ static k4a_result_t get_device_mode_ids(k4a::device *device,
                                         k4a_fps_mode_info_t *fps_mode_info)
 {
 
-    // 1. get available modes from device info
+    // 1. get available modes from device info - note that you must instantiate info structs with struct size and abi
+    // version of the get methods will not succceed
     k4a_device_info_t device_info = device->get_info();
     bool hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
     bool hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
 
     // 3. get the device modes
-    vector<k4a_color_mode_info_t> color_modes = device->get_color_modes();
-    vector<k4a_depth_mode_info_t> depth_modes = device->get_depth_modes();
-    vector<k4a_fps_mode_info_t> fps_modes = device->get_fps_modes();
+    std::vector<k4a_color_mode_info_t> color_modes = device->get_color_modes();
+    std::vector<k4a_depth_mode_info_t> depth_modes = device->get_depth_modes();
+    std::vector<k4a_fps_mode_info_t> fps_modes = device->get_fps_modes();
 
     // 4. get the size of modes
     uint32_t color_mode_size = (uint32_t)color_modes.size();
     uint32_t depth_mode_size = (uint32_t)depth_modes.size();
     uint32_t fps_mode_size = (uint32_t)fps_modes.size();
 
-    // 5. find the mode ids you want
+    // 5. find the mode ids you want - for this example, let's find a color mode with a height of at least 720 or over,
+    // a depth mode with a height under 512 and a vertical fov of at least 120 or over and the fps mode with the
+    // heightest fps
     if (hasColorDevice && color_mode_size > 1)
     {
-        for (uint32_t c = 1; c < color_mode_size; c++)
+        for (uint32_t c = 0; c < color_mode_size; c++)
         {
             if (color_modes[c].height >= 720)
             {
@@ -54,7 +56,7 @@ static k4a_result_t get_device_mode_ids(k4a::device *device,
 
     if (hasDepthDevice && depth_mode_size > 1)
     {
-        for (uint32_t d = 1; d < depth_mode_size; d++)
+        for (uint32_t d = 0; d < depth_mode_size; d++)
         {
             if (depth_modes[d].height <= 512 && depth_modes[d].vertical_fov >= 120)
             {
@@ -68,7 +70,7 @@ static k4a_result_t get_device_mode_ids(k4a::device *device,
     {
         uint32_t max_fps = 0;
         uint32_t fps_mode_id = 0;
-        for (uint32_t f = 1; f < fps_mode_size; f++)
+        for (uint32_t f = 0; f < fps_mode_size; f++)
         {
             if (fps_modes[f].fps >= (int)max_fps)
             {
@@ -83,13 +85,13 @@ static k4a_result_t get_device_mode_ids(k4a::device *device,
     // to 0
     if (fps_mode_info->mode_id == 0)
     {
-        cout << "Fps mode id must not be set to 0 (Off)" << endl;
+        std::cout << "Fps mode id must not be set to 0 (Off)" << std::endl;
         exit(-1);
     }
 
     if (color_mode_info->mode_id == 0 && depth_mode_info->mode_id == 0)
     {
-        cout << "Either color mode id or depth mode id must not be set to 0 (Off)" << endl;
+        std::cout << "Either color mode id or depth mode id must not be set to 0 (Off)" << std::endl;
         exit(-1);
     }
 
@@ -118,7 +120,7 @@ int main()
 
         if (!K4A_SUCCEEDED(get_device_mode_ids(&dev, &color_mode_info, &depth_mode_info, &fps_mode_info)))
         {
-            cout << "Failed to get device mode ids" << endl;
+            std::cout << "Failed to get device mode ids" << std::endl;
             exit(-1);
         }
 

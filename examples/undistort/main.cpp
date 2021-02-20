@@ -8,7 +8,6 @@
 #include <math.h>
 #include <string>
 #include <algorithm>
-using namespace std;
 
 #define INVALID INT32_MIN
 
@@ -338,7 +337,8 @@ static void write_csv_file(const char *file_name, const k4a_image_t src)
 static k4a_result_t
 get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *depth_mode_id, uint32_t *fps_mode_id)
 {
-    // 1. declare device info and mode infos
+    // 1. declare device info and mode infos - note that you must instantiate info structs with struct size and abi
+    // version of the get methods will not succceed
     k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
     k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
     k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
@@ -365,26 +365,28 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
 
     if (hasColorDevice && !K4A_SUCCEEDED(k4a_device_get_color_mode_count(device, &color_mode_count)))
     {
-        cout << "Failed to get color mode count" << endl;
+        std::cout << "Failed to get color mode count" << std::endl;
         return K4A_RESULT_FAILED;
     }
 
     if (hasDepthDevice && !K4A_SUCCEEDED(k4a_device_get_depth_mode_count(device, &depth_mode_count)))
     {
-        cout << "Failed to get depth mode count" << endl;
+        std::cout << "Failed to get depth mode count" << std::endl;
         return K4A_RESULT_FAILED;
     }
 
     if (!k4a_device_get_fps_mode_count(device, &fps_mode_count) == K4A_RESULT_SUCCEEDED)
     {
-        cout << "Failed to get fps mode count" << endl;
+        std::cout << "Failed to get fps mode count" << std::endl;
         return K4A_RESULT_FAILED;
     }
 
-    // 6. find the mode ids you want
+    // 6. find the mode ids you want - for this example, let's find a color mode with mode id of 0, which is Off, a
+    // depth mode with a height under 512 and a vertical fov of at least 120 or over and the fps mode with the heightest
+    // fps
     if (hasColorDevice && color_mode_count > 1)
     {
-        for (uint32_t c = 1; c < color_mode_count; c++)
+        for (uint32_t c = 0; c < color_mode_count; c++)
         {
             if (k4a_device_get_color_mode(device, c, &color_mode_info) == K4A_RESULT_SUCCEEDED)
             {
@@ -399,7 +401,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
 
     if (hasDepthDevice && depth_mode_count > 1)
     {
-        for (uint32_t d = 1; d < depth_mode_count; d++)
+        for (uint32_t d = 0; d < depth_mode_count; d++)
         {
             if (k4a_device_get_depth_mode(device, d, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
             {
@@ -415,7 +417,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
     if (fps_mode_count > 1)
     {
         uint32_t max_fps = 0;
-        for (uint32_t f = 1; f < fps_mode_count; f++)
+        for (uint32_t f = 0; f < fps_mode_count; f++)
         {
             if (k4a_device_get_fps_mode(device, f, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
             {
@@ -431,13 +433,13 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
     // 7. fps mode id must not be set to 0, which is Off, and either color mode id or depth mode id must not be set to 0
     if (*fps_mode_id == 0)
     {
-        cout << "Fps mode id must not be set to 0 (Off)" << endl;
+        std::cout << "Fps mode id must not be set to 0 (Off)" << std::endl;
         return K4A_RESULT_FAILED;
     }
 
     if (*color_mode_id == 0 && *depth_mode_id == 0)
     {
-        cout << "Either color mode id or depth mode id must not be set to 0 (Off)" << endl;
+        std::cout << "Either color mode id or depth mode id must not be set to 0 (Off)" << std::endl;
         return K4A_RESULT_FAILED;
     }
 
@@ -494,7 +496,7 @@ int main(int argc, char **argv)
 
     if (!K4A_SUCCEEDED(get_device_mode_ids(device, &color_mode_id, &depth_mode_id, &fps_mode_id)))
     {
-        cout << "Failed to get device mode ids" << endl;
+        std::cout << "Failed to get device mode ids" << std::endl;
         exit(-1);
     }
 
