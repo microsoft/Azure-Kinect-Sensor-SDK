@@ -553,9 +553,9 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Get the ColorMode Info.
         /// </summary>
-        /// <param name="colorModeId">colorModeid</param>
+        /// <param name="colorModeIndex">colorModeid</param>
         /// <returns>The ColorMode Info.</returns>
-        public ColorModeInfo GetColorMode(int colorModeId)
+        public ColorModeInfo GetColorMode(int colorModeIndex)
         {
             lock (this)
             {
@@ -565,7 +565,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
                 ColorModeInfo colorModeInfo = new ColorModeInfo();
                 k4a_color_mode_info_t color_mode_info = colorModeInfo.GetNativeConfiguration();
-                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_color_mode(this.handle, (uint)colorModeId, out color_mode_info));
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_color_mode(this.handle, (uint)colorModeIndex, out color_mode_info));
                 colorModeInfo.SetUsingNativeConfiguration(color_mode_info);
                 return colorModeInfo;
             }
@@ -605,9 +605,9 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Get the DepthMode Info.
         /// </summary>
-        /// <param name="depthModeId">depthModeId</param>
+        /// <param name="depthModeIndex">depthModeId</param>
         /// <returns>The DepthMode Info.</returns>
-        public DepthModeInfo GetDepthMode(int depthModeId)
+        public DepthModeInfo GetDepthMode(int depthModeIndex)
         {
             lock (this)
             {
@@ -618,7 +618,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 DepthModeInfo depthModeInfo = new DepthModeInfo();
                 k4a_depth_mode_info_t depth_mode_info = depthModeInfo.GetNativeConfiguration();
-                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_depth_mode(this.handle, (uint)depthModeId, out depth_mode_info));
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_depth_mode(this.handle, (uint)depthModeIndex, out depth_mode_info));
                 depthModeInfo.SetUsingNativeConfiguration(depth_mode_info);
                 return depthModeInfo;
             }
@@ -658,9 +658,9 @@ namespace Microsoft.Azure.Kinect.Sensor
         /// <summary>
         /// Get the FPShMode Info.
         /// </summary>
-        /// <param name="fpsModeId">fpsModeId</param>
+        /// <param name="fpsModeIndex">fpsModeId</param>
         /// <returns>The FPSMode Info.</returns>
-        public FPSModeInfo GetFPSMode(int fpsModeId)
+        public FPSModeInfo GetFPSMode(int fpsModeIndex)
         {
             lock (this)
             {
@@ -671,7 +671,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
                 FPSModeInfo fpsModeInfo = new FPSModeInfo();
                 k4a_fps_mode_info_t fps_mode_info = fpsModeInfo.GetNativeConfiguration();
-                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_fps_mode(this.handle, (uint)fpsModeId, out fps_mode_info));
+                AzureKinectException.ThrowIfNotSuccess(() => k4a_device_get_fps_mode(this.handle, (uint)fpsModeIndex, out fps_mode_info));
                 fpsModeInfo.SetUsingNativeConfiguration(fps_mode_info);
                 return fpsModeInfo;
             }

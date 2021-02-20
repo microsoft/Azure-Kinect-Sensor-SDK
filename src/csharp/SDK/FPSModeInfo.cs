@@ -49,7 +49,7 @@ namespace Microsoft.Azure.Kinect.Sensor
                 struct_size = (uint)this.StructSize,
                 struct_version = (uint)this.StructVersion,
                 mode_id = (uint)this.ModeId,
-                fps = this.FPS,
+                fps = (uint)this.FPS,
             };
         }
 
@@ -62,7 +62,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             this.StructSize = (int)fpsModeInfo.struct_size;
             this.StructVersion = (int)fpsModeInfo.struct_version;
             this.ModeId = (int)fpsModeInfo.mode_id;
-            this.FPS = fpsModeInfo.fps;
+            this.FPS = (int)fpsModeInfo.fps;
         }
     }
 }

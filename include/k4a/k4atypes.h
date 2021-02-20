@@ -987,7 +987,7 @@ typedef struct _k4a_fps_mode_info_t
     uint32_t struct_size;    /**< Must be equal to sizeof(k4a_fps_mode_info_t). */
     uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
     uint32_t mode_id;        /**< Mode identifier to use to select this mode. */
-    int fps;                 /**< The frame rate per second. */
+    uint32_t fps;            /**< The frame rate per second. */
 } k4a_fps_mode_info_t;
 
 /** Configuration parameters for an Azure Kinect device.

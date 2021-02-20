@@ -42,9 +42,13 @@ static string get_serial(k4a_device_t device)
 
 static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *depth_mode_id)
 {
-    // 1. get available modes from device info
+    // 1. declare device info and mode infos - note that you must instantiate info structs with struct size and abi
+    // version of the get methods will not succceed
+    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
     k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
 
+    // 2. get device info
     if (!k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
     {
         cout << "Failed to get device info" << endl;
@@ -54,10 +58,6 @@ static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *color_mod
     // Capabilities is a bitmask in which bit 0 is depth and bit 1 is color.
     bool hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
     bool hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
-
-    // 2. declare mode infos
-    k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
-    k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
 
     // 3. get the count of modes
     uint32_t color_mode_count = 0;
@@ -75,10 +75,11 @@ static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *color_mod
         return K4A_RESULT_FAILED;
     }
 
-    // 4. find the mode ids you want
+    // 4. find the mode ids you want - for this example, let's find a color mode with a height of at least 1080 or over
+    // and a depth mode with a height of at least 576 or over and a vertical fov at least 65 or under
     if (hasColorDevice && color_mode_count > 1)
     {
-        for (uint32_t c = 1; c < color_mode_count; c++)
+        for (uint32_t c = 0; c < color_mode_count; c++)
         {
             if (k4a_device_get_color_mode(device, c, &color_mode_info) == K4A_RESULT_SUCCEEDED)
             {
@@ -93,7 +94,7 @@ static k4a_result_t get_device_mode_ids(k4a_device_t device, uint32_t *color_mod
 
     if (hasDepthDevice && depth_mode_count > 1)
     {
-        for (uint32_t d = 1; d < depth_mode_count; d++)
+        for (uint32_t d = 0; d < depth_mode_count; d++)
         {
             if (k4a_device_get_depth_mode(device, d, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
             {
