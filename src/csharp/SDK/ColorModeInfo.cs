@@ -19,9 +19,9 @@ namespace Microsoft.Azure.Kinect.Sensor
     public class ColorModeInfo
     {
         /// <summary>
-        /// Gets or sets the Struct Size.
+        /// Gets or sets the Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_color_mode_info_t k4atypes.h.
         /// </summary>
-        public int StructSize { get; set; } = 40;
+        public int StructSize { get; set; } = colorModeInfoStructSize;
 
         /// <summary>
         /// Gets or sets the Struct Version.
