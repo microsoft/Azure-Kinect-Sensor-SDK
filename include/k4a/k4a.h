@@ -341,7 +341,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
-                                                uint32_t mode_id,
+                                                uint32_t mode_index,
                                                 k4a_fps_mode_info_t *mode_info);
 
 /** Open an Azure Kinect device.

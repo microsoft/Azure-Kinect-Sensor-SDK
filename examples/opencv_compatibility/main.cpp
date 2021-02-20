@@ -21,7 +21,8 @@ static void clean_up(k4a_device_t device)
 static k4a_result_t
 get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *depth_mode_id, uint32_t *fps_mode_id)
 {
-    // 1. declare device info and mode infos
+    // 1. declare device info and mode infos - note that you must instantiate info structs with struct size and abi
+    // version of the get methods will not succceed
     k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
     k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
     k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
@@ -64,10 +65,12 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
         return K4A_RESULT_FAILED;
     }
 
-    // 5. find the mode ids you want
+    // 5. find the mode ids you want - for this example, let's find a color mode with a height of at least 1080 or over,
+    // a depth mode with a height of at least 512 or under and a vertical fov at least 65 or under and the fps mode with
+    // the heightest fps
     if (hasColorDevice && color_mode_count > 1)
     {
-        for (uint32_t c = 1; c < color_mode_count; c++)
+        for (uint32_t c = 0; c < color_mode_count; c++)
         {
             if (k4a_device_get_color_mode(device, c, &color_mode_info) == K4A_RESULT_SUCCEEDED)
             {
@@ -82,7 +85,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
 
     if (hasDepthDevice && depth_mode_count > 1)
     {
-        for (uint32_t d = 1; d < depth_mode_count; d++)
+        for (uint32_t d = 0; d < depth_mode_count; d++)
         {
             if (k4a_device_get_depth_mode(device, d, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
             {
@@ -98,7 +101,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
     if (fps_mode_count > 1)
     {
         uint32_t max_fps = 0;
-        for (uint32_t f = 1; f < fps_mode_count; f++)
+        for (uint32_t f = 0; f < fps_mode_count; f++)
         {
             if (k4a_device_get_fps_mode(device, f, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
             {

@@ -57,7 +57,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
                 // 3. For this example, let's find the first depth mode that isn't the Off mode.
                 DepthModeInfo depthModeInfo = depthModes.Find(d => d.ModeId > 0);
 
-                // 4. For this example, let's find the fps mode with the heighest frames per second.
+                // 4. For this example, let's find the fps mode with the highest frames per second.
                 fpsModes.Sort((a, b) => b.FPS.CompareTo(a.FPS));
                 FPSModeInfo fpsModeInfo = fpsModes.Find(f => f.ModeId != 0);
 

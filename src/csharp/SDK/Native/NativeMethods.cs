@@ -427,7 +427,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, uint mode_id, out k4a_color_mode_info_t mode_info);
+        public static extern k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, uint mode_index, out k4a_color_mode_info_t mode_info);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -435,7 +435,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, uint mode_id, out k4a_depth_mode_info_t mode_info);
+        public static extern k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, uint mode_index, out k4a_depth_mode_info_t mode_info);
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -443,7 +443,7 @@ namespace Microsoft.Azure.Kinect.Sensor
 
         [DllImport("k4a", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint mode_id, out k4a_fps_mode_info_t mode_info);
+        public static extern k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint mode_index, out k4a_fps_mode_info_t mode_info);
 
         [NativeReference]
         [StructLayout(LayoutKind.Sequential)]
@@ -552,7 +552,7 @@ namespace Microsoft.Azure.Kinect.Sensor
             public uint struct_size;
             public uint struct_version;
             public uint mode_id;
-            public int fps;
+            public uint fps;
         }
 
         public class k4a_device_t : Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid

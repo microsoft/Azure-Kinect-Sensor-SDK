@@ -56,7 +56,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
                 // 3. For this example, let's find the first depth mode with an image height of at least 512 and a horizontal fov of at least 120.
                 DepthModeInfo depthModeInfo = depthModes.Find(d => d.Height >= 512 && d.HorizontalFOV >= 120);
 
-                // 4. For this example, let's find the fps mode with the heighest frames per second.
+                // 4. For this example, let's find the fps mode with the highest frames per second.
                 fpsModes.Sort((a, b) => b.FPS.CompareTo(a.FPS));
                 FPSModeInfo fpsModeInfo = fpsModes.Find(f => f.ModeId != 0);
 
