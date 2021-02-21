@@ -288,10 +288,10 @@ typedef enum
  */
 typedef enum
 {
-    K4A_CAPABILITY_DEPTH = 1,
-    K4A_CAPABILITY_COLOR = 2,
-    K4A_CAPABILITY_IMU = 4,
-    K4A_CAPABILITY_MICROPHONE = 8,
+    K4A_CAPABILITY_DEPTH = 1,      /**< Depth sensor capability bitmap value. */
+    K4A_CAPABILITY_COLOR = 2,      /**< Color sensor capability bitmap value. */
+    K4A_CAPABILITY_IMU = 4,        /**< Inertial measurement unit capability bitmap value. */
+    K4A_CAPABILITY_MICROPHONE = 8, /**< Microphone capability bitmap value. */
 } k4a_device_capabilities_t;
 
 /** Image format type.
