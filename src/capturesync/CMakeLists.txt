@@ -12,7 +12,8 @@ target_include_directories(k4a_capturesync PUBLIC
 # Dependencies of this library
 target_link_libraries(k4a_capturesync PUBLIC 
     azure::aziotsharedutil
-    k4ainternal::logging)
+    k4ainternal::logging
+	k4ainternal::modes)
 
 # Define alias for other targets to link against
 add_library(k4ainternal::capturesync ALIAS k4a_capturesync)

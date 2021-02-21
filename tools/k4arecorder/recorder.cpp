@@ -63,7 +63,22 @@ int do_recording(uint8_t device_index,
               << "; A: " << version_info.audio.major << "." << version_info.audio.minor << "."
               << version_info.audio.iteration << std::endl;
 
-    uint32_t camera_fps = static_cast<uint32_t>(device_config->fps_mode_id);
+    // Get the camera fps that corresponds to the fps mode id.
+    uint32_t camera_fps = 0;
+    uint32_t fps_mode_count = 0;
+    k4a_fps_mode_info_t fps_mode_info = { static_cast<uint32_t>(sizeof(k4a_fps_mode_info_t)), K4A_ABI_VERSION };
+    if (K4A_SUCCEEDED(k4a_device_get_fps_mode_count(device, &fps_mode_count)))
+    {
+        for (uint32_t mode_index = 0; mode_index < fps_mode_count; ++mode_index)
+        {
+            if (K4A_SUCCEEDED(k4a_device_get_fps_mode(device, mode_index, &fps_mode_info)) &&
+                fps_mode_info.mode_id == device_config->fps_mode_id)
+            {
+                camera_fps = fps_mode_info.fps;
+                break;
+            }
+        }
+    }
 
     if (camera_fps <= 0 || (device_config->color_mode_id == K4A_COLOR_RESOLUTION_OFF &&
                             device_config->depth_mode_id == K4A_DEPTH_MODE_OFF))

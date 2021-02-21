@@ -491,7 +491,7 @@ k4a_result_t capturesync_start(capturesync_t capturesync_handle, const k4a_devic
     sync->waiting_for_clean_depth_ts = true;
     sync->synchronized_images_only = config->synchronized_images_only;
 
-    sync->fps_period = HZ_TO_PERIOD_US(config->fps_mode_id);
+    sync->fps_period = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->fps_mode_id));
     sync->fps_1_quarter_period = sync->fps_period / 4;
     sync->depth_delay_off_color_usec = config->depth_delay_off_color_usec;
     sync->sync_captures = true;

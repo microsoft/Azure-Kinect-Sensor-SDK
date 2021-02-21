@@ -37,8 +37,8 @@ typedef struct _dewrapper_context_t
     volatile bool thread_stop;
     k4a_result_t thread_start_result;
 
-    int fps_mode_id;
-    int depth_mode_id;
+    uint32_t fps_mode_id;
+    uint32_t depth_mode_id;
 
     TICK_COUNTER_HANDLE tick;
     dewrapper_streaming_capture_cb_t *capture_ready_cb;
@@ -123,22 +123,24 @@ static void free_shared_depth_image(void *buffer, void *context)
 }
 
 static k4a_result_t depth_engine_start_helper(dewrapper_context_t *dewrapper,
-                                              int32_t fps_mode_id,
-                                              int32_t depth_mode_id,
+                                              uint32_t fps_mode_id,
+                                              uint32_t depth_mode_id,
                                               int *depth_engine_max_compute_time_ms,
                                               size_t *depth_engine_output_buffer_size)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
-                        fps_mode_id < K4A_FRAMES_PER_SECOND_5 || fps_mode_id > K4A_FRAMES_PER_SECOND_30);
+                        fps_mode_id < (uint32_t)K4A_FRAMES_PER_SECOND_5 ||
+                            fps_mode_id > (uint32_t)K4A_FRAMES_PER_SECOND_30);
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
-                        depth_mode_id <= K4A_DEPTH_MODE_OFF || depth_mode_id > K4A_DEPTH_MODE_PASSIVE_IR);
+                        depth_mode_id <= (uint32_t)K4A_DEPTH_MODE_OFF ||
+                            depth_mode_id > (uint32_t)K4A_DEPTH_MODE_PASSIVE_IR);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
     assert(dewrapper->depth_engine == NULL);
     assert(dewrapper->calibration_memory != NULL);
 
     // Max comput time is the configured FPS
-    *depth_engine_max_compute_time_ms = HZ_TO_PERIOD_MS((uint32_t)fps_mode_id);
+    *depth_engine_max_compute_time_ms = HZ_TO_PERIOD_MS(fps_mode_id);
     result = K4A_RESULT_FROM_BOOL(*depth_engine_max_compute_time_ms != 0);
 
     if (K4A_SUCCEEDED(result))

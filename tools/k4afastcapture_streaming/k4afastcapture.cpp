@@ -192,7 +192,25 @@ void K4AFastCapture::Run(int streamingLength)
     k4a_image_t depth_image = NULL;
     k4a_image_t color_image = NULL;
 
-    uint32_t camera_fps = m_deviceConfig.fps_mode_id;
+    uint32_t camera_fps = 0;
+
+    // Get the camera fps that corresponds to the fps mode id.
+    k4a_fps_mode_info_t fps_mode = { static_cast<uint32_t>(sizeof(k4a_fps_mode_info_t)), K4A_ABI_VERSION };
+    uint32_t mode_count = 0;
+    k4a_result_t status = k4a_device_get_fps_mode_count(m_device, &mode_count);
+    if (status == K4A_RESULT_SUCCEEDED)
+    {
+        for (uint32_t mode_index = 0; mode_index < mode_count; ++mode_index)
+        {
+            status = k4a_device_get_fps_mode(m_device, mode_index, &fps_mode);
+            if (status == K4A_RESULT_SUCCEEDED)
+            {
+                camera_fps = fps_mode.fps;
+                break;
+            }
+        }
+    }
+
     uint32_t remainingFrames = UINT32_MAX;
     if (streamingLength >= 0)
     {

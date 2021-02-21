@@ -26,7 +26,7 @@ static int32_t g_sample_count = 100;
 static uint32_t g_subordinate_delay = 0;
 static int32_t g_m_depth_delay = 0;
 static int32_t g_s_depth_delay = 0;
-static k4a_fps_t g_frame_rate = (k4a_fps_t)-1;
+static k4a_fps_t g_frame_rate = K4A_FRAMES_PER_SECOND_0;
 
 int main(int argc, char **argv)
 {
@@ -92,31 +92,17 @@ int main(int argc, char **argv)
             {
                 int32_t frame_rate;
                 frame_rate = (int32_t)strtol(argv[i + 1], NULL, 10);
-                if (frame_rate == 5)
-                {
-                    g_frame_rate = K4A_FRAMES_PER_SECOND_5;
-                }
-                else if (frame_rate == 15)
-                {
-                    g_frame_rate = K4A_FRAMES_PER_SECOND_15;
-                }
-                else if (frame_rate == 30)
-                {
-                    g_frame_rate = K4A_FRAMES_PER_SECOND_30;
-                }
-                else if (frame_rate == K4A_FRAMES_PER_SECOND_5 || frame_rate == K4A_FRAMES_PER_SECOND_15 ||
-                         frame_rate == K4A_FRAMES_PER_SECOND_30)
-                {
-                    g_frame_rate = (k4a_fps_t)frame_rate;
-                }
-                else
+                g_frame_rate = k4a_convert_uint_to_fps(static_cast<uint32_t>(frame_rate));
+
+                if (g_frame_rate == K4A_FRAMES_PER_SECOND_0)
                 {
                     printf("Error: --fps parameter invalid: %d\n", frame_rate);
                     error = true;
                 }
+
                 if (!error)
                 {
-                    printf("Setting frame_rate = %d\n", g_frame_rate);
+                    printf("Setting frame_rate = %d\n", frame_rate);
                     i++;
                 }
             }
@@ -520,8 +506,8 @@ verify_ts(int64_t ts_1, int64_t ts_2, int64_t ts_offset, int64_t max_sync_delay,
 
 TEST_F(multidevice_sync_ft, multi_sync_validation)
 {
-    if (g_frame_rate != K4A_FRAMES_PER_SECOND_0 && g_frame_rate != K4A_FRAMES_PER_SECOND_5 &&
-        g_frame_rate != K4A_FRAMES_PER_SECOND_15 && g_frame_rate != K4A_FRAMES_PER_SECOND_30)
+    if (g_frame_rate != K4A_FRAMES_PER_SECOND_5 && g_frame_rate != K4A_FRAMES_PER_SECOND_15 &&
+        g_frame_rate != K4A_FRAMES_PER_SECOND_30)
     {
 #if defined(__aarch64__) || defined(_M_ARM64)
         // Jetson Nano can't handle 2 30FPS streams
@@ -539,13 +525,13 @@ TEST_F(multidevice_sync_ft, multi_sync_validation)
         case 2:
             g_frame_rate = K4A_FRAMES_PER_SECOND_15;
             break;
-        case 3:
+        default:
             g_frame_rate = K4A_FRAMES_PER_SECOND_30;
             break;
         }
     }
 
-    int32_t fps_in_usec = 1000000 / (int32_t)g_frame_rate;
+    int32_t fps_in_usec = 1000000 / static_cast<int32_t>(k4a_convert_fps_to_uint(g_frame_rate));
     if (g_m_depth_delay == 0)
     {
         g_m_depth_delay = (int32_t)RAND_VALUE(-fps_in_usec, fps_in_usec);

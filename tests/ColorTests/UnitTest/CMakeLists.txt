@@ -29,6 +29,7 @@ target_link_libraries(color_ut PRIVATE
     # Link k4ainternal::color without transitive dependencies
     $<TARGET_FILE:k4ainternal::color>
     k4ainternal::image
+    k4ainternal::modes
     k4ainternal::queue)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")

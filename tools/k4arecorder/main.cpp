@@ -94,11 +94,10 @@ static int string_compare(const char *s1, const char *s2)
                     bool hasColorDevice = false;
                     bool hasDepthDevice = false;
                     bool hasIMUDevice = false;
-                    uint32_t capabilities = (uint32_t)device_info.capabilities;
 
-                    hasDepthDevice = (capabilities & 0x0001) == 1;
-                    hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
-                    hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;
+                    hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
+                    hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
+                    hasIMUDevice = (device_info.capabilities.bitmap.bHasIMU == 1);
 
                     k4a_hardware_version_t version_info;
                     if (K4A_SUCCEEDED(k4a_device_get_version(device, &version_info)))
@@ -265,11 +264,9 @@ static k4a_result_t get_device_info(k4a_device_t device, bool *hasDepthDevice, b
     k4a_device_info_t device_info = { sizeof(k4a_device_info_t), K4A_ABI_VERSION, 0 };
     if (k4a_device_get_info(device, &device_info) == K4A_RESULT_SUCCEEDED)
     {
-        uint32_t capabilities = (uint32_t)device_info.capabilities;
-
-        *hasDepthDevice = (capabilities & 0x0001) == 1;
-        *hasColorDevice = ((capabilities >> 1) & 0x01) == 1;
-        *hasIMUDevice = ((capabilities >> 2) & 0x01) == 1;
+        *hasDepthDevice = (device_info.capabilities.bitmap.bHasDepth == 1);
+        *hasColorDevice = (device_info.capabilities.bitmap.bHasColor == 1);
+        *hasIMUDevice = (device_info.capabilities.bitmap.bHasIMU == 1);
 
         return K4A_RESULT_SUCCEEDED;
     }
@@ -390,7 +387,7 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
                 fps_mode_info->fps > 15)
             {
                 // Find the maximum FPS available that is less than or equal to 15 FPS.
-                int fps = 0;
+                uint32_t fps = 0;
                 for (uint32_t n = 0; n < mode_count; ++n)
                 {
                     k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
@@ -722,7 +719,6 @@ int main(int argc, char **argv)
         k4a_device_t device;
         if (K4A_SUCCEEDED(k4a_device_open(device_index, &device)))
         {
-
             bool hasColorDevice = false;
             bool hasDepthDevice = false;
             bool hasIMUDevice = false;
@@ -766,6 +762,36 @@ int main(int argc, char **argv)
                 {
                     std::cout << "A recording requires either a color or a depth device." << std::endl;
                     return 1;
+                }
+
+                if (recording_fps_mode == INVALID_AND_NOT_USER_DEFINED)
+                {
+                    uint32_t fps_mode_count = 0;
+
+                    if (!k4a_device_get_fps_mode_count(device, &fps_mode_count) == K4A_RESULT_SUCCEEDED)
+                    {
+                        printf("Failed to get fps mode count\n");
+                        exit(-1);
+                    }
+
+                    if (fps_mode_count > 1)
+                    {
+                        uint32_t fps_mode_id = 0;
+                        uint32_t max_fps = 0;
+                        for (uint32_t f = 1; f < fps_mode_count; f++)
+                        {
+                            k4a_fps_mode_info_t fps_mode = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
+                            if (k4a_device_get_fps_mode(device, f, &fps_mode) == K4A_RESULT_SUCCEEDED)
+                            {
+                                if (fps_mode.fps >= (int)max_fps)
+                                {
+                                    max_fps = (uint32_t)fps_mode.fps;
+                                    fps_mode_id = f;
+                                }
+                            }
+                        }
+                        recording_fps_mode = fps_mode_id;
+                    }
                 }
 
                 if (!K4A_SUCCEEDED(get_fps_mode_info(

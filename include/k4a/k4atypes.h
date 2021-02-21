@@ -288,11 +288,11 @@ typedef enum
  */
 typedef enum
 {
-    K4A_CAPABILITY_DEPTH = 1,
-    K4A_CAPABILITY_COLOR = 2,
-    K4A_CAPABILITY_IMU = 4,
-    K4A_CAPABILITY_MICROPHONE = 8,
-} device_capabilities;
+    K4A_CAPABILITY_DEPTH = 1,      /**< Depth sensor capability bitmap value. */
+    K4A_CAPABILITY_COLOR = 2,      /**< Color sensor capability bitmap value. */
+    K4A_CAPABILITY_IMU = 4,        /**< Inertial measurement unit capability bitmap value. */
+    K4A_CAPABILITY_MICROPHONE = 8, /**< Microphone capability bitmap value. */
+} k4a_device_capabilities_t;
 
 /** Image format type.
  *
@@ -884,7 +884,7 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
 
 /** Stores the vendor id, the device id and device capabilities.
  *
- * \sa device_capabilities
+ * \sa k4a_device_capabilities_t
  *
  * \xmlonly
  * <requirements>
@@ -898,7 +898,21 @@ typedef struct _k4a_device_info_t
     uint32_t struct_version; /**< The version of this device info struct */
     uint32_t vendor_id;      /**< 0 to 65535 : reserved for registered USB VID numbers. */
     uint32_t device_id;      /**< Vendor specific device ID. */
-    uint32_t capabilities;   /**< Binary combination of capability flags. */
+
+    union
+    {
+        uint32_t value; /**< Unsigned int value of the binary combination of capability flags. */
+        struct
+        {
+            uint32_t bHasDepth : 1; /**< Bit value of 1 specifies the device has depth sensor.*/
+            uint32_t bHasColor : 1; /**< Bit value of 1 specifies the device has color sensor.*/
+            uint32_t bHasIMU : 1;   /**< Bit value of 1 specifies the device has IMU sensor.*/
+            uint32_t bHasMic : 1;   /**< Bit value of 1 specifies the device has microphone.*/
+            uint32_t resv : 28;
+        } bitmap; /**< Bitmap of binary combination of capability flags. */
+
+    } capabilities; /**< Binary combination of capability flags. */
+
 } k4a_device_info_t;
 
 /** Color mode info type representing color mode info.
@@ -923,8 +937,8 @@ typedef struct _k4a_color_mode_info_t
     k4a_image_format_t native_format; /**< Image format. */
     float horizontal_fov;             /**< Approximate horizontal field of view. */
     float vertical_fov;               /**< Approximate vertical field of view. */
-    int min_fps;                      /**< Minimum supported framerate. */
-    int max_fps;                      /**< Maximum supported ramerate. */
+    uint32_t min_fps;                 /**< Minimum supported framerate. */
+    uint32_t max_fps;                 /**< Maximum supported ramerate. */
 } k4a_color_mode_info_t;
 
 /** Depth mode info type representing depth mode info.
@@ -950,8 +964,8 @@ typedef struct _k4a_depth_mode_info_t
     k4a_image_format_t native_format; /**< Image format. */
     float horizontal_fov;             /**< Approximate horizontal field of view. */
     float vertical_fov;               /**< Approximate vertical field of view. */
-    int min_fps;                      /**< Minimum supported framerate. */
-    int max_fps;                      /**< Maximum supported framerate. */
+    uint32_t min_fps;                 /**< Minimum supported framerate. */
+    uint32_t max_fps;                 /**< Maximum supported framerate. */
     uint32_t min_range;               /**< Min values expected for mode in millimeters */
     uint32_t max_range;               /**< Max values expected for mode in millimeters */
 } k4a_depth_mode_info_t;
@@ -973,7 +987,7 @@ typedef struct _k4a_fps_mode_info_t
     uint32_t struct_size;    /**< Must be equal to sizeof(k4a_fps_mode_info_t). */
     uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
     uint32_t mode_id;        /**< Mode identifier to use to select this mode. */
-    int fps;                 /**< The frame rate per second. */
+    uint32_t fps;            /**< The frame rate per second. */
 } k4a_fps_mode_info_t;
 
 /** Configuration parameters for an Azure Kinect device.
@@ -1337,7 +1351,7 @@ typedef struct _k4a_imu_sample_t
  * \endxmlonly
  */
 static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL =
-    { K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 2, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false };
+    { K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false };
 
 /**
  * @}

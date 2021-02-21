@@ -17,7 +17,7 @@
 #include <k4ainternal/logging.h>
 #include <k4ainternal/modes.h>
 #include <azure_c_shared_utility/tickcounter.h>
-#include <k4ainternal/usbcommand.h>
+#include <k4ainternal/usb_device_ids.h>
 
 // System dependencies
 #include <stdlib.h>
@@ -681,7 +681,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
         if (config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE &&
             config->subordinate_delay_off_master_usec != 0)
         {
-            uint32_t fps_in_usec = HZ_TO_PERIOD_US((uint32_t)config->fps_mode_id);
+            uint32_t fps_in_usec = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->fps_mode_id));
             if (config->subordinate_delay_off_master_usec > fps_in_usec)
             {
                 result = K4A_RESULT_FAILED;
@@ -716,7 +716,7 @@ static k4a_result_t validate_configuration(k4a_context_t *device, const k4a_devi
 
         if (depth_enabled && color_enabled)
         {
-            int64_t fps = HZ_TO_PERIOD_US((uint32_t)config->fps_mode_id);
+            int64_t fps = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->fps_mode_id));
             if (config->depth_delay_off_color_usec < -fps || config->depth_delay_off_color_usec > fps)
             {
                 result = K4A_RESULT_FAILED;
@@ -1300,12 +1300,12 @@ k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_device_t, device_handle);
     k4a_result_t result = K4A_RESULT_SUCCEEDED;
 
-    k4a_device_info_t info = { sizeof(k4a_device_info_t),
+    k4a_device_info_t info = { (uint32_t)sizeof(k4a_device_info_t),
                                K4A_ABI_VERSION,
                                K4A_MSFT_VID,
                                K4A_DEPTH_PID,
-                               K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU |
-                                   K4A_CAPABILITY_MICROPHONE };
+                               { K4A_CAPABILITY_DEPTH | K4A_CAPABILITY_COLOR | K4A_CAPABILITY_IMU |
+                                 K4A_CAPABILITY_MICROPHONE } };
 
     SAFE_COPY_STRUCT(device_info, &info);
 
@@ -1319,8 +1319,7 @@ k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, uint32_
     k4a_result_t result = K4A_RESULT_FAILED;
     if (NULL != mode_count)
     {
-        // device_color_modes is statically defined in <k4ainternal/modes.h>.
-        *mode_count = sizeof(device_color_modes) / sizeof(device_color_modes[0]);
+        *mode_count = k4a_get_device_color_modes_count();
         result = K4A_RESULT_SUCCEEDED;
     }
 
@@ -1357,9 +1356,8 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
         return K4A_RESULT_FAILED;
     }
 
-    // Get the corresponding color mode info. device_color_modes is statically defined in <k4ainternal/modes.h>.
-    k4a_color_mode_info_t color_mode_info = device_color_modes[mode_index];
-    color_mode_info.struct_size = (uint32_t)sizeof(k4a_color_mode_info_t);
+    // Get the corresponding color mode info.
+    k4a_color_mode_info_t color_mode_info = k4a_get_device_color_mode(mode_index);
     SAFE_COPY_STRUCT(mode_info, &color_mode_info);
     return K4A_RESULT_SUCCEEDED;
 }
@@ -1371,8 +1369,7 @@ k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, uint32_
     k4a_result_t result = K4A_RESULT_FAILED;
     if (NULL != mode_count)
     {
-        // device_depth_modes is statically defined in <k4ainternal/modes.h>.
-        *mode_count = sizeof(device_depth_modes) / sizeof(device_depth_modes[0]);
+        *mode_count = k4a_get_device_depth_modes_count();
         result = K4A_RESULT_SUCCEEDED;
     }
 
@@ -1409,9 +1406,8 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
         return K4A_RESULT_FAILED;
     }
 
-    // Get the corresponding depth mode info. device_depth_modes is statically defined in <k4ainternal/modes.h>.
-    k4a_depth_mode_info_t depth_mode_info = device_depth_modes[mode_index];
-    depth_mode_info.struct_size = (uint32_t)sizeof(k4a_depth_mode_info_t);
+    // Get the corresponding depth mode info.
+    k4a_depth_mode_info_t depth_mode_info = k4a_get_device_depth_mode(mode_index);
     SAFE_COPY_STRUCT(mode_info, &depth_mode_info);
     return K4A_RESULT_SUCCEEDED;
 }
@@ -1423,8 +1419,7 @@ k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, uint32_t 
     k4a_result_t result = K4A_RESULT_FAILED;
     if (NULL != mode_count)
     {
-        // device_fps_modes is statically defined in <k4ainternal/modes.h>.
-        *mode_count = sizeof(device_fps_modes) / sizeof(device_fps_modes[0]);
+        *mode_count = k4a_get_device_fps_modes_count();
         result = K4A_RESULT_SUCCEEDED;
     }
 
@@ -1459,9 +1454,8 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_i
         return K4A_RESULT_FAILED;
     }
 
-    // Get the corresponding fps mode info. device_fps_modes is statically defined in <k4ainternal/modes.h>.
-    k4a_fps_mode_info_t fps_mode_info = device_fps_modes[mode_index];
-    fps_mode_info.struct_size = (uint32_t)sizeof(k4a_fps_mode_info_t);
+    // Get the corresponding fps mode info.
+    k4a_fps_mode_info_t fps_mode_info = k4a_get_device_fps_mode(mode_index);
     SAFE_COPY_STRUCT(mode_info, &fps_mode_info);
     return K4A_RESULT_SUCCEEDED;
 }

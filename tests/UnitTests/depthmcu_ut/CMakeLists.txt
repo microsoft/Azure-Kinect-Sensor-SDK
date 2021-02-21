@@ -12,6 +12,7 @@ target_link_libraries(depthmcu_ut PRIVATE
     k4ainternal::allocator
     k4ainternal::image
     k4ainternal::logging
+	k4ainternal::modes
     )
 
 # Include the PUBLIC and INTERFACE directories specified by k4ainternal::depth_mcu
