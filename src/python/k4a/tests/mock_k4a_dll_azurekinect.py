@@ -112,7 +112,7 @@ def mock_k4a_get_device_info(device_handle, device_info)->k4a.EStatus:
     device_info._obj.struct_version = temp_device_info.struct_version
     device_info._obj.vendor_id = 0x045E
     device_info._obj.device_id = 0x097C
-    device_info._obj.capabilities = (
+    device_info._obj.capabilities.value = (
         k4a.EDeviceCapabilities.DEPTH | 
         k4a.EDeviceCapabilities.COLOR | 
         k4a.EDeviceCapabilities.IMU | 

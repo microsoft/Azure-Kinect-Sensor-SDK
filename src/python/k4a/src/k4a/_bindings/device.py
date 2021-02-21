@@ -530,7 +530,7 @@ class Device:
             command is in automatic mode, the value for that command is not valid.
         '''
         # Get device capabilities and check if it supports COLOR.
-        if (self.device_info.capabilities >> int(log2(EDeviceCapabilities.COLOR)) & 0x0001) == 0:
+        if (self.device_info.capabilities.bitmap.bHasColor) == 0:
             return (None, None)
 
         ret_list = list()

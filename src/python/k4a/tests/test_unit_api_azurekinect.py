@@ -123,7 +123,7 @@ class Test_Unit_Device_AzureKinect(unittest.TestCase):
         self.assertEqual(device.device_info.struct_version, k4a.K4A_ABI_VERSION)
         self.assertEqual(device.device_info.vendor_id, 0x045E)
         self.assertEqual(device.device_info.device_id, 0x097C)
-        self.assertEqual(device.device_info.capabilities, 0x000F)
+        self.assertEqual(device.device_info.capabilities.value, 0x000F)
 
         self.assertIsInstance(device.hardware_version, k4a.HardwareVersion)
         self.assertTrue(str(device.hardware_version.rgb)=="0.1.0")
@@ -155,7 +155,7 @@ class Test_Unit_Device_AzureKinect(unittest.TestCase):
         self.assertEqual(device.device_info.struct_version, k4a.K4A_ABI_VERSION)
         self.assertEqual(device.device_info.vendor_id, 0x045E)
         self.assertEqual(device.device_info.device_id, 0x097C)
-        self.assertEqual(device.device_info.capabilities, 0x000F)
+        self.assertEqual(device.device_info.capabilities.value, 0x000F)
 
         self.assertIsInstance(device.hardware_version, k4a.HardwareVersion)
         self.assertTrue(str(device.hardware_version.rgb)=="0.0.0")
@@ -187,7 +187,7 @@ class Test_Unit_Device_AzureKinect(unittest.TestCase):
         self.assertEqual(device.device_info.struct_version, k4a.K4A_ABI_VERSION)
         self.assertEqual(device.device_info.vendor_id, 0)
         self.assertEqual(device.device_info.device_id, 0)
-        self.assertEqual(device.device_info.capabilities, 0)
+        self.assertEqual(device.device_info.capabilities.value, 0)
 
         self.assertIsInstance(device.hardware_version, k4a.HardwareVersion)
         self.assertTrue(str(device.hardware_version.rgb)=="0.1.0")
@@ -304,7 +304,7 @@ class Test_Unit_Device_AzureKinect(unittest.TestCase):
         self.assertEqual(device_info.struct_version, k4a.K4A_ABI_VERSION)
         self.assertEqual(device_info.vendor_id, 0x045E)
         self.assertEqual(device_info.device_id, 0x097C)
-        self.assertEqual(device_info.capabilities, capabilities)
+        self.assertEqual(device_info.capabilities.value, capabilities)
         mock_func_info.assert_not_called()
 
     @mock.patch('k4a._bindings.device.k4a_device_get_color_mode_count', side_effect=mock_k4a_get_mode_count)

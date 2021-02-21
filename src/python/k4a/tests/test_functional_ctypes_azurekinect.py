@@ -182,7 +182,7 @@ class Test_Functional_Fast_Ctypes_AzureKinect(unittest.TestCase):
         self.assertTrue(k4a.K4A_SUCCEEDED(status))
         self.assertEqual(device_info.vendor_id, 0x045E)
         self.assertEqual(device_info.device_id, 0x097C)
-        self.assertEqual(device_info.capabilities, 
+        self.assertEqual(device_info.capabilities.value, 
             k4a.EDeviceCapabilities.MICROPHONE | k4a.EDeviceCapabilities.IMU | 
             k4a.EDeviceCapabilities.COLOR | k4a.EDeviceCapabilities.DEPTH)
 

@@ -107,7 +107,7 @@ class Test_Functional_Fast_API_Device_AzureKinect(unittest.TestCase):
         self.assertNotEqual(device_info.struct_size, 0)
         self.assertNotEqual(device_info.struct_version, 0)
         self.assertNotEqual(device_info.vendor_id, 0)
-        self.assertNotEqual(device_info.capabilities, 0)
+        self.assertNotEqual(device_info.capabilities.value, 0)
 
     def test_functional_fast_api_get_device_info(self):
         device_info = self.device.device_info
@@ -116,7 +116,7 @@ class Test_Functional_Fast_API_Device_AzureKinect(unittest.TestCase):
         self.assertNotEqual(device_info.struct_size, 0)
         self.assertNotEqual(device_info.struct_version, 0)
         self.assertNotEqual(device_info.vendor_id, 0)
-        self.assertNotEqual(device_info.capabilities, 0)
+        self.assertNotEqual(device_info.capabilities.value, 0)
 
     def test_functional_fast_api_get_depth_modes(self):
         depth_modes = self.device.get_depth_modes()

@@ -541,7 +541,7 @@ _memory_allocate_cb = _FUNCTYPE(
 
 # K4A_DECLARE_HANDLE(handle_k4a_device_t);
 class __handle_k4a_device_t(_ctypes.Structure):
-     _fields_= [
+     _fields_ = [
         ("_rsvd", _ctypes.c_size_t),
     ]
 _DeviceHandle = _ctypes.POINTER(__handle_k4a_device_t)
@@ -549,7 +549,7 @@ _DeviceHandle = _ctypes.POINTER(__handle_k4a_device_t)
 
 # K4A_DECLARE_HANDLE(handle_k4a_capture_t);
 class __handle_k4a_capture_t(_ctypes.Structure):
-     _fields_= [
+     _fields_ = [
         ("_rsvd", _ctypes.c_size_t),
     ]
 _CaptureHandle = _ctypes.POINTER(__handle_k4a_capture_t)
@@ -557,7 +557,7 @@ _CaptureHandle = _ctypes.POINTER(__handle_k4a_capture_t)
 
 # K4A_DECLARE_HANDLE(handle_k4a_image_t);
 class __handle_k4a_image_t(_ctypes.Structure):
-     _fields_= [
+     _fields_ = [
         ("_rsvd", _ctypes.c_size_t),
     ]
 _ImageHandle = _ctypes.POINTER(__handle_k4a_image_t)
@@ -565,11 +565,26 @@ _ImageHandle = _ctypes.POINTER(__handle_k4a_image_t)
 
 # K4A_DECLARE_HANDLE(k4a_transformation_t);
 class __handle_k4a_transformation_t(_ctypes.Structure):
-     _fields_= [
+     _fields_ = [
         ("_rsvd", _ctypes.c_size_t),
     ]
 _TransformationHandle = _ctypes.POINTER(__handle_k4a_transformation_t)
 
+
+class _CapabilitiesBitmap(_ctypes.Structure):
+    _fields_ = [
+        ("bHasDepth", _ctypes.c_uint32, 1),
+        ("bHasColor", _ctypes.c_uint32, 1),
+        ("bHasIMU", _ctypes.c_uint32, 1),
+        ("bHasMic", _ctypes.c_uint32, 1),
+        ("resv", _ctypes.c_uint32, 28),
+    ]
+
+class _Capabilities(_ctypes.Union):
+    _fields_ = [
+        ("value", _ctypes.c_uint32),
+        ("bitmap", _CapabilitiesBitmap),
+    ]
 
 '''! Device information.
 
@@ -582,12 +597,12 @@ _TransformationHandle = _ctypes.POINTER(__handle_k4a_transformation_t)
     capabilities   | int   | A bitmap of device capabilities.
     '''
 class DeviceInfo(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("struct_size", _ctypes.c_uint32),
         ("struct_version", _ctypes.c_uint32),
         ("vendor_id", _ctypes.c_uint32),
         ("device_id", _ctypes.c_uint32),
-        ("capabilities", _ctypes.c_uint32),
+        ("capabilities", _Capabilities),
     ]
 
     def __init__(self, 
@@ -601,20 +616,20 @@ class DeviceInfo(_ctypes.Structure):
         self.struct_version = struct_version
         self.vendor_id = vendor_id
         self.device_id = device_id
-        self.capabilities = capabilities
+        self.capabilities.value = capabilities
 
     def __str__(self):
         return ''.join([
             'struct_size=%d, ',
             'struct_version=%d, ',
-            'vendor_id=%d, ',
-            'device_id=%d, ',
-            'capabilities=%d']) % (
+            'vendor_id=0x%04x, ',
+            'device_id=0x%04x, ',
+            'capabilities=%s']) % (
             self.struct_size,
             self.struct_version,
             self.vendor_id,
             self.device_id,
-            self.capabilities)
+            format(self.capabilities.value, '#b'))
 
 
 '''! Color mode information.
@@ -633,7 +648,7 @@ class DeviceInfo(_ctypes.Structure):
     max_fps        | int   | The maximum supported frame rate.
     '''
 class ColorModeInfo(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("struct_size", _ctypes.c_uint32),
         ("struct_version", _ctypes.c_uint32),
         ("mode_id", _ctypes.c_uint32),
@@ -642,8 +657,8 @@ class ColorModeInfo(_ctypes.Structure):
         ("native_format", _ctypes.c_uint32),
         ("horizontal_fov", _ctypes.c_float),
         ("vertical_fov", _ctypes.c_float),
-        ("min_fps", _ctypes.c_int),
-        ("max_fps", _ctypes.c_int),
+        ("min_fps", _ctypes.c_uint32),
+        ("max_fps", _ctypes.c_uint32),
     ]
 
     def __init__(self, 
@@ -712,7 +727,7 @@ class ColorModeInfo(_ctypes.Structure):
     max_range       | int   | The maximum expected depth value in millimeters.
     '''
 class DepthModeInfo(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("struct_size", _ctypes.c_uint32),
         ("struct_version", _ctypes.c_uint32),
         ("mode_id", _ctypes.c_uint32),
@@ -722,8 +737,8 @@ class DepthModeInfo(_ctypes.Structure):
         ("native_format", _ctypes.c_uint32),
         ("horizontal_fov", _ctypes.c_float),
         ("vertical_fov", _ctypes.c_float),
-        ("min_fps", _ctypes.c_int),
-        ("max_fps", _ctypes.c_int),
+        ("min_fps", _ctypes.c_uint32),
+        ("max_fps", _ctypes.c_uint32),
         ("min_range", _ctypes.c_uint32),
         ("max_range", _ctypes.c_uint32),
     ]
@@ -795,11 +810,11 @@ class DepthModeInfo(_ctypes.Structure):
     fps             | int   | The frame rate per second.
     '''
 class FPSModeInfo(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("struct_size", _ctypes.c_uint32),
         ("struct_version", _ctypes.c_uint32),
         ("mode_id", _ctypes.c_uint32),
-        ("fps", _ctypes.c_int32),
+        ("fps", _ctypes.c_uint32),
     ]
 
     def __init__(self, 
@@ -931,7 +946,7 @@ class DeviceConfiguration(_ctypes.Structure):
     
     </table>
     '''
-    _fields_= [
+    _fields_ = [
         ("color_format", _ctypes.c_int),
         ("color_mode_id", _ctypes.c_uint32),
         ("depth_mode_id", _ctypes.c_uint32),
@@ -998,7 +1013,7 @@ class CalibrationExtrinsics(_ctypes.Structure):
     rotation      | float * 9  | 3x3 Rotation matrix stored in row major order.
     translation   | float * 3  | Translation vector, x,y,z (in millimeters).
     '''
-    _fields_= [
+    _fields_ = [
         ("rotation", (_ctypes.c_float * 3) * 3),
         ("translation", _ctypes.c_float * 3),
     ]
@@ -1077,7 +1092,7 @@ class CalibrationIntrinsicParam(_ctypes.Structure):
 
 
 class _CalibrationIntrinsicParameters(_ctypes.Union):
-    _fields_= [
+    _fields_ = [
         ("param", CalibrationIntrinsicParam),
         ("v", _ctypes.c_float * 15),
     ]
@@ -1103,7 +1118,7 @@ class CalibrationIntrinsics(_ctypes.Structure):
     parameter_count | int              | Number of valid entries in parameters.
     parameters      | struct           | Calibration parameters.
     '''
-    _fields_= [
+    _fields_ = [
         ("type", _ctypes.c_int),
         ("parameter_count", _ctypes.c_uint),
         ("parameters", _CalibrationIntrinsicParameters),
@@ -1131,7 +1146,7 @@ class CalibrationCamera(_ctypes.Structure):
     resolution_height | int                   | Resolution height of the calibration sensor.
     metric_radius     | float                 | Max FOV of the camera.
     '''
-    _fields_= [
+    _fields_ = [
         ("extrinsics", CalibrationExtrinsics),
         ("intrinsics", CalibrationIntrinsics),
         ("resolution_width", _ctypes.c_int),
@@ -1154,7 +1169,7 @@ class CalibrationCamera(_ctypes.Structure):
 
 
 class _Calibration(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("depth_camera_calibration", CalibrationCamera),
         ("color_camera_calibration", CalibrationCamera),
         ("extrinsics", (CalibrationExtrinsics * ECalibrationType.NUM_TYPES) * ECalibrationType.NUM_TYPES),
@@ -1193,7 +1208,7 @@ class Version(_ctypes.Structure):
     minor      | int     | Minor version; represents additional features, no regression from lower versions with same major version.
     iteration  | int     | Reserved.
     '''
-    _fields_= [
+    _fields_ = [
         ("major", _ctypes.c_uint32),
         ("minor", _ctypes.c_uint32),
         ("iteration", _ctypes.c_uint32),
@@ -1218,7 +1233,7 @@ class HardwareVersion(_ctypes.Structure):
     firmware_build     | int     | Build type reported by the firmware.
     firmware_signature | int     | Signature type of the firmware.
     '''
-    _fields_= [
+    _fields_ = [
         ("rgb", Version),
         ("depth", Version),
         ("audio", Version),
@@ -1244,7 +1259,7 @@ class HardwareVersion(_ctypes.Structure):
 
 
 class _XY(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("x", _ctypes.c_float),
         ("y", _ctypes.c_float),
         ]
@@ -1258,7 +1273,7 @@ class _XY(_ctypes.Structure):
 
 
 class _Float2(_ctypes.Union):
-    _fields_= [
+    _fields_ = [
         ("xy", _XY),
         ("v", _ctypes.c_float * 2),
         ]
@@ -1271,7 +1286,7 @@ class _Float2(_ctypes.Union):
 
 
 class _XYZ(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("x", _ctypes.c_float),
         ("y", _ctypes.c_float),
         ("z", _ctypes.c_float),
@@ -1287,7 +1302,7 @@ class _XYZ(_ctypes.Structure):
 
 
 class _Float3(_ctypes.Union):
-    _fields_= [
+    _fields_ = [
         ("xyz", _XYZ),
         ("v", _ctypes.c_float * 3)
     ]
@@ -1310,7 +1325,7 @@ class ImuSample(_ctypes.Structure):
     gyro_sample         | float * 3 | Gyro sample in radians per second.
     gyro_timestamp_usec | int       | Timestamp of the gyroscope in microseconds.
     '''
-    _fields_= [
+    _fields_ = [
         ("temperature", _ctypes.c_float),
         ("acc_sample", _Float3),
         ("acc_timestamp_usec", _ctypes.c_uint64),
