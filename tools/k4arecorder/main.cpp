@@ -783,7 +783,7 @@ int main(int argc, char **argv)
                             k4a_fps_mode_info_t fps_mode = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
                             if (k4a_device_get_fps_mode(device, f, &fps_mode) == K4A_RESULT_SUCCEEDED)
                             {
-                                if (fps_mode.fps >= (int)max_fps)
+                                if (fps_mode.fps >= max_fps)
                                 {
                                     max_fps = (uint32_t)fps_mode.fps;
                                     fps_mode_id = f;
