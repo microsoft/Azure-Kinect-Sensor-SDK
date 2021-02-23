@@ -78,6 +78,78 @@ void k4a_device_close(k4a_device_t device_handle)
 }");
         }
 
+        // Helper function to implement device get color mode and color modes count
+        private void SetDeviceGetColorModeAndModesCountImplementation()
+        {
+            NativeK4a.SetImplementation(@"
+k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, uint32_t *mode_count)
+{
+    return 7;
+}
+
+k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, uint32_t mode_index, k4a_color_mode_info_t *mode_info)
+{
+    static const k4a_color_mode_info_t device_color_modes[] = {
+        { 40, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 40, 1, 1, 1280, 720, 0, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 2, 1920, 1080, 0, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 3, 2560, 1440, 0, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 4, 2048, 1536, 0, 90.0f, 74.3f, 5, 30 },
+        { 40, 1, 5, 3840, 2160, 0, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 6, 4096, 3072, 0, 90.0f, 74.3f, 5, 30 }
+    };
+
+    *mode_info = device_color_modes[mode_index];
+}         
+");
+        }
+
+        // Helper function to implement device get depth mode and color modes count
+        private void SetDeviceGetDepthModeAndModesCountImplementation()
+        {
+            NativeK4a.SetImplementation(@"
+k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, uint32_t *mode_count)
+{
+    return 6;
+}
+
+k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, uint32_t mode_index, k4a_depth_mode_info_t *mode_info)
+{
+    static const k4a_depth_mode_info_t device_depth_modes[] = {
+        { 52, 1, 0, false, 0, 0, 4, 0.0f, 0.0f, 0, 0, 0, 0 },
+        { 52, 1, 1, false, 320, 288, 4, 75.0f, 65.0f, 5, 30, 500, 5800 },
+        { 52, 1, 2, false, 640, 576, 4, 75.0f, 65.0f, 5, 30, 500, 4000 },
+        { 52, 1, 3, false, 512, 512, 4, 120.0f, 120.0f, 5, 30, 250, 3000 },
+        { 52, 1, 4, false, 1024, 1024, 4, 120.0f, 120.0f, 5, 30, 250, 2500 },
+        { 52, 1, 5, true, 1024, 1024, 4, 120.0f, 120.0f, 5, 30, 0, 100 }
+    };
+
+    *mode_info = device_depth_modes[mode_index];
+}         
+");
+        }
+
+        // Helper function to implement device get fps mode and color modes count
+        private void SetDeviceGetFPSModeAndModesCountImplementation()
+        {
+            NativeK4a.SetImplementation(@"
+k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, uint32_t *mode_count)
+{
+    return 4;
+}
+
+k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_index, k4a_fps_mode_info_t *mode_info)
+{
+    static const k4a_fps_mode_info_t device_fps_modes[] = { { 16, 1, 0, 0 },
+                                                            { 16, 1, 5, 5 },
+                                                            { 16, 1, 15, 15 },
+                                                            { 16, 1, 30, 30 } };
+
+    *mode_info = device_fps_modes[mode_index];
+}         
+");
+        }
+
         [Test]
         public void GetInstalledCount()
         {
@@ -454,6 +526,8 @@ k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle,
         public void DeviceGetCalibration()
         {
             SetOpenCloseImplementation();
+            SetDeviceGetColorModeAndModesCountImplementation();
+            SetDeviceGetDepthModeAndModesCountImplementation();
 
             NativeK4a.SetImplementation(@"
 
@@ -588,6 +662,8 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
         public void DeviceGetCalibrationFailure()
         {
             SetOpenCloseImplementation();
+            SetDeviceGetColorModeAndModesCountImplementation();
+            SetDeviceGetDepthModeAndModesCountImplementation();
 
             NativeK4a.SetImplementation(@"
 
@@ -1308,6 +1384,8 @@ k4a_result_t k4a_device_get_version(
         public void DeviceStartCameras()
         {
             SetOpenCloseImplementation();
+            SetDeviceGetColorModeAndModesCountImplementation();
+            SetDeviceGetDepthModeAndModesCountImplementation();
 
             NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_start_cameras(
@@ -1406,6 +1484,9 @@ k4a_result_t k4a_device_start_cameras(
         public void DeviceStartCamerasFailure()
         {
             SetOpenCloseImplementation();
+            SetDeviceGetColorModeAndModesCountImplementation();
+            SetDeviceGetDepthModeAndModesCountImplementation();
+            SetDeviceGetFPSModeAndModesCountImplementation();
 
             NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_start_cameras(

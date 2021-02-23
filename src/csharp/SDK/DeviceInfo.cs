@@ -19,29 +19,29 @@ namespace Microsoft.Azure.Kinect.Sensor
     public class DeviceInfo
     {
         /// <summary>
-        /// Gets or sets Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_device_info_t k4atypes.h.
+        /// Gets Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_device_info_t k4atypes.h.
         /// </summary>
-        public int StructSize { get; set; } = deviceInfoStructSize;
+        public int StructSize { get; private set; } = deviceInfoStructSize;
 
         /// <summary>
-        /// Gets or sets the Struct Version.
+        /// Gets the Struct Version.
         /// </summary>
-        public int StructVersion { get; set; } = 1;
+        public int StructVersion { get; private set; } = 1;
 
         /// <summary>
-        /// Gets or sets the Vendor Id.
+        /// Gets the Vendor Id.
         /// </summary>
-        public int VendorId { get; set; } = 0;
+        public int VendorId { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Device Id.
+        /// Gets the Device Id.
         /// </summary>
-        public int DeviceId { get; set; } = 0;
+        public int DeviceId { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Capabilities.
+        /// Gets the Capabilities.
         /// </summary>
-        public int Capabilities { get; set; } = 0;
+        public int Capabilities { get; private set; } = 0;
 
         /// <summary>
         /// Get the equivalent native configuration structure.

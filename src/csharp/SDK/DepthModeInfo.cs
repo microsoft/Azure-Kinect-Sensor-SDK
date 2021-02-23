@@ -19,72 +19,72 @@ namespace Microsoft.Azure.Kinect.Sensor
     public class DepthModeInfo
     {
         /// <summary>
-        /// Gets or sets the Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_depth_mode_info_t k4atypes.h.
+        /// Gets the Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_depth_mode_info_t k4atypes.h.
         /// </summary>
-        public int StructSize { get; set; } = depthModeInfoInfoStructSize;
+        public int StructSize { get; private set; } = depthModeInfoInfoStructSize;
 
         /// <summary>
-        /// Gets or sets the Struct Version.
+        /// Gets the Struct Version.
         /// </summary>
-        public int StructVersion { get; set; } = 1;
+        public int StructVersion { get; private set; } = 1;
 
         /// <summary>
-        /// Gets or sets the ModeId of the depth camera.
+        /// Gets the ModeId of the depth camera.
         /// </summary>
-        public int ModeId { get; set; } = 0;
+        public int ModeId { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets a value indicating whether to use Passive IR Only.
+        /// Gets a value indicating whether to use Passive IR Only.
         /// </summary>
         /// <remarks>
         /// If this is false, the Passive IR images are dropped.
         /// </remarks>
-        public bool PassiveIROnly { get; set; } = false;
+        public bool PassiveIROnly { get; private set; } = false;
 
         /// <summary>
-        /// Gets or sets the image width.
+        /// Gets the image width.
         /// </summary>
-        public int Width { get; set; } = 0;
+        public int Width { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the image height.
+        /// Gets the image height.
         /// </summary>
-        public int Height { get; set; } = 0;
+        public int Height { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the image format. Depth image type DEPTH16. Each pixel of DEPTH16 data is two bytes of little-endian unsigned depth data.
+        /// Gets the image format. Depth image type DEPTH16. Each pixel of DEPTH16 data is two bytes of little-endian unsigned depth data.
         /// </summary>
-        public ImageFormat NativeFormat { get; set; } = ImageFormat.Depth16;
+        public ImageFormat NativeFormat { get; private set; } = ImageFormat.Depth16;
 
         /// <summary>
-        /// Gets or sets the Horizontal FOV.
+        /// Gets the Horizontal FOV.
         /// </summary>
-        public float HorizontalFOV { get; set; } = 0;
+        public float HorizontalFOV { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Vertical FOV.
+        /// Gets the Vertical FOV.
         /// </summary>
-        public float VerticalFOV { get; set; } = 0;
+        public float VerticalFOV { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Min FPS.
+        /// Gets the Min FPS.
         /// </summary>
-        public int MinFPS { get; set; } = 0;
+        public int MinFPS { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Max FPS.
+        /// Gets the Max FPS.
         /// </summary>
-        public int MaxFPS { get; set; } = 0;
+        public int MaxFPS { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Min Range.
+        /// Gets the Min Range.
         /// </summary>
-        public int MinRange { get; set; } = 0;
+        public int MinRange { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Max Range.
+        /// Gets the Max Range.
         /// </summary>
-        public int MaxRange { get; set; } = 0;
+        public int MaxRange { get; private set; } = 0;
 
         /// <summary>
         /// Gets equivalent native configuration struct.
