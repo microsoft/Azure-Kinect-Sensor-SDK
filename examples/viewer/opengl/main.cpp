@@ -72,7 +72,7 @@ static k4a_result_t get_device_mode_ids(k4a::device *device,
         uint32_t fps_mode_id = 0;
         for (uint32_t f = 0; f < fps_mode_size; f++)
         {
-            if (fps_modes[f].fps >= (int)max_fps)
+            if (fps_modes[f].fps >= max_fps)
             {
                 max_fps = (uint32_t)fps_modes[f].fps;
                 fps_mode_id = f;
