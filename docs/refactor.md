@@ -28,10 +28,10 @@
 
 	4. The following structs have been added:
 
-		k4a_device_info_t		Contains the size and version of the struct as well as  vendor id, device id and 
+		k4a_device_info_t		Contains the size and version of the struct as well as vendor id, device id and 
 								capabilities(color, depth, IMU, microphone).
 
-		k4a_color_mode_info_t	Contains the size and version of the struct as well as  mode id, width, height, native format, 
+		k4a_color_mode_info_t	Contains the size and version of the struct as well as mode id, width, height, native format, 
 								horizontal/vertical fov and min/max fps.
 
 		k4a_depth_mode_info_t	Contains the size and version of the struct as well as mode id, whether to capture passive IR only, 
@@ -101,7 +101,7 @@
 			k4a_device_t device = NULL;
 			if (K4A_RESULT_SUCCEEDED != k4a_device_open(0, &device))
 			{
-				cout << 0 << ": Failed to open device" << endl;
+				printf("0: Failed to open device");
 				exit(-1);
 			}
 
@@ -140,7 +140,7 @@
 			k4a_device_t device = NULL;
 			if (K4A_RESULT_SUCCEEDED != k4a_device_open(0, &device))
 			{
-				cout << 0 << ": Failed to open device" << endl;
+				printf("0: Failed to open device");
 				exit(-1);
 			}
 
@@ -202,7 +202,7 @@
 			k4a_device_t device = NULL;
 			if (K4A_RESULT_SUCCEEDED != k4a_device_open(0, &device))
 			{
-				cout << 0 << ": Failed to open device" << endl;
+				printf("0: Failed to open device");
 				exit(-1);
 			}
 
@@ -274,7 +274,7 @@
 			k4a_device_t device = NULL;
 			if (K4A_RESULT_SUCCEEDED != k4a_device_open(0, &device))
 			{
-				cout << 0 << ": Failed to open device" << endl;
+				printf("0: Failed to open device");
 				exit(-1);
 			}
 			
