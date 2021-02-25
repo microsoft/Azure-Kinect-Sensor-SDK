@@ -1392,6 +1392,7 @@ k4a_result_t k4a_device_get_version(
             SetOpenCloseImplementation();
             SetDeviceGetColorModeAndModesCountImplementation();
             SetDeviceGetDepthModeAndModesCountImplementation();
+            SetDeviceGetFPSModeAndModesCountImplementation();
 
             NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_start_cameras(
