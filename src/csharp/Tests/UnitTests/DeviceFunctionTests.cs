@@ -84,22 +84,24 @@ void k4a_device_close(k4a_device_t device_handle)
             NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, uint32_t *mode_count)
 {
-    return 7;
+    *mode_count = 7;
+    return K4A_RESULT_SUCCEEDED;
 }
 
 k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, uint32_t mode_index, k4a_color_mode_info_t *mode_info)
 {
     static const k4a_color_mode_info_t device_color_modes[] = {
-        { 40, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
-        { 40, 1, 1, 1280, 720, 0, 90.0f, 59.0f, 5, 30 },
-        { 40, 1, 2, 1920, 1080, 0, 90.0f, 59.0f, 5, 30 },
-        { 40, 1, 3, 2560, 1440, 0, 90.0f, 59.0f, 5, 30 },
-        { 40, 1, 4, 2048, 1536, 0, 90.0f, 74.3f, 5, 30 },
-        { 40, 1, 5, 3840, 2160, 0, 90.0f, 59.0f, 5, 30 },
-        { 40, 1, 6, 4096, 3072, 0, 90.0f, 74.3f, 5, 30 }
+        { 40, 1, 0, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 },
+        { 40, 1, 1, 1280, 720,  K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 2, 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 3, 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 4, 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
+        { 40, 1, 5, 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 6, 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 }
     };
 
     *mode_info = device_color_modes[mode_index];
+    return K4A_RESULT_SUCCEEDED;
 }         
 ");
         }
@@ -110,21 +112,23 @@ k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, uint32_t mode
             NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, uint32_t *mode_count)
 {
-    return 6;
+    *mode_count = 6;
+    return K4A_RESULT_SUCCEEDED;
 }
 
 k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, uint32_t mode_index, k4a_depth_mode_info_t *mode_info)
 {
     static const k4a_depth_mode_info_t device_depth_modes[] = {
-        { 52, 1, 0, false, 0, 0, 4, 0.0f, 0.0f, 0, 0, 0, 0 },
-        { 52, 1, 1, false, 320, 288, 4, 75.0f, 65.0f, 5, 30, 500, 5800 },
-        { 52, 1, 2, false, 640, 576, 4, 75.0f, 65.0f, 5, 30, 500, 4000 },
-        { 52, 1, 3, false, 512, 512, 4, 120.0f, 120.0f, 5, 30, 250, 3000 },
-        { 52, 1, 4, false, 1024, 1024, 4, 120.0f, 120.0f, 5, 30, 250, 2500 },
-        { 52, 1, 5, true, 1024, 1024, 4, 120.0f, 120.0f, 5, 30, 0, 100 }
+        { 52, 1, 0, false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 },
+        { 52, 1, 1, false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800 },
+        { 52, 1, 2, false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 },
+        { 52, 1, 3, false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000 },
+        { 52, 1, 4, false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500 },
+        { 52, 1, 5, true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100 }
     };
 
     *mode_info = device_depth_modes[mode_index];
+    return K4A_RESULT_SUCCEEDED;
 }         
 ");
         }
@@ -135,7 +139,8 @@ k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, uint32_t mode
             NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, uint32_t *mode_count)
 {
-    return 4;
+    *mode_count = 4;
+    return K4A_RESULT_SUCCEEDED;
 }
 
 k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_index, k4a_fps_mode_info_t *mode_info)
@@ -146,6 +151,7 @@ k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_i
                                                             { 16, 1, 30, 30 } };
 
     *mode_info = device_fps_modes[mode_index];
+    return K4A_RESULT_SUCCEEDED;
 }         
 ");
         }
@@ -531,7 +537,7 @@ k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle,
 
             NativeK4a.SetImplementation(@"
 
-k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, uint depth_mode_id, uint color_mode_id, k4a_calibration_t* calibration)
+k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, uint32_t depth_mode_id, uint32_t color_mode_id, k4a_calibration_t* calibration)
 {
     STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
     STUB_ASSERT(depth_mode_id > 0);
@@ -667,7 +673,7 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
 
             NativeK4a.SetImplementation(@"
 
-k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, uint depth_mode_id, uint color_mode_id, k4a_calibration_t* calibration)
+k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, uint32_t depth_mode_id, uint32_t color_mode_id, k4a_calibration_t* calibration)
 {
     STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
     STUB_ASSERT(depth_mode_id > 0);

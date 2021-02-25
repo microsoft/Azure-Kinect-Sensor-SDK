@@ -195,7 +195,7 @@
 		}
 
 
-	2. Using k4a_device_get_depth_mode with k4a_device_get_depth_mode_count:
+	3. Using k4a_device_get_depth_mode with k4a_device_get_depth_mode_count:
 
 		int main(int argc, char **argv)
 		{
@@ -267,7 +267,7 @@
 		}
 
 
-	2. Using k4a_device_get_fps_mode with k4a_device_get_fps_mode_count:
+	4. Using k4a_device_get_fps_mode with k4a_device_get_fps_mode_count:
 
 		int main(int argc, char **argv)
 		{
