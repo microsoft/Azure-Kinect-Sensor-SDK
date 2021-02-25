@@ -3,7 +3,7 @@
 	The following changes have been made to the Kinect SDK API surface (k4a.h, k4atypes.h) so camera manufacturers may provide 
 	their own implementation of the Kinect SDK that will work with their cameras. The key change is switching from enums that identify 
 	color resolution, depth mode and framerate, to structs that contain information about color mode, depth mode and fps mode. All 
-	devices must support a depth sensor, but color, audio and IMU sensors are not required.
+	devices must support a depth sensor, but color, microphone and IMU sensors are not required.
 
 ## Changes to k4atypes.h
 
