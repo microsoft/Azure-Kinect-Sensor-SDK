@@ -19,24 +19,24 @@ namespace Microsoft.Azure.Kinect.Sensor
     public class FPSModeInfo
     {
         /// <summary>
-        /// Gets or sets the Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_fps_mode_info_t k4atypes.h.
+        /// Gets the Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_fps_mode_info_t k4atypes.h.
         /// </summary>
-        public int StructSize { get; set; } = fpsModeInfoStructSize;
+        public int StructSize { get; private set; } = fpsModeInfoStructSize;
 
         /// <summary>
-        /// Gets or sets the Struct Version.
+        /// Gets the Struct Version.
         /// </summary>
-        public int StructVersion { get; set; } = 1;
+        public int StructVersion { get; private set; } = 1;
 
         /// <summary>
-        /// Gets or sets the ModeId.
+        /// Gets the ModeId.
         /// </summary>
-        public int ModeId { get; set; } = 0;
+        public int ModeId { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the FPS.
+        /// Gets the FPS.
         /// </summary>
-        public int FPS { get; set; } = 0;
+        public int FPS { get; private set; } = 0;
 
         /// <summary>
         ///  Get the equivalent native configuration struct.

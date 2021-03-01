@@ -358,7 +358,7 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
     result = k4a_device_get_fps_mode_count(device, &mode_count);
     if (K4A_SUCCEEDED(result) && mode_count > 0)
     {
-        // Go through the list of depth modes and find the one that matches the mode_id.
+        // Go through the list of fps modes and find the one that matches the mode_id.
         for (uint32_t n = 0; n < mode_count; ++n)
         {
             k4a_fps_mode_info_t mode_info = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
@@ -394,7 +394,7 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
                     result = k4a_device_get_fps_mode(device, n, &mode_info);
                     if (K4A_SUCCEEDED(result) && mode_info.fps <= 15)
                     {
-                        if (fps == 0 || mode_info.fps > fps)
+                        if (mode_info.fps > fps)
                         {
                             SAFE_COPY_STRUCT(fps_mode_info, &mode_info);
                             *fps_mode_id = mode_info.mode_id;
@@ -404,7 +404,15 @@ static k4a_result_t get_fps_mode_info(k4a_device_t device,
                     }
                 }
 
-                std::cout << "Warning: reduced frame rate down to " << fps << "." << std::endl;
+                if (fps == 0)
+                {
+                    std::cout << "Error: a fps mode with a framerate greater than 0 has not been found." << std::endl;
+                    result = K4A_RESULT_FAILED;
+                }
+                else
+                {
+                    std::cout << "Warning: reduced frame rate down to " << fps << "." << std::endl;
+                }
             }
         }
     }
@@ -783,10 +791,10 @@ int main(int argc, char **argv)
                             k4a_fps_mode_info_t fps_mode = { sizeof(k4a_fps_mode_info_t), K4A_ABI_VERSION, 0 };
                             if (k4a_device_get_fps_mode(device, f, &fps_mode) == K4A_RESULT_SUCCEEDED)
                             {
-                                if (fps_mode.fps >= (int)max_fps)
+                                if (fps_mode.fps >= max_fps)
                                 {
                                     max_fps = (uint32_t)fps_mode.fps;
-                                    fps_mode_id = f;
+                                    fps_mode_id = fps_mode.mode_id;
                                 }
                             }
                         }

@@ -557,7 +557,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
         {
             if (k4a_device_get_color_mode(device, c, &color_mode_info) == K4A_RESULT_SUCCEEDED)
             {
-                if (color_mode.height >= 720)
+                if (color_mode_info.height >= 720)
                 {
                     *color_mode_id = color_mode_info.mode_id;
                     break;
@@ -570,7 +570,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
     {
         for (uint32_t d = 0; d < depth_mode_count; d++)
         {
-            if (k4a_device_get_depth_mode(device, d, &depth_mode) == K4A_RESULT_SUCCEEDED)
+            if (k4a_device_get_depth_mode(device, d, &depth_mode_info) == K4A_RESULT_SUCCEEDED)
             {
                 if (depth_mode_info.height >= 1024 && depth_mode_info.vertical_fov <= 120)
                 {

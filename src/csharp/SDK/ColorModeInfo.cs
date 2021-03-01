@@ -19,54 +19,54 @@ namespace Microsoft.Azure.Kinect.Sensor
     public class ColorModeInfo
     {
         /// <summary>
-        /// Gets or sets the Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_color_mode_info_t k4atypes.h.
+        /// Gets the Struct Size. Default set in the NativeMethods class and must be kept in sync with k4a_color_mode_info_t k4atypes.h.
         /// </summary>
-        public int StructSize { get; set; } = colorModeInfoStructSize;
+        public int StructSize { get; private set; } = colorModeInfoStructSize;
 
         /// <summary>
-        /// Gets or sets the Struct Version.
+        /// Gets the Struct Version.
         /// </summary>
-        public int StructVersion { get; set; } = 1;
+        public int StructVersion { get; private set; } = 1;
 
         /// <summary>
-        /// Gets or sets the ModeId of the color camera.
+        /// Gets the ModeId of the color camera.
         /// </summary>
-        public int ModeId { get; set; } = 0;
+        public int ModeId { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the image Width.
+        /// Gets the image Width.
         /// </summary>
-        public int Width { get; set; } = 0;
+        public int Width { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the image Height.
+        /// Gets the image Height.
         /// </summary>
-        public int Height { get; set; } = 0;
+        public int Height { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Native Image Format.
+        /// Gets the Native Image Format.
         /// </summary>
-        public ImageFormat NativeFormat { get; set; } = ImageFormat.ColorMJPG;
+        public ImageFormat NativeFormat { get; private set; } = ImageFormat.ColorMJPG;
 
         /// <summary>
-        /// Gets or sets the Horizontal FOV.
+        /// Gets the Horizontal FOV.
         /// </summary>
-        public float HorizontalFOV { get; set; } = 0;
+        public float HorizontalFOV { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Vertical FOV.
+        /// Gets the Vertical FOV.
         /// </summary>
-        public float VerticalFOV { get; set; } = 0;
+        public float VerticalFOV { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Min FPS.
+        /// Gets the Min FPS.
         /// </summary>
-        public int MinFPS { get; set; } = 0;
+        public int MinFPS { get; private set; } = 0;
 
         /// <summary>
-        /// Gets or sets the Max FPS.
+        /// Gets the Max FPS.
         /// </summary>
-        public int MaxFPS { get; set; } = 0;
+        public int MaxFPS { get; private set; } = 0;
 
         /// <summary>
         /// Get the equivalent native configuration struct.

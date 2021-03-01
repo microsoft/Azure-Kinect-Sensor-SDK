@@ -105,7 +105,7 @@ get_device_mode_ids(k4a_device_t device, uint32_t *color_mode_id, uint32_t *dept
         {
             if (k4a_device_get_fps_mode(device, f, &fps_mode_info) == K4A_RESULT_SUCCEEDED)
             {
-                if (fps_mode_info.fps >= (int)max_fps)
+                if (fps_mode_info.fps >= max_fps)
                 {
                     max_fps = (uint32_t)fps_mode_info.fps;
                     *fps_mode_id = fps_mode_info.mode_id;
@@ -163,7 +163,7 @@ int main(int argc, char ** /*argv*/)
 
     if (!K4A_SUCCEEDED(get_device_mode_ids(device, &color_mode_id, &depth_mode_id, &fps_mode_id)))
     {
-        cout << "Failed to get device mode ids" << endl;
+        printf("Failed to get device mode ids\n");
         exit(-1);
     }
 
