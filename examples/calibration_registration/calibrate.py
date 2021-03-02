@@ -13,14 +13,14 @@ from camera_tools import calibrate_camera
 # ------------------------------------------------------------------------------
 def parse_args():
   """
-  Get arguments for running the carlibration.
+  Get arguments for running the calibration.
 
   Returns:
-    args -- Return a list of command line arguments for running calibartion.
+    args -- Return a list of command line arguments for running calibration.
   """
 
   parser = argparse.ArgumentParser(description="Generate calibration.")
-  parser.add_argument("-d", "--dataset-dir",required=True,
+  parser.add_argument("-d", "--dataset-dir", required=True,
     help="Full path to all captures from camera.")
   parser.add_argument("-t", "--template", required=True,
     help="Full path to Charuco board template file.")
@@ -33,7 +33,7 @@ def parse_args():
 if __name__ == "__main__":
   args = parse_args()
 
-  rms, calib_matrix, dist_coeffs, img_size, rvecs, tvecs = \
+  rms, calib_matrix, dist_coeffs, img_size, rvecs, tvecs, num_good_images = \
     calibrate_camera(args.dataset_dir,
                      args.template,
                      init_calfile=args.calib_file)

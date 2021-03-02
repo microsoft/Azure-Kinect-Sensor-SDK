@@ -113,7 +113,7 @@ def write_opencv_calfile(calfile:str,
   Args:
     calfile (str): Full path of calibration file.
     k_matrix (np.array): the camera intrinsics matrix.
-    dist8 (List): The distorition coefficients.
+    dist8 (List): The distortion coefficients.
     img_size (np.array): 2d array of the image size, in the order width, height.
   """
   fs_calib = cv2.FileStorage(calfile, cv2.FILE_STORAGE_WRITE)
@@ -507,25 +507,29 @@ def registration_error(array_a:np.array,
   # calculated points.
   num_points = pts.shape[0]
   squares = [elem**2 for elem in angles]
-  rms_radians = math.sqrt(sum(squares))/num_points
+  rms_radians = math.sqrt(sum(squares)/num_points)
   print(f"RMS (Radians): {rms_radians}")
 
   rms_pixels = np.sqrt(np.sum((corners_a-pts)**2)/num_points)
   return rms_pixels, rms_radians
 
 #-------------------------------------------------------------------------------
-def calibrate_camera(imdir:str,
-           template:str,
-           init_calfile:str = None,
-           rms_thr:float = 1.0,
-           postfix:str = "",
-           min_detections:int = 30,
-           min_images:int = 30) -> Tuple[float,
-                       np.array,
-                       np.array,
-                       np.array,
-                       List,
-                       List]:
+def calibrate_camera(
+  imdir:str,
+  template:str,
+  init_calfile:str = None,
+  rms_thr:float = 1.0,
+  postfix:str = "",
+  min_detections:int = 30,
+  min_images:int = 30,
+  min_quality_images:int = 30,
+  per_view_threshold:int = 1
+  ) -> Tuple[float,
+             np.array,
+             np.array,
+             np.array,
+             List,
+             List]:
   """  Calibrate a camera using charuco detector and opencv bundler.
 
   Args:
@@ -536,11 +540,16 @@ def calibrate_camera(imdir:str,
     postfix (str, optional): Calibration filename suffix. Defaults to "".
     min_detections (int, optional): Required minimum number of detections.
       Defaults to 30.
-    postfix (int, optional): Required minimum number of images. Defaults to 30.
+    min_images (int, optional): Minimum number of images. Defaults to 30.
+    min_quality_images (int, optional): Minimum number of images with sufficient
+      reprojection quality. Defaults to 30.
+    per_view_threshold (int, optional): RMS reprojection error threshold to
+      distinguish quality images. Defaults to 1.
 
   Raises:
     CalibrationError: Not enough images for calibration.
     CalibrationError: Not enough detections for calibration.
+    CalibrationError: Not enough images with low rms for calibration.
 
   Returns:
     Tuple[float, np.array, np.array, np.array, List, List]:
@@ -573,7 +582,7 @@ def calibrate_camera(imdir:str,
   ccorners_all, cids_all, p3d, img_size, board = \
     detect_markers_many_images(imgnames, template)
 
-  # check number of board detections
+  # check number of times corners were successfully detected.
   num_det = len(ccorners_all)
   if num_det < min_detections:
     msg = f"Insufficent detections. {num_det} found, {min_detections} required."
@@ -593,7 +602,7 @@ def calibrate_camera(imdir:str,
   criteria = cv2.TERM_CRITERIA_COUNT + cv2.TERM_CRITERIA_EPS, 100, 1e-6
 
   start = time.perf_counter()
-  rms, k_matrix, dist, rvecs, tvecs, _, _, _ = \
+  rms, k_matrix, dist, rvecs, tvecs, stdDeviationsIntrinsics, stdDeviationsExtrinsics, perViewErrors = \
         aruco.calibrateCameraCharucoExtended(ccorners_all,
                            cids_all,
                            board,
@@ -603,17 +612,34 @@ def calibrate_camera(imdir:str,
                            flags=flags,
                            criteria=criteria)
 
+  # Check Quality of each image.
+  n_low_rms = [err[0] for err in perViewErrors if err[0] <= per_view_threshold]
+  num_good_images = len(n_low_rms)
+
+  # Report which indexes are failing in perViewErros.
+  failing_idxs = []
+  [failing_idxs.append(str(index)) for (index, err) in enumerate(perViewErrors) if err[0] > per_view_threshold]
+  warning_failing_indexes = "Failing image indices: " + ", ".join(failing_idxs)
+
+  if len(failing_idxs) != 0:
+    warnings.warn(warning_failing_indexes)
+
+  if num_good_images < min_quality_images:
+    msg = f"Insufficent number of quality images. " \
+      f"{num_good_images} found, {min_quality_images} required."
+    raise CalibrationError(msg)
+
   dist8 = dist[:8, :]
   img_size_as_array = np.array([np.array([img_size[0]]),
                                 np.array([img_size[1]])])
   if rms < rms_thr:
-    print("calibrateCamera took {} sec".format(time.perf_counter()-start))
+    print("calibrate_camera took {} sec".format(time.perf_counter()-start))
     write_opencv_calfile(calfile, k_matrix, dist8, img_size_as_array)
     write_json(os.path.join(imdir, "report.json"), {"RMS_pixels":rms})
   else:
-    print("calibrateCamera failed \n")
+    print("calibrate_camera failed \n")
 
-  return rms, k_matrix, dist, img_size, rvecs, tvecs
+  return rms, k_matrix, dist, img_size, rvecs, tvecs, num_good_images
 
 #-------------------------------------------------------------------------------
 def register(img_a: str,
