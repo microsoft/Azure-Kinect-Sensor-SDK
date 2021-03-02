@@ -18,14 +18,6 @@ from os import linesep as _newline
 import platform as _platform
 
 
-# Determine the calling convention to use.
-_IS_WINDOWS = 'Windows' == _platform.system()
-if _IS_WINDOWS:
-    _FUNCTYPE = _ctypes.CFUNCTYPE
-else:
-    _FUNCTYPE = _ctypes.CFUNCTYPE
-
-
 '''! The ABI version of the SDK implementation.
 
 @remarks This must be equivalent to the value in k4atypes.h.
@@ -524,18 +516,18 @@ def K4A_FAILED(result):
 #                                       const char *file,
 #                                       const int line,
 #                                       const char *message);
-logging_message_cb = _FUNCTYPE(None,
-    _ctypes.c_void_p, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char), 
-    _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char))
+_logging_message_cb = _ctypes.CFUNCTYPE(_ctypes.c_void_p,
+    _ctypes.c_void_p, _ctypes.c_int, _ctypes.c_char_p, 
+    _ctypes.c_int, _ctypes.c_char_p)
 
 
 #typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
-_memory_destroy_cb = _FUNCTYPE(
+_memory_destroy_cb = _ctypes.CFUNCTYPE(
     None, _ctypes.c_void_p, _ctypes.c_void_p)
 
 
 #typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
-_memory_allocate_cb = _FUNCTYPE(
+_memory_allocate_cb = _ctypes.CFUNCTYPE(
     _ctypes.c_uint8, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_void_p))
 
 

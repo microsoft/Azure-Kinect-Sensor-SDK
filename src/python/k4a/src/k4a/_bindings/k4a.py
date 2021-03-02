@@ -21,7 +21,7 @@ import platform as _platform
 from .k4atypes import *
 from .k4atypes import _DeviceHandle, _CaptureHandle, _ImageHandle, \
     _TransformationHandle, _Calibration, _Float2, _Float3, \
-    _memory_allocate_cb, _memory_destroy_cb
+    _memory_allocate_cb, _memory_destroy_cb, _logging_message_cb
 
 
 __all__ = []
@@ -51,7 +51,7 @@ except Exception as ee:
 #                                                      k4a_log_level_t min_level);
 k4a_set_debug_message_handler = _k4a_lib.k4a_set_debug_message_handler
 k4a_set_debug_message_handler.restype = EStatus
-k4a_set_debug_message_handler.argtypes = (_ctypes.POINTER(logging_message_cb), _ctypes.c_void_p, _ctypes.c_int)
+k4a_set_debug_message_handler.argtypes = (_logging_message_cb, _ctypes.py_object, _ctypes.c_int)
 
 
 #K4A_EXPORT k4a_result_t k4a_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memory_destroy_cb_t free);

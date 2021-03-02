@@ -15,6 +15,34 @@ import k4a
 import test_config
 
 
+class LogContext:
+    call_count = 0
+
+    def get_call_count(self):
+        retValue = self.call_count
+        self.call_count = self.call_count + 1
+        return retValue
+
+# Global context.
+context = LogContext()
+
+
+# Define a callback function for logging.
+@k4a.logging_message_cb
+def logging_callback(context_local, loglevel:k4a.ELogLevel, src_filename:str, src_line:int, message:str):
+
+    formattedStr = str()
+
+    # Convert py_object to LogContext.
+    if context_local is not None:
+        pyLogContext = context_local.value
+        if pyLogContext is not None:
+            formattedStr += str(pyLogContext.get_call_count()) + " "
+    
+    formattedStr += str(k4a.ELogLevel(loglevel)) + " in " + str(src_filename, 'UTF-8') + " at line " + str(src_line) + ": " + str(message, 'UTF-8')
+    print(formattedStr)
+
+
 def k4a_device_set_and_get_color_control(
     device:k4a.Device,
     color_control_command:k4a.EColorControlCommand):
@@ -79,6 +107,30 @@ class Test_Functional_Fast_API_Device_AzureKinect(unittest.TestCase):
         cls.device.stop_imu()
         cls.device.close()
         del cls.device
+
+    def test_functional_logging_nocontext(self):
+        # Pass the callback function to set_logger_callback.
+        status = k4a.set_logging_callback(logging_callback, None, k4a.ELogLevel.INFO)
+        self.assertEqual(status, k4a.EStatus.SUCCEEDED)
+
+        # Force a log message to call the python callback function. Starting IMU without starting cameras
+        # should log an error message.
+        # But cannot really automate this test except to debug this test and set a breakpoint in the callback function.
+        bytearray = self.device.get_raw_calibration()
+        self.assertIsNotNone(bytearray)
+
+    def test_functional_logging_withcontext(self):
+        global context
+
+        # Pass the callback function to set_logger_callback.
+        status = k4a.set_logging_callback(logging_callback, context, k4a.ELogLevel.INFO)
+        self.assertEqual(status, k4a.EStatus.SUCCEEDED)
+
+        # Force a log message to call the python callback function. Starting IMU without starting cameras
+        # should log an error message.
+        # But cannot really automate this test except to debug this test and set a breakpoint in the callback function.
+        bytearray = self.device.get_raw_calibration()
+        self.assertIsNotNone(bytearray)
 
     def test_functional_fast_api_open_twice_expected_fail(self):
         device2 = k4a.Device.open()

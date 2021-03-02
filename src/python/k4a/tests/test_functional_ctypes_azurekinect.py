@@ -13,6 +13,34 @@ import k4a
 import test_config
 
 
+class LogContext:
+    call_count = 0
+
+    def get_call_count(self):
+        retValue = self.call_count
+        self.call_count = self.call_count + 1
+        return retValue
+
+# Global context.
+context = LogContext()
+
+@k4a._bindings.k4a._logging_message_cb
+def logging_print_message(context_local, 
+                          level:ctypes.c_int,
+                          src_file:ctypes.c_char_p, 
+                          src_line:ctypes.c_int, 
+                          message:ctypes.c_char_p):
+    formattedStr = str()
+
+    # Convert c_void_p to LogContext.
+    if context_local is not None:
+        pyLogContext = context_local.value
+        formattedStr += str(pyLogContext.get_call_count()) + " "
+    
+    formattedStr += str(k4a.ELogLevel(level)) + " in " + str(src_file, 'UTF-8') + " at line " + str(src_line) + ": " + str(message, 'UTF-8')
+    print(formattedStr)
+
+
 def get_1080p_bgr32_nfov_2x2binned(device_handle):
     return test_config.get_capture(device_handle,
         k4a.EImageFormat.COLOR_BGRA32,
@@ -155,24 +183,48 @@ class Test_Functional_Fast_Ctypes_AzureKinect(unittest.TestCase):
         device_count = k4a._bindings.k4a.k4a_device_get_installed_count()
         self.assertGreater(device_count, 0)
 
-    @unittest.skip
     def test_functional_fast_ctypes_set_debug_message_handler_NULL_callback(self):
-        status = k4a._bindings.k4a_set_debug_message_handler(
-            ctypes.cast(ctypes.c_void_p(), ctypes.POINTER(k4a.logging_message_cb)), 
+        status = k4a._bindings.k4a.k4a_set_debug_message_handler(
+            ctypes.cast(ctypes.c_void_p(), k4a._bindings.k4a._logging_message_cb),
             ctypes.c_void_p(), 
             k4a.ELogLevel.TRACE)
         self.assertTrue(k4a.K4A_SUCCEEDED(status))
 
-    @unittest.skip
-    def test_functional_fast_ctypes_set_debug_message_handler_callback(self):
-        logger_cb = k4a.logging_message_cb(glb_print_message)
-        context = ctypes.c_void_p()
-        status = k4a._bindings.k4a_set_debug_message_handler(
-            ctypes.byref(logger_cb), 
-            context, 
+        # Force a log message to call the python callback function.
+        # But cannot really automate this test except to debug this test and set a breakpoint in the callback function.
+        status = k4a._bindings.k4a.k4a_device_start_imu(self.device_handle)
+        self.assertTrue(k4a.K4A_FAILED(status))
+
+    def test_functional_fast_ctypes_set_debug_message_handler_nocontext(self):
+        status = k4a._bindings.k4a.k4a_set_debug_message_handler(
+            logging_print_message,
+            ctypes.c_void_p(), 
             k4a.ELogLevel.TRACE
         )
         self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+        # Force a log message to call the python callback function.
+        # But cannot really automate this test except to debug this test and set a breakpoint in the callback function.
+        strsize = ctypes.c_ulonglong(32)
+        serial_number = (ctypes.c_char * strsize.value)()
+        status = k4a._bindings.k4a.k4a_device_get_serialnum(self.device_handle, serial_number, ctypes.byref(strsize))
+        self.assertEqual(k4a.EStatus.SUCCEEDED, status)
+
+    def test_functional_fast_ctypes_set_debug_message_handler_withcontext(self):
+        global context
+        status = k4a._bindings.k4a.k4a_set_debug_message_handler(
+            logging_print_message, 
+            ctypes.py_object(context),
+            k4a.ELogLevel.TRACE
+        )
+        self.assertTrue(k4a.K4A_SUCCEEDED(status))
+
+        # Force a log message to call the python callback function.
+        # But cannot really automate this test except to debug this test and set a breakpoint in the callback function.
+        strsize = ctypes.c_ulonglong(32)
+        serial_number = (ctypes.c_char * strsize.value)()
+        status = k4a._bindings.k4a.k4a_device_get_serialnum(self.device_handle, serial_number, ctypes.byref(strsize))
+        self.assertEqual(k4a.EStatus.SUCCEEDED, status)
 
     def test_functional_fast_ctypes_device_get_info(self):
         device_info = k4a.DeviceInfo()

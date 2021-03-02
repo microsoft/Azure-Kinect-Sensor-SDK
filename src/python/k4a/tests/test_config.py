@@ -18,15 +18,6 @@ glb_color_format = None
 glb_color_mode_id = None
 glb_depth_mode_id = None
 glb_lock = Lock()
-
-
-# Use for logging callback. But it doesn't work right now...
-def glb_print_message(context:ctypes.c_void_p, 
-                      level:k4a.ELogLevel, 
-                      src_file:ctypes.POINTER(ctypes.c_char), 
-                      src_line:ctypes.c_int, 
-                      message:ctypes.POINTER(ctypes.c_char)):
-    print(str(level) + " in " + str(src_file) + " at line " + str(src_line) + ": " + str(message))
     
     
 # Used to get a capture from device, or a previously-captured capture.
