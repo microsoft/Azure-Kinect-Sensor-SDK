@@ -60,8 +60,8 @@ to the following packages:
 Please note that "\<major\>" and "\<minor\>" refer to the major and minor
 portion of the version of the SDK you would like to target. For example, at the writing of these instructions the following packages are available.
 
-* libk4a1.3
-* libk4a1.3-dev
+* libk4a1.4
+* libk4a1.4-dev
 * k4a-tools
 
 Each package contains different elements.
