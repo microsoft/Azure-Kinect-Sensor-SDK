@@ -139,7 +139,7 @@ def write_calibration_blob(calibrations:List[str],
   blob = {"CalibrationInformation":{"Cameras":[]}}
 
   for idx, calibration_file in enumerate(calibrations):
-    if idx == 1:
+    if idx == 0:
       # RT for the camera used as the origin for all others.
       reshape_r = [1,0,0,0,1,0,0,0,1]
       reshape_t = [0,0,0]
