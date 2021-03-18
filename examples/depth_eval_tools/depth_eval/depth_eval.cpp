@@ -24,8 +24,8 @@ void help()
     std::cout << "\nDepth Evaluation Tool for K4A.\n";
     std::cout << "\nit uses 2 mkv files:\n";
     std::cout
-        << "\t 1st is PASSIVE_IR recorded using: \n\t\t k4arecorder.exe - c 3072p - d PASSIVE_IR - l 3  board1.mkv\n";
-    std::cout << "\t 2nd is WFOV_2X2BINNED recorded using: \n\t\t k4arecorder.exe - c 3072p - d WFOV_2X2BINNED - l 3  "
+        << "\t 1st is PASSIVE_IR recorded using: \n\t\t k4arecorder.exe -c 3072p -d PASSIVE_IR -l 3  board1.mkv\n";
+    std::cout << "\t 2nd is WFOV_2X2BINNED recorded using: \n\t\t k4arecorder.exe -c 3072p -d WFOV_2X2BINNED -l 3  "
                  "board2.mkv\n";
     std::cout << "\t This version supports WFOV_2X2BINNED but can be easily generalized\n";
     std::cout << "Usage:\n"

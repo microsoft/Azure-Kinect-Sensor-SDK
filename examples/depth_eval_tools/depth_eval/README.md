@@ -8,9 +8,9 @@
 
    This tool utilizes two mkv files.
 
-   The 1st mkv file is PASSIVE_IR recorded using: ```k4arecorder.exe - c 3072p - d PASSIVE_IR - l 3  board1.mkv```
+   The 1st mkv file is PASSIVE_IR recorded using: ```k4arecorder.exe -c 3072p -d PASSIVE_IR -l 3  board1.mkv```
 
-   The 2nd mkv file is WFOV_2X2BINNED recorded using: ```k4arecorder.exe - c 3072p - d WFOV_2X2BINNED - l 3 board2.mkv```
+   The 2nd mkv file is WFOV_2X2BINNED recorded using: ```k4arecorder.exe -c 3072p -d WFOV_2X2BINNED -l 3 board2.mkv```
 
    This version supports WFOV_2X2BINNED but can be easily generalized.
 
