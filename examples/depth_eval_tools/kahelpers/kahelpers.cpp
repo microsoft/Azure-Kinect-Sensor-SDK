@@ -252,6 +252,7 @@ bool write_calibration_blob(const std::vector<uchar> calibration_buffer,
     std::ofstream ofs(file_name, std::ofstream::binary);
     if (!ofs.is_open())
         std::cout << "Error opening file";
+        return false;
 
     ofs.write(reinterpret_cast<const char *>(&calibration_buffer[0]), calibration_buffer.size() - 1);
     ofs.close();
@@ -519,6 +520,12 @@ bool gen_checkered_pattern(const cv::Mat &A, const cv::Mat &B, cv::Mat &C, int n
     else
     {
         std::cerr << "number of channels is not supported \n";
+        return false;
+    }
+
+    if (n <= 0)
+    {
+        std::cerr << "Invalid value for n, must be greater than 0 \n";
         return false;
     }
 
