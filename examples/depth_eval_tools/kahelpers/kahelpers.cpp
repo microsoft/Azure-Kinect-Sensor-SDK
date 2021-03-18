@@ -468,6 +468,7 @@ void write_xy_table(const k4a::image &xy_table, const std::string output_dir, co
 
     if (!ofsx.is_open() || !ofsy.is_open())
         std::cout << "Error opening file";
+        return;
 
     // xy_table.
     for (int y = 0; y < height; y++)
