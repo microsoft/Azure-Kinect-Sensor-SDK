@@ -240,8 +240,6 @@ int main(int argc, char **argv)
                             gray_percentile,
                             save_images);
 
-    if (stat)
-        return 0;
-    else
-        return 1;
+    return (stat) ? 0:1;
+    
 }
