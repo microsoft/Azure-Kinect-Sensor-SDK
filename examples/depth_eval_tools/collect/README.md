@@ -4,7 +4,7 @@
 
 ## Description
 
-   Collect depth and color images from K4A.
+   Collect multiple view, depth and color images from K4A device and pre-process the data for use with the other evaluation tools.
 
 ---
 
