@@ -11,8 +11,8 @@
 ## Usage
    ```
    ./collect -h or -help or -? print the help message
-   ./collect -mode=<depth mode> -nv=<num of views> -nc=<num of captures per view> -fps=<frame rate enum>
-   -cal=<dump cal file> -xy=<dump xytable> -d=<capture depth> -i=<capture ir> -c=<capture color>
+   ./collect -mode=<depth mode> -res=<color resolution> -nv=<num of views> -nc=<num of captures per view>
+   -fps=<frame rate enum> -cal=<dump cal file> -xy=<dump xytable> -d=<capture depth> -i=<capture ir> -c=<capture color>
    -out=<output directory>
    -gg=<gray_gamma used to convert ir data to 8bit gray image. default=0.5>
    -gm=<gray_max used to convert ir data to 8bit gray image. default=4000.0>

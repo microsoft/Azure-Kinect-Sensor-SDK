@@ -4,7 +4,7 @@
 
    Depth Evaluation Example Tools for Azure Kinect DK.
 
-   These tools enable developers to collect depth and color images from a Azure Kinect device (`collect`), convert mkv files to images (`mkv2images`), evaluate the depth bias (`depth_eval`), and evaluate the transformation re-projection error between sensors (`transformation_eval`).
+   These tools enable developers to collect depth and color images from a Azure Kinect device using the `collect` and `mkv2images` tools, or from any camera as long as the data can be converted to `mkv` format. Developers can then evaluate the depth bias and evaluate the transformation re-projection error between sensors using the `depth_eval` and `transformation_eval` tools.
 
 ---
 ## Setup
@@ -49,8 +49,8 @@
 
    ```
    ./collect -h or -help or -? print the help message
-   ./collect -mode=<depth mode> -nv=<num of views> -nc=<num of captures per view> -fps=<frame rate enum>
-   -cal=<dump cal file> -xy=<dump xytable> -d=<capture depth> -i=<capture ir> -c=<capture color>
+   ./collect -mode=<depth mode> -res=<color resolution> -nv=<num of views> -nc=<num of captures per view> 
+   -fps=<frame rate enum> -cal=<dump cal file> -xy=<dump xytable> -d=<capture depth> -i=<capture ir> -c=<capture color>
    -out=<output directory>
    -gg=<gray_gamma used to convert ir data to 8bit gray image. default=0.5>
    -gm=<gray_max used to convert ir data to 8bit gray image. default=4000.0>
