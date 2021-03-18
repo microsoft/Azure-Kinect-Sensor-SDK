@@ -562,7 +562,7 @@ def calibrate_camera(
       tvecs: list of translation vectors.
   """
 
-  # Check valididty of initial calibration file.
+  # Check validity of initial calibration file.
   if init_calfile is not None and os.path.exists(init_calfile) is False:
     FileExistsError(f"Initial calibration does not exist: {init_calfile}")
 
@@ -616,7 +616,7 @@ def calibrate_camera(
   n_low_rms = [err[0] for err in perViewErrors if err[0] <= per_view_threshold]
   num_good_images = len(n_low_rms)
 
-  # Report which indexes are failing in perViewErros.
+  # Report which indexes are failing in perViewErrors.
   failing_idxs = []
   [failing_idxs.append(str(index)) for (index, err) in enumerate(perViewErrors) if err[0] > per_view_threshold]
   warning_failing_indexes = "Failing image indices: " + ", ".join(failing_idxs)
@@ -683,7 +683,7 @@ def register(img_a: str,
   if not os.path.exists(img_a):
     raise FileExistsError(f"Image file not found for camera A @ {img_a}")
   if not os.path.exists(img_b):
-    raise FileExistsError(f"Iamge file not found for camera B @ {img_b}")
+    raise FileExistsError(f"Image file not found for camera B @ {img_b}")
   if not os.path.exists(template):
     raise FileExistsError(f"Board template parameters not found @ {template}")
   if not os.path.exists(calib_a):

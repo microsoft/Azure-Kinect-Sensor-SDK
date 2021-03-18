@@ -47,10 +47,10 @@ These scripts enable developers to do two things: Calibrate a given camera, and 
    3. If you already have a collected set of data, run the calibration code this way:
 
       ``` windows
-      python <full_path>\calibrate.py. –dataset-dir <dataset_dir> --template <full_path_tempate>
+      python <full_path>\calibrate.py --dataset-dir <dataset_dir> --template <full_path_template>
       ```
 
-      The tool may optinally take in an existing calibration file with the flag `--calib-file`
+      The tool may optionally take in an existing calibration file with the flag `--calib-file`
 
    4. If the calibration is successful, this will generate a `calib.yml` file in the dataset-dir directory.
 
@@ -65,8 +65,8 @@ The script `register.py`, like `calibrate.py` is designed to take in command lin
 
         ``` windows
         python <full_path>\register.py --img-a <full_path_img_a> --img-b <full_path_img_b> `
-        --template <full_path_tempate> --calib-a <full_path_calibration_a> `
-        --calib-b <full_path_calibration_b> --out-dir <full_path_calibration_b>
+        --template <full_path_template> --calib-a <full_path_calibration_a> `
+        --calib-b <full_path_calibration_b> --out-dir <out_dir>
         ```
 
    4. If successful, the code will print out the rotation and translation matrix from camera B to camera A and save the calibration blob as a json.
