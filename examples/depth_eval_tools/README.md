@@ -4,7 +4,7 @@
 
    Depth Evaluation Example Tools for Azure Kinect DK.
 
-   These tools enable developers to collect depth and color images from a Azure Kinect device using the `collect` and `mkv2images` tools, or from any camera as long as the data can be converted to `mkv` format. Developers can then evaluate the depth bias and evaluate the transformation re-projection error between sensors using the `depth_eval` and `transformation_eval` tools.
+   These tools enable developers to collect depth and color images from a Azure Kinect device (`collect`), convert mkv files to images (`mkv2images`), evaluate the depth bias (`depth_eval`), and evaluate the transformation re-projection error between sensors (`transformation_eval`).
 
 ---
 ## Setup
@@ -108,7 +108,7 @@
    RMS of Z depth bias = 3.47157 mm
    ```
 
-   * The maximum bias should be expected to be within +/- 11mm. A depth bias outside of this range indicates a poor device calibration and the example Calibration tool should be used to recalibrate the device. 
+   * The maximum bias should be expected to be within +/- 11mm. A depth bias outside of this range indicates a poor device calibration and the example Calibration tool should be used to obtain an improved calibration that can be stored (external of the device) and used in place of the factory calibration (Note: The factory calibration stored on the Kinect device can not be overwritten). 
 
    * Minimum example command: ```./depth_eval -i=board1.mkv -d=board2.mkv -t=plane.json -out=c:/data```
 
@@ -200,6 +200,7 @@
    4. Install Release Version
 
       ```c:\opencv\build> cd ..```
+      
       ```c:\opencv> cmake --build c:/opencv/build --target install```
 
    5. Build Debug Version
