@@ -72,7 +72,10 @@ To capture the results, use an additional --junit-xml=./test_results.xml option.
 Performance tests attempt to verify the performance of the device under stress,
 such as maintaining frame rates, etc. These tests require an attached device.
 These tests should be run on every pull request.
-      
+
+>**Note:** There are currently no performance tests. This section is here as a placeholder
+>for planned performance tests in the future.
+
 To run the performance tests:   
     `python -m pytest tests -k perf`
       
