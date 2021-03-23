@@ -196,7 +196,7 @@ class Device:
             device = None
         else:
             # Get serial number.
-            serial_number_size = _ctypes.c_ulonglong(Device._MAX_SERIAL_NUM_LENGTH)
+            serial_number_size = _ctypes.c_size_t(Device._MAX_SERIAL_NUM_LENGTH)
             serial_number_buffer = _ctypes.create_string_buffer(
                 Device._MAX_SERIAL_NUM_LENGTH)
             
@@ -579,7 +579,7 @@ class Device:
 
         # Get the size in bytes of the buffer that is required to
         # hold the raw calibration data.
-        buffer_size_bytes = _ctypes.c_ulonglong(0)
+        buffer_size_bytes = _ctypes.c_size_t(0)
         buffer_ptr = _ctypes.c_uint8(0)
 
         status = k4a_device_get_raw_calibration(

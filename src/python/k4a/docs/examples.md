@@ -66,7 +66,7 @@ Close the figure to proceed and the program exits.
 A simple program to continuously capture images from an Azure Kinect device and display the images.
 
 Additional Prerequisites:  
-- Matplotlib installed via pip:  pip install matplotlib  
+- Matplotlib installed via pip:  `pip install matplotlib`  
     
 To run, open a command terminal and type:  
 `python simple_viewer.py`  

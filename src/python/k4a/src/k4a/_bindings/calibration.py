@@ -83,7 +83,7 @@ class Calibration:
             isinstance(depth_mode, EDepthMode) and
             isinstance(color_resolution, EColorResolution)):
 
-            buffer_size_bytes = _ctypes.c_ulonglong(len(raw_calibration))
+            buffer_size_bytes = _ctypes.c_size_t(len(raw_calibration))
             cbuffer = (_ctypes.c_uint8 * buffer_size_bytes.value).from_buffer(raw_calibration)
             cbufferptr = _ctypes.cast(cbuffer, _ctypes.POINTER(_ctypes.c_char))
             _calibration = _Calibration()
