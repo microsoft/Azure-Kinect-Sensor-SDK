@@ -37,6 +37,14 @@ The following dependencies are for both Windows and Linux:
   SDK installer. The DE binary needs to be copied to the host system and added 
   to the path src/python/k4a/src/k4a/_libs in this repository before building.
 
+The following dependencies are for both Windows and Linux, but in Windows they seems to be
+automatically part of a Python installation, while on Linux they need to be installed
+separately:
+
+* Python module venv  
+   On Linux, install venv with:  
+   `sudo apt install python3-venv -y`
+
 The following tools are optional:
 
 * [doxygen](https://github.com/doxygen/doxygen)

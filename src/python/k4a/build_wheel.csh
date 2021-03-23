@@ -59,6 +59,8 @@ if command -v doxygen &> /dev/null
 then
     mkdir ./build/docs
     doxygen ./Doxyfile
+else
+    echo "doxygen not found, skipping building the documentation."
 fi
 
 # Create a convenient documentation.html that redirects to the index.html that doxygen generates.
@@ -74,3 +76,5 @@ echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://ww
 # Deactivate virtual environment and delete it.
 deactivate
 rm -rf "temp_build_venv"
+
+echo "Done creating k4a package wheel."
