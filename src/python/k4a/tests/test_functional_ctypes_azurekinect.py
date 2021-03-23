@@ -762,7 +762,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
             k4a._bindings.k4a.k4a_device_stop_cameras(self.device_handle)
 
     def test_functional_fast_ctypes_device_get_serialnum(self):
-        strsize = ctypes.c_ulonglong(32)
+        strsize = ctypes.c_size_t(32)
         serial_number = (ctypes.c_char * strsize.value)()
         status = k4a._bindings.k4a.k4a_device_get_serialnum(self.device_handle, serial_number, ctypes.byref(strsize))
         self.assertEqual(k4a.EStatus.SUCCEEDED, status)
@@ -858,7 +858,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
         with self.lock:
             
             # Get buffer size requirement.
-            buffer_size = ctypes.c_ulonglong(0)
+            buffer_size = ctypes.c_size_t(0)
             buffer = ctypes.c_uint8(0)
             status = k4a._bindings.k4a.k4a_device_get_raw_calibration(
                 self.device_handle, ctypes.byref(buffer), ctypes.byref(buffer_size))
@@ -915,7 +915,7 @@ class Test_Functional_Ctypes_AzureKinect(unittest.TestCase):
         with self.lock:
             
             # Get buffer size requirement.
-            buffer_size = ctypes.c_ulonglong(0)
+            buffer_size = ctypes.c_size_t(0)
             buffer = ctypes.c_uint8(0)
             status = k4a._bindings.k4a.k4a_device_get_raw_calibration(
                 self.device_handle, ctypes.byref(buffer), ctypes.byref(buffer_size))
