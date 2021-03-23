@@ -28,7 +28,9 @@ A simple program to showcase the basic functions in the Azure Kinect API.
 
 Additional Prerequisites: None
 
-To run, open a command terminal and type: python the_basics.py
+To run, open a command terminal and type:  
+`python the_basics.py`  
+
 The expected output is a print out on the terminal of the device, capture, and image properties.
 
 ### image_transformations.py
@@ -36,12 +38,13 @@ The expected output is a print out on the terminal of the device, capture, and i
 A simple program to showcase the image transformation functions in the Azure Kinect API.
 
 Additional Prerequisites: 
-    Matplotlib installed via pip:  pip install matplotlib
-    Numpy installed via pip:       pip install numpy==1.18.5
+    - Matplotlib installed via pip:  pip install matplotlib
+    - Numpy installed via pip:       pip install numpy==1.18.5
     
 Note that numpy version 1.19.5 currently has a bug for Windows, so do not use it as of 2020/12/28.
 
-To run, open a command terminal and type: python image_transformations.py
+To run, open a command terminal and type:  
+`python image_transformations.py`
 
 The program transforms a color image into the depth camera space and displays the images in a figure.
 Close the figure to proceed.
@@ -57,9 +60,10 @@ Close the figure to proceed and the program exits.
 A simple program to continuously capture images from an Azure Kinect device and display the images.
 
 Additional Prerequisites:
-    Matplotlib installed via pip:  pip install matplotlib
+    - Matplotlib installed via pip:  pip install matplotlib
     
-To run, open a command terminal and type: python simple_viewer.py
+To run, open a command terminal and type:  
+`python simple_viewer.py`  
 
 The program creates a figure and continuously displays the captured images on the figure.
 Close the figure to end the program.

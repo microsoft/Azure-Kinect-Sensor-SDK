@@ -5,13 +5,13 @@
 # to manually copy them into the _libs/ folder.
 If (-not (Test-Path -Path "$PSScriptRoot\src\k4a\_libs\k4a.dll")) {
     Write-Host "File not found: $PSScriptRoot\src\k4a\_libs\k4a.dll"
-    Write-Host "Please manually copy the dll into that folder."
+    Write-Host "Please manually copy the k4a library into that folder."
     exit 1
 }
 
-If (-not(Test-Path -Path "$PSScriptRoot\src\k4a\_libs\depthengine.dll")) {
-    Write-Host "File not found: $PSScriptRoot\src\k4a\_libs\depthengine.dll"
-    Write-Host "Please manually copy the dll into that folder."
+If (-not(Test-Path -Path "$PSScriptRoot\src\k4a\_libs\depthengine*.dll")) {
+    Write-Host "File not found: $PSScriptRoot\src\k4a\_libs\depthengine*.dll"
+    Write-Host "Please manually copy the depth engine library into that folder."
     exit 1
 }
 

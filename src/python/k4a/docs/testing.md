@@ -22,28 +22,24 @@ The following are required in order to run the Python K4A tests.
 ### Setting up the test environment
 
 1. Copy the k4a and DE dynamic libraries (.dll or .so) into the folder src/python/k4a/src/k4a/_libs. 
-The file names MUST be k4a.dll and depthengine.dll in Windows, and
-the file names MUST be libk4a.so and libdepthengine.so in Linux.
-
-Note: If the libraries have different names, create a symlink with relative redirection. This may
-      require elevated permissions to create the symlinks.
+   The file names for the k4a library MUST be k4a.dll (for Windows) and libk4a.so (for Linux).
 
 2. In a command line terminal, create a Python virtual environment and activate it (do not include brackets):
-      cd <repo_root>/src/python/k4a
-      python -m venv <env_name>
+    `cd <repo_root>/src/python/k4a`  
+    `python -m venv <env_name>`  
       
-      Windows:
-      .\<env_name>\Scripts\activate
+    Windows:  
+    `.\<env_name>\Scripts\activate`  
       
-      Ubuntu:
-      source ./<env_name>/bin/activate
+    Ubuntu:  
+    `source ./<env_name>/bin/activate`  
       
 3. Install the k4a package in development mode. This is required in order to
    automatically install required Python packages for running the tests, as
    well as to install the code with the k4a package as the root of the 
    subpackages and modules. In the command below, make sure to include 
-   ".[test]" with dot and square brackets.
-      pip install -e .[test]
+   ".[test]" with dot and square brackets.  
+    `pip install -e .[test]`
 
 ### Running unit tests on the command line
 
@@ -51,9 +47,8 @@ Unit tests execute small pieces of code that run very fast (less than a second).
 These tests do not require any hardware to be attached.
 These tests should be run on every pull request.
       
-To run the unit tests:
-      
-      python -m pytest tests -k unit
+To run the unit tests:  
+    `python -m pytest tests -k _unit_`
       
 To capture the results, use an additional --junit-xml=./test_results.xml option.
 
@@ -64,13 +59,11 @@ There are 2 types of functional tests:
     1. functional_fast - fast functional tests that should be run on every pull request.
     2. functional - more comprehensive functional tests but these may take a long time.
       
-To run the functional_fast tests:
-
-      python -m pytest tests -k functional_fast
+To run the functional_fast tests:  
+    `python -m pytest tests -k functional_fast`
       
-To run all functional tests:
-
-      python -m pytest tests -k functional
+To run all functional tests:  
+    `python -m pytest tests -k functional`
       
 To capture the results, use an additional --junit-xml=./test_results.xml option.
 
@@ -80,9 +73,8 @@ Performance tests attempt to verify the performance of the device under stress,
 such as maintaining frame rates, etc. These tests require an attached device.
 These tests should be run on every pull request.
       
-To run the performance tests:
-      
-      python -m pytest tests -k perf
+To run the performance tests:   
+    `python -m pytest tests -k perf`
       
 To capture the results, use an additional --junit-xml=./test_results.xml option.
 
