@@ -41,6 +41,10 @@ The following dependencies are for both Windows and Linux, but in Windows they s
 automatically part of a Python installation, while on Linux they need to be installed
 separately:
 
+* Python module pip  
+   On Linux, install pip with:  
+   `sudo apt install python3-pip -y`  
+   
 * Python module venv  
    On Linux, install venv with:  
    `sudo apt install python3-venv -y`
