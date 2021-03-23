@@ -52,7 +52,7 @@ separately:
 The following tools are optional:
 
 * [doxygen](https://github.com/doxygen/doxygen)
-  Required for building documentation.
+  Required for building documentation. If not installed, html documentation will not be built.
 
 
 ## Building
@@ -65,16 +65,28 @@ The following tools are optional:
     >**Note:** To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
     >copied into the folder. Python will look for "k4a.dll" in Windows and "libk4a.so" in Linux.
 
+    >**Note:** An example of the files in _libs for Windows are: 
+    >- k4a.dll
+    >- depthengine\_2\_0.dll
+
 2. In a powershell terminal, run the script src/python/k4a/build_wheel.ps1.
    This will create the .whl file in a build/ folder.
 
 ### Building using a bash script (Linux)
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
-   The file name for the k4a library MUST be libk4a.so.
+   The file name for the k4a library MUST be libk4a.so. The depth engine library must be in a
+   folder named libk4a\<ver\>, where \<ver\> is the version major.minor of the k4a library
+   (e.g. _libs constains libk4a1.4/libdepthengine.so.2.0).
    
     >**Note:** To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
     >copied into the folder. Python will look for "k4a.dll" in Windows and "libk4a.so" in Linux.
+
+    >**Note:** An example of the files in _libs for Linux are: 
+    >- libk4a.so, a soft link to libk4a.1.4
+    >- libk4a.so.1.4, a soft link to libk4a.1.4.0
+    >- libk4a.so.1.4.1, the k4a library
+    >- libk4a1.4/depthengine.so.2.0, the depth engine library in a sub-folder
 
 2. In a terminal, source the script src/python/k4a/build_wheel.csh.
    This will create the .whl file in a build/ folder.
@@ -89,6 +101,14 @@ The following tools are optional:
    
     >**Note:** To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
     >copied into the folder. Python will look for "k4a.dll" in Windows and "libk4a.so" in Linux.
+
+    >**Note:** An example of the files in _libs for cross-platform compatibility are: 
+    >- libk4a.so, a soft link to libk4a.1.4
+    >- libk4a.so.1.4, a soft link to libk4a.1.4.0
+    >- libk4a.so.1.4.1, the k4a library
+    >- libk4a1.4/depthengine.so.2.0, the depth engine library in a sub-folder
+    >- k4a.dll
+    >- depthengine\_2\_0.dll
 
 2. In a command line terminal, create a Python virtual environment and activate it (do not include brackets):
     `cd <repo_root>/src/python/k4a`  

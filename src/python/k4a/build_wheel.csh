@@ -26,8 +26,8 @@ if [ ! -f "$DIR/src/k4a/_libs/libk4a.so" ] && [ ! -h "$DIR/src/k4a/_libs/libk4a.
     return 1
 fi
 
-if [ ! -f "$DIR/src/k4a/_libs/libdepthengine*" ] && [ ! -h "$DIR/src/k4a/_libs/libdepthengine*" ]; then
-    echo "File not found: $DIR/src/k4a/_libs/libdepthengine*"
+if [ ! -f "$DIR/src/k4a/_libs/libk4a"*"/libdepthengine"* ] && [ ! -h "$DIR/src/k4a/_libs/libk4a"*"/libdepthengine"* ]; then
+    echo "File not found: $DIR/src/k4a/_libs/libk4a*/libdepthengine*"
     echo "Please manually copy the depth engine library into that folder."
     return 1
 fi
