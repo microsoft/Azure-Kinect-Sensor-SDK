@@ -6,13 +6,18 @@ Kinect device using the Python API. This is not the fastest way to display
 a sequence of images; this is only meant to show how to capture frames
 in a sequence.
 
+Requirements:
+Users should install the following python packages before using this module:
+   matplotlib
+
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 Kinect For Azure SDK.
 '''
 
 # This package is used for displaying the images.
-# It is not part of the k4a package and is not a hard requirement.
+# It is not part of the k4a package and is not a hard requirement for k4a.
+# Users need to install these packages in order to use this module.
 import matplotlib.pyplot as plt
 
 # This will import all the public symbols into the k4a namespace.
