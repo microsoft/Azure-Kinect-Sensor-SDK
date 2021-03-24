@@ -25,11 +25,11 @@ The following are required in order to run the Python K4A tests.
 
 ### Setting up the test environment
 
-1. Copy the k4a and DE dynamic libraries (.dll or .so) into the folder src/python/k4a/src/k4a/_libs. 
-   The file names for the k4a library MUST be k4a.dll (for Windows) and libk4a.so (for Linux).  
+1. Copy the k4a and depth engine dynamic libraries (.dll or .so) into the folder 
+   src/python/k4a/src/k4a/_libs. 
 
    >**Note:** Read [building.md](./building.md) for more information on how to copy the libraries into
-   >the _libs folder. The file names and folder structure are slightly different in Windows and Linux.  
+   >the _libs folder. The file names are slightly different in Windows and Linux.  
 
 2. In a command line terminal, create a Python virtual environment and activate it (do not include brackets):  
     `cd <repo_root>/src/python/k4a`  

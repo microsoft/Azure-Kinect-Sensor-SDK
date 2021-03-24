@@ -62,8 +62,8 @@ The following tools are optional:
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs. 
    The file name for the k4a library MUST be k4a.dll.
    
-    >**Note:** To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
-    >copied into the folder. Python will look for "k4a.dll" in Windows and "libk4a.so" in Linux.
+    >**Note:** To create a Windows-only wheel, the .dll for Windows need to copied into the folder. 
+    >Python will look for "k4a.dll" which will also load the depth engine dll.
 
     >**Note:** An example of the files in _libs for Windows are: 
     >- k4a.dll
@@ -79,14 +79,14 @@ The following tools are optional:
    folder named libk4a\<ver\>, where \<ver\> is the version major.minor of the k4a library
    (e.g. _libs constains libk4a1.4/libdepthengine.so.2.0).
    
-    >**Note:** To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
-    >copied into the folder. Python will look for "k4a.dll" in Windows and "libk4a.so" in Linux.
+    >**Note:** To create a Linux-only wheel, the the .so for Linux need to copied into the folder. 
+    >Python will look for "libk4a.so" in Linux which will also load the depth engine dll.
 
     >**Note:** An example of the files in _libs for Linux are: 
     >- libk4a.so, a soft link to libk4a.1.4
     >- libk4a.so.1.4, a soft link to libk4a.1.4.0
     >- libk4a.so.1.4.1, the k4a library
-    >- libk4a1.4/depthengine.so.2.0, the depth engine library in a sub-folder
+    >- depthengine.so.2.0, the depth engine library in a sub-folder
 
 2. In a terminal, source the script src/python/k4a/build_wheel.csh.
    This will create the .whl file in a build/ folder.
@@ -105,8 +105,8 @@ The following tools are optional:
     >**Note:** An example of the files in _libs for cross-platform compatibility are: 
     >- libk4a.so, a soft link to libk4a.1.4
     >- libk4a.so.1.4, a soft link to libk4a.1.4.0
-    >- libk4a.so.1.4.1, the k4a library
-    >- libk4a1.4/depthengine.so.2.0, the depth engine library in a sub-folder
+    >- libk4a.so.1.4.1
+    >- depthengine.so.2.0
     >- k4a.dll
     >- depthengine\_2\_0.dll
 
