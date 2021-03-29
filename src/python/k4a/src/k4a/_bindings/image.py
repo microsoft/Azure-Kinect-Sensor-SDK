@@ -411,7 +411,7 @@ class Image:
         width_pixels = _ctypes.c_int(width_pixels_custom)
         height_pixels = _ctypes.c_int(height_pixels_custom)
         stride_bytes = _ctypes.c_int(stride_bytes_custom)
-        size_bytes = _ctypes.c_int(size_bytes_custom)
+        size_bytes = _ctypes.c_size_t(size_bytes_custom)
 
         # Use the ndarray sizes if the custom size info is not passed in.
         if width_pixels == 0:
@@ -421,7 +421,7 @@ class Image:
             height_pixels = _ctypes.c_int(arr.shape[1])
 
         if size_bytes == 0:
-            size_bytes = _ctypes.c_int(arr.itemsize * arr.size)
+            size_bytes = _ctypes.c_size_t(arr.itemsize * arr.size)
 
         if len(arr.shape) > 2 and stride_bytes == 0:
             stride_bytes = _ctypes.c_int(arr.shape[2])

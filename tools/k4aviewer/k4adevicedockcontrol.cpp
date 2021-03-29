@@ -447,11 +447,6 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
                          __FILE__,
                          __LINE__,
                          "The selected image format only supports color mode resolution up to 720p.");
-                K4AViewerLogManager::Instance()
-                    .Log(K4A_LOG_LEVEL_WARNING,
-                         __FILE__,
-                         __LINE__,
-                         "The selected image format only supports color mode resolution up to 720p.");
             }
         }
 
@@ -641,10 +636,6 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
         if (m_config.depth_mode_id == K4A_DEPTH_MODE_WFOV_UNBINNED)
         {
             m_config.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
-            K4AViewerLogManager::Instance().Log(K4A_LOG_LEVEL_WARNING,
-                                                __FILE__,
-                                                __LINE__,
-                                                "The selected depth mode only supports up to 15 FPS.");
             K4AViewerLogManager::Instance().Log(K4A_LOG_LEVEL_WARNING,
                                                 __FILE__,
                                                 __LINE__,

@@ -22,13 +22,13 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 # to manually copy them into the _libs/ folder.
 if [ ! -f "$DIR/src/k4a/_libs/libk4a.so" ] && [ ! -h "$DIR/src/k4a/_libs/libk4a.so" ]; then
     echo "File not found: $DIR/src/k4a/_libs/libk4a.so"
-    echo "Please manually copy the library into that folder."
+    echo "Please manually copy the k4a library into that folder."
     return 1
 fi
 
-if [ ! -f "$DIR/src/k4a/_libs/libdepthengine.so" ] && [ ! -h "$DIR/src/k4a/_libs/libdepthengine.so" ]; then
-    echo "File not found: $DIR/src/k4a/_libs/libdepthengine.so"
-    echo "Please manually copy the library into that folder."
+if [ ! -f "$DIR/src/k4a/_libs/libdepthengine"* ] && [ ! -h "$DIR/src/k4a/_libs/libdepthengine"* ]; then
+    echo "File not found: $DIR/src/k4a/_libs/libdepthengine*"
+    echo "Please manually copy the depth engine library into that folder."
     return 1
 fi
 
@@ -59,6 +59,8 @@ if command -v doxygen &> /dev/null
 then
     mkdir ./build/docs
     doxygen ./Doxyfile
+else
+    echo "doxygen not found, skipping building the documentation."
 fi
 
 # Create a convenient documentation.html that redirects to the index.html that doxygen generates.
@@ -74,3 +76,5 @@ echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://ww
 # Deactivate virtual environment and delete it.
 deactivate
 rm -rf "temp_build_venv"
+
+echo "Done creating k4a package wheel."

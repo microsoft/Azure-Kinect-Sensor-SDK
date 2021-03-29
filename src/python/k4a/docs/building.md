@@ -28,7 +28,7 @@ The following dependencies are for both Windows and Linux:
   
 * [k4a library](../../../../docs/building.md)
   The k4a library can be built from the repository or the SDK can be downloaded
-  for the binary. The Windows library is k4a.dll, and the Linux library is k4a.so.
+  for the binary. The Windows library is k4a.dll, and the Linux library is libk4a.so.
   The k4a binary needs to be copied to the host system and added 
   to the path src/python/k4a/src/k4a/_libs in this repository before building.
 
@@ -37,25 +37,36 @@ The following dependencies are for both Windows and Linux:
   SDK installer. The DE binary needs to be copied to the host system and added 
   to the path src/python/k4a/src/k4a/_libs in this repository before building.
 
+The following dependencies are for both Windows and Linux, but in Windows they seems to be
+automatically part of a Python installation, while on Linux they need to be installed
+separately:
+
+* Python module pip  
+   On Linux, install pip with:  
+   `sudo apt install python3-pip -y`  
+   
+* Python module venv  
+   On Linux, install venv with:  
+   `sudo apt install python3-venv -y`
+
 The following tools are optional:
 
 * [doxygen](https://github.com/doxygen/doxygen)
-  Required for building documentation.
+  Required for building documentation. If not installed, html documentation will not be built.
 
 
 ## Building
 
 ### Building using a powershell script (Windows)
 
-1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
-   The file names MUST be k4a.dll and depthengine.dll. 
+1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs. 
+   The file name for the k4a library MUST be k4a.dll.
    
-   Note: To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
-         copied into the folder.
-   Note: If the dlls have different names, create a symlink with relative redirection. This may
-         require elevated permissions to create the symlink as well as run build_wheel.ps1.
-   Note: If the .so have different names, create a symlink with relative redirection. This may
-         require elevated permissions to create the symlink as well as run build_wheel.csh.
+    >**Note:** Python will look for "k4a.dll" in Windows to load the k4a library, 
+    >which will then load the depth engine dll.
+    >An example of the files to put in \_libs/ for Windows are: 
+    >- k4a.dll
+    >- depthengine\_2\_0.dll
 
 2. In a powershell terminal, run the script src/python/k4a/build_wheel.ps1.
    This will create the .whl file in a build/ folder.
@@ -63,53 +74,60 @@ The following tools are optional:
 ### Building using a bash script (Linux)
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
-   The file names MUST be libk4a.so and libdepthengine.so.
+   The file name for the k4a library MUST be libk4a.so.
    
-   Note: To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
-         copied into the folder.
-   Note: If the dlls have different names, create a symlink with relative redirection. This may
-         require elevated permissions to create the symlink as well as run build_wheel.ps1.
-   Note: If the .so have different names, create a symlink with relative redirection. This may
-         require elevated permissions to create the symlink as well as run build_wheel.csh.
+    >**Note:** Python will look for "libk4a.so" in Linux to load the k4a library,
+    >which will then load the depth engine dll.
+    >An example of the files to put in \_libs/ for Linux are:  
+    >- libk4a.so (link) -> libk4a.so.1.4
+    >- libk4a.so.1.4 (link) -> libk4a.1.4.1
+    >- libk4a.so.1.4.1
+    >- depthengine.so.2.0
 
 2. In a terminal, source the script src/python/k4a/build_wheel.csh.
    This will create the .whl file in a build/ folder.
    
-   cd <repo_root>/src/python/k4a
-   source build_wheel.csh
+    `cd <repo_root>/src/python/k4a`  
+    `source build_wheel.csh`  
    
 ### Building using a command line terminal (cross platform)
 
 1. Copy the k4a and DE binaries into the folder src/python/k4a/src/k4a/_libs.
-   The file names MUST be k4a.dll and depthengine.dll in Windows, and
-   the file names MUST be libk4a.so and libdepthengine.so in Linux.
+   The file names for the k4a library MUST be k4a.dll (for Windows) and libk4a.so (for Linux).
    
-   Note: To create a cross-platform wheel, the .dll for Windows and the .so for Linux need to
-         copied into the folder.
-   Note: If the dlls have different names, create a symlink with relative redirection. This may
-         require elevated permissions to create the symlink as well as run build_wheel.ps1.
-   Note: If the .so have different names, create a symlink with relative redirection. This may
-         require elevated permissions to create the symlink as well as run build_wheel.csh.
+    >**Note:** Python will look for "k4a.dll" in Windows and "libk4a.so" in Linux to
+    >load the k4a library, which will then load the depth engine dll.
+    >An example of the files to put in \_libs/ for cross-platform compatibility are: 
+    >- libk4a.so (link) -> libk4a.so.1.4
+    >- libk4a.so.1.4 (link) -> libk4a.1.4.1
+    >- libk4a.so.1.4.1
+    >- depthengine.so.2.0
+    >- k4a.dll
+    >- depthengine\_2\_0.dll
 
 2. In a command line terminal, create a Python virtual environment and activate it (do not include brackets):
-      cd <repo_root>/src/python/k4a
-      python -m venv <env_name>
-      ./<env_name>/Scripts/activate
+    `cd <repo_root>/src/python/k4a`  
+    `python -m venv <env_name>`  
+    `./<env_name>/Scripts/activate`  
       
 3. Build the .whl file and place it in a build/ folder.
-      pip install wheel
-      pip wheel . -w build
+    `pip install wheel`  
+    `pip wheel . -w build`  
 
-4. Deactivate the virtual environment and delete it.
-      ./<env_name>/Scripts/deactivate.bat
-      Delete the directory <env_name>
+4. Deactivate the virtual environment and delete it.  
+    `./<env_name>/Scripts/deactivate.bat`  
+    Delete the directory `<env_name>`.
       
 ### Building the HTML Documentation
 
-A Doxygen settings file is provided in the project directory. Run doxygen using the
-settings file to create the html documentation. 
+A Doxygen settings file is provided in the project directory.
 
-The build scripts will run doxygen as part of the build.
+1. Run doxygen using the settings file to create the html documentation.  
+    `doxygen Doxyfile`
+
+The output files are put in the build/docs/ folder.  The main page is build/docs/html/index.html. 
+
+The build scripts will also run doxygen as part of the build if doxygen is installed.
       
 ## Installing
 
@@ -118,6 +136,6 @@ The wheel file can be distributed and installed as follows.
 
 1. In a command line terminal, install the k4a python library via pip.
    Replace <k4a*.whl> with the name of the wheel file.
-      pip install <k4a*.whl>
+    `pip install <k4a*.whl>`
       
 Once installed, the user can "import k4a" in their python code.
