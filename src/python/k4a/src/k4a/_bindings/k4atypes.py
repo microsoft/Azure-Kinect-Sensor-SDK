@@ -516,8 +516,8 @@ def K4A_FAILED(result):
 #                                       const char *file,
 #                                       const int line,
 #                                       const char *message);
-_logging_message_cb = _ctypes.CFUNCTYPE(_ctypes.c_void_p,
-    _ctypes.c_void_p, _ctypes.c_int, _ctypes.c_char_p, 
+_logging_message_cb = _ctypes.CFUNCTYPE(None,
+    _ctypes.py_object, _ctypes.c_int, _ctypes.c_char_p, 
     _ctypes.c_int, _ctypes.c_char_p)
 
 

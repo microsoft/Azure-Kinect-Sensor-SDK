@@ -34,8 +34,7 @@ def logging_print_message(context_local,
 
     # Convert c_void_p to LogContext.
     if context_local is not None:
-        pyLogContext = context_local.value
-        formattedStr += str(pyLogContext.get_call_count()) + " "
+        formattedStr += str(context_local.get_call_count()) + " "
     
     formattedStr += str(k4a.ELogLevel(level)) + " in " + str(src_file, 'UTF-8') + " at line " + str(src_line) + ": " + str(message, 'UTF-8')
     print(formattedStr)
@@ -198,7 +197,7 @@ class Test_Functional_Fast_Ctypes_AzureKinect(unittest.TestCase):
     def test_functional_fast_ctypes_set_debug_message_handler_nocontext(self):
         status = k4a._bindings.k4a.k4a_set_debug_message_handler(
             logging_print_message,
-            ctypes.c_void_p(), 
+            None, 
             k4a.ELogLevel.TRACE
         )
         self.assertTrue(k4a.K4A_SUCCEEDED(status))

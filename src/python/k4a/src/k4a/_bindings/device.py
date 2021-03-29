@@ -74,10 +74,7 @@ def set_logging_callback(callback_func:logging_message_cb, context_local, loglev
     
     The context_local is a Python object that is passed to the DLL, which is then passed back
     to the callback function. If the user does not need a context, use None. In the callback
-    function, the context is passed in as a ctypes param object. To get back the context as a
-    Python object, extract the .value field, as follows:
-
-    python_object = context_local.value
+    function, the context is passed in as the same Python object that is passed to the DLL.
 
     @note When using a context, the context object or instance must exist for the lifetime
     of the loaded DLL. As such, a global context object is usually used for the entire lifetime
@@ -120,9 +117,7 @@ def set_logging_callback(callback_func:logging_message_cb, context_local, loglev
 
         # Convert py_object to LogContext.
         if context_local is not None:
-            pyLogContext = ctypes.cast(context_local, ctypes.py_object).value
-            if pyLogContext is not None:
-                formattedStr += str(pyLogContext.get_call_count()) + " "
+            formattedStr += str(context_local.get_call_count()) + " "
         
         formattedStr += str(k4a.ELogLevel(loglevel)) + " in " + str(src_filename, 'UTF-8') + " at line " + str(src_line) + ": " + str(message, 'UTF-8')
         print(formattedStr)

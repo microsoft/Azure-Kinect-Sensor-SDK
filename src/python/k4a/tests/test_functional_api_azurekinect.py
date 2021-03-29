@@ -8,6 +8,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 import unittest
 import copy
+import ctypes
 
 import numpy as np
 
@@ -35,9 +36,7 @@ def logging_callback(context_local, loglevel:k4a.ELogLevel, src_filename:str, sr
 
     # Convert py_object to LogContext.
     if context_local is not None:
-        pyLogContext = context_local.value
-        if pyLogContext is not None:
-            formattedStr += str(pyLogContext.get_call_count()) + " "
+        formattedStr += str(context_local.get_call_count()) + " "
     
     formattedStr += str(k4a.ELogLevel(loglevel)) + " in " + str(src_filename, 'UTF-8') + " at line " + str(src_line) + ": " + str(message, 'UTF-8')
     print(formattedStr)
