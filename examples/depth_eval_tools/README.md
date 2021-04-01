@@ -175,7 +175,9 @@
 ---
 ## OpenCV Dependency 
 
-   These example tools require both OpenCV and OpenCV Contrib to be installed. 
+   These example tools require both OpenCV and OpenCV Contrib to be installed prior to building the SDK. After installing OpenCV Contrib, the lib path in ```cmake/FindOpenCV.cmake``` will need to change from ```C:/opencv/build/x64/vc14/lib``` to ```C:/opencv/build/x64/vc16/lib```
+
+   If a prior version of OpenCV exists in ```C:\opencv```, remove it before running the following steps. 
 
    To build opencv and opencv_contrib from source follow these steps:
 
