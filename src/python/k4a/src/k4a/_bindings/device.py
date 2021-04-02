@@ -121,8 +121,8 @@ class Device:
         pass
 
     def __del__(self):
-
-        # Ensure that handle is closed.
+        self.stop_cameras()
+        self.stop_imu()
         self.close()
 
         del self.__device_handle
@@ -276,9 +276,13 @@ class Device:
             been deleted to ensure that all memory is freed.
         '''
 
-        self.stop_cameras()
-        self.stop_imu()
+        if self.__device_handle is None:
+            return
+
         k4a_device_close(self.__device_handle)
+
+        del self.__device_handle
+        self.__device_handle = None
 
     def get_capture(self, timeout_ms:int)->Capture:
         '''! Reads a sensor capture.
@@ -435,6 +439,9 @@ class Device:
         
         @see start_cameras
         '''
+        if self.__device_handle is None:
+            return
+
         k4a_device_stop_cameras(self.__device_handle)
 
     def start_imu(self)->EStatus:
@@ -469,6 +476,9 @@ class Device:
             in get_imu_sample(). Calling this function while another thread is
             in that function will result in that function returning a failure.
         '''
+        if self.__device_handle is None:
+            return
+
         k4a_device_stop_imu(self.__device_handle)
 
     def get_color_control(self, 
