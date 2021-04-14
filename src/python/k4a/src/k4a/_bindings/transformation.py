@@ -583,9 +583,9 @@ class Transformation:
             times its width in pixels.
 
         @remarks
-        - Each pixel of the output image consists of three int16_t values, 
-            totaling 6 bytes. The three int values are the X, Y, and Z values 
-            of the point.
+        - Each plane of the output image consists of the X, Y, and Z planar images of int16 samples.
+          If out is the output image, then out[:,:,1] corresponds to the X coordinates, 
+          out[:,:,2] corresponds to the Y coordinates, and out[:,:,3] is the Z depth image.
         '''
 
         # Create a custom image.
@@ -607,7 +607,7 @@ class Transformation:
             # The ndarray for a CUSTOM image format is a flat buffer.
             # Rewrite the ndarray to have 3 dimensions for X, Y, and Z points.
             buffer_ptr = k4a_image_get_buffer(point_cloud_image._image_handle)
-            array_type = ((_ctypes.c_uint16 * 3) * depth.width_pixels) * depth.height_pixels
+            array_type = ((_ctypes.c_int16 * 3) * depth.width_pixels) * depth.height_pixels
             point_cloud_image._data = _np.ctypeslib.as_array(array_type.from_address(
                 _ctypes.c_void_p.from_buffer(buffer_ptr).value))
 
