@@ -26,9 +26,7 @@ if __name__ == '__main__':
     # Save Point Cloud To Ascii Format File. Interleave the [X, Y, Z] channels into [x0, y0, z0, x1, y1, z1, ...]
     width, height, channels = xyz_image.data.shape
     xyz_data = np.empty((width * height, channels,), dtype=xyz_image.data.dtype)
-    xyz_data[:,0] = xyz_image.data[:,:,0].reshape(width*height)
-    xyz_data[:,1] = xyz_image.data[:,:,1].reshape(width*height)
-    xyz_data[:,2] = xyz_image.data[:,:,2].reshape(width*height)
+    xyz_data = xyz_image.data.reshape(height * width, channels)
     
     np.savetxt('data.txt', xyz_data, delimiter=' ', fmt='%u') # save ascii format (x y z\n x y z\n x y z\n ...)
 
