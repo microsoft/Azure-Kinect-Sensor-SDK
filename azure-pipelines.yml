@@ -103,7 +103,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Debug'
         vmImage: 'windows-2019'
-        UsesOpenCV: 'TRUE'
+        UsesOpenCV: 'FALSE'
       VS2019_x86-msvc_rel_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -111,7 +111,7 @@ jobs:
         MSBuildPlatform: 'x86'
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
-        UsesOpenCV: 'TRUE'
+        UsesOpenCV: 'FALSE'
   pool:
     vmImage: $(vmImage)
 
