@@ -4,20 +4,20 @@
 name: K4A-SDK-$(SourceBranchName)-$(Date:yyyyMMdd)-$(Rev:rrr)
 
 schedules:
-# Every 30 minutes from 08:00 UTC (00:00 PST/01:00 PDT) to 10:00 UTC (02:00 PST/03:00 PDT)
-- cron: "*/30 08-10 * * *"
+# Every 60 minutes from 08:00 UTC (00:00 PST/01:00 PDT) to 10:00 UTC (02:00 PST/03:00 PDT)
+- cron: "*/60 08-10 * * *"
   displayName: 'Nightly Builds - Develop'
   branches:
     include:
     - develop
   always: true
 # Every 30 minutes from 11:00 UTC (03:00 PST/04:00 PDT) to 13:00 UTC (05:00 PST/06:00 PDT)
-- cron: "*/30 11-13 * * *"
-  displayName: 'Nightly Builds - Master'
-  branches:
-    include:
-    - master
-  always: true
+# - cron: "*/30 11-13 * * *"
+#   displayName: 'Nightly Builds - Master'
+#   branches:
+#     include:
+#     - master
+#   always: true
 
     
 variables:
@@ -63,23 +63,7 @@ jobs:
         MSBuildPlatform: 'x64'
         MSBuildConfiguration: 'Release'
         vmImage: 'vs2017-win2016'
-        UsesOpenCV: 'TRUE'
-      VS2017_x64-msvc_debug_msbuild:
-        CMakeArch: 'amd64'
-        BuildGenerator: 'Visual Studio 15 2017 Win64'
-        CMakeConfiguration: 'debug'
-        MSBuildPlatform: 'x64'
-        MSBuildConfiguration: 'Debug'
-        vmImage: 'vs2017-win2016'
-        UsesOpenCV: 'TRUE'
-      VS2017_x64-msvc_rel_msbuild:
-        CMakeArch: 'amd64'
-        BuildGenerator: 'Visual Studio 15 2017 Win64'
-        CMakeConfiguration: 'relwithdebinfo'
-        MSBuildPlatform: 'x64'
-        MSBuildConfiguration: 'Release'
-        vmImage: 'vs2017-win2016'
-        UsesOpenCV: 'TRUE'
+        UsesOpenCV: 'TRUE'      
       VS2017_x86-msvc_debug_ninja:
         CMakeArch: 'x86'
         BuildGenerator: 'Ninja'
@@ -112,6 +96,22 @@ jobs:
         MSBuildConfiguration: 'Release'
         vmImage: 'windows-2019'
         UsesOpenCV: 'TRUE'
+      VS2019_x86-msvc_debug_ninja:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'debug'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Debug'
+        vmImage: 'windows-2019'
+        UsesOpenCV: 'FALSE'
+      VS2019_x86-msvc_rel_ninja:
+        CMakeArch: 'x86'
+        BuildGenerator: 'Ninja'
+        CMakeConfiguration: 'relwithdebinfo'
+        MSBuildPlatform: 'x86'
+        MSBuildConfiguration: 'Release'
+        vmImage: 'windows-2019'
+        UsesOpenCV: 'FALSE'
   pool:
     vmImage: $(vmImage)
 
