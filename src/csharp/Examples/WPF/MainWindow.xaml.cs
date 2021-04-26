@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
@@ -42,13 +43,32 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WPFViewer
         {
             using (Device device = Device.Open(0))
             {
+                // We need to provide mode ids for color, depth and fps for the device configuration passed to the device start cameras method.
+
+                // 1. Get the available modes for device using the get modes methods.
+                List<ColorModeInfo> colorModes = device.GetColorModes();
+                List<FPSModeInfo> fpsModes = device.GetFPSModes();
+                List<DepthModeInfo> depthModes = device.GetDepthModes();
+
+                // 2. For this example, let's find the first color mode with an image height of at least 1080.
+                ColorModeInfo colorModeInfo = colorModes.Find(c => c.Height >= 1080);
+
+                // 3. For this example, let's find the first depth mode with an image height of at least 512 and a horizontal fov of at least 120.
+                DepthModeInfo depthModeInfo = depthModes.Find(d => d.Height >= 512 && d.HorizontalFOV >= 120);
+
+                // 4. For this example, let's find the fps mode with the highest frames per second.
+                fpsModes.Sort((a, b) => b.FPS.CompareTo(a.FPS));
+                FPSModeInfo fpsModeInfo = fpsModes.Find(f => f.ModeId != 0);
+
+                // 5. If either a color or depth mode was found that met our example conditions and as long as there was at least one fps mode (there should always be),
+                // then the mode ids will be valid parameters for the device configuration passed into the device start camera function.
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorResolution = ColorResolution.R720p,
-                    DepthMode = DepthMode.WFOV_2x2Binned,
+                    ColorModeId = colorModeInfo.ModeId,
+                    DepthModeId = depthModeInfo.ModeId,
                     SynchronizedImagesOnly = true,
-                    CameraFPS = FPS.FPS30,
+                    FPSModeId = fpsModeInfo.ModeId,
                 });
 
                 int colorWidth = device.GetCalibration().ColorCameraCalibration.ResolutionWidth;

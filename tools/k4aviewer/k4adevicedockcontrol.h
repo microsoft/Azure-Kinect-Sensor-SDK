@@ -16,10 +16,13 @@
 //
 #include "ik4adockcontrol.h"
 #include "k4adatasource.h"
-#include "k4amicrophone.h"
 #include "k4apollingthread.h"
 #include "k4aviewersettingsmanager.h"
 #include "k4awindowset.h"
+
+#ifdef K4A_INCLUDE_AUDIO
+#include "k4amicrophone.h"
+#endif
 
 namespace k4aviewer
 {
@@ -84,8 +87,10 @@ private:
     bool StartCameras();
     void StopCameras();
 
+#ifdef K4A_INCLUDE_AUDIO
     bool StartMicrophone();
     void StopMicrophone();
+#endif
 
     bool StartImu();
     void StopImu();
@@ -110,7 +115,10 @@ private:
     bool m_imuAbortInProgress = false;
 
     std::string m_deviceSerialNumber;
+
+#ifdef K4A_INCLUDE_AUDIO
     std::shared_ptr<K4AMicrophone> m_microphone;
+#endif
 
     K4ADataSource<k4a::capture> m_cameraDataSource;
     K4ADataSource<k4a_imu_sample_t> m_imuDataSource;

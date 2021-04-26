@@ -8,7 +8,6 @@
 #include <k4a/k4a.h>
 #include <k4arecord/playback.h>
 #include <k4ainternal/matroska_read.h>
-#include <k4ainternal/common.h>
 
 using namespace k4arecord;
 using namespace LIBMATROSKA_NAMESPACE;
@@ -153,8 +152,8 @@ k4a_result_t k4a_playback_get_calibration(k4a_playback_t playback_handle, k4a_ca
         buffer[buffer.size() - 1] = '\0';
         k4a_result_t result = k4a_calibration_get_from_raw(buffer.data(),
                                                            buffer.size(),
-                                                           context->record_config.depth_mode,
-                                                           context->record_config.color_resolution,
+                                                           context->record_config.depth_mode_info.mode_id,
+                                                           context->record_config.color_mode_info.mode_id,
                                                            context->device_calibration.get());
         if (K4A_FAILED(result))
         {

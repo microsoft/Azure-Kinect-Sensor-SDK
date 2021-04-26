@@ -18,25 +18,43 @@ from os import linesep as _newline
 import platform as _platform
 
 
-# Determine the calling convention to use.
-_IS_WINDOWS = 'Windows' == _platform.system()
-if _IS_WINDOWS:
-    _FUNCTYPE = _ctypes.CFUNCTYPE
-else:
-    _FUNCTYPE = _ctypes.CFUNCTYPE
+'''! The ABI version of the SDK implementation.
+
+@remarks This must be equivalent to the value in k4atypes.h.
+
+@note Users should not modify this value.
+'''
+K4A_ABI_VERSION = 1
+
+
+'''! The index to use to connect to a default device.
+
+@note Users should not modify this value.
+'''
+K4A_DEVICE_DEFAULT = 0
+
+
+'''! The value to use in functions that accept a timeout argument to signify to
+the function to wait forever.
+
+@note Users should not modify this value.
+'''
+K4A_WAIT_INFINITE = -1
 
 
 @_unique
 class EStatus(_IntEnum):
     '''! Result code returned by Azure Kinect APIs.
 
-    Name              | Description
-    ----------------- | -------------------------------------------------------
-    EStatus.SUCCEEDED | Successful status.
-    EStatus.FAILED    | Failed status.
+    Name                | Description
+    ------------------- | -----------------------------------------------------
+    EStatus.SUCCEEDED   | Successful status.
+    EStatus.FAILED      | Failed status.
+    EStatus.UNSUPPORTED | Unsupported operation.
     '''
     SUCCEEDED = 0
     FAILED = _auto()
+    UNSUPPORTED = _auto()
 
 
 @_unique
@@ -48,10 +66,12 @@ class EBufferStatus(_IntEnum):
     EBufferStatus.SUCCEEDED         | Successful buffer request status.
     EBufferStatus.FAILED            | Failed buffer request status.
     EBufferStatus.BUFFER_TOO_SMALL  | Buffer is too small.
+    EBufferStatus.UNSUPPORTED       | Unsupported operation.
     '''
     SUCCEEDED = 0
     FAILED = _auto()
     BUFFER_TOO_SMALL = _auto()
+    UNSUPPORTED = _auto()
 
 
 @_unique
@@ -63,10 +83,12 @@ class EWaitStatus(_IntEnum):
     EWaitStatus.SUCCEEDED           | Successful result status.
     EWaitStatus.FAILED              | Failed result status.
     EWaitStatus.TIMEOUT             | The request timed out.
+    EWaitStatus.UNSUPPORTED         | Unsupported operation.
     '''
     SUCCEEDED = 0
     FAILED = _auto()
     TIMEOUT = _auto()
+    UNSUPPORTED = _auto()
 
 
 @_unique
@@ -91,55 +113,22 @@ class ELogLevel(_IntEnum):
 
 
 @_unique
-class EDepthMode(_IntEnum):
-    '''! Depth sensor capture modes.
+class EDeviceCapabilities(_IntEnum):
+    '''! Defines capabilities of a device. 
 
-    See the hardware specification for additional details on the field of view
-    and supported frame rates for each mode.
-
-    NFOV and WFOV denote Narrow and Wide Field of View configurations.
-
-    Binned modes reduce the captured camera resolution by combining adjacent
-    sensor pixels into a bin.
+    @note This is used in bitmaps so the values should take on powers of 2.
 
     Name                            | Description
     ------------------------------- | -----------------------------------------
-    EDepthMode.OFF                  | Depth sensor will be turned off.
-    EDepthMode.NFOV_2X2BINNED       | Depth and Active IR captured at 320x288.
-    EDepthMode.NFOV_UNBINNED        | Depth and Active IR captured at 640x576.
-    EDepthMode.WFOV_2X2BINNED       | Depth and Active IR captured at 512x512.
-    EDepthMode.WFOV_UNBINNED        | Depth and Active IR captured at 1024x1024.
-    EDepthMode.PASSIVE_IR           | Passive IR only, captured at 1024x1024.
+    EDeviceCapabilities.DEPTH       | The device has a depth sensor.
+    EDeviceCapabilities.COLOR       | The device has a color camera.
+    EDeviceCapabilities.IMU         | The device has an IMU.
+    EDeviceCapabilities.MICROPHONE  | The device has a microphone.
     '''
-    OFF = 0
-    NFOV_2X2BINNED = _auto()
-    NFOV_UNBINNED = _auto()
-    WFOV_2X2BINNED = _auto()
-    WFOV_UNBINNED = _auto()
-    PASSIVE_IR = _auto()
-
-
-@_unique
-class EColorResolution(_IntEnum):
-    '''! Color sensor resolutions, width * height and aspect ratio.
-
-    Name                            | Description
-    ------------------------------- | -----------------------------------------
-    EColorResolution.OFF            | Color camera will be turned off.
-    EColorResolution.RES_720P       | 1280 * 720  16:9.
-    EColorResolution.RES_1080P      | 1920 * 1080 16:9.
-    EColorResolution.RES_1440P      | 2560 * 1440 16:9.
-    EColorResolution.RES_1536P      | 2048 * 1536 4:3.
-    EColorResolution.RES_2160P      | 3840 * 2160 16:9.
-    EColorResolution.RES_3072P      | 4096 * 3072 4:3.
-    '''
-    OFF = 0
-    RES_720P = _auto()
-    RES_1080P = _auto()
-    RES_1440P = _auto()
-    RES_1536P = _auto()
-    RES_2160P = _auto()
-    RES_3072P = _auto()
+    DEPTH = 1
+    COLOR = 2
+    IMU = 4
+    MICROPHONE = 8
 
 
 @_unique
@@ -271,26 +260,6 @@ class ETransformInterpolationType(_IntEnum):
     '''
     NEAREST = 0
     LINEAR = _auto()
-
-
-@_unique
-class EFramesPerSecond(_IntEnum):
-    '''! Color and depth sensor frame rate.
-
-    This enumeration is used to select the desired frame rate to operate the
-    cameras. The actual frame rate may vary slightly due to dropped data, 
-    synchronization variation between devices, clock accuracy, or if the camera
-    exposure priority mode causes reduced frame rate.
-
-    Name                            | Description
-    ------------------------------- | -----------------------------------------
-    EFramesPerSecond.FPS_5          | 5 frames per second.
-    EFramesPerSecond.FPS_15         | 15 frames per second.
-    EFramesPerSecond.FPS_30         | 30 frames per second.
-    '''
-    FPS_5 = 0
-    FPS_15 = _auto()
-    FPS_30 = _auto()
 
 
 @_unique
@@ -547,24 +516,24 @@ def K4A_FAILED(result):
 #                                       const char *file,
 #                                       const int line,
 #                                       const char *message);
-logging_message_cb = _FUNCTYPE(None,
-    _ctypes.c_void_p, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char), 
-    _ctypes.c_int, _ctypes.POINTER(_ctypes.c_char))
+_logging_message_cb = _ctypes.CFUNCTYPE(None,
+    _ctypes.py_object, _ctypes.c_int, _ctypes.c_char_p, 
+    _ctypes.c_int, _ctypes.c_char_p)
 
 
 #typedef void(k4a_memory_destroy_cb_t)(void *buffer, void *context);
-_memory_destroy_cb = _FUNCTYPE(
+_memory_destroy_cb = _ctypes.CFUNCTYPE(
     None, _ctypes.c_void_p, _ctypes.c_void_p)
 
 
 #typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
-_memory_allocate_cb = _FUNCTYPE(
+_memory_allocate_cb = _ctypes.CFUNCTYPE(
     _ctypes.c_uint8, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_void_p))
 
 
 # K4A_DECLARE_HANDLE(handle_k4a_device_t);
 class __handle_k4a_device_t(_ctypes.Structure):
-     _fields_= [
+     _fields_ = [
         ("_rsvd", _ctypes.c_size_t),
     ]
 _DeviceHandle = _ctypes.POINTER(__handle_k4a_device_t)
@@ -572,7 +541,7 @@ _DeviceHandle = _ctypes.POINTER(__handle_k4a_device_t)
 
 # K4A_DECLARE_HANDLE(handle_k4a_capture_t);
 class __handle_k4a_capture_t(_ctypes.Structure):
-     _fields_= [
+     _fields_ = [
         ("_rsvd", _ctypes.c_size_t),
     ]
 _CaptureHandle = _ctypes.POINTER(__handle_k4a_capture_t)
@@ -580,7 +549,7 @@ _CaptureHandle = _ctypes.POINTER(__handle_k4a_capture_t)
 
 # K4A_DECLARE_HANDLE(handle_k4a_image_t);
 class __handle_k4a_image_t(_ctypes.Structure):
-     _fields_= [
+     _fields_ = [
         ("_rsvd", _ctypes.c_size_t),
     ]
 _ImageHandle = _ctypes.POINTER(__handle_k4a_image_t)
@@ -588,10 +557,279 @@ _ImageHandle = _ctypes.POINTER(__handle_k4a_image_t)
 
 # K4A_DECLARE_HANDLE(k4a_transformation_t);
 class __handle_k4a_transformation_t(_ctypes.Structure):
-     _fields_= [
+     _fields_ = [
         ("_rsvd", _ctypes.c_size_t),
     ]
 _TransformationHandle = _ctypes.POINTER(__handle_k4a_transformation_t)
+
+
+class _CapabilitiesBitmap(_ctypes.Structure):
+    _fields_ = [
+        ("bHasDepth", _ctypes.c_uint32, 1),
+        ("bHasColor", _ctypes.c_uint32, 1),
+        ("bHasIMU", _ctypes.c_uint32, 1),
+        ("bHasMic", _ctypes.c_uint32, 1),
+        ("resv", _ctypes.c_uint32, 28),
+    ]
+
+class _Capabilities(_ctypes.Union):
+    _fields_ = [
+        ("value", _ctypes.c_uint32),
+        ("bitmap", _CapabilitiesBitmap),
+    ]
+
+'''! Device information.
+
+    Name           | Type  | Description
+    -------------- | ----- | ----------------------------------------------
+    struct_size    | int   | The size in bytes of this struct.
+    struct_version | int   | The version of this struct.
+    vendor_id      | int   | The unique vendor ID of the device.
+    device_id      | int   | The ID of the device (i.e. product ID, PID).
+    capabilities   | int   | A bitmap of device capabilities.
+    '''
+class DeviceInfo(_ctypes.Structure):
+    _fields_ = [
+        ("struct_size", _ctypes.c_uint32),
+        ("struct_version", _ctypes.c_uint32),
+        ("vendor_id", _ctypes.c_uint32),
+        ("device_id", _ctypes.c_uint32),
+        ("capabilities", _Capabilities),
+    ]
+
+    def __init__(self, 
+        struct_size:int=20, # Size of this struct in bytes.
+        struct_version:int=K4A_ABI_VERSION,
+        vendor_id:int=0,
+        device_id:int=0,
+        capabilities:int=0):
+
+        self.struct_size = struct_size
+        self.struct_version = struct_version
+        self.vendor_id = vendor_id
+        self.device_id = device_id
+        self.capabilities.value = capabilities
+
+    def __str__(self):
+        return ''.join([
+            'struct_size=%d, ',
+            'struct_version=%d, ',
+            'vendor_id=0x%04x, ',
+            'device_id=0x%04x, ',
+            'capabilities=%s']) % (
+            self.struct_size,
+            self.struct_version,
+            self.vendor_id,
+            self.device_id,
+            format(self.capabilities.value, '#b'))
+
+
+'''! Color mode information.
+
+    Name           | Type  | Description
+    -------------- | ----- | ----------------------------------------------
+    struct_size    | int   | The size in bytes of this struct.
+    struct_version | int   | The version of this struct.
+    mode_id        | int   | The mode identifier to use to select a color mode. 0 is reserved for off.
+    width          | int   | The image width in pixels.
+    height         | int   | The image height in pixels.
+    native_format  | EImageFormat | The default image format.
+    horizontal_fov | float | The approximate horizontal field of view in degrees.
+    vertical_fov   | float | The approximate vertical field of view in degrees.
+    min_fps        | int   | The minimum supported frame rate.
+    max_fps        | int   | The maximum supported frame rate.
+    '''
+class ColorModeInfo(_ctypes.Structure):
+    _fields_ = [
+        ("struct_size", _ctypes.c_uint32),
+        ("struct_version", _ctypes.c_uint32),
+        ("mode_id", _ctypes.c_uint32),
+        ("width", _ctypes.c_uint32),
+        ("height", _ctypes.c_uint32),
+        ("native_format", _ctypes.c_uint32),
+        ("horizontal_fov", _ctypes.c_float),
+        ("vertical_fov", _ctypes.c_float),
+        ("min_fps", _ctypes.c_uint32),
+        ("max_fps", _ctypes.c_uint32),
+    ]
+
+    def __init__(self, 
+        struct_size:int=40, # Size of this struct in bytes.
+        struct_version:int=K4A_ABI_VERSION,
+        mode_id:int=0,
+        width:int=0,
+        height:int=0,
+        native_format:EImageFormat=EImageFormat.COLOR_MJPG,
+        horizontal_fov:float=0,
+        vertical_fov:float=0,
+        min_fps:int=0,
+        max_fps:int=0):
+
+        self.struct_size = struct_size
+        self.struct_version = struct_version
+        self.mode_id = mode_id
+        self.width = width
+        self.height = height
+        self.native_format = native_format
+        self.horizontal_fov = horizontal_fov
+        self.vertical_fov = vertical_fov
+        self.min_fps = min_fps
+        self.max_fps = max_fps
+
+    def __str__(self):
+        return ''.join([
+            'struct_size=%d, ',
+            'struct_version=%d, ',
+            'mode_id=%d, ',
+            'width=%d, ',
+            'height=%d, ',
+            'native_format=%s, ',
+            'horizontal_fov=%f, ',
+            'vertical_fov=%f, ',
+            'min_fps=%d, ',
+            'max_fps=%d']) % (
+            self.struct_size,
+            self.struct_version,
+            self.mode_id,
+            self.width,
+            self.height,
+            self.native_format,
+            self.horizontal_fov,
+            self.vertical_fov,
+            self.min_fps,
+            self.max_fps)
+
+
+'''! Depth mode information.
+
+    Name            | Type  | Description
+    --------------- | ----- | ----------------------------------------------
+    struct_size     | int   | The size in bytes of this struct.
+    struct_version  | int   | The version of this struct.
+    mode_id         | int   | The mode identifier to use to select a depth mode. 0 is reserved for off.
+    passive_ir_only | bool  | True if only capturing passive IR.
+    width           | int   | The image width in pixels.
+    height          | int   | The image height in pixels.
+    native_format   | EImageFormat | The default image format.
+    horizontal_fov  | float | The approximate horizontal field of view in degrees.
+    vertical_fov    | float | The approximate vertical field of view in degrees.
+    min_fps         | int   | The minimum supported frame rate.
+    max_fps         | int   | The maximum supported frame rate.
+    min_range       | int   | The minimum expected depth value in millimeters.
+    max_range       | int   | The maximum expected depth value in millimeters.
+    '''
+class DepthModeInfo(_ctypes.Structure):
+    _fields_ = [
+        ("struct_size", _ctypes.c_uint32),
+        ("struct_version", _ctypes.c_uint32),
+        ("mode_id", _ctypes.c_uint32),
+        ("passive_ir_only", _ctypes.c_bool),
+        ("width", _ctypes.c_uint32),
+        ("height", _ctypes.c_uint32),
+        ("native_format", _ctypes.c_uint32),
+        ("horizontal_fov", _ctypes.c_float),
+        ("vertical_fov", _ctypes.c_float),
+        ("min_fps", _ctypes.c_uint32),
+        ("max_fps", _ctypes.c_uint32),
+        ("min_range", _ctypes.c_uint32),
+        ("max_range", _ctypes.c_uint32),
+    ]
+
+    def __init__(self, 
+        struct_size:int=52, # Size of this struct in bytes (in C).
+        struct_version:int=K4A_ABI_VERSION,
+        mode_id:int=0,
+        passive_ir_only:bool=False,
+        width:int=0,
+        height:int=0,
+        native_format:EImageFormat=EImageFormat.COLOR_MJPG,
+        horizontal_fov:float=0,
+        vertical_fov:float=0,
+        min_fps:int=0,
+        max_fps:int=0,
+        min_range:int=0,
+        max_range:int=0):
+
+        self.struct_size = struct_size
+        self.struct_version = struct_version
+        self.mode_id = mode_id
+        self.passive_ir_only = passive_ir_only
+        self.width = width
+        self.height = height
+        self.native_format = native_format
+        self.horizontal_fov = horizontal_fov
+        self.vertical_fov = vertical_fov
+        self.min_fps = min_fps
+        self.max_fps = max_fps
+
+    def __str__(self):
+        return ''.join([
+            'struct_size=%d, ',
+            'struct_version=%d, ',
+            'mode_id=%d, ',
+            'passive_ir_only=%s, ',
+            'width=%d, ',
+            'height=%d, ',
+            'native_format=%s, ',
+            'horizontal_fov=%f, ',
+            'vertical_fov=%f, ',
+            'min_fps=%d, ',
+            'max_fps=%d, ',
+            'min_range=%d, ',
+            'max_range=%d']) % (
+            self.struct_size,
+            self.struct_version,
+            self.mode_id,
+            self.passive_ir_only,
+            self.width,
+            self.height,
+            self.native_format,
+            self.horizontal_fov,
+            self.vertical_fov,
+            self.min_fps,
+            self.max_fps,
+            self.min_range,
+            self.max_range)
+
+
+'''! FPS mode information for specifying frame rates.
+
+    Name            | Type  | Description
+    --------------- | ----- | ----------------------------------------------
+    struct_size     | int   | The size in bytes of this struct.
+    struct_version  | int   | The version of this struct.
+    mode_id         | int   | The mode identifier to use to select an FPS mode.
+    fps             | int   | The frame rate per second.
+    '''
+class FPSModeInfo(_ctypes.Structure):
+    _fields_ = [
+        ("struct_size", _ctypes.c_uint32),
+        ("struct_version", _ctypes.c_uint32),
+        ("mode_id", _ctypes.c_uint32),
+        ("fps", _ctypes.c_uint32),
+    ]
+
+    def __init__(self, 
+        struct_size:int=16, # Size of this struct in bytes.
+        struct_version:int=K4A_ABI_VERSION,
+        mode_id:int=0,
+        fps:int=0):
+
+        self.struct_size = struct_size
+        self.struct_version = struct_version
+        self.mode_id = mode_id
+        self.fps = fps
+
+    def __str__(self):
+        return ''.join([
+            'struct_size=%d, ',
+            'struct_version=%d, ',
+            'mode_id=%d, ',
+            'fps=%d']) % (
+            self.struct_size,
+            self.struct_version,
+            self.mode_id,
+            self.fps)
 
 
 class DeviceConfiguration(_ctypes.Structure):
@@ -617,22 +855,22 @@ class DeviceConfiguration(_ctypes.Structure):
     </tr>
 
     <tr>
-    <td> color_resolution </td>
-    <td> EColorResolution </td>
+    <td> color_mode_id </td>
+    <td> int </td>
     <td> Image resolution to capture with the color camera.
     </td>
     </tr>
 
     <tr>
-    <td> depth_mode </td>
-    <td> EDepthMode </td>
+    <td> depth_mode_id </td>
+    <td> int </td>
     <td> Capture mode for the depth camera.
     </td>
     </tr>
 
     <tr>
-    <td> camera_fps </td>
-    <td> EFramesPerSecond </td>
+    <td> fps_mode_id </td>
+    <td> int </td>
     <td> Desired frame rate for the color and depth camera.
     </td>
     </tr>
@@ -700,11 +938,11 @@ class DeviceConfiguration(_ctypes.Structure):
     
     </table>
     '''
-    _fields_= [
+    _fields_ = [
         ("color_format", _ctypes.c_int),
-        ("color_resolution", _ctypes.c_int),
-        ("depth_mode", _ctypes.c_int),
-        ("camera_fps", _ctypes.c_int),
+        ("color_mode_id", _ctypes.c_uint32),
+        ("depth_mode_id", _ctypes.c_uint32),
+        ("fps_mode_id", _ctypes.c_uint32),
         ("synchronized_images_only", _ctypes.c_bool),
         ("depth_delay_off_color_usec", _ctypes.c_int32),
         ("wired_sync_mode", _ctypes.c_int),
@@ -714,9 +952,9 @@ class DeviceConfiguration(_ctypes.Structure):
 
     def __init__(self, 
         color_format:EImageFormat=EImageFormat.CUSTOM,
-        color_resolution:EColorResolution=EColorResolution.RES_720P,
-        depth_mode:EDepthMode=EDepthMode.OFF,
-        camera_fps:EFramesPerSecond=EFramesPerSecond.FPS_5,
+        color_mode_id:int=0, # 720P
+        depth_mode_id:int=0, # OFF
+        fps_mode_id:int=0, # FPS_0
         synchronized_images_only:bool=True,
         depth_delay_off_color_usec:int=0,
         wired_sync_mode:EWiredSyncMode=EWiredSyncMode.STANDALONE,
@@ -724,9 +962,9 @@ class DeviceConfiguration(_ctypes.Structure):
         disable_streaming_indicator:bool=False):
 
         self.color_format = color_format
-        self.color_resolution = color_resolution
-        self.depth_mode = depth_mode
-        self.camera_fps = camera_fps
+        self.color_mode_id = color_mode_id
+        self.depth_mode_id = depth_mode_id
+        self.fps_mode_id = fps_mode_id
         self.synchronized_images_only = synchronized_images_only
         self.depth_delay_off_color_usec = depth_delay_off_color_usec
         self.wired_sync_mode = wired_sync_mode
@@ -735,19 +973,19 @@ class DeviceConfiguration(_ctypes.Structure):
 
     def __str__(self):
         return ''.join([
-            'color_format=%d, ',
-            'color_resolution=%d, ',
-            'depth_mode=%d, ',
-            'camera_fps=%d, ',
+            'color_format=%s, ',
+            'color_mode_id=%d, ',
+            'depth_mode_id=%d, ',
+            'fps_mode_id=%d, ',
             'synchronized_images_only=%s, ',
             'depth_delay_off_color_usec=%d, ',
-            'wired_sync_mode=%d, ',
+            'wired_sync_mode=%s, ',
             'subordinate_delay_off_master_usec=%d, ',
             'disable_streaming_indicator=%s']) % (
             self.color_format,
-            self.color_resolution,
-            self.depth_mode,
-            self.camera_fps,
+            self.color_mode_id,
+            self.depth_mode_id,
+            self.fps_mode_id,
             self.synchronized_images_only,
             self.depth_delay_off_color_usec,
             self.wired_sync_mode,
@@ -767,7 +1005,7 @@ class CalibrationExtrinsics(_ctypes.Structure):
     rotation      | float * 9  | 3x3 Rotation matrix stored in row major order.
     translation   | float * 3  | Translation vector, x,y,z (in millimeters).
     '''
-    _fields_= [
+    _fields_ = [
         ("rotation", (_ctypes.c_float * 3) * 3),
         ("translation", _ctypes.c_float * 3),
     ]
@@ -846,7 +1084,7 @@ class CalibrationIntrinsicParam(_ctypes.Structure):
 
 
 class _CalibrationIntrinsicParameters(_ctypes.Union):
-    _fields_= [
+    _fields_ = [
         ("param", CalibrationIntrinsicParam),
         ("v", _ctypes.c_float * 15),
     ]
@@ -872,7 +1110,7 @@ class CalibrationIntrinsics(_ctypes.Structure):
     parameter_count | int              | Number of valid entries in parameters.
     parameters      | struct           | Calibration parameters.
     '''
-    _fields_= [
+    _fields_ = [
         ("type", _ctypes.c_int),
         ("parameter_count", _ctypes.c_uint),
         ("parameters", _CalibrationIntrinsicParameters),
@@ -900,7 +1138,7 @@ class CalibrationCamera(_ctypes.Structure):
     resolution_height | int                   | Resolution height of the calibration sensor.
     metric_radius     | float                 | Max FOV of the camera.
     '''
-    _fields_= [
+    _fields_ = [
         ("extrinsics", CalibrationExtrinsics),
         ("intrinsics", CalibrationIntrinsics),
         ("resolution_width", _ctypes.c_int),
@@ -923,12 +1161,12 @@ class CalibrationCamera(_ctypes.Structure):
 
 
 class _Calibration(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("depth_camera_calibration", CalibrationCamera),
         ("color_camera_calibration", CalibrationCamera),
         ("extrinsics", (CalibrationExtrinsics * ECalibrationType.NUM_TYPES) * ECalibrationType.NUM_TYPES),
-        ("depth_mode", _ctypes.c_int),
-        ("color_resolution", _ctypes.c_int),
+        ("depth_mode_id", _ctypes.c_int),
+        ("color_mode_id", _ctypes.c_int),
     ]
 
     def __str__(self):
@@ -944,10 +1182,10 @@ class _Calibration(_ctypes.Structure):
                 s = ''.join([s, 'extrinsics[%d][%d]=%s, ']) % (r, c, self.extrinsics[r][c].__str__())
 
         s = ''.join([s,
-            'depth_mode=%d, ',
-            'color_resolution=%d']) % (
-                self.depth_mode,
-                self.color_resolution
+            'depth_mode_id=%d, ',
+            'color_mode_id=%d']) % (
+                self.depth_mode_id,
+                self.color_mode_id
             )
 
         return s
@@ -962,7 +1200,7 @@ class Version(_ctypes.Structure):
     minor      | int     | Minor version; represents additional features, no regression from lower versions with same major version.
     iteration  | int     | Reserved.
     '''
-    _fields_= [
+    _fields_ = [
         ("major", _ctypes.c_uint32),
         ("minor", _ctypes.c_uint32),
         ("iteration", _ctypes.c_uint32),
@@ -987,7 +1225,7 @@ class HardwareVersion(_ctypes.Structure):
     firmware_build     | int     | Build type reported by the firmware.
     firmware_signature | int     | Signature type of the firmware.
     '''
-    _fields_= [
+    _fields_ = [
         ("rgb", Version),
         ("depth", Version),
         ("audio", Version),
@@ -1013,7 +1251,7 @@ class HardwareVersion(_ctypes.Structure):
 
 
 class _XY(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("x", _ctypes.c_float),
         ("y", _ctypes.c_float),
         ]
@@ -1027,7 +1265,7 @@ class _XY(_ctypes.Structure):
 
 
 class _Float2(_ctypes.Union):
-    _fields_= [
+    _fields_ = [
         ("xy", _XY),
         ("v", _ctypes.c_float * 2),
         ]
@@ -1040,7 +1278,7 @@ class _Float2(_ctypes.Union):
 
 
 class _XYZ(_ctypes.Structure):
-    _fields_= [
+    _fields_ = [
         ("x", _ctypes.c_float),
         ("y", _ctypes.c_float),
         ("z", _ctypes.c_float),
@@ -1056,7 +1294,7 @@ class _XYZ(_ctypes.Structure):
 
 
 class _Float3(_ctypes.Union):
-    _fields_= [
+    _fields_ = [
         ("xyz", _XYZ),
         ("v", _ctypes.c_float * 3)
     ]
@@ -1079,7 +1317,7 @@ class ImuSample(_ctypes.Structure):
     gyro_sample         | float * 3 | Gyro sample in radians per second.
     gyro_timestamp_usec | int       | Timestamp of the gyroscope in microseconds.
     '''
-    _fields_= [
+    _fields_ = [
         ("temperature", _ctypes.c_float),
         ("acc_sample", _Float3),
         ("acc_timestamp_usec", _ctypes.c_uint64),
@@ -1101,118 +1339,49 @@ class ImuSample(_ctypes.Structure):
             self.gyro_timestamp_usec)
 
 
-# An empty class for appending fields dynamically.
-class _EmptyClass:
-    
+class ColorControlCapability():
+    '''! Color control capabilities.
+
+    Name                | Type      | Description
+    ------------- | -------------------- | ---------------------------------------------
+    command       | EColorControlCommand | The type of color control command.
+    supports_auto | bool      | True if the capability supports auto-level.
+    min_value     | int       | The minimum value of the capability.
+    max_value     | int       | The maximum value of the capability.
+    step_value    | int       | The step value of the capability.
+    default_value | int       | The default value of the capability.
+    default_mode  | EColorControlMode | The default mode of the command, AUTO or MANUAL.
+    '''
+    def __init__(self, 
+        command:EColorControlCommand,
+        supports_auto:bool=True,
+        min_value:int=0,
+        max_value:int=0,
+        step_value:int=0,
+        default_value:int=0,
+        default_mode:EColorControlMode=EColorControlMode.AUTO):
+
+        self.command = command
+        self.supports_auto = supports_auto
+        self.min_value = min_value
+        self.max_value = max_value
+        self.step_value = step_value
+        self.default_value = default_value
+        self.default_mode = default_mode
+
     def __str__(self):
-        keys = list(self.__dict__.keys())
-        tempstr = ''
-
-        if len(keys) > 0:
-            for n in range(len(keys)-1):
-                tempstr = tempstr + str(keys[n]) + "=" + str(self.__dict__[keys[n]]) + ", "
-            tempstr = tempstr + str(keys[len(keys)-1]) + "=" + str(self.__dict__[keys[len(keys)-1]])
-
-        return tempstr
-
-
-# ############# Define global instances of device configurations. #############
-
-DEVICE_CONFIG_DISABLE_ALL = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_MJPG,
-    color_resolution = EColorResolution.OFF,
-    depth_mode = EDepthMode.OFF,
-    camera_fps = EFramesPerSecond.FPS_30,
-    synchronized_images_only = False,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-DEVICE_CONFIG_BGRA32_2160P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_2160P,
-    depth_mode = EDepthMode.WFOV_UNBINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
-    synchronized_images_only = True,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-DEVICE_CONFIG_BGRA32_2160P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_2160P,
-    depth_mode = EDepthMode.WFOV_2X2BINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
-    synchronized_images_only = True,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-DEVICE_CONFIG_BGRA32_2160P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_2160P,
-    depth_mode = EDepthMode.NFOV_UNBINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
-    synchronized_images_only = True,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-DEVICE_CONFIG_BGRA32_2160P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_2160P,
-    depth_mode = EDepthMode.NFOV_2X2BINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
-    synchronized_images_only = True,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-DEVICE_CONFIG_BGRA32_1080P_WFOV_UNBINNED_FPS15 = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_1080P,
-    depth_mode = EDepthMode.WFOV_UNBINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
-    synchronized_images_only = True,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-DEVICE_CONFIG_BGRA32_1080P_WFOV_2X2BINNED_FPS15 = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_1080P,
-    depth_mode = EDepthMode.WFOV_2X2BINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
-    synchronized_images_only = True,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-DEVICE_CONFIG_BGRA32_1080P_NFOV_UNBINNED_FPS15 = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_1080P,
-    depth_mode = EDepthMode.NFOV_UNBINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
-    synchronized_images_only = True,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
-
-DEVICE_CONFIG_BGRA32_1080P_NFOV_2X2BINNED_FPS15 = DeviceConfiguration(
-    color_format = EImageFormat.COLOR_BGRA32,
-    color_resolution = EColorResolution.RES_1080P,
-    depth_mode = EDepthMode.NFOV_2X2BINNED,
-    camera_fps = EFramesPerSecond.FPS_15,
-    synchronized_images_only = True,
-    depth_delay_off_color_usec = 0,
-    wired_sync_mode = EWiredSyncMode.STANDALONE,
-    subordinate_delay_off_master_usec = 0,
-    disable_streaming_indicator = False)
+        return ''.join([
+            'command=%s, ',
+            'supports_auto=%s, ',
+            'min_value=%d, ',
+            'max_value=%d, ',
+            'step_value=%d, ',
+            'default_value=%d, ',
+            'default_mode=%s']) % (
+            self.command,
+            self.supports_auto,
+            self.min_value,
+            self.max_value,
+            self.step_value,
+            self.default_value,
+            self.default_mode)

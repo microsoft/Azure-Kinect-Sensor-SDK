@@ -3,6 +3,7 @@
 
 #include "k4ainternal/transformation.h"
 #include <k4ainternal/logging.h>
+#include <k4ainternal/modes.h>
 
 k4a_result_t
 transformation_get_mode_specific_camera_calibration(const k4a_calibration_camera_t *raw_camera_calibration,
@@ -63,11 +64,11 @@ transformation_get_mode_specific_camera_calibration(const k4a_calibration_camera
 
 k4a_result_t
 transformation_get_mode_specific_depth_camera_calibration(const k4a_calibration_camera_t *raw_camera_calibration,
-                                                          const k4a_depth_mode_t depth_mode,
+                                                          const uint32_t depth_mode_id,
                                                           k4a_calibration_camera_t *mode_specific_camera_calibration)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, raw_camera_calibration == NULL);
-    // TODO: Read this from calibration data instead of hardcoding.
+
     if (K4A_FAILED(K4A_RESULT_FROM_BOOL(raw_camera_calibration->resolution_width == 1024 &&
                                         raw_camera_calibration->resolution_height == 1024)))
     {
@@ -79,7 +80,7 @@ transformation_get_mode_specific_depth_camera_calibration(const k4a_calibration_
         return K4A_RESULT_FAILED;
     }
 
-    switch (depth_mode)
+    switch (depth_mode_id)
     {
     case K4A_DEPTH_MODE_NFOV_2X2BINNED:
     {
@@ -127,7 +128,7 @@ transformation_get_mode_specific_depth_camera_calibration(const k4a_calibration_
 
 k4a_result_t
 transformation_get_mode_specific_color_camera_calibration(const k4a_calibration_camera_t *raw_camera_calibration,
-                                                          const k4a_color_resolution_t color_resolution,
+                                                          const uint32_t color_mode_id,
                                                           k4a_calibration_camera_t *mode_specific_camera_calibration)
 {
     if (raw_camera_calibration->resolution_width * 9 / 16 == raw_camera_calibration->resolution_height)
@@ -157,7 +158,7 @@ transformation_get_mode_specific_color_camera_calibration(const k4a_calibration_
         return K4A_RESULT_FAILED;
     }
 
-    switch (color_resolution)
+    switch (color_mode_id)
     {
     case K4A_COLOR_RESOLUTION_720P:
     {
@@ -215,7 +216,7 @@ transformation_get_mode_specific_color_camera_calibration(const k4a_calibration_
     }
     default:
     {
-        LOG_ERROR("Unexpected color resolution type %d.", color_resolution);
+        LOG_ERROR("Unexpected color resolution type %d.", color_mode_id);
         return K4A_RESULT_FAILED;
     }
     }

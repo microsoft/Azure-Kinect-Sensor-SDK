@@ -21,6 +21,8 @@ std::ostream &operator<<(std::ostream &s, const k4a_result_t &val)
         return s << "K4A_RESULT_SUCCEEDED";
     case K4A_RESULT_FAILED:
         return s << "K4A_RESULT_FAILED";
+    case K4A_RESULT_UNSUPPORTED:
+        return s << "K4A_RESULT_UNSUPPORTED";
     }
 
     return s;
@@ -36,6 +38,8 @@ std::ostream &operator<<(std::ostream &s, const k4a_buffer_result_t &val)
         return s << "K4A_BUFFER_RESULT_FAILED";
     case K4A_BUFFER_RESULT_TOO_SMALL:
         return s << "K4A_BUFFER_RESULT_TOO_SMALL";
+    case K4A_BUFFER_RESULT_UNSUPPORTED:
+        return s << "K4A_BUFFER_RESULT_UNSUPPORTED";
     }
 
     return s;
@@ -51,6 +55,8 @@ std::ostream &operator<<(std::ostream &s, const k4a_wait_result_t &val)
         return s << "K4A_WAIT_RESULT_FAILED";
     case K4A_WAIT_RESULT_TIMEOUT:
         return s << "K4A_WAIT_RESULT_TIMEOUT";
+    case K4A_WAIT_RESULT_UNSUPPORTED:
+        return s << "K4A_WAIT_RESULT_UNSUPPORTED";
     }
 
     return s;
@@ -121,6 +127,9 @@ int64_t k4a_unittest_get_max_sync_delay_ms(k4a_fps_t fps)
         break;
     case K4A_FRAMES_PER_SECOND_30:
         max_delay = 110;
+        break;
+    default:
+        max_delay = 0;
         break;
     }
     return max_delay;

@@ -130,6 +130,7 @@ typedef enum
     K4A_STREAM_RESULT_SUCCEEDED = 0, /**< The result was successful. */
     K4A_STREAM_RESULT_FAILED,        /**< The result was a failure. */
     K4A_STREAM_RESULT_EOF,           /**< The end of the data stream was reached. */
+    K4A_STREAM_RESULT_UNSUPPORTED,   /**< The result was unsupported. */
 } k4a_stream_result_t;
 
 /** Playback seeking positions.
@@ -170,14 +171,17 @@ typedef struct _k4a_record_configuration_t
     /** Image format used to record the color camera. */
     k4a_image_format_t color_format;
 
-    /** Image resolution used to record the color camera. */
-    k4a_color_resolution_t color_resolution;
+    /** Mode info used to record the color camera. */
+    k4a_color_mode_info_t color_mode_info;
 
-    /** Mode used to record the depth camera. */
-    k4a_depth_mode_t depth_mode;
+    /** Mode info used to record the depth camera. */
+    k4a_depth_mode_info_t depth_mode_info;
 
     /** Frame rate used to record the color and depth camera. */
-    k4a_fps_t camera_fps;
+    k4a_fps_mode_info_t fps_mode_info;
+
+    /** Vendor Id, Device Id and device Capabilities. */
+    k4a_device_info_t device_info;
 
     /** True if the recording contains Color camera frames. */
     bool color_track_enabled;

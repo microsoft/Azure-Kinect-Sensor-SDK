@@ -29,6 +29,7 @@ public:
     ~K4ASourceSelectionDockControl() override = default;
 
     K4ADockControlStatus Show() override;
+    static int SelectedDevice;
 
     K4ASourceSelectionDockControl(const K4ASourceSelectionDockControl &) = delete;
     K4ASourceSelectionDockControl(const K4ASourceSelectionDockControl &&) = delete;
@@ -41,8 +42,8 @@ private:
     void OpenDevice();
     void OpenRecording(const std17::filesystem::path &path);
 
-    int m_selectedDevice = -1;
     std::vector<std::pair<int, std::string>> m_connectedDevices;
+    int m_selectedDevice;
 
     K4AFilePicker m_filePicker;
 };

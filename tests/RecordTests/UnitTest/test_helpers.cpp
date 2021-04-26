@@ -28,8 +28,8 @@
 
 k4a_capture_t create_test_capture(uint64_t timestamp_us[3],
                                   k4a_image_format_t color_format,
-                                  k4a_color_resolution_t resolution,
-                                  k4a_depth_mode_t mode)
+                                  uint32_t color_mode_id,
+                                  uint32_t depth_mode_id)
 {
     k4a_capture_t capture = NULL;
     k4a_result_t result = k4a_capture_create(&capture);
@@ -37,9 +37,9 @@ k4a_capture_t create_test_capture(uint64_t timestamp_us[3],
 
     uint32_t width = 0;
     uint32_t height = 0;
-    if (resolution != K4A_COLOR_RESOLUTION_OFF)
+    if (color_mode_id != K4A_COLOR_RESOLUTION_OFF)
     {
-        EXIT_IF_FALSE(k4a_convert_resolution_to_width_height(resolution, &width, &height));
+        EXIT_IF_FALSE(k4a_convert_resolution_to_width_height((k4a_color_resolution_t)color_mode_id, &width, &height));
 
         uint32_t color_stride = 0;
         if (color_format == K4A_IMAGE_FORMAT_COLOR_NV12)
@@ -55,10 +55,10 @@ k4a_capture_t create_test_capture(uint64_t timestamp_us[3],
         k4a_image_release(color_image);
     }
 
-    if (mode != K4A_DEPTH_MODE_OFF)
+    if (depth_mode_id != K4A_DEPTH_MODE_OFF)
     {
-        EXIT_IF_FALSE(k4a_convert_depth_mode_to_width_height(mode, &width, &height));
-        if (mode != K4A_DEPTH_MODE_PASSIVE_IR)
+        EXIT_IF_FALSE(k4a_convert_depth_mode_to_width_height((k4a_depth_mode_t)depth_mode_id, &width, &height));
+        if (depth_mode_id != K4A_DEPTH_MODE_PASSIVE_IR)
         {
             k4a_image_t depth_image =
                 create_test_image(timestamp_us[1], K4A_IMAGE_FORMAT_DEPTH16, width, height, width * 2);
@@ -75,17 +75,18 @@ k4a_capture_t create_test_capture(uint64_t timestamp_us[3],
 bool validate_test_capture(k4a_capture_t capture,
                            uint64_t timestamp_us[3],
                            k4a_image_format_t color_format,
-                           k4a_color_resolution_t resolution,
-                           k4a_depth_mode_t mode)
+                           uint32_t color_mode_id,
+                           uint32_t depth_mode_id)
 {
 
     if (capture != NULL)
     {
-        if (resolution != K4A_COLOR_RESOLUTION_OFF)
+        if (color_mode_id != K4A_COLOR_RESOLUTION_OFF)
         {
             uint32_t width = 0;
             uint32_t height = 0;
-            EXIT_IF_FALSE(k4a_convert_resolution_to_width_height(resolution, &width, &height));
+            EXIT_IF_FALSE(
+                k4a_convert_resolution_to_width_height((k4a_color_resolution_t)color_mode_id, &width, &height));
 
             uint32_t color_stride = 0;
             if (color_format == K4A_IMAGE_FORMAT_COLOR_NV12)
@@ -122,13 +123,13 @@ bool validate_test_capture(k4a_capture_t capture,
             return false;
         }
 
-        if (mode != K4A_DEPTH_MODE_OFF)
+        if (depth_mode_id != K4A_DEPTH_MODE_OFF)
         {
             uint32_t width = 0;
             uint32_t height = 0;
-            EXIT_IF_FALSE(k4a_convert_depth_mode_to_width_height(mode, &width, &height));
+            EXIT_IF_FALSE(k4a_convert_depth_mode_to_width_height((k4a_depth_mode_t)depth_mode_id, &width, &height));
 
-            if (mode != K4A_DEPTH_MODE_PASSIVE_IR)
+            if (depth_mode_id != K4A_DEPTH_MODE_PASSIVE_IR)
             {
                 k4a_image_t depth_image = k4a_capture_get_depth_image(capture);
                 if (depth_image == NULL)

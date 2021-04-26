@@ -764,17 +764,12 @@ struct calibration : public k4a_calibration_t
      *
      * \sa k4a_calibration_get_from_raw
      */
-    static calibration get_from_raw(char *raw_calibration,
-                                    size_t raw_calibration_size,
-                                    k4a_depth_mode_t target_depth_mode,
-                                    k4a_color_resolution_t target_color_resolution)
+    static calibration
+    get_from_raw(char *raw_calibration, size_t raw_calibration_size, uint32_t depth_mode_id, uint32_t color_mode_id)
     {
         calibration calib;
-        k4a_result_t result = k4a_calibration_get_from_raw(raw_calibration,
-                                                           raw_calibration_size,
-                                                           target_depth_mode,
-                                                           target_color_resolution,
-                                                           &calib);
+        k4a_result_t result =
+            k4a_calibration_get_from_raw(raw_calibration, raw_calibration_size, depth_mode_id, color_mode_id, &calib);
 
         if (K4A_RESULT_SUCCEEDED != result)
         {
@@ -788,15 +783,13 @@ struct calibration : public k4a_calibration_t
      *
      * \sa k4a_calibration_get_from_raw
      */
-    static calibration get_from_raw(uint8_t *raw_calibration,
-                                    size_t raw_calibration_size,
-                                    k4a_depth_mode_t target_depth_mode,
-                                    k4a_color_resolution_t target_color_resolution)
+    static calibration
+    get_from_raw(uint8_t *raw_calibration, size_t raw_calibration_size, uint32_t depth_mode_id, uint32_t color_mode_id)
     {
         return get_from_raw(reinterpret_cast<char *>(raw_calibration),
                             raw_calibration_size,
-                            target_depth_mode,
-                            target_color_resolution);
+                            depth_mode_id,
+                            color_mode_id);
     }
 
     /** Get the camera calibration for a device from a raw calibration blob.
@@ -805,13 +798,13 @@ struct calibration : public k4a_calibration_t
      * \sa k4a_calibration_get_from_raw
      */
     static calibration get_from_raw(std::vector<uint8_t> &raw_calibration,
-                                    k4a_depth_mode_t target_depth_mode,
-                                    k4a_color_resolution_t target_color_resolution)
+                                    uint32_t depth_mode_id,
+                                    uint32_t color_mode_id)
     {
         return get_from_raw(reinterpret_cast<char *>(raw_calibration.data()),
                             raw_calibration.size(),
-                            target_depth_mode,
-                            target_color_resolution);
+                            depth_mode_id,
+                            color_mode_id);
     }
 };
 
@@ -1360,10 +1353,10 @@ public:
      *
      * \sa k4a_device_get_calibration
      */
-    calibration get_calibration(k4a_depth_mode_t depth_mode, k4a_color_resolution_t color_resolution) const
+    calibration get_calibration(uint32_t depth_mode_id, uint32_t color_mode_id) const
     {
         calibration calib;
-        k4a_result_t result = k4a_device_get_calibration(m_handle, depth_mode, color_resolution, &calib);
+        k4a_result_t result = k4a_device_get_calibration(m_handle, depth_mode_id, color_mode_id, &calib);
 
         if (K4A_RESULT_SUCCEEDED != result)
         {
@@ -1447,6 +1440,165 @@ public:
     static uint32_t get_installed_count() noexcept
     {
         return k4a_device_get_installed_count();
+    }
+
+    /** Gets info about a device
+     *
+     * \sa k4a_device_get_info
+     */
+    k4a_device_info_t get_info() const
+    {
+        K4A_INIT_STRUCT(k4a_device_info_t, info);
+        k4a_device_get_info(m_handle, &info);
+
+        return info;
+    }
+
+    /** Gets the available device color modes.
+     *
+     */
+    std::vector<k4a_color_mode_info_t> get_color_modes() const
+    {
+        K4A_INIT_STRUCT(k4a_color_mode_info_t, mode);
+
+        std::vector<k4a_color_mode_info_t> modes;
+        uint32_t mode_count;
+        k4a_result_t result = k4a_device_get_color_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
+        {
+            modes.reserve(mode_count);
+            for (uint32_t i = 0; i < mode_count; i++)
+            {
+                if (k4a_device_get_color_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    modes.push_back(mode);
+                }
+            }
+        }
+
+        return modes;
+    }
+
+    /** Gets a device color mode by index.
+     *
+     * \sa k4a_device_get_color_mode
+     */
+    k4a_color_mode_info_t get_color_mode(uint32_t color_mode_index) const
+    {
+        K4A_INIT_STRUCT(k4a_color_mode_info_t, mode);
+
+        uint32_t mode_count;
+        k4a_result_t result = k4a_device_get_color_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
+        {
+            if (color_mode_index < mode_count)
+            {
+                if (k4a_device_get_color_mode(m_handle, color_mode_index, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    return mode;
+                }
+            }
+        }
+
+        return mode;
+    }
+
+    /** Gets the available device depth modes.
+     *
+     */
+    std::vector<k4a_depth_mode_info_t> get_depth_modes() const
+    {
+        K4A_INIT_STRUCT(k4a_depth_mode_info_t, mode);
+
+        std::vector<k4a_depth_mode_info_t> modes;
+        uint32_t mode_count;
+        k4a_result_t result = k4a_device_get_depth_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
+        {
+            modes.reserve(mode_count);
+            for (uint32_t i = 0; i < mode_count; i++)
+            {
+                if (k4a_device_get_depth_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    modes.push_back(mode);
+                }
+            }
+        }
+
+        return modes;
+    }
+
+    /** Gets the device depth mode by mode index.
+     *
+     * \sa k4a_device_get_depth_mode
+     */
+    k4a_depth_mode_info_t get_depth_mode(uint32_t depth_mode_index) const
+    {
+        K4A_INIT_STRUCT(k4a_depth_mode_info_t, mode);
+
+        uint32_t mode_count;
+        k4a_result_t result = k4a_device_get_depth_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
+        {
+            if (depth_mode_index < mode_count)
+            {
+                if (k4a_device_get_depth_mode(m_handle, depth_mode_index, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    return mode;
+                }
+            }
+        }
+
+        return mode;
+    }
+
+    /** Get available device fps modes.
+     *
+     */
+    std::vector<k4a_fps_mode_info_t> get_fps_modes() const
+    {
+        K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
+
+        std::vector<k4a_fps_mode_info_t> modes;
+        uint32_t mode_count;
+        k4a_result_t result = k4a_device_get_fps_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
+        {
+            modes.reserve(mode_count);
+            for (uint32_t i = 0; i < mode_count; i++)
+            {
+                if (k4a_device_get_fps_mode(m_handle, i, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    modes.push_back(mode);
+                }
+            }
+        }
+
+        return modes;
+    }
+
+    /** Gets the device fps mode by mode index.
+     *
+     * \sa k4a_device_get_fps_mode
+     */
+    k4a_fps_mode_info_t get_fps_mode(uint32_t fps_mode_index) const
+    {
+        K4A_INIT_STRUCT(k4a_fps_mode_info_t, mode);
+
+        uint32_t mode_count;
+        k4a_result_t result = k4a_device_get_fps_mode_count(m_handle, &mode_count);
+        if (result == K4A_RESULT_SUCCEEDED)
+        {
+            if (fps_mode_index < mode_count)
+            {
+                if (k4a_device_get_fps_mode(m_handle, fps_mode_index, &mode) == K4A_RESULT_SUCCEEDED)
+                {
+                    return mode;
+                }
+            }
+        }
+
+        return mode;
     }
 
 private:

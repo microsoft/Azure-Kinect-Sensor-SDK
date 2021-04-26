@@ -29,9 +29,9 @@ TEST_F(custom_track_ut, open_custom_track_file)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_CUSTOM);
-    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_OFF);
-    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_OFF);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_FALSE(config.color_track_enabled);
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);
@@ -52,7 +52,7 @@ TEST_F(custom_track_ut, open_custom_track_file)
                                           timestamps_usec,
                                           config.color_format,
                                           K4A_COLOR_RESOLUTION_OFF,
-                                          config.depth_mode));
+                                          config.depth_mode_info.mode_id));
         k4a_capture_release(capture);
         timestamps_usec[0] += test_timestamp_delta_usec;
         timestamps_usec[1] += test_timestamp_delta_usec;
@@ -76,9 +76,9 @@ TEST_F(custom_track_ut, list_available_tracks)
     result = k4a_playback_get_record_configuration(handle, &config);
     ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(config.color_format, K4A_IMAGE_FORMAT_CUSTOM);
-    ASSERT_EQ(config.color_resolution, K4A_COLOR_RESOLUTION_OFF);
-    ASSERT_EQ(config.depth_mode, K4A_DEPTH_MODE_NFOV_UNBINNED);
-    ASSERT_EQ(config.camera_fps, K4A_FRAMES_PER_SECOND_30);
+    ASSERT_EQ(config.color_mode_info.mode_id, (uint32_t)K4A_COLOR_RESOLUTION_OFF);
+    ASSERT_EQ(config.depth_mode_info.mode_id, (uint32_t)K4A_DEPTH_MODE_NFOV_UNBINNED);
+    ASSERT_EQ(config.fps_mode_info.mode_id, (uint32_t)K4A_FRAMES_PER_SECOND_30);
     ASSERT_FALSE(config.color_track_enabled);
     ASSERT_TRUE(config.depth_track_enabled);
     ASSERT_TRUE(config.ir_track_enabled);

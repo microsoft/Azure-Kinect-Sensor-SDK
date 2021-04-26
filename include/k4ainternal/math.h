@@ -54,6 +54,8 @@ void math_quadratic_transform_3(const float A[3 * 3],
                                 const float b[3],
                                 float out[3]);
 
+int math_get_common_factor(int width, int height);
+
 #ifdef __cplusplus
 }
 #endif

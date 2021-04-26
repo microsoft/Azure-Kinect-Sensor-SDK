@@ -5,7 +5,6 @@
 
 #include <cstdio>
 #include <k4arecord/record.h>
-#include <k4ainternal/common.h>
 #include <k4ainternal/matroska_write.h>
 
 using namespace testing;
@@ -13,14 +12,15 @@ using namespace testing;
 void SampleRecordings::SetUp()
 {
     k4a_device_configuration_t record_config_empty = {};
-    record_config_empty.color_resolution = K4A_COLOR_RESOLUTION_OFF;
-    record_config_empty.depth_mode = K4A_DEPTH_MODE_OFF;
+    record_config_empty.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+    record_config_empty.depth_mode_id = K4A_DEPTH_MODE_OFF;
+    record_config_empty.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
 
     k4a_device_configuration_t record_config_full = {};
     record_config_full.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    record_config_full.color_resolution = K4A_COLOR_RESOLUTION_1080P;
-    record_config_full.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    record_config_full.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    record_config_full.color_mode_id = K4A_COLOR_RESOLUTION_1080P;
+    record_config_full.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    record_config_full.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
 
     k4a_device_configuration_t record_config_delay = record_config_full;
     record_config_delay.depth_delay_off_color_usec = 10000; // 10ms
@@ -30,14 +30,14 @@ void SampleRecordings::SetUp()
     record_config_sub.subordinate_delay_off_master_usec = 10000; // 10ms
 
     k4a_device_configuration_t record_config_color_only = record_config_full;
-    record_config_color_only.depth_mode = K4A_DEPTH_MODE_OFF;
+    record_config_color_only.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     k4a_device_configuration_t record_config_depth_only = record_config_full;
-    record_config_depth_only.color_resolution = K4A_COLOR_RESOLUTION_OFF;
+    record_config_depth_only.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
 
     k4a_device_configuration_t record_config_bgra_color = record_config_full;
     record_config_bgra_color.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-    record_config_bgra_color.depth_mode = K4A_DEPTH_MODE_OFF;
+    record_config_bgra_color.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     {
         k4a_record_t handle = NULL;
@@ -65,14 +65,15 @@ void SampleRecordings::SetUp()
 
         uint64_t timestamps[3] = { 0, 1000, 1000 }; // Offset the Depth and IR tracks by 1ms to test
         uint64_t imu_timestamp = 1150;
-        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_full.camera_fps));
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(
+            k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(record_config_full.fps_mode_id)));
         k4a_capture_t capture = NULL;
         for (size_t i = 0; i < test_frame_count; i++)
         {
             capture = create_test_capture(timestamps,
                                           record_config_full.color_format,
-                                          record_config_full.color_resolution,
-                                          record_config_full.depth_mode);
+                                          (k4a_color_resolution_t)record_config_full.color_mode_id,
+                                          (k4a_depth_mode_t)record_config_full.depth_mode_id);
             result = k4a_record_write_capture(handle, capture);
             ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
             k4a_capture_release(capture);
@@ -108,14 +109,15 @@ void SampleRecordings::SetUp()
         uint64_t timestamps[3] = { 0,
                                    (uint64_t)record_config_delay.depth_delay_off_color_usec,
                                    (uint64_t)record_config_delay.depth_delay_off_color_usec };
-        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_delay.camera_fps));
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(
+            k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(record_config_delay.fps_mode_id)));
         k4a_capture_t capture = NULL;
         for (size_t i = 0; i < test_frame_count; i++)
         {
             capture = create_test_capture(timestamps,
                                           record_config_delay.color_format,
-                                          record_config_delay.color_resolution,
-                                          record_config_delay.depth_mode);
+                                          (k4a_color_resolution_t)record_config_delay.color_mode_id,
+                                          (k4a_depth_mode_t)record_config_delay.depth_mode_id);
             result = k4a_record_write_capture(handle, capture);
             ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
             k4a_capture_release(capture);
@@ -143,8 +145,8 @@ void SampleRecordings::SetUp()
                                    record_config_sub.subordinate_delay_off_master_usec };
         k4a_capture_t capture = create_test_capture(timestamps,
                                                     record_config_sub.color_format,
-                                                    record_config_sub.color_resolution,
-                                                    record_config_sub.depth_mode);
+                                                    (k4a_color_resolution_t)record_config_sub.color_mode_id,
+                                                    (k4a_depth_mode_t)record_config_sub.depth_mode_id);
         result = k4a_record_write_capture(handle, capture);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
         k4a_capture_release(capture);
@@ -169,7 +171,8 @@ void SampleRecordings::SetUp()
         }
 
         uint64_t timestamps[3] = { 1000000, 1001000, 1001000 }; // Start recording at 1s
-        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_full.camera_fps));
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(
+            k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(record_config_full.fps_mode_id)));
         for (size_t i = 0; i < test_frame_count; i++)
         {
             // Create a known pattern of dropped / missing frames that can be tested against
@@ -181,12 +184,12 @@ void SampleRecordings::SetUp()
                 capture = create_test_capture(timestamps,
                                               record_config_full.color_format,
                                               K4A_COLOR_RESOLUTION_OFF,
-                                              record_config_full.depth_mode);
+                                              (k4a_depth_mode_t)record_config_full.depth_mode_id);
                 break;
             case 1: // Color Only
                 capture = create_test_capture(timestamps,
                                               record_config_full.color_format,
-                                              record_config_full.color_resolution,
+                                              (k4a_color_resolution_t)record_config_full.color_mode_id,
                                               K4A_DEPTH_MODE_OFF);
                 break;
             case 2: // No frames
@@ -194,8 +197,8 @@ void SampleRecordings::SetUp()
             case 3: // Both Depth + Color
                 capture = create_test_capture(timestamps,
                                               record_config_full.color_format,
-                                              record_config_full.color_resolution,
-                                              record_config_full.depth_mode);
+                                              (k4a_color_resolution_t)record_config_full.color_mode_id,
+                                              (k4a_depth_mode_t)record_config_full.depth_mode_id);
                 break;
             }
             if (capture)
@@ -235,14 +238,15 @@ void SampleRecordings::SetUp()
 
         uint64_t timestamps[3] = { 1000000, 1000000, 1000000 };
         uint64_t imu_timestamp = 1001150;
-        uint32_t timestamp_delta = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(record_config_delay.camera_fps));
+        uint32_t timestamp_delta = HZ_TO_PERIOD_US(
+            k4a_convert_fps_to_uint(static_cast<k4a_fps_t>(record_config_delay.fps_mode_id)));
         k4a_capture_t capture = NULL;
         for (size_t i = 0; i < test_frame_count; i++)
         {
             capture = create_test_capture(timestamps,
                                           record_config_delay.color_format,
-                                          record_config_delay.color_resolution,
-                                          record_config_delay.depth_mode);
+                                          (k4a_color_resolution_t)record_config_delay.color_mode_id,
+                                          (k4a_depth_mode_t)record_config_delay.depth_mode_id);
             result = k4a_record_write_capture(handle, capture);
             ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
             k4a_capture_release(capture);
@@ -278,8 +282,8 @@ void SampleRecordings::SetUp()
         uint64_t timestamps[3] = { 0, 0, 0 };
         k4a_capture_t capture = create_test_capture(timestamps,
                                                     record_config_color_only.color_format,
-                                                    record_config_color_only.color_resolution,
-                                                    record_config_color_only.depth_mode);
+                                                    (k4a_color_resolution_t)record_config_color_only.color_mode_id,
+                                                    (k4a_depth_mode_t)record_config_color_only.depth_mode_id);
         result = k4a_record_write_capture(handle, capture);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
         k4a_capture_release(capture);
@@ -300,8 +304,8 @@ void SampleRecordings::SetUp()
         uint64_t timestamps[3] = { 0, 0, 0 };
         k4a_capture_t capture = create_test_capture(timestamps,
                                                     record_config_depth_only.color_format,
-                                                    record_config_depth_only.color_resolution,
-                                                    record_config_depth_only.depth_mode);
+                                                    (k4a_color_resolution_t)record_config_depth_only.color_mode_id,
+                                                    (k4a_depth_mode_t)record_config_depth_only.depth_mode_id);
         result = k4a_record_write_capture(handle, capture);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
         k4a_capture_release(capture);
@@ -322,8 +326,8 @@ void SampleRecordings::SetUp()
         uint64_t timestamps[3] = { 0, 0, 0 };
         k4a_capture_t capture = create_test_capture(timestamps,
                                                     record_config_bgra_color.color_format,
-                                                    record_config_bgra_color.color_resolution,
-                                                    record_config_bgra_color.depth_mode);
+                                                    (k4a_color_resolution_t)record_config_bgra_color.color_mode_id,
+                                                    (k4a_depth_mode_t)record_config_bgra_color.depth_mode_id);
         result = k4a_record_write_capture(handle, capture);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
         k4a_capture_release(capture);

@@ -7,7 +7,6 @@
 #endif
 
 #include <k4a/k4a.h>
-#include <k4ainternal/common.h>
 #include <k4ainternal/logging.h>
 #include <gtest/gtest.h>
 #include <utcommon.h>
@@ -153,7 +152,7 @@ static const char *get_string_from_color_resolution(k4a_color_resolution_t resol
     switch (resolution)
     {
     case K4A_COLOR_RESOLUTION_OFF:
-        return "OFF";
+        return "K4A_COLOR_RESOLUTION_OFF";
         break;
     case K4A_COLOR_RESOLUTION_720P:
         return "1280 * 720  16:9";
@@ -172,6 +171,9 @@ static const char *get_string_from_color_resolution(k4a_color_resolution_t resol
         break;
     case K4A_COLOR_RESOLUTION_3072P:
         return "4096 * 3072 4:3";
+        break;
+    case K4A_COLOR_RESOLUTION_COUNT:
+        return "K4A_COLOR_RESOLUTION_INVALID";
         break;
     }
     assert(0);
@@ -199,6 +201,9 @@ static const char *get_string_from_depth_mode(k4a_depth_mode_t mode)
         break;
     case K4A_DEPTH_MODE_PASSIVE_IR:
         return "K4A_DEPTH_MODE_PASSIVE_IR";
+        break;
+    case K4A_DEPTH_MODE_COUNT:
+        return "K4A_DEPTH_MODE_INVALID";
         break;
     }
     assert(0);
@@ -557,9 +562,9 @@ TEST_P(latency_perf, testTest)
     }
 
     config.color_format = as.color_format;
-    config.color_resolution = as.color_resolution;
-    config.depth_mode = as.depth_mode;
-    config.camera_fps = as.fps;
+    config.color_mode_id = as.color_resolution;
+    config.depth_mode_id = as.depth_mode;
+    config.fps_mode_id = as.fps;
     config.depth_delay_off_color_usec = g_depth_delay_off_color_usec;
     config.wired_sync_mode = g_wired_sync_mode;
     config.synchronized_images_only = g_synchronized_images_only;
@@ -567,9 +572,9 @@ TEST_P(latency_perf, testTest)
 
     printf("Config being used is:\n");
     printf("    color_format:%d\n", config.color_format);
-    printf("    color_resolution:%d\n", config.color_resolution);
-    printf("    depth_mode:%d\n", config.depth_mode);
-    printf("    camera_fps:%d\n", config.camera_fps);
+    printf("    color_resolution:%d\n", config.color_mode_id);
+    printf("    depth_mode:%d\n", config.depth_mode_id);
+    printf("    camera_fps:%d\n", config.fps_mode_id);
     printf("    synchronized_images_only:%d\n", config.synchronized_images_only);
     printf("    depth_delay_off_color_usec:%d\n", config.depth_delay_off_color_usec);
     printf("    wired_sync_mode:%d\n", config.wired_sync_mode);
@@ -732,7 +737,7 @@ TEST_P(latency_perf, testTest)
                      disable_synchronization ? disable_synchronization : "0",
                      get_string_from_color_format(as.color_format),
                      get_string_from_color_resolution(as.color_resolution),
-                     k4a_convert_fps_to_uint(as.fps),
+                     (uint32_t)as.fps,
                      get_string_from_depth_mode(as.depth_mode),
                      g_capture_count,
                      g_manual_exposure,
@@ -804,7 +809,7 @@ TEST_P(latency_perf, testTest)
         }
         ir_system_latency_ave = ir_system_latency_ave / ir_system_latency.size();
         print_and_log("   IR System Time Latency",
-                      get_string_from_depth_mode(config.depth_mode),
+                      get_string_from_depth_mode((k4a_depth_mode_t)config.depth_mode_id),
                       STS_TO_MS(ir_system_latency_ave),
                       STS_TO_MS(min),
                       STS_TO_MS(max));
@@ -827,7 +832,7 @@ TEST_P(latency_perf, testTest)
         }
         ir_system_latency_from_pts_ave = ir_system_latency_from_pts_ave / ir_system_latency_from_pts.size();
         print_and_log("   IR System Time PTS",
-                      get_string_from_depth_mode(config.depth_mode),
+                      get_string_from_depth_mode((k4a_depth_mode_t)config.depth_mode_id),
                       STS_TO_MS(ir_system_latency_from_pts_ave),
                       STS_TO_MS(min),
                       STS_TO_MS(max));

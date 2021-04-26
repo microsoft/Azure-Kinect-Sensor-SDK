@@ -1,4 +1,4 @@
-/** \file k4atypes.h
+﻿/** \file k4atypes.h
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
  * Kinect For Azure SDK Type definitions.
@@ -25,7 +25,7 @@ extern "C" {
 /**
  * Declare an opaque handle type.
  *
- * \param _handle_name_ The type name of the handle
+ * \param \_handle_name_ The type name of the handle
  *
  * \remarks
  * This is used to define the public handle types for the Azure Kinect APIs.
@@ -218,6 +218,7 @@ typedef enum
 {
     K4A_RESULT_SUCCEEDED = 0, /**< The result was successful */
     K4A_RESULT_FAILED,        /**< The result was a failure */
+    K4A_RESULT_UNSUPPORTED,   /**< The operation was unsupported */
 } k4a_result_t;
 
 /** Result code returned by Azure Kinect APIs.
@@ -233,6 +234,7 @@ typedef enum
     K4A_BUFFER_RESULT_SUCCEEDED = 0, /**< The result was successful */
     K4A_BUFFER_RESULT_FAILED,        /**< The result was a failure */
     K4A_BUFFER_RESULT_TOO_SMALL,     /**< The input buffer was too small */
+    K4A_BUFFER_RESULT_UNSUPPORTED,   /**< The operation was unsupported */
 } k4a_buffer_result_t;
 
 /** Result code returned by Azure Kinect APIs.
@@ -248,6 +250,7 @@ typedef enum
     K4A_WAIT_RESULT_SUCCEEDED = 0, /**< The result was successful */
     K4A_WAIT_RESULT_FAILED,        /**< The result was a failure */
     K4A_WAIT_RESULT_TIMEOUT,       /**< The operation timed out */
+    K4A_WAIT_RESULT_UNSUPPORTED,   /**< The operation was unsupported */
 } k4a_wait_result_t;
 
 /** Verbosity levels of debug messaging
@@ -268,17 +271,14 @@ typedef enum
     K4A_LOG_LEVEL_OFF,          /**< No logging is performed */
 } k4a_log_level_t;
 
-/** Depth sensor capture modes.
+/** Device capabilities.
  *
  * \remarks
- * See the hardware specification for additional details on the field of view, and supported frame rates
- * for each mode.
+ * Used by \p k4a_device_info_t to store whether a device has a color camera, a depth camera, and IMU.
  *
- * \remarks
- * NFOV and WFOV denote Narrow and Wide Field Of View configurations.
- *
- * \remarks
- * Binned modes reduce the captured camera resolution by combining adjacent sensor pixels into a bin.
+ * \note
+ * These are used in a bitmap, so the values should be unique powers of 2. These values should not be
+ * modified; if a new capability is available, a new enum field should be defined.
  *
  * \xmlonly
  * <requirements>
@@ -286,36 +286,13 @@ typedef enum
  * </requirements>
  * \endxmlonly
  */
-// Be sure to update k4a_depth_mode_to_string in k4a.c if enum values are added.
 typedef enum
 {
-    K4A_DEPTH_MODE_OFF = 0,        /**< Depth sensor will be turned off with this setting. */
-    K4A_DEPTH_MODE_NFOV_2X2BINNED, /**< Depth captured at 320x288. Passive IR is also captured at 320x288. */
-    K4A_DEPTH_MODE_NFOV_UNBINNED,  /**< Depth captured at 640x576. Passive IR is also captured at 640x576. */
-    K4A_DEPTH_MODE_WFOV_2X2BINNED, /**< Depth captured at 512x512. Passive IR is also captured at 512x512. */
-    K4A_DEPTH_MODE_WFOV_UNBINNED,  /**< Depth captured at 1024x1024. Passive IR is also captured at 1024x1024. */
-    K4A_DEPTH_MODE_PASSIVE_IR,     /**< Passive IR only, captured at 1024x1024. */
-} k4a_depth_mode_t;
-
-/** Color sensor resolutions.
- *
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-// Be sure to update k4a_color_resolution_to_string in k4a.c if enum values are added.
-typedef enum
-{
-    K4A_COLOR_RESOLUTION_OFF = 0, /**< Color camera will be turned off with this setting */
-    K4A_COLOR_RESOLUTION_720P,    /**< 1280 * 720  16:9 */
-    K4A_COLOR_RESOLUTION_1080P,   /**< 1920 * 1080 16:9 */
-    K4A_COLOR_RESOLUTION_1440P,   /**< 2560 * 1440 16:9 */
-    K4A_COLOR_RESOLUTION_1536P,   /**< 2048 * 1536 4:3  */
-    K4A_COLOR_RESOLUTION_2160P,   /**< 3840 * 2160 16:9 */
-    K4A_COLOR_RESOLUTION_3072P,   /**< 4096 * 3072 4:3  */
-} k4a_color_resolution_t;
+    K4A_CAPABILITY_DEPTH = 1,      /**< Depth sensor capability bitmap value. */
+    K4A_CAPABILITY_COLOR = 2,      /**< Color sensor capability bitmap value. */
+    K4A_CAPABILITY_IMU = 4,        /**< Inertial measurement unit capability bitmap value. */
+    K4A_CAPABILITY_MICROPHONE = 8, /**< Microphone capability bitmap value. */
+} k4a_device_capabilities_t;
 
 /** Image format type.
  *
@@ -461,26 +438,6 @@ typedef enum
     K4A_TRANSFORMATION_INTERPOLATION_TYPE_NEAREST = 0, /**< Nearest neighbor interpolation */
     K4A_TRANSFORMATION_INTERPOLATION_TYPE_LINEAR,      /**< Linear interpolation */
 } k4a_transformation_interpolation_type_t;
-
-/** Color and depth sensor frame rate.
- *
- * \remarks
- * This enumeration is used to select the desired frame rate to operate the cameras. The actual
- * frame rate may vary slightly due to dropped data, synchronization variation between devices,
- * clock accuracy, or if the camera exposure priority mode causes reduced frame rate.
- * \xmlonly
- * <requirements>
- *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
- * </requirements>
- * \endxmlonly
- */
-// Be sure to update k4a_fps_to_string in k4a.c if enum values are added.
-typedef enum
-{
-    K4A_FRAMES_PER_SECOND_5 = 0, /**< 5 FPS */
-    K4A_FRAMES_PER_SECOND_15,    /**< 15 FPS */
-    K4A_FRAMES_PER_SECOND_30,    /**< 30 FPS */
-} k4a_fps_t;
 
 /** Color sensor control commands
  *
@@ -754,6 +711,28 @@ typedef enum
 
 /**
  *
+ * \param T
+ * Type of struct
+ *
+ * \param S
+ * Instance of a struct of type T
+ *
+ * \remarks
+ * Initializes a struct of type T with a struct size and a struct version.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_INIT_STRUCT(T, S)                                                                                          \
+    T S{};                                                                                                             \
+    S.struct_size = sizeof(T);                                                                                         \
+    S.struct_version = K4A_ABI_VERSION;
+
+/**
+ *
  * @}
  *
  * \defgroup Logging Error and event logging
@@ -903,6 +882,114 @@ typedef uint8_t *(k4a_memory_allocate_cb_t)(int size, void **context);
  * @{
  */
 
+/** Stores the vendor id, the device id and device capabilities.
+ *
+ * \sa k4a_device_capabilities_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef struct _k4a_device_info_t
+{
+    uint32_t struct_size;    /**< The size of this device info struct */
+    uint32_t struct_version; /**< The version of this device info struct */
+    uint32_t vendor_id;      /**< 0 to 65535 : reserved for registered USB VID numbers. */
+    uint32_t device_id;      /**< Vendor specific device ID. */
+
+    union
+    {
+        uint32_t value; /**< Unsigned int value of the binary combination of capability flags. */
+        struct
+        {
+            uint32_t bHasDepth : 1; /**< Bit value of 1 specifies the device has depth sensor.*/
+            uint32_t bHasColor : 1; /**< Bit value of 1 specifies the device has color sensor.*/
+            uint32_t bHasIMU : 1;   /**< Bit value of 1 specifies the device has IMU sensor.*/
+            uint32_t bHasMic : 1;   /**< Bit value of 1 specifies the device has microphone.*/
+            uint32_t resv : 28;
+        } bitmap; /**< Bitmap of binary combination of capability flags. */
+
+    } capabilities; /**< Binary combination of capability flags. */
+
+} k4a_device_info_t;
+
+/** Color mode info type representing color mode info.
+ *
+ * \remarks
+ * The mode_id field is used in k4a_device_configuration_t and passed to k4a_device_start_cameras().
+ * This sets the device to a specific color mode of operation with properties specified in this struct.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef struct _k4a_color_mode_info_t
+{
+    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_color_mode_info_t). */
+    uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
+    uint32_t mode_id;        /**< Mode identifier to use to select this mode. 0 is reserved for disabling color */
+    uint32_t width;          /**< Image width. */
+    uint32_t height;         /**< Image height. */
+    k4a_image_format_t native_format; /**< Image format. */
+    float horizontal_fov;             /**< Approximate horizontal field of view. */
+    float vertical_fov;               /**< Approximate vertical field of view. */
+    uint32_t min_fps;                 /**< Minimum supported framerate. */
+    uint32_t max_fps;                 /**< Maximum supported ramerate. */
+} k4a_color_mode_info_t;
+
+/** Depth mode info type representing depth mode info.
+ *
+ * \remarks
+ * The mode_id field is used in k4a_device_configuration_t and passed to k4a_device_start_cameras().
+ * This sets the device to a specific depth mode of operation with depth properties specified in this struct.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef struct _k4a_depth_mode_info_t
+{
+    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_depth_mode_info_t). */
+    uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
+    uint32_t mode_id;        /**< Mode identifier to use to select this mode. 0 is reserved for disabling depth. */
+    bool passive_ir_only;    /**< True if only capturing passive IR. */
+    uint32_t width;          /**< Image width. */
+    uint32_t height;         /**< Image height. */
+    k4a_image_format_t native_format; /**< Image format. */
+    float horizontal_fov;             /**< Approximate horizontal field of view. */
+    float vertical_fov;               /**< Approximate vertical field of view. */
+    uint32_t min_fps;                 /**< Minimum supported framerate. */
+    uint32_t max_fps;                 /**< Maximum supported framerate. */
+    uint32_t min_range;               /**< Min values expected for mode in millimeters */
+    uint32_t max_range;               /**< Max values expected for mode in millimeters */
+} k4a_depth_mode_info_t;
+
+/** Frames per second (fps) mode info type representing fps mode info.
+ *
+ * \remarks
+ * The mode_id field is used in k4a_device_configuration_t and passed to k4a_device_start_cameras().
+ * This sets the device to a specific fps specified by the fps field in this struct.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+typedef struct _k4a_fps_mode_info_t
+{
+    uint32_t struct_size;    /**< Must be equal to sizeof(k4a_fps_mode_info_t). */
+    uint32_t struct_version; /**< Must be equal to 1. Future API versions may define new structure versions. */
+    uint32_t mode_id;        /**< Mode identifier to use to select this mode. */
+    uint32_t fps;            /**< The frame rate per second. */
+} k4a_fps_mode_info_t;
+
 /** Configuration parameters for an Azure Kinect device.
  *
  * \remarks
@@ -922,14 +1009,14 @@ typedef struct _k4a_device_configuration_t
      * Setting ::K4A_IMAGE_FORMAT_COLOR_BGRA32 for color_format will result in higher CPU utilization. */
     k4a_image_format_t color_format;
 
-    /** Image resolution to capture with the color camera. */
-    k4a_color_resolution_t color_resolution;
+    /** Capture mode for the color camera. */
+    uint32_t color_mode_id;
 
     /** Capture mode for the depth camera. */
-    k4a_depth_mode_t depth_mode;
+    uint32_t depth_mode_id;
 
     /** Desired frame rate for the color and depth camera. */
-    k4a_fps_t camera_fps;
+    uint32_t fps_mode_id;
 
     /** Only produce k4a_capture_t objects if they contain synchronized color and depth images.
      *
@@ -1110,8 +1197,8 @@ typedef struct _k4a_calibration_t
      */
     k4a_calibration_extrinsics_t extrinsics[K4A_CALIBRATION_TYPE_NUM][K4A_CALIBRATION_TYPE_NUM];
 
-    k4a_depth_mode_t depth_mode;             /**< Depth camera mode for which calibration was obtained. */
-    k4a_color_resolution_t color_resolution; /**< Color camera resolution for which calibration was obtained. */
+    uint32_t depth_mode_id; /**< Depth camera mode for which calibration was obtained. */
+    uint32_t color_mode_id; /**< Color camera mode for which calibration was obtained. */
 } k4a_calibration_t;
 
 /** Version information.
@@ -1217,6 +1304,19 @@ typedef struct _k4a_imu_sample_t
  * @{
  */
 
+/** The ABI version of the SDK implementation.
+ *
+ * \remarks
+ * Vendors that modify the public API of this SDK should change the value.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4atypes.h (include k4a/k4a.h)</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+#define K4A_ABI_VERSION 1
+
 /** Default device index.
  *
  * Passed as an argument to \ref k4a_device_open() to open the default sensor
@@ -1250,15 +1350,8 @@ typedef struct _k4a_imu_sample_t
  * </requirements>
  * \endxmlonly
  */
-static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL = { K4A_IMAGE_FORMAT_COLOR_MJPG,
-                                                                               K4A_COLOR_RESOLUTION_OFF,
-                                                                               K4A_DEPTH_MODE_OFF,
-                                                                               K4A_FRAMES_PER_SECOND_30,
-                                                                               false,
-                                                                               0,
-                                                                               K4A_WIRED_SYNC_MODE_STANDALONE,
-                                                                               0,
-                                                                               false };
+static const k4a_device_configuration_t K4A_DEVICE_CONFIG_INIT_DISABLE_ALL =
+    { K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, false, 0, K4A_WIRED_SYNC_MODE_STANDALONE, 0, false };
 
 /**
  * @}

@@ -45,9 +45,9 @@ TEST(capturesync_ut, capturesync)
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
 
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
-    config.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    config.camera_fps = K4A_FRAMES_PER_SECOND_5;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_1080P;
+    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_5;
 
     ASSERT_EQ(capturesync_create(&sync), K4A_RESULT_SUCCEEDED);
     ASSERT_EQ(capturesync_start(NULL, NULL), K4A_RESULT_FAILED);
@@ -523,9 +523,9 @@ static void capturesync_validate_synchronization(capturesync_test_timing_t *test
     ASSERT_NE(depth_test.condition = Condition_Init(), (COND_HANDLE)NULL);
 
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
-    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config.depth_mode_id = K4A_DEPTH_MODE_WFOV_2X2BINNED;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     config.synchronized_images_only = synchd_images_only;
     if (color_first)
     {

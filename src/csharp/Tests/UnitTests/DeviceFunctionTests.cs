@@ -8,6 +8,7 @@ using System;
 using Microsoft.Azure.Kinect.Sensor.Test.StubGenerator;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Azure.Kinect.Sensor.UnitTests
 {
@@ -75,6 +76,84 @@ void k4a_device_close(k4a_device_t device_handle)
 {
     STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
 }");
+        }
+
+        // Helper function to implement device get color mode and color modes count
+        private void SetDeviceGetColorModeAndModesCountImplementation()
+        {
+            NativeK4a.SetImplementation(@"
+k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, uint32_t *mode_count)
+{
+    *mode_count = 7;
+    return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle, uint32_t mode_index, k4a_color_mode_info_t *mode_info)
+{
+    static const k4a_color_mode_info_t device_color_modes[] = {
+        { 40, 1, 0, 0, 0, K4A_IMAGE_FORMAT_COLOR_MJPG, 0, 0, 0, 0 },
+        { 40, 1, 1, 1280, 720,  K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 2, 1920, 1080, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 3, 2560, 1440, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 4, 2048, 1536, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 },
+        { 40, 1, 5, 3840, 2160, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 59.0f, 5, 30 },
+        { 40, 1, 6, 4096, 3072, K4A_IMAGE_FORMAT_COLOR_MJPG, 90.0f, 74.3f, 5, 30 }
+    };
+
+    *mode_info = device_color_modes[mode_index];
+    return K4A_RESULT_SUCCEEDED;
+}         
+");
+        }
+
+        // Helper function to implement device get depth mode and color modes count
+        private void SetDeviceGetDepthModeAndModesCountImplementation()
+        {
+            NativeK4a.SetImplementation(@"
+k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, uint32_t *mode_count)
+{
+    *mode_count = 6;
+    return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle, uint32_t mode_index, k4a_depth_mode_info_t *mode_info)
+{
+    static const k4a_depth_mode_info_t device_depth_modes[] = {
+        { 52, 1, 0, false, 0, 0, K4A_IMAGE_FORMAT_DEPTH16, 0.0f, 0.0f, 0, 0, 0, 0 },
+        { 52, 1, 1, false, 320, 288, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 5800 },
+        { 52, 1, 2, false, 640, 576, K4A_IMAGE_FORMAT_DEPTH16, 75.0f, 65.0f, 5, 30, 500, 4000 },
+        { 52, 1, 3, false, 512, 512, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 3000 },
+        { 52, 1, 4, false, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 250, 2500 },
+        { 52, 1, 5, true, 1024, 1024, K4A_IMAGE_FORMAT_DEPTH16, 120.0f, 120.0f, 5, 30, 0, 100 }
+    };
+
+    *mode_info = device_depth_modes[mode_index];
+    return K4A_RESULT_SUCCEEDED;
+}         
+");
+        }
+
+        // Helper function to implement device get fps mode and color modes count
+        private void SetDeviceGetFPSModeAndModesCountImplementation()
+        {
+            NativeK4a.SetImplementation(@"
+k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, uint32_t *mode_count)
+{
+    *mode_count = 4;
+    return K4A_RESULT_SUCCEEDED;
+}
+
+k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle, uint32_t mode_index, k4a_fps_mode_info_t *mode_info)
+{
+    static const k4a_fps_mode_info_t device_fps_modes[] = { { 16, 1, 0, 0 },
+                                                            { 16, 1, 5, 5 },
+                                                            { 16, 1, 15, 15 },
+                                                            { 16, 1, 30, 30 } };
+
+    *mode_info = device_fps_modes[mode_index];
+    return K4A_RESULT_SUCCEEDED;
+}         
+");
         }
 
         [Test]
@@ -453,19 +532,21 @@ k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t device_handle,
         public void DeviceGetCalibration()
         {
             SetOpenCloseImplementation();
+            SetDeviceGetColorModeAndModesCountImplementation();
+            SetDeviceGetDepthModeAndModesCountImplementation();
 
             NativeK4a.SetImplementation(@"
 
-k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mode_t depth_mode, k4a_color_resolution_t color_resolution, k4a_calibration_t* calibration)
+k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, uint32_t depth_mode_id, uint32_t color_mode_id, k4a_calibration_t* calibration)
 {
     STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
-    STUB_ASSERT(depth_mode == K4A_DEPTH_MODE_NFOV_UNBINNED);
-    STUB_ASSERT(color_resolution == K4A_COLOR_RESOLUTION_1440P);
+    STUB_ASSERT(depth_mode_id > 0);
+    STUB_ASSERT(color_mode_id > 0);
     STUB_ASSERT(calibration != NULL);
 
     // Fill the structure with values we can verify (pick values to pass that are unique so that a swap of values will be detected)
-    calibration->depth_mode = depth_mode;
-    calibration->color_resolution = color_resolution;
+    calibration->depth_mode_id = depth_mode_id;
+    calibration->color_mode_id = color_mode_id;
     
     for (int i = 0; i < 9; i++)
         calibration->depth_camera_calibration.extrinsics.rotation[i] = (float)i * 1.2f;
@@ -492,12 +573,18 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
             CallCount count = NativeK4a.CountCalls();
             using (Device device = Device.Open(0))
             {
-                Calibration calibration = device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.R1440p);
+                List<ColorModeInfo> colorModes = device.GetColorModes();
+                List<DepthModeInfo> depthModes = device.GetDepthModes();
+
+                ColorModeInfo colorModeInfo = colorModes.Find(c => c.ModeId > 0);
+                DepthModeInfo depthModeInfo = depthModes.Find(d => d.ModeId > 0);
+
+                Calibration calibration = device.GetCalibration(depthModeInfo.ModeId, colorModeInfo.ModeId);
 
                 Assert.AreEqual(1, count.Calls("k4a_device_get_calibration"));
 
-                Assert.AreEqual(DepthMode.NFOV_Unbinned, calibration.DepthMode);
-                Assert.AreEqual(ColorResolution.R1440p, calibration.ColorResolution);
+                Assert.AreEqual(depthModeInfo.ModeId, calibration.DepthModeId);
+                Assert.AreEqual(colorModeInfo.ModeId, calibration.ColorModeId);
 
                 for (int i = 0; i < 9; i++)
                 {
@@ -550,8 +637,8 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
 
                 device.StartCameras(new DeviceConfiguration
                 {
-                    ColorResolution = ColorResolution.R1440p,
-                    DepthMode = DepthMode.NFOV_Unbinned
+                    ColorModeId = colorModeInfo.ModeId,
+                    DepthModeId = depthModeInfo.ModeId
                 });
 
                 // Calibration should return correctly now
@@ -569,7 +656,7 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
 
                 Assert.Throws(typeof(ObjectDisposedException), () =>
                     {
-                        device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.R1440p);
+                        device.GetCalibration(depthModeInfo.ModeId, colorModeInfo.ModeId);
                     });
 
             }
@@ -581,14 +668,16 @@ void k4a_device_stop_cameras(k4a_device_t device_handle)
         public void DeviceGetCalibrationFailure()
         {
             SetOpenCloseImplementation();
+            SetDeviceGetColorModeAndModesCountImplementation();
+            SetDeviceGetDepthModeAndModesCountImplementation();
 
             NativeK4a.SetImplementation(@"
 
-k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mode_t depth_mode, k4a_color_resolution_t color_resolution, k4a_calibration_t* calibration)
+k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, uint32_t depth_mode_id, uint32_t color_mode_id, k4a_calibration_t* calibration)
 {
     STUB_ASSERT(device_handle == (k4a_device_t)0x1234ABCD);
-    STUB_ASSERT(depth_mode == K4A_DEPTH_MODE_NFOV_UNBINNED);
-    STUB_ASSERT(color_resolution == K4A_COLOR_RESOLUTION_1440P);
+    STUB_ASSERT(depth_mode_id > 0);
+    STUB_ASSERT(color_mode_id > 0);
     STUB_ASSERT(calibration != NULL);
 
     return K4A_RESULT_FAILED;
@@ -596,9 +685,15 @@ k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle, k4a_depth_mo
 ");
             using (Device device = Device.Open(0))
             {
+                List<ColorModeInfo> colorModes = device.GetColorModes();
+                List<DepthModeInfo> depthModes = device.GetDepthModes();
+
+                ColorModeInfo colorModeInfo = colorModes.Find(c => c.ModeId > 0);
+                DepthModeInfo depthModeInfo = depthModes.Find(d => d.ModeId > 0);
+
                 Assert.Throws(typeof(AzureKinectException), () =>
                     {
-                        Calibration calibration = device.GetCalibration(DepthMode.NFOV_Unbinned, ColorResolution.R1440p);
+                        Calibration calibration = device.GetCalibration(depthModeInfo.ModeId, colorModeInfo.ModeId);
                     });
 
             }
@@ -1295,6 +1390,9 @@ k4a_result_t k4a_device_get_version(
         public void DeviceStartCameras()
         {
             SetOpenCloseImplementation();
+            SetDeviceGetColorModeAndModesCountImplementation();
+            SetDeviceGetDepthModeAndModesCountImplementation();
+            SetDeviceGetFPSModeAndModesCountImplementation();
 
             NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_start_cameras(
@@ -1306,9 +1404,9 @@ k4a_result_t k4a_device_start_cameras(
     STUB_ASSERT(config != NULL);
 
     STUB_ASSERT(config->color_format == K4A_IMAGE_FORMAT_COLOR_MJPG);
-    STUB_ASSERT(config->color_resolution == K4A_COLOR_RESOLUTION_OFF);
-    STUB_ASSERT(config->depth_mode == K4A_DEPTH_MODE_OFF);
-    STUB_ASSERT(config->camera_fps == K4A_FRAMES_PER_SECOND_30);
+    STUB_ASSERT(config->color_mode_id == 0);
+    STUB_ASSERT(config->depth_mode_id == 0);
+    STUB_ASSERT(config->fps_mode_id == 0);
     STUB_ASSERT(config->synchronized_images_only == false);
     STUB_ASSERT(config->depth_delay_off_color_usec == 0);
     STUB_ASSERT(config->wired_sync_mode == K4A_WIRED_SYNC_MODE_STANDALONE);
@@ -1342,9 +1440,9 @@ k4a_result_t k4a_device_start_cameras(
     STUB_ASSERT(config != NULL);
 
     STUB_ASSERT(config->color_format == K4A_IMAGE_FORMAT_COLOR_BGRA32);
-    STUB_ASSERT(config->color_resolution == K4A_COLOR_RESOLUTION_1080P);
-    STUB_ASSERT(config->depth_mode == K4A_DEPTH_MODE_PASSIVE_IR);
-    STUB_ASSERT(config->camera_fps == K4A_FRAMES_PER_SECOND_15);
+    STUB_ASSERT(config->color_mode_id > 0);
+    STUB_ASSERT(config->depth_mode_id > 0);
+    STUB_ASSERT(config->fps_mode_id > 0);
     STUB_ASSERT(config->synchronized_images_only == true);
     STUB_ASSERT(config->depth_delay_off_color_usec == -1000000);
     STUB_ASSERT(config->wired_sync_mode == K4A_WIRED_SYNC_MODE_MASTER);
@@ -1354,12 +1452,20 @@ k4a_result_t k4a_device_start_cameras(
     return K4A_RESULT_SUCCEEDED;
 }
 ");
+                    List<ColorModeInfo> colorModes = device.GetColorModes();
+                    List<DepthModeInfo> depthModes = device.GetDepthModes();
+                    List<FPSModeInfo> fpsModes = device.GetFPSModes();
+
+                    ColorModeInfo colorModeInfo = colorModes.Find(c => c.ModeId > 0);
+                    DepthModeInfo depthModeInfo = depthModes.Find(d => d.ModeId > 0);
+                    FPSModeInfo fpsModeInfo = fpsModes.Find(f => f.ModeId > 0);
+
                     DeviceConfiguration config = new DeviceConfiguration
                     {
                         ColorFormat = ImageFormat.ColorBGRA32,
-                        ColorResolution = ColorResolution.R1080p,
-                        DepthMode = DepthMode.PassiveIR,
-                        CameraFPS = FPS.FPS15,
+                        ColorModeId = colorModeInfo.ModeId,
+                        DepthModeId = depthModeInfo.ModeId,
+                        FPSModeId = fpsModeInfo.ModeId,
                         SynchronizedImagesOnly = true,
                         DepthDelayOffColor = System.TimeSpan.FromSeconds(-1),
                         WiredSyncMode = WiredSyncMode.Master,
@@ -1385,6 +1491,9 @@ k4a_result_t k4a_device_start_cameras(
         public void DeviceStartCamerasFailure()
         {
             SetOpenCloseImplementation();
+            SetDeviceGetColorModeAndModesCountImplementation();
+            SetDeviceGetDepthModeAndModesCountImplementation();
+            SetDeviceGetFPSModeAndModesCountImplementation();
 
             NativeK4a.SetImplementation(@"
 k4a_result_t k4a_device_start_cameras(
@@ -1402,12 +1511,20 @@ k4a_result_t k4a_device_start_cameras(
                 CallCount count = NativeK4a.CountCalls();
                 using (Device device = Device.Open(0))
                 {
+                    List<ColorModeInfo> colorModes = device.GetColorModes();
+                    List<DepthModeInfo> depthModes = device.GetDepthModes();
+                    List<FPSModeInfo> fpsModes = device.GetFPSModes();
+
+                    ColorModeInfo colorModeInfo = colorModes.Find(c => c.ModeId > 0);
+                    DepthModeInfo depthModeInfo = depthModes.Find(d => d.ModeId > 0);
+                    FPSModeInfo fpsModeInfo = fpsModes.Find(f => f.ModeId > 0);
+
                     DeviceConfiguration config = new DeviceConfiguration
                     {
                         ColorFormat = ImageFormat.ColorBGRA32,
-                        ColorResolution = ColorResolution.R1080p,
-                        DepthMode = DepthMode.PassiveIR,
-                        CameraFPS = FPS.FPS15,
+                        ColorModeId = colorModeInfo.ModeId,
+                        DepthModeId = depthModeInfo.ModeId,
+                        FPSModeId = fpsModeInfo.ModeId,
                         SynchronizedImagesOnly = true,
                         DepthDelayOffColor = System.TimeSpan.FromSeconds(-1),
                         WiredSyncMode = WiredSyncMode.Master,

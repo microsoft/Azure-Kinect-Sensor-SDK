@@ -3,6 +3,7 @@
 
 // This library
 #include <k4ainternal/color.h>
+#include <k4ainternal/modes.h>
 
 // Dependent libraries
 
@@ -133,52 +134,20 @@ k4a_result_t color_start(color_t color_handle, const k4a_device_configuration_t 
     color_context_t *color = color_t_get_context(color_handle);
     uint32_t width = 0;
     uint32_t height = 0;
-    float fps = 1.0f;
+    uint32_t fps = 1;
 
-    switch (config->color_resolution)
+    if (!k4a_convert_resolution_to_width_height(static_cast<k4a_color_resolution_t>(config->color_mode_id),
+                                                &width,
+                                                &height))
     {
-    case K4A_COLOR_RESOLUTION_720P:
-        width = 1280;
-        height = 720;
-        break;
-    case K4A_COLOR_RESOLUTION_2160P:
-        width = 3840;
-        height = 2160;
-        break;
-    case K4A_COLOR_RESOLUTION_1440P:
-        width = 2560;
-        height = 1440;
-        break;
-    case K4A_COLOR_RESOLUTION_1080P:
-        width = 1920;
-        height = 1080;
-        break;
-    case K4A_COLOR_RESOLUTION_3072P:
-        width = 4096;
-        height = 3072;
-        break;
-    case K4A_COLOR_RESOLUTION_1536P:
-        width = 2048;
-        height = 1536;
-        break;
-    default:
-        LOG_ERROR("color_resolution %d is invalid", config->color_resolution);
+        LOG_ERROR("color_resolution %d is invalid", config->color_mode_id);
         return K4A_RESULT_FAILED;
     }
 
-    switch (config->camera_fps)
+    fps = static_cast<uint32_t>(config->fps_mode_id);
+    if (fps == 0)
     {
-    case K4A_FRAMES_PER_SECOND_30:
-        fps = 30.0f;
-        break;
-    case K4A_FRAMES_PER_SECOND_15:
-        fps = 15.0f;
-        break;
-    case K4A_FRAMES_PER_SECOND_5:
-        fps = 5.0f;
-        break;
-    default:
-        LOG_ERROR("camera_fps %d is invalid", config->camera_fps);
+        LOG_ERROR("camera_fps %d is invalid", config->fps_mode_id);
         return K4A_RESULT_FAILED;
     }
 
@@ -188,7 +157,7 @@ k4a_result_t color_start(color_t color_handle, const k4a_device_configuration_t 
     {
         result = TRACE_CALL(color->m_spCameraReader->Start(width,
                                                            height,                   // Resolution
-                                                           fps,                      // Framerate
+                                                           static_cast<float>(fps),  // Framerate
                                                            config->color_format,     // Color format enum
                                                            &color_capture_available, // Callback
                                                            color));                  // Callback context

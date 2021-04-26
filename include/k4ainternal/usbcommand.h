@@ -10,7 +10,6 @@
 //************************ Includes *****************************
 #include <k4a/k4atypes.h>
 #include <k4ainternal/image.h>
-#include <k4ainternal/common.h>
 
 #ifdef __cplusplus
 extern "C" {

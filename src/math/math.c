@@ -108,3 +108,8 @@ void math_quadratic_transform_3(const float A[3 * 3],
     // y = B*x2 + temp
     math_affine_transform_3(B, x2, temp, out);
 }
+
+int math_get_common_factor(int width, int height)
+{
+    return (height == 0) ? width : math_get_common_factor(height, width % height);
+}

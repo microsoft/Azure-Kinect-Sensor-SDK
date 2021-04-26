@@ -5,7 +5,6 @@
 #include <ut_calibration_data.h>
 
 // Module being tested
-#include <k4ainternal/common.h>
 #include <k4ainternal/depth.h>
 #include <k4ainternal/depth_mcu.h>
 #include <k4ainternal/calibration.h>
@@ -28,9 +27,9 @@ public:
                        k4a_result_t(depthmcu_t depthmcu_handle, depthmcu_firmware_versions_t *version));
 
     MOCK_CONST_METHOD2(depthmcu_depth_set_capture_mode,
-                       k4a_result_t(depthmcu_t depthmcu_handle, k4a_depth_mode_t capture_mode));
+                       k4a_result_t(depthmcu_t depthmcu_handle, uint32_t depth_mode_id));
 
-    MOCK_CONST_METHOD2(depthmcu_depth_set_fps, k4a_result_t(depthmcu_t depthmcu_handle, k4a_fps_t capture_fps));
+    MOCK_CONST_METHOD2(depthmcu_depth_set_fps, k4a_result_t(depthmcu_t depthmcu_handle, uint32_t fps_mode_id));
 
     MOCK_CONST_METHOD3(depthmcu_depth_start_streaming,
                        k4a_result_t(depthmcu_t depthmcu_handle,
@@ -66,14 +65,14 @@ k4a_result_t depthmcu_get_version(depthmcu_t depthmcu_handle, depthmcu_firmware_
     return g_MockDepthMcu->depthmcu_get_version(depthmcu_handle, version);
 }
 
-k4a_result_t depthmcu_depth_set_capture_mode(depthmcu_t depthmcu_handle, k4a_depth_mode_t capture_mode)
+k4a_result_t depthmcu_depth_set_capture_mode(depthmcu_t depthmcu_handle, uint32_t depth_mode_id)
 {
-    return g_MockDepthMcu->depthmcu_depth_set_capture_mode(depthmcu_handle, capture_mode);
+    return g_MockDepthMcu->depthmcu_depth_set_capture_mode(depthmcu_handle, depth_mode_id);
 }
 
-k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, k4a_fps_t capture_fps)
+k4a_result_t depthmcu_depth_set_fps(depthmcu_t depthmcu_handle, uint32_t fps_mode_id)
 {
-    return g_MockDepthMcu->depthmcu_depth_set_fps(depthmcu_handle, capture_fps);
+    return g_MockDepthMcu->depthmcu_depth_set_fps(depthmcu_handle, fps_mode_id);
 }
 
 k4a_result_t depthmcu_depth_start_streaming(depthmcu_t depthmcu_handle,

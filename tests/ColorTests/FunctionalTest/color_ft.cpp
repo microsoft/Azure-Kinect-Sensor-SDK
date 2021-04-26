@@ -4,6 +4,7 @@
 //************************ Includes *****************************
 #include <k4a/k4a.h>
 #include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 #include <k4ainternal/../../src/color/color_priv.h>
 #include <utcommon.h>
 #include <gtest/gtest.h>
@@ -57,8 +58,8 @@ struct color_mode_parameter
 {
     uint32_t test_index;
     k4a_image_format_t color_format;
-    k4a_color_resolution_t color_resolution;
-    k4a_fps_t color_rate;
+    uint32_t color_mode_id;
+    uint32_t color_rate;
     size_t expected_image_size;
     uint32_t expected_fps;
 
@@ -124,10 +125,10 @@ TEST_P(color_functional_test, color_streaming_test)
     stream_count = STREAM_RUN_TIME_SEC * as.expected_fps;
 
     // Configure the stream
-    config.camera_fps = as.color_rate;
+    config.fps_mode_id = as.color_rate;
     config.color_format = as.color_format;
-    config.color_resolution = as.color_resolution;
-    config.depth_mode = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = as.color_mode_id;
+    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
@@ -238,66 +239,77 @@ INSTANTIATE_TEST_CASE_P(color_streaming,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_NV12_720P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 1,
                                                   K4A_IMAGE_FORMAT_COLOR_YUY2,
                                                   K4A_COLOR_RESOLUTION_720P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_YUY2_720P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 2,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_2160P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 3,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_1440P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 4,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_1080P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 5,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_720P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 6,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_1536P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 7,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_2160P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_RGB_2160P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 8,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_1440P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_RGB_1440P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 9,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_1080P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_RGB_1080P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 10,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_720P,
                                                   K4A_FRAMES_PER_SECOND_30,
                                                   K4A_COLOR_MODE_RGB_720P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_30 },
+
                             color_mode_parameter{ 11,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_1536P,
@@ -312,78 +324,91 @@ INSTANTIATE_TEST_CASE_P(color_streaming,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_NV12_720P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 13,
                                                   K4A_IMAGE_FORMAT_COLOR_YUY2,
                                                   K4A_COLOR_RESOLUTION_720P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_YUY2_720P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 14,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_2160P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 15,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_1440P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 16,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_1080P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 17,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_720P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 18,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_3072P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 19,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_1536P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 20,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_2160P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_RGB_2160P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 21,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_1440P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_RGB_1440P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 22,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_1080P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_RGB_1080P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 23,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_720P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_RGB_720P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 24,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_3072P,
                                                   K4A_FRAMES_PER_SECOND_15,
                                                   K4A_COLOR_MODE_RGB_3072P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_15 },
+
                             color_mode_parameter{ 25,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_1536P,
@@ -398,78 +423,91 @@ INSTANTIATE_TEST_CASE_P(color_streaming,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_NV12_720P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 27,
                                                   K4A_IMAGE_FORMAT_COLOR_YUY2,
                                                   K4A_COLOR_RESOLUTION_720P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_YUY2_720P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 28,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_2160P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 29,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_1440P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 30,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_1080P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 31,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_720P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 32,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_3072P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 33,
                                                   K4A_IMAGE_FORMAT_COLOR_MJPG,
                                                   K4A_COLOR_RESOLUTION_1536P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_MJPG_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 34,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_2160P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_RGB_2160P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 35,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_1440P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_RGB_1440P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 36,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_1080P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_RGB_1080P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 37,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_720P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_RGB_720P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 38,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_3072P,
                                                   K4A_FRAMES_PER_SECOND_5,
                                                   K4A_COLOR_MODE_RGB_3072P_EXPECTED_SIZE,
                                                   K4A_COLOR_MODE_EXPECTED_FPS_5 },
+
                             color_mode_parameter{ 39,
                                                   K4A_IMAGE_FORMAT_COLOR_BGRA32,
                                                   K4A_COLOR_RESOLUTION_1536P,
@@ -499,15 +537,15 @@ TEST_F(color_functional_test, colorModeChange)
 
     // Create two valid configs that are expected to yield different-sized color payloads
     //
-    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
-    config2.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config2.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     config2.color_format = K4A_IMAGE_FORMAT_COLOR_YUY2;
-    config2.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config2.depth_mode = K4A_DEPTH_MODE_OFF;
+    config2.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config2.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     // Start device in first mode and check frame size
     //
@@ -567,10 +605,10 @@ TEST_F(color_functional_test, colorExposureTest)
 
     // Create two valid configs that are expected to yield different-sized color payloads
     //
-    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_30;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_NV12;
-    config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode = K4A_DEPTH_MODE_OFF;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_720P;
+    config.depth_mode_id = K4A_DEPTH_MODE_OFF;
 
     // Exposure set test
     ASSERT_EQ(K4A_RESULT_SUCCEEDED,
@@ -785,10 +823,10 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
     if ((rand() * 2 / RAND_MAX) >= 1)
     {
         config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.camera_fps = K4A_FRAMES_PER_SECOND_5;
+        config.fps_mode_id = K4A_FRAMES_PER_SECOND_5;
         config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-        config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
-        config.depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
+        config.color_mode_id = K4A_COLOR_RESOLUTION_1080P;
+        config.depth_mode_id = K4A_DEPTH_MODE_WFOV_2X2BINNED;
         config.synchronized_images_only = true;
         ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(m_device, &config));
         std::cout << "control_test_worker: k4a_device_start_cameras called\n";
@@ -855,7 +893,8 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
             ASSERT_EQ(value, map_manual_exposure(testValue, b_sixty_hertz)) << testValue << " was the value tested\n";
             if (cameras_running)
             {
-                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, config.camera_fps)) << "1";
+                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, (k4a_fps_t)config.fps_mode_id))
+                    << "1";
             }
 
             testValue = threshold;
@@ -865,7 +904,8 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
             ASSERT_EQ(value, map_manual_exposure(testValue, b_sixty_hertz)) << testValue << " was the value tested\n";
             if (cameras_running)
             {
-                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, config.camera_fps)) << "2";
+                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, (k4a_fps_t)config.fps_mode_id))
+                    << "2";
             }
 
             testValue = threshold + 1;
@@ -875,7 +915,8 @@ void color_control_test::control_test_worker(const k4a_color_control_command_t c
             ASSERT_EQ(value, map_manual_exposure(testValue, b_sixty_hertz)) << testValue << " was the value tested\n";
             if (cameras_running)
             {
-                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, config.camera_fps)) << "3";
+                ASSERT_TRUE(validate_image_exposure_setting(value, b_sixty_hertz, (k4a_fps_t)config.fps_mode_id))
+                    << "3";
             }
 
             ASSERT_EQ(current_mode, manual);
@@ -955,6 +996,56 @@ TEST_P(color_control_test, control_test)
     else
     {
         control_test_worker(as.command, as.default_mode, as.default_value);
+    }
+}
+
+/**
+ *  Functional test for verifying color modes.
+ *
+ *  @Test criteria
+ *   Pass conditions;
+ *       Calling k4a_device_get_color_mode_count() and k4a_device_get_color_mode() has proper return values.
+ *
+ */
+TEST_F(color_functional_test, colorModeInfo)
+{
+    K4A_INIT_STRUCT(k4a_color_mode_info_t, colorModeInfo)
+    uint32_t colorModeCount = 0;
+
+    // Test invalid arguments.
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode_count(NULL, &colorModeCount))
+        << "Unexpected return value for invalid device handle.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode_count(m_device, NULL))
+        << "Unexpected return value for invalid depth mode count pointer.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode(NULL, 0, &colorModeInfo))
+        << "Unexpected return value for invalid device handle.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode(m_device, 0, NULL))
+        << "Unexpected return value for invalid device handle.\n";
+
+    // Get the color mode count.
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_mode_count(m_device, &colorModeCount))
+        << "Couldn't get color mode count.\n";
+
+    // Test invalid color mode index.
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_color_mode(m_device, colorModeCount, &colorModeInfo))
+        << "Unexpected return value for color mode index greater than number of depth modes.\n";
+
+    // Get color mode info.
+    for (uint32_t d = 0; d < colorModeCount; ++d)
+    {
+        colorModeInfo = { colorModeInfo.struct_size, colorModeInfo.struct_version, 0 };
+
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_color_mode(m_device, d, &colorModeInfo))
+            << "Couldn't get color mode info.\n";
+
+        EXPECT_EQ(colorModeInfo.struct_version, static_cast<uint32_t>(K4A_ABI_VERSION))
+            << "Color mode struct version invalid\n";
+
+        EXPECT_EQ(colorModeInfo.struct_size, static_cast<uint32_t>(sizeof(k4a_color_mode_info_t)))
+            << "Color mode struct size invalid\n";
     }
 }
 

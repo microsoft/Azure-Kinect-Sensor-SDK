@@ -60,7 +60,8 @@ K4A_EXPORT uint32_t k4a_device_get_installed_count(void);
  * The least critical error the user wants to be notified about.
  *
  * \return ::K4A_RESULT_SUCCEEDED if the callback function was set or cleared successfully. ::K4A_RESULT_FAILED if an
- * error is encountered or the callback function has already been set.
+ * error is encountered or the callback function has already been set. ::K4A_RESULT_UNSUPPORTED if the operation is
+ * not supported.
  *
  * \remarks
  * Call this function to set or clear the callback function that is used to deliver debug messages to the caller. This
@@ -107,7 +108,8 @@ K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *
  * is no longer needed.
  *
  * \return ::K4A_RESULT_SUCCEEDED if the callback function was set or cleared successfully. ::K4A_RESULT_FAILED if an
- * error is encountered or the callback function has already been set.
+ * error is encountered or the callback function has already been set. ::K4A_RESULT_UNSUPPORTED if the operation is
+ * not supported.
  *
  * \remarks
  * Call this function to hook memory allocation by the SDK. Calling with both \p allocate and \p free as NULL will
@@ -132,6 +134,216 @@ K4A_EXPORT k4a_result_t k4a_set_debug_message_handler(k4a_logging_message_cb_t *
  */
 K4A_EXPORT k4a_result_t k4a_set_allocator(k4a_memory_allocate_cb_t allocate, k4a_memory_destroy_cb_t free);
 
+/** Get the device info and capabilities.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param device_info
+ * Location to write the device info.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p device info was successfully written. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \remarks
+ * The device info output contains the vendor id, the device id and available capabilities.
+ *
+ * \sa k4a_device_t
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_info(k4a_device_t device_handle, k4a_device_info_t *device_info);
+
+/** Get the number of valid color modes.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_count
+ * Location to write the color mode count.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \remarks
+ * The mode count output is the number of available color modes for the device specified by device_handle.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_color_mode_count(k4a_device_t device_handle, uint32_t *mode_count);
+
+/** Get the color mode info for a specified index.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_index
+ * The index of the color mode to get.
+ *
+ * \param mode_info
+ * Location to write the color mode info.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \sa k4a_color_mode_info_t
+ *
+ * \sa k4a_device_get_color_mode_count
+ *
+ * \remarks
+ * The mode_index parameter has valid values [0, N-1] where N is the value returned by
+ * k4a_device_get_color_mode_count().
+ *
+ * \remarks
+ * The color mode info output contains image resolution, native image format, horizontal and vertical fov and min and
+ * max fps.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_color_mode(k4a_device_t device_handle,
+                                                  uint32_t mode_index,
+                                                  k4a_color_mode_info_t *mode_info);
+
+/** Get the number of valid depth modes.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_count
+ * Location to write the depth mode count.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \remarks
+ * The mode count output is the number of available depth modes for the device specified by device_handle.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_depth_mode_count(k4a_device_t device_handle, uint32_t *mode_count);
+
+/** Get the depth mode info for a specified index.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_index
+ * The index of the color mode to get.
+ *
+ * \param mode_info
+ * Location to write the depth mode info.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \sa k4a_depth_mode_info_t
+ *
+ * \sa k4a_device_get_depth_mode_count
+ *
+ * \remarks
+ * The mode_index parameter has valid values [0, N-1] where N is the value returned by
+ * k4a_device_get_depth_mode_count().
+ *
+ * \remarks
+ * The depth mode info output contains image resolution, image native format, horizontal and vertical fov, min and max
+ * fps, min and max range and whether it is passive ir only.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_depth_mode(k4a_device_t device_handle,
+                                                  uint32_t mode_index,
+                                                  k4a_depth_mode_info_t *mode_info);
+
+/** Get the number of valid fps modes.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_count
+ * Location to write the fps mode count.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode count was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \remarks
+ * The mode count output is the number of available fps modes for the device specified by device_handle.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_fps_mode_count(k4a_device_t device_handle, uint32_t *mode_count);
+
+/** Get the fps mode info for a specified index.
+ *
+ * \param device_handle
+ * Handle obtained by k4a_device_open().
+ *
+ * \param mode_index
+ * The index of the color mode to get.
+ *
+ * \param mode_info
+ * Location to write the fps mode info.
+ *
+ * \returns
+ * ::K4A_RESULT_SUCCEEDED if \p mode info was successfully retrieved. ::K4A_RESULT_FAILED otherwise.
+ *
+ * \sa k4a_fps_mode_info_t
+ *
+ * \sa k4a_device_get_fps_mode_count
+ *
+ * \remarks
+ * The mode_index parameter has valid values [0, N-1] where N is the value returned by k4a_device_get_fps_mode_count().
+ *
+ * \remarks
+ * The fps mode info contains the frame rate per second.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">k4a.h (include k4a/k4a.h)</requirement>
+ *   <requirement name="Library">k4a.lib</requirement>
+ *   <requirement name="DLL">k4a.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4A_EXPORT k4a_result_t k4a_device_get_fps_mode(k4a_device_t device_handle,
+                                                uint32_t mode_index,
+                                                k4a_fps_mode_info_t *mode_info);
+
 /** Open an Azure Kinect device.
  *
  * \param index
@@ -142,7 +354,8 @@ K4A_EXPORT k4a_result_t k4a_set_allocator(k4a_memory_allocate_cb_t allocate, k4a
  *
  * \relates k4a_device_t
  *
- * \return ::K4A_RESULT_SUCCEEDED if the device was opened successfully.
+ * \return ::K4A_RESULT_SUCCEEDED if the device was opened successfully. ::K4A_RESULT_FAILED if the device was
+ * not opened successfully.
  *
  * \remarks
  * If successful, k4a_device_open() will return a device handle in the device_handle parameter.
@@ -261,7 +474,8 @@ K4A_EXPORT k4a_wait_result_t k4a_device_get_capture(k4a_device_t device_handle,
  *
  * \returns
  * ::K4A_WAIT_RESULT_SUCCEEDED if a sample is returned. If a sample is not available before the timeout elapses, the
- * function will return ::K4A_WAIT_RESULT_TIMEOUT. All other failures will return ::K4A_WAIT_RESULT_FAILED.
+ * function will return ::K4A_WAIT_RESULT_TIMEOUT. If a device does not support an IMU, then
+ * ::K4A_WAIT_RESULT_UNSUPPORTED is returned. All other failures will return ::K4A_WAIT_RESULT_FAILED.
  *
  * \relates k4a_device_t
  *
@@ -1240,7 +1454,7 @@ K4A_EXPORT void k4a_image_release(k4a_image_t image_handle);
  * The configuration we want to run the device in. This can be initialized with ::K4A_DEVICE_CONFIG_INIT_DISABLE_ALL.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED is returned on success.
+ * ::K4A_RESULT_SUCCEEDED is returned on success, ::K4A_RESULT_FAILED otherwise.
  *
  * \relates k4a_device_t
  *
@@ -1293,7 +1507,7 @@ K4A_EXPORT void k4a_device_stop_cameras(k4a_device_t device_handle);
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED is returned on success. ::K4A_RESULT_FAILED if the sensor is already running or a failure is
- * encountered
+ * encountered. If a device does not support an IMU, ::K4A_RESULT_UNSUPPORTED is returned.
  *
  * \relates k4a_device_t
  *
@@ -1433,7 +1647,8 @@ K4A_EXPORT k4a_result_t k4a_device_get_version(k4a_device_t device_handle, k4a_h
  * Location to store the color sensor's control default mode of /p command.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if the value was successfully returned, ::K4A_RESULT_FAILED if an error occurred
+ * ::K4A_RESULT_SUCCEEDED if the value was successfully returned, ::K4A_RESULT_FAILED if an error occurred.
+ * ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \relates k4a_device_t
  *
@@ -1472,7 +1687,8 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_control_capabilities(k4a_device_t d
  * mode returned is ::K4A_COLOR_CONTROL_MODE_MANUAL for the current \p command.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if the value was successfully returned, ::K4A_RESULT_FAILED if an error occurred
+ * ::K4A_RESULT_SUCCEEDED if the value was successfully returned, ::K4A_RESULT_FAILED if an error occurred.
+ * ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \remarks
  * Each control command may be set to manual or automatic. See the definition of \ref k4a_color_control_command_t on
@@ -1517,7 +1733,8 @@ K4A_EXPORT k4a_result_t k4a_device_get_color_control(k4a_device_t device_handle,
  * is set to ::K4A_COLOR_CONTROL_MODE_MANUAL, and is otherwise ignored.
  *
  * \returns
- * ::K4A_RESULT_SUCCEEDED if the value was successfully set, ::K4A_RESULT_FAILED if an error occurred
+ * ::K4A_RESULT_SUCCEEDED if the value was successfully set, ::K4A_RESULT_FAILED if an error occurred.
+ * ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \remarks
  * Each control command may be set to manual or automatic. See the definition of \ref k4a_color_control_command_t on how
@@ -1584,11 +1801,11 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
  * \param device_handle
  * Handle obtained by k4a_device_open().
  *
- * \param depth_mode
+ * \param depth_mode_id
  * Mode in which depth camera is operated.
  *
- * \param color_resolution
- * Resolution in which color camera is operated.
+ * \param color_mode_id
+ * Mode in which color camera is operated.
  *
  * \param calibration
  * Location to write the calibration
@@ -1598,7 +1815,7 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
  *
  * \remarks
  * The \p calibration represents the data needed to transform between the camera views and may be
- * different for each operating \p depth_mode and \p color_resolution the device is configured to operate in.
+ * different for each operating \p depth_mode_id and \p color_mode_id the device is configured to operate in.
  *
  * \remarks
  * The \p calibration output is used as input to all calibration and transformation functions.
@@ -1619,8 +1836,8 @@ K4A_EXPORT k4a_buffer_result_t k4a_device_get_raw_calibration(k4a_device_t devic
  * \endxmlonly
  */
 K4A_EXPORT k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle,
-                                                   const k4a_depth_mode_t depth_mode,
-                                                   const k4a_color_resolution_t color_resolution,
+                                                   const uint32_t depth_mode_id,
+                                                   const uint32_t color_mode_id,
                                                    k4a_calibration_t *calibration);
 
 /** Get the device jack status for the synchronization in and synchronization out connectors.
@@ -1636,6 +1853,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_calibration(k4a_device_t device_handle,
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if the connector status was successfully read.
+ * ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \relates k4a_device_t
  *
@@ -1667,10 +1885,10 @@ K4A_EXPORT k4a_result_t k4a_device_get_sync_jack(k4a_device_t device_handle,
  * \param raw_calibration_size
  * The size, in bytes, of raw_calibration including the NULL termination.
  *
- * \param depth_mode
+ * \param depth_mode_id
  * Mode in which depth camera is operated.
  *
- * \param color_resolution
+ * \param color_mode_id
  * Resolution in which color camera is operated.
  *
  * \param calibration
@@ -1681,7 +1899,7 @@ K4A_EXPORT k4a_result_t k4a_device_get_sync_jack(k4a_device_t device_handle,
  *
  * \remarks
  * The \p calibration represents the data needed to transform between the camera views and is
- * different for each operating \p depth_mode and \p color_resolution the device is configured to operate in.
+ * different for each operating \p depth_mode_id and \p color_mode_id the device is configured to operate in.
  *
  * \remarks
  * The \p calibration output is used as input to all transformation functions.
@@ -1703,8 +1921,8 @@ K4A_EXPORT k4a_result_t k4a_device_get_sync_jack(k4a_device_t device_handle,
  */
 K4A_EXPORT k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
                                                      size_t raw_calibration_size,
-                                                     const k4a_depth_mode_t depth_mode,
-                                                     const k4a_color_resolution_t color_resolution,
+                                                     const uint32_t depth_mode_id,
+                                                     const uint32_t color_mode_id,
                                                      k4a_calibration_t *calibration);
 
 /** Transform a 3D point of a source coordinate system into a 3D point of the target coordinate system
@@ -1727,7 +1945,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_get_from_raw(char *raw_calibration,
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p target_point3d_mm was successfully written. ::K4A_RESULT_FAILED if \p calibration
- * contained invalid transformation parameters.
+ * contained invalid transformation parameters. ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \remarks
  * This function is used to transform 3D points between depth and color camera coordinate systems. The function uses the
@@ -1782,7 +2000,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_3d(const k4a_calibration_t *calibr
  * ::K4A_RESULT_SUCCEEDED if \p target_point3d_mm was successfully written. ::K4A_RESULT_FAILED if \p calibration
  * contained invalid transformation parameters. If the function returns ::K4A_RESULT_SUCCEEDED, but \p valid is 0,
  * the transformation was computed, but the results in \p target_point3d_mm are outside of the range of valid
- * calibration and should be ignored.
+ * calibration and should be ignored. ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \remarks
  * This function applies the intrinsic calibration of \p source_camera to compute the 3D ray from the focal point of the
@@ -1839,7 +2057,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_2d_to_3d(const k4a_calibration_t *calibr
  * ::K4A_RESULT_SUCCEEDED if \p target_point2d was successfully written. ::K4A_RESULT_FAILED if \p calibration
  * contained invalid transformation parameters. If the function returns ::K4A_RESULT_SUCCEEDED, but \p valid is 0,
  * the transformation was computed, but the results in \p target_point2d are outside of the range of valid calibration
- * and should be ignored.
+ * and should be ignored. ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \remarks
  * If \p target_camera is different from \p source_camera, \p source_point3d_mm is transformed to \p target_camera using
@@ -1899,7 +2117,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_3d_to_2d(const k4a_calibration_t *calibr
  * ::K4A_RESULT_SUCCEEDED if \p target_point2d was successfully written. ::K4A_RESULT_FAILED if \p calibration
  * contained invalid transformation parameters. If the function returns ::K4A_RESULT_SUCCEEDED, but \p valid is 0,
  * the transformation was computed, but the results in \p target_point2d are outside of the range of valid calibration
- * and should be ignored.
+ * and should be ignored. ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \remarks
  * This function maps a pixel between the coordinate systems of the depth and color cameras. It is equivalent to calling
@@ -1956,7 +2174,7 @@ K4A_EXPORT k4a_result_t k4a_calibration_2d_to_2d(const k4a_calibration_t *calibr
  * ::K4A_RESULT_SUCCEEDED if \p target_point2d was successfully written. ::K4A_RESULT_FAILED if \p calibration
  * contained invalid transformation parameters. If the function returns ::K4A_RESULT_SUCCEEDED, but \p valid is 0,
  * the transformation was computed, but the results in \p target_point2d are outside of the range of valid calibration
- * and should be ignored.
+ * and should be ignored. ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \remarks
  * This function represents an alternative to k4a_calibration_2d_to_2d() if the number of pixels that need to be
@@ -2062,6 +2280,7 @@ K4A_EXPORT void k4a_transformation_destroy(k4a_transformation_t transformation_h
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p transformed_depth_image was successfully written and ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \relates k4a_transformation_t
  *
@@ -2141,7 +2360,7 @@ K4A_EXPORT k4a_result_t k4a_transformation_depth_image_to_color_camera(k4a_trans
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p transformed_depth_image and \p transformed_custom_image were successfully written and
- * ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_FAILED otherwise. ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \relates k4a_transformation_t
  *
@@ -2198,6 +2417,7 @@ k4a_transformation_depth_image_to_color_camera_custom(k4a_transformation_t trans
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p transformed_color_image was successfully written and ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \relates k4a_transformation_t
  *
@@ -2250,6 +2470,7 @@ K4A_EXPORT k4a_result_t k4a_transformation_color_image_to_depth_camera(k4a_trans
  *
  * \returns
  * ::K4A_RESULT_SUCCEEDED if \p xyz_image was successfully written and ::K4A_RESULT_FAILED otherwise.
+ * ::K4A_RESULT_UNSUPPORTED if the device does not support this operation.
  *
  * \relates k4a_transformation_t
  *

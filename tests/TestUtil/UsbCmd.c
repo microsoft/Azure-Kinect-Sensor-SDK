@@ -4,6 +4,7 @@
 //************************ Includes *****************************
 #include <stdio.h>
 #include <k4a/k4a.h>
+#include <k4ainternal/modes.h>
 #include <k4ainternal/logging.h>
 #include <k4ainternal/usbcommand.h>
 #include <k4ainternal/imu.h>

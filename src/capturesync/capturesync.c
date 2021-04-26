@@ -8,7 +8,7 @@
 #include <k4ainternal/handle.h>
 #include <k4ainternal/queue.h>
 #include <k4ainternal/logging.h>
-#include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 
 #include <azure_c_shared_utility/lock.h>
 #include <azure_c_shared_utility/envvariable.h>
@@ -491,13 +491,13 @@ k4a_result_t capturesync_start(capturesync_t capturesync_handle, const k4a_devic
     sync->waiting_for_clean_depth_ts = true;
     sync->synchronized_images_only = config->synchronized_images_only;
 
-    sync->fps_period = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->camera_fps));
+    sync->fps_period = HZ_TO_PERIOD_US(k4a_convert_fps_to_uint(config->fps_mode_id));
     sync->fps_1_quarter_period = sync->fps_period / 4;
     sync->depth_delay_off_color_usec = config->depth_delay_off_color_usec;
     sync->sync_captures = true;
     sync->depth_captures_dropped = 0;
 
-    if (config->color_resolution == K4A_COLOR_RESOLUTION_OFF || config->depth_mode == K4A_DEPTH_MODE_OFF)
+    if (config->color_mode_id == K4A_COLOR_RESOLUTION_OFF || config->depth_mode_id == K4A_DEPTH_MODE_OFF)
     {
         // Only 1 sensor is running, disable synchronization
         sync->sync_captures = false;

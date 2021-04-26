@@ -26,9 +26,9 @@ template<k4a_image_format_t ImageFormat, DepthPixelVisualizationFunction Visuali
 class K4ADepthImageConverterBase : public IK4AImageConverter<ImageFormat>
 {
 public:
-    explicit K4ADepthImageConverterBase(const k4a_depth_mode_t depthMode,
+    explicit K4ADepthImageConverterBase(const k4a_depth_mode_info_t depth_mode_info,
                                         const std::pair<DepthPixel, DepthPixel> expectedValueRange) :
-        m_dimensions(GetDepthDimensions(depthMode)),
+        m_dimensions(GetDepthDimensions(depth_mode_info)),
         m_expectedValueRange(expectedValueRange),
         m_expectedBufferSize(static_cast<size_t>(m_dimensions.Width * m_dimensions.Height) * sizeof(BgraPixel))
     {

@@ -81,22 +81,38 @@ TEST_F(k4a_cpp_ft, k4a)
     (void)kinect.is_sync_in_connected();
 
     {
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
+        k4a_device_get_depth_mode(kinect.handle(), 1, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_2X2BINNED
+
+        k4a_color_mode_info_t color_mode_info = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+        k4a_device_get_color_mode(kinect.handle(), 3, &color_mode_info); // K4A_COLOR_RESOLUTION_1440P
+
         // should not throw exception
-        calibration cal = kinect.get_calibration(K4A_DEPTH_MODE_NFOV_2X2BINNED, K4A_COLOR_RESOLUTION_1440P);
+        calibration cal = kinect.get_calibration(depth_mode_info.mode_id, color_mode_info.mode_id);
         calibration cal2 = cal;
-        ASSERT_EQ(cal.color_resolution, cal2.color_resolution);
+
+        ASSERT_EQ(cal.color_mode_id, cal2.color_mode_id);
     }
 
     {
+        k4a_depth_mode_info_t depth_mode_info = { sizeof(k4a_depth_mode_info_t), K4A_ABI_VERSION, 0 };
+        k4a_device_get_depth_mode(kinect.handle(), 1, &depth_mode_info); // K4A_DEPTH_MODE_NFOV_2X2BINNED
+
+        k4a_color_mode_info_t color_mode_info3 = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+        k4a_device_get_color_mode(kinect.handle(), 3, &color_mode_info3); // K4A_COLOR_RESOLUTION_1440P
+
         std::vector<uint8_t> raw_cal = kinect.get_raw_calibration();
-        calibration cal = kinect.get_calibration(K4A_DEPTH_MODE_NFOV_2X2BINNED, K4A_COLOR_RESOLUTION_1440P);
-        ASSERT_EQ(cal.color_resolution, K4A_COLOR_RESOLUTION_1440P);
+        calibration cal = kinect.get_calibration(depth_mode_info.mode_id, color_mode_info3.mode_id);
+        ASSERT_EQ(cal.color_mode_id, (uint32_t)3);
+
+        k4a_color_mode_info_t color_mode_info2 = { sizeof(k4a_color_mode_info_t), K4A_ABI_VERSION, 0 };
+        k4a_device_get_color_mode(kinect.handle(), 2, &color_mode_info2); // K4A_COLOR_RESOLUTION_1080P
 
         cal = calibration::get_from_raw(raw_cal.data(),
                                         raw_cal.size(),
-                                        K4A_DEPTH_MODE_NFOV_2X2BINNED,
-                                        K4A_COLOR_RESOLUTION_1080P);
-        ASSERT_EQ(cal.color_resolution, K4A_COLOR_RESOLUTION_1080P);
+                                        depth_mode_info.mode_id,
+                                        color_mode_info2.mode_id);
+        ASSERT_EQ(cal.color_mode_id, (uint32_t)2);
     }
 
     {
@@ -115,8 +131,9 @@ TEST_F(k4a_cpp_ft, k4a)
         k4a_imu_sample_t sample = { 0 };
         capture cap1, cap2;
         k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-        config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
-        config.depth_mode = K4A_DEPTH_MODE_PASSIVE_IR;
+        config.color_mode_id = 2; // K4A_COLOR_RESOLUTION_1080P
+        config.depth_mode_id = 5; // K4A_DEPTH_MODE_PASSIVE_IR
+        config.fps_mode_id = 30;  // K4A_FRAMES_PER_SECOND_30
         config.synchronized_images_only = true;
         kinect.start_cameras(&config);
         kinect.start_imu();
@@ -255,8 +272,9 @@ static void test_record(void)
     record recorder;
     device kinect = device::open(0);
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-    config.color_resolution = K4A_COLOR_RESOLUTION_1080P;
-    config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    config.color_mode_id = 2; // K4A_COLOR_RESOLUTION_1080P
+    config.depth_mode_id = 2; // K4A_DEPTH_MODE_NFOV_UNBINNED
+    config.fps_mode_id = 30;  // K4A_FRAMES_PER_SECOND_30
     config.synchronized_images_only = true;
     kinect.start_cameras(&config);
     kinect.start_imu();
@@ -392,9 +410,9 @@ static void test_playback(void)
     calibration cal = pback.get_calibration();
     {
         device kinect = device::open(0);
-        calibration device_cal = kinect.get_calibration(config.depth_mode, config.color_resolution);
-        ASSERT_TRUE(cal.color_resolution == device_cal.color_resolution);
-        ASSERT_TRUE(cal.depth_mode == device_cal.depth_mode);
+        calibration device_cal = kinect.get_calibration(config.depth_mode_info.mode_id, config.color_mode_info.mode_id);
+        ASSERT_TRUE(cal.color_mode_id == device_cal.color_mode_id);
+        ASSERT_TRUE(cal.depth_mode_id == device_cal.depth_mode_id);
     }
 
     pback.set_color_conversion(K4A_IMAGE_FORMAT_COLOR_NV12);

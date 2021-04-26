@@ -8,6 +8,8 @@
 #include <utility>
 
 #include <k4a/k4a.hpp>
+#include <k4ainternal/modes.h>
+#include "k4asourceselectiondockcontrol.h"
 
 namespace k4aviewer
 {
@@ -15,69 +17,30 @@ namespace k4aviewer
 // Gets the dimensions of the color images that the color camera will produce for a
 // given color resolution
 //
-inline std::pair<int, int> GetColorDimensions(const k4a_color_resolution_t resolution)
+inline std::pair<int, int> GetColorDimensions(k4a_color_mode_info_t color_mode_info)
 {
-    switch (resolution)
-    {
-    case K4A_COLOR_RESOLUTION_720P:
-        return { 1280, 720 };
-    case K4A_COLOR_RESOLUTION_2160P:
-        return { 3840, 2160 };
-    case K4A_COLOR_RESOLUTION_1440P:
-        return { 2560, 1440 };
-    case K4A_COLOR_RESOLUTION_1080P:
-        return { 1920, 1080 };
-    case K4A_COLOR_RESOLUTION_3072P:
-        return { 4096, 3072 };
-    case K4A_COLOR_RESOLUTION_1536P:
-        return { 2048, 1536 };
-
-    default:
-        throw std::logic_error("Invalid color dimensions value!");
-    }
+    return { (int)color_mode_info.width, (int)color_mode_info.height };
 }
 
 // Gets the dimensions of the depth images that the depth camera will produce for a
 // given depth mode
 //
-inline std::pair<int, int> GetDepthDimensions(const k4a_depth_mode_t depthMode)
+inline std::pair<int, int> GetDepthDimensions(k4a_depth_mode_info_t depth_mode_info)
 {
-    switch (depthMode)
-    {
-    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-        return { 320, 288 };
-    case K4A_DEPTH_MODE_NFOV_UNBINNED:
-        return { 640, 576 };
-    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-        return { 512, 512 };
-    case K4A_DEPTH_MODE_WFOV_UNBINNED:
-        return { 1024, 1024 };
-    case K4A_DEPTH_MODE_PASSIVE_IR:
-        return { 1024, 1024 };
-
-    default:
-        throw std::logic_error("Invalid depth dimensions value!");
-    }
+    return { (int)depth_mode_info.width, (int)depth_mode_info.height };
 }
 
 // Gets the range of values that we expect to see from the depth camera
 // when using a given depth mode, in millimeters
 //
-inline std::pair<uint16_t, uint16_t> GetDepthModeRange(const k4a_depth_mode_t depthMode)
+inline std::pair<uint16_t, uint16_t> GetDepthModeRange(k4a_depth_mode_info_t depth_mode_info)
 {
-    switch (depthMode)
+    if (!depth_mode_info.passive_ir_only)
     {
-    case K4A_DEPTH_MODE_NFOV_2X2BINNED:
-        return { (uint16_t)500, (uint16_t)5800 };
-    case K4A_DEPTH_MODE_NFOV_UNBINNED:
-        return { (uint16_t)500, (uint16_t)4000 };
-    case K4A_DEPTH_MODE_WFOV_2X2BINNED:
-        return { (uint16_t)250, (uint16_t)3000 };
-    case K4A_DEPTH_MODE_WFOV_UNBINNED:
-        return { (uint16_t)250, (uint16_t)2500 };
-
-    case K4A_DEPTH_MODE_PASSIVE_IR:
-    default:
+        return { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range };
+    }
+    else
+    {
         throw std::logic_error("Invalid depth mode!");
     }
 }
@@ -85,17 +48,18 @@ inline std::pair<uint16_t, uint16_t> GetDepthModeRange(const k4a_depth_mode_t de
 // Gets the expected min/max IR brightness levels that we expect to see
 // from the IR camera when using a given depth mode
 //
-inline std::pair<uint16_t, uint16_t> GetIrLevels(const k4a_depth_mode_t depthMode)
+inline std::pair<uint16_t, uint16_t> GetIrLevels(k4a_depth_mode_info_t depth_mode_info)
 {
-    switch (depthMode)
+    if (depth_mode_info.mode_id == K4A_DEPTH_MODE_OFF)
     {
-    case K4A_DEPTH_MODE_PASSIVE_IR:
-        return { (uint16_t)0, (uint16_t)100 };
-
-    case K4A_DEPTH_MODE_OFF:
         throw std::logic_error("Invalid depth mode!");
-
-    default:
+    }
+    else if (depth_mode_info.passive_ir_only)
+    {
+        return { (uint16_t)depth_mode_info.min_range, (uint16_t)depth_mode_info.max_range };
+    }
+    else
+    {
         return { (uint16_t)0, (uint16_t)1000 };
     }
 }

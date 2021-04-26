@@ -3,6 +3,7 @@
 
 //************************ Includes *****************************
 #include <k4a/k4a.h>
+#include <k4ainternal/modes.h>
 #include <gtest/gtest.h>
 #include <utcommon.h>
 #include <azure_c_shared_utility/tickcounter.h>
@@ -137,9 +138,9 @@ static void RunStreamConfig(k4a_device_t device,
 
     // Configure the stream
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
-    config.depth_mode = depth_mode;
-    config.camera_fps = depth_fps;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+    config.depth_mode_id = depth_mode;
+    config.fps_mode_id = depth_fps;
 
     // start streaming.
     ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_start_cameras(device, &config));
@@ -487,14 +488,14 @@ TEST_F(depth_ft, depthModeChange)
     // Create two valid configs that are expected to yield different-sized depth payloads
     //
     config.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config.color_resolution = K4A_COLOR_RESOLUTION_OFF;
-    config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
-    config.camera_fps = K4A_FRAMES_PER_SECOND_15;
+    config.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+    config.depth_mode_id = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    config.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
 
     config2.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    config2.color_resolution = K4A_COLOR_RESOLUTION_OFF;
-    config2.depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-    config2.camera_fps = K4A_FRAMES_PER_SECOND_15;
+    config2.color_mode_id = K4A_COLOR_RESOLUTION_OFF;
+    config2.depth_mode_id = K4A_DEPTH_MODE_NFOV_2X2BINNED;
+    config2.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
 
     // Start device in first mode and check frame size
     //
@@ -502,7 +503,7 @@ TEST_F(depth_ft, depthModeChange)
 
     ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(m_device, &depth_capture, timeout_ms));
 
-    if (config.depth_mode != K4A_DEPTH_MODE_PASSIVE_IR)
+    if (config.depth_mode_id != K4A_DEPTH_MODE_PASSIVE_IR)
     {
         image = k4a_capture_get_depth_image(depth_capture);
         ASSERT_NE(k4a_image_get_buffer(image), (uint8_t *)NULL);
@@ -525,7 +526,7 @@ TEST_F(depth_ft, depthModeChange)
 
     ASSERT_EQ(K4A_WAIT_RESULT_SUCCEEDED, k4a_device_get_capture(m_device, &depth_capture, timeout_ms));
 
-    if (config2.depth_mode != K4A_DEPTH_MODE_PASSIVE_IR)
+    if (config2.depth_mode_id != K4A_DEPTH_MODE_PASSIVE_IR)
     {
         image = k4a_capture_get_depth_image(depth_capture);
         ASSERT_NE(k4a_image_get_buffer(image), (uint8_t *)NULL);
@@ -541,6 +542,137 @@ TEST_F(depth_ft, depthModeChange)
     (void)k4a_capture_release(depth_capture);
 
     k4a_device_stop_cameras(m_device);
+}
+
+/**
+ *  Functional test for verifying correct device info.
+ *
+ *  @Test criteria
+ *   Pass conditions;
+ *       Device info has non-zero VID, PID, and capabilities.
+ *       Capabilities shall only be composed of binary bitmap allowed values.
+ *
+ */
+TEST_F(depth_ft, deviceInfo)
+{
+    K4A_INIT_STRUCT(k4a_device_info_t, deviceInfo)
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_info(NULL, &deviceInfo))
+        << "Unexpected return value for invalid device handle.";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_info(m_device, NULL))
+        << "Unexpected return value for invalid device info pointer.";
+
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_info(m_device, &deviceInfo)) << "Couldn't get device information\n";
+
+    EXPECT_EQ(deviceInfo.struct_version, static_cast<uint32_t>(K4A_ABI_VERSION))
+        << "Device info struct version invalid\n";
+    EXPECT_EQ(deviceInfo.struct_size, static_cast<uint32_t>(sizeof(k4a_device_info_t)))
+        << "Device info struct size invalid\n";
+    EXPECT_NE(deviceInfo.vendor_id, static_cast<uint32_t>(0)) << "Device info vendor id invalid\n";
+    EXPECT_NE(deviceInfo.device_id, static_cast<uint32_t>(0)) << "Device info device id invalid\n";
+    EXPECT_GT(deviceInfo.capabilities.value, static_cast<uint32_t>(0))
+        << "Device info capabilities must be greater than 0.\n";
+}
+
+/**
+ *  Functional test for verifying depth modes.
+ *
+ *  @Test criteria
+ *   Pass conditions;
+ *       Calling k4a_device_get_depth_mode_count() and k4a_device_get_depth_mode() has proper return values.
+ *
+ */
+TEST_F(depth_ft, deviceModeInfo)
+{
+    K4A_INIT_STRUCT(k4a_depth_mode_info_t, depthModeInfo)
+    uint32_t depthModeCount = 0;
+
+    // Test invalid arguments.
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_depth_mode_count(NULL, &depthModeCount))
+        << "Unexpected return value for invalid device handle.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_depth_mode_count(m_device, NULL))
+        << "Unexpected return value for invalid depth mode count pointer.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_depth_mode(NULL, 0, &depthModeInfo))
+        << "Unexpected return value for invalid device handle.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_depth_mode(m_device, 0, NULL))
+        << "Unexpected return value for invalid device handle.\n";
+
+    // Get the depth mode count.
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_depth_mode_count(m_device, &depthModeCount))
+        << "Couldn't get depth mode count.\n";
+
+    // Test invalid depth mode index.
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_depth_mode(m_device, depthModeCount, &depthModeInfo))
+        << "Unexpected return value for depth mode index greater than number of depth modes.\n";
+
+    // Get depth mode info.
+    for (uint32_t d = 0; d < depthModeCount; ++d)
+    {
+        depthModeInfo = { depthModeInfo.struct_size, depthModeInfo.struct_version, 0 };
+
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_depth_mode(m_device, d, &depthModeInfo))
+            << "Couldn't get depth mode info.\n";
+
+        EXPECT_EQ(depthModeInfo.struct_version, static_cast<uint32_t>(K4A_ABI_VERSION))
+            << "Depth mode struct version invalid\n";
+
+        EXPECT_EQ(depthModeInfo.struct_size, static_cast<uint32_t>(sizeof(k4a_depth_mode_info_t)))
+            << "Depth mode struct size invalid\n";
+    }
+}
+
+/**
+ *  Functional test for verifying fps modes.
+ *
+ *  @Test criteria
+ *   Pass conditions;
+ *       Calling k4a_device_get_fps_mode_count() and k4a_device_get_fps_mode() has proper return values.
+ *
+ */
+TEST_F(depth_ft, fpsModeInfo)
+{
+    K4A_INIT_STRUCT(k4a_fps_mode_info_t, fpsModeInfo)
+    uint32_t fpsModeCount = 0;
+
+    // Test invalid arguments.
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_fps_mode_count(NULL, &fpsModeCount))
+        << "Unexpected return value for invalid device handle.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_fps_mode_count(m_device, NULL))
+        << "Unexpected return value for invalid depth mode count pointer.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_fps_mode(NULL, 0, &fpsModeInfo))
+        << "Unexpected return value for invalid device handle.\n";
+
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_fps_mode(m_device, 0, NULL))
+        << "Unexpected return value for invalid device handle.\n";
+
+    // Get the depth mode count.
+    ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_fps_mode_count(m_device, &fpsModeCount))
+        << "Couldn't get fps mode count.\n";
+
+    // Test invalid depth mode index.
+    ASSERT_EQ(K4A_RESULT_FAILED, k4a_device_get_fps_mode(m_device, fpsModeCount, &fpsModeInfo))
+        << "Unexpected return value for fps mode index greater than number of depth modes.\n";
+
+    // Get fps mode info.
+    for (uint32_t d = 0; d < fpsModeCount; ++d)
+    {
+        fpsModeInfo = { fpsModeInfo.struct_size, fpsModeInfo.struct_version, 0 };
+
+        ASSERT_EQ(K4A_RESULT_SUCCEEDED, k4a_device_get_fps_mode(m_device, d, &fpsModeInfo))
+            << "Couldn't get fps mode info.\n";
+
+        EXPECT_EQ(fpsModeInfo.struct_version, static_cast<uint32_t>(K4A_ABI_VERSION))
+            << "FPS mode struct version invalid\n";
+
+        EXPECT_EQ(fpsModeInfo.struct_size, static_cast<uint32_t>(sizeof(k4a_fps_mode_info_t)))
+            << "FPS mode struct size invalid\n";
+    }
 }
 
 int main(int argc, char **argv)

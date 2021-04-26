@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -43,12 +44,32 @@ namespace Microsoft.Azure.Kinect.Sensor.Examples.WinForms
         {
             using (Device device = Device.Open(0))
             {
+                // We need to provide mode ids for color, depth and fps for the device configuration passed to the device start cameras method.
+
+                // 1. Get the available modes for device using the get modes methods.
+                List<ColorModeInfo> colorModes = device.GetColorModes();
+                List<FPSModeInfo> fpsModes = device.GetFPSModes();
+                List<DepthModeInfo> depthModes = device.GetDepthModes();
+
+                // 2. For this example, let's find the first color mode that isn't the Off mode.
+                ColorModeInfo colorModeInfo = colorModes.Find(c => c.ModeId > 0);
+
+                // 3. For this example, let's find the first depth mode that isn't the Off mode.
+                DepthModeInfo depthModeInfo = depthModes.Find(d => d.ModeId > 0);
+
+                // 4. For this example, let's find the fps mode with the highest frames per second.
+                fpsModes.Sort((a, b) => b.FPS.CompareTo(a.FPS));
+                FPSModeInfo fpsModeInfo = fpsModes.Find(f => f.ModeId != 0);
+
+                // 5. If either a color or depth mode was found that met our example conditions and as long as there was at least one fps mode (there should always be),
+                // then the mode ids will be valid parameters for the device configuration passed into the device start camera function.
                 device.StartCameras(new DeviceConfiguration
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
-                    ColorResolution = ColorResolution.R720p,
-                    DepthMode = DepthMode.NFOV_2x2Binned,
+                    ColorModeId = colorModeInfo.ModeId,
+                    DepthModeId = depthModeInfo.ModeId,
                     SynchronizedImagesOnly = true,
+                    FPSModeId = fpsModeInfo.ModeId,
                 });
 
                 Stopwatch sw = new Stopwatch();

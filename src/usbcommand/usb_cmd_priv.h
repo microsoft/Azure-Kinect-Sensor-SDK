@@ -12,7 +12,7 @@
 #include <stdbool.h>
 // This library
 #include <k4ainternal/usbcommand.h>
-#include <k4ainternal/common.h>
+#include <k4ainternal/usb_device_ids.h>
 
 // Dependent libraries
 #include <k4ainternal/allocator.h>
@@ -45,9 +45,6 @@ extern "C" {
 #define USB_MAX_TX_DATA 128
 #define USB_CMD_PACKET_TYPE 0x06022009
 #define USB_CMD_PACKET_TYPE_RESPONSE 0x0A6FE000
-#define K4A_MSFT_VID 0x045E
-#define K4A_RGB_PID 0x097D
-#define K4A_DEPTH_PID 0x097C
 #define USB_CMD_DEFAULT_CONFIG 1
 
 #define USB_CMD_DEPTH_INTERFACE 0

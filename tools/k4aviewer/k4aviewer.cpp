@@ -16,13 +16,16 @@
 
 // Project headers
 //
-#include "k4aaudiomanager.h"
 #include "k4alogdockcontrol.h"
 #include "k4asourceselectiondockcontrol.h"
 #include "k4aviewererrormanager.h"
 #include "k4aviewerutil.h"
 #include "k4awindowmanager.h"
 #include "perfcounter.h"
+
+#ifdef K4A_INCLUDE_AUDIO
+#include "k4aaudiomanager.h"
+#endif
 
 using namespace k4aviewer;
 
@@ -142,6 +145,7 @@ K4AViewer::K4AViewer(const K4AViewerArgs &args)
         SetHighDpi();
     }
 
+#ifdef K4A_INCLUDE_AUDIO
     const int audioInitStatus = K4AAudioManager::Instance().Initialize();
     if (audioInitStatus != SoundIoErrorNone)
     {
@@ -149,6 +153,7 @@ K4AViewer::K4AViewer(const K4AViewerArgs &args)
         errorBuilder << "Failed to initialize audio backend: " << soundio_strerror(audioInitStatus) << "!";
         K4AViewerErrorManager::Instance().SetErrorStatus(errorBuilder.str().c_str());
     }
+#endif
 
     K4AWindowManager::Instance().PushLeftDockControl(std14::make_unique<K4ASourceSelectionDockControl>());
     K4AWindowManager::Instance().PushBottomDockControl(std14::make_unique<K4ALogDockControl>());

@@ -7,8 +7,8 @@
 // Module being tested
 #include <k4a/k4a.h>
 #include <k4ainternal/transformation.h>
-#include <k4ainternal/common.h>
 #include <k4ainternal/image.h>
+#include <k4ainternal/modes.h>
 
 using namespace testing;
 
@@ -39,13 +39,20 @@ protected:
         m_accel_point3d_reference[1] = 4.92006636f;
         m_accel_point3d_reference[2] = 108.398674f;
 
-        k4a_depth_mode_t depth_mode = K4A_DEPTH_MODE_WFOV_2X2BINNED;
-        k4a_color_resolution_t color_resolution = K4A_COLOR_RESOLUTION_2160P;
+        // device_depth_modes is statically defined in <k4ainternal/modes.h>.
+        // device_depth_modes[3] is the mode for K4A_DEPTH_MODE_WFOV_2X2BINNED.
+        k4a_depth_mode_info_t depth_mode_info = k4a_get_device_depth_mode(3);
+        depth_mode_info.struct_size = sizeof(k4a_depth_mode_info_t);
+
+        // device_color_modes is statically defined in <k4ainternal/modes.h>.
+        // device_color_modes[5] is the mode for K4A_COLOR_RESOLUTION_2160P.
+        k4a_color_mode_info_t color_mode_info = k4a_get_device_color_mode(5);
+        color_mode_info.struct_size = sizeof(k4a_color_mode_info_t);
 
         k4a_result_t result = k4a_calibration_get_from_raw(g_test_json,
                                                            sizeof(g_test_json),
-                                                           depth_mode,
-                                                           color_resolution,
+                                                           depth_mode_info.mode_id,
+                                                           color_mode_info.mode_id,
                                                            &m_calibration);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
     };
@@ -560,35 +567,40 @@ TEST_F(transformation_ut, transformation_all_image_functions_with_failure_cases)
 
     for (int i = 0; i < 5; i++)
     {
-        k4a_depth_mode_t depth_mode = K4A_DEPTH_MODE_OFF;
-        k4a_color_resolution_t color_resolution = K4A_COLOR_RESOLUTION_OFF;
+        k4a_depth_mode_t depth_mode;
+        k4a_color_resolution_t color_mode;
 
         switch (i)
         {
         case 0:
             depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
-            color_resolution = K4A_COLOR_RESOLUTION_OFF;
+            color_mode = K4A_COLOR_RESOLUTION_OFF;
             break;
+
         case 1:
             depth_mode = K4A_DEPTH_MODE_OFF;
-            color_resolution = K4A_COLOR_RESOLUTION_720P;
+            color_mode = K4A_COLOR_RESOLUTION_720P;
             break;
+
         case 2:
             depth_mode = K4A_DEPTH_MODE_NFOV_2X2BINNED;
-            color_resolution = K4A_COLOR_RESOLUTION_720P;
+            color_mode = K4A_COLOR_RESOLUTION_720P;
             break;
+
         case 3:
             depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
-            color_resolution = K4A_COLOR_RESOLUTION_2160P;
+            color_mode = K4A_COLOR_RESOLUTION_2160P;
             break;
+
         default:
             depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
-            color_resolution = K4A_COLOR_RESOLUTION_720P;
+            color_mode = K4A_COLOR_RESOLUTION_720P;
+            break;
         }
 
         k4a_calibration_t calibration;
         k4a_result_t result =
-            k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_resolution, &calibration);
+            k4a_calibration_get_from_raw(g_test_json, sizeof(g_test_json), depth_mode, color_mode, &calibration);
         ASSERT_EQ(result, K4A_RESULT_SUCCEEDED);
 
         k4a_transformation_t transformation_handle = transformation_create(&calibration, false);

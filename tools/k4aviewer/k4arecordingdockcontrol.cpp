@@ -22,6 +22,8 @@
 #include "k4aviewerutil.h"
 #include "k4awindowmanager.h"
 #include "k4aimugraphdatagenerator.h"
+#include <k4ainternal/math.h>
+#include <k4ainternal/modes.h>
 
 using namespace k4aviewer;
 namespace
@@ -49,24 +51,14 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     //
     m_recordConfiguration = recording.get_record_configuration();
     std::stringstream fpsSS;
-    fpsSS << m_recordConfiguration.camera_fps;
+
+    fpsSS << m_recordConfiguration.fps_mode_info.fps;
+
     m_fpsLabel = fpsSS.str();
 
-    switch (m_recordConfiguration.camera_fps)
-    {
-    case K4A_FRAMES_PER_SECOND_5:
-        m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 5));
-        break;
-
-    case K4A_FRAMES_PER_SECOND_15:
-        m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 15));
-        break;
-
-    case K4A_FRAMES_PER_SECOND_30:
-    default:
-        m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * 30));
-        break;
-    }
+    // Get fps value from the fps mode.
+    uint32_t fps_int = m_recordConfiguration.fps_mode_info.mode_id;
+    m_playbackThreadState.TimePerFrame = std::chrono::microseconds(std::micro::den / (std::micro::num * fps_int));
 
     constexpr char noneStr[] = "(None)";
 
@@ -77,7 +69,18 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     std::stringstream depthSS;
     if (m_recordingHasDepth || m_recordingHasIR)
     {
-        depthSS << m_recordConfiguration.depth_mode;
+        int width = static_cast<int>(m_recordConfiguration.depth_mode_info.width);
+        int height = static_cast<int>(m_recordConfiguration.depth_mode_info.height);
+        float fov = m_recordConfiguration.depth_mode_info.horizontal_fov;
+
+        if (m_recordConfiguration.depth_mode_info.passive_ir_only)
+        {
+            depthSS << "Passive IR";
+        }
+        else
+        {
+            depthSS << std::to_string(width) << "x" << std::to_string(height) << ", " << std::to_string(fov) << " Deg";
+        }
     }
     else
     {
@@ -91,7 +94,13 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
     if (m_recordingHasColor)
     {
         colorFormatSS << m_recordConfiguration.color_format;
-        colorResolutionSS << m_recordConfiguration.color_resolution;
+
+        int width = static_cast<int>(m_recordConfiguration.color_mode_info.width);
+        int height = static_cast<int>(m_recordConfiguration.color_mode_info.height);
+        int common_factor = math_get_common_factor(width, height);
+
+        colorResolutionSS << (height < 1000 ? " " : "") << std::to_string(height) << "p "
+                          << std::to_string(width / common_factor) << ":" << std::to_string(height / common_factor);
 
         recording.set_color_conversion(K4A_IMAGE_FORMAT_COLOR_BGRA32);
         m_recordConfiguration.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
@@ -133,6 +142,14 @@ K4ARecordingDockControl::K4ARecordingDockControl(std::string &&path, k4a::playba
 
 K4ADockControlStatus K4ARecordingDockControl::Show()
 {
+    bool hasColorDevice = false;
+    bool hasDepthDevice = false;
+    bool hasIMUDevice = false;
+
+    hasDepthDevice = (m_recordConfiguration.device_info.capabilities.bitmap.bHasDepth == 1);
+    hasColorDevice = (m_recordConfiguration.device_info.capabilities.bitmap.bHasColor == 1);
+    hasIMUDevice = (m_recordConfiguration.device_info.capabilities.bitmap.bHasIMU == 1);
+
     ImGui::TextUnformatted(m_filenameLabel.c_str());
     ImGui::SameLine();
     ImGuiExtensions::ButtonColorChanger cc(ImGuiExtensions::ButtonColor::Red);
@@ -146,14 +163,31 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
 
     ImGui::TextUnformatted("Recording Settings");
     ImGui::Text("FPS:              %s", m_fpsLabel.c_str());
-    ImGui::Text("Depth mode:       %s", m_depthModeLabel.c_str());
-    ImGui::Text("Color format:     %s", m_colorFormatLabel.c_str());
-    ImGui::Text("Color resolution: %s", m_colorResolutionLabel.c_str());
-    ImGui::Text("IMU enabled:      %s", m_recordConfiguration.imu_track_enabled ? "Yes" : "No");
+
+    if (hasDepthDevice)
+    {
+        ImGui::Text("Depth mode:       %s", m_depthModeLabel.c_str());
+    }
+
+    if (hasColorDevice)
+    {
+        ImGui::Text("Color format:     %s", m_colorFormatLabel.c_str());
+        ImGui::Text("Color resolution: %s", m_colorResolutionLabel.c_str());
+    }
+
+    if (hasIMUDevice)
+    {
+        ImGui::Text("IMU enabled:      %s", m_recordConfiguration.imu_track_enabled ? "Yes" : "No");
+    }
+
     ImGui::Separator();
 
     ImGui::TextUnformatted("Sync settings");
-    ImGui::Text("Depth/color delay (us): %d", m_depthDelayOffColorUsec);
+
+    std::string delay_description = hasColorDevice && hasDepthDevice ? "Depth/color" :
+                                                                       hasDepthDevice ? "Depth" : "Color";
+    ImGui::Text("%s delay (us): %d", delay_description.c_str(), m_depthDelayOffColorUsec);
+
     ImGui::Text("Sync mode:              %s", m_wiredSyncModeLabel.c_str());
     ImGui::Text("Subordinate delay (us): %d", m_subordinateDelayOffMasterUsec);
     ImGui::Text("Start timestamp offset: %d", m_startTimestampOffsetUsec);
@@ -162,8 +196,17 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
 
     ImGui::TextUnformatted("Device info");
     ImGui::Text("Device S/N:      %s", m_deviceSerialNumber.c_str());
-    ImGui::Text("RGB camera FW:   %s", m_colorFirmwareVersion.c_str());
-    ImGui::Text("Depth camera FW: %s", m_depthFirmwareVersion.c_str());
+
+    if (hasColorDevice)
+    {
+        ImGui::Text("RGB camera FW:   %s", m_colorFirmwareVersion.c_str());
+    }
+
+    if (hasDepthDevice)
+    {
+        ImGui::Text("Depth camera FW: %s", m_depthFirmwareVersion.c_str());
+    }
+
     ImGui::Separator();
 
     if (!m_playbackThread->IsRunning())
@@ -465,20 +508,26 @@ void K4ARecordingDockControl::SetViewType(K4AWindowSet::ViewType viewType)
         K4AWindowSet::StartNormalWindows(m_filenameLabel.c_str(),
                                          &m_playbackThreadState.CaptureDataSource,
                                          imuDataSource,
+#ifdef K4A_INCLUDE_AUDIO
                                          nullptr, // Audio source - sound is not supported in recordings
+#endif
                                          m_recordingHasDepth || m_recordingHasIR,
-                                         m_recordConfiguration.depth_mode,
+                                         m_recordConfiguration.depth_mode_info,
                                          m_recordingHasColor,
                                          m_recordConfiguration.color_format,
-                                         m_recordConfiguration.color_resolution);
+                                         m_recordConfiguration.color_mode_info);
         break;
 
     case K4AWindowSet::ViewType::PointCloudViewer:
         try
         {
             k4a::calibration calibration = m_playbackThreadState.Recording.get_calibration();
+            k4a_record_configuration_t record_configuration =
+                m_playbackThreadState.Recording.get_record_configuration();
+            k4a_depth_mode_info_t depth_mode_info = record_configuration.depth_mode_info;
             K4AWindowSet::StartPointCloudWindow(m_filenameLabel.c_str(),
                                                 std::move(calibration),
+                                                depth_mode_info,
                                                 &m_playbackThreadState.CaptureDataSource,
                                                 m_recordConfiguration.color_track_enabled);
         }

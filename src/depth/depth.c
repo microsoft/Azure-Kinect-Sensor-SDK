@@ -10,7 +10,6 @@
 #include <stdbool.h>
 
 // Dependent libraries
-#include <k4ainternal/common.h>
 #include <k4ainternal/dewrapper.h>
 
 // System dependencies
@@ -374,7 +373,7 @@ k4a_result_t depth_start(depth_t depth_handle, const k4a_device_configuration_t 
     if (K4A_SUCCEEDED(result))
     {
         depth->running = true; // set to true once we know we need to call depth_stop to unwind
-        result = TRACE_CALL(depthmcu_depth_set_capture_mode(depth->depthmcu, config->depth_mode));
+        result = TRACE_CALL(depthmcu_depth_set_capture_mode(depth->depthmcu, config->depth_mode_id));
     }
 
     if (K4A_SUCCEEDED(result) && depth->calibration_init == false)
@@ -400,7 +399,7 @@ k4a_result_t depth_start(depth_t depth_handle, const k4a_device_configuration_t 
 
     if (K4A_SUCCEEDED(result))
     {
-        result = TRACE_CALL(depthmcu_depth_set_fps(depth->depthmcu, config->camera_fps));
+        result = TRACE_CALL(depthmcu_depth_set_fps(depth->depthmcu, config->fps_mode_id));
     }
 
     if (K4A_SUCCEEDED(result))

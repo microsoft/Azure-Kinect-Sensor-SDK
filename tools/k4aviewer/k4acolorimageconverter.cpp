@@ -49,8 +49,8 @@ public:
     }
 
 protected:
-    explicit K4AColorImageConverterBase(k4a_color_resolution_t colorResolution) :
-        m_dimensions(GetColorDimensions(colorResolution))
+    explicit K4AColorImageConverterBase(k4a_color_mode_info_t color_mode_info) :
+        m_dimensions(GetColorDimensions(color_mode_info))
     {
         m_expectedBufferSize = sizeof(BgraPixel) * static_cast<size_t>(m_dimensions.Width * m_dimensions.Height);
     }
@@ -118,7 +118,7 @@ public:
         return ImageConversionResult::Success;
     }
 
-    K4AYUY2ImageConverter(k4a_color_resolution_t resolution) : K4AColorImageConverterBase(resolution) {}
+    K4AYUY2ImageConverter(k4a_color_mode_info_t color_mode_info) : K4AColorImageConverterBase(color_mode_info) {}
 };
 
 class K4ANV12ImageConverter : public K4AColorImageConverterBase<K4A_IMAGE_FORMAT_COLOR_NV12>
@@ -165,7 +165,7 @@ public:
         return ImageConversionResult::Success;
     }
 
-    K4ANV12ImageConverter(k4a_color_resolution_t resolution) : K4AColorImageConverterBase(resolution) {}
+    K4ANV12ImageConverter(k4a_color_mode_info_t color_mode_info) : K4AColorImageConverterBase(color_mode_info) {}
 };
 
 class K4ABGRA32ImageConverter : public K4AColorImageConverterBase<K4A_IMAGE_FORMAT_COLOR_BGRA32>
@@ -184,7 +184,7 @@ public:
         return ImageConversionResult::Success;
     }
 
-    K4ABGRA32ImageConverter(k4a_color_resolution_t resolution) : K4AColorImageConverterBase(resolution) {}
+    K4ABGRA32ImageConverter(k4a_color_mode_info_t color_mode_info) : K4AColorImageConverterBase(color_mode_info) {}
 };
 
 class K4AMJPGImageConverter : public K4AColorImageConverterBase<K4A_IMAGE_FORMAT_COLOR_MJPG>
@@ -220,8 +220,8 @@ public:
         return ImageConversionResult::Success;
     }
 
-    K4AMJPGImageConverter(k4a_color_resolution_t resolution) :
-        K4AColorImageConverterBase(resolution),
+    K4AMJPGImageConverter(k4a_color_mode_info_t color_mode_info) :
+        K4AColorImageConverterBase(color_mode_info),
         m_decompressor(tjInitDecompress())
     {
     }
@@ -237,28 +237,28 @@ private:
 
 template<>
 std::unique_ptr<IK4AImageConverter<K4A_IMAGE_FORMAT_COLOR_YUY2>>
-K4AColorImageConverterFactory::Create(k4a_color_resolution_t resolution)
+K4AColorImageConverterFactory::Create(k4a_color_mode_info_t color_mode_info)
 {
-    return std14::make_unique<K4AYUY2ImageConverter>(resolution);
+    return std14::make_unique<K4AYUY2ImageConverter>(color_mode_info);
 }
 
 template<>
 std::unique_ptr<IK4AImageConverter<K4A_IMAGE_FORMAT_COLOR_NV12>>
-K4AColorImageConverterFactory::Create(k4a_color_resolution_t resolution)
+K4AColorImageConverterFactory::Create(k4a_color_mode_info_t color_mode_info)
 {
-    return std14::make_unique<K4ANV12ImageConverter>(resolution);
+    return std14::make_unique<K4ANV12ImageConverter>(color_mode_info);
 }
 
 template<>
 std::unique_ptr<IK4AImageConverter<K4A_IMAGE_FORMAT_COLOR_BGRA32>>
-K4AColorImageConverterFactory::Create(k4a_color_resolution_t resolution)
+K4AColorImageConverterFactory::Create(k4a_color_mode_info_t color_mode_info)
 {
-    return std14::make_unique<K4ABGRA32ImageConverter>(resolution);
+    return std14::make_unique<K4ABGRA32ImageConverter>(color_mode_info);
 }
 
 template<>
 std::unique_ptr<IK4AImageConverter<K4A_IMAGE_FORMAT_COLOR_MJPG>>
-K4AColorImageConverterFactory::Create(k4a_color_resolution_t resolution)
+K4AColorImageConverterFactory::Create(k4a_color_mode_info_t color_mode_info)
 {
-    return std14::make_unique<K4AMJPGImageConverter>(resolution);
+    return std14::make_unique<K4AMJPGImageConverter>(color_mode_info);
 }

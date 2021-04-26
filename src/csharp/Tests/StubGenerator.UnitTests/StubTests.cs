@@ -15,6 +15,7 @@ namespace Tests
         {
             K4A_RESULT_SUCCEEDED = 0,
             K4A_RESULT_FAILED,
+            K4A_RESULT_UNSUPPORTED,
         }
 
         public class k4a_device_t : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid

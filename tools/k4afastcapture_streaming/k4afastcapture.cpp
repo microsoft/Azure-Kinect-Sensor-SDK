@@ -3,6 +3,7 @@
 
 #include "k4afastcapture.h"
 #include <k4ainternal/common.h>
+#include <k4ainternal/modes.h>
 #include <string>
 
 using namespace k4afastcapture;
@@ -86,9 +87,9 @@ bool K4AFastCapture::Configure(const char *fileDirectory, int32_t exposureValue,
     }
 
     m_deviceConfig.color_format = K4A_IMAGE_FORMAT_COLOR_MJPG;
-    m_deviceConfig.color_resolution = K4A_COLOR_RESOLUTION_3072P;
-    m_deviceConfig.depth_mode = K4A_DEPTH_MODE_PASSIVE_IR;
-    m_deviceConfig.camera_fps = K4A_FRAMES_PER_SECOND_15;
+    m_deviceConfig.color_mode_id = K4A_COLOR_RESOLUTION_3072P;
+    m_deviceConfig.depth_mode_id = K4A_DEPTH_MODE_PASSIVE_IR;
+    m_deviceConfig.fps_mode_id = K4A_FRAMES_PER_SECOND_15;
     m_deviceConfig.synchronized_images_only = true;
 
     if (K4A_RESULT_SUCCEEDED != k4a_device_start_cameras(m_device, &m_deviceConfig))
@@ -191,7 +192,25 @@ void K4AFastCapture::Run(int streamingLength)
     k4a_image_t depth_image = NULL;
     k4a_image_t color_image = NULL;
 
-    uint32_t camera_fps = k4a_convert_fps_to_uint(m_deviceConfig.camera_fps);
+    uint32_t camera_fps = 0;
+
+    // Get the camera fps that corresponds to the fps mode id.
+    k4a_fps_mode_info_t fps_mode = { static_cast<uint32_t>(sizeof(k4a_fps_mode_info_t)), K4A_ABI_VERSION };
+    uint32_t mode_count = 0;
+    k4a_result_t status = k4a_device_get_fps_mode_count(m_device, &mode_count);
+    if (status == K4A_RESULT_SUCCEEDED)
+    {
+        for (uint32_t mode_index = 0; mode_index < mode_count; ++mode_index)
+        {
+            status = k4a_device_get_fps_mode(m_device, mode_index, &fps_mode);
+            if (status == K4A_RESULT_SUCCEEDED)
+            {
+                camera_fps = fps_mode.fps;
+                break;
+            }
+        }
+    }
+
     uint32_t remainingFrames = UINT32_MAX;
     if (streamingLength >= 0)
     {
@@ -226,6 +245,7 @@ void K4AFastCapture::Run(int streamingLength)
             // std::cout << "[Streaming Service] Timed out waiting for the capture" << std::endl;
             continue;
         case K4A_WAIT_RESULT_FAILED:
+        case K4A_WAIT_RESULT_UNSUPPORTED:
             std::cout << "[Streaming Service] Failed to get the capture" << std::endl;
             return;
         }
@@ -240,7 +260,7 @@ void K4AFastCapture::Run(int streamingLength)
         if (0 == result)
 #endif
         {
-            if (m_deviceConfig.depth_mode == K4A_DEPTH_MODE_PASSIVE_IR)
+            if (m_deviceConfig.depth_mode_id == K4A_DEPTH_MODE_PASSIVE_IR)
             {
                 // for the passive IR mode, there is no depth image. Only IR image is available in the capture.
                 ir_image = k4a_capture_get_ir_image(m_capture);
