@@ -24,8 +24,7 @@ if __name__ == '__main__':
     xyz_image = transformation.depth_image_to_point_cloud(capture.depth, k4a.ECalibrationType.DEPTH)
 
     # Save Point Cloud To Ascii Format File. Interleave the [X, Y, Z] channels into [x0, y0, z0, x1, y1, z1, ...]
-    width, height, channels = xyz_image.data.shape
-    xyz_data = np.empty((width * height, channels,), dtype=xyz_image.data.dtype)
+    height, width, channels = xyz_image.data.shape
     xyz_data = xyz_image.data.reshape(height * width, channels)
     
     np.savetxt('data.txt', xyz_data, delimiter=' ', fmt='%u') # save ascii format (x y z\n x y z\n x y z\n ...)
