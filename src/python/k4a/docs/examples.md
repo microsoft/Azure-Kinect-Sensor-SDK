@@ -39,10 +39,8 @@ A simple program to showcase the image transformation functions in the Azure Kin
 
 Additional Prerequisites:  
 - Matplotlib installed via pip:  `pip install matplotlib`  
-- Numpy installed via pip:       `pip install numpy==1.18.5`  
+- Numpy installed via pip:       `pip install numpy`  
 - tkinter installed via pip:     `pip install tk`  
-    
->**Note:** numpy version 1.19.5 currently has a bug for Windows, so do not use it as of 2020/12/28.
 
 In Linux, another way to install tkinter is: `sudo apt install python3-tk`  
 
@@ -60,6 +58,20 @@ Close the figure to proceed.
 
 The program then transforms a depth image and an IR image into the color camera space and displays them in a figure.
 Close the figure to proceed and the program exits.  
+
+### point_cloud_capture.py
+
+A simple program to capture a single frame, transform to point cloud, and write to text file.
+The text file can then be opened in a 3D renderer application like MeshLab.
+
+Additional Prerequisites:  
+- Numpy installed via pip:       `pip install numpy`   
+
+
+To run, open a command terminal and type:  
+`python point_cloud_capture.py`  
+
+An output text file data.txt is written in the same directory in which the example program is run.
 
 ### simple_viewer.py
 
