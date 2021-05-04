@@ -3,12 +3,15 @@
 
 #include "recorder.h"
 #include <ctime>
+#include <chrono>
 #include <atomic>
 #include <iostream>
 #include <algorithm>
 
 #include <k4a/k4a.h>
 #include <k4arecord/record.h>
+
+using namespace std::chrono;
 
 inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
 {
@@ -53,6 +56,7 @@ int do_recording(uint8_t device_index,
                  int32_t absoluteExposureValue,
                  int32_t gain)
 {
+    seconds recording_length_seconds(recording_length);
     const uint32_t installed_devices = k4a_device_get_installed_count();
     if (device_index >= installed_devices)
     {
@@ -145,16 +149,16 @@ int do_recording(uint8_t device_index,
 
     // Wait for the first capture before starting recording.
     k4a_capture_t capture;
-    int32_t timeout_sec_for_first_capture = 60;
+    seconds timeout_sec_for_first_capture(60);
     if (device_config->wired_sync_mode == K4A_WIRED_SYNC_MODE_SUBORDINATE)
     {
-        timeout_sec_for_first_capture = 360;
+        timeout_sec_for_first_capture = seconds(360);
         std::cout << "[subordinate mode] Waiting for signal from master" << std::endl;
     }
-    clock_t first_capture_start = clock();
+    steady_clock::time_point first_capture_start = steady_clock::now();
     k4a_wait_result_t result = K4A_WAIT_RESULT_TIMEOUT;
     // Wait for the first capture in a loop so Ctrl-C will still exit.
-    while (!exiting && (clock() - first_capture_start) < (CLOCKS_PER_SEC * timeout_sec_for_first_capture))
+    while (!exiting && (steady_clock::now() - first_capture_start) < timeout_sec_for_first_capture)
     {
         result = k4a_device_get_capture(device, &capture, 100);
         if (result == K4A_WAIT_RESULT_SUCCEEDED)
@@ -186,7 +190,7 @@ int do_recording(uint8_t device_index,
         std::cout << "Press Ctrl-C to stop recording." << std::endl;
     }
 
-    clock_t recording_start = clock();
+    steady_clock::time_point recording_start = steady_clock::now();
     int32_t timeout_ms = 1000 / camera_fps;
     do
     {
@@ -225,10 +229,10 @@ int do_recording(uint8_t device_index,
                     break;
                 }
             } while (!exiting && result != K4A_WAIT_RESULT_FAILED &&
-                     (recording_length < 0 || (clock() - recording_start < recording_length * CLOCKS_PER_SEC)));
+                     (recording_length < 0 || (steady_clock::now() - recording_start < recording_length_seconds)));
         }
     } while (!exiting && result != K4A_WAIT_RESULT_FAILED &&
-             (recording_length < 0 || (clock() - recording_start < recording_length * CLOCKS_PER_SEC)));
+             (recording_length < 0 || (steady_clock::now() - recording_start < recording_length_seconds)));
 
     if (!exiting)
     {
