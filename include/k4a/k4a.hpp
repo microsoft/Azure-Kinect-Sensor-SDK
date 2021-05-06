@@ -1198,7 +1198,7 @@ public:
      *
      * \sa k4a_device_get_imu_sample
      */
-    bool get_imu_sample(k4a_imu_sample_t *imu_sample, std::chrono::milliseconds timeout)
+    bool get_imu_sample(k4a_imu_sample_t *imu_sample, std::chrono::milliseconds timeout) const
     {
         int32_t timeout_ms = internal::clamp_cast<int32_t>(timeout.count());
         k4a_wait_result_t result = k4a_device_get_imu_sample(m_handle, imu_sample, timeout_ms);
@@ -1219,7 +1219,7 @@ public:
      *
      * \sa k4a_device_get_imu_sample
      */
-    bool get_imu_sample(k4a_imu_sample_t *imu_sample)
+    bool get_imu_sample(k4a_imu_sample_t *imu_sample) const
     {
         return get_imu_sample(imu_sample, std::chrono::milliseconds(K4A_WAIT_INFINITE));
     }
@@ -1229,7 +1229,7 @@ public:
      *
      * \sa k4a_device_start_cameras
      */
-    void start_cameras(const k4a_device_configuration_t *configuration)
+    void start_cameras(const k4a_device_configuration_t *configuration) const
     {
         k4a_result_t result = k4a_device_start_cameras(m_handle, configuration);
         if (K4A_RESULT_SUCCEEDED != result)
@@ -1242,7 +1242,7 @@ public:
      *
      * \sa k4a_device_stop_cameras
      */
-    void stop_cameras() noexcept
+    void stop_cameras() const noexcept
     {
         k4a_device_stop_cameras(m_handle);
     }
@@ -1252,7 +1252,7 @@ public:
      *
      * \sa k4a_device_start_imu
      */
-    void start_imu()
+    void start_imu() const
     {
         k4a_result_t result = k4a_device_start_imu(m_handle);
         if (K4A_RESULT_SUCCEEDED != result)
@@ -1265,7 +1265,7 @@ public:
      *
      * \sa k4a_device_stop_imu
      */
-    void stop_imu() noexcept
+    void stop_imu() const noexcept
     {
         k4a_device_stop_imu(m_handle);
     }
