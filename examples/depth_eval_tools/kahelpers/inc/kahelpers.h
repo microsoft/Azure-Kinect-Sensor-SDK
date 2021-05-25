@@ -2,18 +2,11 @@
 // Licensed under the MIT License.
 #ifndef KAHELPERS_H
 #define KAHELPERS_H
-//#include <string>
-//#include <iostream>     // std::cout
-//#include <fstream>      // std::ofstream
 
 #include <k4a/k4a.hpp>
 #include <k4arecord/playback.hpp>
 
 #include "opencv2/core.hpp"
-//#include "opencv2/calib3d.hpp"
-//#include <opencv2/imgcodecs.hpp>
-//#include <opencv2/imgproc.hpp>
-//#include "opencv2/highgui/highgui.hpp"
 #include <opencv2/aruco/charuco.hpp>
 
 namespace kahelpers
