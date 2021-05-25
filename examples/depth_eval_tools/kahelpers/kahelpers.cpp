@@ -248,7 +248,7 @@ bool write_calibration_blob(const std::vector<uchar> calibration_buffer,
     std::ofstream ofs(file_name, std::ofstream::binary);
     if (!ofs.is_open())
         std::cout << "Error opening file";
-        return false;
+    return false;
 
     ofs.write(reinterpret_cast<const char *>(&calibration_buffer[0]), calibration_buffer.size() - 1);
     ofs.close();
@@ -465,7 +465,7 @@ void write_xy_table(const k4a::image &xy_table, const std::string output_dir, co
 
     if (!ofsx.is_open() || !ofsy.is_open())
         std::cout << "Error opening file";
-        return;
+    return;
 
     // xy_table.
     for (int y = 0; y < height; y++)
