@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-//#include <stdio.h>
-//#include <stdlib.h>
 #include <k4a/k4a.h>
 #include <vector>
 #include <math.h>
