@@ -304,7 +304,7 @@ void get_images(k4a::playback &playback,
                 bool get_color)
 {
     playback.seek_timestamp(std::chrono::microseconds(timestamp * 1000), K4A_PLAYBACK_SEEK_BEGIN);
-    
+
     // std::chrono::microseconds length = playback.get_recording_length();
     // printf("Seeking to timestamp: %d/%d (ms)\n", timestamp, (int)(length.count() / 1000));
 
