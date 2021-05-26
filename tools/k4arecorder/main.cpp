@@ -14,10 +14,13 @@
 #include <iostream>
 #include <atomic>
 #include <ctime>
+#include <chrono>
 #include <csignal>
 #include <math.h>
 
-static time_t exiting_timestamp;
+using namespace std::chrono;
+
+static steady_clock::time_point exiting_timestamp;
 
 static void signal_handler(int s)
 {
@@ -26,11 +29,11 @@ static void signal_handler(int s)
     if (!exiting)
     {
         std::cout << "Stopping recording..." << std::endl;
-        exiting_timestamp = clock();
+        exiting_timestamp = steady_clock::now();
         exiting = true;
     }
     // If Ctrl-C is received again after 1 second, force-stop the application since it's not responding.
-    else if (exiting_timestamp != 0 && clock() - exiting_timestamp > CLOCKS_PER_SEC)
+    else if (steady_clock::now() - exiting_timestamp > seconds(1))
     {
         std::cout << "Forcing stop." << std::endl;
         exit(1);
