@@ -51,7 +51,7 @@ bool charuco_target::read_from_json(const std::string template_file)
 
     if (shapes.type() == cv::FileNode::SEQ)
     {
-        for (unsigned int i = 0; i < shapes.size(); i++)
+        for (unsigned long i = 0; i < shapes.size(); i++)
         {
             // cv::FileNode val1 = shapes[i]["shape"]; // we only want the content of val1
             // int j = 0;
@@ -184,7 +184,7 @@ k4a::image color_from_opencv(const cv::Mat &M)
     }
 
     k4a::image img = k4a::image::create(K4A_IMAGE_FORMAT_COLOR_BGRA32, M4.cols, M4.rows, static_cast<int>(M4.step));
-    memcpy(img.get_buffer(), M4.data, static_cast<int>(M4.total() * M4.elemSize()));
+    memcpy(img.get_buffer(), M4.data, static_cast<size_t>(M4.total() * M4.elemSize()));
 
     return img;
 }
@@ -198,7 +198,7 @@ k4a::image depth_from_opencv(const cv::Mat &M)
         return NULL;
     }
     k4a::image img = k4a::image::create(K4A_IMAGE_FORMAT_DEPTH16, M.cols, M.rows, static_cast<int>(M.step));
-    memcpy((void *)img.get_buffer(), M.data, static_cast<int>(M.total() * M.elemSize()));
+    memcpy((void *)img.get_buffer(), M.data, static_cast<size_t>(M.total() * M.elemSize()));
 
     return img;
 }
@@ -212,7 +212,7 @@ k4a::image ir_from_opencv(const cv::Mat &M)
         return NULL;
     }
     k4a::image img = k4a::image::create(K4A_IMAGE_FORMAT_IR16, M.cols, M.rows, static_cast<int>(M.step));
-    memcpy(img.get_buffer(), M.data, static_cast<int>(M.total() * M.elemSize()));
+    memcpy(img.get_buffer(), M.data, static_cast<size_t>(M.total() * M.elemSize()));
 
     return img;
 }
@@ -228,7 +228,7 @@ float get_gray_gamma_img(const cv::Mat &inImg, cv::Mat &outImg, float gamma, flo
 
     float v = cal_percentile(floatMat, percentile, maxInputValue + 1, 1000);
 
-    float scale = 255.0f / float(pow(v, gamma)); // gamma
+    float scale = 255.0f / static_cast<float>(pow(v, gamma)); // gamma
 
     floatMat = cv::max(floatMat, 1);
     // cv::log(floatMat, logImg);
@@ -252,7 +252,8 @@ bool write_calibration_blob(const std::vector<uchar> calibration_buffer,
         return false;
     }
 
-    ofs.write(reinterpret_cast<const char *>(&calibration_buffer[0]), long(calibration_buffer.size() - 1));
+    ofs.write(reinterpret_cast<const char *>(&calibration_buffer[0]),
+              static_cast<std::streamsize>(calibration_buffer.size() - 1));
     ofs.close();
 
     return true;
@@ -601,16 +602,16 @@ void find_common_markers(const std::vector<int> &id1,
     ccorners1.clear();
     ccorners2.clear();
 
-    for (int i = 0; i < id1.size(); i++)
+    for (unsigned long i = 0; i < id1.size(); i++)
     {
-        auto it = std::find(id2.begin(), id2.end(), id1[i]);
+        auto it = std::find(id2.begin(), id2.end(), static_cast<std::vector::size_type>(id1[i]));
         if (it != id2.end())
         {
             int j = (int)(it - id2.begin());
             // std::cout << std::endl << v1[i] << "   " << *it << "       " << v2[j] << std::endl;
-            cid.push_back(id1[i]);
-            ccorners1.push_back(corners1[i]);
-            ccorners2.push_back(corners2[j]);
+            cid.push_back(static_cast<std::vector::size_type>(id1[i]));
+            ccorners1.push_back(static_cast<std::vector::size_type>(corners1[i]));
+            ccorners2.push_back(static_cast<std::vector::size_type>(corners2[j]));
         }
     }
     return;
@@ -626,7 +627,7 @@ void get_board_object_points_charuco(const cv::Ptr<cv::aruco::CharucoBoard> &boa
     for (size_t i = 0; i < ids.size(); i++)
     {
         int id = ids[i];
-        corners3d.push_back(board->chessboardCorners[id]);
+        corners3d.push_back(static_cast<std::vector::size_type>(board->chessboardCorners[id]));
     }
     return;
 }
