@@ -113,4 +113,4 @@ void get_board_object_points_charuco(const cv::Ptr<cv::aruco::CharucoBoard> &boa
                                      const std::vector<int> &ids,
                                      std::vector<cv::Point3f> &corners3d);
 } // namespace kahelpers
-#endif KAHELPERS_H
+#endif

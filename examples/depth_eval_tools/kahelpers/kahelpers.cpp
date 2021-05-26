@@ -51,7 +51,7 @@ bool charuco_target::read_from_json(const std::string template_file)
 
     if (shapes.type() == cv::FileNode::SEQ)
     {
-        for (int i = 0; i < shapes.size(); i++)
+        for (unsigned int i = 0; i < shapes.size(); i++)
         {
             // cv::FileNode val1 = shapes[i]["shape"]; // we only want the content of val1
             // int j = 0;
@@ -228,7 +228,7 @@ float get_gray_gamma_img(const cv::Mat &inImg, cv::Mat &outImg, float gamma, flo
 
     float v = cal_percentile(floatMat, percentile, maxInputValue + 1, 1000);
 
-    float scale = 255.0f / pow(v, gamma); // gamma
+    float scale = 255.0f / float(pow(v, gamma)); // gamma
 
     floatMat = cv::max(floatMat, 1);
     // cv::log(floatMat, logImg);
@@ -252,7 +252,7 @@ bool write_calibration_blob(const std::vector<uchar> calibration_buffer,
         return false;
     }
 
-    ofs.write(reinterpret_cast<const char *>(&calibration_buffer[0]), calibration_buffer.size() - 1);
+    ofs.write(reinterpret_cast<const char *>(&calibration_buffer[0]), long(calibration_buffer.size() - 1));
     ofs.close();
 
     return true;
@@ -303,8 +303,8 @@ void get_images(k4a::playback &playback,
                 bool get_color)
 {
     playback.seek_timestamp(std::chrono::microseconds(timestamp * 1000), K4A_PLAYBACK_SEEK_BEGIN);
-    std::chrono::microseconds length = playback.get_recording_length();
-
+    
+    // std::chrono::microseconds length = playback.get_recording_length();
     // printf("Seeking to timestamp: %d/%d (ms)\n", timestamp, (int)(length.count() / 1000));
 
     int n_ir = 0, n_depth = 0, n_color = 0;
