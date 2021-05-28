@@ -602,16 +602,16 @@ void find_common_markers(const std::vector<int> &id1,
     ccorners1.clear();
     ccorners2.clear();
 
-    for (unsigned long i = 0; i < id1.size(); i++)
+    for (size_t i = 0; i < id1.size(); i++)
     {
-        auto it = std::find(id2.begin(), id2.end(), static_cast<std::vector::size_type>(id1[i]));
+        auto it = std::find(id2.begin(), id2.end(), id1[i]);
         if (it != id2.end())
         {
             int j = (int)(it - id2.begin());
             // std::cout << std::endl << v1[i] << "   " << *it << "       " << v2[j] << std::endl;
-            cid.push_back(static_cast<std::vector::size_type>(id1[i]));
-            ccorners1.push_back(static_cast<std::vector::size_type>(corners1[i]));
-            ccorners2.push_back(static_cast<std::vector::size_type>(corners2[j]));
+            cid.push_back(id1[i]);
+            ccorners1.push_back(corners1[i]);
+            ccorners2.push_back(corners2[j]);
         }
     }
     return;
@@ -627,7 +627,7 @@ void get_board_object_points_charuco(const cv::Ptr<cv::aruco::CharucoBoard> &boa
     for (size_t i = 0; i < ids.size(); i++)
     {
         int id = ids[i];
-        corners3d.push_back(static_cast<std::vector::size_type>(board->chessboardCorners[id]));
+        corners3d.push_back(board->chessboardCorners[id]);
     }
     return;
 }

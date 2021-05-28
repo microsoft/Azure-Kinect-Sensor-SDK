@@ -15,6 +15,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/aruco/charuco.hpp>
 
+#include "inc/depth_eval.h"
 #include "kahelpers.h"
 
 using namespace kahelpers;
@@ -104,7 +105,8 @@ static bool process_mkv(const std::string &passive_ir_mkv,
     //
     // detect markers in passive_ir8
     cv::Ptr<cv::aruco::DetectorParameters> params = cv::aruco::DetectorParameters::create();
-    params->cornerRefinementMethod = cv::aruco::CORNER_REFINE_NONE; // best option as my limited testing indicated
+    // Parameter not in OpenCV 3.2.0 (used by build pipeline)
+    // params->cornerRefinementMethod = cv::aruco::CORNER_REFINE_NONE; // best option as my limited testing indicated
     std::vector<int> markerIds_ir;
     std::vector<std::vector<cv::Point2f>> markerCorners_ir;
     std::vector<int> charucoIds_ir;

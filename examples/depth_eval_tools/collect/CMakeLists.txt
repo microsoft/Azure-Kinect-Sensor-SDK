@@ -4,12 +4,14 @@
 find_package(OpenCV REQUIRED)
 include_directories(
     .
+	./inc/
 	../kahelpers/
 	../kahelpers/inc/
 	)
 
 add_executable(collect
     collect.cpp
+	./inc/collect.h
 	../kahelpers/kahelpers.cpp
 	../kahelpers/inc/kahelpers.h
 	)

@@ -4,12 +4,14 @@
 find_package(OpenCV REQUIRED)
 include_directories(
     .
+	./inc/
 	../kahelpers/
 	../kahelpers/inc/
 	)
 
 add_executable(transformation_eval
     transformation_eval.cpp
+	./inc/transformation_eval.h
 	../kahelpers/kahelpers.cpp
 	../kahelpers/inc/kahelpers.h
 	)

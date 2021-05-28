@@ -14,6 +14,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/aruco/charuco.hpp>
 
+#include "inc/transformation_eval.h"
 #include "kahelpers.h"
 
 using namespace kahelpers;
@@ -46,7 +47,7 @@ int calculate_transformation_error(const cv::Mat &depth16,
                                    const k4a::calibration &calibration,
                                    float &rms,
                                    cv::Mat &err_img,
-                                   bool gen_err_img = true)
+                                   bool gen_err_img)
 {
     rms = 0;
     int nValid = 0;

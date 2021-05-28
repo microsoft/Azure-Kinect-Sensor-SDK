@@ -15,6 +15,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "inc/collect.h"
 #include "kahelpers.h"
 
 using namespace kahelpers;

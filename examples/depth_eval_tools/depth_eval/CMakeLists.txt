@@ -4,12 +4,14 @@
 find_package(OpenCV REQUIRED)
 include_directories(
     .
+	./inc/
 	../kahelpers/
 	../kahelpers/inc/
 	)
 
 add_executable(depth_eval
     depth_eval.cpp
+	./inc/depth_eval.h
 	../kahelpers/kahelpers.cpp
 	../kahelpers/inc/kahelpers.h
 	)

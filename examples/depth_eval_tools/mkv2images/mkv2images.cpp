@@ -14,6 +14,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/aruco/charuco.hpp>
 
+#include "inc/mkv2images.h"
 #include "kahelpers.h"
 
 using namespace kahelpers;
