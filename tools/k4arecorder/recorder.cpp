@@ -48,12 +48,50 @@ inline static uint32_t k4a_convert_fps_to_uint(k4a_fps_t fps)
 
 std::atomic_bool exiting(false);
 
+void set_color_param(k4a_device_t &device,
+                     k4a_color_control_command_t command,
+                     const char *command_name, 
+                     int32_t value,
+                     int32_t defaultValue,
+                     bool defaultAuto)
+{
+    k4a_color_control_mode_t read_mode;
+    int32_t read_value;
+
+    if (value != defaultValue)
+    {
+        if (K4A_FAILED(k4a_device_set_color_control(device, command,
+                                                    K4A_COLOR_CONTROL_MODE_MANUAL, value)))
+        {
+            std::cerr << "Runtime error: k4a_device_set_color_control() failed for manual " << command_name << std::endl;
+        }
+    }
+    else if (defaultAuto)
+    {
+        if (K4A_FAILED(k4a_device_set_color_control(device, command,
+                                                    K4A_COLOR_CONTROL_MODE_AUTO,
+                                                    0)))
+        {
+            std::cerr << "Runtime error: k4a_device_set_color_control() failed for auto " << command_name << std::endl;
+        }
+    }
+
+    k4a_device_get_color_control(device, command, &read_mode, &read_value);
+    std::cout << "Current " << (read_mode == K4A_COLOR_CONTROL_MODE_AUTO ? "AUTO" : "MANUAL") << command_name << " value: " << read_value
+                                                                        << std::endl;
+}
+
 int do_recording(uint8_t device_index,
                  char *recording_filename,
                  int recording_length,
                  k4a_device_configuration_t *device_config,
                  bool record_imu,
                  int32_t absoluteExposureValue,
+                 int32_t whiteBalance,
+                 int32_t brightness,
+                 int32_t contrast,
+                 int32_t saturation,
+                 int32_t sharpness,
                  int32_t gain)
 {
     seconds recording_length_seconds(recording_length);
@@ -96,35 +134,18 @@ int do_recording(uint8_t device_index,
         return 1;
     }
 
-    if (absoluteExposureValue != defaultExposureAuto)
-    {
-        if (K4A_FAILED(k4a_device_set_color_control(device,
-                                                    K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-                                                    K4A_COLOR_CONTROL_MODE_MANUAL,
-                                                    absoluteExposureValue)))
-        {
-            std::cerr << "Runtime error: k4a_device_set_color_control() for manual exposure failed " << std::endl;
-        }
-    }
-    else
-    {
-        if (K4A_FAILED(k4a_device_set_color_control(device,
-                                                    K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
-                                                    K4A_COLOR_CONTROL_MODE_AUTO,
-                                                    0)))
-        {
-            std::cerr << "Runtime error: k4a_device_set_color_control() for auto exposure failed " << std::endl;
-        }
-    }
-
-    if (gain != defaultGainAuto)
-    {
-        if (K4A_FAILED(
-                k4a_device_set_color_control(device, K4A_COLOR_CONTROL_GAIN, K4A_COLOR_CONTROL_MODE_MANUAL, gain)))
-        {
-            std::cerr << "Runtime error: k4a_device_set_color_control() for manual gain failed " << std::endl;
-        }
-    }
+    set_color_param(device,
+                    K4A_COLOR_CONTROL_EXPOSURE_TIME_ABSOLUTE,
+                    "exposure",
+                    absoluteExposureValue,
+                    defaultExposureAuto,
+                    true);
+    set_color_param(device, K4A_COLOR_CONTROL_WHITEBALANCE, "white balance", whiteBalance, defaultWhiteBalance, true);
+    set_color_param(device, K4A_COLOR_CONTROL_BRIGHTNESS, "brightness", brightness, defaultBrightness, false);
+    set_color_param(device, K4A_COLOR_CONTROL_CONTRAST, "contrast", contrast, defaultContrast, false);
+    set_color_param(device, K4A_COLOR_CONTROL_SATURATION, "saturation", saturation, defaultSaturation, false);
+    set_color_param(device, K4A_COLOR_CONTROL_SHARPNESS, "brightness", sharpness, defaultSharpness, false);
+    set_color_param(device, K4A_COLOR_CONTROL_GAIN, "gain", gain, defaultGainAuto, false);
 
     CHECK(k4a_device_start_cameras(device, device_config), device);
     if (record_imu)
