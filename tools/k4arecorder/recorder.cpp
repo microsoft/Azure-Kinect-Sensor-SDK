@@ -77,8 +77,8 @@ void set_color_param(k4a_device_t &device,
     }
 
     k4a_device_get_color_control(device, command, &read_mode, &read_value);
-    std::cout << "Current " << (read_mode == K4A_COLOR_CONTROL_MODE_AUTO ? "AUTO" : "MANUAL") << command_name << " value: " << read_value
-                                                                        << std::endl;
+    std::cout << "Current " << command_name << " set to " << (read_mode == K4A_COLOR_CONTROL_MODE_AUTO ? "AUTO" : "MANUAL") << " mode and has value " << read_value
+        << std::endl;
 }
 
 int do_recording(uint8_t device_index,
@@ -144,7 +144,7 @@ int do_recording(uint8_t device_index,
     set_color_param(device, K4A_COLOR_CONTROL_BRIGHTNESS, "brightness", brightness, defaultBrightness, false);
     set_color_param(device, K4A_COLOR_CONTROL_CONTRAST, "contrast", contrast, defaultContrast, false);
     set_color_param(device, K4A_COLOR_CONTROL_SATURATION, "saturation", saturation, defaultSaturation, false);
-    set_color_param(device, K4A_COLOR_CONTROL_SHARPNESS, "brightness", sharpness, defaultSharpness, false);
+    set_color_param(device, K4A_COLOR_CONTROL_SHARPNESS, "sharpness", sharpness, defaultSharpness, false);
     set_color_param(device, K4A_COLOR_CONTROL_GAIN, "gain", gain, defaultGainAuto, false);
 
     CHECK(k4a_device_start_cameras(device, device_config), device);
