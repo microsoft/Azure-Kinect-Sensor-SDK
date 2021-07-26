@@ -390,7 +390,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
                 NativeMethods.k4a_buffer_result_t result;
 
 #pragma warning disable CA1508 // Avoid dead conditional code
-                using (LoggingTracer tracer = new LoggingTracer(LogLevel.Warning, Logger.LogProvider, RecordLogger.LogProvider))
+                using (LoggingTracer tracer = new LoggingTracer())
 #pragma warning restore CA1508 // Avoid dead conditional code
                 {
                     result = NativeMethods.k4a_playback_get_tag(this.handle, name, null, ref size);

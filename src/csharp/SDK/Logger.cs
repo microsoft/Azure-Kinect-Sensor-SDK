@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // <copyright file="Logger.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
@@ -16,7 +16,6 @@ namespace Microsoft.Azure.Kinect.Sensor
     {
         private static readonly object SyncRoot = new object();
         private static readonly NativeMethods.k4a_logging_message_cb_t DebugMessageHandler = OnDebugMessage;
-        private static readonly LoggerProvider LoggerProviderValue = new LoggerProvider();
         private static bool isInitialized;
 
 #pragma warning disable CA1003 // Use generic event handler instances
@@ -49,17 +48,6 @@ namespace Microsoft.Azure.Kinect.Sensor
         }
 
         private static event Action<LogMessage> LogMessageHandlers;
-
-        /// <summary>
-        /// Gets the interface for reading log messages.
-        /// </summary>
-        public static ILoggingProvider LogProvider
-        {
-            get
-            {
-                return Logger.LoggerProviderValue;
-            }
-        }
 
         /// <summary>
         /// Initializes the <see cref="Logger"/> class to begin receiving messages from the Azure Kinect Sensor SDK.
@@ -130,24 +118,6 @@ namespace Microsoft.Azure.Kinect.Sensor
             {
                 Trace.WriteLine("Failed to close the debug message handler");
             }
-        }
-
-        private class LoggerProvider : ILoggingProvider
-        {
-            public event Action<LogMessage> LogMessage
-            {
-                add
-                {
-                    Logger.LogMessage += value;
-                }
-
-                remove
-                {
-                    Logger.LogMessage -= value;
-                }
-            }
-
-            public string ProviderName => "Azure Kinect SDK";
         }
     }
 }

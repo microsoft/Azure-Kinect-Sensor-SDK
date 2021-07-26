@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
         internal static void ThrowIfNotSuccess<T>(Func<T> function)
             where T : System.Enum
         {
-            using (LoggingTracer tracer = new LoggingTracer(LogLevel.Warning, Logger.LogProvider, RecordLogger.LogProvider))
+            using (LoggingTracer tracer = new LoggingTracer())
             {
                 T result = function();
                 if (!AzureKinectRecordException.IsSuccess(result))

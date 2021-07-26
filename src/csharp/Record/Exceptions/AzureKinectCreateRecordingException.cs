@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // <copyright file="AzureKinectCreateRecordingException.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
@@ -89,7 +89,8 @@ namespace Microsoft.Azure.Kinect.Sensor.Record.Exceptions
         internal static void ThrowIfNotSuccess<T>(string fileName, Func<T> function)
             where T : System.Enum
         {
-            using (LoggingTracer tracer = new LoggingTracer(LogLevel.Warning, Logger.LogProvider, RecordLogger.LogProvider))
+            
+            using (LoggingTracer tracer = new LoggingTracer())
             {
                 T result = function();
                 if (!AzureKinectRecordException.IsSuccess(result))

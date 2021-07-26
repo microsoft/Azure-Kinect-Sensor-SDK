@@ -49,12 +49,6 @@ namespace Microsoft.Azure.Kinect.Sensor.Record
             K4A_STREAM_RESULT_EOF,
         }
 
-        [DllImport("k4arecord", CallingConvention = k4aCallingConvention)]
-        public static extern k4a_result_t k4a_record_set_debug_message_handler(
-            k4a_logging_message_cb_t message_cb,
-            IntPtr message_cb_context,
-            LogLevel min_level);
-
         [DllImport("k4arecord", CallingConvention = k4aCallingConvention, CharSet = CharSet.Ansi)]
         public static extern k4a_result_t k4a_record_create(string path, IntPtr device, k4a_device_configuration_t deviceConfiguration, out k4a_record_t handle);
 
