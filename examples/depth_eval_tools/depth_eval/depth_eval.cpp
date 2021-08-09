@@ -139,7 +139,7 @@ static bool process_mkv(const std::string &passive_ir_mkv,
     {
         cv::Mat R;
         cv::Rodrigues(rvec, R);
-        for (int i = 0; i < corners3d.size(); i++)
+        for (unsigned int i = 0; i < corners3d.size(); i++)
         {
             cv::Mat Pw = (cv::Mat_<double>(3, 1) << corners3d[i].x, corners3d[i].y, corners3d[i].z);
 
@@ -151,7 +151,7 @@ static bool process_mkv(const std::string &passive_ir_mkv,
 
     std::vector<float> dz;
 
-    for (int i = 0; i < corners3d_cam.size(); i++)
+    for (unsigned int i = 0; i < corners3d_cam.size(); i++)
     {
         float d_mm;
         cv::Point2f corner_depth;
@@ -178,7 +178,7 @@ static bool process_mkv(const std::string &passive_ir_mkv,
 
     float dz_mean = 0.0;
     float dz_rms = 0.0;
-    for (int i = 0; i < dz.size(); i++)
+    for (unsigned int i = 0; i < dz.size(); i++)
     {
         // std::cout << std::endl << dz[i];
         dz_mean += dz[i];
