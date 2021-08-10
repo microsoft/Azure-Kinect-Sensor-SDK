@@ -185,7 +185,7 @@ static bool process_mkv(const std::string &passive_ir_mkv,
         dz_rms += dz[i] * dz[i];
     }
     dz_mean /= dz.size();
-    dz_rms = sqrt(dz_rms / dz.size());
+    dz_rms = (float)sqrt(dz_rms / dz.size());
     std::cout << std::endl << "Mean of Z deph bias = " << dz_mean << " mm";
     std::cout << std::endl << "RMS of Z depth bias = " << dz_rms << " mm";
 

@@ -58,21 +58,21 @@ bool charuco_target::read_from_json(const std::string template_file)
             // std::cout << val1[j];
             std::string s;
             // second method: use FileNode::operator >>
-            shapes[i]["shape"] >> s;
+            shapes[(int)i]["shape"] >> s;
             if (s.compare("charuco") == 0)
             {
-                if (!shapes[i]["squares_x"].empty())
-                    squaresX = (int)shapes[i]["squares_x"];
-                if (!shapes[i]["squares_y"].empty())
-                    squaresY = (int)shapes[i]["squares_y"];
-                if (!shapes[i]["square_length"].empty())
-                    squareLength_mm = (float)shapes[i]["square_length"];
-                if (!shapes[i]["marker_length"].empty())
-                    markerLength_mm = (float)shapes[i]["marker_length"];
-                if (!shapes[i]["margin_size"].empty())
-                    marginSize_mm = (float)shapes[i]["margin_size"];
-                if (!shapes[i]["aruco_dict_name"].empty())
-                    aruco_dict_name = (int)shapes[i]["aruco_dict_name"];
+                if (!shapes[(int)i]["squares_x"].empty())
+                    squaresX = (int)shapes[(int)i]["squares_x"];
+                if (!shapes[(int)i]["squares_y"].empty())
+                    squaresY = (int)shapes[(int)i]["squares_y"];
+                if (!shapes[(int)i]["square_length"].empty())
+                    squareLength_mm = (float)shapes[(int)i]["square_length"];
+                if (!shapes[(int)i]["marker_length"].empty())
+                    markerLength_mm = (float)shapes[(int)i]["marker_length"];
+                if (!shapes[(int)i]["margin_size"].empty())
+                    marginSize_mm = (float)shapes[(int)i]["margin_size"];
+                if (!shapes[(int)i]["aruco_dict_name"].empty())
+                    aruco_dict_name = (int)shapes[(int)i]["aruco_dict_name"];
                 valid = true;
                 break;
             }
@@ -607,7 +607,7 @@ void find_common_markers(const std::vector<int> &id1,
         auto it = std::find(id2.begin(), id2.end(), id1[i]);
         if (it != id2.end())
         {
-            int j = (int)(it - id2.begin());
+            size_t j = (size_t)(it - id2.begin());
             // std::cout << std::endl << v1[i] << "   " << *it << "       " << v2[j] << std::endl;
             cid.push_back(id1[i]);
             ccorners1.push_back(corners1[i]);
@@ -626,7 +626,7 @@ void get_board_object_points_charuco(const cv::Ptr<cv::aruco::CharucoBoard> &boa
 
     for (size_t i = 0; i < ids.size(); i++)
     {
-        int id = ids[i];
+        size_t id = (size_t)ids[i];
         corners3d.push_back(board->chessboardCorners[id]);
     }
     return;
