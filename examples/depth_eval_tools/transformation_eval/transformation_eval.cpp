@@ -91,12 +91,12 @@ int calculate_transformation_error(const cv::Mat &depth16,
     if (nValid > 0 && gen_err_img)
     {
         color8.copyTo(err_img);
-        for (int i = 0; i < xpc_predict.rows; i++)
+        for (unsigned long i = 0; i < xpc_predict.rows; i++)
         {
             if (xpc_predict.at<float>(i, 0) >= 0) // valid
             {
                 cv::Point2f p1(corners_c[i].x, corners_c[i].y);
-                cv::Point2f p2(xpc_predict.at<float>(i, 0), xpc_predict.at<float>(i, 1));
+                cv::Point2f p2(xpc_predict.at<float>((int)i, 0), xpc_predict.at<float>((int)i, 1));
 
                 cv::line(err_img, p1, p2, cv::Scalar(0, 0, 255), 1);
                 cv::drawMarker(err_img, p1, cv::Scalar(0, 255, 0), cv::MARKER_CROSS, 2);
