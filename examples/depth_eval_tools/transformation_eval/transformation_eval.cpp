@@ -75,8 +75,8 @@ int calculate_transformation_error(const cv::Mat &depth16,
         // err = prediction - detection
         if (valid)
         {
-            xpc_predict.at<float>(i, 0) = pc.v[0];
-            xpc_predict.at<float>(i, 1) = pc.v[1];
+            xpc_predict.at<float>((int)i, 0) = pc.v[0];
+            xpc_predict.at<float>((int)i, 1) = pc.v[1];
             float dx = pc.v[0] - corners_c[i].x;
             float dy = pc.v[1] - corners_c[i].y;
             rms += dx * dx + dy * dy;
@@ -91,7 +91,7 @@ int calculate_transformation_error(const cv::Mat &depth16,
     if (nValid > 0 && gen_err_img)
     {
         color8.copyTo(err_img);
-        for (unsigned long i = 0; i < xpc_predict.rows; i++)
+        for (int i = 0; i < xpc_predict.rows; i++)
         {
             if (xpc_predict.at<float>(i, 0) >= 0) // valid
             {
