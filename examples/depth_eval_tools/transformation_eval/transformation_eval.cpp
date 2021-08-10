@@ -53,7 +53,7 @@ int calculate_transformation_error(const cv::Mat &depth16,
     int nValid = 0;
 
     cv::Mat xpc_predict((int)corners_c.size(), 2, CV_32F, -1.0);
-    for (int i = 0; i < corners_d.size(); i++)
+    for (unsigned long i = 0; i < corners_d.size(); i++)
     {
         float d_mm;
         interpolate_depth(depth16, corners_d[i].x, corners_d[i].y, d_mm);
@@ -85,13 +85,13 @@ int calculate_transformation_error(const cv::Mat &depth16,
     }
 
     if (nValid > 0)
-        rms = sqrt(rms / nValid);
+        rms = (float)sqrt(rms / nValid);
 
     // show the error on the color image
     if (nValid > 0 && gen_err_img)
     {
         color8.copyTo(err_img);
-        for (int i = 0; i < xpc_predict.rows; i++)
+        for (unsigned long i = 0; i < xpc_predict.rows; i++)
         {
             if (xpc_predict.at<float>(i, 0) >= 0) // valid
             {

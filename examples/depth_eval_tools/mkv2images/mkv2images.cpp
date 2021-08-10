@@ -37,7 +37,7 @@ void help()
 // extract filename from the full path
 std::string extract_filename(const std::string &full_filename)
 {
-    int index = (int)full_filename.find_last_of("/\\");
+    unsigned long index = (unsigned long)full_filename.find_last_of("/\\");
     std::string filename = full_filename.substr(index + 1);
     return filename;
 }
