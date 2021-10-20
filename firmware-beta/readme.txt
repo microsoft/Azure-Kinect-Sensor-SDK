@@ -1,4 +1,4 @@
-Beta version of Azure Kinect DK Firmware
+Removed beta monika. Now firmware shipped on new Azure Kinect devices
 
 Firmware v1.6.110080014 Fixes:
 
