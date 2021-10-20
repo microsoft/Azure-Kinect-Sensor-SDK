@@ -1,4 +1,4 @@
-Removed beta monika. Firmware now shipping on new Azure Kinect DKs
+Removed beta moniker. Firmware now shipping on new Azure Kinect DKs
 
 Firmware v1.6.110080014 Fixes:
 
