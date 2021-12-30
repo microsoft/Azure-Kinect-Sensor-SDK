@@ -50,7 +50,7 @@ std::atomic_bool exiting(false);
 
 void set_color_param(k4a_device_t &device,
                      k4a_color_control_command_t command,
-                     const char *command_name, 
+                     const char *command_name,
                      int32_t value,
                      int32_t defaultValue,
                      bool defaultAuto)
@@ -60,25 +60,24 @@ void set_color_param(k4a_device_t &device,
 
     if (value != defaultValue)
     {
-        if (K4A_FAILED(k4a_device_set_color_control(device, command,
-                                                    K4A_COLOR_CONTROL_MODE_MANUAL, value)))
+        if (K4A_FAILED(k4a_device_set_color_control(device, command, K4A_COLOR_CONTROL_MODE_MANUAL, value)))
         {
-            std::cerr << "Runtime error: k4a_device_set_color_control() failed for manual " << command_name << std::endl;
+            std::cerr << "Runtime error: k4a_device_set_color_control() failed for manual " << command_name
+                      << std::endl;
         }
     }
     else if (defaultAuto)
     {
-        if (K4A_FAILED(k4a_device_set_color_control(device, command,
-                                                    K4A_COLOR_CONTROL_MODE_AUTO,
-                                                    0)))
+        if (K4A_FAILED(k4a_device_set_color_control(device, command, K4A_COLOR_CONTROL_MODE_AUTO, 0)))
         {
             std::cerr << "Runtime error: k4a_device_set_color_control() failed for auto " << command_name << std::endl;
         }
     }
 
     k4a_device_get_color_control(device, command, &read_mode, &read_value);
-    std::cout << "Current " << command_name << " set to " << (read_mode == K4A_COLOR_CONTROL_MODE_AUTO ? "AUTO" : "MANUAL") << " mode and has value " << read_value
-        << std::endl;
+    std::cout << "Current " << command_name << " set to "
+              << (read_mode == K4A_COLOR_CONTROL_MODE_AUTO ? "AUTO" : "MANUAL") << " mode and has value " << read_value
+              << std::endl;
 }
 
 int do_recording(uint8_t device_index,
