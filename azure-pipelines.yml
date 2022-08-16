@@ -420,7 +420,7 @@ jobs:
 - job: DocumentationBuild
   displayName: Documentation Build
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
     demands:
       - Cmd
 
@@ -432,9 +432,9 @@ jobs:
     submodules: true
 
   - task: BatchScript@1
-    displayName: 'Setup VS2017 Env'
+    displayName: 'Setup VS2019 Env'
     inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat'
       modifyEnvironment: true
 
   - powershell: |
