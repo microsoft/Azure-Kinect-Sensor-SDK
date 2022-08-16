@@ -48,38 +48,6 @@ jobs:
   strategy:
     maxParallel: 100
     matrix:
-      VS2017_x64-msvc_debug_ninja:
-        CMakeArch: 'amd64'
-        BuildGenerator: 'Ninja'
-        CMakeConfiguration: 'debug'
-        MSBuildPlatform: 'x64'
-        MSBuildConfiguration: 'Debug'
-        vmImage: 'vs2017-win2016'
-        UsesOpenCV: 'TRUE'
-      VS2017_x64-msvc_rel_ninja:
-        CMakeArch: 'amd64'
-        BuildGenerator: 'Ninja'
-        CMakeConfiguration: 'relwithdebinfo'
-        MSBuildPlatform: 'x64'
-        MSBuildConfiguration: 'Release'
-        vmImage: 'vs2017-win2016'
-        UsesOpenCV: 'TRUE'      
-      VS2017_x86-msvc_debug_ninja:
-        CMakeArch: 'x86'
-        BuildGenerator: 'Ninja'
-        CMakeConfiguration: 'debug'
-        MSBuildPlatform: 'x86'
-        MSBuildConfiguration: 'Debug'
-        vmImage: 'vs2017-win2016'
-        UsesOpenCV: 'FALSE'
-      VS2017_x86-msvc_rel_ninja:
-        CMakeArch: 'x86'
-        BuildGenerator: 'Ninja'
-        CMakeConfiguration: 'relwithdebinfo'
-        MSBuildPlatform: 'x86'
-        MSBuildConfiguration: 'Release'
-        vmImage: 'vs2017-win2016'
-        UsesOpenCV: 'FALSE'
       VS2019_x64-msvc_debug_ninja:
         CMakeArch: 'amd64'
         BuildGenerator: 'Ninja'
