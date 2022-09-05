@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // <copyright file="Logger.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
@@ -18,12 +18,12 @@ namespace Microsoft.Azure.Kinect.Sensor
         private static readonly NativeMethods.k4a_logging_message_cb_t DebugMessageHandler = OnDebugMessage;
         private static bool isInitialized;
 
-        private static event Action<LogMessage> LogMessageHandlers;
-
+#pragma warning disable CA1003 // Use generic event handler instances
         /// <summary>
         /// Occurs when the Azure Kinect Sensor SDK delivers a debug message.
         /// </summary>
         public static event Action<LogMessage> LogMessage
+#pragma warning restore CA1003 // Use generic event handler instances
         {
             add
             {
@@ -46,6 +46,8 @@ namespace Microsoft.Azure.Kinect.Sensor
                 }
             }
         }
+
+        private static event Action<LogMessage> LogMessageHandlers;
 
         /// <summary>
         /// Initializes the <see cref="Logger"/> class to begin receiving messages from the Azure Kinect Sensor SDK.
