@@ -60,7 +60,7 @@ The script `register.py`, like `calibrate.py` is designed to take in command lin
    2. Find the five files you will need. Two images (one per camera) taken at the same time and the corresponding `calib.yml` calibration files generated for a well calibrated camera. Also pass in the template file.
         * Example: RGB and IR images taken simultaneously.
         * ![Color Image](example_files/registration/color-0.jpg "Color Image")
-        * ![IR Image](example_files\registration/ir-0.png "IR Image")
+        * ![IR Image](example_files/registration/ir-0.png "IR Image")
    3. If you already have a collected set of data, run the calibration code this way:
 
         ``` windows
