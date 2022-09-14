@@ -70,6 +70,18 @@ Each package contains different elements.
 * Development package - contains headers and cmake files to build against libk4a.
 * Tools package - contains k4aviewer and k4arecorder
 
+## Installing using vcpkg
+
+You can build and install azure-kinect-sensor-sdk using [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+
+* git clone https://github.com/Microsoft/vcpkg.git
+* cd vcpkg
+* ./bootstrap-vcpkg.sh  # ./bootstrap-vcpkg.bat for Windows
+* ./vcpkg integrate install
+* ./vcpkg install azure-kinect-sensor-sdk
+
+The azure-kinect-sensor-sdk port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
 ## Using tools
 
 The installer comes with a pre-built viewer application (k4aviewer.exe) which can be used to verify the
