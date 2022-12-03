@@ -8,6 +8,7 @@
 // System headers
 //
 #include <regex>
+#include <cstring>
 
 // Library headers
 //
