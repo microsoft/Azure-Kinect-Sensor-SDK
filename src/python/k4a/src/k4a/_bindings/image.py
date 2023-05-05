@@ -1,4 +1,4 @@
-'''!
+"""!
 @file image.py
 
 Defines an Image class that is a container for a single image
@@ -7,17 +7,16 @@ from an Azure Kinect device.
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 Kinect For Azure SDK.
-'''
+"""
 
 import ctypes as _ctypes
 import numpy as _np
-import copy as _copy
 
 from .k4atypes import _ImageHandle, EStatus, EImageFormat
 
 from .k4a import k4a_image_create, k4a_image_create_from_buffer, \
     k4a_image_release, k4a_image_get_buffer, \
-    k4a_image_reference, k4a_image_release, k4a_image_get_format, \
+    k4a_image_reference, k4a_image_get_format, \
     k4a_image_get_size, k4a_image_get_width_pixels, \
     k4a_image_get_height_pixels, k4a_image_get_stride_bytes, \
     k4a_image_get_device_timestamp_usec, k4a_image_set_device_timestamp_usec, \
@@ -26,15 +25,16 @@ from .k4a import k4a_image_create, k4a_image_create_from_buffer, \
     k4a_image_get_white_balance, k4a_image_set_white_balance, \
     k4a_image_get_iso_speed, k4a_image_set_iso_speed
 
+
 class Image:
-    '''! A class that represents an image from an imaging sensor in an
+    """! A class that represents an image from an imaging sensor in an
     Azure Kinect device.
 
     <table>
     <tr style="background-color: #323C7D; color: #ffffff;">
     <td> Property Name </td><td> Type </td><td> R/W </td><td> Description </td>
     </tr>
-    
+
     <tr>
     <td> data </td>
     <td> numpy.ndarray </td>
@@ -83,7 +83,7 @@ class Image:
     <td> R/W </td>
     <td> The device timestamp in microseconds.
          - Timestamps are recorded by the device and represent the mid-point of
-            exposure. They may be used for relative comparison, but their 
+            exposure. They may be used for relative comparison, but their
             absolute value has no defined meaning.
          - If the Image is invalid or if no timestamp was set for the image,
             this value will be 0. It is also possible for a 0 value to be a
@@ -97,19 +97,19 @@ class Image:
     <td> int </td>
     <td> R/W </td>
     <td> The device timestamp in nanoseconds.
-         - The system timestamp is a high performance and increasing clock 
-            (from boot). The timestamp represents the time immediately after 
+         - The system timestamp is a high performance and increasing clock
+            (from boot). The timestamp represents the time immediately after
             the image buffer was read by the host PC.
          - Timestamps are recorded by the host. They may be used for relative
-            comparision, as they are relative to the corresponding system 
-            clock. The absolute value is a monotonic count from an arbitrary 
+            comparision, as they are relative to the corresponding system
+            clock. The absolute value is a monotonic count from an arbitrary
             point in the past.
-         - The system timestamp is captured at the moment host PC finishes 
+         - The system timestamp is captured at the moment host PC finishes
             receiving the image.
-         - On Linux the system timestamp is read from 
+         - On Linux the system timestamp is read from
             clock_gettime(CLOCK_MONOTONIC), which measures realtime and is not
-            impacted by adjustments to the system clock. It starts from an 
-            arbitrary point in the past. On Windows the system timestamp is 
+            impacted by adjustments to the system clock. It starts from an
+            arbitrary point in the past. On Windows the system timestamp is
             read from QueryPerformanceCounter(). It also measures realtime and
             is not impacted by adjustments to the system clock. It also starts
             from an arbitrary point in the past.
@@ -159,55 +159,55 @@ class Image:
 
     </table>
 
-    @remarks 
+    @remarks
     - An Image manages an image buffer and associated metadata.
-    
-    @remarks 
+
+    @remarks
     - Do not use the Image() constructor to get an Image instance. It
         will return an object that does not have a handle to the image
         resources held by the SDK. Instead, use the create() function.
 
-    @remarks 
+    @remarks
     - The memory associated with the image buffer in an Image may have been
-    allocated by the Azure Kinect APIs or by the application. If the 
+    allocated by the Azure Kinect APIs or by the application. If the
     Image was created by an Azure Kinect API, its memory will be freed when all
     references to the Image are released. All images retrieved directly from a
     device will have been created by the API. An application can create an
     Image using memory that it has allocated using create_from_ndarray() and
-    passing an numpy ndarray with a pre-allocated memory. In both cases, the
+    passing a numpy ndarray with a pre-allocated memory. In both cases, the
     memory is released when the all references to the Image object are
     released, either explicitly with del or it goes out of scope. Users do not
     need to worry about memory allocation and deallocation other than the
     normal rules for Python objects.
 
     @remarks
-    - An image has a number of metadata properties that can be set or 
-    retrieved. Not all properties are applicable to images of all types. 
+    - An image has a number of metadata properties that can be set or
+    retrieved. Not all properties are applicable to images of all types.
     See the documentation for the individual properties for more information on
     their applicability and meaning.
 
     @remarks
-    - Images may be of one of the standard EImageFormat formats, or may be of 
-    format EImageFormat.CUSTOM. The format defines how the underlying image 
+    - Images may be of one of the standard EImageFormat formats, or may be of
+    format EImageFormat.CUSTOM. The format defines how the underlying image
     buffer should be interpreted.
 
     @remarks
-    - Images from a device are retrieved through a Capture object returned by 
+    - Images from a device are retrieved through a Capture object returned by
     Device.get_capture().
 
     @remarks
     - Images stored in a capture are referenced by the capture until they are
     replaced or the capture is destroyed.
 
-    @remarks 
+    @remarks
     - An Image object may be copied or deep copied. A shallow copy
         shares the same data as the original, and any changes in one will
         affect the other. A deep copy does not share any resources with the
         original, and changes in one will not affect the other. In both shallow
         and deep copies, deleting one will have no effects on the other.
-    '''
+    """
 
-    def __init__(self, image_handle:_ImageHandle=None):
+    def __init__(self, image_handle: _ImageHandle = None):
         self.__image_handle = image_handle
 
         # The _data property is a numpy ndarray. The buffer backing the ndarray
@@ -228,10 +228,10 @@ class Image:
 
     @staticmethod
     def _get_array_type_from_format(
-        image_format:EImageFormat,
-        buffer_size:int, 
-        width_pixels:int, 
-        height_pixels:int):
+            image_format: EImageFormat,
+            buffer_size: int,
+            width_pixels: int,
+            height_pixels: int):
 
         array_type = None
         array_len_bytes = 0
@@ -240,10 +240,10 @@ class Image:
             array_type = _ctypes.c_ubyte * buffer_size
             array_len_bytes = buffer_size
         elif image_format == EImageFormat.COLOR_NV12:
-            array_type = ((_ctypes.c_ubyte * 1) * width_pixels) * (height_pixels + int(height_pixels/2)) 
-            array_len_bytes = width_pixels * (height_pixels + int(height_pixels/2))
+            array_type = ((_ctypes.c_ubyte * 1) * width_pixels) * (height_pixels + int(height_pixels / 2))
+            array_len_bytes = width_pixels * (height_pixels + int(height_pixels / 2))
         elif image_format == EImageFormat.COLOR_YUY2:
-            array_type = (_ctypes.c_ubyte * width_pixels*2) * height_pixels
+            array_type = (_ctypes.c_ubyte * width_pixels * 2) * height_pixels
             array_len_bytes = width_pixels * height_pixels * 2
         elif image_format == EImageFormat.COLOR_BGRA32:
             array_type = ((_ctypes.c_ubyte * 4) * width_pixels) * height_pixels
@@ -264,13 +264,13 @@ class Image:
             array_type = _ctypes.c_ubyte * buffer_size
             array_len_bytes = buffer_size
 
-        return (array_type, array_len_bytes)
+        return array_type, array_len_bytes
 
     # This static method should not be called by users.
     # It is an internal-only function for instantiating an Image object.
     @staticmethod
     def _create_from_existing_image_handle(
-        image_handle:_ImageHandle):
+            image_handle: _ImageHandle):
 
         # Create an Image object.
         image = Image(image_handle=image_handle)
@@ -282,20 +282,20 @@ class Image:
 
     @staticmethod
     def create(
-        image_format:EImageFormat,
-        width_pixels:int,
-        height_pixels:int,
-        stride_bytes:int):
-        '''! Create an image.
+            image_format: EImageFormat,
+            width_pixels: int,
+            height_pixels: int,
+            stride_bytes: int):
+        """! Create an image.
 
-        @param image_format (EImageFormat): The format of the image that will
+        @param image_format: (EImageFormat): The format of the image that will
             be stored in this image container.
 
-        @param width_pixels (int): Width in pixels.
+        @param width_pixels: (int): Width in pixels.
 
-        @param height_pixels (int): Height in pixels.
+        @param height_pixels: (int): Height in pixels.
 
-        @param stride_bytes (int): The number of bytes per horizontal line of
+        @param stride_bytes: (int): The number of bytes per horizontal line of
             the image. If set to 0, the stride will be set to the minimum size
             given the image format and width_pixels.
 
@@ -303,7 +303,7 @@ class Image:
             error occurs, then None is returned.
 
         @remarks
-        - This function is used to create images of formats that have 
+        - This function is used to create images of formats that have
             consistent stride. The function is not suitable for compressed
             formats that may not be represented by the same number of bytes per
             line.
@@ -311,27 +311,27 @@ class Image:
         @remarks
         - For most image formats, the function will allocate an image buffer of
             size @p height_pixels * @p stride_bytes. Buffers with image format
-            of EImageFormat.COLOR_NV12 will allocate an additional 
-            @p height_pixels / 2 set of lines (each of @p stride_bytes). This 
+            of EImageFormat.COLOR_NV12 will allocate an additional
+            @p height_pixels / 2 set of lines (each of @p stride_bytes). This
             function cannot be used to allocate EImageFormat.COLOR_MJPG buffer.
 
         @remarks
-        - To create an image object without the API allocating memory, or to 
-            represent an image that has a non-deterministic stride, use 
+        - To create an image object without the API allocating memory, or to
+            represent an image that has a non-deterministic stride, use
             create_from_ndarray().
 
         @remarks
         - If an error occurs, then None is returned.
-        '''
+        """
 
         image = None
 
-        assert(isinstance(image_format, EImageFormat)), "image_format parameter must be an EImageFormat."
-        assert(width_pixels > 0), "width_pixels must be greater than zero."
-        assert(height_pixels > 0), "height_pixels must be greater than zero."
-        assert(stride_bytes > 0), "stride_bytes must be greater than zero."
-        assert(stride_bytes > width_pixels), "stride_bytes must be greater than width_pixels."
-        assert(stride_bytes > height_pixels), "stride_bytes must be greater than height_pixels."
+        assert (isinstance(image_format, EImageFormat)), "image_format parameter must be an EImageFormat."
+        assert (width_pixels > 0), "width_pixels must be greater than zero."
+        assert (height_pixels > 0), "height_pixels must be greater than zero."
+        assert (stride_bytes > 0), "stride_bytes must be greater than zero."
+        assert (stride_bytes > width_pixels), "stride_bytes must be greater than width_pixels."
+        assert (stride_bytes > height_pixels), "stride_bytes must be greater than height_pixels."
 
         # Create an image.
         image_handle = _ImageHandle()
@@ -349,32 +349,32 @@ class Image:
 
     @staticmethod
     def create_from_ndarray(
-        image_format:EImageFormat,
-        arr:_np.ndarray,
-        stride_bytes_custom:int=0,
-        size_bytes_custom:int=0,
-        width_pixels_custom:int=0,
-        height_pixels_custom:int=0):
-        '''! Create an image from a pre-allocated buffer.
+            image_format: EImageFormat,
+            arr: _np.ndarray,
+            stride_bytes_custom: int = 0,
+            size_bytes_custom: int = 0,
+            width_pixels_custom: int = 0,
+            height_pixels_custom: int = 0):
+        """! Create an image from a pre-allocated buffer.
 
-        @param image_format (EImageFormat): The format of the image that will
+        @param image_format: (EImageFormat): The format of the image that will
             be stored in this image container.
 
-        @param arr (numpy.ndarray): A pre-allocated numpy ndarray.
+        @param arr: (numpy.ndarray): A pre-allocated numpy ndarray.
 
-        @param stride_bytes_custom (int, optional): User-defined stride in bytes.
+        @param stride_bytes_custom: (int, optional): User-defined stride in bytes.
 
-        @param size_bytes_custom (int): User-defined size in bytes of the data.
+        @param size_bytes_custom: (int): User-defined size in bytes of the data.
 
-        @param width_pixels_custom (int): User-defined width in pixels of the data.
+        @param width_pixels_custom: (int): User-defined width in pixels of the data.
 
-        @param height_pixels_custom (int): User-defined height in pixels of the data.
+        @param height_pixels_custom: (int): User-defined height in pixels of the data.
 
         @returns Image: An Image instance using the pre-allocated data buffer. If an
             error occurs, then None is returned.
 
         @remarks
-        - This function is used to create images of formats that have 
+        - This function is used to create images of formats that have
             consistent stride. The function is not suitable for compressed
             formats that may not be represented by the same number of bytes per
             line.
@@ -397,7 +397,7 @@ class Image:
 
         @remarks
         - If an error occurs, then None is returned.
-        '''
+        """
         image = None
 
         assert(isinstance(arr, _nd.ndarray)), "arr must be a numpy ndarray object."
@@ -453,7 +453,7 @@ class Image:
     def __del__(self):
 
         # Deleting the _image_handle will release the image reference.
-        del self._image_handle
+        del self.image_handle
 
         del self.data
         del self.image_format
@@ -470,7 +470,7 @@ class Image:
     def __copy__(self):
 
         # Create a shallow copy.
-        new_image = Image(self._image_handle)
+        new_image = Image(self.image_handle)
         new_image._data = self._data.view()
         new_image._image_format = self._image_format
         new_image._size_bytes = self._size_bytes
@@ -479,7 +479,7 @@ class Image:
         new_image._stride_bytes = self._stride_bytes
         new_image._device_timestamp_usec = self._device_timestamp_usec
         new_image._system_timestamp_nsec = self._system_timestamp_nsec
-        new_image._exposure_usec =self._exposure_usec
+        new_image._exposure_usec = self._exposure_usec
         new_image._white_balance = self._white_balance
         new_image._iso_speed = self._iso_speed
 
@@ -510,7 +510,7 @@ class Image:
 
         # Do not need to update reference count. Just return the copy.
         return new_image
-    
+
     def __enter__(self):
         return self
 
@@ -544,12 +544,12 @@ class Image:
 
     # Define properties and get/set functions. ############### 
     @property
-    def _image_handle(self):
+    def image_handle(self):
         return self.__image_handle
 
-    @_image_handle.deleter
-    def _image_handle(self):
-        
+    @image_handle.deleter
+    def image_handle(self):
+
         # Release the image before deleting.
         if isinstance(self._data, _np.ndarray):
             if not self._data.flags.owndata:
@@ -571,18 +571,18 @@ class Image:
             height_pixels = k4a_image_get_height_pixels(self.__image_handle)
             stride_bytes = k4a_image_get_stride_bytes(self.__image_handle)
 
-            assert(buffer_size > 0), "buffer_size must be greater than zero."
-            assert(width_pixels > 0), "width_pixels must be greater than zero."
-            assert(height_pixels > 0), "height_pixels must be greater than zero."
-            assert(stride_bytes > 0), "stride_bytes must be greater than zero."
-            assert(stride_bytes > width_pixels), "stride_bytes must be greater than width_pixels."
-            assert(stride_bytes > height_pixels), "stride_bytes must be greater than height_pixels."
+            assert (buffer_size > 0), "buffer_size must be greater than zero."
+            assert (width_pixels > 0), "width_pixels must be greater than zero."
+            assert (height_pixels > 0), "height_pixels must be greater than zero."
+            assert (stride_bytes > 0), "stride_bytes must be greater than zero."
+            assert (stride_bytes > width_pixels), "stride_bytes must be greater than width_pixels."
+            assert (stride_bytes > height_pixels), "stride_bytes must be greater than height_pixels."
 
             # Construct a descriptor of the data in the buffer.
             (array_type, array_len_bytes) = Image._get_array_type_from_format(
                 image_format, buffer_size, width_pixels, height_pixels)
-            assert(array_type is not None), "Unrecognized image format."
-            assert(array_len_bytes <= buffer_size), "ndarray size should be less than buffer size in bytes."
+            assert (array_type is not None), "Unrecognized image format."
+            assert (array_len_bytes <= buffer_size), "ndarray size should be less than buffer size in bytes."
 
             self._data = _np.ctypeslib.as_array(array_type.from_address(
                 _ctypes.c_void_p.from_buffer(buffer_ptr).value))
@@ -650,9 +650,9 @@ class Image:
         return self._device_timestamp_usec
 
     @device_timestamp_usec.setter
-    def device_timestamp_usec(self, value:int):
+    def device_timestamp_usec(self, value: int):
         k4a_image_set_device_timestamp_usec(
-            self.__image_handle, 
+            self.__image_handle,
             _ctypes.c_ulonglong(value))
         self._device_timestamp_usec = value
 
@@ -667,9 +667,9 @@ class Image:
         return self._system_timestamp_nsec
 
     @system_timestamp_nsec.setter
-    def system_timestamp_nsec(self, value:int):
+    def system_timestamp_nsec(self, value: int):
         k4a_image_set_system_timestamp_nsec(
-            self.__image_handle, 
+            self.__image_handle,
             _ctypes.c_ulonglong(value))
         self._system_timestamp_nsec = value
 
@@ -684,9 +684,9 @@ class Image:
         return self._exposure_usec
 
     @exposure_usec.setter
-    def exposure_usec(self, value:int):
+    def exposure_usec(self, value: int):
         k4a_image_set_exposure_usec(
-            self.__image_handle, 
+            self.__image_handle,
             _ctypes.c_ulonglong(value))
         self._exposure_usec = value
 
@@ -701,9 +701,9 @@ class Image:
         return self._white_balance
 
     @white_balance.setter
-    def white_balance(self, value:int):
+    def white_balance(self, value: int):
         k4a_image_set_white_balance(
-            self.__image_handle, 
+            self.__image_handle,
             _ctypes.c_uint32(value))
         self._white_balance = value
 
@@ -718,9 +718,9 @@ class Image:
         return self._iso_speed
 
     @iso_speed.setter
-    def iso_speed(self, value:int):
+    def iso_speed(self, value: int):
         k4a_image_set_iso_speed(
-            self.__image_handle, 
+            self.__image_handle,
             _ctypes.c_uint32(value))
         self._iso_speed = value
 
@@ -728,5 +728,5 @@ class Image:
     def iso_speed(self):
         del self._iso_speed
         self._iso_speed = None
-    
+
     # ###############

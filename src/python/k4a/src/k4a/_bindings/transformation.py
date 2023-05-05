@@ -364,11 +364,11 @@ class Transformation:
         status = k4a_calibration_color_2d_to_depth_2d(
             self._calibration._calibration,
             _ctypes.byref(src_pt),
-            depth._image_handle,
+            depth.image_handle,
             _ctypes.byref(tgt_pt),
             _ctypes.byref(valid_int_flag))
 
-        if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1):
+        if status == EStatus.SUCCEEDED and valid_int_flag.value == 1:
             target_point = (tgt_pt.xy.x, tgt_pt.xy.y)
 
         return target_point
@@ -407,13 +407,13 @@ class Transformation:
 
         status = k4a_transformation_depth_image_to_color_camera(
             self.__transform_handle,
-            depth._image_handle,
-            transformed_depth_image._image_handle)
+            depth.image_handle,
+            transformed_depth_image.image_handle)
 
-        if (status != EStatus.SUCCEEDED):
+        if status != EStatus.SUCCEEDED:
             transformed_depth_image = None
         else:
-            buffer_ptr = k4a_image_get_buffer(transformed_depth_image._image_handle)
+            buffer_ptr = k4a_image_get_buffer(transformed_depth_image.image_handle)
             array_type = (_ctypes.c_uint16 * height_pixels) * width_pixels
             self._data = _np.ctypeslib.as_array(array_type.from_address(
                 _ctypes.c_void_p.from_buffer(buffer_ptr).value))
@@ -492,18 +492,18 @@ class Transformation:
 
         status = k4a_transformation_depth_image_to_color_camera_custom(
             self.__transform_handle,
-            depth._image_handle,
-            custom._image_handle,
-            transformed_depth_image._image_handle,
-            transformed_custom_image._image_handle,
+            depth.image_handle,
+            custom.image_handle,
+            transformed_depth_image.image_handle,
+            transformed_custom_image.image_handle,
             interp_type,
             _ctypes.c_uint32(invalid_value))
 
-        if (status != EStatus.SUCCEEDED):
+        if status != EStatus.SUCCEEDED:
             transformed_depth_image = None
             transformed_custom_image = None
 
-        return (transformed_depth_image, transformed_custom_image)
+        return transformed_depth_image, transformed_custom_image
 
     def color_image_to_depth_camera(self,
         depth:Image,
@@ -545,11 +545,11 @@ class Transformation:
 
         status = k4a_transformation_color_image_to_depth_camera(
             self.__transform_handle,
-            depth._image_handle,
-            color._image_handle,
-            transformed_color_image._image_handle)
+            depth.image_handle,
+            color.image_handle,
+            transformed_color_image.image_handle)
 
-        if (status != EStatus.SUCCEEDED):
+        if status != EStatus.SUCCEEDED:
             transformed_color_image = None
 
         return transformed_color_image
@@ -597,16 +597,16 @@ class Transformation:
 
         status = k4a_transformation_depth_image_to_point_cloud(
             self.__transform_handle,
-            depth._image_handle,
+            depth.image_handle,
             camera_type,
-            point_cloud_image._image_handle)
+            point_cloud_image.image_handle)
 
-        if (status != EStatus.SUCCEEDED):
+        if status != EStatus.SUCCEEDED:
             point_cloud_image = None
         else:
             # The ndarray for a CUSTOM image format is a flat buffer.
             # Rewrite the ndarray to have 3 dimensions for X, Y, and Z points.
-            buffer_ptr = k4a_image_get_buffer(point_cloud_image._image_handle)
+            buffer_ptr = k4a_image_get_buffer(point_cloud_image.image_handle)
             array_type = ((_ctypes.c_int16 * 3) * depth.width_pixels) * depth.height_pixels
             point_cloud_image._data = _np.ctypeslib.as_array(array_type.from_address(
                 _ctypes.c_void_p.from_buffer(buffer_ptr).value))

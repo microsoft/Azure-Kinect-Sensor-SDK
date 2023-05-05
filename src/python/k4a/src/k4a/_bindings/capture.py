@@ -1,4 +1,4 @@
-'''!
+"""!
 @file capture.py
 
 Defines a Capture class that is a container for a single capture of data
@@ -7,7 +7,7 @@ from an Azure Kinect device.
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 Kinect For Azure SDK.
-'''
+"""
 
 import ctypes as _ctypes
 import copy as _copy
@@ -23,8 +23,9 @@ from .k4a import k4a_capture_create, k4a_capture_release, k4a_capture_reference,
 
 from .image import Image
 
+
 class Capture:
-    '''! A class that represents a capture from an Azure Kinect device.
+    """! A class that represents a capture from an Azure Kinect device.
 
     Property Name | Type  | R/W | Description
     ------------- | ----- | --- | -----------------------------------------
@@ -33,44 +34,44 @@ class Capture:
     ir            | Image | R/W | The IR image container.
     temperature   | float | R/W | The temperature
 
-    @remarks 
-    - A capture represents a set of images that were captured by a 
+    @remarks
+    - A capture represents a set of images that were captured by a
         device at approximately the same time. A capture may have a color, IR,
-        and depth image. A capture may have up to one image of each type. A 
+        and depth image. A capture may have up to one image of each type. A
         capture may have no image for a given type as well.
-    
-    @remarks 
+
+    @remarks
     - Do not use the Capture() constructor to get a Capture instance. It
         will return an object that does not have a handle to the capture
         resources held by the SDK. Instead, use the create() function.
 
-    @remarks 
-    - Captures also store a temperature value which represents the 
+    @remarks
+    - Captures also store a temperature value which represents the
         temperature of the device at the time of the capture.
 
-    @remarks 
+    @remarks
     - While all the images associated with the capture were collected at
-        approximately the same time, each image has an individual timestamp 
-        which may differ from each other. If the device was configured to 
-        capture depth and color images separated by a delay, 
-        Device.get_capture() will return a capture containing both image types 
+        approximately the same time, each image has an individual timestamp
+        which may differ from each other. If the device was configured to
+        capture depth and color images separated by a delay,
+        Device.get_capture() will return a capture containing both image types
         separated by the configured delay.
 
-    @remarks 
+    @remarks
     - Empty captures are created with create().
 
-    @remarks 
+    @remarks
     - Captures can be obtained from a Device object using get_capture().
 
-    @remarks 
+    @remarks
     - A Capture object may be copied or deep copied. A shallow copy
         shares the same images as the original, and any changes in one will
         affect the other. A deep copy does not share any resources with the
         original, and changes in one will not affect the other. In both shallow
         and deep copies, deleting one will have no effects on the other.
-    '''
+    """
 
-    def __init__(self, capture_handle:_CaptureHandle):
+    def __init__(self, capture_handle: _CaptureHandle):
         self._capture_handle = capture_handle
         self._color = None
         self._depth = None
@@ -79,13 +80,13 @@ class Capture:
 
     @staticmethod
     def create():
-        '''! Create an empty capture object.
-                
+        """! Create an empty capture object.
+
         @returns Capture instance with empty contents.
-        
-        @remarks 
+
+        @remarks
         - If unsuccessful, None is returned.
-        '''
+        """
 
         capture = None
 
@@ -105,7 +106,7 @@ class Capture:
         k4a_capture_reference(self._capture_handle)
 
     def __copy__(self):
-         # Create a shallow copy.
+        # Create a shallow copy.
         new_capture = Capture(self._capture_handle)
         new_capture.color = _copy.copy(self.color)
         new_capture.depth = _copy.copy(self.depth)
@@ -118,7 +119,7 @@ class Capture:
         return new_capture
 
     def __deepcopy__(self, memo):
-        
+
         # Create a new capture.
         new_capture = Capture.create()
 
@@ -132,7 +133,7 @@ class Capture:
         # Since it is a completely different capture, there is no need to
         # increment the reference count. Just return the deep copy.
         return new_capture
-    
+
     def __enter__(self):
         return self
 
@@ -176,13 +177,13 @@ class Capture:
         return self._color
 
     @color.setter
-    def color(self, image:Image):
+    def color(self, image: Image):
         if image is not None and isinstance(image, Image):
             del self._color
 
             k4a_capture_set_color_image(
-                self._capture_handle, 
-                image._image_handle)
+                self._capture_handle,
+                image.image_handle)
 
             self._color = image
 
@@ -199,13 +200,13 @@ class Capture:
         return self._depth
 
     @depth.setter
-    def depth(self, image:Image):
+    def depth(self, image: Image):
         if image is not None and isinstance(image, Image):
             del self._depth
 
             k4a_capture_set_depth_image(
-                self._capture_handle, 
-                image._image_handle)
+                self._capture_handle,
+                image.image_handle)
 
             self._depth = image
 
@@ -222,13 +223,13 @@ class Capture:
         return self._ir
 
     @ir.setter
-    def ir(self, image:Image):
+    def ir(self, image: Image):
         if image is not None and isinstance(image, Image):
             del self._ir
 
             k4a_capture_set_ir_image(
-                self._capture_handle, 
-                image._image_handle)
+                self._capture_handle,
+                image.image_handle)
 
             self._ir = image
 
@@ -242,12 +243,12 @@ class Capture:
         return self._temperature
 
     @temperature.setter
-    def temperature(self, temperature:float):
+    def temperature(self, temperature: float):
         if temperature is not None and isinstance(temperature, float):
             del self._temperature
 
             k4a_capture_set_temperature_c(
-                self._capture_handle, 
+                self._capture_handle,
                 _ctypes.c_float(temperature))
 
             self._temperature = temperature
