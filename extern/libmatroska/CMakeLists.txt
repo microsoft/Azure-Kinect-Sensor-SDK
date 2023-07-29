@@ -10,11 +10,11 @@ if (NOT TARGET matroska)
     # This is a hack to trick libmatroska into thinking there is an installed
     # version of ebml. In reality, ebml is already a target since its source is
     # part of the build graph.
-    set(Ebml_DIR "${CMAKE_CURRENT_LIST_DIR}")
+    set(EBML_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
     add_subdirectory(src EXCLUDE_FROM_ALL)
 else()
     message(STATUS "matroska is already a target. Skipping adding it twice")
 endif()
 
-add_library(matroska::matroska ALIAS matroska)
+add_library(Matroska::matroska ALIAS matroska)
