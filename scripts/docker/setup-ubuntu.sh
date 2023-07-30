@@ -1,36 +1,28 @@
 #!/bin/bash
 
-# Usage:
-# ./setup-ubuntu.sh [arm64 | amd64]
+if [ "$1" = "" ] || [ "$2" = "" ]; then
+  echo "Please execute with target device and image.
+$0 target_device image
 
-# Warning! This will override your sources.list file!!
+Usage:
+$0 [arm64 | amd64] [ubuntu-version like 22.04]"
+  exit 1
+fi
 
-arch=amd64
-
-# Copy off old sources.list file
-cp /etc/apt/sources.list /etc/apt/sources.list.old
-echo "Backed up /etc/apt/sources.list to /etc/apt/sources.list.old"
-
-# Copy over the new file
-cp sources.list /etc/apt/sources.list
-echo "Overwrote /etc/apt/sources.list with sources.list"
+arch=$1
+UBUNTU_VERSION=$2
 
 apt-get update
 
 apt-get install wget -y
 
 # Add Public microsoft repo keys to the image
-wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-
-if [ "$1" = "arm64" ]; then
-    arch="arm64"
-fi
+wget -q https://packages.microsoft.com/config/ubuntu/${UBUNTU_VERSION}/packages-microsoft-prod.deb -P /tmp
+dpkg -i /tmp/packages-microsoft-prod.deb
 
 echo "Setting up for building $arch binaries"
 
-dpkg --add-architecture amd64
-dpkg --add-architecture arm64
+dpkg --add-architecture $arch
 
 apt-get update
 
