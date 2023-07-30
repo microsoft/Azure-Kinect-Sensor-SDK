@@ -41,7 +41,7 @@ LargeFileIOCallback::~LargeFileIOCallback()
     close();
 }
 
-uint32 LargeFileIOCallback::read(void *buffer, size_t size)
+size_t LargeFileIOCallback::read(void *buffer, size_t size)
 {
     assert(size <= UINT32_MAX); // can't properly return > uint32
     assert(m_owner == std::this_thread::get_id());
