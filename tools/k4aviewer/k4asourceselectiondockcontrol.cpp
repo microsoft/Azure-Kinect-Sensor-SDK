@@ -34,7 +34,7 @@ K4ASourceSelectionDockControl::K4ASourceSelectionDockControl()
 
 K4ADockControlStatus K4ASourceSelectionDockControl::Show()
 {
-    ImGui::SetNextTreeNodeOpen(true, ImGuiCond_FirstUseEver);
+    ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
     if (ImGui::TreeNode("Open Device"))
     {
         ImGuiExtensions::K4AComboBox("Device S/N",
