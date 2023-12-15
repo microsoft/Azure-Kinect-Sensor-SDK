@@ -337,9 +337,9 @@ class Test_Functional_API_Capture_AzureKinect(unittest.TestCase):
         self.assertAlmostEqual(capture2.temperature, self.capture.temperature, 4)
 
         # Check that the image handles are the same.
-        self.assertIs(capture2.color.image_handle, self.capture.color.image_handle)
-        self.assertIs(capture2.depth.image_handle, self.capture.depth.image_handle)
-        self.assertIs(capture2.ir.image_handle, self.capture.ir.image_handle)
+        self.assertIs(capture2.color._image_handle, self.capture.color._image_handle)
+        self.assertIs(capture2.depth._image_handle, self.capture.depth._image_handle)
+        self.assertIs(capture2.ir._image_handle, self.capture.ir._image_handle)
 
         # Check that modifying one also modifies the other.
         self.capture.temperature = self.capture.temperature + 1
@@ -375,9 +375,9 @@ class Test_Functional_API_Capture_AzureKinect(unittest.TestCase):
         self.assertAlmostEqual(capture2.temperature, self.capture.temperature, 4)
 
         # Check that the image handles are not the same.
-        self.assertIsNot(capture2.color.image_handle, self.capture.color.image_handle)
-        self.assertIsNot(capture2.depth.image_handle, self.capture.depth.image_handle)
-        self.assertIsNot(capture2.ir.image_handle, self.capture.ir.image_handle)
+        self.assertIsNot(capture2.color._image_handle, self.capture.color._image_handle)
+        self.assertIsNot(capture2.depth._image_handle, self.capture.depth._image_handle)
+        self.assertIsNot(capture2.ir._image_handle, self.capture.ir._image_handle)
 
         # Check that modifying one does not modify the other.
         self.capture.temperature = self.capture.temperature + 1
@@ -562,9 +562,9 @@ class Test_Functional_API_Image_AzureKinect(unittest.TestCase):
         self.check_copy(self.ir, ir2)
 
         # Check that the image handles are the same.
-        self.assertIs(color2.image_handle, self.color.image_handle)
-        self.assertIs(depth2.image_handle, self.depth.image_handle)
-        self.assertIs(ir2.image_handle, self.ir.image_handle)
+        self.assertIs(color2._image_handle, self.color._image_handle)
+        self.assertIs(depth2._image_handle, self.depth._image_handle)
+        self.assertIs(ir2._image_handle, self.ir._image_handle)
 
         # Check that modifying one also modifies the other.
         self.color.white_balance = self.color.white_balance + 1
@@ -594,9 +594,9 @@ class Test_Functional_API_Image_AzureKinect(unittest.TestCase):
         self.check_copy(self.ir, ir2)
 
         # Check that the image handles are the same.
-        self.assertIsNot(color2.image_handle, self.color.image_handle)
-        self.assertIsNot(depth2.image_handle, self.depth.image_handle)
-        self.assertIsNot(ir2.image_handle, self.ir.image_handle)
+        self.assertIsNot(color2._image_handle, self.color._image_handle)
+        self.assertIsNot(depth2._image_handle, self.depth._image_handle)
+        self.assertIsNot(ir2._image_handle, self.ir._image_handle)
 
         # Check that modifying one does not modifies the other.
         self.color.white_balance = self.color.white_balance + 1
