@@ -468,7 +468,7 @@ class Image:
     def __del__(self):
 
         # Deleting the _image_handle will release the image reference.
-        del self.image_handle
+        del self._image_handle
 
         del self.data
         del self.image_format
@@ -485,7 +485,7 @@ class Image:
     def __copy__(self):
 
         # Create a shallow copy.
-        new_image = Image(self.image_handle)
+        new_image = Image(self._image_handle)
         new_image._data = self._data.view()
         new_image._image_format = self._image_format
         new_image._size_bytes = self._size_bytes
@@ -559,11 +559,11 @@ class Image:
 
     # Define properties and get/set functions. ############### 
     @property
-    def image_handle(self):
+    def _image_handle(self):
         return self.__image_handle
 
-    @image_handle.deleter
-    def image_handle(self):
+    @_image_handle.deleter
+    def _image_handle(self):
 
         # Release the image before deleting.
         if isinstance(self._data, _np.ndarray):
