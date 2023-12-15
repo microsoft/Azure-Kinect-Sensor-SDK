@@ -13,11 +13,11 @@ import ctypes as _ctypes
 import numpy as _np
 import copy as _copy
 
-from .k4atypes import _ImageHandle, EStatus, EImageFormat
+from .k4atypes import _ImageHandle, EStatus, EImageFormat, _memory_destroy_cb
 
 from .k4a import k4a_image_create, k4a_image_create_from_buffer, \
     k4a_image_release, k4a_image_get_buffer, \
-    k4a_image_reference, k4a_image_release, k4a_image_get_format, \
+    k4a_image_reference, k4a_image_get_format, \
     k4a_image_get_size, k4a_image_get_width_pixels, \
     k4a_image_get_height_pixels, k4a_image_get_stride_bytes, \
     k4a_image_get_device_timestamp_usec, k4a_image_set_device_timestamp_usec, \
@@ -281,6 +281,19 @@ class Image:
         return image
 
     @staticmethod
+    @_memory_destroy_cb
+    def _buffer_destroy_callback(buffer: _ctypes.c_void_p, context: _ctypes.c_void_p):
+        """
+        Skip decrementing the reference count on the array when the buffer is released
+        :param buffer:  The image buffer
+        :param context: The array buffer object
+        :return: None
+        """
+        # This function will probably not be called, but the buffer shouldn't be released
+        # since it is referenced by a numpy array
+        pass
+
+    @staticmethod
     def create(
         image_format:EImageFormat,
         width_pixels:int,
@@ -400,47 +413,49 @@ class Image:
         '''
         image = None
 
-        assert(isinstance(arr, _nd.ndarray)), "arr must be a numpy ndarray object."
-        assert(isinstance(image_format, EImageFormat)), "image_format parameter must be an EImageFormat."
+        assert (isinstance(arr, _np.ndarray)), "arr must be a numpy ndarray object."
+        assert (isinstance(image_format, EImageFormat)), "image_format parameter must be an EImageFormat."
 
         # Get buffer pointer and sizes of the numpy ndarray.
-        buffer_ptr = ctypes.cast(
-            _ctypes.addressof(np.ctypeslib.as_ctypes(arr)), 
-            _ctypes.POINTER(_ctypes.c_uint8))
+        buffer_ptr = _ctypes.cast(_np.ctypeslib.as_ctypes(arr), _ctypes.POINTER(_ctypes.c_uint8))
+        array_obj = _ctypes.py_object(arr)
+        # Hold onto the buffer memory by incrementing the reference count on the array object
+        _ctypes.pythonapi.Py_IncRef(array_obj)
 
-        width_pixels = _ctypes.c_int(width_pixels_custom)
-        height_pixels = _ctypes.c_int(height_pixels_custom)
-        stride_bytes = _ctypes.c_int(stride_bytes_custom)
-        size_bytes = _ctypes.c_size_t(size_bytes_custom)
+        try:
+            # Use the ndarray sizes if the custom size info is not passed in.
+            width_pixels = _ctypes.c_int(arr.shape[1]) \
+                if width_pixels_custom == 0 else _ctypes.c_int(width_pixels_custom)
+            height_pixels = _ctypes.c_int(arr.shape[0]) \
+                if height_pixels_custom == 0 else _ctypes.c_int(height_pixels_custom)
+            stride_bytes = _ctypes.c_int(arr.strides[0]) \
+                if stride_bytes_custom == 0 else _ctypes.c_int(stride_bytes_custom)
+            size_bytes = _ctypes.c_size_t(arr.itemsize * arr.size) \
+                if size_bytes_custom == 0 else _ctypes.c_size_t(size_bytes_custom)
 
-        # Use the ndarray sizes if the custom size info is not passed in.
-        if width_pixels == 0:
-            width_pixels = _ctypes.c_int(arr.shape[0])
+            # Create image from the numpy buffer.
+            image_handle = _ImageHandle()
+            status = k4a_image_create_from_buffer(
+                image_format,
+                width_pixels,
+                height_pixels,
+                stride_bytes,
+                buffer_ptr,
+                size_bytes,
+                Image._buffer_destroy_callback,
+                _ctypes.cast(_ctypes.pointer(array_obj), _ctypes.c_void_p),
+                _ctypes.byref(image_handle))
 
-        if height_pixels == 0:
-            height_pixels = _ctypes.c_int(arr.shape[1])
-
-        if size_bytes == 0:
-            size_bytes = _ctypes.c_size_t(arr.itemsize * arr.size)
-
-        if len(arr.shape) > 2 and stride_bytes == 0:
-            stride_bytes = _ctypes.c_int(arr.shape[2])
-
-        # Create image from the numpy buffer.
-        image_handle = _ImageHandle()
-        status = k4a_image_create_from_buffer(
-            image_format,
-            width_pixels,
-            height_pixels,
-            stride_bytes,
-            buffer_ptr,
-            size_bytes,
-            None,
-            None,
-            _ctypes.byref(image_handle))
-
-        if status == EStatus.SUCCEEDED:
-            image = Image._create_from_existing_image_handle(image_handle)
+            if status == EStatus.SUCCEEDED:
+                image = Image._create_from_existing_image_handle(image_handle)
+                # Delete the array object created indirectly by _create_from_existing_image_handle
+                # without deleting the data
+                del image.data
+                # Use the given array object instead (this won't create a new reference)
+                image._data = arr
+        except _ctypes.ArgumentError as details:
+            _ctypes.pythonapi.Py_DecRef(array_obj)
+            raise _ctypes.ArgumentError(details)
 
         return image
 
@@ -453,7 +468,7 @@ class Image:
     def __del__(self):
 
         # Deleting the _image_handle will release the image reference.
-        del self._image_handle
+        del self.image_handle
 
         del self.data
         del self.image_format
@@ -470,7 +485,7 @@ class Image:
     def __copy__(self):
 
         # Create a shallow copy.
-        new_image = Image(self._image_handle)
+        new_image = Image(self.image_handle)
         new_image._data = self._data.view()
         new_image._image_format = self._image_format
         new_image._size_bytes = self._size_bytes
@@ -514,7 +529,7 @@ class Image:
     def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, *exception_details):
         del self
 
     def __str__(self):
@@ -544,12 +559,12 @@ class Image:
 
     # Define properties and get/set functions. ############### 
     @property
-    def _image_handle(self):
+    def image_handle(self):
         return self.__image_handle
 
-    @_image_handle.deleter
-    def _image_handle(self):
-        
+    @image_handle.deleter
+    def image_handle(self):
+
         # Release the image before deleting.
         if isinstance(self._data, _np.ndarray):
             if not self._data.flags.owndata:
