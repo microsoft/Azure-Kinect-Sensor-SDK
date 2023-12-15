@@ -183,7 +183,7 @@ class Capture:
 
             k4a_capture_set_color_image(
                 self._capture_handle,
-                image.image_handle)
+                image._image_handle)
 
             self._color = image
 
@@ -206,7 +206,7 @@ class Capture:
 
             k4a_capture_set_depth_image(
                 self._capture_handle,
-                image.image_handle)
+                image._image_handle)
 
             self._depth = image
 
@@ -229,7 +229,7 @@ class Capture:
 
             k4a_capture_set_ir_image(
                 self._capture_handle,
-                image.image_handle)
+                image._image_handle)
 
             self._ir = image
 
