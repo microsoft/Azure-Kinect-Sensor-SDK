@@ -368,7 +368,7 @@ class Transformation:
             _ctypes.byref(tgt_pt),
             _ctypes.byref(valid_int_flag))
 
-        if (status == EStatus.SUCCEEDED and valid_int_flag.value == 1):
+        if status == EStatus.SUCCEEDED and valid_int_flag.value == 1:
             target_point = (tgt_pt.xy.x, tgt_pt.xy.y)
 
         return target_point
@@ -410,7 +410,7 @@ class Transformation:
             depth._image_handle,
             transformed_depth_image._image_handle)
 
-        if (status != EStatus.SUCCEEDED):
+        if status != EStatus.SUCCEEDED:
             transformed_depth_image = None
         else:
             buffer_ptr = k4a_image_get_buffer(transformed_depth_image._image_handle)
@@ -499,11 +499,11 @@ class Transformation:
             interp_type,
             _ctypes.c_uint32(invalid_value))
 
-        if (status != EStatus.SUCCEEDED):
+        if status != EStatus.SUCCEEDED:
             transformed_depth_image = None
             transformed_custom_image = None
 
-        return (transformed_depth_image, transformed_custom_image)
+        return transformed_depth_image, transformed_custom_image
 
     def color_image_to_depth_camera(self,
         depth:Image,
@@ -549,7 +549,7 @@ class Transformation:
             color._image_handle,
             transformed_color_image._image_handle)
 
-        if (status != EStatus.SUCCEEDED):
+        if status != EStatus.SUCCEEDED:
             transformed_color_image = None
 
         return transformed_color_image
@@ -601,7 +601,7 @@ class Transformation:
             camera_type,
             point_cloud_image._image_handle)
 
-        if (status != EStatus.SUCCEEDED):
+        if status != EStatus.SUCCEEDED:
             point_cloud_image = None
         else:
             # The ndarray for a CUSTOM image format is a flat buffer.

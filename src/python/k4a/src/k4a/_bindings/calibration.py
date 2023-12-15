@@ -1,4 +1,4 @@
-'''!
+"""!
 @file calibration.py
 
 Defines a Calibration class that is a container for a device calibration.
@@ -6,16 +6,17 @@ Defines a Calibration class that is a container for a device calibration.
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 Kinect For Azure SDK.
-'''
+"""
 
 import ctypes as _ctypes
 
-from .k4atypes import _Calibration, EStatus, EDepthMode, EColorResolution, _Calibration
+from .k4atypes import _Calibration, EStatus, EDepthMode, EColorResolution
 
 from .k4a import k4a_calibration_get_from_raw
 
+
 class Calibration:
-    '''! Camera calibration contains intrinsic and extrinsic calibration
+    """! Camera calibration contains intrinsic and extrinsic calibration
     information for a camera.
 
     Name              | Type                  | Description
@@ -25,13 +26,13 @@ class Calibration:
     resolution_width  | int                   | Resolution width of the calibration sensor.
     resolution_height | int                   | Resolution height of the calibration sensor.
     metric_radius     | float                 | Max FOV of the camera.
-    '''
-    
-    def __init__(self, _calibration:_Calibration=None):
+    """
+
+    def __init__(self, _calibration: _Calibration = None):
         self._calibration = _calibration
         if self._calibration is None:
             self._calibration = _Calibration()
-    
+
     # Allow "with" syntax.
     def __enter__(self):
         return self
@@ -45,24 +46,24 @@ class Calibration:
 
     @staticmethod
     def create_from_raw(
-        raw_calibration:bytearray,
-        depth_mode:EDepthMode,
-        color_resolution:EColorResolution):
-        '''! Get the camera calibration for a device from a raw calibration blob.
+            raw_calibration: bytearray,
+            depth_mode: EDepthMode,
+            color_resolution: EColorResolution):
+        """! Get the camera calibration for a device from a raw calibration blob.
 
-        @param raw_calibration (bytearray): Raw calibration blob obtained from
+        @param raw_calibration: (bytearray): Raw calibration blob obtained from
             a device or recording. The raw calibration must be NULL terminated.
 
-        @param depth_mode (EDepthMode): Mode in which depth camera is operated.
+        @param depth_mode: (EDepthMode): Mode in which depth camera is operated.
 
-        @param color_resolution (EColorResolution): Resolution in which color 
+        @param color_resolution: (EColorResolution): Resolution in which color
             camera is operated.
 
         @returns Calibration: A Calibration instance.
 
         @remarks
         - The calibration represents the data needed to transform between the
-            camera views and is different for each operating @p depth_mode and 
+            camera views and is different for each operating @p depth_mode and
             @p color_resolution the device is configured to operate in.
 
         @remarks
@@ -74,14 +75,14 @@ class Calibration:
         @remarks
         - This function is equivalent to Device.get_calibration() function.
             Both functions return the same calibration data.
-        '''
+        """
 
         calibration = None
 
         # Get the _Calibration struct from the raw buffer.
         if (isinstance(raw_calibration, bytearray) and
-            isinstance(depth_mode, EDepthMode) and
-            isinstance(color_resolution, EColorResolution)):
+                isinstance(depth_mode, EDepthMode) and
+                isinstance(color_resolution, EColorResolution)):
 
             buffer_size_bytes = _ctypes.c_size_t(len(raw_calibration))
             cbuffer = (_ctypes.c_uint8 * buffer_size_bytes.value).from_buffer(raw_calibration)
@@ -102,7 +103,7 @@ class Calibration:
         return calibration
 
     # Define properties and get/set functions. ############### 
-    
+
     @property
     def depth_cam_cal(self):
         return self._calibration.depth_camera_calibration
@@ -110,7 +111,7 @@ class Calibration:
     @property
     def color_cam_cal(self):
         return self._calibration.color_camera_calibration
-    
+
     @property
     def extrinsics(self):
         return self._calibration.extrinsics
