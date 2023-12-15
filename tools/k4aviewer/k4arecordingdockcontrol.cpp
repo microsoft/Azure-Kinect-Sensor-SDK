@@ -158,6 +158,16 @@ K4ADockControlStatus K4ARecordingDockControl::Show()
     ImGui::Text("Subordinate delay (us): %d", m_subordinateDelayOffMasterUsec);
     ImGui::Text("Start timestamp offset: %d", m_startTimestampOffsetUsec);
     ImGui::Text("Recording Length (us):  %lu", m_recordingLengthUsec);
+    if (ImGui::Button("Copy to clipboard"))
+    {
+        std::stringstream sync_settings;
+        sync_settings << "Depth/color delay (us):" << m_depthDelayOffColorUsec << std::endl;
+        sync_settings << "Sync mode:" << m_wiredSyncModeLabel.c_str() << std::endl;
+        sync_settings << "Subordinate delay (us):" << m_subordinateDelayOffMasterUsec << std::endl;
+        sync_settings << "Start timestamp offset:" << m_startTimestampOffsetUsec << std::endl;
+        sync_settings << "Recording Length (us):" << m_recordingLengthUsec << std::endl;
+        ImGui::SetClipboardText(sync_settings.str().c_str());
+    }
     ImGui::Separator();
 
     ImGui::TextUnformatted("Device info");
