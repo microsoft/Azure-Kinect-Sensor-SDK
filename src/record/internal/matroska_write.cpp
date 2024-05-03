@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include <sstream>
+#include <chrono>
 
 #include <k4a/k4a.h>
 #include <k4ainternal/matroska_write.h>
@@ -335,7 +336,15 @@ k4a_result_t write_cluster(k4a_record_context_t *context, cluster_t *cluster, ui
     if (!context->start_offset_tag_added)
     {
         std::ostringstream offset_str;
-        offset_str << context->start_timestamp_offset;
+        if (context->use_system_time)
+        {
+            auto epoch = std::chrono::system_clock::now().time_since_epoch();
+            offset_str << std::chrono::duration_cast<std::chrono::nanoseconds>(epoch).count();
+        }
+        else
+        {
+            offset_str << context->start_timestamp_offset;
+        }
         add_tag(context, "K4A_START_OFFSET_NS", offset_str.str().c_str());
         context->start_offset_tag_added = true;
     }

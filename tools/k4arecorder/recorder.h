@@ -18,6 +18,7 @@ int do_recording(uint8_t device_index,
                  k4a_device_configuration_t *device_config,
                  bool record_imu,
                  int32_t absoluteExposureValue,
-                 int32_t gain);
+                 int32_t gain,
+                 bool use_system_time);
 
 #endif /* RECORDER_H */

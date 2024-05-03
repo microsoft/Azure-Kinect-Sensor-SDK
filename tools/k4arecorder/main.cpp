@@ -119,6 +119,7 @@ int main(int argc, char **argv)
     k4a_fps_t recording_rate = K4A_FRAMES_PER_SECOND_30;
     bool recording_rate_set = false;
     bool recording_imu_enabled = true;
+    bool recording_use_system_time = false;
     k4a_wired_sync_mode_t wired_sync_mode = K4A_WIRED_SYNC_MODE_STANDALONE;
     int32_t depth_delay_off_color_usec = 0;
     uint32_t subordinate_delay_off_master_usec = 0;
@@ -326,6 +327,25 @@ int main(int argc, char **argv)
                                   }
                                   subordinate_delay_off_master_usec = (uint32_t)delay;
                               });
+    cmd_parser.RegisterOption("--time-source",
+                              "Set the time source to synchronize the recording (DEVICE, SYSTEM, default: DEVICE)",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  if (string_compare(args[0], "device") == 0)
+                                  {
+                                      recording_use_system_time = false;
+                                  }
+                                  else if (string_compare(args[0], "system") == 0)
+                                  {
+                                      recording_use_system_time = true;
+                                  }
+                                  else
+                                  {
+                                      std::ostringstream str;
+                                      str << "Unknown time source specified: " << args[0];
+                                      throw std::runtime_error(str.str());
+                                  }
+                              });
     cmd_parser.RegisterOption("-e|--exposure-control",
                               "Set manual exposure value from 2 us to 200,000us for the RGB camera (default: \n"
                               "auto exposure). This control also supports MFC settings of -11 to 1).",
@@ -433,5 +453,6 @@ int main(int argc, char **argv)
                         &device_config,
                         recording_imu_enabled,
                         absoluteExposureValue,
-                        gain);
+                        gain,
+                        recording_use_system_time);
 }

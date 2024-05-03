@@ -99,6 +99,7 @@ typedef struct _k4a_record_context_t
     std::mutex writer_lock;
 
     bool header_written, first_cluster_written;
+    bool use_system_time = false;
 } k4a_record_context_t;
 
 K4A_DECLARE_CONTEXT(k4a_record_t, k4a_record_context_t);

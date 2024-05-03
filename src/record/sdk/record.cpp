@@ -362,6 +362,17 @@ k4a_result_t k4a_record_create(const char *path,
     return result;
 }
 
+k4a_result_t k4a_set_time_source(const k4a_record_t recording_handle, const bool use_system_time)
+{
+    RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
+
+    k4a_record_context_t *context = k4a_record_t_get_context(recording_handle);
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, context == NULL);
+    context->use_system_time = use_system_time;
+
+    return K4A_RESULT_SUCCEEDED;
+}
+
 k4a_result_t k4a_record_add_tag(const k4a_record_t recording_handle, const char *name, const char *value)
 {
     RETURN_VALUE_IF_HANDLE_INVALID(K4A_RESULT_FAILED, k4a_record_t, recording_handle);
