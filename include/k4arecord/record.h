@@ -105,6 +105,30 @@ K4ARECORD_EXPORT k4a_result_t k4a_record_create(const char *path,
  */
 K4ARECORD_EXPORT k4a_result_t k4a_record_add_tag(k4a_record_t recording_handle, const char *name, const char *value);
 
+/** Set recording time source
+ *
+ * \param recording_handle
+ * The handle of a new recording, obtained by k4a_record_create().
+ *
+ * \param use_system_time
+ * Flag indicating time source
+ *
+ * \headerfile record.h <k4arecord/record.h>
+ *
+ * \relates k4a_record_t
+ *
+ * \returns ::K4A_RESULT_SUCCEEDED is returned on success.
+ *
+ * \xmlonly
+ * <requirements>
+ *   <requirement name="Header">record.h (include k4arecord/record.h)</requirement>
+ *   <requirement name="Library">k4arecord.lib</requirement>
+ *   <requirement name="DLL">k4arecord.dll</requirement>
+ * </requirements>
+ * \endxmlonly
+ */
+K4ARECORD_EXPORT k4a_result_t k4a_set_time_source(const k4a_record_t recording_handle, const bool use_system_time);
+
 /** Adds the track header for recording IMU.
  *
  * \param recording_handle

@@ -29,5 +29,7 @@ k4arecorder [options] output.mkv
   --external-sync         Set the external sync mode (Master, Subordinate, Standalone default: Standalone)
   --sync-delay            Set the external sync delay off the master camera in microseconds (default: 0)
                             This setting is only valid if the camera is in Subordinate mode.
+  --time-source           Set the time source to synchronize the recording (DEVICE, SYSTEM, default: DEVICE)
   -e, --exposure-control  Set manual exposure value (-11 to 1) for the RGB camera (default: auto exposure)
+  -g, --gain              Set cameras manual gain. The valid range is 0 to 255. (default: auto)
 ```

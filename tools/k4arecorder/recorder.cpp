@@ -54,7 +54,8 @@ int do_recording(uint8_t device_index,
                  k4a_device_configuration_t *device_config,
                  bool record_imu,
                  int32_t absoluteExposureValue,
-                 int32_t gain)
+                 int32_t gain,
+                 bool use_system_time)
 {
     seconds recording_length_seconds(recording_length);
     const uint32_t installed_devices = k4a_device_get_installed_count();
@@ -140,6 +141,8 @@ int do_recording(uint8_t device_index,
         std::cerr << "Unable to create recording file: " << recording_filename << std::endl;
         return 1;
     }
+
+    CHECK(k4a_set_time_source(recording, use_system_time), device);
 
     if (record_imu)
     {
