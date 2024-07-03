@@ -4,6 +4,11 @@ Every Microsoft product has a lifecycle, including Azure Kinect Sensor SDK. The 
 
 This document describes the support lifecycle for: Azure Kinect Sensor SDK.
 
+## Azure Kinect DK Sensor SDK - End of Support / Retirement
+Microsoft announced [End of Production of Azure Kinect DK](https://techcommunity.microsoft.com/t5/mixed-reality-blog/microsoft-s-azure-kinect-developer-kit-technology-transfers-to/ba-p/3899122) on Aug 17th 2023. 
+End of Support / Retirement Date for Azure Kinect DK Sensor SDK is Aug 16th 2024.
+
+
 ## Release Types
 
 Microsoft produces **Long Term Support (LTS)** and **Current** releases, which are defined as:
