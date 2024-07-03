@@ -123,6 +123,11 @@ int main(int argc, char **argv)
     int32_t depth_delay_off_color_usec = 0;
     uint32_t subordinate_delay_off_master_usec = 0;
     int absoluteExposureValue = defaultExposureAuto;
+    int whiteBalance = defaultWhiteBalance;
+    int brightness = defaultBrightness;
+    int contrast = defaultContrast;
+    int saturation = defaultSaturation;
+    int sharpness = defaultSharpness;
     int gain = defaultGainAuto;
     char *recording_filename;
 
@@ -346,6 +351,67 @@ int main(int argc, char **argv)
                                       throw std::runtime_error("Exposure value range is 2 to 5s, or -11 to 1.");
                                   }
                               });
+    cmd_parser.RegisterOption("-w|--white-balance",
+                              "Set manual white balance from 2500K to 12500K for the RGB camera (default: \n"
+                              "auto white balance). The value has to be divisible by 10.",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  int whiteBalanceSetting = std::stoi(args[0]);
+                                  if (whiteBalanceSetting < 2500 || whiteBalanceSetting > 12500 ||
+                                      whiteBalanceSetting % 10 != 0)
+                                  {
+                                      throw std::runtime_error("White balance setting has invalid value.");
+                                  }
+                                  whiteBalance = whiteBalanceSetting;
+                              });
+    cmd_parser.RegisterOption("--brightness",
+                              "Set brightness from 0 to 255 for the RGB camera (default: \n"
+                              "previously set value, non deterministic).",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  int brightnessSetting = std::stoi(args[0]);
+                                  if (brightnessSetting < 0 || brightnessSetting > 255)
+                                  {
+                                      throw std::runtime_error("Brightness setting has invalid value.");
+                                  }
+                                  brightness = brightnessSetting;
+                              });
+    cmd_parser.RegisterOption("--contrast",
+                              "Set contrast from 0 to 10 for the RGB camera (default: \n"
+                              "previously set value, non deterministic).",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  int contrastSetting = std::stoi(args[0]);
+                                  if (contrastSetting < 0 || contrastSetting > 10)
+                                  {
+                                      throw std::runtime_error("Contrast setting has invalid value.");
+                                  }
+                                  contrast = contrastSetting;
+                              });
+    cmd_parser.RegisterOption("--saturation",
+                              "Set saturation from 0 to 63 for the RGB camera (default: \n"
+                              "previously set value, non deterministic).",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  int saturationSetting = std::stoi(args[0]);
+                                  if (saturationSetting < 0 || saturationSetting > 63)
+                                  {
+                                      throw std::runtime_error("Saturation setting has invalid value.");
+                                  }
+                                  saturation = saturationSetting;
+                              });
+    cmd_parser.RegisterOption("--sharpness",
+                              "Set sharpness from 0 to 4 for the RGB camera (default: \n"
+                              "previously set value, non deterministic).",
+                              1,
+                              [&](const std::vector<char *> &args) {
+                                  int sharpnessSetting = std::stoi(args[0]);
+                                  if (sharpnessSetting < 0 || sharpnessSetting > 4)
+                                  {
+                                      throw std::runtime_error("Sharpness setting has invalid value.");
+                                  }
+                                  sharpness = sharpnessSetting;
+                              });
     cmd_parser.RegisterOption("-g|--gain",
                               "Set cameras manual gain. The valid range is 0 to 255. (default: auto)",
                               1,
@@ -433,5 +499,10 @@ int main(int argc, char **argv)
                         &device_config,
                         recording_imu_enabled,
                         absoluteExposureValue,
+                        whiteBalance,
+                        brightness,
+                        contrast,
+                        saturation,
+                        sharpness,
                         gain);
 }
