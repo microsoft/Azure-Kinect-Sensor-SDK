@@ -630,7 +630,7 @@ k4a_result_t calibration_create_from_raw(char *raw_calibration,
                                          k4a_calibration_imu_t *accel_calibration)
 {
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, raw_calibration == NULL);
-    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !(strnlen(raw_calibration, raw_calibration_size) < raw_calibration_size));
+    RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED, !(strnlen(raw_calibration, raw_calibration_size) <= raw_calibration_size));
     RETURN_VALUE_IF_ARG(K4A_RESULT_FAILED,
                         depth_calibration == NULL && color_calibration == NULL && gyro_calibration == NULL &&
                             accel_calibration == NULL);
