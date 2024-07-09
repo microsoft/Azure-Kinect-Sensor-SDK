@@ -7,6 +7,7 @@
 // System headers
 //
 #include <algorithm>
+#include <limits>
 
 // Library headers
 //
