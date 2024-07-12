@@ -142,7 +142,7 @@ public:
     LargeFileIOCallback(const char *path, const open_mode mode);
     ~LargeFileIOCallback() override;
 
-    uint32 read(void *buffer, size_t size) override;
+    size_t read(void *buffer, size_t size) override;
     void setFilePointer(int64 offset, libebml::seek_mode mode = libebml::seek_beginning) override;
     size_t write(const void *buffer, size_t size) override;
     uint64 getFilePointer() override;

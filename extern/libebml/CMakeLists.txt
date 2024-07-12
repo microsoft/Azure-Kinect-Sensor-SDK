@@ -12,4 +12,4 @@ else()
     message(STATUS "ebml is already a target. Skipping adding it twice")
 endif()
 
-add_library(ebml::ebml ALIAS ebml)
+add_library(EBML::ebml ALIAS ebml)
