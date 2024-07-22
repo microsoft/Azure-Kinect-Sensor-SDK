@@ -333,7 +333,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     if (m_firstRun || depthEnabledStateChanged)
     {
-        ImGui::SetNextTreeNodeOpen(m_config.EnableDepthCamera);
+        ImGui::SetNextItemOpen(m_config.EnableDepthCamera);
     }
 
     ImGui::Indent();
@@ -376,7 +376,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     if (m_firstRun || colorEnableStateChanged)
     {
-        ImGui::SetNextTreeNodeOpen(m_config.EnableColorCamera);
+        ImGui::SetNextItemOpen(m_config.EnableColorCamera);
     }
 
     ImGui::Indent();
@@ -710,7 +710,7 @@ K4ADockControlStatus K4ADeviceDockControl::Show()
 
     if (m_firstRun && (m_syncInConnected || m_syncOutConnected))
     {
-        ImGui::SetNextTreeNodeOpen(true);
+        ImGui::SetNextItemOpen(true);
     }
     if (ImGui::TreeNode("External Sync"))
     {
