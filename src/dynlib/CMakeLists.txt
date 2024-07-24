@@ -5,7 +5,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(DYNLIB_SRCS dynlib_windows.c)
     set(DYNLIB_DEPENDENCIES 
         pathcch.lib)
-elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" OR ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     set(DYNLIB_SRCS dynlib_linux.c)
 else()
     message(FATAL_ERROR "Unknown system: ${CMAKE_SYSTEM_NAME}")

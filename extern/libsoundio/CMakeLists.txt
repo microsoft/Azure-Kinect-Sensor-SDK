@@ -27,7 +27,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     endif()
 
     add_library(libsoundio::libsoundio ALIAS libsoundio_static)
-elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" OR ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     find_library(LIBSOUNDIO_LIB soundio)
     add_library(libsoundio::libsoundio SHARED IMPORTED GLOBAL)
     set_property(TARGET libsoundio::libsoundio PROPERTY IMPORTED_LOCATION ${LIBSOUNDIO_LIB})

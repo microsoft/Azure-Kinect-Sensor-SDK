@@ -11,7 +11,7 @@ function(determine_target_arch OUTPUT_VARIABLE)
         else()
             message(FATAL_ERROR "Unrecognized architecture ${MSVC_C_ARCHITECTURE_ID} from ${CMAKE_C_COMPILER}")
         endif()
-    elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+  elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "AppleClang")
         if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
             set(CMD_ARGS "-target" "${CMAKE_C_COMPILER_TARGET}" "-dumpmachine")
         else()
@@ -35,6 +35,8 @@ function(determine_target_arch OUTPUT_VARIABLE)
         set(ARCH ${CMAKE_MATCH_1})
 
         if("${ARCH}" STREQUAL "x86_64")
+            # Do nothing
+        elseif("${ARCH}" STREQUAL "arm64")
             # Do nothing
         elseif("${ARCH}" STREQUAL "aarch64")
             set(ARCH "arm64")

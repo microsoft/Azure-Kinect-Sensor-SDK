@@ -5,7 +5,7 @@ if (NOT ("${CMAKE_C_COMPILER_ID}" STREQUAL "${CMAKE_CXX_COMPILER_ID}"))
     message(FATAL_ERROR "C compiler (${CMAKE_C_COMPILER_ID}) does not match C++ compiler (${CMAKE_CXX_COMPILER_ID})")
 endif()
 
-if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "AppleClang")
     set(CLANG_ALL_WARNINGS "-Weverything")
     list(APPEND CLANG_ALL_WARNINGS "-Wno-missing-field-initializers") # Allow c structs without all fields initialized
     list(APPEND CLANG_ALL_WARNINGS "-Wno-reserved-id-macro") # Needed for azure-c-shared-utility which defines new macros that start with "_"
