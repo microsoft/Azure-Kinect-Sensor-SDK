@@ -223,8 +223,8 @@ int main(int argc, char **argv)
         // We now have the secondary depth to secondary color transform. We also have the transformation from the
         // secondary color perspective to the main color perspective from the calibration earlier. Now let's compose the
         // depth secondary -> color secondary, color secondary -> color main into depth secondary -> color main
-        Transformation tr_secondary_depth_to_main_color = tr_secondary_depth_to_secondary_color.compose_with(
-            tr_secondary_color_to_main_color);
+        Transformation tr_secondary_depth_to_main_color = tr_secondary_color_to_main_color.compose_with(
+            tr_secondary_depth_to_secondary_color);
 
         // Construct a new calibration object to transform from the secondary depth camera to the main color camera
         k4a::calibration secondary_depth_to_main_color_cal =
