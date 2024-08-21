@@ -23,9 +23,30 @@ from .k4atypes import _DeviceHandle, _CaptureHandle, _ImageHandle, \
     _TransformationHandle, _Calibration, _Float2, _Float3, \
     _memory_allocate_cb, _memory_destroy_cb
 
-
-__all__ = []
-
+__all__ = ['k4a_image_create', 'k4a_image_create_from_buffer', 'k4a_set_debug_message_handler',
+           'k4a_image_release', 'k4a_image_get_buffer',
+           'k4a_image_reference', 'k4a_image_get_format',
+           'k4a_image_get_size', 'k4a_image_get_width_pixels',
+           'k4a_image_get_height_pixels', 'k4a_image_get_stride_bytes',
+           'k4a_image_get_device_timestamp_usec', 'k4a_image_set_device_timestamp_usec',
+           'k4a_image_get_system_timestamp_nsec', 'k4a_image_set_system_timestamp_nsec',
+           'k4a_image_get_exposure_usec', 'k4a_image_set_exposure_usec',
+           'k4a_image_get_white_balance', 'k4a_image_set_white_balance',
+           'k4a_image_get_iso_speed', 'k4a_image_set_iso_speed', 'k4a_calibration_get_from_raw',
+           'k4a_capture_create', 'k4a_capture_release', 'k4a_capture_reference',
+           'k4a_capture_get_color_image', 'k4a_capture_set_color_image',
+           'k4a_capture_get_depth_image', 'k4a_capture_set_depth_image',
+           'k4a_capture_get_ir_image', 'k4a_capture_set_ir_image',
+           'k4a_capture_get_temperature_c', 'k4a_capture_set_temperature_c',
+           'k4a_device_get_installed_count', 'k4a_device_open',
+           'k4a_device_get_serialnum', 'k4a_device_get_version',
+           'k4a_device_get_color_control_capabilities', 'k4a_device_close',
+           'k4a_device_get_imu_sample', 'k4a_device_get_color_control',
+           'k4a_device_start_cameras', 'k4a_device_stop_cameras',
+           'k4a_device_start_imu', 'k4a_device_stop_imu',
+           'k4a_device_set_color_control', 'k4a_device_get_raw_calibration',
+           'k4a_device_get_sync_jack', 'k4a_device_get_capture', 'k4a_device_get_calibration'
+           ]
 
 # Load the k4a.dll.
 try:
@@ -182,9 +203,7 @@ k4a_image_create_from_buffer = _k4a_lib.k4a_image_create_from_buffer
 k4a_image_create_from_buffer.restype = EStatus
 k4a_image_create_from_buffer.argtypes=(
     _ctypes.c_int, _ctypes.c_int, _ctypes.c_int, _ctypes.c_int, _ctypes.POINTER(_ctypes.c_uint8),
-    _ctypes.c_size_t, _memory_allocate_cb, _ctypes.c_void_p, _ctypes.POINTER(_ImageHandle))
-
-
+    _ctypes.c_size_t, _memory_destroy_cb, _ctypes.c_void_p, _ctypes.POINTER(_ImageHandle))
 
 #K4A_EXPORT uint8_t *k4a_image_get_buffer(k4a_image_t image_handle);
 k4a_image_get_buffer = _k4a_lib.k4a_image_get_buffer

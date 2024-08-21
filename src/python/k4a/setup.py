@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='k4a',
-    version='0.0.2',
+    version='0.0.3',
     author='Jonathan Santos',
     author_email='jonsanto@microsoft.com',
     description='Python interface to Azure Kinect API.',
