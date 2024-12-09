@@ -1,0 +1,4 @@
+# Data science would like to know about all schema changes Engineering plan to make to SQL databases.  This automates the process and is intended to be used by Data Science as a FYI of an incoming change as opposed to a review. 
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+* @vald-green/code-owners-harald
+*.sql @vald-green/code-owners-harald @vald-green/code-owners-data-science

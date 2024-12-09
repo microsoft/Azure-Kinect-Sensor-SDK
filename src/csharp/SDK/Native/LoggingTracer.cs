@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // <copyright file="LoggingTracer.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
@@ -14,7 +14,7 @@ namespace Microsoft.Azure.Kinect.Sensor
     /// Represents a tracer for capturing thread specific logging messages for tracing native calls
     /// into the Azure Kinect Sensor SDK.
     /// </summary>
-    internal class LoggingTracer : IDisposable
+    public class LoggingTracer : IDisposable
     {
         private readonly int threadId;
 
